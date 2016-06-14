@@ -36,5 +36,29 @@ public class RDispatcherTest {
 		}
 		assertEquals("TRUE", result);
 	}
+	
+	@Test
+	public void testNumOfRecords() {
+		
+		// will come from metadata record using xpath queries
+		// see metadata here: https://knb.ecoinformatics.org/knb/d1/mn/v2/object/doi:10.5063/AA/tao.1.1
+		Map<String, Object> names = new HashMap<String, Object>();
+		names.put("dataUrl", "https://knb.ecoinformatics.org/knb/d1/mn/v2/object/doi:10.5063/AA/tao.2.1");
+		names.put("header", true);
+		names.put("sep", ",");
+		names.put("expected", 100);
+		
+		// R code to check congruence between loaded data and the metadata
+		String code = "df <- read.csv(dataUrl, header=header, sep=sep); nrow(df) == expected";
+		String result = null;
+		try {
+			result = dispatcher.dispatch(names, code);
+		} catch (ScriptException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			fail(e.getMessage());
+		}
+		assertEquals("TRUE", result);
+	}
 
 }
