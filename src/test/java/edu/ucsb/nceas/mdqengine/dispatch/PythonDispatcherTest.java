@@ -17,7 +17,7 @@ public class PythonDispatcherTest {
 	
 	@Before
 	public void init() {
-		dispatcher = new PythonDispatcher();
+		dispatcher = Dispatcher.getDispatcher("python");
 	}
 	
 	@Test

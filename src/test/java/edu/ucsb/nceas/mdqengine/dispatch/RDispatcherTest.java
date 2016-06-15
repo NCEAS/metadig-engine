@@ -11,15 +11,13 @@ import javax.script.ScriptException;
 import org.junit.Before;
 import org.junit.Test;
 
-import edu.ucsb.nceas.mdqengine.dispatch.RDispatcher;
-
 public class RDispatcherTest {
 	
 	private Dispatcher dispatcher = null;
 	
 	@Before
 	public void init() {
-		dispatcher = new RDispatcher();
+		dispatcher = Dispatcher.getDispatcher("r");
 	}
 	
 	@Test

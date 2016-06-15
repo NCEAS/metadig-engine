@@ -10,7 +10,7 @@ import javax.script.ScriptException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-public abstract class Dispatcher {
+public class Dispatcher {
 	
 	protected Log log = LogFactory.getLog(this.getClass());
 	
@@ -29,5 +29,35 @@ public abstract class Dispatcher {
 		log.debug("Result: " + res);
 		return res.toString();
 		
+	}
+	
+	private Dispatcher() {}
+		
+	private Dispatcher(String engineName) {
+	
+		// create a the engine:
+	    engine = manager.getEngineByName(engineName);
+	    // check if the engine has loaded correctly:
+	    if (engine == null) {
+	        throw new RuntimeException(engineName + " Engine not found on the classpath.");
+	    }
+	    
+	}
+	
+	public static Dispatcher getDispatcher(String env) {
+	    
+		String engineName = null;
+		if (env.equalsIgnoreCase("r")) {
+			engineName = "Renjin";
+		} else if (env.equalsIgnoreCase("python")) {
+			engineName = "python";
+		} else if (env.equalsIgnoreCase("JavaScript")) {
+			engineName = "JavaScript";
+		}
+		
+		Dispatcher instance = new Dispatcher(engineName);
+		
+		return instance;
+	    
 	}
 }

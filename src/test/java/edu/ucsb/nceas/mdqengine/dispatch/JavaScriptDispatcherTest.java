@@ -17,7 +17,7 @@ public class JavaScriptDispatcherTest {
 	
 	@Before
 	public void init() {
-		dispatcher = new JavaScriptDispatcher();
+		dispatcher = Dispatcher.getDispatcher("JavaScript");
 	}
 	
 	@Test

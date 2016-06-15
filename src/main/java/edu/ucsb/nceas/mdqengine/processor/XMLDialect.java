@@ -18,8 +18,6 @@ import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
 import edu.ucsb.nceas.mdqengine.dispatch.Dispatcher;
-import edu.ucsb.nceas.mdqengine.dispatch.PythonDispatcher;
-import edu.ucsb.nceas.mdqengine.dispatch.RDispatcher;
 import edu.ucsb.nceas.mdqengine.model.Check;
 import edu.ucsb.nceas.mdqengine.model.Result;
 import edu.ucsb.nceas.mdqengine.model.Selector;
@@ -53,13 +51,7 @@ public class XMLDialect {
 		}
 		
 		// dispatch to checker impl
-		Dispatcher dispatcher = null;
-		if (check.getEnvironment().equalsIgnoreCase("r")) {
-			dispatcher = new RDispatcher();
-		}
-		else if (check.getEnvironment().equalsIgnoreCase("python")) {
-			dispatcher = new PythonDispatcher();
-		}
+		Dispatcher dispatcher = Dispatcher.getDispatcher(check.getEnvironment());
 		
 		String returnVal = dispatcher.dispatch(variables, check.getCode());
 
