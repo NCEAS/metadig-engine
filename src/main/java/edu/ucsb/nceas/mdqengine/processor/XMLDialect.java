@@ -28,6 +28,7 @@ import edu.ucsb.nceas.mdqengine.dispatch.Dispatcher;
 import edu.ucsb.nceas.mdqengine.model.Check;
 import edu.ucsb.nceas.mdqengine.model.Result;
 import edu.ucsb.nceas.mdqengine.model.Selector;
+import edu.ucsb.nceas.mdqengine.serialize.JsonMarshaller;
 
 public class XMLDialect {
 	
@@ -48,6 +49,8 @@ public class XMLDialect {
 	}
 	
 	public Result runCheck(Check check) throws XPathExpressionException, ScriptException {
+		
+		log.debug("Running Check: " + JsonMarshaller.toJson(check));
 		
 		// gather the required information
 		Map<String, Object> variables = new HashMap<String, Object>();
