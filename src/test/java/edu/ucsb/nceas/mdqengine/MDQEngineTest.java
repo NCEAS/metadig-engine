@@ -26,6 +26,8 @@ public class MDQEngineTest {
 	
 	protected Log log = LogFactory.getLog(this.getClass());
 
+	private String id = "doi:10.5063/AA/tao.1.1";
+
 	private Recommendation recommendation = null;
 	
 	@Before
@@ -92,7 +94,6 @@ public class MDQEngineTest {
 		try {
 			
 			// parse the metadata content
-			String id = "doi:10.5063/AA/tao.1.1";
 			String metadataURL = "https://knb.ecoinformatics.org/knb/d1/mn/v2/object/" + id;
 			InputStream input = new URL(metadataURL).openStream();
 			XMLDialect xml = new XMLDialect(input);
@@ -114,7 +115,6 @@ public class MDQEngineTest {
 	@Test
 	public void testRunRecommendationForId() {
 		MDQEngine mdqe = new MDQEngine();
-		String id = "doi:10.5063/AA/tao.1.1";
 		Run run = null;
 		try {
 			run = mdqe.runRecommendation(recommendation, id );

@@ -43,6 +43,8 @@ public class MDQEngine {
 			throws MalformedURLException, IOException, SAXException, 
 			ParserConfigurationException, XPathExpressionException, ScriptException {
 			
+		log.debug("Running recommendation: " + JsonMarshaller.toJson(recommendation));
+
 		// parse the metadata content
 		// TODO: configurable repo for fetching content by id
 		String metadataURL = "https://cn.dataone.org/cn/v2/object/" + id;

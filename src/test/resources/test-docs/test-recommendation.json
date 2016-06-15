@@ -1,0 +1,30 @@
+{"name":"Testing suite",
+"checks":[
+	{"name":"titleLength",
+	"level":"WARN",
+	"environment":"r",
+	"code":"nchar(title) \u003e 10",
+	"expected":"TRUE",
+	"selectors":[
+		{"name":"title",
+		"xpath":"//dataset/title"}
+	]},
+	{"name":"entityCount",
+	"level":"INFO",
+	"environment":"JavaScript",
+	"code":"entityCount \u003e 0",
+	"expected":"true",
+	"selectors":[
+		{"name":"entityCount",
+		"xpath":"count(//dataset/dataTable | //dataset/otherEntity)"}
+	]},
+	{"name":"attributeNames",
+	"level":"ERROR",
+	"environment":"r",
+	"code":"any(duplicated(attributeNames))",
+	"expected":"FALSE",
+	"selectors":[
+		{"name":"attributeNames",
+		"xpath":"//attribute/attributeName"}
+	]}
+]}

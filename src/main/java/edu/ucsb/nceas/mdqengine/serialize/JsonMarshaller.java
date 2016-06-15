@@ -10,7 +10,7 @@ public class JsonMarshaller {
 		return gson.toJson(obj);
 	}
 	
-	public static Object fromJson(String json, Class<Object> clazz) {
+	public static Object fromJson(String json, Class clazz) {
 		return gson.fromJson(json, clazz);
 	}
 }
