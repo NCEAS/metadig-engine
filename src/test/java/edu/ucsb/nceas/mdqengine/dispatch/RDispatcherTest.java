@@ -1,4 +1,4 @@
-package edu.ucsb.nceas.mdqengine.r;
+package edu.ucsb.nceas.mdqengine.dispatch;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
@@ -11,9 +11,11 @@ import javax.script.ScriptException;
 import org.junit.Before;
 import org.junit.Test;
 
+import edu.ucsb.nceas.mdqengine.dispatch.RDispatcher;
+
 public class RDispatcherTest {
 	
-	private RDispatcher dispatcher = null;
+	private Dispatcher dispatcher = null;
 	
 	@Before
 	public void init() {
