@@ -1,8 +1,10 @@
 package edu.ucsb.nceas.mdqengine.serialize;
 
 import java.io.ByteArrayOutputStream;
+import java.io.UnsupportedEncodingException;
 
 import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 
@@ -10,7 +12,7 @@ import org.apache.commons.io.IOUtils;
 
 public class XmlMarshaller {
 
-	public static String toXml(Object obj) throws Exception {
+	public static String toXml(Object obj) throws JAXBException, UnsupportedEncodingException {
 		
 	    JAXBContext context = JAXBContext.newInstance(obj.getClass());
 

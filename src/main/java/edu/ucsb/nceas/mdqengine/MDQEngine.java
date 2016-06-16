@@ -62,7 +62,7 @@ public class MDQEngine {
 			Result result = xml.runCheck(check);
 			results.add(result);
 		}
-		run.setResults(results);
+		run.setResult(results);
 		
 		log.debug("Run results: " + JsonMarshaller.toJson(run));
 		

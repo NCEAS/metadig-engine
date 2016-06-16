@@ -18,6 +18,7 @@ import edu.ucsb.nceas.mdqengine.model.Result;
 import edu.ucsb.nceas.mdqengine.model.Run;
 import edu.ucsb.nceas.mdqengine.processor.XMLDialect;
 import edu.ucsb.nceas.mdqengine.serialize.JsonMarshaller;
+import edu.ucsb.nceas.mdqengine.serialize.XmlMarshaller;
 
 public class MDQEngineTest {
 	
@@ -60,13 +61,16 @@ public class MDQEngineTest {
 		MDQEngine mdqe = new MDQEngine();
 		Run run = null;
 		try {
-			run = mdqe.runRecommendation(recommendation, id );
+			run = mdqe.runRecommendation(recommendation, id);
+			log.debug("Run results JSON: " + JsonMarshaller.toJson(run));
+			log.debug("Run results XML: " + XmlMarshaller.toXml(run));
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 			fail(e.getMessage());
 		}
-		log.debug("Run results: " + JsonMarshaller.toJson(run));
+		
+
 
 	}
 }

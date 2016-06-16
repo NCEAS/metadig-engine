@@ -12,7 +12,7 @@ public class Run {
 	
 	private String objectIdentifier;
 		
-	private List<Result> results;
+	private List<Result> result;
 
 	public Date getTimestamp() {
 		return timestamp;
@@ -22,12 +22,12 @@ public class Run {
 		this.timestamp = timestamp;
 	}
 
-	public List<Result> getResults() {
-		return results;
+	public List<Result> getResult() {
+		return result;
 	}
 
-	public void setResults(List<Result> results) {
-		this.results = results;
+	public void setResult(List<Result> result) {
+		this.result = result;
 	}
 
 	public String getObjectIdentifier() {
