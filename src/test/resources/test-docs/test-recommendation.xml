@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<recommendation>
+    <check>
+        <code>nchar(title) &gt; 10</code>
+        <environment>r</environment>
+        <expected>TRUE</expected>
+        <level>WARN</level>
+        <name>titleLength</name>
+        <selector>
+            <name>title</name>
+            <xpath>//dataset/title</xpath>
+        </selector>
+    </check>
+    <check>
+        <code>entityCount &gt; 0</code>
+        <environment>JavaScript</environment>
+        <expected>true</expected>
+        <level>INFO</level>
+        <name>entityCount</name>
+        <selector>
+            <name>entityCount</name>
+            <xpath>count(//dataset/dataTable | //dataset/otherEntity)</xpath>
+        </selector>
+    </check>
+    <check>
+        <code>any(duplicated(attributeNames))</code>
+        <environment>r</environment>
+        <expected>FALSE</expected>
+        <level>ERROR</level>
+        <name>attributeNames</name>
+        <selector>
+            <name>attributeNames</name>
+            <xpath>//attribute/attributeName</xpath>
+        </selector>
+    </check>
+    <name>Testing suite</name>
+</recommendation>

@@ -46,5 +46,21 @@ public class RecommendationTest {
 		
 	}
 	
+	@Test
+	public void testXmlRoundTrip() {
+		Recommendation recommendation = RecommendationFactory.getMockRecommendation();
+		try {
+			String xml = IOUtils.toString(this.getClass().getResourceAsStream("/test-docs/test-recommendation.xml"), "UTF-8");
+			log.debug("XML serialization: " + xml);
+			Recommendation r = (Recommendation) XmlMarshaller.fromXml(xml, Recommendation.class);
+			assertEquals(recommendation.getName(), r.getName());
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			fail(e.getMessage());
+		}
+		
+	}
+	
 
 }
