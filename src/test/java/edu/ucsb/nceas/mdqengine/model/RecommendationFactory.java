@@ -1,4 +1,4 @@
-package edu.ucsb.nceas.mdqengine;
+package edu.ucsb.nceas.mdqengine.model;
 
 import java.util.ArrayList;
 import java.util.List;
