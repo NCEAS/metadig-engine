@@ -58,6 +58,12 @@
 		    <artifactId>commons-io</artifactId>
 		    <version>2.5</version>
 		</dependency>
+		<!-- http://mvnrepository.com/artifact/org.eclipse.persistence/org.eclipse.persistence.moxy -->
+		<dependency>
+		    <groupId>org.eclipse.persistence</groupId>
+		    <artifactId>org.eclipse.persistence.moxy</artifactId>
+		    <version>2.6.3</version>
+		</dependency>
 		
 	</dependencies>
 	<repositories>

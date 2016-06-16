@@ -4,6 +4,8 @@ import java.util.List;
 
 import javax.xml.bind.annotation.XmlRootElement;
 
+import org.eclipse.persistence.oxm.annotations.XmlCDATA;
+
 @XmlRootElement
 public class Check {
 	
@@ -14,7 +16,8 @@ public class Check {
 	private String level;
 	
 	private String environment;
-	
+
+	@XmlCDATA
 	private String code;
 	
 	private String expected;
