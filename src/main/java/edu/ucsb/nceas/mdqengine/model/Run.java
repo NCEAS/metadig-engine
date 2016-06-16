@@ -3,6 +3,9 @@ package edu.ucsb.nceas.mdqengine.model;
 import java.util.Date;
 import java.util.List;
 
+import javax.xml.bind.annotation.XmlRootElement;
+
+@XmlRootElement
 public class Run {
 	
 	private Date timestamp;

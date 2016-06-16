@@ -2,11 +2,14 @@ package edu.ucsb.nceas.mdqengine.model;
 
 import java.util.List;
 
+import javax.xml.bind.annotation.XmlRootElement;
+
+@XmlRootElement
 public class Recommendation {
 	
 	private String name;
 	
-	private List<Check> checks;
+	private List<Check> check;
 
 	public String getName() {
 		return name;
@@ -16,12 +19,12 @@ public class Recommendation {
 		this.name = name;
 	}
 
-	public List<Check> getChecks() {
-		return checks;
+	public List<Check> getCheck() {
+		return check;
 	}
 
-	public void setChecks(List<Check> checks) {
-		this.checks = checks;
+	public void setCheck(List<Check> check) {
+		this.check = check;
 	}
 
 }

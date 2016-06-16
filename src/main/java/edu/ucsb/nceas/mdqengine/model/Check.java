@@ -2,6 +2,9 @@ package edu.ucsb.nceas.mdqengine.model;
 
 import java.util.List;
 
+import javax.xml.bind.annotation.XmlRootElement;
+
+@XmlRootElement
 public class Check {
 	
 	private String name;
@@ -16,7 +19,7 @@ public class Check {
 	
 	private String expected;
 
-	private List<Selector> selectors;
+	private List<Selector> selector;
 
 	public String getName() {
 		return name;
@@ -58,12 +61,12 @@ public class Check {
 		this.code = code;
 	}
 
-	public List<Selector> getSelectors() {
-		return selectors;
+	public List<Selector> getSelector() {
+		return selector;
 	}
 
-	public void setSelectors(List<Selector> selectors) {
-		this.selectors = selectors;
+	public void setSelector(List<Selector> selector) {
+		this.selector = selector;
 	}
 
 	public String getExpected() {

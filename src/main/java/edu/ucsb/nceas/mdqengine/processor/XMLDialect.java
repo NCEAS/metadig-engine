@@ -54,7 +54,7 @@ public class XMLDialect {
 		
 		// gather the required information
 		Map<String, Object> variables = new HashMap<String, Object>();
-		for (Selector selector: check.getSelectors()) {
+		for (Selector selector: check.getSelector()) {
 			
 			String name = selector.getName();
 			Object value = null;

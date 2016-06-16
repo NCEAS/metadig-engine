@@ -58,7 +58,7 @@ public class MDQEngine {
 		List<Result> results = new ArrayList<Result>();
 
 		// run the checks in the recommendation
-		for (Check check: recommendation.getChecks()) {
+		for (Check check: recommendation.getCheck()) {
 			Result result = xml.runCheck(check);
 			results.add(result);
 		}
