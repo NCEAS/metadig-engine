@@ -3,7 +3,6 @@ package edu.ucsb.nceas.mdqengine;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
@@ -30,7 +29,7 @@ public class MDQEngine {
 	/**
 	 * Executes the given recommendation for a given object identifier
 	 * @param recommendation
-	 * @param id
+	 * @param input the InputStream for the object to QC
 	 * @return the Run results for this execution
 	 * @throws MalformedURLException
 	 * @throws IOException
@@ -39,25 +38,21 @@ public class MDQEngine {
 	 * @throws XPathExpressionException
 	 * @throws ScriptException
 	 */
-	public Run runRecommendation(Recommendation recommendation, String id) 
+	public Run runRecommendation(Recommendation recommendation, InputStream input) 
 			throws MalformedURLException, IOException, SAXException, 
 			ParserConfigurationException, XPathExpressionException, ScriptException {
 			
 		log.debug("Running recommendation: " + JsonMarshaller.toJson(recommendation));
 
-		// parse the metadata content
-		// TODO: configurable repo for fetching content by id
-		String metadataURL = "https://cn.dataone.org/cn/v2/object/" + id;
-		InputStream input = new URL(metadataURL).openStream();
+		// TODO: anything other than XML?
 		XMLDialect xml = new XMLDialect(input);
 		
-		// make a run
+		// make a run to capture results
 		Run run = new Run();
-		run.setObjectIdentifier(id);
 		run.setTimestamp(Calendar.getInstance().getTime());
 		List<Result> results = new ArrayList<Result>();
 
-		// run the checks in the recommendation
+		// run the checks in the recommendation to get results
 		for (Check check: recommendation.getCheck()) {
 			Result result = xml.runCheck(check);
 			results.add(result);

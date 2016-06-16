@@ -61,7 +61,12 @@ public class MDQEngineTest {
 		MDQEngine mdqe = new MDQEngine();
 		Run run = null;
 		try {
-			run = mdqe.runRecommendation(recommendation, id);
+			// retrieve the metadata content
+			String metadataURL = "https://cn.dataone.org/cn/v2/object/" + id;
+			InputStream input = new URL(metadataURL).openStream();
+			// run the recommendation on it
+			run = mdqe.runRecommendation(recommendation, input);
+			run.setObjectIdentifier(id);
 			log.debug("Run results JSON: " + JsonMarshaller.toJson(run));
 			log.debug("Run results XML: " + XmlMarshaller.toXml(run));
 		} catch (Exception e) {
