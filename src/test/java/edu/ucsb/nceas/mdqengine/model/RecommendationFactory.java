@@ -13,7 +13,7 @@ public class RecommendationFactory {
 		// make a recommendation
 		Recommendation recommendation = new Recommendation();
 		recommendation.setName("Testing suite");
-		recommendation.setId("suite.1.1");
+		recommendation.setId("suite.2.1");
 
 		// set-up checks
 		List<Check> checks = new ArrayList<Check>();

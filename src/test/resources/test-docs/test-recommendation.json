@@ -1,5 +1,5 @@
 {"name":"Testing suite",
-"id":"suite.1.1",
+"id":"suite.2.1",
 "check":[
 	{"name":"titleLength",
 	"id":"check.1.1",

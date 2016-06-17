@@ -36,6 +36,6 @@
          <xpath>//attribute/attributeName</xpath>
       </selector>
    </check>
-   <id>suite.1.1</id>      
+   <id>suite.2.1</id>      
    <name>Testing suite</name>
 </recommendation>
