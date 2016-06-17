@@ -7,9 +7,19 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlRootElement
 public class Recommendation {
 	
+	private String id;
+
 	private String name;
 	
 	private List<Check> check;
+
+	public String getId() {
+		return id;
+	}
+
+	public void setId(String id) {
+		this.id = id;
+	}
 
 	public String getName() {
 		return name;

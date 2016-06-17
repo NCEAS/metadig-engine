@@ -6,6 +6,7 @@ import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
+import java.util.UUID;
 
 import javax.script.ScriptException;
 import javax.xml.parsers.ParserConfigurationException;
@@ -49,6 +50,7 @@ public class MDQEngine {
 		
 		// make a run to capture results
 		Run run = new Run();
+		run.setId(UUID.randomUUID().toString());
 		run.setTimestamp(Calendar.getInstance().getTime());
 		List<Result> results = new ArrayList<Result>();
 

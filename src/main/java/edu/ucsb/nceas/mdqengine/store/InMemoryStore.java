@@ -36,17 +36,17 @@ public class InMemoryStore implements MDQStore{
 
 	@Override
 	public void createRecommendation(Recommendation rec) {
-		recommendations.put(rec.getName(), rec);
+		recommendations.put(rec.getId(), rec);
 	}
 
 	@Override
 	public void updateRecommendation(Recommendation rec) {
-		recommendations.put(rec.getName(), rec);
+		recommendations.put(rec.getId(), rec);
 	}
 
 	@Override
 	public void deleteRecommendation(Recommendation rec) {
-		recommendations.remove(rec.getName());		
+		recommendations.remove(rec.getId());		
 	}
 
 	@Override
@@ -61,17 +61,17 @@ public class InMemoryStore implements MDQStore{
 
 	@Override
 	public void createCheck(Check check) {
-		checks.put(check.getName(), check);
+		checks.put(check.getId(), check);
 	}
 
 	@Override
 	public void updateCheck(Check check) {
-		checks.put(check.getName(), check);		
+		checks.put(check.getId(), check);		
 	}
 
 	@Override
 	public void deleteCheck(Check check) {
-		checks.remove(check.getName());
+		checks.remove(check.getId());
 	}
 
 	@Override
@@ -86,12 +86,12 @@ public class InMemoryStore implements MDQStore{
 
 	@Override
 	public void createRun(Run run) {
-		runs.put(run.getTimestamp().toString(), run);
+		runs.put(run.getId(), run);
 	}
 
 	@Override
 	public void deleteRun(Run run) {
-		runs.remove(run.getTimestamp().toString());
+		runs.remove(run.getId());
 	}
 
 }

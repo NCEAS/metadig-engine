@@ -1,6 +1,8 @@
 {"name":"Testing suite",
+"id":"suite.1.1",
 "check":[
 	{"name":"titleLength",
+	"id":"check.1.1",
 	"level":"WARN",
 	"environment":"r",
 	"code":"nchar(title) \u003e 10",
@@ -10,6 +12,7 @@
 		"xpath":"//dataset/title"}
 	]},
 	{"name":"entityCount",
+	"id":"check.2.1",
 	"level":"INFO",
 	"environment":"JavaScript",
 	"code":"entityCount \u003e 0",
@@ -19,6 +22,7 @@
 		"xpath":"count(//dataset/dataTable | //dataset/otherEntity)"}
 	]},
 	{"name":"attributeNames",
+	"id":"check.3.1",
 	"level":"ERROR",
 	"environment":"r",
 	"code":"any(duplicated(attributeNames))",

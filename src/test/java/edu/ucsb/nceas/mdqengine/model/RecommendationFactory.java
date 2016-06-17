@@ -13,12 +13,14 @@ public class RecommendationFactory {
 		// make a recommendation
 		Recommendation recommendation = new Recommendation();
 		recommendation.setName("Testing suite");
+		recommendation.setId("suite.1.1");
 
 		// set-up checks
 		List<Check> checks = new ArrayList<Check>();
 
 		// title
 		Check titleCheck = new Check();
+		titleCheck.setId("check.1.1");
 		titleCheck.setName("titleLength");
 		titleCheck.setEnvironment("r");
 		titleCheck.setLevel("WARN");
@@ -34,6 +36,7 @@ public class RecommendationFactory {
 
 		// entityCount
 		Check entityCount = new Check();
+		entityCount.setId("check.2.1");
 		entityCount.setName("entityCount");
 		entityCount.setEnvironment("JavaScript");
 		entityCount.setLevel("INFO");
@@ -49,6 +52,7 @@ public class RecommendationFactory {
 
 		// attributeNames
 		Check attributeNames = new Check();
+		attributeNames.setId("check.3.1");
 		attributeNames.setName("attributeNames");
 		attributeNames.setEnvironment("r");
 		attributeNames.setLevel("ERROR");

@@ -8,11 +8,21 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlRootElement
 public class Run {
 	
+	private String id;
+
 	private Date timestamp;
 	
 	private String objectIdentifier;
 		
 	private List<Result> result;
+
+	public String getId() {
+		return id;
+	}
+
+	public void setId(String id) {
+		this.id = id;
+	}
 
 	public Date getTimestamp() {
 		return timestamp;

@@ -66,7 +66,7 @@ public class MDQStoreTest {
 			Collection<Run> runs = store.listRuns();
 			assertEquals(1, runs.size());
 			
-			Run r = store.getRun(run.getTimestamp().toString());
+			Run r = store.getRun(run.getId());
 			assertEquals(run.getObjectIdentifier(), r.getObjectIdentifier());
 			
 			store.deleteRun(run);

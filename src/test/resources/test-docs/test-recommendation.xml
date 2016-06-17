@@ -4,6 +4,7 @@
       <code><![CDATA[nchar(title) > 10]]></code>
       <environment>r</environment>
       <expected>TRUE</expected>
+      <id>check.1.1</id>      
       <level>WARN</level>
       <name>titleLength</name>
       <selector>
@@ -15,6 +16,7 @@
       <code><![CDATA[entityCount > 0]]></code>
       <environment>JavaScript</environment>
       <expected>true</expected>
+      <id>check.2.1</id>      
       <level>INFO</level>
       <name>entityCount</name>
       <selector>
@@ -26,6 +28,7 @@
       <code><![CDATA[any(duplicated(attributeNames))]]></code>
       <environment>r</environment>
       <expected>FALSE</expected>
+      <id>check.3.1</id>      
       <level>ERROR</level>
       <name>attributeNames</name>
       <selector>
@@ -33,5 +36,6 @@
          <xpath>//attribute/attributeName</xpath>
       </selector>
    </check>
+   <id>suite.1.1</id>      
    <name>Testing suite</name>
 </recommendation>
