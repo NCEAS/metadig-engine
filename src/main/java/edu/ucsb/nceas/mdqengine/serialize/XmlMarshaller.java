@@ -1,6 +1,7 @@
 package edu.ucsb.nceas.mdqengine.serialize;
 
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 
 import javax.xml.bind.JAXBContext;
@@ -26,7 +27,7 @@ public class XmlMarshaller {
 
 	  }
 	
-	public static Object fromXml(String xml, Class clazz) throws Exception {
+	public static Object fromXml(String xml, Class clazz) throws JAXBException, IOException {
 		
 	    JAXBContext context = JAXBContext.newInstance(clazz);
 	    Unmarshaller u = context.createUnmarshaller();
