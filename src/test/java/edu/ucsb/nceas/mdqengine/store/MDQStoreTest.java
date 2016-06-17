@@ -27,8 +27,8 @@ public class MDQStoreTest {
 	public static void initStore() {
 		
 		// use in-memory impl for now
-//		store = new InMemoryStore();
-		store = new MNStore();
+		store = new InMemoryStore();
+//		store = new MNStore();
 
 		// save the testing recommendation if we don't have it already
 		Recommendation rec = RecommendationFactory.getMockRecommendation();
