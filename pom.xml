@@ -13,6 +13,11 @@
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <d1_libclient_java.version>2.2.0</d1_libclient_java.version>
+        <renjin.version>0.8.2087</renjin.version>
+        <jython.version>2.5.3</jython.version>
+        <gson.version>2.6.2</gson.version>
+        <moxy.version>2.6.3</moxy.version>
 	</properties>
 
 	<scm>
@@ -52,6 +57,11 @@
 		    <artifactId>gson</artifactId>
 		    <version>2.6.2</version>
 		</dependency>
+		<dependency>
+			<groupId>net.minidev</groupId>
+			<artifactId>json-smart</artifactId>
+			<version>1.1.1</version>
+		</dependency>
 		<!-- http://mvnrepository.com/artifact/commons-io/commons-io -->
 		<dependency>
 		    <groupId>commons-io</groupId>
@@ -64,13 +74,24 @@
 		    <artifactId>org.eclipse.persistence.moxy</artifactId>
 		    <version>2.6.3</version>
 		</dependency>
-		
+		<!-- D1 libclient -->
+		<dependency>
+			<groupId>org.dataone</groupId>
+			<artifactId>d1_libclient_java</artifactId>
+			<version>${d1_libclient_java.version}</version>
+			<type>jar</type>
+		</dependency>
 	</dependencies>
 	<repositories>
 		<repository>
 			<id>bedatadriven</id>
 			<name>bedatadriven public repo</name>
 			<url>https://nexus.bedatadriven.com/content/groups/public/</url>
+		</repository>
+		<repository>
+			<id>dataone.org</id>
+			<name>DataONE Maven repo</name>
+			<url>http://maven.dataone.org/</url>
 		</repository>
 	</repositories>
 	<build>

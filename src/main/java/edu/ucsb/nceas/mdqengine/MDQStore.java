@@ -8,7 +8,7 @@ import edu.ucsb.nceas.mdqengine.model.Run;
 
 public interface MDQStore {
 	
-	public Collection<Recommendation> listRecommendations();
+	public Collection<String> listRecommendations();
 	public Recommendation getRecommendation(String id);
 	public void createRecommendation(Recommendation rec);
 	public void updateRecommendation(Recommendation rec);

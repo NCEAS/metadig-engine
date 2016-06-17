@@ -1,10 +1,10 @@
 package edu.ucsb.nceas.mdqengine.store;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
 import java.io.InputStream;
 import java.net.URL;
+import java.util.Calendar;
 import java.util.Collection;
 
 import org.junit.BeforeClass;
@@ -27,31 +27,61 @@ public class MDQStoreTest {
 	public static void initStore() {
 		
 		// use in-memory impl for now
-		store = new InMemoryStore();
-		
-		// save the testing recommendation
+//		store = new InMemoryStore();
+		store = new MNStore();
+
+		// save the testing recommendation if we don't have it already
 		Recommendation rec = RecommendationFactory.getMockRecommendation();
-		store.createRecommendation(rec);
+		if (store.getRecommendation(rec.getId()) == null) {
+			store.createRecommendation(rec);
+		}
 		
 		// add the checks as stand-alones
-		for (Check check: rec.getCheck()) {
-			store.createCheck(check);
-		}
+//		for (Check check: rec.getCheck()) {
+//			store.createCheck(check);
+//		}
 	}
 	
 	@Test
 	public void testListRecommendations() {
-		Collection<Recommendation> recs = store.listRecommendations();
-		assertEquals(1, recs.size());
+		Collection<String> recs = store.listRecommendations();
+		assertTrue(recs.size() > 0);
 	}
 	
 	@Test
+	public void createRecommendation() {
+		Recommendation rec = new Recommendation();
+		rec.setId("createRecommendation." + Calendar.getInstance().getTimeInMillis());
+		rec.setName("Test create recommendation");
+		store.createRecommendation(rec);
+		Recommendation r = store.getRecommendation(rec.getId());
+		assertEquals(rec.getName(), r.getName());
+		store.deleteRecommendation(rec);
+	}
+	
+	@Test
+	public void updateRecommendation() {
+		Recommendation rec = new Recommendation();
+		rec.setId("updateRecommendation." + Calendar.getInstance().getTimeInMillis());
+		rec.setName("Test update recommendation");
+		store.createRecommendation(rec);
+		Recommendation r = store.getRecommendation(rec.getId());
+		assertEquals(rec.getName(), r.getName());
+		rec.setName("Updated test name");
+		store.updateRecommendation(rec);
+		Recommendation r2 = store.getRecommendation(rec.getId());
+		assertEquals(rec.getName(), r2.getName());
+		store.deleteRecommendation(rec);
+
+	}
+	
+	//@Test
 	public void testListChecks() {
 		Collection<Check> checks = store.listChecks();
 		assertEquals(3, checks.size());
 	}
 	
-	@Test
+	//@Test
 	public void testRuns() {
 		try {
 			MDQEngine mdqe = new MDQEngine();
@@ -59,7 +89,7 @@ public class MDQStoreTest {
 			String metadataURL = "https://knb.ecoinformatics.org/knb/d1/mn/v2/object/" + id;
 			InputStream input = new URL(metadataURL).openStream();
 			
-			Recommendation recommendation = store.listRecommendations().iterator().next();
+			Recommendation recommendation = RecommendationFactory.getMockRecommendation();
 			Run run = mdqe.runRecommendation(recommendation, input);
 			store.createRun(run);
 			
