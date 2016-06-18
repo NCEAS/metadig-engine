@@ -119,10 +119,22 @@ public class MNStore implements MDQStore {
 	@Override
 	public Collection<String> listRecommendations() {
 		
-		Collection<String> recommendations = new ArrayList<String>();
+		// use shared impl
+		Collection<String> results = list(Recommendation.class);
+		return results;
+	}
+	
+	/**
+	 * generic method for looking up model classes from the store
+	 * @param clazz
+	 * @return
+	 */
+	private Collection<String> list(Class clazz) {
+		
+		Collection<String> results = new ArrayList<String>();
 		try {
-			// query system for recommendations
-			String solrQuery = "q=" + URLEncoder.encode("formatId:\"" + Recommendation.class.getCanonicalName() + "\"", "UTF-8");
+			// query system for object
+			String solrQuery = "q=" + URLEncoder.encode("formatId:\"" + clazz.getCanonicalName() + "\"", "UTF-8");
 			solrQuery += URLEncoder.encode("-obsoletedBy:*", "UTF-8");
 			solrQuery += "&fl=id,seriesId&wt=json&rows=10000";
 			log.debug("solrQuery = " + solrQuery);
@@ -146,9 +158,8 @@ public class MNStore implements MDQStore {
 					String seriesId = ((JSONObject) solrDoc).get("seriesId").toString();
 					log.debug("seriesId = " + seriesId);
 					
-					// don't fetch the recommendation - just the id
-					//Recommendation r = this.getRecommendation(seriesId);
-					recommendations.add(seriesId);
+					// don't fetch the object - just the id
+					results.add(seriesId);
 				}
 			}
 			
@@ -156,132 +167,151 @@ public class MNStore implements MDQStore {
 			log.error(e.getMessage(), e);
 		}
 
-		return recommendations;
+		return results;
 	}
-
-	@Override
-	public Recommendation getRecommendation(String id) {
+	
+	/**
+	 * Shared method for getting a model from store
+	 * @param id
+	 * @param clazz
+	 * @return
+	 */
+	private Object get(String id, Class clazz) {
 		
-		Recommendation rec = null;
+		Object model = null;
 		try {
 			Identifier identifier = new Identifier();
 			identifier.setValue(id);
 			InputStream is = node.get(session, identifier);
-			rec = (Recommendation) XmlMarshaller.fromXml(IOUtils.toString(is, "UTF-8"), Recommendation.class);
+			model = XmlMarshaller.fromXml(IOUtils.toString(is, "UTF-8"), clazz);
 		} catch (Exception e) {
-			log.error("Could not get Recommendation: " + id + ": " + e.getMessage(), e);
+			log.error("Could not get model: " + id + ": " + e.getMessage(), e);
 		}
 		
-		return rec;
+		return model;
 	}
-
-	@Override
-	public void createRecommendation(Recommendation rec) {
+	
+	private boolean create(Object model, String id) {
 		try {
 			Identifier identifier = node.generateIdentifier(session, "UUID", null);
 			Identifier sid = null;
-			String existingId = rec.getId();
-			if (existingId != null) {
+			if (id != null) {
 				sid = new Identifier();
-				sid.setValue(rec.getId());
+				sid.setValue(id);
 			}
-			String obj = XmlMarshaller.toXml(rec);
-			SystemMetadata sysMeta = this.generateSystemMetadata(rec);
+			String obj = XmlMarshaller.toXml(model);
+			SystemMetadata sysMeta = this.generateSystemMetadata(model);
 			sysMeta.setIdentifier(identifier);
 			sysMeta.setSeriesId(sid);
 			node.create(session, identifier, IOUtils.toInputStream(obj, "UTF-8"), sysMeta );
 		} catch (Exception e) {
 			log.error(e.getMessage(), e);
+			return false;
 		}
+		return true;
 	}
-
-	@Override
-	public void updateRecommendation(Recommendation rec) {
+	
+	private boolean update(Object model, String id) {
 		try {
 			// identified by SID, but need PIDs for update action
 			Identifier sid = new Identifier();
-			sid.setValue(rec.getId());
+			sid.setValue(id);
 			SystemMetadata oldSysMeta = node.getSystemMetadata(session, sid);
 			Identifier oldId = oldSysMeta.getIdentifier();
 			Identifier newId = node.generateIdentifier(session, "UUID", null);
 			
-			SystemMetadata sysMeta = generateSystemMetadata(rec);
+			SystemMetadata sysMeta = generateSystemMetadata(model);
 			sysMeta.setIdentifier(newId);
 			sysMeta.setSeriesId(sid);
 			sysMeta.setObsoletes(oldId);
 
-			String obj = XmlMarshaller.toXml(rec);
+			String obj = XmlMarshaller.toXml(model);
 			node.update(session, oldId, IOUtils.toInputStream(obj, "UTF-8"), newId , sysMeta );
 		} catch (Exception e) {
 			log.error(e.getMessage(), e);
+			return false;
 		}
+		return true;
+		
+	}
+	
+	private boolean delete(String id) {
+		try {
+			Identifier identifier = new Identifier();
+			identifier.setValue(id);
+			node.archive(session, identifier);
+		} catch (Exception e) {
+			log.error(e.getMessage(), e);
+			return false;
+		}
+		return true;
 		
 	}
 
 	@Override
-	public void deleteRecommendation(Recommendation rec) {
-		try {
-			Identifier identifier = new Identifier();
-			identifier.setValue(rec.getId());
-			node.archive(session, identifier);
-		} catch (Exception e) {
-			log.error(e.getMessage(), e);
-		}
-		
+	public Recommendation getRecommendation(String id) {
+		Recommendation model = (Recommendation) get(id, Recommendation.class);
+		return model;
+	}
+
+	@Override
+	public void createRecommendation(Recommendation model) {
+		create(model, model.getId());
+	}
+
+	@Override
+	public void updateRecommendation(Recommendation model) {
+		update(model, model.getId());	
+	}
+
+	@Override
+	public void deleteRecommendation(Recommendation model) {
+		delete(model.getId());	
 	}
 
 	@Override
 	public Collection<String> listChecks() {
-		// TODO Auto-generated method stub
-		return null;
+		return list(Check.class);
 	}
 
 	@Override
 	public Check getCheck(String id) {
-		// TODO Auto-generated method stub
-		return null;
+		return (Check) get(id, Check.class);
 	}
 
 	@Override
 	public void createCheck(Check check) {
-		// TODO Auto-generated method stub
-		
+		create(check, check.getId());
 	}
 
 	@Override
 	public void updateCheck(Check check) {
-		// TODO Auto-generated method stub
-		
+		update(check, check.getId());
 	}
 
 	@Override
 	public void deleteCheck(Check check) {
-		// TODO Auto-generated method stub
-		
+		delete(check.getId());
 	}
 
 	@Override
 	public Collection<String> listRuns() {
-		// TODO Auto-generated method stub
-		return null;
+		return list(Run.class);
 	}
 
 	@Override
 	public Run getRun(String id) {
-		// TODO Auto-generated method stub
-		return null;
+		return (Run) get(id, Run.class);
 	}
 
 	@Override
 	public void createRun(Run run) {
-		// TODO Auto-generated method stub
-		
+		create(run, run.getId());		
 	}
 
 	@Override
 	public void deleteRun(Run run) {
-		// TODO Auto-generated method stub
-		
+		delete(run.getId());
 	}
 
 }
