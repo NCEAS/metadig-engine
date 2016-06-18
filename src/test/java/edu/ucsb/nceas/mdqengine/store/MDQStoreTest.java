@@ -36,10 +36,12 @@ public class MDQStoreTest {
 			store.createRecommendation(rec);
 		}
 		
-		// add the checks as stand-alones
-//		for (Check check: rec.getCheck()) {
-//			store.createCheck(check);
-//		}
+		// add the checks as independent objects if needed
+		for (Check check: rec.getCheck()) {
+			if (store.getCheck(check.getId()) == null) {
+				store.createCheck(check);
+			}
+		}
 	}
 	
 	@Test
@@ -75,13 +77,13 @@ public class MDQStoreTest {
 
 	}
 	
-	//@Test
+	@Test
 	public void testListChecks() {
 		Collection<String> checks = store.listChecks();
 		assertEquals(3, checks.size());
 	}
 	
-	//@Test
+	@Test
 	public void testRuns() {
 		try {
 			MDQEngine mdqe = new MDQEngine();
@@ -93,14 +95,10 @@ public class MDQStoreTest {
 			Run run = mdqe.runRecommendation(recommendation, input);
 			store.createRun(run);
 			
-			Collection<String> runs = store.listRuns();
-			assertEquals(1, runs.size());
-			
 			Run r = store.getRun(run.getId());
 			assertEquals(run.getObjectIdentifier(), r.getObjectIdentifier());
 			
 			store.deleteRun(run);
-			assertEquals(0, runs.size());
 			
 		} catch (Exception e) {
 			e.printStackTrace();
