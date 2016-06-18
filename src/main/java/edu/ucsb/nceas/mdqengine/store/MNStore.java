@@ -231,7 +231,7 @@ public class MNStore implements MDQStore {
 	}
 
 	@Override
-	public Collection<Check> listChecks() {
+	public Collection<String> listChecks() {
 		// TODO Auto-generated method stub
 		return null;
 	}
@@ -261,7 +261,7 @@ public class MNStore implements MDQStore {
 	}
 
 	@Override
-	public Collection<Run> listRuns() {
+	public Collection<String> listRuns() {
 		// TODO Auto-generated method stub
 		return null;
 	}

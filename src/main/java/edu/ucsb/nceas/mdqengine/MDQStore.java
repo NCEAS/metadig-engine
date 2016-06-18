@@ -14,13 +14,13 @@ public interface MDQStore {
 	public void updateRecommendation(Recommendation rec);
 	public void deleteRecommendation(Recommendation rec);
 
-	public Collection<Check> listChecks();
+	public Collection<String> listChecks();
 	public Check getCheck(String id);
 	public void createCheck(Check check);
 	public void updateCheck(Check check);
 	public void deleteCheck(Check check);
 	
-	public Collection<Run> listRuns();
+	public Collection<String> listRuns();
 	public Run getRun(String id);
 	public void createRun(Run run);
 	public void deleteRun(Run run);

@@ -77,7 +77,7 @@ public class MDQStoreTest {
 	
 	//@Test
 	public void testListChecks() {
-		Collection<Check> checks = store.listChecks();
+		Collection<String> checks = store.listChecks();
 		assertEquals(3, checks.size());
 	}
 	
@@ -93,7 +93,7 @@ public class MDQStoreTest {
 			Run run = mdqe.runRecommendation(recommendation, input);
 			store.createRun(run);
 			
-			Collection<Run> runs = store.listRuns();
+			Collection<String> runs = store.listRuns();
 			assertEquals(1, runs.size());
 			
 			Run r = store.getRun(run.getId());

@@ -50,8 +50,8 @@ public class InMemoryStore implements MDQStore{
 	}
 
 	@Override
-	public Collection<Check> listChecks() {
-		return checks.values();
+	public Collection<String> listChecks() {
+		return checks.keySet();
 	}
 
 	@Override
@@ -75,8 +75,8 @@ public class InMemoryStore implements MDQStore{
 	}
 
 	@Override
-	public Collection<Run> listRuns() {
-		return runs.values();
+	public Collection<String> listRuns() {
+		return runs.keySet();
 	}
 
 	@Override
