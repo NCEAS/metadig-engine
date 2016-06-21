@@ -31,7 +31,7 @@ public class Dispatcher {
 		
 	}
 	
-	private Dispatcher() {}
+	protected Dispatcher() {}
 		
 	private Dispatcher(String engineName) {
 	
@@ -47,6 +47,7 @@ public class Dispatcher {
 	public static Dispatcher getDispatcher(String env) {
 	    
 		String engineName = null;
+		Dispatcher instance = null;
 		if (env.equalsIgnoreCase("r")) {
 			engineName = "Renjin";
 		} else if (env.equalsIgnoreCase("python")) {
@@ -54,8 +55,12 @@ public class Dispatcher {
 		} else if (env.equalsIgnoreCase("JavaScript")) {
 			engineName = "JavaScript";
 		}
-		
-		Dispatcher instance = new Dispatcher(engineName);
+	
+		if (env.equalsIgnoreCase("Java")) {
+			instance = new JavaDispatcher();
+		} else {
+			instance = new Dispatcher(engineName);
+		}
 		
 		return instance;
 	    
