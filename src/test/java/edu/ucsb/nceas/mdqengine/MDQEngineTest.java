@@ -8,7 +8,11 @@ import java.net.URL;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.dataone.client.v2.CNode;
+import org.dataone.client.v2.itk.D1Client;
+import org.dataone.configuration.Settings;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import edu.ucsb.nceas.mdqengine.model.Check;
@@ -27,6 +31,13 @@ public class MDQEngineTest {
 	private String id = "doi:10.5063/AA/tao.1.1";
 
 	private Recommendation recommendation = null;
+	
+	@BeforeClass
+	public static void initProperties() throws Exception {
+		//Settings.getConfiguration().setProperty("D1Client.CN_URL", "https://cn.dataone.org/cn");
+		CNode cn = D1Client.getCN();
+		
+	}
 	
 	@Before
 	public void setUpRecommendation() {
@@ -62,20 +73,40 @@ public class MDQEngineTest {
 		Run run = null;
 		try {
 			// retrieve the metadata content
+			String cnURL = Settings.getConfiguration().getString("D1Client.CN_URL");
+			log.error("CN URL: " + cnURL);
 			String metadataURL = "https://cn.dataone.org/cn/v2/object/" + id;
 			InputStream input = new URL(metadataURL).openStream();
 			// run the recommendation on it
 			run = mdqe.runRecommendation(recommendation, input);
 			run.setObjectIdentifier(id);
 			log.debug("Run results JSON: " + JsonMarshaller.toJson(run));
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			fail(e.getMessage());
+		}
+
+	}
+	
+	@Test
+	public void testRunRecommendationForPackage() {
+		MDQEngine mdqe = new MDQEngine();
+		Run run = null;
+		try {
+			// use the ORE id
+			String packageId = "resourceMap_tao.1.1";
+			String packageURL = "https://cn.dataone.org/cn/v2/object/" + packageId;
+			InputStream input = new URL(packageURL).openStream();
+			// run the recommendation on it
+			run = mdqe.runRecommendation(recommendation, input);
+			run.setObjectIdentifier(packageId);
 			log.debug("Run results XML: " + XmlMarshaller.toXml(run));
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 			fail(e.getMessage());
 		}
-		
-
 
 	}
 }

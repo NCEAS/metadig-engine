@@ -36,6 +36,8 @@ public class XMLDialect {
 	
 	private XPathFactory xPathfactory;
 	
+	private Map<String, String> dataUrls;
+	
 	protected Log log = LogFactory.getLog(this.getClass());
 	
 	public XMLDialect(InputStream input) throws SAXException, IOException, ParserConfigurationException {
@@ -89,6 +91,11 @@ public class XMLDialect {
 			variables.put(name, value);
 		}
 		
+		// make dataUrls available to the check if we have them
+		if (this.dataUrls != null) {
+			variables.put("dataUrls", dataUrls);
+		}
+		
 		// dispatch to checker impl
 		Dispatcher dispatcher = Dispatcher.getDispatcher(check.getEnvironment());
 		
@@ -104,6 +111,14 @@ public class XMLDialect {
 		}
 		
 		return result;
+	}
+
+	public Map<String, String> getDataUrls() {
+		return dataUrls;
+	}
+
+	public void setDataUrls(Map<String, String> dataUrls) {
+		this.dataUrls = dataUrls;
 	}
 
 }
