@@ -26,7 +26,7 @@ public class PythonDispatcherTest {
 		names.put("x", 2);
 		names.put("y", 2);
 		String code = "x == y";
-		String result = null;
+		DispatchResult result = null;
 		try {
 			result = dispatcher.dispatch(names, code);
 		} catch (ScriptException e) {
@@ -34,6 +34,6 @@ public class PythonDispatcherTest {
 			e.printStackTrace();
 			fail(e.getMessage());
 		}
-		assertEquals("true", result);
+		assertEquals("true", result.getValue());
 	}
 }

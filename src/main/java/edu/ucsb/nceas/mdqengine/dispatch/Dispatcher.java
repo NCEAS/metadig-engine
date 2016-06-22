@@ -19,7 +19,7 @@ public class Dispatcher {
 	// create a script engine manager:
     protected ScriptEngineManager manager = new ScriptEngineManager();
 
-	public String dispatch(Map<String, Object> names, String code) throws ScriptException {
+	public DispatchResult dispatch(Map<String, Object> names, String code) throws ScriptException {
 		for (Entry<String, Object> entry: names.entrySet()) {
 			log.debug("Setting variable: " + entry.getKey() + "=" + entry.getValue());
 			engine.put(entry.getKey(), entry.getValue());
@@ -27,7 +27,18 @@ public class Dispatcher {
 		log.debug("Evaluating code: " + code);
 		Object res = engine.eval(code);
 		log.debug("Result: " + res);
-		return res.toString();
+		DispatchResult dr = new DispatchResult();
+		dr.setValue(res.toString());
+		// try to find other result items
+		Object var = engine.get("message");
+		if (var != null) {
+			dr.setMessage(var.toString());
+		}
+		var = engine.get("status");
+		if (var != null) {
+			dr.setStatus(var.toString());
+		}
+		return dr;
 		
 	}
 	

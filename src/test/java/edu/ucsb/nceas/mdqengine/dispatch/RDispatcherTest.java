@@ -26,7 +26,7 @@ public class RDispatcherTest {
 		names.put("x", 2);
 		names.put("y", 2);
 		String code = "x == y";
-		String result = null;
+		DispatchResult result = null;
 		try {
 			result = dispatcher.dispatch(names, code);
 		} catch (ScriptException e) {
@@ -34,7 +34,7 @@ public class RDispatcherTest {
 			e.printStackTrace();
 			fail(e.getMessage());
 		}
-		assertEquals("TRUE", result);
+		assertEquals("TRUE", result.getValue());
 	}
 	
 	@Test
@@ -50,7 +50,7 @@ public class RDispatcherTest {
 		
 		// R code to check congruence between loaded data and the metadata
 		String code = "df <- read.csv(dataUrl, header=header, sep=sep); nrow(df) == expected";
-		String result = null;
+		DispatchResult result = null;
 		try {
 			result = dispatcher.dispatch(names, code);
 		} catch (ScriptException e) {
@@ -58,7 +58,7 @@ public class RDispatcherTest {
 			e.printStackTrace();
 			fail(e.getMessage());
 		}
-		assertEquals("TRUE", result);
+		assertEquals("TRUE", result.getValue());
 	}
 
 }

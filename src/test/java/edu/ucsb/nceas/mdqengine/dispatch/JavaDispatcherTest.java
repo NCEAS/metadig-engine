@@ -26,13 +26,13 @@ public class JavaDispatcherTest {
 		names.put("x", 2);
 		names.put("y", 2);
 		String className = MockJavaEqualityCheck.class.getName();
-		String result = null;
+		DispatchResult result = null;
 		try {
 			result = dispatcher.dispatch(names, className);
 		} catch (ScriptException e) {
 			e.printStackTrace();
 			fail(e.getMessage());
 		}
-		assertEquals("true", result);
+		assertEquals("true", result.getValue());
 	}
 }

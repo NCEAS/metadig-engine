@@ -14,14 +14,14 @@ import org.apache.commons.beanutils.BeanUtils;
 public class JavaDispatcher extends Dispatcher {
 		
 	@Override
-	public String dispatch(Map<String, Object> names, String className) throws ScriptException {
+	public DispatchResult dispatch(Map<String, Object> names, String className) throws ScriptException {
 
-		String results = null;
+		DispatchResult results = null;
 		try {
 			// create instance of the given class - must be impl of Callable<String>
 			Class clazz = Class.forName(className);
 			log.debug("Calling class: " + className);
-			Callable<String> runner = (Callable<String>) clazz.newInstance();
+			Callable<DispatchResult> runner = (Callable<DispatchResult>) clazz.newInstance();
 			// set the properties from name/value Map
 			for (Entry<String, Object> entry: names.entrySet()) {
 				log.debug("Setting property: " + entry.getKey() + "=" + entry.getValue());
@@ -29,14 +29,14 @@ public class JavaDispatcher extends Dispatcher {
 			}
 			// call the bean, blocking for results
 			ExecutorService exec = Executors.newSingleThreadExecutor();
-			Future<String> future = exec.submit(runner);
+			Future<DispatchResult> future = exec.submit(runner);
 			results = future.get();
 			
 		} catch (Exception e) {
 			throw new ScriptException(e);
 		}
 		
-		log.debug("Result: " + results);
+		log.debug("Result: " + results.getValue());
 
 		return results;
 	}
