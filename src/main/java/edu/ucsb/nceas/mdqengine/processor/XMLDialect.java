@@ -24,7 +24,6 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
-import edu.ucsb.nceas.mdqengine.dispatch.DispatchResult;
 import edu.ucsb.nceas.mdqengine.dispatch.Dispatcher;
 import edu.ucsb.nceas.mdqengine.model.Check;
 import edu.ucsb.nceas.mdqengine.model.Result;
@@ -100,16 +99,11 @@ public class XMLDialect {
 		// dispatch to checker impl
 		Dispatcher dispatcher = Dispatcher.getDispatcher(check.getEnvironment());
 		
-		DispatchResult ret = dispatcher.dispatch(variables, check.getCode());
+		Result result = dispatcher.dispatch(variables, check.getCode());
 
 		// summarize the result
-		Result result = new Result();
 		result.setCheck(check);
 		result.setTimestamp(Calendar.getInstance().getTime());
-		result.setMessage(ret.getMessage());
-		if (check.getExpected() != null) {
-			result.setSuccess(ret.getValue() == check.getExpected());
-		}
 		
 		return result;
 	}

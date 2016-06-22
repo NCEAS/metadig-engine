@@ -2,16 +2,18 @@ package edu.ucsb.nceas.mdqengine.dispatch;
 
 import java.util.concurrent.Callable;
 
-public class MockJavaEqualityCheck implements Callable<DispatchResult> {
+import edu.ucsb.nceas.mdqengine.model.Result;
+
+public class MockJavaEqualityCheck implements Callable<Result> {
 
 	private int x;
 	
 	private int y;	
 	
 	@Override
-	public DispatchResult call() throws Exception {
+	public Result call() throws Exception {
 		Boolean result = (x == y);
-		DispatchResult dr = new DispatchResult();
+		Result dr = new Result();
 		dr.setValue(result.toString());
 		return dr;
 	}

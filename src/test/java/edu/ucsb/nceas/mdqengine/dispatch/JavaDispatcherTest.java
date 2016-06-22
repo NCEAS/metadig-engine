@@ -11,6 +11,8 @@ import javax.script.ScriptException;
 import org.junit.Before;
 import org.junit.Test;
 
+import edu.ucsb.nceas.mdqengine.model.Result;
+
 public class JavaDispatcherTest {
 	
 	private Dispatcher dispatcher = null;
@@ -26,7 +28,7 @@ public class JavaDispatcherTest {
 		names.put("x", 2);
 		names.put("y", 2);
 		String className = MockJavaEqualityCheck.class.getName();
-		DispatchResult result = null;
+		Result result = null;
 		try {
 			result = dispatcher.dispatch(names, className);
 		} catch (ScriptException e) {

@@ -11,6 +11,8 @@ import javax.script.ScriptException;
 import org.junit.Before;
 import org.junit.Test;
 
+import edu.ucsb.nceas.mdqengine.model.Result;
+
 public class RDispatcherTest {
 	
 	private Dispatcher dispatcher = null;
@@ -26,7 +28,7 @@ public class RDispatcherTest {
 		names.put("x", 2);
 		names.put("y", 2);
 		String code = "x == y";
-		DispatchResult result = null;
+		Result result = null;
 		try {
 			result = dispatcher.dispatch(names, code);
 		} catch (ScriptException e) {
@@ -50,7 +52,7 @@ public class RDispatcherTest {
 		
 		// R code to check congruence between loaded data and the metadata
 		String code = "df <- read.csv(dataUrl, header=header, sep=sep); nrow(df) == expected";
-		DispatchResult result = null;
+		Result result = null;
 		try {
 			result = dispatcher.dispatch(names, code);
 		} catch (ScriptException e) {

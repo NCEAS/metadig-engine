@@ -11,17 +11,19 @@ import javax.script.ScriptException;
 
 import org.apache.commons.beanutils.BeanUtils;
 
+import edu.ucsb.nceas.mdqengine.model.Result;
+
 public class JavaDispatcher extends Dispatcher {
 		
 	@Override
-	public DispatchResult dispatch(Map<String, Object> names, String className) throws ScriptException {
+	public Result dispatch(Map<String, Object> names, String className) throws ScriptException {
 
-		DispatchResult results = null;
+		Result results = null;
 		try {
 			// create instance of the given class - must be impl of Callable<String>
 			Class clazz = Class.forName(className);
 			log.debug("Calling class: " + className);
-			Callable<DispatchResult> runner = (Callable<DispatchResult>) clazz.newInstance();
+			Callable<Result> runner = (Callable<Result>) clazz.newInstance();
 			// set the properties from name/value Map
 			for (Entry<String, Object> entry: names.entrySet()) {
 				log.debug("Setting property: " + entry.getKey() + "=" + entry.getValue());
@@ -29,7 +31,7 @@ public class JavaDispatcher extends Dispatcher {
 			}
 			// call the bean, blocking for results
 			ExecutorService exec = Executors.newSingleThreadExecutor();
-			Future<DispatchResult> future = exec.submit(runner);
+			Future<Result> future = exec.submit(runner);
 			results = future.get();
 			
 		} catch (Exception e) {

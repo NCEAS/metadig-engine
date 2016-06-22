@@ -77,7 +77,7 @@ public class MDQEngine {
 			
 		} catch (Exception e) {
 			// guess it is not an ORE!
-			log.warn("Input does not appear to be an ORE package, defaulting to metadata parsing. " + e.getCause(), e);
+			log.warn("Input does not appear to be an ORE package, defaulting to metadata parsing. " + e.getCause());
 			metadataContent = content;
 		}
 		

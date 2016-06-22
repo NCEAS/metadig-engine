@@ -5,27 +5,21 @@ import java.util.Date;
 public class Result {
 	
 	private Check check;
+		
+	private Date timestamp;
 	
-	private boolean success;
+	private String value;
 	
 	private String message;
 	
-	private Date timestamp;
+	private String status;
 
-	public Check getCheck() {
-		return check;
+	public String getValue() {
+		return value;
 	}
 
-	public void setCheck(Check check) {
-		this.check = check;
-	}
-
-	public boolean isSuccess() {
-		return success;
-	}
-
-	public void setSuccess(boolean success) {
-		this.success = success;
+	public void setValue(String value) {
+		this.value = value;
 	}
 
 	public String getMessage() {
@@ -34,6 +28,22 @@ public class Result {
 
 	public void setMessage(String message) {
 		this.message = message;
+	}
+
+	public String getStatus() {
+		return status;
+	}
+
+	public void setStatus(String status) {
+		this.status = status;
+	}
+
+	public Check getCheck() {
+		return check;
+	}
+
+	public void setCheck(Check check) {
+		this.check = check;
 	}
 
 	public Date getTimestamp() {

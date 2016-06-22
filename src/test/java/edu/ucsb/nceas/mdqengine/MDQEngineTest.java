@@ -1,6 +1,6 @@
 package edu.ucsb.nceas.mdqengine;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
 import java.io.InputStream;
@@ -32,13 +32,6 @@ public class MDQEngineTest {
 
 	private Recommendation recommendation = null;
 	
-	@BeforeClass
-	public static void initProperties() throws Exception {
-		//Settings.getConfiguration().setProperty("D1Client.CN_URL", "https://cn.dataone.org/cn");
-		CNode cn = D1Client.getCN();
-		
-	}
-	
 	@Before
 	public void setUpRecommendation() {
 		recommendation = RecommendationFactory.getMockRecommendation();
@@ -57,7 +50,7 @@ public class MDQEngineTest {
 			for (Check check: recommendation.getCheck()) {
 				Result result = xml.runCheck(check);
 				log.debug("Check result: " + JsonMarshaller.toJson(result));
-				assertTrue(result.isSuccess());
+				assertEquals(check.getExpected(), result.getValue());
 				break;
 			}
 			

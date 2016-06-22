@@ -11,6 +11,8 @@ import javax.script.ScriptException;
 import org.junit.Before;
 import org.junit.Test;
 
+import edu.ucsb.nceas.mdqengine.model.Result;
+
 public class PythonDispatcherTest {
 	
 	private Dispatcher dispatcher = null;
@@ -26,7 +28,7 @@ public class PythonDispatcherTest {
 		names.put("x", 2);
 		names.put("y", 2);
 		String code = "x == y";
-		DispatchResult result = null;
+		Result result = null;
 		try {
 			result = dispatcher.dispatch(names, code);
 		} catch (ScriptException e) {
