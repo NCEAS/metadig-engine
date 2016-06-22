@@ -33,6 +33,8 @@ public class MDQEngine {
 	
 	private static final String RESOLVE_PREFIX = Settings.getConfiguration().getString("D1Client.CN_URL") + "/v2/resolve/";
 	
+	private MDQStore store = null;
+	
 	protected Log log = LogFactory.getLog(this.getClass());
 
 	/**
@@ -90,6 +92,11 @@ public class MDQEngine {
 
 		// run the checks in the recommendation to get results
 		for (Check check: recommendation.getCheck()) {
+			// is this a reference to existing check?
+			if (check.getCode() == null) {
+				// then load it
+				check = store.getCheck(check.getId());
+			}
 			Result result = xml.runCheck(check);
 			results.add(result);
 		}
@@ -99,6 +106,15 @@ public class MDQEngine {
 		
 		return run;
 		
+	}
+	
+	/** 
+	 * To enable checks-by-id-reference, set the store so that checks can be retrieved
+	 * if not specified inline
+	 * @param store The storage implementation to use for retrieving existing checks
+	 */
+	public void setStore(MDQStore store) {
+		this.store = store;
 	}
 
 }

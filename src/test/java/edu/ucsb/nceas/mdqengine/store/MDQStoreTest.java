@@ -15,6 +15,7 @@ import edu.ucsb.nceas.mdqengine.MDQStore;
 import edu.ucsb.nceas.mdqengine.model.Check;
 import edu.ucsb.nceas.mdqengine.model.Recommendation;
 import edu.ucsb.nceas.mdqengine.model.RecommendationFactory;
+import edu.ucsb.nceas.mdqengine.model.Result;
 import edu.ucsb.nceas.mdqengine.model.Run;
 
 public class MDQStoreTest {
@@ -97,6 +98,39 @@ public class MDQStoreTest {
 			
 			Run r = store.getRun(run.getId());
 			assertEquals(run.getObjectIdentifier(), r.getObjectIdentifier());
+			
+			store.deleteRun(run);
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+			fail(e.getMessage());
+		}
+		
+	}
+	
+	@Test
+	public void testCheckReference() {
+		try {
+			MDQEngine mdqe = new MDQEngine();
+			
+			String metadataURL = "https://knb.ecoinformatics.org/knb/d1/mn/v2/object/" + id;
+			InputStream input = new URL(metadataURL).openStream();
+			
+			Recommendation recommendation = RecommendationFactory.getMockRecommendation();
+			Check checkRef = new Check();
+			String checkId = "check.1.1";
+			checkRef.setId(checkId );
+			recommendation.getCheck().add(checkRef);
+			mdqe.setStore(store);
+			Run run = mdqe.runRecommendation(recommendation, input);
+			int checkCount = 0;
+			for (Result r: run.getResult()) {
+				Check c = r.getCheck();
+				if (c.getId().equals(checkId)) {
+					checkCount++;
+				}
+			}
+			assertEquals(2, checkCount);
 			
 			store.deleteRun(run);
 			
