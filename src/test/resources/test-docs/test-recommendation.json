@@ -23,7 +23,7 @@
 	]},
 	{"name":"attributeNames",
 	"id":"check.3.1",
-	"level":"ERROR",
+	"level":"SEVERE",
 	"environment":"r",
 	"code":"any(duplicated(attributeNames))",
 	"expected":"FALSE",

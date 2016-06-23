@@ -29,7 +29,7 @@
       <environment>r</environment>
       <expected>FALSE</expected>
       <id>check.3.1</id>      
-      <level>ERROR</level>
+      <level>SEVERE</level>
       <name>attributeNames</name>
       <selector>
          <name>attributeNames</name>

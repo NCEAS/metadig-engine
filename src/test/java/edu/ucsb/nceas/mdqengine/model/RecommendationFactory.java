@@ -23,7 +23,7 @@ public class RecommendationFactory {
 		titleCheck.setId("check.1.1");
 		titleCheck.setName("titleLength");
 		titleCheck.setEnvironment("r");
-		titleCheck.setLevel("WARN");
+		titleCheck.setLevel(Level.WARN);
 		List<Selector> selectors = new ArrayList<Selector>();
 		Selector s1 = new Selector();
 		s1.setName("title");
@@ -39,7 +39,7 @@ public class RecommendationFactory {
 		entityCount.setId("check.2.1");
 		entityCount.setName("entityCount");
 		entityCount.setEnvironment("JavaScript");
-		entityCount.setLevel("INFO");
+		entityCount.setLevel(Level.INFO);
 		selectors = new ArrayList<Selector>();
 		s1 = new Selector();
 		s1.setName("entityCount");
@@ -55,7 +55,7 @@ public class RecommendationFactory {
 		attributeNames.setId("check.3.1");
 		attributeNames.setName("attributeNames");
 		attributeNames.setEnvironment("r");
-		attributeNames.setLevel("ERROR");
+		attributeNames.setLevel(Level.SEVERE);
 		selectors = new ArrayList<Selector>();
 		s1 = new Selector();
 		s1.setName("attributeNames");

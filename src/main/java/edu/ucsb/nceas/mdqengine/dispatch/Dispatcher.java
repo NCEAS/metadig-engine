@@ -11,6 +11,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import edu.ucsb.nceas.mdqengine.model.Result;
+import edu.ucsb.nceas.mdqengine.model.Status;
 
 public class Dispatcher {
 	
@@ -33,12 +34,12 @@ public class Dispatcher {
 		dr.setValue(res.toString());
 		// try to find other result items
 		Object var = engine.get("message");
-		if (var != null) {
+		if (var != null && !var.toString().equals("<unbound>")) {
 			dr.setMessage(var.toString());
 		}
 		var = engine.get("status");
-		if (var != null) {
-			dr.setStatus(var.toString());
+		if (var != null && !var.toString().equals("<unbound>")) {
+			dr.setStatus(Status.valueOf(var.toString()));
 		}
 		return dr;
 		

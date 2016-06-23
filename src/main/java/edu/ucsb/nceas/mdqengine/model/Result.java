@@ -12,7 +12,7 @@ public class Result {
 	
 	private String message;
 	
-	private String status;
+	private Status status;
 
 	public String getValue() {
 		return value;
@@ -30,11 +30,11 @@ public class Result {
 		this.message = message;
 	}
 
-	public String getStatus() {
+	public Status getStatus() {
 		return status;
 	}
 
-	public void setStatus(String status) {
+	public void setStatus(Status status) {
 		this.status = status;
 	}
 

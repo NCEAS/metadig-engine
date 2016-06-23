@@ -17,7 +17,7 @@ public class Check {
 
 	private String type;
 	
-	private String level;
+	private Level level;
 	
 	private String environment;
 
@@ -60,11 +60,11 @@ public class Check {
 		this.type = type;
 	}
 
-	public String getLevel() {
+	public Level getLevel() {
 		return level;
 	}
 
-	public void setLevel(String level) {
+	public void setLevel(Level level) {
 		this.level = level;
 	}
 
