@@ -23,15 +23,28 @@ public class Dispatcher {
     protected ScriptEngineManager manager = new ScriptEngineManager();
 
 	public Result dispatch(Map<String, Object> names, String code) throws ScriptException {
+		Result dr = new Result();
+
 		for (Entry<String, Object> entry: names.entrySet()) {
 			log.debug("Setting variable: " + entry.getKey() + "=" + entry.getValue());
 			engine.put(entry.getKey(), entry.getValue());
 		}
 		log.debug("Evaluating code: " + code);
-		Object res = engine.eval(code);
+		
+		Object res = null;
+		try {
+			res = engine.eval(code);
+		} catch (Exception e) {
+			// let's report this
+			dr.setStatus(Status.ERROR);
+			dr.setMessage(e.getMessage());
+			log.warn("Error encountered evaluating code: " + e.getMessage());
+			return dr;
+		}
+		
 		log.debug("Result: " + res);
-		Result dr = new Result();
 		dr.setValue(res.toString());
+		
 		// try to find other result items
 		Object var = engine.get("message");
 		if (var != null && !var.toString().equals("<unbound>")) {

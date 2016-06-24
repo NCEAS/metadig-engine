@@ -12,6 +12,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import edu.ucsb.nceas.mdqengine.model.Result;
+import edu.ucsb.nceas.mdqengine.model.Status;
 
 public class RDispatcherTest {
 	
@@ -37,6 +38,23 @@ public class RDispatcherTest {
 			fail(e.getMessage());
 		}
 		assertEquals("TRUE", result.getValue());
+	}
+	
+	@Test
+	public void testError() {
+		Map<String, Object> names = new HashMap<String, Object>();
+		names.put("x", 1);
+		names.put("y", 2);
+		String code = "stopifnot(x==y)";
+		Result result = null;
+		try {
+			result = dispatcher.dispatch(names, code);
+		} catch (ScriptException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			fail(e.getMessage());
+		}
+		assertEquals(Status.ERROR, result.getStatus());
 	}
 	
 	@Test
