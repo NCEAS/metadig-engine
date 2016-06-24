@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<recommendation>
+   <check>
+      <code><![CDATA[
+import re
+
+def call():
+  # Check if the package identifier has the proper format, i.e. "scope.identifier.revision"
+
+  # Set default message to be returned to MDQ
+  message = "The package identifier is valid"
+  # Set default status
+  status = "valid"
+  pattern = re.compile("[a-zA-Z0-9_\-]+\.(\d+)\.(\d+)")
+  m = pattern.match(packageId)
+
+  if not m:
+    message = "The packageId value should match the pattern 'scope.identifier.revision'"
+    status = "error"
+    return(False)
+
+  (scope, identifier, revision) = packageId.split(".")
+
+  checkStr = re.sub("^0+", "", identifier)
+  if (checkStr != identifier):
+    message = "A leading zero was found in the identifier. The identifier value must be a whole number."
+    status = "error"
+    return(False)
+
+  checkStr = re.sub("^0+", "", revision)
+  if (checkStr != revision):
+    message = "A leading zero was found in the revision. The revision value must be a whole number."
+    status = "error"
+    return(False)
+
+  # All checks have passed 
+  return True
+      ]]></code>
+      <environment>python</environment>
+      <expected>true</expected>
+      <id>check.1.1</id>      
+      <level>WARN</level>
+      <name>packageIdPattern</name>
+      <selector>
+         <name>packageId</name>
+         <xpath>/eml/@packageId</xpath>
+      </selector>
+   </check>
+   <id>test-recommendation.1.1</id>      
+   <name>mdqengine provisional test suite for LTER</name>
+</recommendation>
