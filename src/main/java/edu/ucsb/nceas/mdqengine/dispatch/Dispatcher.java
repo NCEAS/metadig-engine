@@ -23,10 +23,22 @@ public class Dispatcher {
 	// create a script engine manager:
     protected ScriptEngineManager manager = new ScriptEngineManager();
 
-	public Result dispatch(Map<String, Object> names, String code) throws ScriptException {
+    /**
+     * Dispatches the code and variables to the script engine.
+     * There are many options for the code and some depend on the engine being used:
+     * 1) script code that uses given global variables
+     * 2) function definition for call() that uses given global variables
+     * 3) fully-qualified Java bean name that implements Callable<Result> and has properties that 
+     * match the given variable names
+     * @param variables the variable name/values that will be made available to the script
+     * @param code the code, function definition, or classname
+     * @return
+     * @throws ScriptException
+     */
+	public Result dispatch(Map<String, Object> variables, String code) throws ScriptException {
 		Result dr = new Result();
 		
-		for (Entry<String, Object> entry: names.entrySet()) {
+		for (Entry<String, Object> entry: variables.entrySet()) {
 			log.debug("Setting variable: " + entry.getKey() + "=" + entry.getValue());
 			engine.put(entry.getKey(), entry.getValue());
 		}
