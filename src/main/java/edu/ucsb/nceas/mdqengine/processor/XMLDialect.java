@@ -28,6 +28,7 @@ import edu.ucsb.nceas.mdqengine.dispatch.Dispatcher;
 import edu.ucsb.nceas.mdqengine.model.Check;
 import edu.ucsb.nceas.mdqengine.model.Result;
 import edu.ucsb.nceas.mdqengine.model.Selector;
+import edu.ucsb.nceas.mdqengine.model.Status;
 import edu.ucsb.nceas.mdqengine.serialize.JsonMarshaller;
 
 public class XMLDialect {
@@ -101,6 +102,13 @@ public class XMLDialect {
 		
 		Result result = dispatcher.dispatch(variables, check.getCode());
 
+		// set the status if it has not been set already
+		if (result.getStatus() == null && check.getExpected() != null) {
+			if (result.getValue().equals(check.getExpected())) {
+				result.setStatus(Status.SUCCESS);
+			}
+			
+		}
 		// summarize the result
 		result.setCheck(check);
 		result.setTimestamp(Calendar.getInstance().getTime());
