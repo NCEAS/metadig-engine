@@ -31,12 +31,12 @@
 		<dependency>
 			<groupId>org.renjin</groupId>
 			<artifactId>renjin-script-engine</artifactId>
-			<version>0.8.2087</version>
+			<version>${renjin.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.python</groupId>
 			<artifactId>jython-standalone</artifactId>
-			<version>2.7.1b2</version>
+			<version>${jython.version}</version>
 		</dependency>
 		<!-- http://mvnrepository.com/artifact/log4j/log4j -->
 		<dependency>
@@ -55,7 +55,7 @@
 		<dependency>
 		    <groupId>com.google.code.gson</groupId>
 		    <artifactId>gson</artifactId>
-		    <version>2.6.2</version>
+		    <version>${gson.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>net.minidev</groupId>
@@ -72,7 +72,7 @@
 		<dependency>
 		    <groupId>org.eclipse.persistence</groupId>
 		    <artifactId>org.eclipse.persistence.moxy</artifactId>
-		    <version>2.6.3</version>
+		    <version>${moxy.version}</version>
 		</dependency>
 		<!-- D1 libclient -->
 		<dependency>
