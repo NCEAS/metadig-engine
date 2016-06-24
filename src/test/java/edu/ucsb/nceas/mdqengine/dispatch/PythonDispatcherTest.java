@@ -38,4 +38,22 @@ public class PythonDispatcherTest {
 		}
 		assertEquals("true", result.getValue());
 	}
+	
+	@Test
+	public void testMethodReturn() {
+		Map<String, Object> names = new HashMap<String, Object>();
+		names.put("x", 2);
+		names.put("y", 2);
+		String code = 
+				"def call(a,b):    return (a == b)\n\n";
+		Result result = null;
+		try {
+			result = dispatcher.dispatch(names, code);
+		} catch (ScriptException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			fail(e.getMessage());
+		}
+		assertEquals("true", result.getValue());
+	}
 }

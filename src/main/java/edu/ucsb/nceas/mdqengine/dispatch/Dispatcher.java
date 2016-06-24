@@ -3,6 +3,7 @@ package edu.ucsb.nceas.mdqengine.dispatch;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import javax.script.Invocable;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
@@ -24,7 +25,7 @@ public class Dispatcher {
 
 	public Result dispatch(Map<String, Object> names, String code) throws ScriptException {
 		Result dr = new Result();
-
+		
 		for (Entry<String, Object> entry: names.entrySet()) {
 			log.debug("Setting variable: " + entry.getKey() + "=" + entry.getValue());
 			engine.put(entry.getKey(), entry.getValue());
@@ -43,6 +44,16 @@ public class Dispatcher {
 		}
 		
 		log.debug("Result: " + res);
+		if (res == null) {
+			Invocable invoc = (Invocable) engine;
+			try {
+				res = invoc.invokeFunction("call", names.values().toArray());
+				log.debug("Invocation result: " + res);
+			} catch (NoSuchMethodException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
 		dr.setValue(res.toString());
 		
 		// try to find other result items
