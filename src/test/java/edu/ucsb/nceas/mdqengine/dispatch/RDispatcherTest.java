@@ -41,6 +41,24 @@ public class RDispatcherTest {
 	}
 	
 	@Test
+	public void testMethodReturn() {
+		Map<String, Object> names = new HashMap<String, Object>();
+		names.put("x", 2);
+		names.put("y", 2);
+		String code = 
+				"call <- function() { return (x == y) }";
+		Result result = null;
+		try {
+			result = dispatcher.dispatch(names, code);
+		} catch (ScriptException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			fail(e.getMessage());
+		}
+		assertEquals("TRUE", result.getValue());
+	}
+	
+	@Test
 	public void testError() {
 		Map<String, Object> names = new HashMap<String, Object>();
 		names.put("x", 1);

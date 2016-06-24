@@ -44,7 +44,12 @@ public class Dispatcher {
 			return dr;
 		}
 		
-		if (res == null) {
+		// defining functions can result in different results depending on the engine
+		if (
+				res == null // python
+				|| res.toString().equals("function()") // r
+				|| res.toString().contains("sun.org.mozilla.javascript.internal.InterpretedFunction") // js
+				) {
 			Invocable invoc = (Invocable) engine;
 			try {
 				res = invoc.invokeFunction("call");
