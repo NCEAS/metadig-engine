@@ -45,7 +45,8 @@ public class PythonDispatcherTest {
 		names.put("x", 2);
 		names.put("y", 2);
 		String code = 
-				"def call(a,b):    return (a == b)\n\n";
+				//"def call(a,b):    return (a == b)\n\n";
+				"def call():    return (x == y)\n\n";
 		Result result = null;
 		try {
 			result = dispatcher.dispatch(names, code);

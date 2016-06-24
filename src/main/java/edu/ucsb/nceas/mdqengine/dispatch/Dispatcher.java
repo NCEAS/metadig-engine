@@ -35,6 +35,7 @@ public class Dispatcher {
 		Object res = null;
 		try {
 			res = engine.eval(code);
+			log.debug("Result: " + res);
 		} catch (Exception e) {
 			// let's report this
 			dr.setStatus(Status.ERROR);
@@ -43,15 +44,16 @@ public class Dispatcher {
 			return dr;
 		}
 		
-		log.debug("Result: " + res);
 		if (res == null) {
 			Invocable invoc = (Invocable) engine;
 			try {
-				res = invoc.invokeFunction("call", names.values().toArray());
+				res = invoc.invokeFunction("call");
 				log.debug("Invocation result: " + res);
 			} catch (NoSuchMethodException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				dr.setStatus(Status.ERROR);
+				dr.setMessage(e.getMessage());
+				log.warn("Error encountered invoking function: " + e.getMessage());
+				return dr;
 			}
 		}
 		dr.setValue(res.toString());
