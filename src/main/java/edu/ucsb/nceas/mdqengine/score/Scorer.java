@@ -12,13 +12,11 @@ import edu.ucsb.nceas.mdqengine.model.Status;
 public class Scorer {
 
 	/**
-	 * Get ratio of status/total check results for this run
-	 * Depending on the status, a higher ratio will be better (SUCCESS) or worse (FAILURE)
+	 * Get number of results with given status
 	 * @param status
 	 * @return
 	 */
-	public static double getScore(Run run, final Status status) {
-		double score = 0;
+	public static int getScore(Run run, final Status status) {
 		
 		Collection<Result> result = run.getResult();
 		Predicate predicate = new Predicate() {			
@@ -28,8 +26,19 @@ public class Scorer {
 			}
 		};
 		int matches = CollectionUtils.countMatches(result, predicate);
-		score = matches/result.size();
 
+		
+		return matches;
+	}
+	
+	/**
+	 * Get ratio of status/total check results for this run
+	 * Depending on the status, a higher ratio will be better (SUCCESS) or worse (FAILURE)
+	 * @param status
+	 * @return
+	 */
+	public static double getRatioScore(Run run, final Status status) {
+		double score = getScore(run, status)/run.getResult().size();
 		
 		return score;
 	}
@@ -46,7 +55,7 @@ public class Scorer {
 		double error = getScore(run, Status.ERROR);
 		double skip = getScore(run, Status.SKIP);
 
-		return success;
+		return success + (failure * -0.5) + (error * -0.25) + (skip * -0.25);
 		
 	}
 }
