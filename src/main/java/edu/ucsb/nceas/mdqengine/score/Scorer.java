@@ -5,18 +5,28 @@ import java.util.Collection;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.Predicate;
 
+import edu.ucsb.nceas.mdqengine.model.Level;
 import edu.ucsb.nceas.mdqengine.model.Result;
 import edu.ucsb.nceas.mdqengine.model.Run;
 import edu.ucsb.nceas.mdqengine.model.Status;
 
 public class Scorer {
+	
+	public static double FACTOR_SUCCESS = 1.0;
+	public static double FACTOR_FAILURE = -0.5;
+	public static double FACTOR_ERROR = -0.25;
+	public static double FACTOR_SKIP = -0.0;
 
+	public static int WEIGHT_INFO = 1;
+	public static int WEIGHT_WARN = 2;
+	public static int WEIGHT_SEVERE = 3;
+	
 	/**
 	 * Get number of results with given status
 	 * @param status
 	 * @return
 	 */
-	public static int getScore(Run run, final Status status) {
+	public static int getCount(Run run, final Status status) {
 		
 		Collection<Result> result = run.getResult();
 		Predicate predicate = new Predicate() {			
@@ -32,15 +42,86 @@ public class Scorer {
 	}
 	
 	/**
-	 * Get ratio of status/total check results for this run
-	 * Depending on the status, a higher ratio will be better (SUCCESS) or worse (FAILURE)
-	 * @param status
+	 * Get the weighed score for this run.
+	 * Takes into consideration the check level and status of result.
+	 * A total score is computed and given over the total number of checks (weighted)
+	 * resulting in higher scores that do better on more severe tests
+	 * @param Run
 	 * @return
 	 */
-	public static double getRatioScore(Run run, final Status status) {
-		double score = getScore(run, status)/run.getResult().size();
+	public static double getWeightedScore(Run run) {
+		// keep track of what we have processed
+		int count = 0;
+		int weightedCount = 0;
+		double total = 0;
 		
-		return score;
+		
+		for (Result result : run.getResult()) {
+			
+			double score = 0;
+
+			Level level = result.getCheck().getLevel();
+			Status status = result.getStatus();
+			
+			
+			switch (status) {
+			case SUCCESS:
+				score = 1 * FACTOR_SUCCESS;
+				break;
+				
+			case FAILURE:
+				score = 1 * FACTOR_FAILURE;
+				break;
+				
+			case ERROR:
+				score = 1 * FACTOR_ERROR;
+				break;	
+				
+			case SKIP:
+				score = 1 * FACTOR_SKIP;
+				break;	
+				
+			default:
+				score = 0;
+				break;
+			
+			}
+			
+			// so weight it
+			switch (level) {
+			case INFO:
+				weightedCount += WEIGHT_INFO;
+				score = score * WEIGHT_INFO;
+				break;
+				
+			case WARN:
+				weightedCount += WEIGHT_WARN;
+				score = score * WEIGHT_WARN;
+				break;	
+			
+			case SEVERE:
+				weightedCount += WEIGHT_SEVERE;
+				score = score * WEIGHT_SEVERE;
+				break;
+
+			default:
+				weightedCount += 1;
+				score = score * 1;
+				break;
+			}
+			
+			// now we have a weighted score to include in our total
+			total = total + score;
+			
+			// keep track of all the results, unweighted, just in case
+			count++;
+				
+		}
+		
+		// return the ratio
+		double ratio = total/weightedCount;
+		
+		return ratio;
 	}
 	
 	/**
@@ -50,12 +131,18 @@ public class Scorer {
 	 * @return
 	 */
 	public static double getCompositeScore(Run run) {
-		double success = getScore(run, Status.SUCCESS);
-		double failure = getScore(run, Status.FAILURE);
-		double error = getScore(run, Status.ERROR);
-		double skip = getScore(run, Status.SKIP);
+		double success = getCount(run, Status.SUCCESS);
+		double failure = getCount(run, Status.FAILURE);
+		double error = getCount(run, Status.ERROR);
+		double skip = getCount(run, Status.SKIP);
 
-		return success + (failure * -0.5) + (error * -0.25) + (skip * -0.25);
+		double sum = (success * FACTOR_SUCCESS)
+				+ (failure * FACTOR_FAILURE) 
+				+ (error * FACTOR_ERROR) 
+				+ (skip * FACTOR_SKIP);
+		int count = run.getResult().size();
+		
+		return sum/count;
 		
 	}
 }

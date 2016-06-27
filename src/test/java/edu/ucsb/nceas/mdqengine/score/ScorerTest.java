@@ -16,6 +16,7 @@ import edu.ucsb.nceas.mdqengine.MDQEngine;
 import edu.ucsb.nceas.mdqengine.model.Recommendation;
 import edu.ucsb.nceas.mdqengine.model.RecommendationFactory;
 import edu.ucsb.nceas.mdqengine.model.Run;
+import edu.ucsb.nceas.mdqengine.model.RunFactory;
 
 public class ScorerTest {
 	
@@ -46,7 +47,7 @@ public class ScorerTest {
 			
 			log.debug("Run score: " + Scorer.getCompositeScore(run));
 			
-			assertEquals(3.0, Scorer.getCompositeScore(run), 0);
+			assertEquals(1.0, Scorer.getCompositeScore(run), 0);
 			
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
@@ -54,6 +55,19 @@ public class ScorerTest {
 			fail(e.getMessage());
 		}
 
+	}
+	
+	@Test
+	public void testMixedRun() {
+		
+		Run run = RunFactory.getMockRun();
+		
+		double weightedScore = Scorer.getWeightedScore(run);
+		log.debug("Weighted run score=" + weightedScore);
+		
+		double compositeScore = Scorer.getCompositeScore(run);
+		log.debug("Composite run score=" + compositeScore);
+		
 	}
 
 }
