@@ -11,30 +11,35 @@ def call():
   message = "The package identifier is valid"
   # Set default status
   status = "valid"
+  result = True
+  message = "The package identifier is valid"
   pattern = re.compile("[a-zA-Z0-9_\-]+\.(\d+)\.(\d+)")
   m = pattern.match(packageId)
 
   if not m:
-    message = "The packageId value should match the pattern 'scope.identifier.revision'"
+    result = False
     status = "error"
+    message = "The packageId value should match the pattern 'scope.identifier.revision'"
     return(False)
 
   (scope, identifier, revision) = packageId.split(".")
 
   checkStr = re.sub("^0+", "", identifier)
   if (checkStr != identifier):
-    message = "A leading zero was found in the identifier. The identifier value must be a whole number."
+    result = False
     status = "error"
-    return(False)
+    message = "A leading zero was found in the identifier. The identifier value must be a whole number."
+    return(result)
 
   checkStr = re.sub("^0+", "", revision)
   if (checkStr != revision):
+    result = False
     message = "A leading zero was found in the revision. The revision value must be a whole number."
     status = "error"
-    return(False)
+    return(result)
 
   # All checks have passed 
-  return True
+  return result
       ]]></code>
       <environment>python</environment>
       <expected>true</expected>
