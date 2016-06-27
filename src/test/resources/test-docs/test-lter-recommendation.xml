@@ -51,6 +51,91 @@ def call():
          <xpath>/eml/@packageId</xpath>
       </selector>
    </check>
-   <id>test-recommendation.1.1</id>      
+
+   <check>
+      <code><![CDATA[
+def call():
+
+  # Message is set when an error occurs.
+  message = ""
+
+  if(len(keywords) > 0):
+    result = True
+    status = "valid"
+  else:
+    result = False
+    message = "Keywords are not present"
+    status = "ERROR"
+      
+  return(result)
+      ]]></code>
+      <environment>python</environment>
+      <expected>true</expected>
+      <id>check.2.1</id>      
+      <level>ERROR</level>
+      <name>keywordPresent</name>
+      <selector>
+         <name>keywords</name>
+         <xpath>/eml/dataset/keywordSet/keyword</xpath>
+      </selector>
+   </check>
+   
+      <check>
+      <code><![CDATA[
+def call():
+  if(len(methods) > 0):
+    result = True
+    message = ""
+    status = "valid"
+  else:
+    result = False
+    message = "A <methods> element is not present"
+    status = "warn"
+      
+  return(result)
+      ]]></code>
+      <environment>python</environment>
+      <expected>true</expected>
+      <id>check.3.1</id>
+      <level>WARN</level>
+      <name>methodsElementPresent</name>
+      <selector>
+         <name>methods</name>
+         <xpath>/eml/dataset/methods</xpath>
+      </selector>
+   </check>
+
+   <check>
+      <id>check.4.1</id>
+      <name>coveragePresent</name>
+      <level>WARN</level>
+      <environment>python</environment>
+      <expected>true</expected>
+      <selector>
+         <name>coverages</name>
+         <xpath>/eml/dataset/coverage/geographicCoverage | /eml/dataset/coverage/temporalCoverage | /eml/dataset/coverage/taxonomicCoverage</xpath>
+      </selector>
+      <code><![CDATA[
+def call():
+
+  message = ""
+  # Check if the mdq set our xpath result 
+  if 'coverages' not in globals():
+    result = False
+    message = "A <coverage> element is not present"
+    status = "valid"
+  elif(len(coverages) > 0):
+    result = True
+    status = "valid"
+  else:
+    result = False
+    message = "A <coverage> element is not present"
+    status = "warn"
+      
+  return(result)
+      ]]></code>
+   </check>
+
+   <id>test-lter-recommendation.1.1</id>      
    <name>mdqengine provisional test suite for LTER</name>
 </recommendation>
