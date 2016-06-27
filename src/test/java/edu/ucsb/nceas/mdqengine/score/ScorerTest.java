@@ -1,5 +1,6 @@
 package edu.ucsb.nceas.mdqengine.score;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
 import java.io.InputStream;
@@ -44,6 +45,8 @@ public class ScorerTest {
 			run.setObjectIdentifier(id);
 			
 			log.debug("Run score: " + Scorer.getCompositeScore(run));
+			
+			assertEquals(3.0, Scorer.getCompositeScore(run), 0);
 			
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
