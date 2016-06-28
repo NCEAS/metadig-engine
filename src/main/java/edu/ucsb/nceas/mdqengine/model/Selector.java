@@ -5,6 +5,8 @@ public class Selector {
 	private String name;
 	
 	private String xpath;
+	
+	private Selector subSelector;
 
 	public String getName() {
 		return name;
@@ -20,6 +22,14 @@ public class Selector {
 
 	public void setXpath(String xpath) {
 		this.xpath = xpath;
+	}
+
+	public Selector getSubSelector() {
+		return subSelector;
+	}
+
+	public void setSubSelector(Selector subSelector) {
+		this.subSelector = subSelector;
 	}
 
 }

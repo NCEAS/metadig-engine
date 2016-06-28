@@ -72,10 +72,27 @@ public class XMLDialect {
 				nodes = (NodeList) xpath.evaluate(selectorPath, document, XPathConstants.NODESET);
 				if (nodes.getLength() > 1) {
 					// multiple values
-					List<String> values = new ArrayList<String>();
+					List<Object> values = new ArrayList<Object>();
 					for (int i = 0; i < nodes.getLength(); i++) {
 						Node node = nodes.item(i);
-						values.add(node.getTextContent());
+						if (selector.getSubSelector() == null) {
+							values.add(node.getTextContent());
+						} else {
+							// we have more xpaths to try
+							String subSelectorPath = selector.getSubSelector().getXpath();
+							NodeList subNodes = (NodeList) xpath.evaluate(subSelectorPath, node, XPathConstants.NODESET);
+							if (subNodes.getLength() > 1) {
+								List<String> subValues = new ArrayList<String>();
+								for (int j = 0; j < subNodes.getLength(); j++) {
+									Node subNode = subNodes.item(j);
+									subValues.add(subNode.getTextContent());
+								}
+								values.add(subValues);
+							} else {
+								values.add(subNodes.item(0).getTextContent());
+							}
+						}
+						
 					}
 					value = values;
 				} else {
