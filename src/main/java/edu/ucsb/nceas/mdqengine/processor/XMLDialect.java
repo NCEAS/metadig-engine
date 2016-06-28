@@ -55,55 +55,12 @@ public class XMLDialect {
 		
 		log.debug("Running Check: " + JsonMarshaller.toJson(check));
 		
-		// gather the required information
+		// gather the variable name/value details
 		Map<String, Object> variables = new HashMap<String, Object>();
 		for (Selector selector: check.getSelector()) {
 			
 			String name = selector.getName();
-			Object value = null;
-			
-			// select one or more values from document
-			String selectorPath = selector.getXpath();
-			XPath xpath = xPathfactory.newXPath();
-			
-			// try multiple first
-			NodeList nodes = null;
-			try {
-				nodes = (NodeList) xpath.evaluate(selectorPath, document, XPathConstants.NODESET);
-				if (nodes.getLength() > 1) {
-					// multiple values
-					List<Object> values = new ArrayList<Object>();
-					for (int i = 0; i < nodes.getLength(); i++) {
-						Node node = nodes.item(i);
-						if (selector.getSubSelector() == null) {
-							values.add(node.getTextContent());
-						} else {
-							// we have more xpaths to try
-							String subSelectorPath = selector.getSubSelector().getXpath();
-							NodeList subNodes = (NodeList) xpath.evaluate(subSelectorPath, node, XPathConstants.NODESET);
-							if (subNodes.getLength() > 1) {
-								List<String> subValues = new ArrayList<String>();
-								for (int j = 0; j < subNodes.getLength(); j++) {
-									Node subNode = subNodes.item(j);
-									subValues.add(subNode.getTextContent());
-								}
-								values.add(subValues);
-							} else {
-								values.add(subNodes.item(0).getTextContent());
-							}
-						}
-						
-					}
-					value = values;
-				} else {
-					// single value
-					value = nodes.item(0).getTextContent();
-				}
-			} catch (XPathExpressionException xpee) {
-				log.warn("Defaulting to single value selection: " + xpee.getCause().getMessage());
-				// try just a single value
-				value = xpath.evaluate(selectorPath, document);
-			}
+			Object value = this.selectPath(selector, document);
 			
 			// make available in script
 			variables.put(name, value);
@@ -131,6 +88,52 @@ public class XMLDialect {
 		result.setTimestamp(Calendar.getInstance().getTime());
 		
 		return result;
+	}
+	
+	private Object selectPath(Selector selector, Node contextNode) throws XPathExpressionException {
+		
+		Object value = null;
+		
+		// select one or more values from document
+		String selectorPath = selector.getXpath();
+		XPath xpath = xPathfactory.newXPath();
+		
+		// try multiple first
+		NodeList nodes = null;
+		try {
+			nodes = (NodeList) xpath.evaluate(selectorPath, contextNode, XPathConstants.NODESET);
+			
+			if (nodes.getLength() > 1) {
+				// multiple values
+				List<Object> values = new ArrayList<Object>();
+				
+				for (int i = 0; i < nodes.getLength(); i++) {
+					Node node = nodes.item(i);
+					// is there a subselector?
+					if (selector.getSubSelector() != null) {
+						Selector subSelector = selector.getSubSelector();
+						// recurse
+						Object subvalue = this.selectPath(subSelector, node);
+						values.add(subvalue);
+					} else {
+						// otherwise just add the node value
+						values.add(node.getTextContent());
+					}
+				}
+				// return the list
+				value = values;
+			} else {
+				// just return single value
+				value = nodes.item(0).getTextContent();
+			}
+		} catch (XPathExpressionException xpee) {
+			log.warn("Defaulting to single value selection: " + xpee.getCause().getMessage());
+			// try just a single value
+			value = xpath.evaluate(selectorPath, contextNode);
+		}
+		
+		return value;
+	
 	}
 
 	public Map<String, String> getDataUrls() {
