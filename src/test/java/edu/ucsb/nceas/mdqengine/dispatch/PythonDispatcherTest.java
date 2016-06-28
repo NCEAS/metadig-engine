@@ -57,4 +57,20 @@ public class PythonDispatcherTest {
 		}
 		assertEquals("true", result.getValue());
 	}
+	@Test
+	public void testNullArg() {
+		Map<String, Object> names = new HashMap<String, Object>();
+		names.put("x", null);
+		String code = 
+				"def call():    return (x == None)\n\n";
+		Result result = null;
+		try {
+			result = dispatcher.dispatch(names, code);
+		} catch (ScriptException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			fail(e.getMessage());
+		}
+		assertEquals("true", result.getValue());
+	}
 }
