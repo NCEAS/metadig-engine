@@ -30,7 +30,10 @@ public class LTERRecommendationTest{
 	
 	protected Log log = LogFactory.getLog(this.getClass());
 
-	private String metadataId = "knb-lter-sbc.18.18";
+	// Metadata for dataset that has single entity
+	//private String metadataId = "knb-lter-sbc.18.18";
+	// Metadata for dataset that has multiple entities
+	private String metadataId = "knb-lter-sbc.1001.7";
 	// This dataset has a single data entity
 	private String packageId = "doi:10.6073/pasta/d90872297e30026b263a119d4f5bca9f";
 	// This dataset has mulitple entities
