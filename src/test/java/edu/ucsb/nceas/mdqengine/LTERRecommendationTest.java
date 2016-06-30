@@ -63,7 +63,6 @@ public class LTERRecommendationTest{
 				Result result = xml.runCheck(check);
 				log.debug("Check result: " + XmlMarshaller.toXml(result));
 				assertEquals(check.getExpected(), result.getValue());
-				break;
 			}	
 			
 		} catch (Exception e) {
