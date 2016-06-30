@@ -27,6 +27,8 @@ public class Check {
 	private String expected;
 
 	private List<Selector> selector;
+	
+	private List<Dialect> dialect;
 
 	public String getId() {
 		return id;
@@ -90,6 +92,14 @@ public class Check {
 
 	public void setSelector(List<Selector> selector) {
 		this.selector = selector;
+	}
+
+	public List<Dialect> getDialect() {
+		return dialect;
+	}
+
+	public void setDialect(List<Dialect> dialect) {
+		this.dialect = dialect;
 	}
 
 	public String getExpected() {

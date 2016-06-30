@@ -26,6 +26,7 @@ import org.xml.sax.SAXException;
 
 import edu.ucsb.nceas.mdqengine.dispatch.Dispatcher;
 import edu.ucsb.nceas.mdqengine.model.Check;
+import edu.ucsb.nceas.mdqengine.model.Dialect;
 import edu.ucsb.nceas.mdqengine.model.Result;
 import edu.ucsb.nceas.mdqengine.model.Selector;
 import edu.ucsb.nceas.mdqengine.model.Status;
@@ -53,41 +54,88 @@ public class XMLDialect {
 	
 	public Result runCheck(Check check) throws XPathExpressionException, ScriptException {
 		
+		Result result = null;
+		
 		log.debug("Running Check: " + JsonMarshaller.toJson(check));
 		
-		// gather the variable name/value details
-		Map<String, Object> variables = new HashMap<String, Object>();
-		for (Selector selector: check.getSelector()) {
-			
-			String name = selector.getName();
-			Object value = this.selectPath(selector, document);
-			
-			// make available in script
-			variables.put(name, value);
-		}
+		// only bother dispatching if check can be applied to this document
+		if (this.isCheckValid(check)) {
 		
-		// make dataUrls available to the check if we have them
-		if (this.dataUrls != null) {
-			variables.put("dataUrls", dataUrls);
-		}
-		
-		// dispatch to checker impl
-		Dispatcher dispatcher = Dispatcher.getDispatcher(check.getEnvironment());
-		
-		Result result = dispatcher.dispatch(variables, check.getCode());
-
-		// set the status if it has not been set already
-		if (result.getStatus() == null && check.getExpected() != null) {
-			if (result.getValue().equals(check.getExpected())) {
-				result.setStatus(Status.SUCCESS);
+			// gather the variable name/value details
+			Map<String, Object> variables = new HashMap<String, Object>();
+			for (Selector selector: check.getSelector()) {
+				
+				String name = selector.getName();
+				Object value = this.selectPath(selector, document);
+				
+				// make available in script
+				variables.put(name, value);
 			}
 			
+			// make dataUrls available to the check if we have them
+			if (this.dataUrls != null) {
+				variables.put("dataUrls", dataUrls);
+			}
+			
+			// dispatch to checker impl
+			Dispatcher dispatcher = Dispatcher.getDispatcher(check.getEnvironment());
+			
+			result = dispatcher.dispatch(variables, check.getCode());
+	
+			// set the status if it has not been set already
+			if (result.getStatus() == null && check.getExpected() != null) {
+				if (result.getValue().equals(check.getExpected())) {
+					result.setStatus(Status.SUCCESS);
+				}
+				
+			}
+		} else {
+			// we just skip instead
+			result = new Result();
+			result.setStatus(Status.SKIP);
+			result.setMessage("Dialect for this check is not supported");
 		}
-		// summarize the result
+		
+		// set additional info before returning
 		result.setCheck(check);
 		result.setTimestamp(Calendar.getInstance().getTime());
 		
 		return result;
+	}
+	
+	/**
+	 * Determine if the check is valid for the document
+	 * @param check
+	 * @return
+	 * @throws XPathExpressionException
+	 */
+	public boolean isCheckValid(Check check) throws XPathExpressionException {
+
+		if (check.getDialect() == null) {
+			log.info("No dialects have been specified for check, assuming it is valid for this document");
+			return true;
+		}
+		
+		XPath xpath = xPathfactory.newXPath();
+
+		for (Dialect dialect: check.getDialect()) {
+			
+			String name = dialect.getName();
+			String expression = dialect.getXpath();
+			log.debug("Dialect name: " + name + ", expression: " + expression);
+			String value = xpath.evaluate(expression, document);
+			
+			if (Boolean.valueOf(value)) {
+				log.debug("Dialect " + name + " is valid for document ");
+				return true;
+			} else {
+				log.debug("Dialect " + name + " is NOT valid for document");
+			}
+		}
+		
+		log.info("No supported check dialects found for this document");
+
+		return false;
 	}
 	
 	private Object selectPath(Selector selector, Node contextNode) throws XPathExpressionException {
