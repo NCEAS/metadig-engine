@@ -159,4 +159,189 @@ def call():
   return(result)
       ]]></code>
 	</check>
+
+	<check>
+		<id>check.5.1</id>
+		<name>geographicCoveragePresent</name>
+		<environment>python</environment>
+		<dialect>
+		  <name>eml</name>
+		  <xpath>boolean(/*[local-name() = 'eml'])</xpath>
+		</dialect>
+		<level>INFO</level>
+		<expected>true</expected>
+		<!-- Geographic coverage at the dataset level -->
+		<selector>
+			<name>datasetGeographicCoverage</name>
+			<xpath>boolean(/eml/dataset/coverage/geographicCoverage)</xpath>
+		</selector>
+		<!-- Geographic coverage at the entity level. Use the required element 
+			'entityName' to ensure that entities are being selected. -->
+		<selector>
+			<name>entityGeographicCoverage</name>
+			<xpath>boolean(/eml/dataset/*/entityName/../coverage/geographicCoverage)
+			</xpath>
+		</selector>
+		<!-- Geographic coverage can be at the attribute level -->
+		<selector>
+			<name>attributeGeographicCoverage</name>
+			<xpath>boolean(/eml/dataset/*/attributeList/attribute/coverage/geographicCoverage)
+			</xpath>
+		</selector>
+		<code><![CDATA[
+def call():
+  global message
+  global status
+
+  # If a geographicCoverage element is found at the dataset level
+  # then the check passes. If this element is not found at the
+  # dataset level, then one must be present at either at the entity
+  # level (for at least one entity) or at the attribute level (for
+  # at least on attribute). 
+  # Check if the mdq set the result for our xpath selector
+
+  # Check if the scripting engine has set each value that we are looking
+  # for.
+  if 'datasetGeographicCoverage' in globals():
+    if str(datasetGeographicCoverage).lower() == "true": 
+      message = "A coverage is present at the dataset level."
+      status = "SUCCESS"
+      return True
+
+  # Geo coverage not found at the dataset level, check entity and attribute levels
+  if 'entityGeographicCoverage' in globals():
+    if str(entityGeographicCoverage).lower() == "true":
+      message = "A coverage is present at the entity level."
+      status = "SUCCESS"
+      return True
+      
+  if 'attributeGeographicCoverage' in globals():
+    if str(attributeGeographicCoverage).lower() == "true":
+      message = "A coverage is present at the attribute level."
+      status = "SUCCESS"
+      return True
+
+  # A coveage element was not found at any level.
+  message = "A coverage element is not present at the dataset, entity or attribute levels"
+  status = "FAILURE"
+      
+  return(False)
+      ]]></code>
+	</check>
+
+	<check>
+		<id>check.6.1</id>
+		<name>tooFewFields</name>
+		<environment>python</environment>
+		<dialect>
+		  <name>eml</name>
+		  <xpath>boolean(/*[local-name() = 'eml'])</xpath>
+		</dialect>
+		<level>INFO</level>
+		<expected>false</expected>
+		<selector>
+			<name>entityCount</name>
+			<xpath>count(/eml/dataset/dataTable)</xpath>
+		</selector>
+		<selector>
+			<name>attributeNames</name>
+			<xpath>/eml/dataset/dataTable</xpath>
+			<subSelector>
+				<name>attributeNamesSubSelector</name>
+				<xpath>./attributeList/attribute/attributeName</xpath>
+			</subSelector>
+		</selector>
+		<selector>
+			<name>numHeaderLines</name>
+			<xpath>/eml/dataset/dataTable</xpath>
+			<subSelector>
+				<name>numHeaderLinesSubSelect</name>
+				<xpath>./physical/dataFormat/textFormat/numHeaderLines</xpath>
+			</subSelector>
+		</selector>
+
+		<selector>
+			<name>fieldDelimiters</name>
+			<xpath>/eml/dataset/dataTable</xpath>
+			<subSelector>
+				<name>fieldDelimitersSubSelect</name>
+				<xpath>./physical/dataFormat/textFormat/simpleDelimited/fieldDelimiter
+				</xpath>
+			</subSelector>
+		</selector>
+
+		<selector>
+			<name>recordDelimiters</name>
+			<xpath>/eml/dataset/dataTable</xpath>
+			<subSelector>
+				<name>recordDelimitersSubSelect</name>
+				<xpath>./physical/dataFormat/textFormat/recordDelimiter</xpath>
+			</subSelector>
+		</selector>
+
+		<selector>
+			<name>distributionUrls</name>
+			<xpath>/eml/dataset/dataTable</xpath>
+			<subSelector>
+				<name>distributionUrlsSubSelect</name>
+				<xpath>./physical/distribution/online/url</xpath>
+			</subSelector>
+		</selector>
+		<code><![CDATA[ 
+def call():
+
+  import sys
+  import csv
+  import urllib2
+  
+  global message
+  global status
+
+  # varialbe defined by MQE 
+  # "attributeNames" - the attribute names (column headings) for the entity 
+  # "numHeaderLines" - the number of header lines for a data entity
+  # "recordDelimiter" - the delimiter character used to separate records in the data entities
+  # "fieldDelimiter" -  the delimiter character used to separate fields in the data entities
+  #  print "entityCount", entityCount
+  
+  # Download enough data to get the entire header, i.e. don't need to read the whole file
+  maxDownloadByteCount = 2048
+
+  # The dataset may have multiple entities, so check each one
+  for iEntity in range(0, int(entityCount)):
+    thisAttributeNames = attributeNames[iEntity]
+    thisNumHeaderLines = numHeaderLines[iEntity]
+    url = distributionUrls[iEntity]
+    print "url: %s" % url
+    thisFieldDelimiter = fieldDelimiters[iEntity]
+    thisRecordDelimiter = recordDelimiters[iEntity].encode('ascii', errors='ignore')
+
+    response = urllib2.urlopen(url)
+    remoteData = response.read(maxDownloadByteCount)
+
+    encodingScheme = response.headers.getparam('charset')
+    print "remote data encoding: %s" % encodingScheme
+    # The default python encoding is 'ascii', so we have to
+    # Deal with characters outside of the ASCII range by just ignoring them. We aren't displaying
+    # the data or processing it, just counting how many columns of data there are.
+    dataEntity = remoteData.encode("ascii", errors='ignore')
+    #lines = dataEntity.split(thisRecordDelimiter)
+    lines = dataEntity.splitlines()
+    
+    headerLine = ''
+    for iLine in range(0, int(thisNumHeaderLines)):
+      headerLine += lines[iLine]
+   
+    colNames = headerLine.split(thisFieldDelimiter)
+    print "number of attributes in metadata: ", len(thisAttributeNames)
+    print "number of columns in data: ", len(colNames)
+   
+    # Fail if any one of the entiies has too fields, otherwise continue
+    if (len(colNames) < len(attributeNames)):
+      return True
+
+  return False
+      ]]></code>
+	</check>
+
 </recommendation>
