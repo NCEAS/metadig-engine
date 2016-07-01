@@ -11,6 +11,9 @@ import org.junit.Test;
 
 import edu.ucsb.nceas.mdqengine.model.Recommendation;
 import edu.ucsb.nceas.mdqengine.model.RecommendationFactory;
+import edu.ucsb.nceas.mdqengine.model.Run;
+import edu.ucsb.nceas.mdqengine.model.RunFactory;
+import edu.ucsb.nceas.mdqengine.score.Scorer;
 
 public class AggregatorTest {
 	
@@ -40,4 +43,19 @@ public class AggregatorTest {
 		
 	}
 
+	@Test
+	public void testCSVRun() {
+		
+		Run run = RunFactory.getMockRun();
+		
+		try {
+			String csv = Aggregator.toCSV(run);
+			log.debug("Tabular Run format: \n" + csv);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			fail(e.getMessage());
+		}
+		
+	}
 }

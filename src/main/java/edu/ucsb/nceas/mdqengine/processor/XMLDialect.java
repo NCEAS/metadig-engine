@@ -86,6 +86,8 @@ public class XMLDialect {
 			if (result.getStatus() == null && check.getExpected() != null) {
 				if (result.getValue().equals(check.getExpected())) {
 					result.setStatus(Status.SUCCESS);
+				} else {
+					result.setStatus(Status.FAILURE);
 				}
 				
 			}

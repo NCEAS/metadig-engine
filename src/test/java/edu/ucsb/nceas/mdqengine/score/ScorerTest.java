@@ -71,20 +71,4 @@ public class ScorerTest {
 		
 	}
 
-	
-	@Test
-	public void testCSVRun() {
-		
-		Run run = RunFactory.getMockRun();
-		
-		try {
-			String csv = Scorer.toCSV(run);
-			log.debug("Tabular Run format: \n" + csv);
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			fail(e.getMessage());
-		}
-		
-	}
 }

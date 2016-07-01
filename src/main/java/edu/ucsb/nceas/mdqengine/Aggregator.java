@@ -6,22 +6,53 @@ import java.io.InputStreamReader;
 import java.io.StringReader;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
 import java.util.Iterator;
+import java.util.List;
 
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVPrinter;
 import org.apache.commons.csv.CSVRecord;
+import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.dataone.client.v2.CNode;
 import org.dataone.client.v2.itk.D1Client;
 
+import edu.ucsb.nceas.mdqengine.model.Check;
+import edu.ucsb.nceas.mdqengine.model.Level;
 import edu.ucsb.nceas.mdqengine.model.Recommendation;
+import edu.ucsb.nceas.mdqengine.model.Result;
 import edu.ucsb.nceas.mdqengine.model.Run;
-import edu.ucsb.nceas.mdqengine.score.Scorer;
+import edu.ucsb.nceas.mdqengine.model.Status;
 
 public class Aggregator {
+	
+	public static String[] runColumns = {
+		"pid",
+		"runId",
+		"checkId",
+		"checkName",
+		"type",
+		"environment",
+		"level",
+		"status",
+		"message",
+		"value",
+		"timestamp"
+	};
+	
+	public static String[] docColumns = {
+		"id",
+		"formatId",
+		"datasource",
+		"dataUrl",
+		"rightsHolder"
+	};
+	
 	
 	protected Log log = LogFactory.getLog(this.getClass());
 		
@@ -30,7 +61,12 @@ public class Aggregator {
 	public String runBatch(String query, Recommendation recommendation) throws IOException {
 		
 		StringBuffer results = new StringBuffer();
-		CSVPrinter csvPrinter = new CSVPrinter(results, CSVFormat.DEFAULT);
+		
+		// set up our output headers
+		List<Object> headerList = new ArrayList<Object>(Arrays.asList(ArrayUtils.addAll(runColumns, docColumns)));
+		headerList.add(0, "recommendationId");
+		CSVFormat format = CSVFormat.DEFAULT.withHeader(headerList.toArray(new String[]{}));
+		CSVPrinter csvPrinter = new CSVPrinter(results, format );
 		
 		CSVParser docsCsv = this.queryCSV(query);
 		if (docsCsv != null) {
@@ -43,12 +79,17 @@ public class Aggregator {
 				try {
 					InputStream input = new URL(dataUrl).openStream();
 					Run run = engine.runRecommendation(recommendation, input);
+					run.setObjectIdentifier(id);
+
 					// this is a silly step to get the columns back
-					String runString = Scorer.toCSV(run);
+					String runString = toCSV(run);
 					CSVParser runCsv = new CSVParser(new StringReader(runString), CSVFormat.DEFAULT.withHeader());
 					Iterator<CSVRecord> runIter = runCsv.iterator();
 					while (runIter.hasNext()) {
 						CSVRecord runRecord = runIter.next();
+						
+						// include the recommendation
+						csvPrinter.print(recommendation.getId());
 						
 						// print out run information
 						Iterator<String> runValueIter = runRecord.iterator();
@@ -66,6 +107,8 @@ public class Aggregator {
 						csvPrinter.println();
 						
 					}
+					
+					runCsv.close();
 					
 				} catch (Exception e) {
 					log.error("Could not run QC on id: " + id, e);
@@ -87,7 +130,14 @@ public class Aggregator {
 			// query system for object
 			String solrQuery = "?q=" + URLEncoder.encode(query, "UTF-8");
 			solrQuery += URLEncoder.encode("-obsoletedBy:*", "UTF-8");
+			solrQuery += "&fl=";
+			for (String field: docColumns) {
+				solrQuery += field + ",";
+			}
+			solrQuery.substring(0, solrQuery.length()-1); // get rid of the last comma
+			solrQuery += "&wt=csv&rows=10";
 			solrQuery += "&fl=id,formatId,datasource,dataUrl,rightsHolder&wt=csv&rows=10";
+
 			log.debug("solrQuery = " + solrQuery);
 
 			// search the index
@@ -101,6 +151,57 @@ public class Aggregator {
 			log.error(e.getMessage(), e);
 		}
 		return null;
+	}
+	
+	/**
+	 * Output the run[s] as a set of CSV records
+	 * @param run
+	 * @return
+	 * @throws IOException 
+	 */
+	public static String toCSV(Run... runs) throws IOException {
+		
+		StringBuffer sb = new StringBuffer();
+		CSVPrinter csv = CSVFormat.DEFAULT.withHeader(runColumns).print(sb);
+
+		for (Run run: runs) {
+			String pid = run.getObjectIdentifier();
+			String runId = run.getId();
+			Date timestamp = run.getTimestamp();
+	
+			for (Result result: run.getResult()) {
+				
+				Check check = result.getCheck();
+				String checkId = check.getId();
+				String checkName = check.getName();
+
+				String type = check.getType();
+				String environment = check.getEnvironment();
+				Level level = check.getLevel();
+				
+				Status status = result.getStatus();
+				String message = result.getMessage();
+				String value = result.getValue();
+				
+				// create a csv record from this entry
+				csv.printRecord(
+						pid,
+						runId,
+						checkId,
+						checkName,
+						type,
+						environment,
+						level,
+						status,
+						message,
+						value,
+						timestamp);
+				
+			}
+		}
+		
+		return sb.toString();
+		
 	}
 
 }
