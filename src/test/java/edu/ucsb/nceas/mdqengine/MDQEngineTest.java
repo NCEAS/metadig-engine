@@ -13,6 +13,7 @@ import org.dataone.client.v2.itk.D1Client;
 import org.dataone.configuration.Settings;
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import edu.ucsb.nceas.mdqengine.model.Check;
@@ -82,6 +83,7 @@ public class MDQEngineTest {
 
 	}
 	
+	@Ignore
 	@Test
 	public void testRunRecommendationForPackage() {
 		MDQEngine mdqe = new MDQEngine();

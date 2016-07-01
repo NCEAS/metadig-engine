@@ -55,30 +55,34 @@ public class MDQEngine {
 			
 		log.debug("Running recommendation: " + JsonMarshaller.toJson(recommendation));
 
-		// check if this is an ORE package
-		DataPackage dp = null;
-		String metadataContent = null;
 		String content = IOUtils.toString(input, "UTF-8");
+		String metadataContent = content;
 		Map<String, String> dataUrls = null;
-		try {
-			
-			// parse as ORE
-			dp = DataPackage.deserializePackage(content);
-			
-			// assume single metadata item in package
-			List<Identifier> dataIds = dp.getMetadataMap().values().iterator().next();
-			Identifier metadataId = dp.getMetadataMap().keySet().iterator().next();
-			dataUrls = new HashMap<String, String>();
-			for (Identifier id: dataIds) {
-				dataUrls.put(id.getValue(), RESOLVE_PREFIX + id.getValue());
+		
+		// check if this is an ORE package
+		boolean tryORE = false;
+		if (tryORE) {
+			DataPackage dp = null;
+			try {
+				
+				// parse as ORE
+				dp = DataPackage.deserializePackage(content);
+				
+				// assume single metadata item in package
+				List<Identifier> dataIds = dp.getMetadataMap().values().iterator().next();
+				Identifier metadataId = dp.getMetadataMap().keySet().iterator().next();
+				dataUrls = new HashMap<String, String>();
+				for (Identifier id: dataIds) {
+					dataUrls.put(id.getValue(), RESOLVE_PREFIX + id.getValue());
+				}
+				//  fetch the metadata content for checker
+				metadataContent = IOUtils.toString(dp.get(metadataId).getData(), "UTF-8");
+				
+			} catch (Exception e) {
+				// guess it is not an ORE!
+				log.warn("Input does not appear to be an ORE package, defaulting to metadata parsing. " + e.getCause());
+				metadataContent = content;
 			}
-			//  fetch the metadata content for checker
-			metadataContent = IOUtils.toString(dp.get(metadataId).getData(), "UTF-8");
-			
-		} catch (Exception e) {
-			// guess it is not an ORE!
-			log.warn("Input does not appear to be an ORE package, defaulting to metadata parsing. " + e.getCause());
-			metadataContent = content;
 		}
 		
 		XMLDialect xml = new XMLDialect(IOUtils.toInputStream(metadataContent, "UTF-8"));
