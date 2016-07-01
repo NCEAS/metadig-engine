@@ -12,6 +12,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import edu.ucsb.nceas.mdqengine.model.Result;
+import edu.ucsb.nceas.mdqengine.processor.XMLDialect;
 
 public class PythonDispatcherTest {
 	
@@ -20,6 +21,27 @@ public class PythonDispatcherTest {
 	@Before
 	public void init() {
 		dispatcher = Dispatcher.getDispatcher("python");
+	}
+	
+	@Test
+	public void testTypes() {
+		Map<String, Object> names = new HashMap<String, Object>();
+		
+		names.put("myInt", XMLDialect.retypeObject("2"));
+		names.put("myFloat", XMLDialect.retypeObject("1.5"));
+		names.put("myBool", XMLDialect.retypeObject("true"));
+		names.put("myStr", XMLDialect.retypeObject("hello"));
+
+		String code = "(type(myInt) is int) and (type(myFloat) is float) and (type(myBool) is bool)";
+		Result result = null;
+		try {
+			result = dispatcher.dispatch(names, code);
+		} catch (ScriptException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			fail(e.getMessage());
+		}
+		assertEquals("true", result.getValue());
 	}
 	
 	@Test

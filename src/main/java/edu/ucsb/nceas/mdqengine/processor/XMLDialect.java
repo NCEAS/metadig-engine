@@ -17,6 +17,8 @@ import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 
+import org.apache.commons.lang.BooleanUtils;
+import org.apache.commons.lang.math.NumberUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.w3c.dom.Document;
@@ -40,7 +42,7 @@ public class XMLDialect {
 	
 	private Map<String, String> dataUrls;
 	
-	protected Log log = LogFactory.getLog(this.getClass());
+	public static Log log = LogFactory.getLog(XMLDialect.class);
 	
 	public XMLDialect(InputStream input) throws SAXException, IOException, ParserConfigurationException {
 		
@@ -167,7 +169,9 @@ public class XMLDialect {
 						values.add(subvalue);
 					} else {
 						// otherwise just add the node value
-						values.add(node.getTextContent());
+						value = node.getTextContent();
+						value = retypeObject(value);
+						values.add(value);
 					}
 				}
 				// return the list
@@ -175,15 +179,34 @@ public class XMLDialect {
 			} else if (nodes != null && nodes.getLength() == 1) {
 				// just return single value
 				value = nodes.item(0).getTextContent();
+				value = retypeObject(value);
+				
 			}
 		} catch (XPathExpressionException xpee) {
 			log.warn("Defaulting to single value selection: " + xpee.getCause().getMessage());
 			// try just a single value
 			value = xpath.evaluate(selectorPath, contextNode);
+			value = retypeObject(value);
 		}
 		
 		return value;
 	
+	}
+	
+	public static Object retypeObject(Object value) {
+		Object result = value;
+		// type the value correctly
+		if (NumberUtils.isNumber((String)value)) {
+			result = NumberUtils.createNumber((String)value);
+		} else {
+			// relies on this method to return null if we are not sure if it is a boolean
+			Boolean bool = BooleanUtils.toBooleanObject((String)value);
+			if (bool != null) {
+				result = bool;
+			}
+		}
+		
+		return result;
 	}
 
 	public Map<String, String> getDataUrls() {
