@@ -10,6 +10,8 @@ public class RunFactory {
 		// make a run
 		Run run = new Run();
 		run.setId("run.2.1");
+		run.setObjectIdentifier("sciMeta.1.1");
+		run.setTimestamp(Calendar.getInstance().getTime());
 
 		List<Result> results = new ArrayList<Result>();
 		Check check = null;
@@ -17,49 +19,73 @@ public class RunFactory {
 		
 		// make some results! 
 		check = new Check();
+		check.setId("check.1");
+		check.setEnvironment("r");
+		check.setType("metadata");
 		check.setLevel(Level.INFO);
 		r = new Result();
 		r.setStatus(Status.FAILURE);
+		r.setValue("false");
 		r.setTimestamp(Calendar.getInstance().getTime());
 		r.setCheck(check);
 		results.add(r);
 		
 		check = new Check();
+		check.setId("check.2");
+		check.setEnvironment("r");
+		check.setType("metadata");
 		check.setLevel(Level.WARN);
 		r = new Result();
 		r.setStatus(Status.SKIP);
+		r.setValue("false");
 		r.setTimestamp(Calendar.getInstance().getTime());
 		r.setCheck(check);
 		results.add(r);
 		
 		check = new Check();
+		check.setId("check.3");
+		check.setEnvironment("r");
+		check.setType("metadata");
 		check.setLevel(Level.INFO);
 		r = new Result();
 		r.setStatus(Status.SUCCESS);
+		r.setValue("true");
 		r.setTimestamp(Calendar.getInstance().getTime());
 		r.setCheck(check);
 		results.add(r);
 		
 		check = new Check();
+		check.setId("check.4");
+		check.setEnvironment("r");
+		check.setType("metadata");
 		check.setLevel(Level.SEVERE);
 		r = new Result();
 		r.setStatus(Status.SUCCESS);
+		r.setValue("true");
 		r.setTimestamp(Calendar.getInstance().getTime());
 		r.setCheck(check);
 		results.add(r);
 		
 		check = new Check();
+		check.setId("check.5");
+		check.setEnvironment("r");
+		check.setType("metadata");
 		check.setLevel(Level.WARN);
 		r = new Result();
 		r.setStatus(Status.SUCCESS);
+		r.setValue("true");
 		r.setTimestamp(Calendar.getInstance().getTime());
 		r.setCheck(check);
 		results.add(r);
 		
 		check = new Check();
+		check.setId("check.6");
+		check.setEnvironment("r");
+		check.setType("metadata");
 		check.setLevel(Level.WARN);
 		r = new Result();
 		r.setStatus(Status.SUCCESS);
+		r.setValue("true");
 		r.setTimestamp(Calendar.getInstance().getTime());
 		r.setCheck(check);
 		results.add(r);

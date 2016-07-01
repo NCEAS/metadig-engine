@@ -1,10 +1,16 @@
 package edu.ucsb.nceas.mdqengine.score;
 
+import java.io.IOException;
 import java.util.Collection;
+import java.util.Date;
+import java.util.List;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.Predicate;
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVPrinter;
 
+import edu.ucsb.nceas.mdqengine.model.Check;
 import edu.ucsb.nceas.mdqengine.model.Level;
 import edu.ucsb.nceas.mdqengine.model.Result;
 import edu.ucsb.nceas.mdqengine.model.Run;
@@ -143,6 +149,67 @@ public class Scorer {
 		int count = run.getResult().size();
 		
 		return sum/count;
+		
+	}
+	
+	/**
+	 * Output the run[s] as a set of CSV records
+	 * @param run
+	 * @return
+	 * @throws IOException 
+	 */
+	public static String toCSV(Run... runs) throws IOException {
+				
+		String[] headers = {
+				"pid",
+				"runId",
+				"checkId",
+				"type",
+				"environment",
+				"level",
+				"status",
+				"message",
+				"value",
+				"timestamp"
+		};
+		
+		StringBuffer sb = new StringBuffer();
+		CSVPrinter csv = CSVFormat.DEFAULT.withHeader(headers).print(sb);
+
+		for (Run run: runs) {
+			String pid = run.getObjectIdentifier();
+			String runId = run.getId();
+			Date timestamp = run.getTimestamp();
+	
+			for (Result result: run.getResult()) {
+				
+				Check check = result.getCheck();
+				String checkId = check.getId();
+				String type = check.getType();
+				String environment = check.getEnvironment();
+				Level level = check.getLevel();
+				
+				Status status = result.getStatus();
+				String message = result.getMessage();
+				String value = result.getValue();
+				
+				// create a csv record from this entry
+				csv.printRecord(
+						pid,
+						runId,
+						checkId,
+						type,
+						environment,
+						level,
+						status,
+						message,
+						value,
+						timestamp);
+				
+			}
+		}
+		
+		return sb.toString();
 		
 	}
 }

@@ -5,6 +5,7 @@ import static org.junit.Assert.fail;
 
 import java.io.InputStream;
 import java.net.URL;
+import java.util.Arrays;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -70,4 +71,20 @@ public class ScorerTest {
 		
 	}
 
+	
+	@Test
+	public void testCSVRun() {
+		
+		Run run = RunFactory.getMockRun();
+		
+		try {
+			String csv = Scorer.toCSV(run);
+			log.debug("Tabular Run format: \n" + csv);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			fail(e.getMessage());
+		}
+		
+	}
 }
