@@ -170,7 +170,7 @@ public class XMLDialect {
 				}
 				// return the list
 				value = values;
-			} else {
+			} else if (nodes != null && nodes.getLength() == 1) {
 				// just return single value
 				value = nodes.item(0).getTextContent();
 			}
