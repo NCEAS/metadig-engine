@@ -12,6 +12,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import edu.ucsb.nceas.mdqengine.model.Recommendation;
@@ -30,6 +31,7 @@ public class AggregatorTest {
 		recommendation = RecommendationFactory.getMockRecommendation();
 	}
 
+	@Ignore
 	@Test
 	public void testBatchEML() {
 		String query = "formatId:\"eml://ecoinformatics.org/eml-2.1.1\"";
@@ -69,7 +71,7 @@ public class AggregatorTest {
 		
 	}
 
-	//@Test
+	@Test
 	public void testCSVRun() {
 		
 		Run run = RunFactory.getMockRun();
