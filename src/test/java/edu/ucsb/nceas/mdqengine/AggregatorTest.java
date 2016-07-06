@@ -1,9 +1,14 @@
 package edu.ucsb.nceas.mdqengine;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.fail;
 
-import java.io.IOException;
+import java.io.File;
+import java.io.FileInputStream;
+import java.net.URL;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.junit.BeforeClass;
@@ -13,7 +18,6 @@ import edu.ucsb.nceas.mdqengine.model.Recommendation;
 import edu.ucsb.nceas.mdqengine.model.RecommendationFactory;
 import edu.ucsb.nceas.mdqengine.model.Run;
 import edu.ucsb.nceas.mdqengine.model.RunFactory;
-import edu.ucsb.nceas.mdqengine.score.Scorer;
 
 public class AggregatorTest {
 	
@@ -33,17 +37,39 @@ public class AggregatorTest {
 		Aggregator aggregator = new Aggregator();
 		String tabularResult = null;
 		try {
-			tabularResult = aggregator.runBatch(query, recommendation);
+			File file = aggregator.runBatch(query, recommendation);
+
+			tabularResult = IOUtils.toString(new FileInputStream(file), "UTF-8");
+			log.debug("Tabular Batch Result: \n" + tabularResult);
 			assertNotNull(tabularResult);
-		} catch (IOException e) {
+			
+			// now try doing some analysis
+			URL url = this.getClass().getResource("/test-docs/plot.R");
+			String script = url.getPath();
+
+			String input = file.getAbsolutePath();
+			String output = input + ".pdf";
+			
+			log.debug("Tabular Batch file: \n" + input);
+
+			ProcessBuilder pb = new ProcessBuilder("Rscript", "--vanilla", script, input, output);
+			Process p = pb.start();
+			int ret = p.waitFor();
+			log.debug("stdOut:" + IOUtils.toString(p.getInputStream(), "UTF-8"));
+			log.debug("stdErr:" + IOUtils.toString(p.getErrorStream(), "UTF-8"));
+			assertEquals(0, ret);
+			
+			log.debug("Barplot available here: \n" + output);
+					
+		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+			fail(e.getMessage());
 		}
-		log.debug("Tabular Batch Result: \n" + tabularResult);
 		
 	}
 
-	@Test
+	//@Test
 	public void testCSVRun() {
 		
 		Run run = RunFactory.getMockRun();

@@ -1,5 +1,6 @@
 package edu.ucsb.nceas.mdqengine;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -16,6 +17,7 @@ import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVPrinter;
 import org.apache.commons.csv.CSVRecord;
+import org.apache.commons.io.output.FileWriterWithEncoding;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -58,9 +60,18 @@ public class Aggregator {
 		
 	private MDQEngine engine = new MDQEngine();
 	
-	public String runBatch(String query, Recommendation recommendation) throws IOException {
+	
+	/**
+	 * Runs recommendation result
+	 * @param query
+	 * @param recommendation
+	 * @return
+	 * @throws IOException
+	 */
+	public File runBatch(String query, Recommendation recommendation) throws IOException {
 		
-		StringBuffer results = new StringBuffer();
+		File file = File.createTempFile("mdqe_batch", ".csv");
+		Appendable results = new FileWriterWithEncoding(file, "UTF-8");
 		
 		// set up our output headers
 		List<Object> headerList = new ArrayList<Object>(Arrays.asList(ArrayUtils.addAll(runColumns, docColumns)));
@@ -120,7 +131,7 @@ public class Aggregator {
 		
 		csvPrinter.close();
 		
-		return results.toString();
+		return file;
 		
 	}
 
