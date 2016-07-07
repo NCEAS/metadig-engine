@@ -17,8 +17,8 @@ import org.junit.Ignore;
 import org.junit.Test;
 
 import edu.ucsb.nceas.mdqengine.model.Check;
-import edu.ucsb.nceas.mdqengine.model.Recommendation;
-import edu.ucsb.nceas.mdqengine.model.RecommendationFactory;
+import edu.ucsb.nceas.mdqengine.model.Suite;
+import edu.ucsb.nceas.mdqengine.model.SuiteFactory;
 import edu.ucsb.nceas.mdqengine.model.Result;
 import edu.ucsb.nceas.mdqengine.model.Run;
 import edu.ucsb.nceas.mdqengine.processor.XMLDialect;
@@ -31,11 +31,11 @@ public class MDQEngineTest {
 
 	private String id = "doi:10.5063/AA/tao.1.1";
 
-	private Recommendation recommendation = null;
+	private Suite suite = null;
 	
 	@Before
-	public void setUpRecommendation() {
-		recommendation = RecommendationFactory.getMockRecommendation();
+	public void setUpSuite() {
+		suite = SuiteFactory.getMockSuite();
 	}
 	
 	@Test
@@ -47,8 +47,8 @@ public class MDQEngineTest {
 			InputStream input = new URL(metadataURL).openStream();
 			XMLDialect xml = new XMLDialect(input);
 			
-			// run a check in the recommendation
-			for (Check check: recommendation.getCheck()) {
+			// run a check in the suite
+			for (Check check: suite.getCheck()) {
 				Result result = xml.runCheck(check);
 				log.debug("Check result: " + JsonMarshaller.toJson(result));
 				assertEquals(check.getExpected(), result.getValue());
@@ -62,7 +62,7 @@ public class MDQEngineTest {
 	}
 
 	@Test
-	public void testRunRecommendationForId() {
+	public void testRunSuiteForId() {
 		MDQEngine mdqe = new MDQEngine();
 		Run run = null;
 		try {
@@ -71,8 +71,8 @@ public class MDQEngineTest {
 			log.error("CN URL: " + cnURL);
 			String metadataURL = "https://cn.dataone.org/cn/v2/object/" + id;
 			InputStream input = new URL(metadataURL).openStream();
-			// run the recommendation on it
-			run = mdqe.runRecommendation(recommendation, input);
+			// run the suite on it
+			run = mdqe.runSuite(suite, input);
 			run.setObjectIdentifier(id);
 			log.debug("Run results JSON: " + JsonMarshaller.toJson(run));
 		} catch (Exception e) {
@@ -85,7 +85,7 @@ public class MDQEngineTest {
 	
 	@Ignore
 	@Test
-	public void testRunRecommendationForPackage() {
+	public void testRunSuiteForPackage() {
 		MDQEngine mdqe = new MDQEngine();
 		Run run = null;
 		try {
@@ -93,8 +93,8 @@ public class MDQEngineTest {
 			String packageId = "resourceMap_tao.1.1";
 			String packageURL = "https://cn.dataone.org/cn/v2/object/" + packageId;
 			InputStream input = new URL(packageURL).openStream();
-			// run the recommendation on it
-			run = mdqe.runRecommendation(recommendation, input);
+			// run the suite on it
+			run = mdqe.runSuite(suite, input);
 			run.setObjectIdentifier(packageId);
 			log.debug("Run results XML: " + XmlMarshaller.toXml(run));
 		} catch (Exception e) {

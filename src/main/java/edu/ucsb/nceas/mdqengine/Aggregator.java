@@ -26,7 +26,7 @@ import org.dataone.client.v2.itk.D1Client;
 
 import edu.ucsb.nceas.mdqengine.model.Check;
 import edu.ucsb.nceas.mdqengine.model.Level;
-import edu.ucsb.nceas.mdqengine.model.Recommendation;
+import edu.ucsb.nceas.mdqengine.model.Suite;
 import edu.ucsb.nceas.mdqengine.model.Result;
 import edu.ucsb.nceas.mdqengine.model.Run;
 import edu.ucsb.nceas.mdqengine.model.Status;
@@ -62,20 +62,20 @@ public class Aggregator {
 	
 	
 	/**
-	 * Runs recommendation result
+	 * Runs suite result
 	 * @param query
-	 * @param recommendation
+	 * @param suite
 	 * @return
 	 * @throws IOException
 	 */
-	public File runBatch(String query, Recommendation recommendation) throws IOException {
+	public File runBatch(String query, Suite suite) throws IOException {
 		
 		File file = File.createTempFile("mdqe_batch", ".csv");
 		Appendable results = new FileWriterWithEncoding(file, "UTF-8");
 		
 		// set up our output headers
 		List<Object> headerList = new ArrayList<Object>(Arrays.asList(ArrayUtils.addAll(runColumns, docColumns)));
-		headerList.add(0, "recommendationId");
+		headerList.add(0, "suiteId");
 		CSVFormat format = CSVFormat.DEFAULT.withHeader(headerList.toArray(new String[]{}));
 		CSVPrinter csvPrinter = new CSVPrinter(results, format );
 		
@@ -89,7 +89,7 @@ public class Aggregator {
 
 				try {
 					InputStream input = new URL(dataUrl).openStream();
-					Run run = engine.runRecommendation(recommendation, input);
+					Run run = engine.runSuite(suite, input);
 					run.setObjectIdentifier(id);
 
 					// this is a silly step to get the columns back
@@ -99,8 +99,8 @@ public class Aggregator {
 					while (runIter.hasNext()) {
 						CSVRecord runRecord = runIter.next();
 						
-						// include the recommendation
-						csvPrinter.print(recommendation.getId());
+						// include the suite
+						csvPrinter.print(suite.getId());
 						
 						// print out run information
 						Iterator<String> runValueIter = runRecord.iterator();

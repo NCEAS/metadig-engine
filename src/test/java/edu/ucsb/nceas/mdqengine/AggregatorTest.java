@@ -15,8 +15,8 @@ import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import edu.ucsb.nceas.mdqengine.model.Recommendation;
-import edu.ucsb.nceas.mdqengine.model.RecommendationFactory;
+import edu.ucsb.nceas.mdqengine.model.Suite;
+import edu.ucsb.nceas.mdqengine.model.SuiteFactory;
 import edu.ucsb.nceas.mdqengine.model.Run;
 import edu.ucsb.nceas.mdqengine.model.RunFactory;
 
@@ -24,11 +24,11 @@ public class AggregatorTest {
 	
 	protected Log log = LogFactory.getLog(this.getClass());
 	
-	private static Recommendation recommendation;
+	private static Suite suite;
 	
 	@BeforeClass
 	public static void init() {
-		recommendation = RecommendationFactory.getMockRecommendation();
+		suite = SuiteFactory.getMockSuite();
 	}
 
 	@Ignore
@@ -39,7 +39,7 @@ public class AggregatorTest {
 		Aggregator aggregator = new Aggregator();
 		String tabularResult = null;
 		try {
-			File file = aggregator.runBatch(query, recommendation);
+			File file = aggregator.runBatch(query, suite);
 
 			tabularResult = IOUtils.toString(new FileInputStream(file), "UTF-8");
 			log.debug("Tabular Batch Result: \n" + tabularResult);

@@ -14,8 +14,8 @@ import org.junit.Before;
 import org.junit.Test;
 
 import edu.ucsb.nceas.mdqengine.MDQEngine;
-import edu.ucsb.nceas.mdqengine.model.Recommendation;
-import edu.ucsb.nceas.mdqengine.model.RecommendationFactory;
+import edu.ucsb.nceas.mdqengine.model.Suite;
+import edu.ucsb.nceas.mdqengine.model.SuiteFactory;
 import edu.ucsb.nceas.mdqengine.model.Run;
 import edu.ucsb.nceas.mdqengine.model.RunFactory;
 
@@ -25,15 +25,15 @@ public class ScorerTest {
 
 	private String id = "doi:10.5063/AA/tao.1.1";
 
-	private Recommendation recommendation = null;
+	private Suite suite = null;
 	
 	@Before
-	public void setUpRecommendation() {
-		recommendation = RecommendationFactory.getMockRecommendation();
+	public void setUpSuite() {
+		suite = SuiteFactory.getMockSuite();
 	}
 	
 	@Test
-	public void testRunRecommendationForId() {
+	public void testRunSuiteForId() {
 		MDQEngine mdqe = new MDQEngine();
 		Run run = null;
 		try {
@@ -42,8 +42,8 @@ public class ScorerTest {
 			log.error("CN URL: " + cnURL);
 			String metadataURL = "https://cn.dataone.org/cn/v2/object/" + id;
 			InputStream input = new URL(metadataURL).openStream();
-			// run the recommendation on it
-			run = mdqe.runRecommendation(recommendation, input);
+			// run the suite on it
+			run = mdqe.runSuite(suite, input);
 			run.setObjectIdentifier(id);
 			
 			log.debug("Run score: " + Scorer.getCompositeScore(run));

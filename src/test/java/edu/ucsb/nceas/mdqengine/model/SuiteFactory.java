@@ -4,16 +4,16 @@ import java.util.ArrayList;
 import java.util.List;
 
 import edu.ucsb.nceas.mdqengine.model.Check;
-import edu.ucsb.nceas.mdqengine.model.Recommendation;
+import edu.ucsb.nceas.mdqengine.model.Suite;
 import edu.ucsb.nceas.mdqengine.model.Selector;
 
-public class RecommendationFactory {
+public class SuiteFactory {
 
-	public static Recommendation getMockRecommendation() {
-		// make a recommendation
-		Recommendation recommendation = new Recommendation();
-		recommendation.setName("Testing suite");
-		recommendation.setId("suite.2.1");
+	public static Suite getMockSuite() {
+		// make a suite
+		Suite suite = new Suite();
+		suite.setName("Testing suite");
+		suite.setId("suite.2.1");
 
 		// set-up checks
 		List<Check> checks = new ArrayList<Check>();
@@ -66,8 +66,8 @@ public class RecommendationFactory {
 		attributeNames.setExpected("FALSE");
 		checks.add(attributeNames);
 
-		recommendation.setCheck(checks);
+		suite.setCheck(checks);
 
-		return recommendation;
+		return suite;
 	}
 }

@@ -5,7 +5,7 @@ import java.util.List;
 import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement
-public class Recommendation {
+public class Suite {
 	
 	private String id;
 

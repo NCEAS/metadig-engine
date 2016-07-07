@@ -13,8 +13,8 @@ import org.junit.Test;
 import edu.ucsb.nceas.mdqengine.MDQEngine;
 import edu.ucsb.nceas.mdqengine.MDQStore;
 import edu.ucsb.nceas.mdqengine.model.Check;
-import edu.ucsb.nceas.mdqengine.model.Recommendation;
-import edu.ucsb.nceas.mdqengine.model.RecommendationFactory;
+import edu.ucsb.nceas.mdqengine.model.Suite;
+import edu.ucsb.nceas.mdqengine.model.SuiteFactory;
 import edu.ucsb.nceas.mdqengine.model.Result;
 import edu.ucsb.nceas.mdqengine.model.Run;
 
@@ -31,10 +31,10 @@ public class MDQStoreTest {
 		store = new InMemoryStore();
 //		store = new MNStore();
 
-		// save the testing recommendation if we don't have it already
-		Recommendation rec = RecommendationFactory.getMockRecommendation();
-		if (store.getRecommendation(rec.getId()) == null) {
-			store.createRecommendation(rec);
+		// save the testing suite if we don't have it already
+		Suite rec = SuiteFactory.getMockSuite();
+		if (store.getSuite(rec.getId()) == null) {
+			store.createSuite(rec);
 		}
 		
 		// add the checks as independent objects if needed
@@ -46,35 +46,35 @@ public class MDQStoreTest {
 	}
 	
 	@Test
-	public void testListRecommendations() {
-		Collection<String> recs = store.listRecommendations();
+	public void testListSuites() {
+		Collection<String> recs = store.listSuite();
 		assertTrue(recs.size() > 0);
 	}
 	
 	@Test
-	public void createRecommendation() {
-		Recommendation rec = new Recommendation();
-		rec.setId("createRecommendation." + Calendar.getInstance().getTimeInMillis());
-		rec.setName("Test create recommendation");
-		store.createRecommendation(rec);
-		Recommendation r = store.getRecommendation(rec.getId());
+	public void createSuite() {
+		Suite rec = new Suite();
+		rec.setId("createSuite." + Calendar.getInstance().getTimeInMillis());
+		rec.setName("Test create suite");
+		store.createSuite(rec);
+		Suite r = store.getSuite(rec.getId());
 		assertEquals(rec.getName(), r.getName());
-		store.deleteRecommendation(rec);
+		store.deleteSuite(rec);
 	}
 	
 	@Test
-	public void updateRecommendation() {
-		Recommendation rec = new Recommendation();
-		rec.setId("updateRecommendation." + Calendar.getInstance().getTimeInMillis());
-		rec.setName("Test update recommendation");
-		store.createRecommendation(rec);
-		Recommendation r = store.getRecommendation(rec.getId());
+	public void updateSuite() {
+		Suite rec = new Suite();
+		rec.setId("updateSuite." + Calendar.getInstance().getTimeInMillis());
+		rec.setName("Test update suite");
+		store.createSuite(rec);
+		Suite r = store.getSuite(rec.getId());
 		assertEquals(rec.getName(), r.getName());
 		rec.setName("Updated test name");
-		store.updateRecommendation(rec);
-		Recommendation r2 = store.getRecommendation(rec.getId());
+		store.updateSuite(rec);
+		Suite r2 = store.getSuite(rec.getId());
 		assertEquals(rec.getName(), r2.getName());
-		store.deleteRecommendation(rec);
+		store.deleteSuite(rec);
 
 	}
 	
@@ -92,8 +92,8 @@ public class MDQStoreTest {
 			String metadataURL = "https://knb.ecoinformatics.org/knb/d1/mn/v2/object/" + id;
 			InputStream input = new URL(metadataURL).openStream();
 			
-			Recommendation recommendation = RecommendationFactory.getMockRecommendation();
-			Run run = mdqe.runRecommendation(recommendation, input);
+			Suite suite = SuiteFactory.getMockSuite();
+			Run run = mdqe.runSuite(suite, input);
 			store.createRun(run);
 			
 			Run r = store.getRun(run.getId());
@@ -116,13 +116,13 @@ public class MDQStoreTest {
 			String metadataURL = "https://knb.ecoinformatics.org/knb/d1/mn/v2/object/" + id;
 			InputStream input = new URL(metadataURL).openStream();
 			
-			Recommendation recommendation = RecommendationFactory.getMockRecommendation();
+			Suite suite = SuiteFactory.getMockSuite();
 			Check checkRef = new Check();
 			String checkId = "check.1.1";
 			checkRef.setId(checkId );
-			recommendation.getCheck().add(checkRef);
+			suite.getCheck().add(checkRef);
 			mdqe.setStore(store);
-			Run run = mdqe.runRecommendation(recommendation, input);
+			Run run = mdqe.runSuite(suite, input);
 			int checkCount = 0;
 			for (Result r: run.getResult()) {
 				Check c = r.getCheck();

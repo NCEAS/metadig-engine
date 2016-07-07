@@ -37,7 +37,7 @@ import org.dataone.service.types.v2.SystemMetadata;
 
 import edu.ucsb.nceas.mdqengine.MDQStore;
 import edu.ucsb.nceas.mdqengine.model.Check;
-import edu.ucsb.nceas.mdqengine.model.Recommendation;
+import edu.ucsb.nceas.mdqengine.model.Suite;
 import edu.ucsb.nceas.mdqengine.model.Run;
 import edu.ucsb.nceas.mdqengine.serialize.XmlMarshaller;
 
@@ -117,10 +117,10 @@ public class MNStore implements MDQStore {
 	}
 
 	@Override
-	public Collection<String> listRecommendations() {
+	public Collection<String> listSuite() {
 		
 		// use shared impl
-		Collection<String> results = list(Recommendation.class);
+		Collection<String> results = list(Suite.class);
 		return results;
 	}
 	
@@ -249,23 +249,23 @@ public class MNStore implements MDQStore {
 	}
 
 	@Override
-	public Recommendation getRecommendation(String id) {
-		Recommendation model = (Recommendation) get(id, Recommendation.class);
+	public Suite getSuite(String id) {
+		Suite model = (Suite) get(id, Suite.class);
 		return model;
 	}
 
 	@Override
-	public void createRecommendation(Recommendation model) {
+	public void createSuite(Suite model) {
 		create(model, model.getId());
 	}
 
 	@Override
-	public void updateRecommendation(Recommendation model) {
+	public void updateSuite(Suite model) {
 		update(model, model.getId());	
 	}
 
 	@Override
-	public void deleteRecommendation(Recommendation model) {
+	public void deleteSuite(Suite model) {
 		delete(model.getId());	
 	}
 

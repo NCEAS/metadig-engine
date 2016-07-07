@@ -23,7 +23,7 @@ import org.dataone.service.types.v1.Identifier;
 import org.xml.sax.SAXException;
 
 import edu.ucsb.nceas.mdqengine.model.Check;
-import edu.ucsb.nceas.mdqengine.model.Recommendation;
+import edu.ucsb.nceas.mdqengine.model.Suite;
 import edu.ucsb.nceas.mdqengine.model.Result;
 import edu.ucsb.nceas.mdqengine.model.Run;
 import edu.ucsb.nceas.mdqengine.processor.XMLDialect;
@@ -38,8 +38,8 @@ public class MDQEngine {
 	protected Log log = LogFactory.getLog(this.getClass());
 
 	/**
-	 * Executes the given recommendation for a given object identifier
-	 * @param recommendation
+	 * Executes the given suite for a given object identifier
+	 * @param suite
 	 * @param input the InputStream for the object to QC
 	 * @return the Run results for this execution
 	 * @throws MalformedURLException
@@ -49,11 +49,11 @@ public class MDQEngine {
 	 * @throws XPathExpressionException
 	 * @throws ScriptException
 	 */
-	public Run runRecommendation(Recommendation recommendation, InputStream input) 
+	public Run runSuite(Suite suite, InputStream input) 
 			throws MalformedURLException, IOException, SAXException, 
 			ParserConfigurationException, XPathExpressionException, ScriptException {
 			
-		log.debug("Running recommendation: " + JsonMarshaller.toJson(recommendation));
+		log.debug("Running suite: " + JsonMarshaller.toJson(suite));
 
 		String content = IOUtils.toString(input, "UTF-8");
 		String metadataContent = content;
@@ -94,8 +94,8 @@ public class MDQEngine {
 		run.setTimestamp(Calendar.getInstance().getTime());
 		List<Result> results = new ArrayList<Result>();
 
-		// run the checks in the recommendation to get results
-		for (Check check: recommendation.getCheck()) {
+		// run the checks in the suite to get results
+		for (Check check: suite.getCheck()) {
 			// is this a reference to existing check?
 			if (check.getCode() == null) {
 				// then load it

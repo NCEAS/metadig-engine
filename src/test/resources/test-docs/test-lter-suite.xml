@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<recommendation>
-	<id>test-lter-recommendation.1.1</id>
+<suite>
+	<id>test-lter-suite.1.1</id>
 	<name>mdqengine provisional test suite for LTER</name>
 	<check>
 		<id>check.1.1</id>
@@ -344,4 +344,4 @@ def call():
       ]]></code>
 	</check>
 
-</recommendation>
+</suite>

@@ -6,47 +6,47 @@ import java.util.Map;
 
 import edu.ucsb.nceas.mdqengine.MDQStore;
 import edu.ucsb.nceas.mdqengine.model.Check;
-import edu.ucsb.nceas.mdqengine.model.Recommendation;
+import edu.ucsb.nceas.mdqengine.model.Suite;
 import edu.ucsb.nceas.mdqengine.model.Run;
 
 /**
  * Place-holder storage implementation for 
- * Checks, Recommendations, and Runs
+ * Checks, Suites, and Runs
  * NOT INTENDED FOR PRODUCTION USE
  * @author leinfelder
  *
  */
 public class InMemoryStore implements MDQStore{
 	
-	Map<String, Recommendation> recommendations = new HashMap<String, Recommendation>();
+	Map<String, Suite> suites = new HashMap<String, Suite>();
 	
 	Map<String, Check> checks = new HashMap<String, Check>();
 	
 	Map<String, Run> runs = new HashMap<String, Run>();
 	
 	@Override
-	public Collection<String> listRecommendations() {
-		return recommendations.keySet();
+	public Collection<String> listSuite() {
+		return suites.keySet();
 	}
 
 	@Override
-	public Recommendation getRecommendation(String id) {
-		return recommendations.get(id);
+	public Suite getSuite(String id) {
+		return suites.get(id);
 	}
 
 	@Override
-	public void createRecommendation(Recommendation rec) {
-		recommendations.put(rec.getId(), rec);
+	public void createSuite(Suite rec) {
+		suites.put(rec.getId(), rec);
 	}
 
 	@Override
-	public void updateRecommendation(Recommendation rec) {
-		recommendations.put(rec.getId(), rec);
+	public void updateSuite(Suite rec) {
+		suites.put(rec.getId(), rec);
 	}
 
 	@Override
-	public void deleteRecommendation(Recommendation rec) {
-		recommendations.remove(rec.getId());		
+	public void deleteSuite(Suite rec) {
+		suites.remove(rec.getId());		
 	}
 
 	@Override
