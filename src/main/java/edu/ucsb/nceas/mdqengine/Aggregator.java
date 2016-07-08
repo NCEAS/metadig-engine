@@ -140,14 +140,14 @@ public class Aggregator {
 		try {
 			// query system for object
 			String solrQuery = "?q=" + URLEncoder.encode(query, "UTF-8");
-			solrQuery += URLEncoder.encode("-obsoletedBy:*", "UTF-8");
+			solrQuery += URLEncoder.encode(" -obsoletedBy:*", "UTF-8");
 			solrQuery += "&fl=";
 			for (String field: docColumns) {
 				solrQuery += field + ",";
 			}
 			solrQuery.substring(0, solrQuery.length()-1); // get rid of the last comma
 			solrQuery += "&wt=csv&rows=10";
-			solrQuery += "&fl=id,formatId,datasource,dataUrl,rightsHolder&wt=csv&rows=10";
+			//solrQuery += "&fl=id,formatId,datasource,dataUrl,rightsHolder";
 
 			log.debug("solrQuery = " + solrQuery);
 
