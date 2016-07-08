@@ -8,7 +8,7 @@ import edu.ucsb.nceas.mdqengine.model.Run;
 
 public interface MDQStore {
 	
-	public Collection<String> listSuite();
+	public Collection<String> listSuites();
 	public Suite getSuite(String id);
 	public void createSuite(Suite suite);
 	public void updateSuite(Suite suite);

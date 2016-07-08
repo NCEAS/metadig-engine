@@ -25,7 +25,7 @@ public class InMemoryStore implements MDQStore{
 	Map<String, Run> runs = new HashMap<String, Run>();
 	
 	@Override
-	public Collection<String> listSuite() {
+	public Collection<String> listSuites() {
 		return suites.keySet();
 	}
 

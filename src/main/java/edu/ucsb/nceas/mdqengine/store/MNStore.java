@@ -117,7 +117,7 @@ public class MNStore implements MDQStore {
 	}
 
 	@Override
-	public Collection<String> listSuite() {
+	public Collection<String> listSuites() {
 		
 		// use shared impl
 		Collection<String> results = list(Suite.class);

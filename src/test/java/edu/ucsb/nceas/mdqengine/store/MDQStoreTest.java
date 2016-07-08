@@ -47,7 +47,7 @@ public class MDQStoreTest {
 	
 	@Test
 	public void testListSuites() {
-		Collection<String> recs = store.listSuite();
+		Collection<String> recs = store.listSuites();
 		assertTrue(recs.size() > 0);
 	}
 	
