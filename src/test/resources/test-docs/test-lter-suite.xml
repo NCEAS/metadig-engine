@@ -4,13 +4,14 @@
 	<id>test-lter-suite.1.1</id>
 	<name>mdqengine provisional test suite for LTER</name>
 	<check>
-		<id>check.1.1</id>
+		<id>check-dataset.1.1</id>
 		<name>packageIdPattern</name>
 		<environment>python</environment>
 		<dialect>
-		  <name>eml</name>
-		  <xpath>boolean(/*[local-name() = 'eml'])</xpath>
+			<name>eml</name>
+			<xpath>boolean(/*[local-name() = 'eml'])</xpath>
 		</dialect>
+		<type>metadata</type>
 		<expected>true</expected>
 		<level>WARN</level>
 		<selector>
@@ -55,15 +56,16 @@ def call():
 	</check>
 
 	<check>
-		<id>check.2.1</id>
+		<id>check-dataset.6.1</id>
 		<name>keywordPresent</name>
 		<environment>python</environment>
 		<dialect>
-		  <name>eml</name>
-		  <xpath>boolean(/*[local-name() = 'eml'])</xpath>
+			<name>eml</name>
+			<xpath>boolean(/*[local-name() = 'eml'])</xpath>
 		</dialect>
+		<type>metadata</type>
 		<expected>true</expected>
-		<level>ERROR</level>
+		<level>WARN</level>
 		<selector>
 			<name>keywords</name>
 			<xpath>/eml/dataset/keywordSet/keyword</xpath>
@@ -87,15 +89,15 @@ def call():
       ]]></code>
 	</check>
 
-
 	<check>
-		<id>check.3.1</id>
+		<id>check-dataset.7.1</id>
 		<name>methodsElementPresent</name>
 		<environment>python</environment>
 		<dialect>
-		  <name>eml</name>
-		  <xpath>boolean(/*[local-name() = 'eml'])</xpath>
+			<name>eml</name>
+			<xpath>boolean(/*[local-name() = 'eml'])</xpath>
 		</dialect>
+		<type>metadata</type>
 		<expected>true</expected>
 		<level>WARN</level>
 		<selector>
@@ -121,13 +123,14 @@ def call():
 	</check>
 
 	<check>
-		<id>check.4.1</id>
+		<id>check-dataset.8.1</id>
 		<name>coveragePresent</name>
 		<environment>python</environment>
 		<dialect>
-		  <name>eml</name>
-		  <xpath>boolean(/*[local-name() = 'eml'])</xpath>
+			<name>eml</name>
+			<xpath>boolean(/*[local-name() = 'eml'])</xpath>
 		</dialect>
+		<type>metadata</type>
 		<level>WARN</level>
 		<expected>true</expected>
 		<selector>
@@ -161,12 +164,10 @@ def call():
 	</check>
 
 	<check>
-		<id>check.5.1</id>
+		<id>check-dataset.9.1</id>
 		<name>geographicCoveragePresent</name>
 		<environment>python</environment>
 		<dialect>
-		  <name>eml</name>
-		  <xpath>boolean(/*[local-name() = 'eml'])</xpath>
 		</dialect>
 		<level>INFO</level>
 		<expected>true</expected>
