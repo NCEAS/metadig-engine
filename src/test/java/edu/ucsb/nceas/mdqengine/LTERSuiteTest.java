@@ -75,31 +75,3 @@ public class LTERSuiteTest{
 		
 	}
 }
-//	@Test
-//	public void runMDQEtestsForPackage() {
-//		try {
-//			// use the ORE id
-//			String packageURL = "https://cn.dataone.org/cn/v2/object/" + packageId;
-//			InputStream input = new URL(packageURL).openStream();
-//			// Read the suite from the suite file, which is
-//			// easier to add longer 'code' sections to than the mock suite.
-//			
-//			try {
-//				String xml = IOUtils.toString(this.getClass().getResourceAsStream("/test-docs/test-mdqe-suite.xml"), "UTF-8");
-//				log.debug("XML serialization: " + xml);
-//				suite = (Suite) XmlMarshaller.fromXml(xml, Suite.class);
-//			} catch (Exception e) {
-//				// TODO Auto-generated catch block
-//				e.printStackTrace();
-//				fail(e.getMessage());
-//			}
-//
-//			run = mdqe.runSuite(suite, input);
-//			run.setObjectIdentifier(packageId);
-//			log.debug("Run results XML: " + XmlMarshaller.toXml(run));
-//		} catch (Exception e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//			fail(e.getMessage());
-//		}
-//	}
