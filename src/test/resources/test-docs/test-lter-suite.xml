@@ -168,7 +168,10 @@ def call():
 		<name>geographicCoveragePresent</name>
 		<environment>python</environment>
 		<dialect>
+			<name>eml</name>
+			<xpath>boolean(/*[local-name() = 'eml'])</xpath>
 		</dialect>
+		<type>metadata</type>
 		<level>INFO</level>
 		<expected>true</expected>
 		<!-- Geographic coverage at the dataset level -->
