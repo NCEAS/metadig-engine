@@ -1,5 +1,7 @@
 package edu.ucsb.nceas.mdqengine;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
@@ -28,6 +30,7 @@ import edu.ucsb.nceas.mdqengine.model.Result;
 import edu.ucsb.nceas.mdqengine.model.Run;
 import edu.ucsb.nceas.mdqengine.processor.XMLDialect;
 import edu.ucsb.nceas.mdqengine.serialize.JsonMarshaller;
+import edu.ucsb.nceas.mdqengine.serialize.XmlMarshaller;
 
 public class MDQEngine {
 	
@@ -119,6 +122,27 @@ public class MDQEngine {
 	 */
 	public void setStore(MDQStore store) {
 		this.store = store;
+	}
+	
+	/**
+	 * Run a suite on a given metadata document. Prints Run XML results.
+	 * @param args first is the metadata file path, second is the suite file path
+	 * 
+	 */
+	public static void main(String args[]) {
+		MDQEngine engine = new MDQEngine();
+		try {
+			InputStream input = new FileInputStream(args[0]);
+			String xml = IOUtils.toString(new FileInputStream(args[1]), "UTF-8");
+			Suite suite = (Suite) XmlMarshaller.fromXml(xml , Suite.class);
+			Run run = engine.runSuite(suite, input);
+			System.out.println(XmlMarshaller.toXml(run));
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		
 	}
 
 }
