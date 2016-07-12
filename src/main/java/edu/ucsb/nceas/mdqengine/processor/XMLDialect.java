@@ -54,7 +54,7 @@ public class XMLDialect {
 
 	}
 	
-	public Result runCheck(Check check) throws XPathExpressionException, ScriptException {
+	public Result runCheck(Check check) throws XPathExpressionException {
 		
 		Result result = null;
 		
@@ -82,7 +82,14 @@ public class XMLDialect {
 			// dispatch to checker impl
 			Dispatcher dispatcher = Dispatcher.getDispatcher(check.getEnvironment());
 			
-			result = dispatcher.dispatch(variables, check.getCode());
+			try {
+				result = dispatcher.dispatch(variables, check.getCode());
+			} catch (ScriptException e) {
+				// report this
+				result = new Result();
+				result.setStatus(Status.ERROR);
+				result.setMessage(e.getMessage());
+			}
 	
 			// set the status if it has not been set already
 			if (result.getStatus() == null && check.getExpected() != null) {
