@@ -32,15 +32,14 @@ public class LTERSuiteTest{
 
 	// Metadata for dataset that has single entity
 	//private String metadataId = "knb-lter-sbc.18.18";
+	//private String metadataId = "knb-lter-sbc.1203.5";
+	//private String metadataId = "knb-lter-sbc.1101.6";
 	// Metadata for dataset that has multiple entities
 	private String metadataId = "knb-lter-sbc.1001.7";
-	// This dataset has a single data entity
-	private String packageId = "doi:10.6073/pasta/d90872297e30026b263a119d4f5bca9f";
-	// This dataset has mulitple entities
-	// private String packageId = "doi:10.6073/pasta/f3a07cde3f91983bbd63f02fb0496569";
 	private Suite suite = null;
 	
 	@Test
+	//@Ignore("ignoring LTERSuiteTest")
 	public void runMDQEtestsForId() {
 		MDQEngine mdqe = new MDQEngine();
 		Run run = null;
