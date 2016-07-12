@@ -1,13 +1,25 @@
 package edu.ucsb.nceas.mdqengine.model;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+
+import javax.xml.bind.JAXBException;
+
+import org.apache.commons.io.IOUtils;
 
 import edu.ucsb.nceas.mdqengine.model.Check;
 import edu.ucsb.nceas.mdqengine.model.Suite;
 import edu.ucsb.nceas.mdqengine.model.Selector;
+import edu.ucsb.nceas.mdqengine.serialize.XmlMarshaller;
 
 public class SuiteFactory {
+	
+	public static Suite getLTERSuite() throws IOException, JAXBException {
+		String xmlStr = IOUtils.toString(SuiteFactory.class.getResourceAsStream("/test-docs/test-lter-suite.xml"), "UTF-8");
+		Suite suite = (Suite) XmlMarshaller.fromXml(xmlStr, Suite.class);
+		return suite;
+	}
 
 	public static Suite getMockSuite() {
 		// make a suite

@@ -6,7 +6,10 @@ import static org.junit.Assert.fail;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.net.URL;
+
+import javax.xml.bind.JAXBException;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
@@ -28,10 +31,16 @@ public class AggregatorTest {
 	
 	@BeforeClass
 	public static void init() {
-		suite = SuiteFactory.getMockSuite();
+		//suite = SuiteFactory.getMockSuite();
+		try {
+			suite = SuiteFactory.getLTERSuite();
+		} catch (Exception e) {
+			e.printStackTrace();
+			fail(e.getMessage());
+		}
 	}
 
-	@Ignore
+	//@Ignore
 	@Test
 	public void testBatchEML() {
 		String query = "formatId:\"eml://ecoinformatics.org/eml-2.1.1\"";
