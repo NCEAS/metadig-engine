@@ -126,15 +126,15 @@ public class MDQEngine {
 	
 	/**
 	 * Run a suite on a given metadata document. Prints Run XML results.
-	 * @param args first is the metadata file path, second is the suite file path
+	 * @param args first is the suite file path, second is the metadata file path
 	 * 
 	 */
 	public static void main(String args[]) {
 		MDQEngine engine = new MDQEngine();
 		try {
-			InputStream input = new FileInputStream(args[0]);
-			String xml = IOUtils.toString(new FileInputStream(args[1]), "UTF-8");
+			String xml = IOUtils.toString(new FileInputStream(args[0]), "UTF-8");
 			Suite suite = (Suite) XmlMarshaller.fromXml(xml , Suite.class);
+			InputStream input = new FileInputStream(args[1]);
 			Run run = engine.runSuite(suite, input);
 			System.out.println(XmlMarshaller.toXml(run));
 		} catch (Exception e) {

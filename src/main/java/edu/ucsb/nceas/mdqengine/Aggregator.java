@@ -1,6 +1,7 @@
 package edu.ucsb.nceas.mdqengine;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -17,6 +18,7 @@ import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVPrinter;
 import org.apache.commons.csv.CSVRecord;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.output.FileWriterWithEncoding;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.logging.Log;
@@ -30,6 +32,7 @@ import edu.ucsb.nceas.mdqengine.model.Suite;
 import edu.ucsb.nceas.mdqengine.model.Result;
 import edu.ucsb.nceas.mdqengine.model.Run;
 import edu.ucsb.nceas.mdqengine.model.Status;
+import edu.ucsb.nceas.mdqengine.serialize.XmlMarshaller;
 
 public class Aggregator {
 	
@@ -59,6 +62,67 @@ public class Aggregator {
 	protected Log log = LogFactory.getLog(this.getClass());
 		
 	private MDQEngine engine = new MDQEngine();
+	
+	/**
+	 * run and graph given suite on a corpus returned by optional query param (solr)
+	 * @param args
+	 */
+	public static void main(String args[]) {
+		
+		try {
+			
+			// default query
+			String query = "formatId:\"eml://ecoinformatics.org/eml-2.1.1\"";
+			
+			// optional query arg
+			if (args.length > 1) {
+				query = args[1];
+			}
+			
+			String xml = IOUtils.toString(new FileInputStream(args[0]), "UTF-8");
+			Suite suite = (Suite) XmlMarshaller.fromXml(xml , Suite.class);
+			Aggregator aggregator = new Aggregator();
+			aggregator.graphBatch(query, suite);
+			//aggregator.runBatch(query, suite);
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+	}
+	
+	public void graphBatch(String query, Suite suite) {
+
+		String tabularResult = null;
+		try {
+			File file = this.runBatch(query, suite);
+
+			tabularResult = IOUtils.toString(new FileInputStream(file), "UTF-8");
+			log.debug("Tabular Batch Result: \n" + tabularResult);
+			
+			// now try doing some analysis
+			URL url = this.getClass().getResource("/code/plot.R");
+			String script = url.getPath();
+
+			String input = file.getAbsolutePath();
+			String output = input + ".pdf";
+			
+			log.debug("Tabular Batch file here: \n" + input);
+
+			ProcessBuilder pb = new ProcessBuilder("Rscript", "--vanilla", script, input, output);
+			Process p = pb.start();
+			int ret = p.waitFor();
+			log.debug("stdOut:" + IOUtils.toString(p.getInputStream(), "UTF-8"));
+			log.debug("stdErr:" + IOUtils.toString(p.getErrorStream(), "UTF-8"));
+			
+			log.debug("Barplot available here: \n" + output);
+					
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+	}
 	
 	
 	/**
@@ -146,7 +210,7 @@ public class Aggregator {
 				solrQuery += field + ",";
 			}
 			solrQuery.substring(0, solrQuery.length()-1); // get rid of the last comma
-			solrQuery += "&sort=dateUploaded%20desc&wt=csv&rows=100";
+			solrQuery += "&sort=dateUploaded%20desc&wt=csv&rows=1";
 			//solrQuery += "&fl=id,formatId,datasource,dataUrl,rightsHolder";
 
 			log.debug("solrQuery = " + solrQuery);
