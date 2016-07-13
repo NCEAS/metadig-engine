@@ -595,6 +595,7 @@ def call():
   
   global message
   global status
+  status = "SUCCESS"
 
   # varialbe defined by MQE 
   # "attributeNames" - the attribute names (column headings) for the entity 
@@ -637,6 +638,7 @@ def call():
    
     # Fail if any one of the entiies has too fields, otherwise continue
     if (len(colNames) < len(attributeNames)):
+      status = "FAILURE"
       return True
 
   return False
