@@ -146,7 +146,7 @@ public class Aggregator {
 				solrQuery += field + ",";
 			}
 			solrQuery.substring(0, solrQuery.length()-1); // get rid of the last comma
-			solrQuery += "&wt=csv&rows=10";
+			solrQuery += "&sort=dateUploaded%20desc&wt=csv&rows=100";
 			//solrQuery += "&fl=id,formatId,datasource,dataUrl,rightsHolder";
 
 			log.debug("solrQuery = " + solrQuery);
