@@ -39,7 +39,7 @@ public class Dispatcher {
 		Result dr = new Result();
 		
 		for (Entry<String, Object> entry: variables.entrySet()) {
-			log.debug("Setting variable: " + entry.getKey() + "=" + entry.getValue());
+			log.trace("Setting variable: " + entry.getKey() + "=" + entry.getValue());
 			engine.put(entry.getKey(), entry.getValue());
 		}
 		log.debug("Evaluating code: " + code);
