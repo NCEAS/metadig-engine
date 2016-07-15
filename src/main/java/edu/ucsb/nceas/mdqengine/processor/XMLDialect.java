@@ -2,6 +2,7 @@ package edu.ucsb.nceas.mdqengine.processor;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
@@ -12,6 +13,11 @@ import javax.script.ScriptException;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpressionException;
@@ -73,6 +79,10 @@ public class XMLDialect {
 				// make available in script
 				variables.put(name, value);
 			}
+			
+			// make the entire dom available
+			// TODO: string seems like only viable option for all env
+			variables.put("document", toXmlString(document));
 			
 			// make dataUrls available to the check if we have them
 			if (this.dataUrls != null) {
@@ -222,6 +232,20 @@ public class XMLDialect {
 
 	public void setDataUrls(Map<String, String> dataUrls) {
 		this.dataUrls = dataUrls;
+	}
+	
+	private String toXmlString(Document document) {
+		try {
+		    Transformer transformer = TransformerFactory.newInstance().newTransformer();
+		    StreamResult result = new StreamResult(new StringWriter());
+		    DOMSource source = new DOMSource(document);
+		    transformer.transform(source, result);
+		    return result.getWriter().toString();
+		} catch(TransformerException ex) {
+		    ex.printStackTrace();
+		    return null;
+		}
+
 	}
 
 }

@@ -134,5 +134,57 @@ public class XMLDialectTest {
 		}
 			
 	}
+	
+	@Test
+	public void testValidation() {
+
+		Check check = new Check();
+		
+		Selector selector = new Selector();
+		selector.setName("entityCount");
+		selector.setXpath("count(//dataset/dataTable)");
+
+		List<Selector> selectors = new ArrayList<Selector>();
+		selectors.add(selector);
+		check.setSelector(selectors);
+		
+		check.setCode(SchemaCheck.class.getName());
+		check.setEnvironment("Java");
+		check.setLevel(Level.SEVERE);
+		check.setName("Schema valid stest");
+				
+		//  run the check on valid EML that declares schemaLocation
+		try {
+			
+			// parse the metadata content
+			InputStream input = this.getClass().getResourceAsStream("/test-docs/eml.1.1.xml");
+			XMLDialect xml = new XMLDialect(input);
+			
+			// run check
+			Result result = xml.runCheck(check);
+			assertEquals(result.getMessage(), Status.SUCCESS, result.getStatus());
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+			fail(e.getMessage());
+		}
+		
+		//  run the check on invalid EML that does not declare schema location
+		try {
+			
+			// parse the metadata content
+			InputStream input = this.getClass().getResourceAsStream("/test-docs/eml-invalid.1.1.xml");
+			XMLDialect xml = new XMLDialect(input);
+			
+			// run check
+			Result result = xml.runCheck(check);
+			assertEquals(result.getMessage(), Status.FAILURE, result.getStatus());
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+			fail(e.getMessage());
+		}
+			
+	}
 
 }
