@@ -16,7 +16,7 @@ import edu.ucsb.nceas.mdqengine.serialize.XmlMarshaller;
 public class SuiteFactory {
 	
 	public static Suite getLTERSuite() throws IOException, JAXBException {
-		String xmlStr = IOUtils.toString(SuiteFactory.class.getResourceAsStream("/test-docs/test-lter-suite.xml"), "UTF-8");
+		String xmlStr = IOUtils.toString(SuiteFactory.class.getResourceAsStream("/suites/test-lter-suite.xml"), "UTF-8");
 		Suite suite = (Suite) XmlMarshaller.fromXml(xmlStr, Suite.class);
 		return suite;
 	}

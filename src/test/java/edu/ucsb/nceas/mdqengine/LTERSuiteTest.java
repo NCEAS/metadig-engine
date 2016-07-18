@@ -45,7 +45,7 @@ public class LTERSuiteTest{
 		MDQEngine mdqe = new MDQEngine();
 		Run run = null;
 		try {
-			String xmlStr = IOUtils.toString(this.getClass().getResourceAsStream("/test-docs/test-lter-suite.xml"), "UTF-8");
+			String xmlStr = IOUtils.toString(this.getClass().getResourceAsStream("/suites/test-lter-suite.xml"), "UTF-8");
 			log.debug("XML serialization: " + xmlStr);
 			suite = (Suite) XmlMarshaller.fromXml(xmlStr, Suite.class);
 			// retrieve the metadata content

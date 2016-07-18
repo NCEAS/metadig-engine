@@ -1,19 +1,10 @@
 package edu.ucsb.nceas.mdqengine;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.net.URL;
 import java.nio.charset.Charset;
 import java.util.List;
 
-import javax.xml.bind.JAXBException;
-
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.NameValuePair;
@@ -22,10 +13,10 @@ import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import edu.ucsb.nceas.mdqengine.model.Suite;
-import edu.ucsb.nceas.mdqengine.model.SuiteFactory;
 import edu.ucsb.nceas.mdqengine.model.Run;
 import edu.ucsb.nceas.mdqengine.model.RunFactory;
+import edu.ucsb.nceas.mdqengine.model.Suite;
+import edu.ucsb.nceas.mdqengine.model.SuiteFactory;
 
 public class AggregatorTest {
 	
@@ -44,7 +35,7 @@ public class AggregatorTest {
 		}
 	}
 
-	//@Ignore
+	@Ignore
 	@Test
 	public void testBatchEML() {
 		String query = "q=formatId:\"eml://ecoinformatics.org/eml-2.1.1\"";
