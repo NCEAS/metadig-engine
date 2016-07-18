@@ -120,7 +120,7 @@ def call():
 	<check>
 		<id>check-dataset.7.1</id>
 		<name>methodsElementPresent</name>
-		<environment>python</environment>
+		<environment>R</environment>
 		<dialect>
 			<name>eml</name>
 			<xpath>boolean(/*[local-name() = 'eml'])</xpath>
@@ -133,23 +133,23 @@ def call():
 			<xpath>/eml/dataset/methods</xpath>
 		</selector>
 		<code><![CDATA[
-def call():
-  global message
-  global status
+check <- function() {
+    # Check that a <methods> element is present for the dataset.
+    status <- "SUCCESS"
+    message <- "A methods element is present"
+    
+    if(any(!exists("methods"), length(methods) == 0, is.null(methods))) {
+        status <- "FAILURE"
+        message <- "A methods element is not present"
+    }
+    return(list(status, message))
+}
 
-  if(len(methods) > 0):
-    status = "SUCCESS"
-    result = True
-    message = "A methods element is present"
-  else:
-    status = "FAILURE"
-    result = False
-    message = "A methods element is not present"
-      
-  return(result)
+result <- check()
+status <- result[[1]]
+message <- result[[2]]
       ]]></code>
 	</check>
-
 	<check>
 		<id>check-dataset.8.1</id>
 		<name>coveragePresent</name>
