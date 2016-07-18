@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<suite>
+    <id>lter-in-r</id>
+    <name>mdqengine provisional test suite for LTER written in R</name>
+
+    <check>
+      <name>package_id_pattern</name>
+      <level>ERROR</level>
+      <expected>true</expected>
+      <selector>
+          <name>package_id</name>
+          <xpath>/eml/@packageId</xpath>
+      </selector>
+      <environment>r</environment>
+      <code><![CDATA[
+          length(strsplit(package_id, "\\.")[[1]]) == 3
+      ]]></code>
+    </check>
+
+    <check>
+      <name>eml_version</name>
+      <level>ERROR</level>
+      <expected>true</expected>
+      <selector>
+          <name>eml_version</name>
+          <xpath>/eml/namespace::*[name()='eml']</xpath>
+      </selector>
+      <environment>r</environment>
+      <code><![CDATA[
+          eml_version == "eml://ecoinformatics.org/eml-2.1.0" || eml_version == "eml://ecoinformatics.org/eml-2.1.1"
+      ]]></code>
+    </check>
+
+    <check>
+      <name>methods_element_present</name>
+      <level>ERROR</level>
+      <expected>TRUE</expected>
+      <selector>
+          <name>methods</name>
+          <xpath>/eml/dataset/methods</xpath>
+      </selector>
+      <environment>r</environment>
+      <code><![CDATA[
+        length(methods) > 0
+      ]]></code>
+    </check>
+
+    <check>
+      <name>title_length_is_sufficient</name>
+      <level>ERROR</level>
+      <expected>TRUE</expected>
+      <selector>
+          <name>title</name>
+          <xpath>/eml/dataset/title</xpath>
+      </selector>
+      <environment>r</environment>
+      <code><![CDATA[
+        words <- strsplit(title, " ")[[1]]
+        length(words) >= 7 && length(words) <= 20
+      ]]></code>
+    </check>
+
+    <check>
+      <name>dataset_abstract_length_is_sufficient</name>
+      <level>ERROR</level>
+      <expected>TRUE</expected>
+      <selector>
+          <name>abstract</name>
+          <xpath>/eml/dataset/abstract</xpath>
+      </selector>
+      <environment>r</environment>
+      <code><![CDATA[
+        words <- strsplit(abstract, " ")[[1]]
+        length(words) >= 20
+      ]]></code>
+    </check>
+
+</suite>
