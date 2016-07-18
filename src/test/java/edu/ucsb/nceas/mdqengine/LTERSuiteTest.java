@@ -26,10 +26,14 @@ import edu.ucsb.nceas.mdqengine.model.Status;
 import edu.ucsb.nceas.mdqengine.processor.XMLDialect;
 import edu.ucsb.nceas.mdqengine.serialize.JsonMarshaller;
 import edu.ucsb.nceas.mdqengine.serialize.XmlMarshaller;
+import edu.ucsb.nceas.mdqengine.store.InMemoryStore;
 
 public class LTERSuiteTest{
 	
 	protected Log log = LogFactory.getLog(this.getClass());
+	
+	// for looking up the "built-in" suite
+	private static MDQStore store = null;
 
 	// Metadata for dataset that has single entity
 	//private String metadataId = "knb-lter-sbc.18.18";
@@ -39,15 +43,24 @@ public class LTERSuiteTest{
 	private String metadataId = "knb-lter-sbc.1001.7";
 	private Suite suite = null;
 	
+	@BeforeClass
+	public static void setUpStore() {
+		store = new InMemoryStore();
+	}
+	
 	@Test
 	//@Ignore("ignoring LTERSuiteTest")
 	public void runMDQEtestsForId() {
 		MDQEngine mdqe = new MDQEngine();
 		Run run = null;
 		try {
-			String xmlStr = IOUtils.toString(this.getClass().getResourceAsStream("/suites/test-lter-suite.xml"), "UTF-8");
-			log.debug("XML serialization: " + xmlStr);
-			suite = (Suite) XmlMarshaller.fromXml(xmlStr, Suite.class);
+			
+//			String xmlStr = IOUtils.toString(this.getClass().getResourceAsStream("/suites/test-lter-suite.xml"), "UTF-8");
+//			log.debug("XML serialization: " + xmlStr);
+//			suite = (Suite) XmlMarshaller.fromXml(xmlStr, Suite.class);
+			
+			suite = store.getSuite("test-lter-suite.1.1");
+			
 			// retrieve the metadata content
 			String cnURL = Settings.getConfiguration().getString("D1Client.CN_URL");
 			log.error("CN URL: " + cnURL);

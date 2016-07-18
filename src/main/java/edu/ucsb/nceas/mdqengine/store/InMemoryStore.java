@@ -12,6 +12,8 @@ import javax.xml.bind.JAXBException;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 
 import edu.ucsb.nceas.mdqengine.MDQStore;
 import edu.ucsb.nceas.mdqengine.model.Check;
@@ -37,24 +39,29 @@ public class InMemoryStore implements MDQStore{
 	protected Log log = LogFactory.getLog(this.getClass());
 	
 	public InMemoryStore() {
-		//this.init();
+		this.init();
 	}
 	
 	// NOTE: does not work with wildcards - investigating alternatives
 	private void init() {
+		
+		PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
+		
+		Resource[] suiteResources = null;
 		// load all the resources from local files
-		Enumeration<URL> suiteResources = null;
 		try {
-			suiteResources = this.getClass().getClassLoader().getResources("/suites/*.xml");
+			suiteResources  = resolver.getResources("classpath*:/suites/*.xml");
+
 		} catch (IOException e) {
 			log.error("Could not read local suite resources: " + e.getMessage(), e);
 			return;
 		}
-		while (suiteResources.hasMoreElements()) {
-			URL url = suiteResources.nextElement();
-			log.debug("Loading suite found at: " + url.toString());
+		for (Resource resource: suiteResources) {
+			
 			Suite suite = null;
 			try {
+				URL url = resource.getURL();
+				log.debug("Loading suite found at: " + url.toString());
 				String xml = IOUtils.toString(url.openStream(), "UTF-8");
 				suite = (Suite) XmlMarshaller.fromXml(xml, Suite.class);
 			} catch (JAXBException | IOException e) {

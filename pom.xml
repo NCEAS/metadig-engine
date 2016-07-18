@@ -79,6 +79,12 @@
 		    <artifactId>org.eclipse.persistence.moxy</artifactId>
 		    <version>${moxy.version}</version>
 		</dependency>
+		<!-- https://mvnrepository.com/artifact/org.springframework/spring-core -->
+		<dependency>
+		    <groupId>org.springframework</groupId>
+		    <artifactId>spring-core</artifactId>
+		    <version>4.3.1.RELEASE</version>
+		</dependency>
 		<!-- D1 libclient -->
 		<dependency>
 			<groupId>org.dataone</groupId>
