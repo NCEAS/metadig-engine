@@ -8,11 +8,13 @@ import java.io.InputStreamReader;
 import java.io.StringReader;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
@@ -23,6 +25,8 @@ import org.apache.commons.io.output.FileWriterWithEncoding;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.utils.URLEncodedUtils;
 import org.dataone.client.v2.CNode;
 import org.dataone.client.v2.itk.D1Client;
 
@@ -58,6 +62,14 @@ public class Aggregator {
 		"rightsHolder"
 	};
 	
+	/**
+	 * Don't let the user override these parameters when querying, otherwise the batch will be broken
+	 */
+	public static String[] ignoredParams = {
+		"fl",
+		"wt"
+	};
+	
 	
 	protected Log log = LogFactory.getLog(this.getClass());
 		
@@ -69,21 +81,23 @@ public class Aggregator {
 	 */
 	public static void main(String args[]) {
 		
+		// default query
+		String query = "q=formatId:\"eml://ecoinformatics.org/eml-2.1.1\" ";
+
 		try {
 			
-			// default query
-			String query = "formatId:\"eml://ecoinformatics.org/eml-2.1.1\"";
-			
-			// optional query arg
+			// use optional query arg
 			if (args.length > 1) {
 				query = args[1];
 			}
+
+			// parse the query syntax
+			List<NameValuePair> params = URLEncodedUtils.parse(query, Charset.forName("UTF-8"));
 			
 			String xml = IOUtils.toString(new FileInputStream(args[0]), "UTF-8");
 			Suite suite = (Suite) XmlMarshaller.fromXml(xml , Suite.class);
 			Aggregator aggregator = new Aggregator();
-			aggregator.graphBatch(query, suite);
-			//aggregator.runBatch(query, suite);
+			aggregator.graphBatch(params, suite);
 
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -91,11 +105,11 @@ public class Aggregator {
 
 	}
 	
-	public void graphBatch(String query, Suite suite) {
+	public void graphBatch(List<NameValuePair> params, Suite suite) {
 
 		String tabularResult = null;
 		try {
-			File file = this.runBatch(query, suite);
+			File file = this.runBatch(params, suite);
 
 			tabularResult = IOUtils.toString(new FileInputStream(file), "UTF-8");
 			log.debug("Tabular Batch Result: \n" + tabularResult);
@@ -132,7 +146,7 @@ public class Aggregator {
 	 * @return
 	 * @throws IOException
 	 */
-	public File runBatch(String query, Suite suite) throws IOException {
+	public File runBatch(List<NameValuePair> params, Suite suite) throws IOException {
 		
 		File file = File.createTempFile("mdqe_batch", ".csv");
 		Appendable results = new FileWriterWithEncoding(file, "UTF-8");
@@ -143,7 +157,7 @@ public class Aggregator {
 		CSVFormat format = CSVFormat.DEFAULT.withHeader(headerList.toArray(new String[]{}));
 		CSVPrinter csvPrinter = new CSVPrinter(results, format );
 		
-		CSVParser docsCsv = this.queryCSV(query);
+		CSVParser docsCsv = this.queryCSV(params);
 		if (docsCsv != null) {
 			Iterator<CSVRecord> recordIter = docsCsv.iterator();
 			while (recordIter.hasNext()) {
@@ -199,19 +213,46 @@ public class Aggregator {
 		
 	}
 
-	public CSVParser queryCSV(String query) {
+	
+	public CSVParser queryCSV(List<NameValuePair> pairs) {
 		
 		try {
 			// query system for object
-			String solrQuery = "?q=" + URLEncoder.encode(query, "UTF-8");
-			solrQuery += URLEncoder.encode(" -obsoletedBy:*", "UTF-8");
+			String solrQuery = "?";
+			
+			// add the user-supplied parameters, for ones that are allowed
+			for (NameValuePair param: pairs) {
+				String name = param.getName();
+				String value = param.getValue();
+
+				if (!ArrayUtils.contains(ignoredParams, name)) {
+					solrQuery += name + "=" + URLEncoder.encode(value, "UTF-8");
+					
+					// make sure we only include current objects in case the user has not specified such
+					if (name.equals("q") && !solrQuery.contains("obsoletedBy")) {
+						solrQuery += URLEncoder.encode(" -obsoletedBy:* ", "UTF-8");
+					}
+				}
+			}
+			
+			
+			// include the field list
 			solrQuery += "&fl=";
 			for (String field: docColumns) {
 				solrQuery += field + ",";
 			}
 			solrQuery.substring(0, solrQuery.length()-1); // get rid of the last comma
-			solrQuery += "&sort=dateUploaded%20desc&wt=csv&rows=1";
-			//solrQuery += "&fl=id,formatId,datasource,dataUrl,rightsHolder";
+
+			// add additional params if missing
+			if (!solrQuery.contains("sort")) {
+				solrQuery += "&sort=dateUploaded%20desc";
+			}
+			if (!solrQuery.contains("rows")) {
+				solrQuery += "&rows=10";
+			}
+			
+			// add additional required parameters
+			solrQuery += "&&wt=csv";
 
 			log.debug("solrQuery = " + solrQuery);
 

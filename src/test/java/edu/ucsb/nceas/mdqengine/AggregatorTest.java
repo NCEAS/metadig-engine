@@ -8,12 +8,16 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.URL;
+import java.nio.charset.Charset;
+import java.util.List;
 
 import javax.xml.bind.JAXBException;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.utils.URLEncodedUtils;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -40,13 +44,14 @@ public class AggregatorTest {
 		}
 	}
 
-	@Ignore
+	//@Ignore
 	@Test
 	public void testBatchEML() {
-		String query = "formatId:\"eml://ecoinformatics.org/eml-2.1.1\"";
-
+		String query = "q=formatId:\"eml://ecoinformatics.org/eml-2.1.1\"";
+		List<NameValuePair> params = URLEncodedUtils.parse(query, Charset.forName("UTF-8"));
+		
 		Aggregator aggregator = new Aggregator();
-		aggregator.graphBatch(query, suite);
+		aggregator.graphBatch(params, suite);
 		
 	}
 
