@@ -6,54 +6,82 @@
 	<check>
 		<id>check-dataset.1.1</id>
 		<name>packageIdPattern</name>
-		<environment>python</environment>
+		<environment>R</environment>
+		<!-- The <dialect> element is used by the scripting engine to
+		determine if a check should be run for a metadata document. The
+		tested document is checked to see if it contains the specified
+		dialect xpath. Multiple dialects can be supported by each check. -->
 		<dialect>
 			<name>eml</name>
 			<xpath>boolean(/*[local-name() = 'eml'])</xpath>
 		</dialect>
 		<type>metadata</type>
-		<expected>true</expected>
 		<level>WARN</level>
+		<!-- The script engine extracts values from the tested metadata
+		document as specified by the selector. The engine then sets a variable
+		the same as the '<name>' value that will be available to the check 
+		code. -->
 		<selector>
 			<name>packageId</name>
 			<xpath>/eml/@packageId</xpath>
 		</selector>
 		<code><![CDATA[
-def call():
+# A test can return status of "SUCCESS", "FAILURE", "ERROR" or
+# "SKIP". The variable 'status' is set by this check routine and will be
+# read by the script engine after check code has been executed. The 
+# possible values of 'status' are:
+#     "SUCCESS" : All tests conducted by the check routine have passed.
+#     "FAILURE" : One or more tests conducted by the check routine have not passed.
+#     "ERROR" : An error has been encountered by the check routine that prevents
+#               it from performing any testing
+#     "SKIP" : The check routine has determined that the tests it performs do
+#              not apply to the current metadata or data.
+# In addition, a check routine can set the variable 'message' which is a description
+# of the results of the test.
+# Both 'status' and 'message' can be set as lists, for example, to 
+# convey results of congruency between a metadata document and the datasets that
+# it documents. Each 'status' element, for example, could be the status for one
+# of the multiple datasets checked. 
+check <- function() {
+    # Assume all the checks will pass.
+    status <- "SUCCESS"
+    message <- "The package identifier is valid"
+    
+    # Stop testing after the first failure.
+    if (! grepl("^[a-zA-Z0-9_\\-]+\\.\\d+\\.\\d+", packageId, perl = TRUE, fixed = FALSE)) {
+        status <- "FAILURE"
+        message <- "The packageId value should match the pattern 'scope.identifier.revision'"
+        return(list(status, message))
+    }
+    
+    tokens = unlist(strsplit(packageId, "\\.", fixed = FALSE, perl = TRUE, useBytes = FALSE))
+    scope <- tokens[[1]]
+    identifier <- tokens[[2]]
+    revision <- tokens[[3]]
+    
+    # Stop running tests if one has failed - can't just exit R doesn't allow halting execution without
+    # signalng an error.
+    if (grepl("^0", identifier)) {
+        status <- "FAILURE"
+        message <- "A leading zero was found in the identifier. The identifier value must be a whole number."
+        return(list(status, message))
+    }
+    
+    if (grepl("^0", revision)) {
+        message <- "A leading zero was found in the revision. The revision value must be a whole number."
+        status <- "FAILURE"
+        return(list(status, message))
+    }
+    
+    return(list(status, message))
+}
 
-  import re
-  global message
-  global status
-  
-  # Check if the package identifier has the proper format, i.e. "scope.identifier.revision"
-  pattern = re.compile("[a-zA-Z0-9_\-]+\.(\d+)\.(\d+)")
-  m = pattern.match(packageId)
-
-  if not m:
-    status = "FAILURE"
-    message = "The packageId value should match the pattern 'scope.identifier.revision'"
-    return(False)
-
-  (scope, identifier, revision) = packageId.split(".")
-
-  checkStr = re.sub("^0+", "", identifier)
-  if (checkStr != identifier):
-    status = "FAILURE"
-    message = "A leading zero was found in the identifier. The identifier value must be a whole number."
-    return(False)
-
-  checkStr = re.sub("^0+", "", revision)
-  if (checkStr != revision):
-    message = "A leading zero was found in the revision. The revision value must be a whole number."
-    status = "FAILURE"
-    return(False)
-
-  # All checks have passed 
-  status = "SUCCESS"
-  message = "The package identifier is valid"
-  return True
+result <- check()
+status <- result[[1]]
+message <- result[[2]]
       ]]></code>
 	</check>
+
 
 	<check>
 		<id>check-dataset.6.1</id>
