@@ -1,5 +1,6 @@
 package edu.ucsb.nceas.mdqengine.model;
 
+import java.net.URL;
 import java.util.List;
 
 import javax.xml.bind.annotation.XmlRootElement;
@@ -23,6 +24,8 @@ public class Check {
 
 	@XmlCDATA
 	private String code;
+	
+	private URL library;
 	
 	private String expected;
 
@@ -108,5 +111,13 @@ public class Check {
 
 	public void setExpected(String expected) {
 		this.expected = expected;
+	}
+
+	public URL getLibrary() {
+		return library;
+	}
+
+	public void setLibrary(URL library) {
+		this.library = library;
 	}
 }

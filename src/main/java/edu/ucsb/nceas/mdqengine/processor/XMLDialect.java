@@ -3,6 +3,7 @@ package edu.ucsb.nceas.mdqengine.processor;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
@@ -23,6 +24,7 @@ import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.BooleanUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import org.apache.commons.logging.Log;
@@ -92,8 +94,28 @@ public class XMLDialect {
 			// dispatch to checker impl
 			Dispatcher dispatcher = Dispatcher.getDispatcher(check.getEnvironment());
 			
+			// gather extra code from external resources
+			String code = check.getCode();
+			URL library = check.getLibrary();
+
+			// TODO: loading random code from a URL is very risky!
+			if (library != null) {
+				log.debug("Loading library code from URL: " + library);
+				// read the library from given URL
+				try {
+					String libraryContent = IOUtils.toString(library.openStream(), "UTF-8");
+					code = libraryContent + code;
+				} catch (IOException e) {
+					log.error("Could not load code library: " + e.getMessage(), e);
+					// report this
+					result = new Result();
+					result.setStatus(Status.ERROR);
+					result.setMessage(e.getMessage());
+				}
+			}
+			
 			try {
-				result = dispatcher.dispatch(variables, check.getCode());
+				result = dispatcher.dispatch(variables, code);
 			} catch (ScriptException e) {
 				// report this
 				result = new Result();

@@ -186,5 +186,48 @@ public class XMLDialectTest {
 		}
 			
 	}
+	
+	@Test
+	public void testLibrary() {
+
+		Check check = new Check();
+		
+		Selector selector = new Selector();
+		selector.setName("entityCount");
+		selector.setXpath("count(//dataset/dataTable)");
+
+		List<Selector> selectors = new ArrayList<Selector>();
+		selectors.add(selector);
+		check.setSelector(selectors);
+		
+		// the library has the code, so we'll just let that do everything
+		check.setCode("");
+		
+		URL library = this.getClass().getResource("/code/sampleLib.R");
+		check.setLibrary(library);
+		check.setExpected("TRUE");
+		
+		check.setEnvironment("r");
+		check.setLevel(Level.WARN);
+		check.setName("External code lib test");
+				
+		//  run the check on valid EML that declares schemaLocation
+		try {
+			
+			// parse the metadata content
+			InputStream input = this.getClass().getResourceAsStream("/test-docs/eml.1.1.xml");
+			XMLDialect xml = new XMLDialect(input);
+			
+			// run check
+			Result result = xml.runCheck(check);
+			assertEquals(result.getMessage(), Status.SUCCESS, result.getStatus());
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+			fail(e.getMessage());
+		}
+			
+	}
+
 
 }
