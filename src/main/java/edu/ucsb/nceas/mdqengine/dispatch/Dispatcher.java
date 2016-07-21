@@ -4,6 +4,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import javax.script.Invocable;
+import javax.script.ScriptContext;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
@@ -19,6 +20,8 @@ public class Dispatcher {
 	protected Log log = LogFactory.getLog(this.getClass());
 	
 	protected ScriptEngine engine = null;
+	
+	protected Map<String, Object> bindings = null;
 	
 	// create a script engine manager:
     protected ScriptEngineManager manager = new ScriptEngineManager();
@@ -86,6 +89,10 @@ public class Dispatcher {
 		if (var != null && !var.toString().equals("<unbound>")) {
 			dr.setStatus(Status.valueOf(var.toString()));
 		}
+		
+		// harvest all other vars for downstream dispatchers
+		bindings = engine.getBindings(ScriptContext.ENGINE_SCOPE);
+		
 		return dr;
 		
 	}
@@ -129,5 +136,13 @@ public class Dispatcher {
 		
 		return instance;
 	    
+	}
+
+	public Map<String, Object> getBindings() {
+		return bindings;
+	}
+
+	public void setBindings(Map<String, Object> bindings) {
+		this.bindings = bindings;
 	}
 }

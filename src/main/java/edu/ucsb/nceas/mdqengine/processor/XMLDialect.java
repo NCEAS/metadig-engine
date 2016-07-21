@@ -97,15 +97,37 @@ public class XMLDialect {
 			if (!check.isInheritState() || dispatcher == null) {
 				// create a fresh dispatcher 
 				dispatcher = Dispatcher.getDispatcher(check.getEnvironment());
+				log.debug("Using new dispatcher for check");
 			} else {
+
 				// ensure that we can reuse the dispatcher to inherit previous state
 				if (!dispatcher.isEnvSupported(check.getEnvironment())) {
-					result = new Result();
-					result.setStatus(Status.ERROR);
-					result.setMessage("Check cannot use persistent state from previous differing environment");
-					return result;
+					
+					// use the bindings from previous dispatcher
+					Map<String, Object> bindings = dispatcher.getBindings();
+					if (bindings == null) {
+						// nothing to inherit
+						result = new Result();
+						result.setStatus(Status.ERROR);
+						result.setMessage("Check cannot use persistent state from previous differing environment");
+						return result;
+					} else {
+						
+						// use the bindings from previous dispatcher
+						for (String key: bindings.keySet()) {
+							Object value = bindings.get(key);
+							log.debug("binding: " + key + "=" + value);
+							variables.put(key, value);
+						}
+						log.debug("Binding existing variables for new dispatcher");
+
+						// and a fresh dispatcher
+						dispatcher = Dispatcher.getDispatcher(check.getEnvironment());
+					}
+				} else {
+					log.debug("Reusisng dispatcher for persistent state check");
+
 				}
-				log.debug("Reusisng dispatcher for persistent state check");
 			}
 			
 			// gather extra code from external resources

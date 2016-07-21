@@ -301,6 +301,37 @@ public class XMLDialectTest {
 			e.printStackTrace();
 			fail(e.getMessage());
 		}
+		
+		// run yet another check using information from the previous check
+		check = new Check();
+		
+		selector = new Selector();
+		selector.setName("packageId");
+		selector.setXpath("//@packageId");
+
+		selectors = new ArrayList<Selector>();
+		selectors.add(selector);
+		check.setSelector(selectors);
+		
+		//check.setCode("title.length > 1");
+		check.setCode("String(title).length > 1");
+
+		check.setExpected("true");
+		check.setEnvironment("JavaScript");
+		check.setLevel(Level.INFO);
+		check.setInheritState(true);
+		
+		//  run this check uses previous info
+		try {
+			
+			// run check
+			Result result = xml.runCheck(check);
+			assertEquals(result.getMessage(), Status.SUCCESS, result.getStatus());
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+			fail(e.getMessage());
+		}
 			
 	}
 
