@@ -48,7 +48,6 @@ public class Dispatcher {
 		try {
 			res = engine.eval(code);
 			log.debug("Result: " + res);
-			log.debug("Result class: " + res.getClass().getName());
 
 		} catch (Exception e) {
 			// let's report this
