@@ -2,12 +2,16 @@ package edu.ucsb.nceas.mdqengine.processor;
 
 import static org.junit.Assert.*;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.xml.parsers.ParserConfigurationException;
+
 import org.junit.Test;
+import org.xml.sax.SAXException;
 
 import edu.ucsb.nceas.mdqengine.model.Check;
 import edu.ucsb.nceas.mdqengine.model.Dialect;
@@ -229,5 +233,75 @@ public class XMLDialectTest {
 			
 	}
 
+	@Test
+	public void testPersist() {
+
+		Check check = new Check();
+		
+		Selector selector = new Selector();
+		selector.setName("entityCount");
+		selector.setXpath("count(//dataset/dataTable)");
+
+		List<Selector> selectors = new ArrayList<Selector>();
+		selectors.add(selector);
+		check.setSelector(selectors);
+		
+		check.setCode("entityCount > 0");
+		check.setExpected("TRUE");
+		check.setEnvironment("r");
+		check.setLevel(Level.INFO);
+		
+		// parse the metadata content
+		InputStream input = this.getClass().getResourceAsStream("/test-docs/eml.1.1.xml");
+		XMLDialect xml = null;
+		try {
+			xml = new XMLDialect(input);
+		} catch (SAXException | IOException | ParserConfigurationException e) {
+			// TODO Auto-generated catch block
+			fail(e.getMessage());
+		}
+					
+		//  run the first check
+		try {
+			
+			// run check
+			Result result = xml.runCheck(check);
+			assertEquals(result.getMessage(), Status.SUCCESS, result.getStatus());
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+			fail(e.getMessage());
+		}
+		
+		// now run another check using information from the previous check
+		check = new Check();
+		
+		selector = new Selector();
+		selector.setName("title");
+		selector.setXpath("//title");
+
+		selectors = new ArrayList<Selector>();
+		selectors.add(selector);
+		check.setSelector(selectors);
+		
+		check.setCode("entityCount == 1");
+		check.setExpected("TRUE");
+		check.setEnvironment("r");
+		check.setLevel(Level.INFO);
+		check.setPersistState(true);
+		
+		//  run this check uses previous info
+		try {
+			
+			// run check
+			Result result = xml.runCheck(check);
+			assertEquals(result.getMessage(), Status.SUCCESS, result.getStatus());
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+			fail(e.getMessage());
+		}
+			
+	}
 
 }

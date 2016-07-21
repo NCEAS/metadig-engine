@@ -88,6 +88,12 @@ public class Dispatcher {
 		
 	}
 	
+	public boolean isEnvSupported(String env) {
+		String currentEnv = engine.getFactory().getLanguageName();
+		log.debug("currentEnv=" + currentEnv);
+		return env.equalsIgnoreCase(currentEnv);
+	}
+	
 	protected Dispatcher() {}
 		
 	private Dispatcher(String engineName) {

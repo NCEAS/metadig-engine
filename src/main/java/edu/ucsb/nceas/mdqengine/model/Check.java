@@ -27,6 +27,8 @@ public class Check {
 	
 	private URL library;
 	
+	private boolean persistState = false;
+	
 	private String expected;
 
 	private List<Selector> selector;
@@ -119,5 +121,13 @@ public class Check {
 
 	public void setLibrary(URL library) {
 		this.library = library;
+	}
+
+	public boolean isPersistState() {
+		return persistState;
+	}
+
+	public void setPersistState(boolean persistState) {
+		this.persistState = persistState;
 	}
 }

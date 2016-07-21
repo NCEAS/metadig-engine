@@ -50,6 +50,8 @@ public class XMLDialect {
 	
 	private Map<String, String> dataUrls;
 	
+	private Dispatcher dispatcher;
+	
 	public static Log log = LogFactory.getLog(XMLDialect.class);
 	
 	public XMLDialect(InputStream input) throws SAXException, IOException, ParserConfigurationException {
@@ -92,7 +94,19 @@ public class XMLDialect {
 			}
 			
 			// dispatch to checker impl
-			Dispatcher dispatcher = Dispatcher.getDispatcher(check.getEnvironment());
+			if (!check.isPersistState() || dispatcher == null) {
+				// create a fresh dispatcher 
+				dispatcher = Dispatcher.getDispatcher(check.getEnvironment());
+			} else {
+				// ensure that we can reuse the dispatcher to inherit previous state
+				if (!dispatcher.isEnvSupported(check.getEnvironment())) {
+					result = new Result();
+					result.setStatus(Status.ERROR);
+					result.setMessage("Check cannot use persistent state from previous differing environment");
+					return result;
+				}
+				log.debug("Reusisng dispatcher for persistent state check");
+			}
 			
 			// gather extra code from external resources
 			String code = check.getCode();
