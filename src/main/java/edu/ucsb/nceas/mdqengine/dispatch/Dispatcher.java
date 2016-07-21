@@ -62,7 +62,8 @@ public class Dispatcher {
 		if (
 				res == null // python
 				|| res.toString().equals("function()") // r
-				|| res.toString().contains("sun.org.mozilla.javascript.internal.InterpretedFunction") // js
+				|| res.getClass().getName().equals("sun.org.mozilla.javascript.internal.InterpretedFunction") // js, java 7 (rhino)
+				|| res.getClass().getName().equals("jdk.nashorn.api.scripting.ScriptObjectMirror") // js, java 8 (nashorn)
 				) {
 			Invocable invoc = (Invocable) engine;
 			try {
