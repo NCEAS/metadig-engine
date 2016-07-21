@@ -27,7 +27,7 @@ public class Check {
 	
 	private URL library;
 	
-	private boolean persistState = false;
+	private boolean inheritState = false;
 	
 	private String expected;
 
@@ -123,11 +123,11 @@ public class Check {
 		this.library = library;
 	}
 
-	public boolean isPersistState() {
-		return persistState;
+	public boolean isInheritState() {
+		return inheritState;
 	}
 
-	public void setPersistState(boolean persistState) {
-		this.persistState = persistState;
+	public void setInheritState(boolean inheritState) {
+		this.inheritState = inheritState;
 	}
 }

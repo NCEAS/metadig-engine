@@ -288,7 +288,7 @@ public class XMLDialectTest {
 		check.setExpected("TRUE");
 		check.setEnvironment("r");
 		check.setLevel(Level.INFO);
-		check.setPersistState(true);
+		check.setInheritState(true);
 		
 		//  run this check uses previous info
 		try {

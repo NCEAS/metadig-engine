@@ -94,7 +94,7 @@ public class XMLDialect {
 			}
 			
 			// dispatch to checker impl
-			if (!check.isPersistState() || dispatcher == null) {
+			if (!check.isInheritState() || dispatcher == null) {
 				// create a fresh dispatcher 
 				dispatcher = Dispatcher.getDispatcher(check.getEnvironment());
 			} else {
