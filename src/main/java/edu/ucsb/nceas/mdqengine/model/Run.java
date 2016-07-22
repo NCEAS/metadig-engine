@@ -15,6 +15,10 @@ public class Run {
 	private String objectIdentifier;
 		
 	private List<Result> result;
+	
+	private String suiteId;
+		
+	private Metadata metadata;
 
 	public String getId() {
 		return id;
@@ -46,6 +50,22 @@ public class Run {
 
 	public void setObjectIdentifier(String objectIdentifier) {
 		this.objectIdentifier = objectIdentifier;
+	}
+
+	public Metadata getMetadata() {
+		return metadata;
+	}
+
+	public void setMetadata(Metadata metadata) {
+		this.metadata = metadata;
+	}
+
+	public String getSuiteId() {
+		return suiteId;
+	}
+
+	public void setSuiteId(String suiteId) {
+		this.suiteId = suiteId;
 	}
 
 }

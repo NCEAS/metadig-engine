@@ -2,26 +2,23 @@ package edu.ucsb.nceas.mdqengine;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.StringReader;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVPrinter;
 import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.io.output.FileWriterWithEncoding;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -32,17 +29,18 @@ import org.dataone.client.v2.itk.D1Client;
 
 import edu.ucsb.nceas.mdqengine.model.Check;
 import edu.ucsb.nceas.mdqengine.model.Level;
-import edu.ucsb.nceas.mdqengine.model.Suite;
+import edu.ucsb.nceas.mdqengine.model.Metadata;
 import edu.ucsb.nceas.mdqengine.model.Result;
 import edu.ucsb.nceas.mdqengine.model.Run;
 import edu.ucsb.nceas.mdqengine.model.Status;
+import edu.ucsb.nceas.mdqengine.model.Suite;
 import edu.ucsb.nceas.mdqengine.serialize.XmlMarshaller;
 
 public class Aggregator {
 	
 	public static String[] runColumns = {
-		"pid",
 		"runId",
+		"suiteId",
 		"checkId",
 		"checkName",
 		"type",
@@ -51,7 +49,13 @@ public class Aggregator {
 		"status",
 		"message",
 		"value",
-		"timestamp"
+		"timestamp",
+		"pid",
+		"formatId",
+		"datasource",
+		"dataUrl",
+		"rightsHolder"
+
 	};
 	
 	public static String[] docColumns = {
@@ -149,13 +153,7 @@ public class Aggregator {
 	public File runBatch(List<NameValuePair> params, Suite suite) throws IOException {
 		
 		File file = File.createTempFile("mdqe_batch", ".csv");
-		Appendable results = new FileWriterWithEncoding(file, "UTF-8");
-		
-		// set up our output headers
-		List<Object> headerList = new ArrayList<Object>(Arrays.asList(ArrayUtils.addAll(runColumns, docColumns)));
-		headerList.add(0, "suiteId");
-		CSVFormat format = CSVFormat.DEFAULT.withHeader(headerList.toArray(new String[]{}));
-		CSVPrinter csvPrinter = new CSVPrinter(results, format );
+		List<Run> runs = new ArrayList<Run>();
 		
 		CSVParser docsCsv = this.queryCSV(params);
 		if (docsCsv != null) {
@@ -164,51 +162,35 @@ public class Aggregator {
 				CSVRecord docRecord = recordIter.next();
 				String id = docRecord.get("id");
 				String dataUrl = docRecord.get("dataUrl");
-
+				String formatId = docRecord.get("formatId");
+				String datasource = docRecord.get("datasource");
+				String rightsHolder = docRecord.get("rightsHolder");
+				
+				Metadata metadata = new Metadata();
+				metadata.setDatasource(datasource);
+				metadata.setDataUrl(dataUrl);
+				metadata.setFormatId(formatId);
+				metadata.setRightsHolder(rightsHolder);
+				
 				try {
 					InputStream input = new URL(dataUrl).openStream();
 					Run run = engine.runSuite(suite, input);
 					run.setObjectIdentifier(id);
-
-					// this is a silly step to get the columns back
-					String runString = toCSV(run);
-					CSVParser runCsv = new CSVParser(new StringReader(runString), CSVFormat.DEFAULT.withHeader());
-					Iterator<CSVRecord> runIter = runCsv.iterator();
-					while (runIter.hasNext()) {
-						CSVRecord runRecord = runIter.next();
-						
-						// include the suite
-						csvPrinter.print(suite.getId());
-						
-						// print out run information
-						Iterator<String> runValueIter = runRecord.iterator();
-						while (runValueIter.hasNext()){
-							csvPrinter.print(runValueIter.next());
-						}
-						
-						// print out doc information on the same line
-						Iterator<String> valueIter = docRecord.iterator();
-						while (valueIter.hasNext()){
-							csvPrinter.print(valueIter.next());
-						}
-						
-						// add the record delimiter
-						csvPrinter.println();
-						
-					}
-					
-					runCsv.close();
+					run.setMetadata(metadata);
+					run.setSuiteId(suite.getId());
+					runs.add(run);
 					
 				} catch (Exception e) {
-					log.error("Could not run QC on id: " + id, e);
+					log.error("Could not run suite on id: " + id, e);
+					continue;
 				}
-				
 			}
 			
+			// write the aggregate content to the file
+			String runContent = toCSV(runs.toArray(new Run[] {}));
+			IOUtils.write(runContent, new FileOutputStream(file), "UTF-8");
 		}
-		
-		csvPrinter.close();
-		
+							
 		return file;
 		
 	}
@@ -283,6 +265,8 @@ public class Aggregator {
 		for (Run run: runs) {
 			String pid = run.getObjectIdentifier();
 			String runId = run.getId();
+			String suiteId = run.getSuiteId();
+
 			Date timestamp = run.getTimestamp();
 	
 			for (Result result: run.getResult()) {
@@ -299,10 +283,22 @@ public class Aggregator {
 				String message = result.getMessage();
 				String value = result.getValue();
 				
+				Metadata metadata = run.getMetadata();
+				String formatId = null;
+				String datasource = null;
+				String dataUrl = null;
+				String rightsHolder = null;
+				if (metadata != null) {
+					formatId = metadata.getFormatId();
+					datasource = metadata.getDatasource();
+					dataUrl = metadata.getDataUrl();
+					rightsHolder = metadata.getRightsHolder();
+				}
+				
 				// create a csv record from this entry
 				csv.printRecord(
-						pid,
 						runId,
+						suiteId,
 						checkId,
 						checkName,
 						type,
@@ -311,7 +307,16 @@ public class Aggregator {
 						status,
 						message,
 						value,
-						timestamp);
+						timestamp,
+						
+						// document  info
+						pid,
+						formatId,
+						datasource,
+						dataUrl,
+						rightsHolder
+						
+						);
 				
 			}
 		}

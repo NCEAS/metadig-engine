@@ -46,7 +46,7 @@ public class AggregatorTest {
 		
 	}
 
-	//@Test
+	@Test
 	public void testCSVRun() {
 		
 		Run run = RunFactory.getMockRun();
