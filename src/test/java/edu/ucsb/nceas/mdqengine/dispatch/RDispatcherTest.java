@@ -30,7 +30,10 @@ public class RDispatcherTest {
 		Map<String, Object> names = new HashMap<String, Object>();
 		names.put("x", 2);
 		names.put("y", 2);
-		String code = "result = list(value = (x == y));";
+		//String code = "result = list(value = (x == y));";
+		// notice that the result construct is optional and taken care of by the dispatcher if omitted
+		String code = "(x == y);";
+
 		Result result = null;
 		try {
 			result = dispatcher.dispatch(names, code);
