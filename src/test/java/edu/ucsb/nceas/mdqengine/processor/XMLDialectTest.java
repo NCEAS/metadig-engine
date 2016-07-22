@@ -24,6 +24,8 @@ public class XMLDialectTest {
 	
 	private String emlId = "doi:10.5063/F10V89RP";
 	
+	private String emlIdSingleTable = "knb-lter-sbc.18.18";
+	
 	private String fgdcId = "361ede66-857b-4289-b4dc-8e414abbb1f0.xml";
 	
 	@Test
@@ -32,7 +34,7 @@ public class XMLDialectTest {
 		Check complexCheck = new Check();
 		
 		Selector selector = new Selector();
-		selector.setName("entityListOfAttributeCounts");
+		selector.setName("entityListOfAttributes");
 		selector.setXpath("//dataset/dataTable");
 
 		Selector subselector = new Selector();
@@ -45,7 +47,8 @@ public class XMLDialectTest {
 		selectors.add(selector);
 		complexCheck.setSelector(selectors);
 		
-		complexCheck.setCode("entityListOfAttributeCounts");
+		complexCheck.setCode("class(entityListOfAttributes) == \"list\" && class(entityListOfAttributes[[1]]) == \"list\"");
+		complexCheck.setExpected("TRUE");
 		complexCheck.setEnvironment("r");
 		complexCheck.setLevel(Level.INFO);
 		complexCheck.setName("testing subselector");
@@ -54,7 +57,24 @@ public class XMLDialectTest {
 		try {
 			
 			// parse the metadata content
-			String metadataURL = "https://knb.ecoinformatics.org/knb/d1/mn/v2/object/" + emlId;
+			String metadataURL = "https://cn.dataone.org/cn/v2/object/" + emlId;
+			InputStream input = new URL(metadataURL).openStream();
+			XMLDialect xml = new XMLDialect(input);
+			
+			// run the complex check
+			Result result = xml.runCheck(complexCheck);
+			assertEquals(Status.SUCCESS, result.getStatus());
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+			fail(e.getMessage());
+		}
+		
+		// run the check on EML with single table
+		try {
+			
+			// parse the metadata content
+			String metadataURL = "https://cn.dataone.org/cn/v2/object/" + emlIdSingleTable;
 			InputStream input = new URL(metadataURL).openStream();
 			XMLDialect xml = new XMLDialect(input);
 			

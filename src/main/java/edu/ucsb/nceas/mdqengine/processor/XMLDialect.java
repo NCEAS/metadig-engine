@@ -230,7 +230,16 @@ public class XMLDialect {
 		try {
 			nodes = (NodeList) xpath.evaluate(selectorPath, contextNode, XPathConstants.NODESET);
 			
-			if (nodes.getLength() > 1) {
+			if (nodes != null && nodes.getLength() == 1 && selector.getSubSelector() == null) {
+				
+				// just return single value
+				value = nodes.item(0).getTextContent();
+				value = retypeObject(value);
+				
+			}
+			
+			else if (nodes.getLength() > 0 || selector.getSubSelector() != null) {
+				
 				// multiple values
 				List<Object> values = new ArrayList<Object>();
 				
@@ -251,12 +260,7 @@ public class XMLDialect {
 				}
 				// return the list
 				value = values;
-			} else if (nodes != null && nodes.getLength() == 1) {
-				// just return single value
-				value = nodes.item(0).getTextContent();
-				value = retypeObject(value);
-				
-			}
+			}  
 		} catch (XPathExpressionException xpee) {
 			log.warn("Defaulting to single value selection: " + xpee.getCause().getMessage());
 			// try just a single value
