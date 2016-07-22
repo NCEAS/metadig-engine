@@ -75,13 +75,15 @@ public class XMLDialect {
 		
 			// gather the variable name/value details
 			Map<String, Object> variables = new HashMap<String, Object>();
-			for (Selector selector: check.getSelector()) {
-				
-				String name = selector.getName();
-				Object value = this.selectPath(selector, document);
-				
-				// make available in script
-				variables.put(name, value);
+			if (check.getSelector() != null) {
+				for (Selector selector: check.getSelector()) {
+					
+					String name = selector.getName();
+					Object value = this.selectPath(selector, document);
+					
+					// make available in script
+					variables.put(name, value);
+				}
 			}
 			
 			// make the entire dom available
