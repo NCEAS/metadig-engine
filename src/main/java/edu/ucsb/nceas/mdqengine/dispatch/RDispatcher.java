@@ -90,9 +90,9 @@ public class RDispatcher extends Dispatcher {
 			throw new ScriptException(e);
 		} finally {
 			// clean up
-			//script.delete();
-			//input.delete();
-			//output.delete();
+			script.delete();
+			input.delete();
+			output.delete();
 		}
 		
 		result.setTimestamp(Calendar.getInstance().getTime());
