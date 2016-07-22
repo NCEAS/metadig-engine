@@ -181,6 +181,7 @@ def call():
     status = "SUCCESS"
   elif(len(coverages) > 0):
     result = True
+    message = "A coverage element is not present"
     status = "SUCCESS"
   else:
     result = False
@@ -491,24 +492,8 @@ def call():
 		<level>WARN</level>
 		<expected>true</expected>
 		<selector>
-			<name>entityCount</name>
-			<xpath>count(/eml/dataset/dataTable)</xpath>
-		</selector>
-		<selector>
 			<name>abstract</name>
-			<xpath>/eml/dataset/dataTable</xpath>
-			<subSelector>
-				<name>abstractSubSelector</name>
-				<xpath>../abstract/*/para</xpath>
-			</subSelector>
-		</selector>
-		<selector>
-			<name>entityNames</name>
-			<xpath>/eml/dataset/dataTable</xpath>
-			<subSelector>
-				<name>entityNamesSubSelector</name>
-				<xpath>./entityName</xpath>
-			</subSelector>
+			<xpath>/eml/dataset/abstract</xpath>
 		</selector>
 		<code><![CDATA[
 def call():
@@ -517,7 +502,7 @@ def call():
 
   global message
   global status
-
+  
   if 'abstract' not in globals():
     message = "No abstract is present."
     status = "FAILURE"
@@ -528,29 +513,16 @@ def call():
     status = "FAILURE"
     return False
 
-  messasge = ""
-  # Check that dataset abstract length is greater that 20 words
-  for iEntity in range(0, int(entityCount)):
-    # Gather all the abstract paragraphs into one string that can be evaluated,
-    # as the paragraph can contain multiple <sections> each with multiple <para> elements.
-    thisAbstract = ' '.join(abstract[iEntity])
-    thisEntityName = entityNames[iEntity]
-
-    numWords = len(re.split('\s+', thisAbstract))
-    if thisAbstract is None:
-      message += "The abstract for entity %s is missing." % thisEntityName
-    elif (numWords < 20):
-      message += "The abstract for entity %s is less that 20 words long." % thisEntityName
-      status = "FAILURE"
-      result = False
-    else:
-      message = "The abstract word count of %s is valid" % numWords
-      status = "SUCCESS"
-      result = True
+  numWords = len(re.split('\s+', abstract))
+  if (numWords < 20):
+    message = "The abstract is less that 20 words long."
+    status = "FAILURE"
+    result = False
+  else:
+    message = "The abstract is valid, with a word count of %s" % numWords
+    status = "SUCCESS"
+    result = True
       
-  if (message == ""):
-    message = "All entities have valid abstracts"
-
   return result
       ]]></code>
 	</check>
