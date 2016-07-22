@@ -14,13 +14,13 @@ import org.junit.Test;
 import edu.ucsb.nceas.mdqengine.model.Result;
 import edu.ucsb.nceas.mdqengine.model.Status;
 
-public class RDispatcherTest {
+public class RenjinDispatcherTest {
 	
 	private Dispatcher dispatcher = null;
 	
 	@Before
 	public void init() {
-		dispatcher = new RDispatcher();
+		dispatcher = Dispatcher.getDispatcher("r");
 	}
 	
 	@Test
@@ -28,7 +28,7 @@ public class RDispatcherTest {
 		Map<String, Object> names = new HashMap<String, Object>();
 		names.put("x", 2);
 		names.put("y", 2);
-		String code = "result = list(value = (x == y));";
+		String code = "x == y";
 		Result result = null;
 		try {
 			result = dispatcher.dispatch(names, code);
@@ -37,7 +37,7 @@ public class RDispatcherTest {
 			e.printStackTrace();
 			fail(e.getMessage());
 		}
-		assertEquals("true", result.getValue());
+		assertEquals("TRUE", result.getValue());
 	}
 	
 	@Test
@@ -46,8 +46,7 @@ public class RDispatcherTest {
 		names.put("x", 2);
 		names.put("y", 2);
 		String code = 
-				"call <- function() { return (x == y) } \n"
-				+ "result = list(value=call());";
+				"call <- function() { return (x == y) }";
 		Result result = null;
 		try {
 			result = dispatcher.dispatch(names, code);
@@ -56,7 +55,7 @@ public class RDispatcherTest {
 			e.printStackTrace();
 			fail(e.getMessage());
 		}
-		assertEquals("true", result.getValue());
+		assertEquals("TRUE", result.getValue());
 	}
 	
 	@Test
@@ -88,9 +87,7 @@ public class RDispatcherTest {
 		names.put("expected", 100);
 		
 		// R code to check congruence between loaded data and the metadata
-		String code = 
-				"df <- read.csv(dataUrl, header=header, sep=sep); "
-				+ "result = list(value = (nrow(df) == expected) )";
+		String code = "df <- read.csv(dataUrl, header=header, sep=sep); nrow(df) == expected";
 		Result result = null;
 		try {
 			result = dispatcher.dispatch(names, code);
@@ -99,7 +96,7 @@ public class RDispatcherTest {
 			e.printStackTrace();
 			fail(e.getMessage());
 		}
-		assertEquals("true", result.getValue());
+		assertEquals("TRUE", result.getValue());
 	}
 
 }

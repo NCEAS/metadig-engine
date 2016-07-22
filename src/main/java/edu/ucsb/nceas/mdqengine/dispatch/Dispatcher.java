@@ -130,6 +130,8 @@ public class Dispatcher {
 	
 		if (env.equalsIgnoreCase("Java")) {
 			instance = new JavaDispatcher();
+		} else if (env.equalsIgnoreCase("rscript")) {
+			instance = new RDispatcher();
 		} else {
 			instance = new Dispatcher(engineName);
 		}
