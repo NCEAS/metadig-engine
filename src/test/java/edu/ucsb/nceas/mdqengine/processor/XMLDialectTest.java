@@ -354,5 +354,62 @@ public class XMLDialectTest {
 		}
 			
 	}
+	
+	@Test
+	public void testPersistMath() {
+
+		Check check = new Check();
+		
+		check.setCode(
+				"x <- 1; x == 1");
+		check.setExpected("TRUE");
+		check.setEnvironment("r");
+		check.setLevel(Level.INFO);
+		
+		// parse the metadata content
+		InputStream input = this.getClass().getResourceAsStream("/test-docs/eml.1.1.xml");
+		XMLDialect xml = null;
+		try {
+			xml = new XMLDialect(input);
+		} catch (SAXException | IOException | ParserConfigurationException e) {
+			// TODO Auto-generated catch block
+			fail(e.getMessage());
+		}
+					
+		//  run the first check
+		try {
+			
+			// run check
+			Result result = xml.runCheck(check);
+			assertEquals(result.getMessage(), Status.SUCCESS, result.getStatus());
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+			fail(e.getMessage());
+		}
+		
+		// run yet another check using information from the previous check
+		check = new Check();
+		
+		check.setCode("x = x + 1; x == 2;");
+
+		check.setExpected("true");
+		check.setEnvironment("JavaScript");
+		check.setLevel(Level.INFO);
+		check.setInheritState(true);
+		
+		//  run this check uses previous info
+		try {
+			
+			// run check
+			Result result = xml.runCheck(check);
+			assertEquals(result.getMessage(), Status.SUCCESS, result.getStatus());
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+			fail(e.getMessage());
+		}
+			
+	}
 
 }

@@ -118,6 +118,7 @@ public class XMLDialect {
 						// use the bindings from previous dispatcher
 						for (String key: bindings.keySet()) {
 							Object value = bindings.get(key);
+							value = retypeObject(value.toString());
 							log.debug("binding: " + key + "=" + value);
 							variables.put(key, value);
 						}
