@@ -3,7 +3,9 @@ package edu.ucsb.nceas.mdqengine.dispatch;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.script.ScriptException;
@@ -29,6 +31,33 @@ public class RDispatcherTest {
 		names.put("x", 2);
 		names.put("y", 2);
 		String code = "result = list(value = (x == y));";
+		Result result = null;
+		try {
+			result = dispatcher.dispatch(names, code);
+		} catch (ScriptException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			fail(e.getMessage());
+		}
+		assertEquals("true", result.getValue());
+	}
+	
+	@Test
+	public void testComplex() {
+		Map<String, Object> names = new HashMap<String, Object>();
+		List<List<String>> list = new ArrayList<List<String>>();
+		List<String> sublist = new ArrayList<String>();
+		sublist.add("one");
+		sublist.add("two");
+		List<String> sublist2 = new ArrayList<String>();
+		sublist2.add("red");
+		sublist2.add("blue");
+		list.add(sublist);
+		list.add(sublist2);
+		names.put("x", list);
+		names.put("length", 2);
+		String code = 
+				"result = list(value = (length(x) == length) );";
 		Result result = null;
 		try {
 			result = dispatcher.dispatch(names, code);
