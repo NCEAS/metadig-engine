@@ -114,14 +114,16 @@ public class RDispatcherTest {
 		// will come from metadata record using xpath queries
 		// see metadata here: https://knb.ecoinformatics.org/knb/d1/mn/v2/object/doi:10.5063/AA/tao.1.1
 		Map<String, Object> names = new HashMap<String, Object>();
-		names.put("dataUrl", "http://knb.ecoinformatics.org/knb/d1/mn/v2/object/doi:10.5063/AA/tao.2.1");
+		names.put("dataUrl", "https://knb.ecoinformatics.org/knb/d1/mn/v2/object/doi:10.5063/AA/tao.2.1");
 		names.put("header", true);
 		names.put("sep", ",");
 		names.put("expected", 100);
 		
 		// R code to check congruence between loaded data and the metadata
 		String code = 
-				"df <- read.csv(dataUrl, header=header, sep=sep); "
+				"library('RCurl'); \n"
+				+ "myCsv <- getURL(dataUrl); \n"
+				+ "df <- read.csv(textConnection(myCsv), header=header, sep=sep); "
 				+ "result = list(value = (nrow(df) == expected) )";
 		Result result = null;
 		try {
