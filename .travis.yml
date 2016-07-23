@@ -28,6 +28,16 @@ before_install:
   - sudo R CMD INSTALL stringr_1.0.0.tar.gz
   - wget https://cran.r-project.org/src/contrib/reshape2_1.4.1.tar.gz
   - sudo R CMD INSTALL reshape2_1.4.1.tar.gz
+  - wget https://cran.r-project.org/src/contrib/RColorBrewer_1.1-2.tar.gz
+  - sudo R CMD INSTALL RColorBrewer_1.1-2.tar.gz
+  - wget https://cran.r-project.org/src/contrib/dichromat_2.0-0.tar.gz
+  - sudo R CMD INSTALL dichromat_2.0-0.tar.gz
+  - wget https://cran.r-project.org/src/contrib/colorspace_1.2-6.tar.gz
+  - sudo R CMD INSTALL colorspace_1.2-6.tar.gz
+  - wget https://cran.r-project.org/src/contrib/munsell_0.4.3.tar.gz
+  - sudo R CMD INSTALL munsell_0.4.3.tar.gz 
+  - wget https://cran.r-project.org/src/contrib/labeling_0.3.tar.gz
+  - sudo R CMD INSTALL labeling_0.3.tar.gz
   - wget https://cran.r-project.org/src/contrib/scales_0.4.0.tar.gz
   - sudo R CMD INSTALL scales_0.4.0.tar.gz  
   - wget https://cran.r-project.org/src/contrib/ggplot2_2.1.0.tar.gz
