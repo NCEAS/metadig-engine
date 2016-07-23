@@ -20,6 +20,12 @@ before_install:
   - sudo R CMD INSTALL Rcpp_0.12.6.tar.gz
   - wget https://cran.r-project.org/src/contrib/plyr_1.8.4.tar.gz
   - sudo R CMD INSTALL plyr_1.8.4.tar.gz
+  - wget https://cran.r-project.org/src/contrib/stringi_1.1.1.tar.gz
+  - sudo R CMD INSTALL stringi_1.1.1.tar.gz
+  - wget https://cran.r-project.org/src/contrib/magrittr_1.5.tar.gz
+  - sudo R CMD INSTALL magrittr_1.5.tar.gz
+  - wget https://cran.r-project.org/src/contrib/stringr_1.0.0.tar.gz
+  - sudo R CMD INSTALL stringr_1.0.0.tar.gz
   - wget https://cran.r-project.org/src/contrib/reshape2_1.4.1.tar.gz
   - sudo R CMD INSTALL reshape2_1.4.1.tar.gz
   - wget https://cran.r-project.org/src/contrib/scales_0.4.0.tar.gz
