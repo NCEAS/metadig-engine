@@ -42,7 +42,6 @@ public class InMemoryStore implements MDQStore{
 		this.init();
 	}
 	
-	// NOTE: does not work with wildcards - investigating alternatives
 	private void init() {
 		
 		PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
