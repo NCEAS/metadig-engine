@@ -12,3 +12,5 @@ before_install:
   - sudo R CMD INSTALL bitops_1.0-6.tar.gz
   - wget https://cran.r-project.org/src/contrib/RCurl_1.95-4.8.tar.gz
   - sudo R CMD INSTALL RCurl_1.95-4.8.tar.gz
+  - wget https://cran.r-project.org/src/contrib/ggplot2_2.1.0.tar.gz
+  - sudo R CMD INSTALL ggplot2_2.1.0.tar.gz

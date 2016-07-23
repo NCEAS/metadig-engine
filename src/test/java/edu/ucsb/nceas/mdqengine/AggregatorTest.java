@@ -35,7 +35,7 @@ public class AggregatorTest {
 		}
 	}
 
-	@Ignore
+	//@Ignore
 	@Test
 	public void testBatchEML() {
 		String query = "q=formatId:\"eml://ecoinformatics.org/eml-2.1.1\"";

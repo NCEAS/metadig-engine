@@ -109,36 +109,47 @@ public class Aggregator {
 
 	}
 	
-	public void graphBatch(List<NameValuePair> params, Suite suite) {
+	public File graphBatch(List<NameValuePair> params, Suite suite) {
 
-		String tabularResult = null;
+		File outputFile = null;
+		File script = null;
+		File batchFile = null;
+
 		try {
-			File file = this.runBatch(params, suite);
+			String runContent = this.runBatch(params, suite);
 
-			tabularResult = IOUtils.toString(new FileInputStream(file), "UTF-8");
-			log.debug("Tabular Batch Result: \n" + tabularResult);
+			log.debug("Tabular Batch Result: \n" + runContent);
 			
 			// now try doing some analysis
-			URL url = this.getClass().getResource("/code/plot.R");
-			String script = url.getPath();
+			// have to do this so R can access it
+			InputStream scriptStream = this.getClass().getResourceAsStream("/code/plot.R");
+			script = File.createTempFile("mdq_script", ".R");
+			IOUtils.copy(scriptStream, new FileOutputStream(script));
 
-			String input = file.getAbsolutePath();
+			batchFile = File.createTempFile("mdqe_batch", ".csv");
+			IOUtils.write(runContent, new FileOutputStream(batchFile), "UTF-8");
+			String input = batchFile.getAbsolutePath();
 			String output = input + ".pdf";
 			
-			log.debug("Tabular Batch file here: \n" + input);
-
-			ProcessBuilder pb = new ProcessBuilder("Rscript", "--vanilla", script, input, output);
+			ProcessBuilder pb = new ProcessBuilder("Rscript", "--vanilla", script.getAbsolutePath(), input, output);
 			Process p = pb.start();
 			int ret = p.waitFor();
-			log.debug("stdOut:" + IOUtils.toString(p.getInputStream(), "UTF-8"));
-			log.debug("stdErr:" + IOUtils.toString(p.getErrorStream(), "UTF-8"));
+			log.info("stdOut:" + IOUtils.toString(p.getInputStream(), "UTF-8"));
+			log.info("stdErr:" + IOUtils.toString(p.getErrorStream(), "UTF-8"));
 			
-			log.debug("Barplot available here: \n" + output);
+			log.info("Barplot available here: \n" + output);
+			outputFile = new File(output);
 					
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+		} finally {
+			script.delete();
+			batchFile.delete();
+			outputFile.deleteOnExit();
 		}
+		
+		return outputFile;
 		
 	}
 	
@@ -150,9 +161,10 @@ public class Aggregator {
 	 * @return
 	 * @throws IOException
 	 */
-	public File runBatch(List<NameValuePair> params, Suite suite) throws IOException {
+	public String runBatch(List<NameValuePair> params, Suite suite) throws IOException {
 		
-		File file = File.createTempFile("mdqe_batch", ".csv");
+		String results = null;
+		
 		List<Run> runs = new ArrayList<Run>();
 		
 		CSVParser docsCsv = this.queryCSV(params);
@@ -187,11 +199,11 @@ public class Aggregator {
 			}
 			
 			// write the aggregate content to the file
-			String runContent = toCSV(runs.toArray(new Run[] {}));
-			IOUtils.write(runContent, new FileOutputStream(file), "UTF-8");
+			results = toCSV(runs.toArray(new Run[] {}));
+			//IOUtils.write(runContent, new FileOutputStream(file), "UTF-8");
 		}
 							
-		return file;
+		return results;
 		
 	}
 
