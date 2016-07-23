@@ -8,5 +8,7 @@ before_install:
   - sudo apt-get install -y curl
   - wget https://cran.r-project.org/src/contrib/jsonlite_1.0.tar.gz
   - sudo R CMD INSTALL jsonlite_1.0.tar.gz
+  - wget https://cran.r-project.org/src/contrib/bitops_1.0-6.tar.gz
+  - sudo R CMD INSTALL bitops_1.0-6.tar.gz
   - wget https://cran.r-project.org/src/contrib/RCurl_1.95-4.8.tar.gz
   - sudo R CMD INSTALL RCurl_1.95-4.8.tar.gz
