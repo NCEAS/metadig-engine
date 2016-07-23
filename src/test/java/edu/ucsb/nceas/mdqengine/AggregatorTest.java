@@ -1,7 +1,8 @@
 package edu.ucsb.nceas.mdqengine;
 
-import static org.junit.Assert.fail;
+import static org.junit.Assert.*;
 
+import java.io.File;
 import java.nio.charset.Charset;
 import java.util.List;
 
@@ -39,11 +40,12 @@ public class AggregatorTest {
 	@Test
 	public void testBatchEML() {
 		String query = "q=formatId:\"eml://ecoinformatics.org/eml-2.1.1\"";
+		String format = "svg";
 		List<NameValuePair> params = URLEncodedUtils.parse(query, Charset.forName("UTF-8"));
 		
 		Aggregator aggregator = new Aggregator();
-		aggregator.graphBatch(params, suite);
-		
+		File file = aggregator.graphBatch(params, suite, format);
+		assertTrue(file.exists());
 	}
 
 	@Test
@@ -54,6 +56,7 @@ public class AggregatorTest {
 		try {
 			String csv = Aggregator.toCSV(run);
 			log.debug("Tabular Run format: \n" + csv);
+			assertNotNull(csv);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

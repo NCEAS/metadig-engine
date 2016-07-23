@@ -1,4 +1,7 @@
+library(methods)
+library(svglite)
 library(ggplot2)
+
 args = commandArgs(trailingOnly=TRUE)
 inputPath = args[1]
 outputPath = args[2]

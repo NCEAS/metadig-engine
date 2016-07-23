@@ -87,12 +87,17 @@ public class Aggregator {
 		
 		// default query
 		String query = "q=formatId:\"eml://ecoinformatics.org/eml-2.1.1\" ";
-
+		String format = "pdf";
 		try {
 			
 			// use optional query arg
 			if (args.length > 1) {
 				query = args[1];
+			}
+			
+			// use optional format arg
+			if (args.length > 2) {
+				format = args[2];
 			}
 
 			// parse the query syntax
@@ -101,7 +106,7 @@ public class Aggregator {
 			String xml = IOUtils.toString(new FileInputStream(args[0]), "UTF-8");
 			Suite suite = (Suite) XmlMarshaller.fromXml(xml , Suite.class);
 			Aggregator aggregator = new Aggregator();
-			aggregator.graphBatch(params, suite);
+			aggregator.graphBatch(params, suite, format);
 
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -109,7 +114,7 @@ public class Aggregator {
 
 	}
 	
-	public File graphBatch(List<NameValuePair> params, Suite suite) {
+	public File graphBatch(List<NameValuePair> params, Suite suite, String format) {
 
 		File outputFile = null;
 		File script = null;
@@ -129,7 +134,8 @@ public class Aggregator {
 			batchFile = File.createTempFile("mdqe_batch", ".csv");
 			IOUtils.write(runContent, new FileOutputStream(batchFile), "UTF-8");
 			String input = batchFile.getAbsolutePath();
-			String output = input + ".pdf";
+			//String output = input + ".pdf";
+			String output = input.replace("csv", format);
 			
 			ProcessBuilder pb = new ProcessBuilder("Rscript", "--vanilla", script.getAbsolutePath(), input, output);
 			Process p = pb.start();
@@ -146,7 +152,7 @@ public class Aggregator {
 		} finally {
 			script.delete();
 			batchFile.delete();
-			outputFile.deleteOnExit();
+			//outputFile.deleteOnExit();
 		}
 		
 		return outputFile;
@@ -220,7 +226,7 @@ public class Aggregator {
 				String value = param.getValue();
 
 				if (!ArrayUtils.contains(ignoredParams, name)) {
-					solrQuery += name + "=" + URLEncoder.encode(value, "UTF-8");
+					solrQuery += "&" + name + "=" + URLEncoder.encode(value, "UTF-8");
 					
 					// make sure we only include current objects in case the user has not specified such
 					if (name.equals("q") && !solrQuery.contains("obsoletedBy")) {
@@ -235,7 +241,7 @@ public class Aggregator {
 			for (String field: docColumns) {
 				solrQuery += field + ",";
 			}
-			solrQuery.substring(0, solrQuery.length()-1); // get rid of the last comma
+			solrQuery = solrQuery.substring(0, solrQuery.length()-1); // get rid of the last comma
 
 			// add additional params if missing
 			if (!solrQuery.contains("sort")) {
@@ -246,7 +252,7 @@ public class Aggregator {
 			}
 			
 			// add additional required parameters
-			solrQuery += "&&wt=csv";
+			solrQuery += "&wt=csv";
 
 			log.debug("solrQuery = " + solrQuery);
 
