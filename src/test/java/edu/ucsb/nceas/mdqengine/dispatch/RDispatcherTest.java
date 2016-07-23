@@ -114,7 +114,7 @@ public class RDispatcherTest {
 		// will come from metadata record using xpath queries
 		// see metadata here: https://knb.ecoinformatics.org/knb/d1/mn/v2/object/doi:10.5063/AA/tao.1.1
 		Map<String, Object> names = new HashMap<String, Object>();
-		names.put("dataUrl", "https://knb.ecoinformatics.org/knb/d1/mn/v2/object/doi:10.5063/AA/tao.2.1");
+		names.put("dataUrl", "http://knb.ecoinformatics.org/knb/d1/mn/v2/object/doi:10.5063/AA/tao.2.1");
 		names.put("header", true);
 		names.put("sep", ",");
 		names.put("expected", 100);
