@@ -16,6 +16,8 @@ before_install:
   - sudo R CMD INSTALL digest_0.6.9.tar.gz
   - wget https://cran.r-project.org/src/contrib/gtable_0.2.0.tar.gz
   - sudo R CMD INSTALL gtable_0.2.0.tar.gz
+  - wget https://cran.r-project.org/src/contrib/Rcpp_0.12.6.tar.gz
+  - sudo R CMD INSTALL Rcpp_0.12.6.tar.gz
   - wget https://cran.r-project.org/src/contrib/plyr_1.8.4.tar.gz
   - sudo R CMD INSTALL plyr_1.8.4.tar.gz
   - wget https://cran.r-project.org/src/contrib/reshape2_1.4.1.tar.gz
