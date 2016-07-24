@@ -114,19 +114,18 @@ public class Aggregator {
 
 	}
 	
-	public File graphBatch(List<NameValuePair> params, Suite suite, String format) {
+	private File graphIt(String runContent, String format) {
+
+		log.debug("Tabular Results: \n" + runContent);
 
 		File outputFile = null;
 		File script = null;
 		File batchFile = null;
 
 		try {
-			String runContent = this.runBatch(params, suite);
 
-			log.debug("Tabular Batch Result: \n" + runContent);
-			
-			// now try doing some analysis
-			// have to do this so R can access it
+			//  try doing some analysis
+			// have to do this so R can access it from jar packaging
 			InputStream scriptStream = this.getClass().getResourceAsStream("/code/plot.R");
 			script = File.createTempFile("mdq_script", ".R");
 			IOUtils.copy(scriptStream, new FileOutputStream(script));
@@ -134,17 +133,17 @@ public class Aggregator {
 			batchFile = File.createTempFile("mdqe_batch", ".csv");
 			IOUtils.write(runContent, new FileOutputStream(batchFile), "UTF-8");
 			String input = batchFile.getAbsolutePath();
-			//String output = input + ".pdf";
 			String output = input.replace("csv", format);
 			
 			ProcessBuilder pb = new ProcessBuilder("Rscript", "--vanilla", script.getAbsolutePath(), input, output);
 			Process p = pb.start();
 			int ret = p.waitFor();
+			
 			log.info("stdOut:" + IOUtils.toString(p.getInputStream(), "UTF-8"));
 			log.info("stdErr:" + IOUtils.toString(p.getErrorStream(), "UTF-8"));
 			
-			log.info("Barplot available here: \n" + output);
 			outputFile = new File(output);
+			log.info("Plot available here: \n" + output);
 					
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
@@ -159,6 +158,32 @@ public class Aggregator {
 		
 	}
 	
+	public File graphBatch(List<NameValuePair> params, Suite suite, String format) {
+
+		String runContent = null;
+		try {
+			runContent = this.runBatch(params, suite);
+		} catch (IOException e) {
+			log.error("Could not generate batch run results: " + e.getMessage());
+			return null;
+		}
+
+		return graphIt(runContent, format);
+	}
+	
+	public File graphSingle(InputStream input, Suite suite, String format) {
+		File output = null;
+		String runContent = null;
+		try {
+			Run run = engine.runSuite(suite, input);
+			runContent = toCSV(run);
+			output = graphIt(runContent, format);
+		} catch (Exception e) {
+			log.error("Could not graph check suite on given content: " + e.getMessage());
+		}
+		return output;
+		
+	}
 	
 	/**
 	 * Runs suite result
@@ -214,7 +239,7 @@ public class Aggregator {
 	}
 
 	
-	public CSVParser queryCSV(List<NameValuePair> pairs) {
+	private CSVParser queryCSV(List<NameValuePair> pairs) {
 		
 		try {
 			// query system for object
