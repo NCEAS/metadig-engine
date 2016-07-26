@@ -3,7 +3,6 @@ package edu.ucsb.nceas.mdqengine.dispatch;
 import static org.junit.Assert.*;
 
 import java.io.File;
-import java.net.URL;
 
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.logging.Log;
@@ -20,19 +19,19 @@ public class MDQCacheTest {
 	public void testCache() {
 		MDQCache cache = new MDQCache();
 		
+		String path = null;
 		File file = null;
-		URL url = null;
 
 		try {
-			url = new URL(dataUrl);
-			file = cache.get(url);
+			path = cache.get(dataUrl);
+			file = new File(path);
 		} catch (Exception e) {
 			fail(e.getMessage());
 		}
 		assertTrue(file.exists());
-		assertEquals(DigestUtils.md5Hex(url.toString()), file.getName());
+		assertEquals(DigestUtils.md5Hex(dataUrl), file.getName());
 
-		log.debug("fetched URL: " + url + " and cached file: " + file.getAbsolutePath());
+		log.debug("fetched URL: " + dataUrl + " and cached file: " + file.getAbsolutePath());
 		
 	}
 

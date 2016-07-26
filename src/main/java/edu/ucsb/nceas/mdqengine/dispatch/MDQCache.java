@@ -3,6 +3,7 @@ package edu.ucsb.nceas.mdqengine.dispatch;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
 
 import org.apache.commons.codec.digest.DigestUtils;
@@ -20,7 +21,7 @@ public class MDQCache {
 		cacheDir += "mdq_cache" + File.separator;
 	}
 	
-	public File get(URL url) throws IOException {
+	public String get(String url) throws IOException {
 		File f = null;
 		
 		// get MD5 of the URL string as the standard filename in the cache dir
@@ -39,11 +40,12 @@ public class MDQCache {
 
 		// if we don't find it, then download and store it
 		if (!f.exists()) {
-			IOUtils.copyLarge(url.openStream(), new FileOutputStream(f));
+			InputStream input = new URL(url).openStream();
+			IOUtils.copyLarge(input, new FileOutputStream(f));
 		}
 		
 		// done!
-		return f;
+		return f.getAbsolutePath();
 		
 	}
 	
