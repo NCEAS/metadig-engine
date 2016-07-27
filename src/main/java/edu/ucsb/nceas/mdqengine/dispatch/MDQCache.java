@@ -17,7 +17,7 @@ public class MDQCache {
 		initialize(null);
 	}
 	
-	static void initialize(String dir) {
+	public static void initialize(String dir) {
 		if (dir == null) {
 			cacheDir = System.getProperty("java.io.tmpdir");
 			if (!cacheDir.endsWith(File.separator)) {

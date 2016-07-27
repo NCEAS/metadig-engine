@@ -24,6 +24,7 @@ import org.dataone.configuration.Settings;
 import org.dataone.service.types.v1.Identifier;
 import org.xml.sax.SAXException;
 
+import edu.ucsb.nceas.mdqengine.dispatch.MDQCache;
 import edu.ucsb.nceas.mdqengine.model.Check;
 import edu.ucsb.nceas.mdqengine.model.Suite;
 import edu.ucsb.nceas.mdqengine.model.Result;
@@ -39,6 +40,10 @@ public class MDQEngine {
 	private MDQStore store = null;
 	
 	protected Log log = LogFactory.getLog(this.getClass());
+	
+	public MDQEngine() {
+		MDQCache.initialize(null);
+	}
 
 	/**
 	 * Executes the given suite for a given object identifier
