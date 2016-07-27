@@ -20,7 +20,7 @@ results_summarized <- results %>%
 g <- ggplot(results_summarized, aes(level, proportion, fill = status)) +
   geom_bar(stat = "identity") +
   scale_fill_manual(drop = FALSE,
-                    values = c("#00CC00", "#CC0000", "#CCCCCC", "#CCCC00")) +
+                    values = c("#d9edf7", "#f2dede", "#f5f5f5", "#fcf8e3"))  +
   labs(x = "", y = "Proportion of All Checks Run") +
   theme(legend.title = element_blank())
 
