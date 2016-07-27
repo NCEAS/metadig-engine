@@ -15,6 +15,12 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
@@ -197,6 +203,10 @@ public class Aggregator {
 	 */
 	public String runBatch(List<NameValuePair> params, Suite suite) throws IOException {
 		
+		ExecutorService executor = Executors.newCachedThreadPool();
+		List<Future<Run>> futures = new ArrayList<Future<Run>>();
+
+		
 		String results = null;
 		
 		List<Run> runs = new ArrayList<Run>();
@@ -219,16 +229,46 @@ public class Aggregator {
 				metadata.setRightsHolder(rightsHolder);
 				
 				try {
-					InputStream input = new URL(dataUrl).openStream();
-					Run run = engine.runSuite(suite, input);
-					run.setObjectIdentifier(id);
-					run.setMetadata(metadata);
-					run.setSuiteId(suite.getId());
-					runs.add(run);
+					
+					// run asynch in thread
+					Callable<Run> runner = new Callable<Run>() {
+						
+						@Override
+						public Run call() throws Exception {
+							InputStream input = new URL(dataUrl).openStream();
+							Run run = engine.runSuite(suite, input);
+							run.setObjectIdentifier(id);
+							run.setMetadata(metadata);
+							run.setSuiteId(suite.getId());
+							return run;
+						}
+					};
+					Future<Run> future = executor.submit(runner);
+					futures.add(future);
 					
 				} catch (Exception e) {
-					log.error("Could not run suite on id: " + id, e);
+					log.error("Could not submit run suite on id: " + id, e);
 					continue;
+				}
+			}
+			
+			boolean complete = false;
+			try {
+				executor.shutdown();
+				complete = executor.awaitTermination(1, TimeUnit.DAYS);
+			} catch (InterruptedException e) {
+				log.error("Executor shutdown error: " + e.getMessage(), e);
+			}
+			
+			// collect the results
+			if (complete) {
+				for (Future<Run> future: futures) {
+					try {
+						runs.add(future.get());
+					} catch (InterruptedException | ExecutionException e) {
+						log.error("Could not fetch Run future: " + e.getMessage(), e);
+						continue;
+					}
 				}
 			}
 			
