@@ -23,7 +23,7 @@ g <- ggplot(results_summarized, aes(level, proportion, fill = status)) +
   theme(legend.title = element_blank(),
         panel.border = element_rect(colour = "black", fill = NA))
 
-if ("datasource" %in% names(results) && (length(unique(results$datasource))> 1)) {
+if ("datasource" %in% names(results_summarized) && (length(unique(results_summarized$datasource)) > 1)) {
   g <- g + facet_wrap(~datasource)
 }
 
