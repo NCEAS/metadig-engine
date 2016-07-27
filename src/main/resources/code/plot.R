@@ -10,11 +10,9 @@ results$status <- factor(results$status,
                          levels = c("SUCCESS", "FAILURE", "SKIP", "ERROR"),
                          ordered = TRUE)
 results_summarized <- results %>%
-  mutate(nchecks = length(pid)) %>%
-  group_by(status, level) %>%
-  summarize(proportion = length(status) / unique(nchecks),
-            datasource = unique(datasource))
-
+  mutate(denom = length(pid)) %>%
+  group_by(datasource, status, level) %>%
+  summarize(proportion = length(status) / unique(denom)[1])
 
 # Create the plot
 g <- ggplot(results_summarized, aes(level, proportion, fill = status)) +
