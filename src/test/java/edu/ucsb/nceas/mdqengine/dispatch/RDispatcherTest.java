@@ -120,8 +120,8 @@ public class RDispatcherTest {
 		names.put("expected", 100);
 		
 		// R code to check congruence between loaded data and the metadata
-		String code = 
-				"library('RCurl'); \n"
+		String code =
+				"library(RCurl); \n"
 				+ "myCsv <- getURL(dataUrl); \n"
 				+ "df <- read.csv(textConnection(myCsv), header=header, sep=sep); "
 				+ "result = list(value = (nrow(df) == expected) )";
