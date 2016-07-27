@@ -25,7 +25,7 @@ public class RDispatcher extends Dispatcher {
 		File output = null;
 		
 		String preCode = 
-				"library('jsonlite', quietly=TRUE); \n"
+				"library(jsonlite, quietly=TRUE); \n"
 				+ "args = commandArgs(trailingOnly=TRUE); \n"
 				+ "input = args[1]; \n"
 				+ "output = args[2]; \n"
