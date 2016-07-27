@@ -11,17 +11,26 @@ import org.apache.commons.io.IOUtils;
 
 public class MDQCache {
 		
-	private String cacheDir = null;
+	private static String cacheDir = null;
 	
-	public MDQCache() {
-		cacheDir = System.getProperty("java.io.tmpdir");
-		if (!cacheDir.endsWith(File.separator)) {
-			cacheDir += File.separator;
-		}
-		cacheDir += "mdq_cache" + File.separator;
+	static {
+		initialize(null);
 	}
 	
-	public String get(String url) throws IOException {
+	static void initialize(String dir) {
+		if (dir == null) {
+			cacheDir = System.getProperty("java.io.tmpdir");
+			if (!cacheDir.endsWith(File.separator)) {
+				cacheDir += File.separator;
+			}
+			cacheDir += "mdq_cache" + File.separator;
+		} else {
+			cacheDir = dir;
+		}
+		System.setProperty("MDQE_CACHE_DIR", cacheDir);
+	}
+	
+	public static String get(String url) throws IOException {
 		File f = null;
 		
 		// get MD5 of the URL string as the standard filename in the cache dir
@@ -49,7 +58,7 @@ public class MDQCache {
 		
 	}
 	
-	public void clearCache() {
+	public static void clearCache() {
 		File dir = new File(cacheDir);
 		if (dir.exists()) {
 			dir.delete();

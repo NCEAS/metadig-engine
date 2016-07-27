@@ -17,13 +17,12 @@ public class MDQCacheTest {
 	
 	@Test
 	public void testCache() {
-		MDQCache cache = new MDQCache();
 		
 		String path = null;
 		File file = null;
 
 		try {
-			path = cache.get(dataUrl);
+			path = MDQCache.get(dataUrl);
 			file = new File(path);
 		} catch (Exception e) {
 			fail(e.getMessage());
