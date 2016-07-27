@@ -11,8 +11,10 @@ import java.net.URLEncoder;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
@@ -27,6 +29,8 @@ import org.apache.http.client.utils.URLEncodedUtils;
 import org.dataone.client.v2.CNode;
 import org.dataone.client.v2.itk.D1Client;
 
+import edu.ucsb.nceas.mdqengine.dispatch.Dispatcher;
+import edu.ucsb.nceas.mdqengine.dispatch.RDispatcher;
 import edu.ucsb.nceas.mdqengine.model.Check;
 import edu.ucsb.nceas.mdqengine.model.Level;
 import edu.ucsb.nceas.mdqengine.model.Metadata;
@@ -118,29 +122,29 @@ public class Aggregator {
 
 		log.debug("Tabular Results: \n" + runContent);
 
-		File outputFile = null;
-		File script = null;
 		File batchFile = null;
+		File outputFile = null;
 
 		try {
 
 			//  try doing some analysis
-			// have to do this so R can access it from jar packaging
 			InputStream scriptStream = this.getClass().getResourceAsStream("/code/plot.R");
-			script = File.createTempFile("mdq_script", ".R");
-			IOUtils.copy(scriptStream, new FileOutputStream(script));
+			String code = IOUtils.toString(scriptStream, "UTF-8");
 
+			// save the batch as a file for reading in R
 			batchFile = File.createTempFile("mdqe_batch", ".csv");
 			IOUtils.write(runContent, new FileOutputStream(batchFile), "UTF-8");
 			String input = batchFile.getAbsolutePath();
 			String output = input.replace("csv", format);
 			
-			ProcessBuilder pb = new ProcessBuilder("Rscript", "--vanilla", script.getAbsolutePath(), input, output);
-			Process p = pb.start();
-			int ret = p.waitFor();
-			
-			log.info("stdOut:" + IOUtils.toString(p.getInputStream(), "UTF-8"));
-			log.info("stdErr:" + IOUtils.toString(p.getErrorStream(), "UTF-8"));
+			// use our dispatcher to call the plotting code
+			Dispatcher dispatcher = new RDispatcher();
+			Map<String, Object> variables = new HashMap<String, Object>();
+			variables.put("inputPath", input);
+			variables.put("outputPath", output);
+
+			Result result = dispatcher.dispatch(variables, code);
+			assert result.getStatus().equals(Status.SUCCESS);
 			
 			outputFile = new File(output);
 			log.info("Plot available here: \n" + output);
@@ -149,7 +153,6 @@ public class Aggregator {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} finally {
-			script.delete();
 			batchFile.delete();
 			//outputFile.deleteOnExit();
 		}
