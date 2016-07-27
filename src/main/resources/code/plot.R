@@ -20,7 +20,8 @@ g <- ggplot(results_summarized, aes(level, proportion, fill = status)) +
   scale_fill_manual(drop = FALSE,
                     values = c("#d9edf7", "#f2dede", "#f5f5f5", "#fcf8e3"))  +
   labs(x = "", y = "Proportion of All Checks Run") +
-  theme(legend.title = element_blank())
+  theme(legend.title = element_blank(),
+        panel.border = element_rect(colour = "black", fill = NA))
 
 if ("datasource" %in% names(results) && (length(unique(results$datasource))> 1)) {
   g <- g + facet_wrap(~datasource)
