@@ -1,0 +1,5 @@
+jsonlite
+dplyr
+ggplot2
+svglite
+digest
