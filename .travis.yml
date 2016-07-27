@@ -8,4 +8,4 @@ before_install:
   - sudo apt-get -qq update
   - sudo apt-get install -y r-base
   - sudo apt-get install -y curl
-  - sudo R CMD BATCH install-packages.R
+  - sudo R CMD BATCH install-r-packages.R
