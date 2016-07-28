@@ -8,16 +8,17 @@ library(dplyr)
 results = read.csv(inputPath)
 
 results$type <- factor(results$type,
-                      levels = c("metadata", "data", "congruence"),
-                      ordered = TRUE)
+                       levels = c("metadata", "data", "congruence"),
+                       ordered = TRUE)
 
 results$level <- factor(results$level,
-                       levels = c("INFO", "WARN", "SEVERE"),
-                       ordered = TRUE)
+                        levels = c("INFO", "WARN", "SEVERE"),
+                        ordered = TRUE)
 
 results$status <- factor(results$status,
                          levels = c("SUCCESS", "FAILURE", "SKIP", "ERROR"),
                          ordered = TRUE)
+
 results_summarized <- results %>%
   mutate(denom = length(pid)) %>%
   group_by(datasource, status, level) %>%
