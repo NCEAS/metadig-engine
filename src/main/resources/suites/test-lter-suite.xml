@@ -6,7 +6,7 @@
 	<check>
 		<id>check-dataset.1.1</id>
 		<name>packageIdPattern</name>
-		<environment>R</environment>
+		<environment>rscript</environment>
 		<!-- The <dialect> element is used by the scripting engine to
 		determine if a check should be run for a metadata document. The
 		tested document is checked to see if it contains the specified
@@ -49,9 +49,10 @@ check <- function() {
     
     # Stop testing after the first failure.
     if (! grepl("^[a-zA-Z0-9_\\-]+\\.\\d+\\.\\d+", packageId, perl = TRUE, fixed = FALSE)) {
-        status <- "FAILURE"
-        message <- "The packageId value should match the pattern 'scope.identifier.revision'"
-        return(list(status, message))
+        status <- "FAILURE";
+        message <- "The packageId value should match the pattern 'scope.identifier.revision'";
+        result <- list(status=status, message=message)
+        return (result);
     }
     
     tokens = unlist(strsplit(packageId, "\\.", fixed = FALSE, perl = TRUE, useBytes = FALSE))
@@ -64,21 +65,24 @@ check <- function() {
     if (grepl("^0", identifier)) {
         status <- "FAILURE"
         message <- "A leading zero was found in the identifier. The identifier value must be a whole number."
-        return(list(status, message))
+        result <- list(status=status, message=message)
+    	return (result)
     }
     
     if (grepl("^0", revision)) {
         message <- "A leading zero was found in the revision. The revision value must be a whole number."
         status <- "FAILURE"
-        return(list(status, message))
+        result <- list(status=status, message=message)
+    	return (result)
     }
     
-    return(list(status, message))
+    result <- list(status=status, message=message)
+    return (result)
 }
 
 result <- check()
-status <- result[[1]]
-message <- result[[2]]
+#status <- result[[1]]
+#message <- result[[2]]
       ]]></code>
 	</check>
 
@@ -120,7 +124,7 @@ def call():
 	<check>
 		<id>check-dataset.7.1</id>
 		<name>methodsElementPresent</name>
-		<environment>R</environment>
+		<environment>rscript</environment>
 		<dialect>
 			<name>eml</name>
 			<xpath>boolean(/*[local-name() = 'eml'])</xpath>
@@ -142,12 +146,13 @@ check <- function() {
         status <- "FAILURE"
         message <- "A methods element is not present"
     }
-    return(list(status, message))
+    result <- list(status=status, message=message)
+    return (result)
 }
 
 result <- check()
-status <- result[[1]]
-message <- result[[2]]
+#status <- result[[1]]
+#message <- result[[2]]
       ]]></code>
 	</check>
 	<check>
