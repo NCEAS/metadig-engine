@@ -18,7 +18,7 @@ public class JavaDispatcher extends Dispatcher {
 	@Override
 	public Result dispatch(Map<String, Object> names, String className) throws ScriptException {
 
-		Result results = null;
+		Result result = null;
 		try {
 			// create instance of the given class - must be impl of Callable<String>
 			Class clazz = Class.forName(className);
@@ -32,15 +32,15 @@ public class JavaDispatcher extends Dispatcher {
 			// call the bean, blocking for results
 			ExecutorService exec = Executors.newSingleThreadExecutor();
 			Future<Result> future = exec.submit(runner);
-			results = future.get();
+			result = future.get();
 			
 		} catch (Exception e) {
 			throw new ScriptException(e);
 		}
 		
-		log.debug("Result: " + results.getValue());
+		log.debug("Result: " + result.getValue());
 
-		return results;
+		return result;
 	}
 
 }
