@@ -39,9 +39,10 @@ if ("datasource" %in% names(results_summarized) && (length(unique(results_summar
 }
 
 # Save to disk
-png(outputPath, width=400, height=400)
-g
-dev.off()
+ggsave(filename = outputPath,
+       plot = g,
+       width = 4,
+       height = 5)
 
 # Pass on result
 result = list(value = outputPath, status="SUCCESS", message="See output path for plot." );
