@@ -31,7 +31,8 @@ g <- ggplot(results_summarized, aes(level, proportion, fill = status)) +
                     values = c("#d9edf7", "#f2dede", "#f5f5f5", "#fcf8e3"))  +
   labs(x = "", y = "Proportion of All Checks Run") +
   theme(legend.title = element_blank(),
-        panel.border = element_rect(colour = "black", fill = NA))
+        panel.border = element_rect(colour = "black", fill = NA),
+        legend.position = "top")
 
 if ("datasource" %in% names(results_summarized) && (length(unique(results_summarized$datasource)) > 1)) {
   g <- g + facet_wrap(~datasource)
