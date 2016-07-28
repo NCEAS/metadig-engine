@@ -51,6 +51,31 @@ public class PythonDispatcherTest {
 	}
 	
 	@Test
+	public void testResult() {
+		Map<String, Object> names = new HashMap<String, Object>();
+		names.put("x", 2);
+		names.put("y", 2);
+		String code = "def call(): \n"
+				+ "  from edu.ucsb.nceas.mdqengine.model import Result \n"
+				+ "  result = Result() \n"
+				+ "  result.setValue(str(x == y)) \n"
+				+ "  result.setMessage(\"Testing the result object\") \n"
+				+ "  from edu.ucsb.nceas.mdqengine.model import Status \n"
+				+ "  result.setStatus(Status.SUCCESS) \n"
+				+ "  return (result) \n"
+				;
+		Result result = null;
+		try {
+			result = dispatcher.dispatch(names, code);
+		} catch (ScriptException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			fail(e.getMessage());
+		}
+		assertEquals("True", result.getValue());
+	}
+	
+	@Test
 	public void testEquality() {
 		Map<String, Object> names = new HashMap<String, Object>();
 		names.put("x", 2);
