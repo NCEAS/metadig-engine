@@ -92,6 +92,29 @@ public class RDispatcherTest {
 	}
 	
 	@Test
+	public void testResult() {
+		Map<String, Object> names = new HashMap<String, Object>();
+		names.put("x", 2);
+		names.put("y", 2);
+		String code = ""
+				+ "value <- TRUE;"
+				+ "status <- \"FAILURE\" \n"
+		        + "message <- \"The packageId value should match the pattern 'scope.identifier.revision'\" \n"
+		        + "result <- list(status=status, message=message, value=value) \n"
+				//+ "result <- list(value=value, message=message, status=status);"
+		        ;
+		Result result = null;
+		try {
+			result = dispatcher.dispatch(names, code);
+		} catch (ScriptException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			fail(e.getMessage());
+		}
+		assertEquals("true", result.getValue());
+	}
+	
+	@Test
 	public void testError() {
 		Map<String, Object> names = new HashMap<String, Object>();
 		names.put("x", 1);

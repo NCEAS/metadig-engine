@@ -78,16 +78,27 @@ public class Dispatcher {
 				return dr;
 			}
 		}
-		dr.setValue(res.toString());
 		
-		// try to find other result items
-		Object var = engine.get("message");
+		// do we have a result object?
+		Object var = engine.get("result");
 		if (var != null && !var.toString().equals("<unbound>")) {
-			dr.setMessage(var.toString());
-		}
-		var = engine.get("status");
-		if (var != null && !var.toString().equals("<unbound>")) {
-			dr.setStatus(Status.valueOf(var.toString()));
+			log.debug("result is: " + var);
+			log.debug("result is class: " + var.getClass());
+
+			dr = (Result) var;
+		} else {
+			
+			dr.setValue(res.toString());
+			
+			// try to find other result items
+			var = engine.get("message");
+			if (var != null && !var.toString().equals("<unbound>")) {
+				dr.setMessage(var.toString());
+			}
+			var = engine.get("status");
+			if (var != null && !var.toString().equals("<unbound>")) {
+				dr.setStatus(Status.valueOf(var.toString()));
+			}
 		}
 		
 		// harvest all other vars for downstream dispatchers
