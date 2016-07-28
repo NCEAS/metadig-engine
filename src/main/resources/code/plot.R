@@ -6,6 +6,15 @@ library(dplyr)
 
 # Load + munge
 results = read.csv(inputPath)
+
+results$type <- factor(results$type,
+                      levels = c("metadata", "data", "congruence"),
+                      ordered = TRUE)
+
+results$level <- factor(results$level,
+                       levels = c("INFO", "WARN", "SEVERE"),
+                       ordered = TRUE)
+
 results$status <- factor(results$status,
                          levels = c("SUCCESS", "FAILURE", "SKIP", "ERROR"),
                          ordered = TRUE)
