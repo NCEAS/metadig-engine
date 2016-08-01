@@ -50,6 +50,8 @@ public class XMLDialect {
 	
 	private Map<String, String> dataUrls;
 	
+	private String directory;
+	
 	private Dispatcher dispatcher;
 	
 	public static Log log = LogFactory.getLog(XMLDialect.class);
@@ -93,6 +95,11 @@ public class XMLDialect {
 			// make dataUrls available to the check if we have them
 			if (this.dataUrls != null) {
 				variables.put("dataUrls", dataUrls);
+			}
+			
+			// give the check a place to write files during the run
+			if (this.directory != null) {
+				variables.put("tempDir", directory);
 			}
 			
 			// dispatch to checker impl
@@ -297,6 +304,10 @@ public class XMLDialect {
 
 	public void setDataUrls(Map<String, String> dataUrls) {
 		this.dataUrls = dataUrls;
+	}
+	
+	public void setDirectory(String dir) {
+		this .directory = dir;
 	}
 	
 	private String toXmlString(Document document) {

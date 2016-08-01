@@ -1,10 +1,13 @@
 package edu.ucsb.nceas.mdqengine;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
@@ -16,6 +19,7 @@ import javax.script.ScriptException;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.xpath.XPathExpressionException;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -95,6 +99,8 @@ public class MDQEngine {
 		
 		XMLDialect xml = new XMLDialect(IOUtils.toInputStream(metadataContent, "UTF-8"));
 		xml.setDataUrls(dataUrls);
+		Path tempDir = Files.createTempDirectory("mdq_run");
+		xml.setDirectory(tempDir.toFile().getAbsolutePath());
 		
 		// make a run to capture results
 		Run run = new Run();
@@ -115,6 +121,9 @@ public class MDQEngine {
 		run.setResult(results);
 		
 		log.debug("Run results: " + JsonMarshaller.toJson(run));
+		
+		// clean up
+		tempDir.toFile().delete();
 		
 		return run;
 		
