@@ -3,7 +3,11 @@ package edu.ucsb.nceas.mdqengine.processor;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
+import java.io.UnsupportedEncodingException;
 import java.net.URL;
+import java.nio.file.InvalidPathException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
@@ -24,6 +28,7 @@ import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 
+import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.BooleanUtils;
 import org.apache.commons.lang.math.NumberUtils;
@@ -189,7 +194,41 @@ public class XMLDialect {
 		result.setCheck(check);
 		result.setTimestamp(Calendar.getInstance().getTime());
 		
+		// do any further processing on the result (e.g., encode value if needed)
+		result = postProcess(result);
+		
 		return result;
+	}
+	
+	private Result postProcess(Result result) {
+	
+		// check if we need to encode the value
+		String value = result.getValue();
+		if (value != null) {
+			Path path = null;
+			try {
+				path = Paths.get(value);
+			} catch (InvalidPathException e) {
+				// NOPE
+				return result;
+			}
+			
+			if (path.toFile().exists()) {
+				// encode it
+				String encoded = null;
+				try {
+					encoded = Base64.encodeBase64String(value.getBytes("UTF-8"));
+					result.setValue(encoded);
+					//TODO: set mime-type when we have support for that
+				} catch (UnsupportedEncodingException e) {
+					log.error(e.getMessage());
+				}				
+			}
+			
+		}
+		
+		return result;
+		
 	}
 	
 	/**
