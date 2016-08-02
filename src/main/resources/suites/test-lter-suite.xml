@@ -36,22 +36,22 @@
 #               it from performing any testing
 #     "SKIP" : The check routine has determined that the tests it performs do
 #              not apply to the current metadata or data.
-# In addition, a check routine can set the variable 'message' which is a description
+# In addition, a check routine can set the variable 'output' which is a description
 # of the results of the test.
-# Both 'status' and 'message' can be set as lists, for example, to 
+# Both 'status' and 'output' can be set as lists, for example, to 
 # convey results of congruency between a metadata document and the datasets that
 # it documents. Each 'status' element, for example, could be the status for one
 # of the multiple datasets checked. 
 check <- function() {
     # Assume all the checks will pass.
     status <- "SUCCESS"
-    message <- "The package identifier is valid"
+    output <- "The package identifier is valid"
     
     # Stop testing after the first failure.
     if (! grepl("^[a-zA-Z0-9_\\-]+\\.\\d+\\.\\d+", packageId, perl = TRUE, fixed = FALSE)) {
         status <- "FAILURE";
-        message <- "The packageId value should match the pattern 'scope.identifier.revision'";
-        mdq_result <- list(status=status, message=message)
+        output <- "The packageId value should match the pattern 'scope.identifier.revision'";
+        mdq_result <- list(status=status, output=output)
         return (mdq_result);
     }
     
@@ -64,19 +64,19 @@ check <- function() {
     # signalng an error.
     if (grepl("^0", identifier)) {
         status <- "FAILURE"
-        message <- "A leading zero was found in the identifier. The identifier value must be a whole number."
-        mdq_result <- list(status=status, message=message)
+        output <- "A leading zero was found in the identifier. The identifier value must be a whole number."
+        mdq_result <- list(status=status, output=output)
     	return (mdq_result)
     }
     
     if (grepl("^0", revision)) {
-        message <- "A leading zero was found in the revision. The revision value must be a whole number."
+        output <- "A leading zero was found in the revision. The revision value must be a whole number."
         status <- "FAILURE"
-        mdq_result <- list(status=status, message=message)
+        mdq_result <- list(status=status, output=output)
     	return (mdq_result)
     }
     
-    mdq_result <- list(status=status, message=message)
+    mdq_result <- list(status=status, output=output)
     return (mdq_result)
 }
 
@@ -101,18 +101,18 @@ mdq_result <- check()
 		</selector>
 		<code><![CDATA[
 def call():
-  global message
+  global output
   global status
 
   # Message is set when an error occurs.
-  message = "Keywords are not present"
+  output = "Keywords are not present"
 
   if(len(keywords) > 0):
     status = "SUCCESS"
     return True
 
   status = "FAILURE"
-  message = "Keywords are not present"
+  output = "Keywords are not present"
   return False
       
       ]]></code>
@@ -136,13 +136,13 @@ def call():
 check <- function() {
     # Check that a <methods> element is present for the dataset.
     status <- "SUCCESS"
-    message <- "A methods element is present"
+    output <- "A methods element is present"
     
     if(any(!exists("methods"), length(methods) == 0, is.null(methods))) {
         status <- "FAILURE"
-        message <- "A methods element is not present"
+        output <- "A methods element is not present"
     }
-    mdq_result <- list(status=status, message=message)
+    mdq_result <- list(status=status, output=output)
     return (mdq_result)
 }
 
@@ -168,22 +168,22 @@ mdq_result <- check()
 		</selector>
 		<code><![CDATA[
 def call():
-  global message
+  global output
   global status
   status = "ERROR"
   
   # Check if the mdq set our xpath mdq_result 
   if 'coverages' not in globals():
     mdq_result = False
-    message = "A coverage element is not present"
+    output = "A coverage element is not present"
     status = "SUCCESS"
   elif(len(coverages) > 0):
     mdq_result = True
-    message = "A coverage element is not present"
+    output = "A coverage element is not present"
     status = "SUCCESS"
   else:
     mdq_result = False
-    message = "A coverage element is not present"
+    output = "A coverage element is not present"
     status = "FAILURE"
       
   return(mdq_result)
@@ -220,7 +220,7 @@ def call():
 		</selector>
 		<code><![CDATA[
 def call():
-  global message
+  global output
   global status
 
   # If a geographicCoverage element is found at the dataset level
@@ -233,23 +233,23 @@ def call():
   # Check if the scripting engine has set each value that we are looking
   # for.
   if datasetGeographicCoverage:
-    message = "A coverage is present at the dataset level."
+    output = "A coverage is present at the dataset level."
     status = "SUCCESS"
     return True
 
   # Geo coverage not found at the dataset level, check entity and attribute levels
   if entityGeographicCoverage:
-    message = "A coverage is present at the entity level."
+    output = "A coverage is present at the entity level."
     status = "SUCCESS"
     return True
       
   if attributeGeographicCoverage:
-    message = "A coverage is present at the attribute level."
+    output = "A coverage is present at the attribute level."
     status = "SUCCESS"
     return True
 
   # A coveage element was not found at any level.
-  message = "A coverage element is not present at the dataset, entity or attribute levels"
+  output = "A coverage element is not present at the dataset, entity or attribute levels"
   status = "FAILURE"
       
   return(False)
@@ -286,7 +286,7 @@ def call():
 		</selector>
 		<code><![CDATA[
 def call():
-  global message
+  global output
   global status
 
   # If a taxonomicCoverage element is found at the dataset level
@@ -297,23 +297,23 @@ def call():
   # Check if the mdq set the mdq_result for our xpath selector
 
   if datasetTaxonomicCoverage:
-    message = "A coverage is present at the dataset level."
+    output = "A coverage is present at the dataset level."
     status = "SUCCESS"
     return True
 
   # Taxonomic coverage not found at the dataset level, check entity and attribute levels
   if entityTaxonomicCoverage:
-    message = "A coverage element is present at the entity level."
+    output = "A coverage element is present at the entity level."
     status = "SUCCESS"
     return True
       
   if attributeTaxonomicCoverage:
-    message = "A coverage element is present at the attribute level."
+    output = "A coverage element is present at the attribute level."
     status = "SUCCESS"
     return True
 
   # A coveage element was not found at any level.
-  message = "A coverage element is not present at the dataset, entity or attribute levels"
+  output = "A coverage element is not present at the dataset, entity or attribute levels"
   status = "FAILURE"
       
   return(False)
@@ -350,7 +350,7 @@ def call():
 		</selector>
 		<code><![CDATA[
 def call():
-  global message
+  global output
   global status
 
   # If a temporalCoverage element is found at the dataset level
@@ -364,23 +364,23 @@ def call():
   # Check if the scripting engine has set each value that we are looking
   # for.
   if datasetTemporalCoverage:
-    message = "A coverage is present at the dataset level."
+    output = "A coverage is present at the dataset level."
     status = "SUCCESS"
     return True
 
   # Temporal coverage not found at the dataset level, check entity and attribute levels
   if entityTemporalCoverage:
-    message = "A coverage element is present at the entity level."
+    output = "A coverage element is present at the entity level."
     status = "SUCCESS"
     return True
       
   if attributeTemporalCoverage:
-    message = "A coverage element is present at the attribute level."
+    output = "A coverage element is present at the attribute level."
     status = "SUCCESS"
     return True
 
   # A coveage element was not found at any level.
-  message = "A coverage element is not present at the dataset, entity or attribute levels"
+  output = "A coverage element is not present at the dataset, entity or attribute levels"
   status = "FAILURE"
       
   return(False)
@@ -405,26 +405,26 @@ def call():
 def call():
   import re
 
-  global message
+  global output
   global status
 
   # Check that the word count of the dataset title is between 7 and 20 words.
   if 'title' in globals():
     numWords = len(re.split('\s+', title))
     if numWords < 7: 
-      message = "The dataset title is less that 7 words."
+      output = "The dataset title is less that 7 words."
       status = "FAILURE"
       mdq_result = False
     elif numWords > 20: 
-      message = "The dataset title is greater than 20 words."
+      output = "The dataset title is greater than 20 words."
       status = "FAILURE"
       mdq_result = False
     else:
-      message = "The dataset title is between 7 and 20 words (count=%s)." % numWords
+      output = "The dataset title is between 7 and 20 words (count=%s)." % numWords
       status = "SUCCESS"
       mdq_result = True
   else:
-    message = "No title element is present."
+    output = "No title element is present."
     status = "FAILURE"
     mdq_result = False
     
@@ -450,22 +450,22 @@ def call():
 def call():
   import re
 
-  global message
+  global output
   global status
 
   # Check that a publication date is present
   if 'pubDate' in globals():
     pubDateLength = len(pubDate)
     if (pubDateLength < 4):
-      message = "The publication date (pubDate) is less that 4 characters long."
+      output = "The publication date (pubDate) is less that 4 characters long."
       status = "FAILURE"
       mdq_result = False
     else:
-      message = "The publication date length of %s is valid" % pubDateLength
+      output = "The publication date length of %s is valid" % pubDateLength
       status = "SUCCESS"
       mdq_result = True
   else:
-    message = "No publication date is present."
+    output = "No publication date is present."
     status = "FAILURE"
     mdq_result = False
     
@@ -492,26 +492,26 @@ def call():
   # check: datasetAbstractLength
   import re
 
-  global message
+  global output
   global status
   
   if 'abstract' not in globals():
-    message = "No abstract is present."
+    output = "No abstract is present."
     status = "FAILURE"
     return False
 
   if abstract is None:
-    message = "Abstract not found with check selector."
+    output = "Abstract not found with check selector."
     status = "FAILURE"
     return False
 
   numWords = len(re.split('\s+', abstract))
   if (numWords < 20):
-    message = "The abstract is less that 20 words long."
+    output = "The abstract is less that 20 words long."
     status = "FAILURE"
     mdq_result = False
   else:
-    message = "The abstract is valid, with a word count of %s" % numWords
+    output = "The abstract is valid, with a word count of %s" % numWords
     status = "SUCCESS"
     mdq_result = True
       
@@ -584,7 +584,7 @@ def call():
   import csv
   import urllib2
   
-  global message
+  global output
   global status
   status = "SUCCESS"
 
@@ -701,7 +701,7 @@ def call():
   import csv
   import urllib2
   
-  global message
+  global output
   global status
 
   # varialbe defined by MQE 
@@ -772,7 +772,7 @@ def call():
 		<code><![CDATA[ 
 def call():
 
-  global message
+  global output
   global status
 
   # varialbe defined by MQE 
@@ -813,7 +813,7 @@ def call():
 		<code><![CDATA[ 
 def call():
 
-  global message
+  global output
   global status
 
   # varialbe defined by MQE 
@@ -824,11 +824,11 @@ def call():
   print "type(entityDescriptions)", type(entityDescriptions)
 
   if entityCount > len(entityDescriptions):
-      message = "There are %d entities and only %d entity descriptions." % (entityCount, len(entityDescriptions))
+      output = "There are %d entities and only %d entity descriptions." % (entityCount, len(entityDescriptions))
       status = "FAILURE"
       return False
   else:
-      message = "There are %d entities and %d entity descriptions." % (entityCount, len(entityDescriptions))
+      output = "There are %d entities and %d entity descriptions." % (entityCount, len(entityDescriptions))
       status = "SUCCESS"
       return True
       ]]></code>
@@ -867,7 +867,7 @@ def call():
 		<code><![CDATA[ 
 def call():
 
-  global message
+  global output
   global status
 
   # varialbe defined by MQE 
@@ -883,11 +883,11 @@ def call():
   # Report the entities that don't have 'numHeaderLines'
   if len(missing) > 0:
     status = "FAILURE"
-    message = "Entities without 'numHeaderLines': %s" % ", ".join(missing)
+    output = "Entities without 'numHeaderLines': %s" % ", ".join(missing)
     mdq_result = False
   else:
     status = "SUCCESS"
-    message = "All entities have 'numHeaderLines'"
+    output = "All entities have 'numHeaderLines'"
     mdq_result = True
 
   return mdq_result 
@@ -927,7 +927,7 @@ def call():
 		<code><![CDATA[ 
 def call():
 
-  global message
+  global output
   global status
 
   # varialbe defined by MQE 
@@ -941,11 +941,11 @@ def call():
       
   if len(missing) > 0:
     status = "FAILURE"
-    message = "Entities without 'numFooterLines': %s" % ", ".join(missing)
+    output = "Entities without 'numFooterLines': %s" % ", ".join(missing)
     mdq_result = False
   else:
     status = "SUCCESS"
-    message = "All entities have 'numFooterLines'"
+    output = "All entities have 'numFooterLines'"
     mdq_result = True
 
   return mdq_result 
@@ -986,7 +986,7 @@ def call():
 		<code><![CDATA[ 
 def call():
 
-  global message
+  global output
   global status
 
   # varialbe defined by MQE 
@@ -1003,11 +1003,11 @@ def call():
       
   if len(invalid) > 0:
     status = "FAILURE"
-    message = "Entities with invalid or missing 'fieldDelimiter': %s" % ", ".join(invalid)
+    output = "Entities with invalid or missing 'fieldDelimiter': %s" % ", ".join(invalid)
     mdq_result = False
   else:
     status = "SUCCESS"
-    message = "All entities have 'fieldDelimiter'"
+    output = "All entities have 'fieldDelimiter'"
     mdq_result = True
 
   return mdq_result 
@@ -1047,7 +1047,7 @@ def call():
 		<code><![CDATA[ 
 def call():
 
-  global message
+  global output
   global status
 
   # varialbe defined by MQE 
@@ -1074,11 +1074,11 @@ def call():
       
   if len(invalid) > 0:
     status = "FAILURE"
-    message = "Entities with invalid or missing 'recordDelimiter': %s" % ", ".join(invalid)
+    output = "Entities with invalid or missing 'recordDelimiter': %s" % ", ".join(invalid)
     mdq_result = False
   else:
     status = "SUCCESS"
-    message = "All entities have a valid 'recordDelimiter'."
+    output = "All entities have a valid 'recordDelimiter'."
     mdq_result = True
   
   return mdq_result 
@@ -1118,7 +1118,7 @@ def call():
 		<code><![CDATA[ 
 def call():
 
-  global message
+  global output
   global status
 
   # varialbe defined by MQE 
@@ -1138,11 +1138,11 @@ def call():
       
   if len(invalid) > 0:
     status = "FAILURE"
-    message = "Entities with duplicate attribute names: %s" % ", ".join(invalid)
+    output = "Entities with duplicate attribute names: %s" % ", ".join(invalid)
     mdq_result = False
   else:
     status = "SUCCESS"
-    message = "Each of the %d entities has unique attribute names" % entityCount
+    output = "Each of the %d entities has unique attribute names" % entityCount
     mdq_result = True
   
   return mdq_result 

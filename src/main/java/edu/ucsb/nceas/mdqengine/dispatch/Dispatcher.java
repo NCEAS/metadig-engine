@@ -55,7 +55,7 @@ public class Dispatcher {
 		} catch (Exception e) {
 			// let's report this
 			dr.setStatus(Status.ERROR);
-			dr.setMessage(e.getMessage());
+			dr.setOutput(e.getMessage());
 			log.warn("Error encountered evaluating code: " + e.getMessage());
 			return dr;
 		}
@@ -73,7 +73,7 @@ public class Dispatcher {
 				log.debug("Invocation result: " + res);
 			} catch (NoSuchMethodException e) {
 				dr.setStatus(Status.ERROR);
-				dr.setMessage(e.getMessage());
+				dr.setOutput(e.getMessage());
 				log.warn("Error encountered invoking function: " + e.getMessage());
 				return dr;
 			}
@@ -95,9 +95,9 @@ public class Dispatcher {
 				dr.setValue(res.toString());
 				
 				// try to find other result items
-				var = engine.get("message");
+				var = engine.get("output");
 				if (var != null && !var.toString().equals("<unbound>")) {
-					dr.setMessage(var.toString());
+					dr.setOutput(var.toString());
 				}
 				var = engine.get("status");
 				if (var != null && !var.toString().equals("<unbound>")) {

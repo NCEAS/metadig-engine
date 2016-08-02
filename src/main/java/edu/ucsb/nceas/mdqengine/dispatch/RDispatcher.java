@@ -27,18 +27,18 @@ public class RDispatcher extends Dispatcher {
 		String preCode = 
 				"library(jsonlite, quietly=TRUE); \n"
 				+ "args = commandArgs(trailingOnly=TRUE); \n"
-				+ "input = args[1]; \n"
-				+ "output = args[2]; \n"
-				+ "vars <- fromJSON(readLines(input, warn=FALSE), simplifyMatrix=FALSE); \n"
-				+ "for (i in seq_along(vars)) { \n"
-				+ "	assign(names(vars)[i], vars[[i]]); \n"
+				+ "mdq_inputPath = args[1]; \n"
+				+ "mdq_outputPath = args[2]; \n"
+				+ "mdq_vars <- fromJSON(readLines(mdq_inputPath, warn=FALSE), simplifyMatrix=FALSE); \n"
+				+ "for (i in seq_along(mdq_vars)) { \n"
+				+ "	assign(names(mdq_vars)[i], mdq_vars[[i]]); \n"
 				+ "} \n";
 		
 		String postCode =
 				"\n"
 				+ "if(!any(grepl('mdq_result', ls()))) mdq_result <- list(value=.Last.value); \n"
 				+ "jsonResult <- toJSON(mdq_result, auto_unbox=TRUE); \n"
-				+ "writeLines(jsonResult, con = output); \n";
+				+ "writeLines(jsonResult, con = mdq_outputPath); \n";
 		
 		try {
 			
@@ -79,7 +79,7 @@ public class RDispatcher extends Dispatcher {
 				// report an error
 				result = new Result();
 				result.setStatus(Status.ERROR);
-				result.setMessage(stdErr);
+				result.setOutput(stdErr);
 			} else {
 				// read result from output
 				String jsonOutput = IOUtils.toString(new FileInputStream(output), "UTF-8");
@@ -99,7 +99,7 @@ public class RDispatcher extends Dispatcher {
 		
 		log.debug("Result value: " + result.getValue());
 		log.debug("Result status: " + result.getStatus());
-		log.debug("Result message: " + result.getMessage());
+		log.debug("Result output: " + result.getOutput());
 
 		return result;
 	}

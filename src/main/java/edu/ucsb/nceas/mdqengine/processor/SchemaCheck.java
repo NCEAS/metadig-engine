@@ -78,20 +78,20 @@ public class SchemaCheck implements Callable<Result> {
 		
 		} catch (IOException | ParserConfigurationException e) {
 			result.setStatus(Status.ERROR);
-			result.setMessage(e.getMessage());
+			result.setOutput(e.getMessage());
 			return result;
 		} catch (SAXParseException e) {
 			result.setStatus(Status.FAILURE);
-			result.setMessage(e.getMessage());
+			result.setOutput(e.getMessage());
 			return result;
 		} catch (Exception e) {
 			result.setStatus(Status.FAILURE);
-			result.setMessage(e.getMessage());
+			result.setOutput(e.getMessage());
 			return result;
 		} 
 		
 		result.setStatus(Status.SUCCESS);
-		result.setMessage("Document is schema valid");
+		result.setOutput("Document is schema valid");
 		return result;
 		
 	}

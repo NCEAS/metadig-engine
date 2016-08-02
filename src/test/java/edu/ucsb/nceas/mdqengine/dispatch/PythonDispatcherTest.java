@@ -59,7 +59,7 @@ public class PythonDispatcherTest {
 				+ "  from edu.ucsb.nceas.mdqengine.model import Result \n"
 				+ "  mdq_result = Result() \n"
 				+ "  mdq_result.setValue(str(x == y)) \n"
-				+ "  mdq_result.setMessage(\"Testing the result object\") \n"
+				+ "  mdq_result.setOutput(\"Testing the result object\") \n"
 				+ "  from edu.ucsb.nceas.mdqengine.model import Status \n"
 				+ "  mdq_result.setStatus(Status.SUCCESS) \n"
 				+ "  return (mdq_result) \n"

@@ -57,7 +57,7 @@ public class Aggregator {
 		"environment",
 		"level",
 		"status",
-		"message",
+		"output",
 		"value",
 		"timestamp",
 		"pid",
@@ -366,7 +366,7 @@ public class Aggregator {
 				Level level = check.getLevel();
 				
 				Status status = result.getStatus();
-				String message = result.getMessage();
+				String output = result.getOutput();
 				String value = result.getValue();
 				
 				Metadata metadata = run.getMetadata();
@@ -391,7 +391,7 @@ public class Aggregator {
 						environment,
 						level,
 						status,
-						message,
+						output,
 						value,
 						timestamp,
 						

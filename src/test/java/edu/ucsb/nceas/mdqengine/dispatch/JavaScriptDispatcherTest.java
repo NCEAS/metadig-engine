@@ -54,7 +54,7 @@ public class JavaScriptDispatcherTest {
 				+ "var Result = Java.type('edu.ucsb.nceas.mdqengine.model.Result');"
 				+ "mdq_result = new Result();"
 				+ "mdq_result.value = (x == y);"
-				+ "mdq_result.message = 'Testing the result object';"
+				+ "mdq_result.output = 'Testing the result object';"
 				+ "mdq_result.status = Java.type('edu.ucsb.nceas.mdqengine.model.Status').SUCCESS;"
 				;
 		Result result = null;

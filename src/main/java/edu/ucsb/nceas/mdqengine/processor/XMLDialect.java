@@ -123,7 +123,7 @@ public class XMLDialect {
 						// nothing to inherit
 						result = new Result();
 						result.setStatus(Status.ERROR);
-						result.setMessage("Check cannot use persistent state from previous differing environment");
+						result.setOutput("Check cannot use persistent state from previous differing environment");
 						return result;
 					} else {
 						
@@ -161,7 +161,7 @@ public class XMLDialect {
 					// report this
 					result = new Result();
 					result.setStatus(Status.ERROR);
-					result.setMessage(e.getMessage());
+					result.setOutput(e.getMessage());
 				}
 			}
 			
@@ -171,14 +171,14 @@ public class XMLDialect {
 				// report this
 				result = new Result();
 				result.setStatus(Status.ERROR);
-				result.setMessage(e.getMessage());
+				result.setOutput(e.getMessage());
 			}
 	
 		} else {
 			// we just skip instead
 			result = new Result();
 			result.setStatus(Status.SKIP);
-			result.setMessage("Dialect for this check is not supported");
+			result.setOutput("Dialect for this check is not supported");
 		}
 		
 		// set additional info before returning

@@ -99,8 +99,8 @@ public class RDispatcherTest {
 		String code = ""
 				+ "value <- TRUE;"
 				+ "status <- \"FAILURE\" \n"
-		        + "message <- \"The packageId value should match the pattern 'scope.identifier.revision'\" \n"
-		        + "mdq_result <- list(status=status, message=message, value=value) \n"
+		        + "output <- \"The packageId value should match the pattern 'scope.identifier.revision'\" \n"
+		        + "mdq_result <- list(status=status, output=output, value=value) \n"
 		        ;
 		Result result = null;
 		try {
