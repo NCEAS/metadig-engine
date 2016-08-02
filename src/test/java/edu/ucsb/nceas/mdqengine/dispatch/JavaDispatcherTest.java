@@ -35,6 +35,6 @@ public class JavaDispatcherTest {
 			e.printStackTrace();
 			fail(e.getMessage());
 		}
-		assertEquals("true", result.getValue());
+		assertEquals("true", result.getOutput());
 	}
 }

@@ -7,20 +7,11 @@ public class Result {
 	private Check check;
 		
 	private Date timestamp;
-	
-	private String value;
-	
+		
 	private String output;
 	
 	private Status status;
 
-	public String getValue() {
-		return value;
-	}
-
-	public void setValue(String value) {
-		this.value = value;
-	}
 
 	public String getOutput() {
 		return output;

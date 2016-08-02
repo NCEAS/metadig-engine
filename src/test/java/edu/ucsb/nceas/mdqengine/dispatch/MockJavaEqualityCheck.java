@@ -14,7 +14,7 @@ public class MockJavaEqualityCheck implements Callable<Result> {
 	public Result call() throws Exception {
 		Boolean result = (x == y);
 		Result dr = new Result();
-		dr.setValue(result.toString());
+		dr.setOutput(result.toString());
 		return dr;
 	}
 	

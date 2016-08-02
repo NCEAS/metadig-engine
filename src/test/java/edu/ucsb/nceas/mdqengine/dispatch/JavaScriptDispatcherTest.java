@@ -15,6 +15,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import edu.ucsb.nceas.mdqengine.model.Result;
+import edu.ucsb.nceas.mdqengine.model.Status;
 
 public class JavaScriptDispatcherTest {
 	
@@ -42,7 +43,7 @@ public class JavaScriptDispatcherTest {
 			e.printStackTrace();
 			fail(e.getMessage());
 		}
-		assertEquals("true", result.getValue());
+		assertEquals("true", result.getOutput());
 	}
 	
 	@Test
@@ -53,8 +54,7 @@ public class JavaScriptDispatcherTest {
 		String code = ""
 				+ "var Result = Java.type('edu.ucsb.nceas.mdqengine.model.Result');"
 				+ "mdq_result = new Result();"
-				+ "mdq_result.value = (x == y);"
-				+ "mdq_result.output = 'Testing the result object';"
+				+ "mdq_result.output = 'Testing the result object, x equals y';"
 				+ "mdq_result.status = Java.type('edu.ucsb.nceas.mdqengine.model.Status').SUCCESS;"
 				;
 		Result result = null;
@@ -65,7 +65,7 @@ public class JavaScriptDispatcherTest {
 			e.printStackTrace();
 			fail(e.getMessage());
 		}
-		assertEquals("true", result.getValue());
+		assertEquals(Status.SUCCESS, result.getStatus());
 	}
 	
 	@Test
@@ -83,7 +83,7 @@ public class JavaScriptDispatcherTest {
 			e.printStackTrace();
 			fail(e.getMessage());
 		}
-		assertEquals("true", result.getValue());
+		assertEquals("true", result.getOutput());
 	}
 	
 	@Test
@@ -105,6 +105,6 @@ public class JavaScriptDispatcherTest {
 			fail(e.getMessage());
 		}
 		// make sure the file is named as expected
-		assertTrue(result.getValue().endsWith(DigestUtils.md5Hex(dataUrl)));
+		assertTrue(result.getOutput().endsWith(DigestUtils.md5Hex(dataUrl)));
 	}
 }

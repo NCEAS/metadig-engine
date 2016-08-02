@@ -92,7 +92,7 @@ public class Dispatcher {
 				dr = (Result) var;
 			} else {
 				
-				dr.setValue(res.toString());
+				dr.setOutput(res.toString());
 				
 				// try to find other result items
 				var = engine.get("output");

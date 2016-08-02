@@ -38,7 +38,7 @@ public class JavaDispatcher extends Dispatcher {
 			throw new ScriptException(e);
 		}
 		
-		log.debug("Result: " + result.getValue());
+		log.debug("Result: " + result.getStatus());
 
 		return result;
 	}

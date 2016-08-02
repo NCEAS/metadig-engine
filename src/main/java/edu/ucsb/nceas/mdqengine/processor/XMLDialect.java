@@ -193,8 +193,8 @@ public class XMLDialect {
 	
 	private Result postProcess(Result result) {
 	
-		// check if we need to encode the value
-		String value = result.getValue();
+		// check if we need to encode the output value
+		String value = result.getOutput();
 		if (value != null) {
 			Path path = null;
 			try {
@@ -209,7 +209,7 @@ public class XMLDialect {
 				String encoded = null;
 				try {
 					encoded = Base64.encodeBase64String(value.getBytes("UTF-8"));
-					result.setValue(encoded);
+					result.setOutput(encoded);
 					//TODO: set mime-type when we have support for that
 				} catch (UnsupportedEncodingException e) {
 					log.error(e.getMessage());

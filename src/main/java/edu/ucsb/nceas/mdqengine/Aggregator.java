@@ -58,7 +58,6 @@ public class Aggregator {
 		"level",
 		"status",
 		"output",
-		"value",
 		"timestamp",
 		"pid",
 		"formatId",
@@ -367,7 +366,6 @@ public class Aggregator {
 				
 				Status status = result.getStatus();
 				String output = result.getOutput();
-				String value = result.getValue();
 				
 				Metadata metadata = run.getMetadata();
 				String formatId = null;
@@ -392,7 +390,6 @@ public class Aggregator {
 						level,
 						status,
 						output,
-						value,
 						timestamp,
 						
 						// document  info

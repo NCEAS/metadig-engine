@@ -37,7 +37,7 @@ public class RenjinDispatcherTest {
 			e.printStackTrace();
 			fail(e.getMessage());
 		}
-		assertEquals("TRUE", result.getValue());
+		assertEquals("TRUE", result.getOutput());
 	}
 	
 	@Test
@@ -55,7 +55,7 @@ public class RenjinDispatcherTest {
 			e.printStackTrace();
 			fail(e.getMessage());
 		}
-		assertEquals("TRUE", result.getValue());
+		assertEquals("TRUE", result.getOutput());
 	}
 	
 	@Test
@@ -96,7 +96,7 @@ public class RenjinDispatcherTest {
 			e.printStackTrace();
 			fail(e.getMessage());
 		}
-		assertEquals("TRUE", result.getValue());
+		assertEquals("TRUE", result.getOutput());
 	}
 
 }

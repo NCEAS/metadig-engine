@@ -16,6 +16,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import edu.ucsb.nceas.mdqengine.model.Result;
+import edu.ucsb.nceas.mdqengine.model.Status;
 import edu.ucsb.nceas.mdqengine.processor.XMLDialect;
 
 public class PythonDispatcherTest {
@@ -47,7 +48,7 @@ public class PythonDispatcherTest {
 			e.printStackTrace();
 			fail(e.getMessage());
 		}
-		assertEquals("true", result.getValue());
+		assertEquals("true", result.getOutput());
 	}
 	
 	@Test
@@ -58,8 +59,7 @@ public class PythonDispatcherTest {
 		String code = "def call(): \n"
 				+ "  from edu.ucsb.nceas.mdqengine.model import Result \n"
 				+ "  mdq_result = Result() \n"
-				+ "  mdq_result.setValue(str(x == y)) \n"
-				+ "  mdq_result.setOutput(\"Testing the result object\") \n"
+				+ "  mdq_result.setOutput(\"Testing the result object, X equals Y\") \n"
 				+ "  from edu.ucsb.nceas.mdqengine.model import Status \n"
 				+ "  mdq_result.setStatus(Status.SUCCESS) \n"
 				+ "  return (mdq_result) \n"
@@ -72,7 +72,7 @@ public class PythonDispatcherTest {
 			e.printStackTrace();
 			fail(e.getMessage());
 		}
-		assertEquals("True", result.getValue());
+		assertEquals(Status.SUCCESS, result.getStatus());
 	}
 	
 	@Test
@@ -89,7 +89,7 @@ public class PythonDispatcherTest {
 			e.printStackTrace();
 			fail(e.getMessage());
 		}
-		assertEquals("true", result.getValue());
+		assertEquals("true", result.getOutput());
 	}
 	
 	@Test
@@ -108,7 +108,7 @@ public class PythonDispatcherTest {
 			e.printStackTrace();
 			fail(e.getMessage());
 		}
-		assertEquals("true", result.getValue());
+		assertEquals("true", result.getOutput());
 	}
 	@Test
 	public void testNullArg() {
@@ -124,7 +124,7 @@ public class PythonDispatcherTest {
 			e.printStackTrace();
 			fail(e.getMessage());
 		}
-		assertEquals("true", result.getValue());
+		assertEquals("true", result.getOutput());
 	}
 	
 	@Test
@@ -148,6 +148,6 @@ public class PythonDispatcherTest {
 			fail(e.getMessage());
 		}
 		// make sure the file is named as expected
-		assertTrue(result.getValue().endsWith(DigestUtils.md5Hex(dataUrl)));
+		assertTrue(result.getOutput().endsWith(DigestUtils.md5Hex(dataUrl)));
 	}
 }

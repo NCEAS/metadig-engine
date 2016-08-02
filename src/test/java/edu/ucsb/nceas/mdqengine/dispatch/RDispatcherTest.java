@@ -42,7 +42,7 @@ public class RDispatcherTest {
 			e.printStackTrace();
 			fail(e.getMessage());
 		}
-		assertEquals("true", result.getValue());
+		assertEquals("true", result.getOutput());
 	}
 	
 	@Test
@@ -60,7 +60,7 @@ public class RDispatcherTest {
 		names.put("x", list);
 		names.put("length", 2);
 		String code = 
-				"mdq_result = list(value = (length(x) == length) );";
+				"mdq_result = list(output = (length(x) == length) );";
 		Result result = null;
 		try {
 			result = dispatcher.dispatch(names, code);
@@ -69,7 +69,7 @@ public class RDispatcherTest {
 			e.printStackTrace();
 			fail(e.getMessage());
 		}
-		assertEquals("true", result.getValue());
+		assertEquals("true", result.getOutput());
 	}
 	
 	@Test
@@ -79,7 +79,7 @@ public class RDispatcherTest {
 		names.put("y", 2);
 		String code = 
 				"call <- function() { return (x == y) } \n"
-				+ "mdq_result = list(value=call());";
+				+ "mdq_result = list(output=call());";
 		Result result = null;
 		try {
 			result = dispatcher.dispatch(names, code);
@@ -88,7 +88,7 @@ public class RDispatcherTest {
 			e.printStackTrace();
 			fail(e.getMessage());
 		}
-		assertEquals("true", result.getValue());
+		assertEquals("true", result.getOutput());
 	}
 	
 	@Test
@@ -97,10 +97,9 @@ public class RDispatcherTest {
 		names.put("x", 2);
 		names.put("y", 2);
 		String code = ""
-				+ "value <- TRUE;"
 				+ "status <- \"FAILURE\" \n"
 		        + "output <- \"The packageId value should match the pattern 'scope.identifier.revision'\" \n"
-		        + "mdq_result <- list(status=status, output=output, value=value) \n"
+		        + "mdq_result <- list(status=status, output=output) \n"
 		        ;
 		Result result = null;
 		try {
@@ -110,7 +109,7 @@ public class RDispatcherTest {
 			e.printStackTrace();
 			fail(e.getMessage());
 		}
-		assertEquals("true", result.getValue());
+		assertEquals(Status.FAILURE, result.getStatus());
 	}
 	
 	@Test
@@ -146,7 +145,7 @@ public class RDispatcherTest {
 				"library(RCurl); \n"
 				+ "myCsv <- getURL(dataUrl); \n"
 				+ "df <- read.csv(textConnection(myCsv), header=header, sep=sep); "
-				+ "mdq_result = list(value = (nrow(df) == expected) )";
+				+ "mdq_result = list(output = (nrow(df) == expected) )";
 		Result result = null;
 		try {
 			result = dispatcher.dispatch(names, code);
@@ -155,7 +154,7 @@ public class RDispatcherTest {
 			e.printStackTrace();
 			fail(e.getMessage());
 		}
-		assertEquals("true", result.getValue());
+		assertEquals("true", result.getOutput());
 	}
 
 }

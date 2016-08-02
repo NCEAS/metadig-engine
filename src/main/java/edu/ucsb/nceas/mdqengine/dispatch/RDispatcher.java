@@ -36,7 +36,7 @@ public class RDispatcher extends Dispatcher {
 		
 		String postCode =
 				"\n"
-				+ "if(!any(grepl('mdq_result', ls()))) mdq_result <- list(value=.Last.value); \n"
+				+ "if(!any(grepl('mdq_result', ls()))) mdq_result <- list(output=.Last.value); \n"
 				+ "jsonResult <- toJSON(mdq_result, auto_unbox=TRUE); \n"
 				+ "writeLines(jsonResult, con = mdq_outputPath); \n";
 		
@@ -97,7 +97,6 @@ public class RDispatcher extends Dispatcher {
 		
 		result.setTimestamp(Calendar.getInstance().getTime());
 		
-		log.debug("Result value: " + result.getValue());
 		log.debug("Result status: " + result.getStatus());
 		log.debug("Result output: " + result.getOutput());
 
