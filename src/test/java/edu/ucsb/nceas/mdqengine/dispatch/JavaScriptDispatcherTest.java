@@ -52,10 +52,10 @@ public class JavaScriptDispatcherTest {
 		names.put("y", 2);
 		String code = ""
 				+ "var Result = Java.type('edu.ucsb.nceas.mdqengine.model.Result');"
-				+ "result = new Result();"
-				+ "result.value = (x == y);"
-				+ "result.message = 'Testing the result object';"
-				+ "result.status = Java.type('edu.ucsb.nceas.mdqengine.model.Status').SUCCESS;"
+				+ "mdq_result = new Result();"
+				+ "mdq_result.value = (x == y);"
+				+ "mdq_result.message = 'Testing the result object';"
+				+ "mdq_result.status = Java.type('edu.ucsb.nceas.mdqengine.model.Status').SUCCESS;"
 				;
 		Result result = null;
 		try {

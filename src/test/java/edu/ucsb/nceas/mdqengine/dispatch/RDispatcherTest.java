@@ -60,7 +60,7 @@ public class RDispatcherTest {
 		names.put("x", list);
 		names.put("length", 2);
 		String code = 
-				"result = list(value = (length(x) == length) );";
+				"mdq_result = list(value = (length(x) == length) );";
 		Result result = null;
 		try {
 			result = dispatcher.dispatch(names, code);
@@ -79,7 +79,7 @@ public class RDispatcherTest {
 		names.put("y", 2);
 		String code = 
 				"call <- function() { return (x == y) } \n"
-				+ "result = list(value=call());";
+				+ "mdq_result = list(value=call());";
 		Result result = null;
 		try {
 			result = dispatcher.dispatch(names, code);
@@ -100,8 +100,7 @@ public class RDispatcherTest {
 				+ "value <- TRUE;"
 				+ "status <- \"FAILURE\" \n"
 		        + "message <- \"The packageId value should match the pattern 'scope.identifier.revision'\" \n"
-		        + "result <- list(status=status, message=message, value=value) \n"
-				//+ "result <- list(value=value, message=message, status=status);"
+		        + "mdq_result <- list(status=status, message=message, value=value) \n"
 		        ;
 		Result result = null;
 		try {
@@ -147,7 +146,7 @@ public class RDispatcherTest {
 				"library(RCurl); \n"
 				+ "myCsv <- getURL(dataUrl); \n"
 				+ "df <- read.csv(textConnection(myCsv), header=header, sep=sep); "
-				+ "result = list(value = (nrow(df) == expected) )";
+				+ "mdq_result = list(value = (nrow(df) == expected) )";
 		Result result = null;
 		try {
 			result = dispatcher.dispatch(names, code);

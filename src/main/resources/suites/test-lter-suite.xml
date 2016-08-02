@@ -51,8 +51,8 @@ check <- function() {
     if (! grepl("^[a-zA-Z0-9_\\-]+\\.\\d+\\.\\d+", packageId, perl = TRUE, fixed = FALSE)) {
         status <- "FAILURE";
         message <- "The packageId value should match the pattern 'scope.identifier.revision'";
-        result <- list(status=status, message=message)
-        return (result);
+        mdq_result <- list(status=status, message=message)
+        return (mdq_result);
     }
     
     tokens = unlist(strsplit(packageId, "\\.", fixed = FALSE, perl = TRUE, useBytes = FALSE))
@@ -65,24 +65,22 @@ check <- function() {
     if (grepl("^0", identifier)) {
         status <- "FAILURE"
         message <- "A leading zero was found in the identifier. The identifier value must be a whole number."
-        result <- list(status=status, message=message)
-    	return (result)
+        mdq_result <- list(status=status, message=message)
+    	return (mdq_result)
     }
     
     if (grepl("^0", revision)) {
         message <- "A leading zero was found in the revision. The revision value must be a whole number."
         status <- "FAILURE"
-        result <- list(status=status, message=message)
-    	return (result)
+        mdq_result <- list(status=status, message=message)
+    	return (mdq_result)
     }
     
-    result <- list(status=status, message=message)
-    return (result)
+    mdq_result <- list(status=status, message=message)
+    return (mdq_result)
 }
 
-result <- check()
-#status <- result[[1]]
-#message <- result[[2]]
+mdq_result <- check()
       ]]></code>
 	</check>
 
@@ -144,13 +142,11 @@ check <- function() {
         status <- "FAILURE"
         message <- "A methods element is not present"
     }
-    result <- list(status=status, message=message)
-    return (result)
+    mdq_result <- list(status=status, message=message)
+    return (mdq_result)
 }
 
-result <- check()
-#status <- result[[1]]
-#message <- result[[2]]
+mdq_result <- check()
       ]]></code>
 	</check>
 	<check>
@@ -176,21 +172,21 @@ def call():
   global status
   status = "ERROR"
   
-  # Check if the mdq set our xpath result 
+  # Check if the mdq set our xpath mdq_result 
   if 'coverages' not in globals():
-    result = False
+    mdq_result = False
     message = "A coverage element is not present"
     status = "SUCCESS"
   elif(len(coverages) > 0):
-    result = True
+    mdq_result = True
     message = "A coverage element is not present"
     status = "SUCCESS"
   else:
-    result = False
+    mdq_result = False
     message = "A coverage element is not present"
     status = "FAILURE"
       
-  return(result)
+  return(mdq_result)
       ]]></code>
 	</check>
 
@@ -232,7 +228,7 @@ def call():
   # dataset level, then one must be present at either at the entity
   # level (for at least one entity) or at the attribute level (for
   # at least on attribute). 
-  # Check if the mdq set the result for our xpath selector
+  # Check if the mdq set the mdq_result for our xpath selector
 
   # Check if the scripting engine has set each value that we are looking
   # for.
@@ -298,7 +294,7 @@ def call():
   # dataset level, then one must be present at either at the entity
   # level (for at least one entity) or at the attribute level (for
   # at least on attribute). 
-  # Check if the mdq set the result for our xpath selector
+  # Check if the mdq set the mdq_result for our xpath selector
 
   if datasetTaxonomicCoverage:
     message = "A coverage is present at the dataset level."
@@ -418,21 +414,21 @@ def call():
     if numWords < 7: 
       message = "The dataset title is less that 7 words."
       status = "FAILURE"
-      result = False
+      mdq_result = False
     elif numWords > 20: 
       message = "The dataset title is greater than 20 words."
       status = "FAILURE"
-      result = False
+      mdq_result = False
     else:
       message = "The dataset title is between 7 and 20 words (count=%s)." % numWords
       status = "SUCCESS"
-      result = True
+      mdq_result = True
   else:
     message = "No title element is present."
     status = "FAILURE"
-    result = False
+    mdq_result = False
     
-  return result
+  return mdq_result
       ]]></code>
 	</check>
 
@@ -463,17 +459,17 @@ def call():
     if (pubDateLength < 4):
       message = "The publication date (pubDate) is less that 4 characters long."
       status = "FAILURE"
-      result = False
+      mdq_result = False
     else:
       message = "The publication date length of %s is valid" % pubDateLength
       status = "SUCCESS"
-      result = True
+      mdq_result = True
   else:
     message = "No publication date is present."
     status = "FAILURE"
-    result = False
+    mdq_result = False
     
-  return result
+  return mdq_result
       ]]></code>
 	</check>
 
@@ -513,13 +509,13 @@ def call():
   if (numWords < 20):
     message = "The abstract is less that 20 words long."
     status = "FAILURE"
-    result = False
+    mdq_result = False
   else:
     message = "The abstract is valid, with a word count of %s" % numWords
     status = "SUCCESS"
-    result = True
+    mdq_result = True
       
-  return result
+  return mdq_result
       ]]></code>
 	</check>
 
@@ -888,13 +884,13 @@ def call():
   if len(missing) > 0:
     status = "FAILURE"
     message = "Entities without 'numHeaderLines': %s" % ", ".join(missing)
-    result = False
+    mdq_result = False
   else:
     status = "SUCCESS"
     message = "All entities have 'numHeaderLines'"
-    result = True
+    mdq_result = True
 
-  return result 
+  return mdq_result 
       ]]></code>
 	</check>
 
@@ -946,13 +942,13 @@ def call():
   if len(missing) > 0:
     status = "FAILURE"
     message = "Entities without 'numFooterLines': %s" % ", ".join(missing)
-    result = False
+    mdq_result = False
   else:
     status = "SUCCESS"
     message = "All entities have 'numFooterLines'"
-    result = True
+    mdq_result = True
 
-  return result 
+  return mdq_result 
       ]]></code>
 	</check>
 
@@ -1008,13 +1004,13 @@ def call():
   if len(invalid) > 0:
     status = "FAILURE"
     message = "Entities with invalid or missing 'fieldDelimiter': %s" % ", ".join(invalid)
-    result = False
+    mdq_result = False
   else:
     status = "SUCCESS"
     message = "All entities have 'fieldDelimiter'"
-    result = True
+    mdq_result = True
 
-  return result 
+  return mdq_result 
       ]]></code>
 	</check>
 
@@ -1079,13 +1075,13 @@ def call():
   if len(invalid) > 0:
     status = "FAILURE"
     message = "Entities with invalid or missing 'recordDelimiter': %s" % ", ".join(invalid)
-    result = False
+    mdq_result = False
   else:
     status = "SUCCESS"
     message = "All entities have a valid 'recordDelimiter'."
-    result = True
+    mdq_result = True
   
-  return result 
+  return mdq_result 
       ]]></code>
 	</check>
 
@@ -1143,13 +1139,13 @@ def call():
   if len(invalid) > 0:
     status = "FAILURE"
     message = "Entities with duplicate attribute names: %s" % ", ".join(invalid)
-    result = False
+    mdq_result = False
   else:
     status = "SUCCESS"
     message = "Each of the %d entities has unique attribute names" % entityCount
-    result = True
+    mdq_result = True
   
-  return result 
+  return mdq_result 
       ]]></code>
 	</check>
 </suite>

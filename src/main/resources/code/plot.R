@@ -45,4 +45,4 @@ ggsave(filename = outputPath,
        height = 5)
 
 # Pass on result
-result = list(value = outputPath, status="SUCCESS", message="See output path for plot." );
+mdq_result = list(value = outputPath, status="SUCCESS", message="See output path for plot." );

@@ -57,12 +57,12 @@ public class PythonDispatcherTest {
 		names.put("y", 2);
 		String code = "def call(): \n"
 				+ "  from edu.ucsb.nceas.mdqengine.model import Result \n"
-				+ "  result = Result() \n"
-				+ "  result.setValue(str(x == y)) \n"
-				+ "  result.setMessage(\"Testing the result object\") \n"
+				+ "  mdq_result = Result() \n"
+				+ "  mdq_result.setValue(str(x == y)) \n"
+				+ "  mdq_result.setMessage(\"Testing the result object\") \n"
 				+ "  from edu.ucsb.nceas.mdqengine.model import Status \n"
-				+ "  result.setStatus(Status.SUCCESS) \n"
-				+ "  return (result) \n"
+				+ "  mdq_result.setStatus(Status.SUCCESS) \n"
+				+ "  return (mdq_result) \n"
 				;
 		Result result = null;
 		try {

@@ -36,8 +36,8 @@ public class RDispatcher extends Dispatcher {
 		
 		String postCode =
 				"\n"
-				+ "if(!any(grepl('result', ls()))) result <- list(value=.Last.value); \n"
-				+ "jsonResult <- toJSON(result, auto_unbox=TRUE); \n"
+				+ "if(!any(grepl('mdq_result', ls()))) mdq_result <- list(value=.Last.value); \n"
+				+ "jsonResult <- toJSON(mdq_result, auto_unbox=TRUE); \n"
 				+ "writeLines(jsonResult, con = output); \n";
 		
 		try {

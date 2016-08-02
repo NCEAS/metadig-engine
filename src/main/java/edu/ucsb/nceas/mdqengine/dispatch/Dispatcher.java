@@ -84,7 +84,7 @@ public class Dispatcher {
 		} else {
 		
 			// do we have a result object?
-			Object var = engine.get("result");
+			Object var = engine.get("mdq_result");
 			if (var != null && !var.toString().equals("<unbound>")) {
 				log.debug("result is: " + var);
 				log.debug("result is class: " + var.getClass());
