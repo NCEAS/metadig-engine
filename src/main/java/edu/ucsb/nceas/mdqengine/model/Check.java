@@ -29,8 +29,6 @@ public class Check {
 	
 	private boolean inheritState = false;
 	
-	private String expected;
-
 	private List<Selector> selector;
 	
 	private List<Dialect> dialect;
@@ -105,14 +103,6 @@ public class Check {
 
 	public void setDialect(List<Dialect> dialect) {
 		this.dialect = dialect;
-	}
-
-	public String getExpected() {
-		return expected;
-	}
-
-	public void setExpected(String expected) {
-		this.expected = expected;
 	}
 
 	public URL getLibrary() {

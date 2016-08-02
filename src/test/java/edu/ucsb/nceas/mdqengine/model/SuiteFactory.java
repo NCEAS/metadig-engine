@@ -42,8 +42,7 @@ public class SuiteFactory {
 		s1.setXpath("//dataset/title");
 		selectors.add(s1);
 		titleCheck.setSelector(selectors);
-		titleCheck.setCode("nchar(title) > 10");
-		titleCheck.setExpected("TRUE");
+		titleCheck.setCode("status <- ifelse( nchar(title) > 10, 'SUCCESS', 'FAILURE')");
 		checks.add(titleCheck);
 
 		// entityCount
@@ -58,8 +57,7 @@ public class SuiteFactory {
 		s1.setXpath("count(//dataset/dataTable | //dataset/otherEntity)");
 		selectors.add(s1);
 		entityCount.setSelector(selectors);
-		entityCount.setCode("entityCount > 0");
-		entityCount.setExpected("true");
+		entityCount.setCode("status = (entityCount > 0 ? 'SUCCESS' : 'FAILURE')");
 		checks.add(entityCount);
 
 		// attributeNames
@@ -74,8 +72,7 @@ public class SuiteFactory {
 		s1.setXpath("//attribute/attributeName");
 		selectors.add(s1);
 		attributeNames.setSelector(selectors);
-		attributeNames.setCode("any(duplicated(attributeNames))");
-		attributeNames.setExpected("FALSE");
+		attributeNames.setCode("status <- ifelse(any(duplicated(attributeNames)), 'FAILURE', 'SUCCESS')");
 		checks.add(attributeNames);
 
 		suite.setCheck(checks);

@@ -1,3 +1,3 @@
 call <- function() {
-    return (entityCount > 0);
-}
+    return (ifelse(entityCount > 0, 'SUCCESS', 'FAILURE'));
+};

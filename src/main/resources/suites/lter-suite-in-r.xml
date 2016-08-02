@@ -6,7 +6,6 @@
     <check>
       <name>package_id_pattern</name>
       <level>ERROR</level>
-      <expected>true</expected>
       <selector>
           <name>package_id</name>
           <xpath>/eml/@packageId</xpath>
@@ -20,7 +19,6 @@
     <check>
       <name>eml_version</name>
       <level>ERROR</level>
-      <expected>true</expected>
       <selector>
           <name>eml_version</name>
           <xpath>/eml/namespace::*[name()='eml']</xpath>
@@ -34,7 +32,6 @@
     <check>
       <name>methods_element_present</name>
       <level>ERROR</level>
-      <expected>TRUE</expected>
       <selector>
           <name>methods</name>
           <xpath>/eml/dataset/methods</xpath>
@@ -48,7 +45,6 @@
     <check>
       <name>title_length_is_sufficient</name>
       <level>ERROR</level>
-      <expected>TRUE</expected>
       <selector>
           <name>title</name>
           <xpath>/eml/dataset/title</xpath>
@@ -63,7 +59,6 @@
     <check>
       <name>dataset_abstract_length_is_sufficient</name>
       <level>ERROR</level>
-      <expected>TRUE</expected>
       <selector>
           <name>abstract</name>
           <xpath>/eml/dataset/abstract</xpath>

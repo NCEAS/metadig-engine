@@ -174,15 +174,6 @@ public class XMLDialect {
 				result.setMessage(e.getMessage());
 			}
 	
-			// set the status if it has not been set already
-			if (result.getStatus() == null && check.getExpected() != null) {
-				if (result.getValue().equals(check.getExpected())) {
-					result.setStatus(Status.SUCCESS);
-				} else {
-					result.setStatus(Status.FAILURE);
-				}
-				
-			}
 		} else {
 			// we just skip instead
 			result = new Result();

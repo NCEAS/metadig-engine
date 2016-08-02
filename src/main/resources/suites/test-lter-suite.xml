@@ -96,7 +96,6 @@ result <- check()
 			<xpath>boolean(/*[local-name() = 'eml'])</xpath>
 		</dialect>
 		<type>metadata</type>
-		<expected>true</expected>
 		<level>WARN</level>
 		<selector>
 			<name>keywords</name>
@@ -130,7 +129,6 @@ def call():
 			<xpath>boolean(/*[local-name() = 'eml'])</xpath>
 		</dialect>
 		<type>metadata</type>
-		<expected>true</expected>
 		<level>WARN</level>
 		<selector>
 			<name>methods</name>
@@ -165,7 +163,6 @@ result <- check()
 		</dialect>
 		<type>metadata</type>
 		<level>WARN</level>
-		<expected>true</expected>
 		<selector>
 			<name>coverages</name>
 			<xpath>/eml/dataset/coverage/geographicCoverage |
@@ -207,7 +204,6 @@ def call():
 		</dialect>
 		<type>metadata</type>
 		<level>INFO</level>
-		<expected>true</expected>
 		<!-- Geographic coverage at the dataset level -->
 		<selector>
 			<name>datasetGeographicCoverage</name>
@@ -274,7 +270,6 @@ def call():
 		</dialect>
 		<type>metadata</type>
 		<level>INFO</level>
-		<expected>true</expected>
 		<!-- Taxonomic coverage at the dataset level -->
 		<selector>
 			<name>datasetTaxonomicCoverage</name>
@@ -339,7 +334,6 @@ def call():
 		</dialect>
 		<type>metadata</type>
 		<level>INFO</level>
-		<expected>true</expected>
 		<!-- Temporal coverage at the dataset level -->
 		<selector>
 			<name>datasetTemporalCoverage</name>
@@ -407,7 +401,6 @@ def call():
 		</dialect>
 		<type>metadata</type>
 		<level>WARN</level>
-		<expected>true</expected>
 		<selector>
 			<name>title</name>
 			<xpath>/*[local-name() = 'eml']/dataset/title</xpath>
@@ -453,7 +446,6 @@ def call():
 		</dialect>
 		<type>metadata</type>
 		<level>WARN</level>
-		<expected>true</expected>
 		<selector>
 			<name>pubDate</name>
 			<xpath>/*[local-name() = 'eml']/dataset/pubDate</xpath>
@@ -495,7 +487,6 @@ def call():
 		</dialect>
 		<type>metadata</type>
 		<level>WARN</level>
-		<expected>true</expected>
 		<selector>
 			<name>abstract</name>
 			<xpath>/eml/dataset/abstract</xpath>
@@ -542,7 +533,6 @@ def call():
 		</dialect>
 		<type>congruency</type>
 		<level>SEVERE</level>
-		<expected>false</expected>
 		<selector>
 			<name>entityCount</name>
 			<xpath>count(/eml/dataset/dataTable)</xpath>
@@ -660,7 +650,6 @@ def call():
 		</dialect>
 		<type>congruency</type>
 		<level>INFO</level>
-		<expected>false</expected>
 		<selector>
 			<name>entityCount</name>
 			<xpath>count(/eml/dataset/dataTable)</xpath>
@@ -772,7 +761,6 @@ def call():
 		</dialect>
 		<type>metadata</type>
 		<level>INFO</level>
-		<expected>false</expected>
 		<selector>
 			<name>entityCount</name>
 			<xpath>count(/eml/dataset/dataTable)</xpath>
@@ -818,7 +806,6 @@ def call():
 		</dialect>
 		<type>metadata</type>
 		<level>WARN</level>
-		<expected>true</expected>
 		<selector>
 			<name>entityCount</name>
 			<xpath>count(/eml/dataset/dataTable)</xpath>
@@ -861,7 +848,6 @@ def call():
 		</dialect>
 		<type>metadata</type>
 		<level>INFO</level>
-		<expected>true</expected>
 		<selector>
 			<name>entityCount</name>
 			<xpath>count(/eml/dataset/dataTable)</xpath>
@@ -922,7 +908,6 @@ def call():
 		</dialect>
 		<type>metadata</type>
 		<level>INFO</level>
-		<expected>true</expected>
 		<selector>
 			<name>entityCount</name>
 			<xpath>count(/eml/dataset/dataTable)</xpath>
@@ -981,7 +966,6 @@ def call():
 		</dialect>
 		<type>metadata</type>
 		<level>INFO</level>
-		<expected>true</expected>
 		<selector>
 			<name>entityCount</name>
 			<xpath>count(/eml/dataset/dataTable)</xpath>
@@ -1044,7 +1028,6 @@ def call():
 		</dialect>
 		<type>metadata</type>
 		<level>INFO</level>
-		<expected>true</expected>
 		<selector>
 			<name>entityCount</name>
 			<xpath>count(/eml/dataset/dataTable)</xpath>
@@ -1116,7 +1099,6 @@ def call():
 		</dialect>
 		<type>metadata</type>
 		<level>WARN</level>
-		<expected>true</expected>
 		<selector>
 			<name>entityCount</name>
 			<xpath>count(/eml/dataset/dataTable)</xpath>

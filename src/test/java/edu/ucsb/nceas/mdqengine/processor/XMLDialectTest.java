@@ -47,8 +47,7 @@ public class XMLDialectTest {
 		selectors.add(selector);
 		complexCheck.setSelector(selectors);
 		
-		complexCheck.setCode("class(entityListOfAttributes) == \"list\" && class(entityListOfAttributes[[1]]) == \"list\"");
-		complexCheck.setExpected("TRUE");
+		complexCheck.setCode("status <- ifelse(class(entityListOfAttributes) == \"list\" && class(entityListOfAttributes[[1]]) == \"list\", 'SUCCESS', 'FAILURE')");
 		complexCheck.setEnvironment("r");
 		complexCheck.setLevel(Level.INFO);
 		complexCheck.setName("testing subselector");
@@ -103,8 +102,7 @@ public class XMLDialectTest {
 		selectors.add(selector);
 		check.setSelector(selectors);
 		
-		check.setCode("entityCount > 0");
-		check.setExpected("TRUE");
+		check.setCode("status <- ifelse(entityCount > 0, 'SUCCESS', 'FAILURE')");
 		check.setEnvironment("r");
 		check.setLevel(Level.INFO);
 		check.setName("testing dialect skipping");
@@ -225,11 +223,10 @@ public class XMLDialectTest {
 		check.setSelector(selectors);
 		
 		// the library has the code, so we'll just let that do everything
-		check.setCode("");
+		check.setCode("status <- call(); ");
 		
 		URL library = this.getClass().getResource("/code/sampleLib.R");
 		check.setLibrary(library);
-		check.setExpected("TRUE");
 		
 		check.setEnvironment("r");
 		check.setLevel(Level.WARN);
@@ -266,8 +263,7 @@ public class XMLDialectTest {
 		selectors.add(selector);
 		check.setSelector(selectors);
 		
-		check.setCode("entityCount > 0");
-		check.setExpected("TRUE");
+		check.setCode("status <- ifelse(entityCount > 0, 'SUCCESS', 'FAILURE')");
 		check.setEnvironment("r");
 		check.setLevel(Level.INFO);
 		
@@ -305,7 +301,6 @@ public class XMLDialectTest {
 		check.setSelector(selectors);
 		
 		check.setCode("entityCount == 1");
-		check.setExpected("TRUE");
 		check.setEnvironment("r");
 		check.setLevel(Level.INFO);
 		check.setInheritState(true);
@@ -336,7 +331,6 @@ public class XMLDialectTest {
 		//check.setCode("title.length > 1");
 		check.setCode("String(title).length > 1");
 
-		check.setExpected("true");
 		check.setEnvironment("JavaScript");
 		check.setLevel(Level.INFO);
 		check.setInheritState(true);
@@ -361,8 +355,7 @@ public class XMLDialectTest {
 		Check check = new Check();
 		
 		check.setCode(
-				"x <- 1; x == 1");
-		check.setExpected("TRUE");
+				"x <- 1; status <- ifelse(x == 1, 'SUCCESS', 'FAILURE'); ");
 		check.setEnvironment("r");
 		check.setLevel(Level.INFO);
 		
@@ -391,9 +384,8 @@ public class XMLDialectTest {
 		// run yet another check using information from the previous check
 		check = new Check();
 		
-		check.setCode("x = x + 1; x == 2;");
+		check.setCode("x = x + 1; status = (x == 2 ? 'SUCCESS' : 'FAILURE');");
 
-		check.setExpected("true");
 		check.setEnvironment("JavaScript");
 		check.setLevel(Level.INFO);
 		check.setInheritState(true);

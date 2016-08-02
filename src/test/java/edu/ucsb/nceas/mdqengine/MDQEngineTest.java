@@ -8,19 +8,17 @@ import java.net.URL;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.dataone.client.v2.CNode;
-import org.dataone.client.v2.itk.D1Client;
 import org.dataone.configuration.Settings;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
 
 import edu.ucsb.nceas.mdqengine.model.Check;
-import edu.ucsb.nceas.mdqengine.model.Suite;
-import edu.ucsb.nceas.mdqengine.model.SuiteFactory;
 import edu.ucsb.nceas.mdqengine.model.Result;
 import edu.ucsb.nceas.mdqengine.model.Run;
+import edu.ucsb.nceas.mdqengine.model.Status;
+import edu.ucsb.nceas.mdqengine.model.Suite;
+import edu.ucsb.nceas.mdqengine.model.SuiteFactory;
 import edu.ucsb.nceas.mdqengine.processor.XMLDialect;
 import edu.ucsb.nceas.mdqengine.serialize.JsonMarshaller;
 import edu.ucsb.nceas.mdqengine.serialize.XmlMarshaller;
@@ -51,7 +49,7 @@ public class MDQEngineTest {
 			for (Check check: suite.getCheck()) {
 				Result result = xml.runCheck(check);
 				log.debug("Check result: " + JsonMarshaller.toJson(result));
-				assertEquals(check.getExpected(), result.getValue());
+				assertEquals(Status.SUCCESS, result.getStatus());
 				break;
 			}
 			
