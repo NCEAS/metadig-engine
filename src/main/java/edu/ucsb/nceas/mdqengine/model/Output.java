@@ -6,6 +6,8 @@ public class Output {
 	
 	private String type;
 
+	public Output() {}
+	
 	public Output(String value) {
 		this.value = value;
 	}

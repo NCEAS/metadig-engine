@@ -21,6 +21,10 @@ public class Result {
 	public void setOutput(Output... output) {
 		this.output = Arrays.asList(output);
 	}
+	
+	public void setOutput(List<Output> output) {
+		this.output = output;
+	}
 
 	public Status getStatus() {
 		return status;

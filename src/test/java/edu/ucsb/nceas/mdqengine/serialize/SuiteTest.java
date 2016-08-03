@@ -9,6 +9,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.junit.Test;
 
+import edu.ucsb.nceas.mdqengine.model.Run;
+import edu.ucsb.nceas.mdqengine.model.RunFactory;
 import edu.ucsb.nceas.mdqengine.model.SuiteFactory;
 import edu.ucsb.nceas.mdqengine.model.Suite;
 
@@ -54,6 +56,20 @@ public class SuiteTest {
 			log.debug("XML serialization: " + xml);
 			Suite r = (Suite) XmlMarshaller.fromXml(xml, Suite.class);
 			assertEquals(suite.getName(), r.getName());
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			fail(e.getMessage());
+		}
+		
+	}
+	
+	@Test
+	public void testRunXmlRoundTrip() {
+		Run run = RunFactory.getMockRun();
+		try {
+			String xml = XmlMarshaller.toXml(run);
+			log.debug("Run XML serialization: " + xml);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
