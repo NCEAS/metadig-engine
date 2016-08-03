@@ -10,6 +10,7 @@ import javax.script.ScriptException;
 
 import org.apache.commons.io.IOUtils;
 
+import edu.ucsb.nceas.mdqengine.model.Output;
 import edu.ucsb.nceas.mdqengine.model.Result;
 import edu.ucsb.nceas.mdqengine.model.Status;
 import edu.ucsb.nceas.mdqengine.serialize.JsonMarshaller;
@@ -36,7 +37,7 @@ public class RDispatcher extends Dispatcher {
 		
 		String postCode =
 				"\n"
-				+ "if(!any(grepl('mdq_result', ls()))) mdq_result <- list(output=.Last.value); \n"
+				+ "if(!any(grepl('mdq_result', ls()))) mdq_result <- list(output=list(list(value=.Last.value))); \n"
 				+ "jsonResult <- toJSON(mdq_result, auto_unbox=TRUE); \n"
 				+ "writeLines(jsonResult, con = mdq_outputPath); \n";
 		
@@ -79,10 +80,11 @@ public class RDispatcher extends Dispatcher {
 				// report an error
 				result = new Result();
 				result.setStatus(Status.ERROR);
-				result.setOutput(stdErr);
+				result.setOutput(new Output(stdErr));
 			} else {
 				// read result from output
 				String jsonOutput = IOUtils.toString(new FileInputStream(output), "UTF-8");
+				log.debug("jsonOutput=" + jsonOutput);
 				result = (Result) JsonMarshaller.fromJson(jsonOutput, Result.class);
 			}
 						

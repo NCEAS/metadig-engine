@@ -43,7 +43,7 @@ public class JavaScriptDispatcherTest {
 			e.printStackTrace();
 			fail(e.getMessage());
 		}
-		assertEquals("true", result.getOutput());
+		assertEquals("true", result.getOutput().get(0).getValue());
 	}
 	
 	@Test
@@ -53,8 +53,9 @@ public class JavaScriptDispatcherTest {
 		names.put("y", 2);
 		String code = ""
 				+ "var Result = Java.type('edu.ucsb.nceas.mdqengine.model.Result');"
+				+ "var Output = Java.type('edu.ucsb.nceas.mdqengine.model.Output');"
 				+ "mdq_result = new Result();"
-				+ "mdq_result.output = 'Testing the result object, x equals y';"
+				+ "mdq_result.output = new Output('Testing the result object, x equals y');"
 				+ "mdq_result.status = Java.type('edu.ucsb.nceas.mdqengine.model.Status').SUCCESS;"
 				;
 		Result result = null;
@@ -83,7 +84,7 @@ public class JavaScriptDispatcherTest {
 			e.printStackTrace();
 			fail(e.getMessage());
 		}
-		assertEquals("true", result.getOutput());
+		assertEquals("true", result.getOutput().get(0).getValue());
 	}
 	
 	@Test
@@ -105,6 +106,6 @@ public class JavaScriptDispatcherTest {
 			fail(e.getMessage());
 		}
 		// make sure the file is named as expected
-		assertTrue(result.getOutput().endsWith(DigestUtils.md5Hex(dataUrl)));
+		assertTrue(result.getOutput().get(0).getValue().endsWith(DigestUtils.md5Hex(dataUrl)));
 	}
 }

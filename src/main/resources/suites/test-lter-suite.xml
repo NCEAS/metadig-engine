@@ -51,7 +51,7 @@ check <- function() {
     if (! grepl("^[a-zA-Z0-9_\\-]+\\.\\d+\\.\\d+", packageId, perl = TRUE, fixed = FALSE)) {
         status <- "FAILURE";
         output <- "The packageId value should match the pattern 'scope.identifier.revision'";
-        mdq_result <- list(status=status, output=output)
+        mdq_result <- list(status=status, output=list(list(value=output)))
         return (mdq_result);
     }
     
@@ -65,18 +65,18 @@ check <- function() {
     if (grepl("^0", identifier)) {
         status <- "FAILURE"
         output <- "A leading zero was found in the identifier. The identifier value must be a whole number."
-        mdq_result <- list(status=status, output=output)
+        mdq_result <- list(status=status, output=list(list(value=output)))
     	return (mdq_result)
     }
     
     if (grepl("^0", revision)) {
         output <- "A leading zero was found in the revision. The revision value must be a whole number."
         status <- "FAILURE"
-        mdq_result <- list(status=status, output=output)
+        mdq_result <- list(status=status, output=list(list(value=output)))
     	return (mdq_result)
     }
     
-    mdq_result <- list(status=status, output=output)
+    mdq_result <- list(status=status, output=list(list(value=output)))
     return (mdq_result)
 }
 
@@ -142,7 +142,7 @@ check <- function() {
         status <- "FAILURE"
         output <- "A methods element is not present"
     }
-    mdq_result <- list(status=status, output=output)
+    mdq_result <- list(status=status, output=list(list(value=output)))
     return (mdq_result)
 }
 

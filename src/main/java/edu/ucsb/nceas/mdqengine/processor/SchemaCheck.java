@@ -18,6 +18,7 @@ import org.xml.sax.ErrorHandler;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 
+import edu.ucsb.nceas.mdqengine.model.Output;
 import edu.ucsb.nceas.mdqengine.model.Result;
 import edu.ucsb.nceas.mdqengine.model.Status;
 
@@ -78,20 +79,20 @@ public class SchemaCheck implements Callable<Result> {
 		
 		} catch (IOException | ParserConfigurationException e) {
 			result.setStatus(Status.ERROR);
-			result.setOutput(e.getMessage());
+			result.setOutput(new Output(e.getMessage()));
 			return result;
 		} catch (SAXParseException e) {
 			result.setStatus(Status.FAILURE);
-			result.setOutput(e.getMessage());
+			result.setOutput(new Output(e.getMessage()));
 			return result;
 		} catch (Exception e) {
 			result.setStatus(Status.FAILURE);
-			result.setOutput(e.getMessage());
+			result.setOutput(new Output(e.getMessage()));
 			return result;
 		} 
 		
 		result.setStatus(Status.SUCCESS);
-		result.setOutput("Document is schema valid");
+		result.setOutput(new Output("Document is schema valid"));
 		return result;
 		
 	}

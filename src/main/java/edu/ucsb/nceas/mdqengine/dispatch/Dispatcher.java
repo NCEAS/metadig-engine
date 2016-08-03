@@ -12,6 +12,7 @@ import javax.script.ScriptException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import edu.ucsb.nceas.mdqengine.model.Output;
 import edu.ucsb.nceas.mdqengine.model.Result;
 import edu.ucsb.nceas.mdqengine.model.Status;
 
@@ -55,7 +56,7 @@ public class Dispatcher {
 		} catch (Exception e) {
 			// let's report this
 			dr.setStatus(Status.ERROR);
-			dr.setOutput(e.getMessage());
+			dr.setOutput(new Output(e.getMessage()));
 			log.warn("Error encountered evaluating code: " + e.getMessage());
 			return dr;
 		}
@@ -73,7 +74,7 @@ public class Dispatcher {
 				log.debug("Invocation result: " + res);
 			} catch (NoSuchMethodException e) {
 				dr.setStatus(Status.ERROR);
-				dr.setOutput(e.getMessage());
+				dr.setOutput(new Output(e.getMessage()));
 				log.warn("Error encountered invoking function: " + e.getMessage());
 				return dr;
 			}
@@ -92,12 +93,12 @@ public class Dispatcher {
 				dr = (Result) var;
 			} else {
 				
-				dr.setOutput(res.toString());
+				dr.setOutput(new Output(res.toString()));
 				
 				// try to find other result items
 				var = engine.get("output");
 				if (var != null && !var.toString().equals("<unbound>")) {
-					dr.setOutput(var.toString());
+					dr.setOutput(new Output(var.toString()));
 				}
 				var = engine.get("status");
 				if (var != null && !var.toString().equals("<unbound>")) {

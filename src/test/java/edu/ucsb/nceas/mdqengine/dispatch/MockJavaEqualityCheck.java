@@ -2,6 +2,7 @@ package edu.ucsb.nceas.mdqengine.dispatch;
 
 import java.util.concurrent.Callable;
 
+import edu.ucsb.nceas.mdqengine.model.Output;
 import edu.ucsb.nceas.mdqengine.model.Result;
 
 public class MockJavaEqualityCheck implements Callable<Result> {
@@ -12,9 +13,9 @@ public class MockJavaEqualityCheck implements Callable<Result> {
 	
 	@Override
 	public Result call() throws Exception {
-		Boolean result = (x == y);
+		Boolean bool = (x == y);
 		Result dr = new Result();
-		dr.setOutput(result.toString());
+		dr.setOutput(new Output(bool.toString()));
 		return dr;
 	}
 	

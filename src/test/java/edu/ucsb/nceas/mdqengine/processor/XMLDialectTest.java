@@ -184,7 +184,7 @@ public class XMLDialectTest {
 			
 			// run check
 			Result result = xml.runCheck(check);
-			assertEquals(result.getOutput(), Status.SUCCESS, result.getStatus());
+			assertEquals(result.getOutput().get(0).getValue(), Status.SUCCESS, result.getStatus());
 			
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -200,7 +200,7 @@ public class XMLDialectTest {
 			
 			// run check
 			Result result = xml.runCheck(check);
-			assertEquals(result.getOutput(), Status.FAILURE, result.getStatus());
+			assertEquals(result.getOutput().get(0).getValue(), Status.FAILURE, result.getStatus());
 			
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -241,7 +241,7 @@ public class XMLDialectTest {
 			
 			// run check
 			Result result = xml.runCheck(check);
-			assertEquals(result.getOutput(), Status.SUCCESS, result.getStatus());
+			assertEquals(result.getOutput().get(0).getValue(), Status.SUCCESS, result.getStatus());
 			
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -282,7 +282,7 @@ public class XMLDialectTest {
 			
 			// run check
 			Result result = xml.runCheck(check);
-			assertEquals(result.getOutput(), Status.SUCCESS, result.getStatus());
+			assertEquals(result.getOutput().get(0).getValue(), Status.SUCCESS, result.getStatus());
 			
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -310,7 +310,7 @@ public class XMLDialectTest {
 			
 			// run check
 			Result result = xml.runCheck(check);
-			assertEquals(result.getOutput(), Status.SUCCESS, result.getStatus());
+			assertEquals(result.getOutput().get(0).getValue(), Status.SUCCESS, result.getStatus());
 			
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -340,7 +340,7 @@ public class XMLDialectTest {
 			
 			// run check
 			Result result = xml.runCheck(check);
-			assertEquals(result.getOutput(), Status.SUCCESS, result.getStatus());
+			assertEquals(result.getOutput().get(0).getValue(), Status.SUCCESS, result.getStatus());
 			
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -374,7 +374,7 @@ public class XMLDialectTest {
 			
 			// run check
 			Result result = xml.runCheck(check);
-			assertEquals(result.getOutput(), Status.SUCCESS, result.getStatus());
+			assertEquals(result.getOutput().get(0).getValue(), Status.SUCCESS, result.getStatus());
 			
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -395,7 +395,7 @@ public class XMLDialectTest {
 			
 			// run check
 			Result result = xml.runCheck(check);
-			assertEquals(result.getOutput(), Status.SUCCESS, result.getStatus());
+			assertEquals(result.getOutput().get(0).getValue(), Status.SUCCESS, result.getStatus());
 			
 		} catch (Exception e) {
 			e.printStackTrace();

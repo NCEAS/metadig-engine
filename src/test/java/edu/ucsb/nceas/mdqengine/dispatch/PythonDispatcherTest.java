@@ -48,7 +48,7 @@ public class PythonDispatcherTest {
 			e.printStackTrace();
 			fail(e.getMessage());
 		}
-		assertEquals("true", result.getOutput());
+		assertEquals("true", result.getOutput().get(0).getValue());
 	}
 	
 	@Test
@@ -58,8 +58,9 @@ public class PythonDispatcherTest {
 		names.put("y", 2);
 		String code = "def call(): \n"
 				+ "  from edu.ucsb.nceas.mdqengine.model import Result \n"
+				+ "  from edu.ucsb.nceas.mdqengine.model import Output \n"
 				+ "  mdq_result = Result() \n"
-				+ "  mdq_result.setOutput(\"Testing the result object, X equals Y\") \n"
+				+ "  mdq_result.setOutput(Output(\"Testing the result object, X equals Y\")) \n"
 				+ "  from edu.ucsb.nceas.mdqengine.model import Status \n"
 				+ "  mdq_result.setStatus(Status.SUCCESS) \n"
 				+ "  return (mdq_result) \n"
@@ -89,7 +90,7 @@ public class PythonDispatcherTest {
 			e.printStackTrace();
 			fail(e.getMessage());
 		}
-		assertEquals("true", result.getOutput());
+		assertEquals("true", result.getOutput().get(0).getValue());
 	}
 	
 	@Test
@@ -108,7 +109,7 @@ public class PythonDispatcherTest {
 			e.printStackTrace();
 			fail(e.getMessage());
 		}
-		assertEquals("true", result.getOutput());
+		assertEquals("true", result.getOutput().get(0).getValue());
 	}
 	@Test
 	public void testNullArg() {
@@ -124,7 +125,7 @@ public class PythonDispatcherTest {
 			e.printStackTrace();
 			fail(e.getMessage());
 		}
-		assertEquals("true", result.getOutput());
+		assertEquals("true", result.getOutput().get(0).getValue());
 	}
 	
 	@Test
@@ -148,6 +149,6 @@ public class PythonDispatcherTest {
 			fail(e.getMessage());
 		}
 		// make sure the file is named as expected
-		assertTrue(result.getOutput().endsWith(DigestUtils.md5Hex(dataUrl)));
+		assertTrue(result.getOutput().get(0).getValue().endsWith(DigestUtils.md5Hex(dataUrl)));
 	}
 }

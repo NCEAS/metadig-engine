@@ -1,6 +1,8 @@
 package edu.ucsb.nceas.mdqengine.model;
 
+import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
 
 public class Result {
 	
@@ -8,17 +10,16 @@ public class Result {
 		
 	private Date timestamp;
 		
-	private String output;
+	private List<Output> output;
 	
 	private Status status;
 
-
-	public String getOutput() {
+	public List<Output> getOutput() {
 		return output;
 	}
 
-	public void setOutput(String output) {
-		this.output = output;
+	public void setOutput(Output... output) {
+		this.output = Arrays.asList(output);
 	}
 
 	public Status getStatus() {

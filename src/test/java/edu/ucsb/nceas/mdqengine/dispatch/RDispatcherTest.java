@@ -42,7 +42,7 @@ public class RDispatcherTest {
 			e.printStackTrace();
 			fail(e.getMessage());
 		}
-		assertEquals("true", result.getOutput());
+		assertEquals("true", result.getOutput().get(0).getValue());
 	}
 	
 	@Test
@@ -60,7 +60,7 @@ public class RDispatcherTest {
 		names.put("x", list);
 		names.put("length", 2);
 		String code = 
-				"mdq_result = list(output = (length(x) == length) );";
+				"mdq_result = list(output = list(list(value= (length(x) == length) )));";
 		Result result = null;
 		try {
 			result = dispatcher.dispatch(names, code);
@@ -69,7 +69,7 @@ public class RDispatcherTest {
 			e.printStackTrace();
 			fail(e.getMessage());
 		}
-		assertEquals("true", result.getOutput());
+		assertEquals("true", result.getOutput().get(0).getValue());
 	}
 	
 	@Test
@@ -79,7 +79,7 @@ public class RDispatcherTest {
 		names.put("y", 2);
 		String code = 
 				"call <- function() { return (x == y) } \n"
-				+ "mdq_result = list(output=call());";
+				+ "mdq_result = list(output=list(list(value=call())));";
 		Result result = null;
 		try {
 			result = dispatcher.dispatch(names, code);
@@ -88,7 +88,7 @@ public class RDispatcherTest {
 			e.printStackTrace();
 			fail(e.getMessage());
 		}
-		assertEquals("true", result.getOutput());
+		assertEquals("true", result.getOutput().get(0).getValue());
 	}
 	
 	@Test
@@ -98,8 +98,8 @@ public class RDispatcherTest {
 		names.put("y", 2);
 		String code = ""
 				+ "status <- \"FAILURE\" \n"
-		        + "output <- \"The packageId value should match the pattern 'scope.identifier.revision'\" \n"
-		        + "mdq_result <- list(status=status, output=output) \n"
+		        + "value <- \"The packageId value should match the pattern 'scope.identifier.revision'\" \n"
+		        + "mdq_result <- list(status=status, output=list(list(value=value))) \n"
 		        ;
 		Result result = null;
 		try {
@@ -145,7 +145,7 @@ public class RDispatcherTest {
 				"library(RCurl); \n"
 				+ "myCsv <- getURL(dataUrl); \n"
 				+ "df <- read.csv(textConnection(myCsv), header=header, sep=sep); "
-				+ "mdq_result = list(output = (nrow(df) == expected) )";
+				+ "mdq_result = list(output=list(list(value = (nrow(df) == expected) )))";
 		Result result = null;
 		try {
 			result = dispatcher.dispatch(names, code);
@@ -154,7 +154,7 @@ public class RDispatcherTest {
 			e.printStackTrace();
 			fail(e.getMessage());
 		}
-		assertEquals("true", result.getOutput());
+		assertEquals("true", result.getOutput().get(0).getValue());
 	}
 
 }

@@ -365,7 +365,7 @@ public class Aggregator {
 				Level level = check.getLevel();
 				
 				Status status = result.getStatus();
-				String output = result.getOutput();
+				String output = result.getOutput().get(0).getValue();
 				
 				Metadata metadata = run.getMetadata();
 				String formatId = null;

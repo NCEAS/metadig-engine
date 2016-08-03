@@ -25,7 +25,7 @@ public class RunFactory {
 		check.setLevel(Level.INFO);
 		r = new Result();
 		r.setStatus(Status.FAILURE);
-		r.setOutput("false");
+		r.setOutput(new Output("false"));
 		r.setTimestamp(Calendar.getInstance().getTime());
 		r.setCheck(check);
 		results.add(r);
@@ -37,7 +37,7 @@ public class RunFactory {
 		check.setLevel(Level.WARN);
 		r = new Result();
 		r.setStatus(Status.SKIP);
-		r.setOutput("false");
+		r.setOutput(new Output("false"));
 		r.setTimestamp(Calendar.getInstance().getTime());
 		r.setCheck(check);
 		results.add(r);
@@ -49,7 +49,7 @@ public class RunFactory {
 		check.setLevel(Level.INFO);
 		r = new Result();
 		r.setStatus(Status.SUCCESS);
-		r.setOutput("true");
+		r.setOutput(new Output("true"));
 		r.setTimestamp(Calendar.getInstance().getTime());
 		r.setCheck(check);
 		results.add(r);
@@ -61,7 +61,7 @@ public class RunFactory {
 		check.setLevel(Level.SEVERE);
 		r = new Result();
 		r.setStatus(Status.SUCCESS);
-		r.setOutput("true");
+		r.setOutput(new Output("true"));
 		r.setTimestamp(Calendar.getInstance().getTime());
 		r.setCheck(check);
 		results.add(r);
@@ -73,7 +73,7 @@ public class RunFactory {
 		check.setLevel(Level.WARN);
 		r = new Result();
 		r.setStatus(Status.SUCCESS);
-		r.setOutput("true");
+		r.setOutput(new Output("true"));
 		r.setTimestamp(Calendar.getInstance().getTime());
 		r.setCheck(check);
 		results.add(r);
@@ -85,7 +85,7 @@ public class RunFactory {
 		check.setLevel(Level.WARN);
 		r = new Result();
 		r.setStatus(Status.SUCCESS);
-		r.setOutput("true");
+		r.setOutput(new Output("true"));
 		r.setTimestamp(Calendar.getInstance().getTime());
 		r.setCheck(check);
 		results.add(r);

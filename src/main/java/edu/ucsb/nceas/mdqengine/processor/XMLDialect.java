@@ -42,6 +42,7 @@ import org.xml.sax.SAXException;
 import edu.ucsb.nceas.mdqengine.dispatch.Dispatcher;
 import edu.ucsb.nceas.mdqengine.model.Check;
 import edu.ucsb.nceas.mdqengine.model.Dialect;
+import edu.ucsb.nceas.mdqengine.model.Output;
 import edu.ucsb.nceas.mdqengine.model.Result;
 import edu.ucsb.nceas.mdqengine.model.Selector;
 import edu.ucsb.nceas.mdqengine.model.Status;
@@ -123,7 +124,7 @@ public class XMLDialect {
 						// nothing to inherit
 						result = new Result();
 						result.setStatus(Status.ERROR);
-						result.setOutput("Check cannot use persistent state from previous differing environment");
+						result.setOutput(new Output("Check cannot use persistent state from previous differing environment"));
 						return result;
 					} else {
 						
@@ -161,7 +162,7 @@ public class XMLDialect {
 					// report this
 					result = new Result();
 					result.setStatus(Status.ERROR);
-					result.setOutput(e.getMessage());
+					result.setOutput(new Output(e.getMessage()));
 				}
 			}
 			
@@ -171,14 +172,14 @@ public class XMLDialect {
 				// report this
 				result = new Result();
 				result.setStatus(Status.ERROR);
-				result.setOutput(e.getMessage());
+				result.setOutput(new Output(e.getMessage()));
 			}
 	
 		} else {
 			// we just skip instead
 			result = new Result();
 			result.setStatus(Status.SKIP);
-			result.setOutput("Dialect for this check is not supported");
+			result.setOutput(new Output("Dialect for this check is not supported"));
 		}
 		
 		// set additional info before returning
@@ -194,28 +195,29 @@ public class XMLDialect {
 	private Result postProcess(Result result) {
 	
 		// check if we need to encode the output value
-		String value = result.getOutput();
-		if (value != null) {
-			Path path = null;
-			try {
-				path = Paths.get(value);
-			} catch (InvalidPathException e) {
-				// NOPE
-				return result;
-			}
-			
-			if (path.toFile().exists()) {
-				// encode it
-				String encoded = null;
+		for (Output output: result.getOutput()) {
+			String value = output.getValue();
+			if (value != null) {
+				Path path = null;
 				try {
-					encoded = Base64.encodeBase64String(value.getBytes("UTF-8"));
-					result.setOutput(encoded);
-					//TODO: set mime-type when we have support for that
-				} catch (UnsupportedEncodingException e) {
-					log.error(e.getMessage());
-				}				
+					path = Paths.get(value);
+				} catch (InvalidPathException e) {
+					// NOPE
+					return result;
+				}
+				
+				if (path.toFile().exists()) {
+					// encode it
+					String encoded = null;
+					try {
+						encoded = Base64.encodeBase64String(value.getBytes("UTF-8"));
+						output.setValue(encoded);
+						//TODO: set mime-type when we have support for that, or assume they did it already?
+					} catch (UnsupportedEncodingException e) {
+						log.error(e.getMessage());
+					}				
+				}		
 			}
-			
 		}
 		
 		return result;
