@@ -68,6 +68,8 @@ public class RDispatcher extends Dispatcher {
 					script.getAbsolutePath(), 
 					input.getAbsolutePath(), 
 					output.getAbsolutePath());
+			
+			pb.environment().put(MDQCache.DIRECTORY_PROPERTY, MDQCache.getCacheDir());
 			Process p = pb.start();
 			int ret = p.waitFor();
 			

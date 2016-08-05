@@ -10,6 +10,8 @@ import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.IOUtils;
 
 public class MDQCache {
+	
+	public static String DIRECTORY_PROPERTY = "MDQE_CACHE_DIR";
 		
 	private static String cacheDir = null;
 	
@@ -27,7 +29,11 @@ public class MDQCache {
 		} else {
 			cacheDir = dir;
 		}
-		System.setProperty("MDQE_CACHE_DIR", cacheDir);
+		System.setProperty(DIRECTORY_PROPERTY, cacheDir);
+	}
+	
+	public static String getCacheDir() {
+		return cacheDir;
 	}
 	
 	public static String get(String url) throws IOException {
