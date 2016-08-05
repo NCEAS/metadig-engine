@@ -210,10 +210,10 @@ public class XMLDialect {
 					// encode it
 					String encoded = null;
 					try {
-						encoded = Base64.encodeBase64String(value.getBytes("UTF-8"));
+						encoded = Base64.encodeBase64String(IOUtils.toByteArray(path.toUri()));
 						output.setValue(encoded);
 						//TODO: set mime-type when we have support for that, or assume they did it already?
-					} catch (UnsupportedEncodingException e) {
+					} catch (IOException e) {
 						log.error(e.getMessage());
 					}				
 				}		

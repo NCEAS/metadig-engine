@@ -100,7 +100,7 @@ results$type <- factor(results$type,
                        ordered = TRUE)
 
 results$level <- factor(results$level,
-                        levels = c("INFO", "WARN", "SEVERE"),
+                    levels = c("INFO", "OPTIONAL", "REQUIRED"),
                         ordered = TRUE)
 
 results$status <- factor(results$status,

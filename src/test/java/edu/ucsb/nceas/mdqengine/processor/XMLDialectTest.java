@@ -175,7 +175,7 @@ public class XMLDialectTest {
 		
 		check.setCode(SchemaCheck.class.getName());
 		check.setEnvironment("Java");
-		check.setLevel(Level.SEVERE);
+		check.setLevel(Level.REQUIRED);
 		check.setName("Schema valid stest");
 				
 		//  run the check on valid EML that declares schemaLocation
@@ -232,7 +232,7 @@ public class XMLDialectTest {
 		check.setLibrary(library);
 		
 		check.setEnvironment("r");
-		check.setLevel(Level.WARN);
+		check.setLevel(Level.OPTIONAL);
 		check.setName("External code lib test");
 				
 		//  run the check on valid EML that declares schemaLocation

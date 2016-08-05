@@ -3,7 +3,7 @@
 "check":[
 	{"name":"titleLength",
 	"id":"check.1.1",
-	"level":"WARN",
+	"level":"OPTIONAL",
 	"environment":"r",
 	"code":"nchar(title) \u003e 10",
 	"expected":"TRUE",
@@ -23,7 +23,7 @@
 	]},
 	{"name":"attributeNames",
 	"id":"check.3.1",
-	"level":"SEVERE",
+	"level":"REQUIRED",
 	"environment":"r",
 	"code":"any(duplicated(attributeNames))",
 	"expected":"FALSE",

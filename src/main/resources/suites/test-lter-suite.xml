@@ -16,7 +16,7 @@
 			<xpath>boolean(/*[local-name() = 'eml'])</xpath>
 		</dialect>
 		<type>metadata</type>
-		<level>WARN</level>
+		<level>OPTIONAL</level>
 		<!-- The script engine extracts values from the tested metadata
 		document as specified by the selector. The engine then sets a variable
 		the same as the '<name>' value that will be available to the check 
@@ -94,7 +94,7 @@ mdq_result <- check()
 			<xpath>boolean(/*[local-name() = 'eml'])</xpath>
 		</dialect>
 		<type>metadata</type>
-		<level>WARN</level>
+		<level>OPTIONAL</level>
 		<selector>
 			<name>keywords</name>
 			<xpath>/eml/dataset/keywordSet/keyword</xpath>
@@ -127,7 +127,7 @@ def call():
 			<xpath>boolean(/*[local-name() = 'eml'])</xpath>
 		</dialect>
 		<type>metadata</type>
-		<level>WARN</level>
+		<level>OPTIONAL</level>
 		<selector>
 			<name>methods</name>
 			<xpath>/eml/dataset/methods</xpath>
@@ -158,7 +158,7 @@ mdq_result <- check()
 			<xpath>boolean(/*[local-name() = 'eml'])</xpath>
 		</dialect>
 		<type>metadata</type>
-		<level>WARN</level>
+		<level>OPTIONAL</level>
 		<selector>
 			<name>coverages</name>
 			<xpath>/eml/dataset/coverage/geographicCoverage |
@@ -396,7 +396,7 @@ def call():
 			<xpath>boolean(/*[local-name() = 'eml'])</xpath>
 		</dialect>
 		<type>metadata</type>
-		<level>WARN</level>
+		<level>OPTIONAL</level>
 		<selector>
 			<name>title</name>
 			<xpath>/*[local-name() = 'eml']/dataset/title</xpath>
@@ -441,7 +441,7 @@ def call():
 			<xpath>boolean(/*[local-name() = 'eml'])</xpath>
 		</dialect>
 		<type>metadata</type>
-		<level>WARN</level>
+		<level>OPTIONAL</level>
 		<selector>
 			<name>pubDate</name>
 			<xpath>/*[local-name() = 'eml']/dataset/pubDate</xpath>
@@ -482,7 +482,7 @@ def call():
 			<xpath>boolean(/*[local-name() = 'eml'])</xpath>
 		</dialect>
 		<type>metadata</type>
-		<level>WARN</level>
+		<level>OPTIONAL</level>
 		<selector>
 			<name>abstract</name>
 			<xpath>/eml/dataset/abstract</xpath>
@@ -528,7 +528,7 @@ def call():
 			<xpath>boolean(/*[local-name() = 'eml'])</xpath>
 		</dialect>
 		<type>congruency</type>
-		<level>SEVERE</level>
+		<level>REQUIRED</level>
 		<selector>
 			<name>entityCount</name>
 			<xpath>count(/eml/dataset/dataTable)</xpath>
@@ -801,7 +801,7 @@ def call():
 			<xpath>boolean(/*[local-name() = 'eml'])</xpath>
 		</dialect>
 		<type>metadata</type>
-		<level>WARN</level>
+		<level>OPTIONAL</level>
 		<selector>
 			<name>entityCount</name>
 			<xpath>count(/eml/dataset/dataTable)</xpath>
@@ -1094,7 +1094,7 @@ def call():
 			<xpath>boolean(/*[local-name() = 'eml'])</xpath>
 		</dialect>
 		<type>metadata</type>
-		<level>WARN</level>
+		<level>OPTIONAL</level>
 		<selector>
 			<name>entityCount</name>
 			<xpath>count(/eml/dataset/dataTable)</xpath>

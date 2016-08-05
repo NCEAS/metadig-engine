@@ -24,8 +24,8 @@ public class Scorer {
 	public static double FACTOR_SKIP = -0.0;
 
 	public static int WEIGHT_INFO = 1;
-	public static int WEIGHT_WARN = 2;
-	public static int WEIGHT_SEVERE = 3;
+	public static int WEIGHT_OPTIONAL = 2;
+	public static int WEIGHT_REQUIRED = 3;
 	
 	/**
 	 * Get number of results with given status
@@ -100,14 +100,14 @@ public class Scorer {
 				score = score * WEIGHT_INFO;
 				break;
 				
-			case WARN:
-				weightedCount += WEIGHT_WARN;
-				score = score * WEIGHT_WARN;
+			case OPTIONAL:
+				weightedCount += WEIGHT_OPTIONAL;
+				score = score * WEIGHT_OPTIONAL;
 				break;	
 			
-			case SEVERE:
-				weightedCount += WEIGHT_SEVERE;
-				score = score * WEIGHT_SEVERE;
+			case REQUIRED:
+				weightedCount += WEIGHT_REQUIRED;
+				score = score * WEIGHT_REQUIRED;
 				break;
 
 			default:

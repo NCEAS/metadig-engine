@@ -34,7 +34,7 @@ public class RunFactory {
 		check.setId("check.2");
 		check.setEnvironment("r");
 		check.setType("metadata");
-		check.setLevel(Level.WARN);
+		check.setLevel(Level.OPTIONAL);
 		r = new Result();
 		r.setStatus(Status.SKIP);
 		r.setOutput(new Output("false"));
@@ -58,7 +58,7 @@ public class RunFactory {
 		check.setId("check.4");
 		check.setEnvironment("r");
 		check.setType("metadata");
-		check.setLevel(Level.SEVERE);
+		check.setLevel(Level.REQUIRED);
 		r = new Result();
 		r.setStatus(Status.SUCCESS);
 		r.setOutput(new Output("true"));
@@ -70,7 +70,7 @@ public class RunFactory {
 		check.setId("check.5");
 		check.setEnvironment("r");
 		check.setType("metadata");
-		check.setLevel(Level.WARN);
+		check.setLevel(Level.OPTIONAL);
 		r = new Result();
 		r.setStatus(Status.SUCCESS);
 		r.setOutput(new Output("true"));
@@ -82,7 +82,7 @@ public class RunFactory {
 		check.setId("check.6");
 		check.setEnvironment("r");
 		check.setType("metadata");
-		check.setLevel(Level.WARN);
+		check.setLevel(Level.OPTIONAL);
 		r = new Result();
 		r.setStatus(Status.SUCCESS);
 		r.setOutput(new Output("true"));

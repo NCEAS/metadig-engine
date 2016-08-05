@@ -35,7 +35,7 @@ public class SuiteFactory {
 		titleCheck.setId("check.1.1");
 		titleCheck.setName("titleLength");
 		titleCheck.setEnvironment("r");
-		titleCheck.setLevel(Level.WARN);
+		titleCheck.setLevel(Level.OPTIONAL);
 		List<Selector> selectors = new ArrayList<Selector>();
 		Selector s1 = new Selector();
 		s1.setName("title");
@@ -65,7 +65,7 @@ public class SuiteFactory {
 		attributeNames.setId("check.3.1");
 		attributeNames.setName("attributeNames");
 		attributeNames.setEnvironment("r");
-		attributeNames.setLevel(Level.SEVERE);
+		attributeNames.setLevel(Level.REQUIRED);
 		selectors = new ArrayList<Selector>();
 		s1 = new Selector();
 		s1.setName("attributeNames");

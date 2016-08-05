@@ -4,7 +4,7 @@
       <code><![CDATA[nchar(title) > 10]]></code>
       <environment>r</environment>
       <id>check.1.1</id>      
-      <level>WARN</level>
+      <level>OPTIONAL</level>
       <name>titleLength</name>
       <selector>
          <name>title</name>
@@ -26,7 +26,7 @@
       <code><![CDATA[any(duplicated(attributeNames))]]></code>
       <environment>r</environment>
       <id>check.3.1</id>      
-      <level>SEVERE</level>
+      <level>REQUIRED</level>
       <name>attributeNames</name>
       <selector>
          <name>attributeNames</name>
