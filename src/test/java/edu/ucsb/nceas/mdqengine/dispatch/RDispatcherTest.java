@@ -1,8 +1,11 @@
 package edu.ucsb.nceas.mdqengine.dispatch;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import java.io.File;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -10,6 +13,8 @@ import java.util.Map;
 
 import javax.script.ScriptException;
 
+import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.commons.io.IOUtils;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -19,7 +24,9 @@ import edu.ucsb.nceas.mdqengine.model.Status;
 public class RDispatcherTest {
 	
 	private Dispatcher dispatcher = null;
-	
+
+	private String dataUrl = "https://cn.dataone.org/cn/v2/resolve/doi:10.5063/AA/wolkovich.29.1";
+
 	@Before
 	public void init() {
 		dispatcher = new RDispatcher();
@@ -155,6 +162,29 @@ public class RDispatcherTest {
 			fail(e.getMessage());
 		}
 		assertEquals("true", result.getOutput().get(0).getValue());
+	}
+
+
+	@Test
+	public void testCache() {
+		Map<String, Object> names = new HashMap<String, Object>();
+
+		InputStream library = this.getClass().getResourceAsStream("/code/mdq-cache.R");
+
+		String code = "path <- get('" + dataUrl + "') \n" +
+				"mdq_result <- list(output = list(list(value = path)))\n";
+
+		Result result = null;
+		try {
+			code = IOUtils.toString(library, "UTF-8") + code;
+			result = dispatcher.dispatch(names, code);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			fail(e.getMessage());
+		}
+		// make sure the file is named as expected
+		assertTrue(result.getOutput().get(0).getValue().endsWith(DigestUtils.md5Hex(dataUrl)));
 	}
 
 }
