@@ -11,6 +11,8 @@ import java.util.List;
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.junit.Test;
+import org.junit.Ignore;
+
 import org.xml.sax.SAXException;
 
 import edu.ucsb.nceas.mdqengine.model.Check;
@@ -157,6 +159,7 @@ public class XMLDialectTest {
 			
 	}
 	
+	@Ignore
 	@Test
 	public void testValidation() {
 
