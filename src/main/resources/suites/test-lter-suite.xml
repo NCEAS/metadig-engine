@@ -1148,4 +1148,19 @@ def call():
   return mdq_result 
       ]]></code>
 	</check>
+	<check>
+		<name>check that a plot can be saved</name>
+		<environment>rscript</environment>
+		<level>INFO</level>
+		<code><![CDATA[
+      		library(ggplot2)
+
+	  		g <- ggplot(diamonds, aes(carat, price, color = cut)) + geom_point()
+	  		path <- file.path(tempDir, "diamonds.png")
+	  		ggsave(path, plot = g, width = 6, height = 6)
+
+  			mdq_result <- list(status = "SUCCESS",
+            output = list(list(value = path, type = "image/png")))
+		]]></code>
+	</check>
 </suite>
