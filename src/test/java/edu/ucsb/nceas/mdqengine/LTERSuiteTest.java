@@ -68,15 +68,13 @@ public class LTERSuiteTest{
 			log.error("metadata URL: " + metadataURL);
 			InputStream input = new URL(metadataURL).openStream();
 			// run the suite on it
-			//run = mdqe.runSuite(suite, input);
-			//run.setObjectIdentifier(metadataId);
-			//log.debug("Run results XML: " + XmlMarshaller.toXml(run));
+			run = mdqe.runSuite(suite, input);
+			run.setObjectIdentifier(metadataId);
+			log.debug("Run results XML: " + XmlMarshaller.toXml(run));
 			
-			XMLDialect xml = new XMLDialect(input);
 			
 			// run a check in the suite
-			for (Check check: suite.getCheck()) {
-				Result result = xml.runCheck(check);
+			for (Result result: run.getResult()) {
 				log.debug("Check result: " + XmlMarshaller.toXml(result));
 				assertTrue(result.getStatus() != Status.ERROR);
 			}	
