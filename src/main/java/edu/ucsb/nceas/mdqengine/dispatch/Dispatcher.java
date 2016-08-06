@@ -51,7 +51,7 @@ public class Dispatcher {
 		Object res = null;
 		try {
 			res = engine.eval(code);
-			log.debug("Result: " + res);
+			log.trace("Result: " + res);
 
 		} catch (Exception e) {
 			// let's report this
@@ -71,7 +71,7 @@ public class Dispatcher {
 			Invocable invoc = (Invocable) engine;
 			try {
 				res = invoc.invokeFunction("call");
-				log.debug("Invocation result: " + res);
+				log.trace("Invocation result: " + res);
 			} catch (NoSuchMethodException e) {
 				dr.setStatus(Status.ERROR);
 				dr.setOutput(new Output(e.getMessage()));
