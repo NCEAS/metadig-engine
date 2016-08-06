@@ -786,8 +786,10 @@ def call():
     thisEntityName = entityNames[iEntity]
     
     if len(thisEntityName) > maxEntityNameLength:
+      status = "SUCCESS"
       return True
 
+  status = "FAILURE"
   return False
       ]]></code>
 	</check>
