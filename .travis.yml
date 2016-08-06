@@ -9,3 +9,4 @@ before_install:
   - sudo apt-get install -y r-base
   - sudo apt-get install -y curl
   - sudo R CMD BATCH --vanilla install-r-packages.R
+cache: packages
