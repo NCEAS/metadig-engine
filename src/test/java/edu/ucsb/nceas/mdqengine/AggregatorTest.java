@@ -55,7 +55,7 @@ public class AggregatorTest {
 		
 		try {
 			String csv = Aggregator.toCSV(run);
-			log.debug("Tabular Run format: \n" + csv);
+			log.trace("Tabular Run format: \n" + csv);
 			assertNotNull(csv);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
