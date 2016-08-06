@@ -70,7 +70,7 @@ public class LTERSuiteTest{
 			// run the suite on it
 			run = mdqe.runSuite(suite, input);
 			run.setObjectIdentifier(metadataId);
-			log.debug("Run results XML: " + XmlMarshaller.toXml(run));
+			log.trace("Run results XML: " + XmlMarshaller.toXml(run));
 			
 			
 			// run a check in the suite

@@ -76,7 +76,7 @@ public class XMLDialect {
 		
 		Result result = null;
 		
-		log.debug("Running Check: " + JsonMarshaller.toJson(check));
+		log.debug("Running Check: " + check.getId());
 		
 		// only bother dispatching if check can be applied to this document
 		if (this.isCheckValid(check)) {
@@ -141,7 +141,7 @@ public class XMLDialect {
 						dispatcher = Dispatcher.getDispatcher(check.getEnvironment());
 					}
 				} else {
-					log.debug("Reusisng dispatcher for persistent state check");
+					log.debug("Reusing dispatcher for persistent state check");
 
 				}
 			}

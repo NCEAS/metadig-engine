@@ -87,7 +87,7 @@ public class Dispatcher {
 			// do we have a result object?
 			Object var = engine.get("mdq_result");
 			if (var != null && !var.toString().equals("<unbound>")) {
-				log.debug("result is: " + var);
+				log.trace("result is: " + var);
 				log.debug("result is class: " + var.getClass());
 	
 				dr = (Result) var;

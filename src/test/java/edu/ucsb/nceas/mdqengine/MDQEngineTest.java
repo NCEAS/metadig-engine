@@ -72,7 +72,7 @@ public class MDQEngineTest {
 			// run the suite on it
 			run = mdqe.runSuite(suite, input);
 			run.setObjectIdentifier(id);
-			log.debug("Run results JSON: " + JsonMarshaller.toJson(run));
+			log.trace("Run results JSON: " + JsonMarshaller.toJson(run));
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -94,7 +94,7 @@ public class MDQEngineTest {
 			// run the suite on it
 			run = mdqe.runSuite(suite, input);
 			run.setObjectIdentifier(packageId);
-			log.debug("Run results XML: " + XmlMarshaller.toXml(run));
+			log.trace("Run results XML: " + XmlMarshaller.toXml(run));
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

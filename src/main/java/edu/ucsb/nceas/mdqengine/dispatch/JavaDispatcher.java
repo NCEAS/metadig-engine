@@ -26,7 +26,7 @@ public class JavaDispatcher extends Dispatcher {
 			Callable<Result> runner = (Callable<Result>) clazz.newInstance();
 			// set the properties from name/value Map
 			for (Entry<String, Object> entry: names.entrySet()) {
-				log.debug("Setting property: " + entry.getKey() + "=" + entry.getValue());
+				log.trace("Setting property: " + entry.getKey() + "=" + entry.getValue());
 				BeanUtils.setProperty(runner, entry.getKey(), entry.getValue());
 			}
 			// call the bean, blocking for results

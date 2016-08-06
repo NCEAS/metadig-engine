@@ -65,7 +65,7 @@ public class MDQEngine {
 			throws MalformedURLException, IOException, SAXException, 
 			ParserConfigurationException, XPathExpressionException, ScriptException {
 			
-		log.debug("Running suite: " + JsonMarshaller.toJson(suite));
+		log.debug("Running suite: " + suite.getId());
 
 		String content = IOUtils.toString(input, "UTF-8");
 		String metadataContent = content;
@@ -120,7 +120,7 @@ public class MDQEngine {
 		}
 		run.setResult(results);
 		
-		log.debug("Run results: " + JsonMarshaller.toJson(run));
+		log.trace("Run results: " + JsonMarshaller.toJson(run));
 		
 		// clean up
 		tempDir.toFile().delete();
