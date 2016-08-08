@@ -146,24 +146,29 @@ public class XMLDialect {
 				}
 			}
 			
-			// gather extra code from external resources
+			// assemble the code to run
 			String code = check.getCode();
-			URL library = check.getLibrary();
-
-			// TODO: loading random code from a URL is very risky!
-			if (library != null) {
-				log.debug("Loading library code from URL: " + library);
-				// read the library from given URL
-				try {
-					String libraryContent = IOUtils.toString(library.openStream(), "UTF-8");
-					code = libraryContent + code;
-				} catch (IOException e) {
-					log.error("Could not load code library: " + e.getMessage(), e);
-					// report this
-					result = new Result();
-					result.setStatus(Status.ERROR);
-					result.setOutput(new Output(e.getMessage()));
+			
+			// gather extra code from external resources
+			List<URL> libraries = check.getLibrary();
+			if (libraries != null) {
+				String libraryContent = "";
+				for (URL library: libraries) {
+					// TODO: loading random code from a URL is very risky!
+					log.debug("Loading library code from URL: " + library);
+					// read the library from given URL
+					try {
+						libraryContent += IOUtils.toString(library.openStream(), "UTF-8");
+					} catch (IOException e) {
+						log.error("Could not load code library: " + e.getMessage(), e);
+						// report this
+						result = new Result();
+						result.setStatus(Status.ERROR);
+						result.setOutput(new Output(e.getMessage()));
+					}
 				}
+				// combine libraries and code
+				code = libraryContent + code;
 			}
 			
 			try {

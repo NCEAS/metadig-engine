@@ -1,6 +1,7 @@
 package edu.ucsb.nceas.mdqengine.model;
 
 import java.net.URL;
+import java.util.Arrays;
 import java.util.List;
 
 import javax.xml.bind.annotation.XmlRootElement;
@@ -25,7 +26,7 @@ public class Check {
 	@XmlCDATA
 	private String code;
 	
-	private URL library;
+	private List<URL> library;
 	
 	private boolean inheritState = false;
 	
@@ -105,11 +106,15 @@ public class Check {
 		this.dialect = dialect;
 	}
 
-	public URL getLibrary() {
+	public List<URL> getLibrary() {
 		return library;
 	}
 
-	public void setLibrary(URL library) {
+	public void setLibrary(URL... library) {
+		this.library = Arrays.asList(library);
+	}
+	
+	public void setLibrary(List<URL> library) {
 		this.library = library;
 	}
 
