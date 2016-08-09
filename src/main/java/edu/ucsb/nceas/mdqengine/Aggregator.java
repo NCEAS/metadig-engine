@@ -211,13 +211,23 @@ public class Aggregator {
 		
 		List<Run> runs = new ArrayList<Run>();
 		
+		String baseUrl = this.getBaseUrl(params);
+				
 		CSVParser docsCsv = this.queryCSV(params);
 		if (docsCsv != null) {
 			Iterator<CSVRecord> recordIter = docsCsv.iterator();
 			while (recordIter.hasNext()) {
 				CSVRecord docRecord = recordIter.next();
 				String id = docRecord.get("id");
-				String dataUrl = docRecord.get("dataUrl");
+				String dataUrl = null;
+				if (baseUrl != null) {
+					dataUrl = baseUrl + "/v2/object/" + id;
+				} else if (docRecord.isSet("dataUrl"))  {
+					dataUrl = docRecord.get("dataUrl");
+				} else {
+					// have to skip if we can't retrieve it
+					continue;
+				}
 				String formatId = docRecord.get("formatId");
 				String datasource = docRecord.get("datasource");
 				String rightsHolder = docRecord.get("rightsHolder");
@@ -230,12 +240,13 @@ public class Aggregator {
 				
 				try {
 					
+					final String finalDataUrl = dataUrl;
 					// run asynch in thread
 					Callable<Run> runner = new Callable<Run>() {
 						
 						@Override
 						public Run call() throws Exception {
-							InputStream input = new URL(dataUrl).openStream();
+							InputStream input = new URL(finalDataUrl).openStream();
 							Run run = engine.runSuite(suite, input);
 							run.setObjectIdentifier(id);
 							run.setMetadata(metadata);
@@ -282,6 +293,19 @@ public class Aggregator {
 	}
 
 	
+	private String getBaseUrl(List<NameValuePair> pairs) {
+		for (NameValuePair param: pairs) {
+			String name = param.getName();
+			String value = param.getValue();
+
+			// use this for determining which server to query if present
+			if (name.equals("baseUrl")) {
+				return value;
+			}
+		}
+		return null;
+	}
+
 	private CSVParser queryCSV(List<NameValuePair> pairs) {
 		
 		try {
