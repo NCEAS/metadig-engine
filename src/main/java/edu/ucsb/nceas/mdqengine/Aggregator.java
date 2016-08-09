@@ -33,6 +33,7 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.utils.URLEncodedUtils;
 import org.dataone.client.v2.CNode;
+import org.dataone.client.v2.MNode;
 import org.dataone.client.v2.itk.D1Client;
 
 import edu.ucsb.nceas.mdqengine.dispatch.Dispatcher;
@@ -286,12 +287,18 @@ public class Aggregator {
 		try {
 			// query system for object
 			String solrQuery = "?";
+			String baseUrl = null;
 			
 			// add the user-supplied parameters, for ones that are allowed
 			for (NameValuePair param: pairs) {
 				String name = param.getName();
 				String value = param.getValue();
 
+				// use this for determining which server to query if present
+				if (name.equals("baseUrl")) {
+					baseUrl = value;
+					continue;
+				}
 				if (!ArrayUtils.contains(ignoredParams, name)) {
 					solrQuery += "&" + name + "=" + URLEncoder.encode(value, "UTF-8");
 					
@@ -324,8 +331,24 @@ public class Aggregator {
 			log.debug("solrQuery = " + solrQuery);
 
 			// search the index
-			CNode node = D1Client.getCN();
-			InputStream solrResultStream = node.query(null, "solr", solrQuery);
+			InputStream solrResultStream = null;
+			if (baseUrl!= null) {
+				if (baseUrl.contains("/cn")) {
+					// use CN
+					CNode node = D1Client.getCN(baseUrl);
+					solrResultStream = node.query(null, "solr", solrQuery);
+				}
+				else {
+					// use MN
+					MNode node = D1Client.getMN(baseUrl);
+					solrResultStream = node.query(null, "solr", solrQuery);
+				}
+
+			} else {
+				// default to default CN
+				CNode node = D1Client.getCN();
+				solrResultStream = node.query(null, "solr", solrQuery);
+			}
 			
 			CSVParser parser = new CSVParser(new InputStreamReader(solrResultStream, "UTF-8"), CSVFormat.DEFAULT.withHeader());
 			return parser;
