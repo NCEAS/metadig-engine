@@ -15,6 +15,7 @@ public class Check {
 
 	private String name;
 	
+	@XmlCDATA
 	private String description;
 
 	private String type;
