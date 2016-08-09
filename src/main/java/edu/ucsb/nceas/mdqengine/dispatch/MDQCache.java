@@ -29,6 +29,11 @@ public class MDQCache {
 		} else {
 			cacheDir = dir;
 		}
+		// make sure it exists
+		File d = new File(cacheDir);
+		if (!d.exists()) {
+			d.mkdirs();
+		}
 		System.setProperty(DIRECTORY_PROPERTY, cacheDir);
 	}
 	
