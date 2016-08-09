@@ -397,7 +397,7 @@ def call():
 	<check>
 		<id>check-dataset.11.1</id>
 		<name>titleLength</name>
-		<description>If the title is shorter than 5 words, it might be insufficient. Title word count >= 7 and <= 20 including prepositions and numbers.</description>
+		<description><![CDATA[If the title is shorter than 5 words, it might be insufficient. Title word count >= 7 and <= 20 including prepositions and numbers.]]></description>
 		<environment>python</environment>
 		<dialect>
 			<name>eml</name>
