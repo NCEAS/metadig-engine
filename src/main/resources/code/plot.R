@@ -79,7 +79,7 @@ makeMultiDocPlot <- function(x) {
 makeMDQPlot <- function(x, path) {
   if (length(unique(x$pid)) == 1) {
     g <- makeSingleDocPlot(x)
-  } else if ("datasource" %in% names(x) && (length(unique(x$datasource)) > 1)) {
+  } else {
     g <- makeMultiDocPlot(x)
   }
 
