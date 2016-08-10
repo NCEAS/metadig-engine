@@ -93,7 +93,10 @@ public class Dispatcher {
 				dr = (Result) var;
 			} else {
 				
-				dr.setOutput(new Output(res.toString()));
+				// if no explicit output included in structure
+				if (res !=null) {
+					dr.setOutput(new Output(res.toString()));
+				}
 				
 				// try to find other result items
 				var = engine.get("output");
