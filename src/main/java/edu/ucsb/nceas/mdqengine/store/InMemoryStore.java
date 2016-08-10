@@ -50,26 +50,50 @@ public class InMemoryStore implements MDQStore{
 		// load all the resources from local files
 		try {
 			suiteResources  = resolver.getResources("classpath*:/suites/*.xml");
-
 		} catch (IOException e) {
 			log.error("Could not read local suite resources: " + e.getMessage(), e);
-			return;
 		}
-		for (Resource resource: suiteResources) {
-			
-			Suite suite = null;
-			try {
-				URL url = resource.getURL();
-				log.debug("Loading suite found at: " + url.toString());
-				String xml = IOUtils.toString(url.openStream(), "UTF-8");
-				suite = (Suite) XmlMarshaller.fromXml(xml, Suite.class);
-			} catch (JAXBException | IOException e) {
-				log.warn("Could not load suite: " + e.getMessage());
-				continue;
+		if (suiteResources != null) {
+			for (Resource resource: suiteResources) {
+				Suite suite = null;
+				try {
+					URL url = resource.getURL();
+					log.debug("Loading suite found at: " + url.toString());
+					String xml = IOUtils.toString(url.openStream(), "UTF-8");
+					suite = (Suite) XmlMarshaller.fromXml(xml, Suite.class);
+				} catch (JAXBException | IOException e) {
+					log.warn("Could not load suite: " + e.getMessage());
+					continue;
+				}
+				this.createSuite(suite);
+	
 			}
-			this.createSuite(suite);
-
 		}
+		
+		// checks
+		Resource[] checkResources = null;
+		// load all the resources from local files
+		try {
+			checkResources  = resolver.getResources("classpath*:/checks/*.xml");
+		} catch (IOException e) {
+			log.error("Could not read local check resources: " + e.getMessage(), e);
+		}
+		if (checkResources != null) {
+			for (Resource resource: checkResources) {
+				
+				Check check = null;
+				try {
+					URL url = resource.getURL();
+					log.debug("Loading check found at: " + url.toString());
+					String xml = IOUtils.toString(url.openStream(), "UTF-8");
+					check = (Check) XmlMarshaller.fromXml(xml, Check.class);
+				} catch (JAXBException | IOException e) {
+					log.warn("Could not load check: " + e.getMessage());
+					continue;
+				}
+				this.createCheck(check);
+			}
+		}		
 		
 	}
 	

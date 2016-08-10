@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<check>
+	<id>check-keywordPresent</id>
+	<name>keywordPresent</name>
+	<description>Checks to see if at least one keyword is present. The LTER
+		portal allows searches on keywords. This check is a precursor for
+		checking on keywords from the controlled vocabulary.</description>
+	<environment>python</environment>
+	<dialect>
+		<name>eml</name>
+		<xpath>boolean(/*[local-name() = 'eml'])</xpath>
+	</dialect>
+	<type>metadata</type>
+	<level>OPTIONAL</level>
+	<selector>
+		<name>keywords</name>
+		<xpath>/eml/dataset/keywordSet/keyword</xpath>
+	</selector>
+	<code><![CDATA[
+def call():
+  global output
+  global status
+
+  # Message is set when an error occurs.
+  output = "Keywords are not present"
+
+  if(len(keywords) > 0):
+    status = "SUCCESS"
+    return True
+
+  status = "FAILURE"
+  output = "Keywords are not present"
+  return False
+
+	]]></code>
+</check>

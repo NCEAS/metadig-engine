@@ -81,7 +81,7 @@ public class MDQStoreTest {
 	@Test
 	public void testListChecks() {
 		Collection<String> checks = store.listChecks();
-		assertEquals(3, checks.size());
+		assertTrue(checks.size() >= 3);
 	}
 	
 	@Test
