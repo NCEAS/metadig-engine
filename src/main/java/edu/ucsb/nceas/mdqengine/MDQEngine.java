@@ -42,7 +42,10 @@ public class MDQEngine {
 	
 	private static final String RESOLVE_PREFIX = Settings.getConfiguration().getString("D1Client.CN_URL") + "/v2/resolve/";
 	
-	private MDQStore store = null;
+	/**
+	 * Default store uses the in-memory implementation
+	 */
+	private MDQStore store = new InMemoryStore();
 	
 	protected Log log = LogFactory.getLog(this.getClass());
 	
@@ -146,8 +149,6 @@ public class MDQEngine {
 	 */
 	public static void main(String args[]) {
 		MDQEngine engine = new MDQEngine();
-		MDQStore s = new InMemoryStore();
-		engine.setStore(s);
 		
 		try {
 			String xml = IOUtils.toString(new FileInputStream(args[0]), "UTF-8");
