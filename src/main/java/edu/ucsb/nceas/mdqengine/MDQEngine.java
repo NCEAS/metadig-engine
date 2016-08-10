@@ -36,6 +36,7 @@ import edu.ucsb.nceas.mdqengine.model.Run;
 import edu.ucsb.nceas.mdqengine.processor.XMLDialect;
 import edu.ucsb.nceas.mdqengine.serialize.JsonMarshaller;
 import edu.ucsb.nceas.mdqengine.serialize.XmlMarshaller;
+import edu.ucsb.nceas.mdqengine.store.InMemoryStore;
 
 public class MDQEngine {
 	
@@ -111,7 +112,7 @@ public class MDQEngine {
 		// run the checks in the suite to get results
 		for (Check check: suite.getCheck()) {
 			// is this a reference to existing check?
-			if (check.getCode() == null) {
+			if (check.getCode() == null && check.getId() != null) {
 				// then load it
 				check = store.getCheck(check.getId());
 			}
@@ -145,6 +146,9 @@ public class MDQEngine {
 	 */
 	public static void main(String args[]) {
 		MDQEngine engine = new MDQEngine();
+		MDQStore s = new InMemoryStore();
+		engine.setStore(s);
+		
 		try {
 			String xml = IOUtils.toString(new FileInputStream(args[0]), "UTF-8");
 			Suite suite = (Suite) XmlMarshaller.fromXml(xml , Suite.class);
