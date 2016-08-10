@@ -139,7 +139,7 @@ makeMDQPlot <- function(x, path) {
   ggsave(filename = path,
          plot = g,
          width = 4,
-         height = 5)
+         height = 4)
 
   path
 }
