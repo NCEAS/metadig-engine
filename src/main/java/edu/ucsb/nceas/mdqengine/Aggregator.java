@@ -65,6 +65,7 @@ public class Aggregator {
 		"datasource",
 		"dataUrl",
 		"rightsHolder"
+		//, "funder"
 
 	};
 	
@@ -74,6 +75,8 @@ public class Aggregator {
 		"datasource",
 		"dataUrl",
 		"rightsHolder"
+		//, "funder"
+
 	};
 	
 	/**
@@ -231,13 +234,19 @@ public class Aggregator {
 				String formatId = docRecord.get("formatId");
 				String datasource = docRecord.get("datasource");
 				String rightsHolder = docRecord.get("rightsHolder");
+				// TODO: add funder to solr index?
+				String funder = null;
+				if (docRecord.isSet("funder")) {
+					funder = docRecord.get("funder");
+				}
 				
 				Metadata metadata = new Metadata();
 				metadata.setDatasource(datasource);
 				metadata.setDataUrl(dataUrl);
 				metadata.setFormatId(formatId);
 				metadata.setRightsHolder(rightsHolder);
-				
+				metadata.setFunder(funder);
+
 				try {
 					
 					final String finalDataUrl = dataUrl;

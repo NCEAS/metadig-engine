@@ -16,7 +16,9 @@ public class Metadata {
 	private String dataUrl;
 	
 	private String rightsHolder;
-
+	
+	private String funder;
+	
 	public String getFormatId() {
 		return formatId;
 	}
@@ -47,6 +49,14 @@ public class Metadata {
 
 	public void setRightsHolder(String rightsHolder) {
 		this.rightsHolder = rightsHolder;
+	}
+
+	public String getFunder() {
+		return funder;
+	}
+
+	public void setFunder(String funder) {
+		this.funder = funder;
 	}
 
 }
