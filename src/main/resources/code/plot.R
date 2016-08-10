@@ -146,7 +146,7 @@ makeMDQPlot <- function(x, path) {
 
 
 # Load + munge data
-results = read.csv(inputPath)
+results = read.csv(inputPath, stringsAsFactors = FALSE)
 
 results$type <- factor(results$type,
                        levels = c("metadata", "data", "congruence"),
