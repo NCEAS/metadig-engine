@@ -832,7 +832,7 @@ def call():
   global output
   global status
 
-  # varialbe defined by MQE
+  # variable defined by MQE
   # "entityCount" - the number of entities in the dataset
   # "entityDescriptions" - the number of entities in the dataset
 
