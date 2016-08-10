@@ -463,8 +463,9 @@ def call():
   global status
 
   # Check that a publication date is present
-  if 'pubDate' in globals():
+  if 'pubDate' in globals() and pubDate is not None:
     pubDateLength = len(pubDate)
+
     if (pubDateLength < 4):
       output = "The publication date (pubDate) is less that 4 characters long."
       status = "FAILURE"
@@ -838,6 +839,11 @@ def call():
 
   print "entityDescriptions", entityDescriptions
   print "type(entityDescriptions)", type(entityDescriptions)
+
+  if entityDescriptions is None:
+  	output = "No entityDescription element present in the document."
+  	status = "FAILURE"
+  	return False
 
   if entityCount > len(entityDescriptions):
       output = "There are %d entities and only %d entity descriptions." % (entityCount, len(entityDescriptions))
