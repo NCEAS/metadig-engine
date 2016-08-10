@@ -106,6 +106,16 @@ public class Dispatcher {
 				var = engine.get("status");
 				if (var != null && !var.toString().equals("<unbound>")) {
 					dr.setStatus(Status.valueOf(var.toString()));
+				} else {
+					// assume a true result means that the test was successful
+					if (res !=null) {
+						boolean interpolatedStatus = Boolean.valueOf(res.toString());
+						if (interpolatedStatus) {
+							dr.setStatus(Status.SUCCESS);
+						} else {
+							dr.setStatus(Status.FAILURE);
+						}
+					}
 				}
 			}
 		}
