@@ -33,7 +33,9 @@ makeSingleDocPlot <- function(x) {
   g
 }
 
-#' Create a ggplot plot for a result on multiple metadata documents
+
+
+#' Create a stacked bar plot for a result on multiple metadata documents
 #'
 #' @param x (data.frame) An MDQ results data frame
 #'
@@ -41,12 +43,11 @@ makeSingleDocPlot <- function(x) {
 #' @export
 #'
 #' @examples
-makeMultiDocPlot <- function(x) {
+makeMultiDocPlotBar <- function(x) {
   results_summarized <- x %>%
     mutate(denom = length(pid)) %>%
     group_by(datasource, status, level) %>%
     summarize(proportion = length(status) / unique(denom)[1])
-
 
   g <- ggplot(results_summarized, aes(level, proportion, fill = status)) +
     geom_bar(stat = "identity") +
@@ -57,12 +58,64 @@ makeMultiDocPlot <- function(x) {
           panel.border = element_rect(colour = "black", fill = NA),
           legend.position = "top")
 
-  if ("datasource" %in% names(results_summarized) && (length(unique(results_summarized$datasource)) > 1)) {
+  # Facet by data source if we have more than one data source
+  if ("datasource" %in% names(results_summarized) &&
+      (length(unique(results_summarized$datasource)) > 1)) {
     g <- g + facet_wrap(~datasource)
   }
 
   g
 }
+
+
+#' Create a box plot for a result on multiple metadata documents
+#'
+#' @param x (data.frame) An MDQ results data frame
+#'
+#' @return (gg) The ggplot2 plot object
+#' @export
+#'
+#' @examples
+makeMultiDocPlotBox <- function(x) {
+  # Calculate scores
+  results_summarized <- x %>%
+    filter(level != "INFO") %>%
+    group_by(datasource, pid) %>%
+    summarize(score = length(which(status == "SUCCESS")) /
+                length(status))
+
+  g <- ggplot(results_summarized, aes(datasource, score)) +
+    geom_boxplot() +
+    scale_y_continuous(limits = c(0, 1)) +
+    labs(x = "", y = "Score") +
+    theme(legend.title = element_blank(),
+          panel.border = element_rect(colour = "black", fill = NA),
+          legend.position = "top")
+
+  g
+}
+
+
+#' Create a plot for a result on multiple metadata documents
+#'
+#' @param x (data.frame) An MDQ results data frame
+#'
+#' @return (gg) The ggplot2 plot object
+#' @export
+#'
+#' @examples
+makeMultiDocPlot <- function(x, type="box") {
+  if (type == "box") {
+    g <- makeMultiDocPlotBox(x)
+  } else if (type == "bar") {
+    g <- makeMultiDocPlotBar(x)
+  } else {
+    stop(paste0("Type of ", type, " is not supported. Must be either 'box' or 'bar'."))
+  }
+
+  g
+}
+
 
 #' Wrapper function that creates result plots for single and multiple document
 #' results.
@@ -80,7 +133,7 @@ makeMDQPlot <- function(x, path) {
   if (length(unique(x$pid)) == 1) {
     g <- makeSingleDocPlot(x)
   } else {
-    g <- makeMultiDocPlot(x)
+    g <- makeMultiDocPlot(x, type = "box")
   }
 
   ggsave(filename = path,
