@@ -1,0 +1,77 @@
+<suite>
+  <id>arctic.data.center</id>
+  <name>Arctic Data Center Quality Suite</name>
+  <description>This is a provisional Arctic Data Center Quality Suite.</description>
+  <check>
+    <name>Title is present</name>
+    <level>required</level>
+  </check>
+  <check>
+    <name>NSF Award Number is present</name>
+    <level>required</level>
+  </check>
+  <check>
+    <name>NSF Award Number is valid</name>
+    <level>required</level>
+  </check>
+  <check>
+    <name>Creator is present</name>
+    <level>required</level>
+  </check>
+  <check>
+    <name>Contact is present</name>
+    <level>required</level>
+  </check>
+  <check>
+    <name>Abstract is greater than 100 words in length</name>
+    <level>required</level>
+  </check>
+  <check>
+    <name>One or more keywords are present</name>
+    <level>optional</level>
+  </check>
+  <check>
+    <name>Temporal coverage has at least a start year</name>
+    <level>required</level>
+  </check>
+  <check>
+    <name>Geographic coverage description is present</name>
+    <level>required</level>
+  </check>
+  <check>
+    <name>Geographic coverage has at least one pair of coordinates</name>
+    <level>required</level>
+  </check>
+  <check>
+    <name>Taxonomic coverage is present</name>
+    <level>optional</level>
+  </check>
+  <check>
+    <name>At least one method step is present</name>
+    <level>optional</level>
+  </check>
+  <!-- <check>
+    <name>Extent of Study Description???</name>
+    <level>optional</level>
+  </check> -->
+  <!-- <check>
+    <name>Sampling description</name>
+    <level>optional</level>
+  </check> -->
+  <check>
+    <name>One or more alternate identifiers are present</name>
+    <level>optional</level>
+  </check>
+  <check>
+    <name>A data medium is either Digital, Hardcopy, or Other</name>
+    <level>required</level>
+  </check>
+  <check>
+    <name>Usage rights is either CC-0 1.0 or CC-BY 4.0</name>
+    <level>REQUIRED</level>
+  </check>
+  <check>
+    <name>Additional information is entered</name>
+    <level>optional</level>
+  </check>
+</suite>
