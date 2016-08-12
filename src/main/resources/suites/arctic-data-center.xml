@@ -1,55 +1,167 @@
 <suite>
   <id>arctic.data.center</id>
   <name>Arctic Data Center Quality Suite</name>
-  <description>This is a provisional Arctic Data Center Quality Suite.</description>
+  <description>This is a provisional Arctic Data Center Quality Suite. It is modeled after the submission guidelines used on the Arctic Data Center (arcticdata.io).</description>
+
+  <!-- title -->
   <check>
     <name>Title is present</name>
+    <description>A title must be present and be of non-zero length.</description>
     <level>required</level>
+    <selector>
+      <name>title</name>
+      <xpath>/eml/dataset/title</xpath>
+    </selector>
+    <environment>rscript</environment>
+    <code><![CDATA[if (is.null(title)) {
+  status <- "FAILURE"
+  output <- "A title element was not found."
+} else if (length(title) != 1) {
+  status <- "FAILURE"
+  output <- paste0(length(title), " titles found when exactly one was expected.")
+} else if (nchar(title) <= 0) {
+  status <- "FAILURE"
+  output <- paste0("The title was of length '", nchar(title), "' but a length greater than zero was expected.")
+} else {
+  status <- "SUCCESS"
+  output <- "A title was found and its length was greater than zero."
+}]]></code>
+  </check>
+
+
+<!--TODO: Find a sentiment/concept analysis package?-->
+  <!--<check>-->
+  <!--<name>Title is sufficient</name>-->
+  <!--<description>Provides enough information to understand the dataset at a general scientific level (i.e. what, where, when)</description>-->
+  <!--<level>required</level>-->
+<!--</check>-->
+
+
+
+  <!-- award -->
+  <check>
+    <name>One or more NSF award numbers is present</name>
+    <description>One or more NSF award numbers must be entered.</description>
+    <level>required</level>
+    <selector>
+      <name>awards</name>
+      <xpath>/eml/dataset/project/funding/para</xpath>
+    </selector>
+    <environment>rscript</environment>
+    <code><![CDATA[if (is.null(awards)) {
+  status <- "FAILURE"
+  output <- "No award numbers were found."
+} else if (length(title) < 1) {
+  status <- "FAILURE"
+  output <- paste0(length(title), " award number(s) found when at least one was expected.")
+} else if (any(nchar(awards) <= 0)) {
+  status <- "FAILURE"
+  output <- paste0("The following award numbers were of zero length: ", which(nchar(awards) <= 0, "."))
+} else {
+  status <- "SUCCESS"
+  output <- paste0("A total of ", length(awards), " valid NSF award number(s) was/were found.")
+}]]></code>
   </check>
   <check>
-    <name>NSF Award Number is present</name>
+    <name>NSF awards in database</name>
+    <description>All entered NSF award numbers are present in the NSF award database.</description>
     <level>required</level>
+    <selector>
+      <name>awards</name>
+      <xpath>/eml/dataset/project/funding/para</xpath>
+    </selector>
+    <environment>rscript</environment>
+    <code><![CDATA[library(httr)
+awards <- list("NSF Award 123123", "1293103981", "1546024", "Y")
+
+# Clean up each award string so we can pass it to the HTTP API
+awards <- trimws(gsub("nsf award", "", tolower(awards)))
+
+# Search for each award
+responses <- lapply(awards, function(award) {
+  tryCatch({
+    req <- GET(paste0("https://arcticdata.io/api.nsf.gov/services/v1/awards.json?id=", award))
+    stopifnot(req$status_code == 200) # Throw an error if the HTTP status isn't 200
+    content(req)
+  },
+  error = function(e) {
+    list()
+  })
+})
+
+# Determine if each award was found
+is_found <- sapply(responses, function(r) ifelse(!is.null(r$response$award) && length(r$response$award) == 1, TRUE, FALSE))
+
+#
+if (all(is_found)) {
+  status <- "SUCCESS"
+  output <- "All award numbers were found in the NSF award database."
+} else {
+  mdq_result <- list(status = "FAILURE",
+                     output = as.list(paste0("The award number '", awards[!is_found], "' was not found in the NSF award database.")))
+}]]></code>
   </check>
-  <check>
-    <name>NSF Award Number is valid</name>
-    <level>required</level>
-  </check>
-  <check>
-    <name>Creator is present</name>
-    <level>required</level>
-  </check>
-  <check>
-    <name>Contact is present</name>
-    <level>required</level>
-  </check>
+
+  <!-- creator -->
+  <!--<check>-->
+    <!--<name>Creator is present</name>-->
+    <!--<level>required</level>-->
+  <!--</check>-->
+  <!--<check>-->
+    <!--<name>Contact is present</name>-->
+    <!--<level>required</level>-->
+  <!--</check>-->
   <check>
     <name>Abstract is greater than 100 words in length</name>
     <level>required</level>
+    <selector>
+      <name>abstract</name>
+      <xpath>/eml/dataset/abstract</xpath>
+    </selector>
+    <environment>rscript</environment>
+    <code><![CDATA[
+# Define a function to determine abstract length
+abstract_length <- function(abstract) length(strsplit(abstract, " ")[[1]])
+
+if (is.null(abstract)) {
+  status <- "FAILURE"
+  output <- "The abstract was was not found."
+} else if (length(abstract) != 1) {
+  status <- "FAILURE"
+  output <- paste0("Expected there to be a single abstract but found ", length(abstract), " abstract(s).")
+} else if (abstract_length(abstract) <= 100) {
+  status <- "FALIURE"
+  output <- paste0("Expected the abstract to be over 100 words in length but it was ", abstract_length(abstract), " word(s) in length instead.")
+} else {
+  status <- "SUCCESS"
+  output <- "The abstract has more than 100 words in it."
+}
+    ]]></code>
   </check>
-  <check>
-    <name>One or more keywords are present</name>
-    <level>optional</level>
-  </check>
-  <check>
-    <name>Temporal coverage has at least a start year</name>
-    <level>required</level>
-  </check>
-  <check>
-    <name>Geographic coverage description is present</name>
-    <level>required</level>
-  </check>
-  <check>
-    <name>Geographic coverage has at least one pair of coordinates</name>
-    <level>required</level>
-  </check>
-  <check>
-    <name>Taxonomic coverage is present</name>
-    <level>optional</level>
-  </check>
-  <check>
-    <name>At least one method step is present</name>
-    <level>optional</level>
-  </check>
+  <!--<check>-->
+    <!--<name>One or more keywords are present</name>-->
+    <!--<level>optional</level>-->
+  <!--</check>-->
+  <!--<check>-->
+    <!--<name>Temporal coverage has at least a start year</name>-->
+    <!--<level>required</level>-->
+  <!--</check>-->
+  <!--<check>-->
+    <!--<name>Geographic coverage description is present</name>-->
+    <!--<level>required</level>-->
+  <!--</check>-->
+  <!--<check>-->
+    <!--<name>Geographic coverage has at least one pair of coordinates</name>-->
+    <!--<level>required</level>-->
+  <!--</check>-->
+  <!--<check>-->
+    <!--<name>Taxonomic coverage is present</name>-->
+    <!--<level>optional</level>-->
+  <!--</check>-->
+  <!--<check>-->
+    <!--<name>At least one method step is present</name>-->
+    <!--<level>optional</level>-->
+  <!--</check>-->
   <!-- <check>
     <name>Extent of Study Description???</name>
     <level>optional</level>
@@ -58,20 +170,20 @@
     <name>Sampling description</name>
     <level>optional</level>
   </check> -->
-  <check>
-    <name>One or more alternate identifiers are present</name>
-    <level>optional</level>
-  </check>
-  <check>
-    <name>A data medium is either Digital, Hardcopy, or Other</name>
-    <level>required</level>
-  </check>
-  <check>
-    <name>Usage rights is either CC-0 1.0 or CC-BY 4.0</name>
-    <level>REQUIRED</level>
-  </check>
-  <check>
-    <name>Additional information is entered</name>
-    <level>optional</level>
-  </check>
+  <!--<check>-->
+    <!--<name>One or more alternate identifiers are present</name>-->
+    <!--<level>optional</level>-->
+  <!--</check>-->
+  <!--<check>-->
+    <!--<name>A data medium is either Digital, Hardcopy, or Other</name>-->
+    <!--<level>required</level>-->
+  <!--</check>-->
+  <!--<check>-->
+    <!--<name>Usage rights is either CC-0 1.0 or CC-BY 4.0</name>-->
+    <!--<level>REQUIRED</level>-->
+  <!--</check>-->
+  <!--<check>-->
+    <!--<name>Additional information is entered</name>-->
+    <!--<level>optional</level>-->
+  <!--</check>-->
 </suite>
