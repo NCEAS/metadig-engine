@@ -53,6 +53,24 @@ public class RDispatcherTest {
 	}
 	
 	@Test
+	public void testNull() {
+		Map<String, Object> names = new HashMap<String, Object>();
+		names.put("x", null);
+		names.put("y", 2);
+		String code = "(is.null(x));";
+
+		Result result = null;
+		try {
+			result = dispatcher.dispatch(names, code);
+		} catch (ScriptException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			fail(e.getMessage());
+		}
+		assertEquals("true", result.getOutput().get(0).getValue());
+	}
+	
+	@Test
 	public void testComplex() {
 		Map<String, Object> names = new HashMap<String, Object>();
 		List<List<String>> list = new ArrayList<List<String>>();
