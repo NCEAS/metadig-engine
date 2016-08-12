@@ -407,4 +407,42 @@ public class XMLDialectTest {
 			
 	}
 
+	@Test
+	public void testSelectorNullIfNotFound() {
+		/* If the XPath expression provided by a selector does not match any path in the document, the `name` of the
+		 * selector should should still be defined and available to the check code and the value should be set to
+		 * NULL. */
+
+		// Set up a test check
+		Check check = new Check();
+		check.setCode("status <- ifelse(!is.null(test), 'SUCCESS', 'FAILURE')");
+		check.setEnvironment("rscript");
+
+		Selector selector = new Selector();
+		selector.setName("test");
+		selector.setXpath("/eml/dataset");
+
+		List<Selector> selectors = new ArrayList<Selector>();
+		selectors.add(selector);
+		check.setSelector(selectors);
+
+		// Grab XML doc to test against
+		InputStream input = this.getClass().getResourceAsStream("/test-docs/eml.1.1.xml");
+		XMLDialect xml = null;
+
+		try {
+			xml = new XMLDialect(input);
+		} catch (SAXException | IOException | ParserConfigurationException e) {
+			// TODO Auto-generated catch block
+			fail(e.getMessage());
+		}
+
+		// Run check and test it
+		try {
+			Result result = xml.runCheck(check);
+			assertEquals(Status.SUCCESS, result.getStatus());
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
 }
