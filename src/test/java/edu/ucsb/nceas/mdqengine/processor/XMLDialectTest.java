@@ -414,6 +414,7 @@ public class XMLDialectTest {
 		 * NULL. */
 
 		// Set up a test check
+		// TODO: Make this test cover all environments, not just 'rscript'
 		Check check = new Check();
 		check.setCode("mdq_result <- list(status = ifelse(is.null(test), 'SUCCESS', 'FAILURE'), output=list(list(value=TRUE)))");
 		check.setEnvironment("rscript");
