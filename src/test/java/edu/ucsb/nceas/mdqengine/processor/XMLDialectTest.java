@@ -415,12 +415,12 @@ public class XMLDialectTest {
 
 		// Set up a test check
 		Check check = new Check();
-		check.setCode("status <- ifelse(!is.null(test), 'SUCCESS', 'FAILURE')");
+		check.setCode("mdq_result <- list(status = ifelse(is.null(test), 'SUCCESS', 'FAILURE'), output=list(list(value=TRUE)))");
 		check.setEnvironment("rscript");
 
 		Selector selector = new Selector();
 		selector.setName("test");
-		selector.setXpath("/eml/dataset");
+		selector.setXpath("/eml/dataset/asdf");
 
 		List<Selector> selectors = new ArrayList<Selector>();
 		selectors.add(selector);
