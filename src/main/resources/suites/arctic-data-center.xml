@@ -71,8 +71,8 @@
       <xpath>/eml/dataset/project/funding/para</xpath>
     </selector>
     <environment>rscript</environment>
-    <code><![CDATA[library(httr)
-awards <- list("NSF Award 123123", "1293103981", "1546024", "Y")
+    <code><![CDATA[
+library(httr)
 
 # Clean up each award string so we can pass it to the HTTP API
 awards <- trimws(gsub("nsf award", "", tolower(awards)))
@@ -92,14 +92,17 @@ responses <- lapply(awards, function(award) {
 # Determine if each award was found
 is_found <- sapply(responses, function(r) ifelse(!is.null(r$response$award) && length(r$response$award) == 1, TRUE, FALSE))
 
-#
+
 if (all(is_found)) {
   status <- "SUCCESS"
   output <- "All award numbers were found in the NSF award database."
 } else {
+
+  outputs <- paste0("The award number '", awards[!is_found], "' was not found in the NSF award database.")
   mdq_result <- list(status = "FAILURE",
-                     output = as.list(paste0("The award number '", awards[!is_found], "' was not found in the NSF award database.")))
-}]]></code>
+                     output = lapply(outputs, function(message) { list(value = message)}))
+}
+]]></code>
   </check>
 
   <!-- creator -->
