@@ -85,6 +85,19 @@ mdq_result <- check()
       ]]></code>
 	</check>
 
+	<check>
+		<id>check-dataset.3.1</id>
+		<name>schemaValid</name>
+		<description>Check if the metadata document is schema valid.</description>
+		<environment>Java</environment>
+		<dialect>
+			<name>eml</name>
+			<xpath>boolean(/*[local-name() = 'eml'])</xpath>
+		</dialect>
+		<type>metadata</type>
+		<level>OPTIONAL</level>
+		<code>edu.ucsb.nceas.mdqengine.processor.SchemaCheck</code>
+	</check>
 
 	<check>
 		<id>check-dataset.6.1</id>
