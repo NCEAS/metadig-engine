@@ -11,10 +11,13 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import javax.script.ScriptException;
+import javax.xml.namespace.NamespaceContext;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -34,6 +37,7 @@ import org.apache.commons.lang.BooleanUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.util.xml.SimpleNamespaceContext;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -271,6 +275,21 @@ public class XMLDialect {
 		// select one or more values from document
 		String selectorPath = selector.getXpath();
 		XPath xpath = xPathfactory.newXPath();
+		
+		// handle namespace prefixes
+		Map<String, String> namespaces = selector.getNamespace();
+		if (namespaces != null) {
+			SimpleNamespaceContext nsContext = new SimpleNamespaceContext();
+			Iterator<Entry<String, String>> nsIter = namespaces.entrySet().iterator();
+			while (nsIter.hasNext()) {
+				Entry<String, String> entry = nsIter.next();
+				String prefix = entry.getKey();
+				String uri = entry.getValue();
+				nsContext.bindNamespaceUri(prefix, uri);
+			}
+			xpath.setNamespaceContext(nsContext);	
+		}
+		
 		
 		// try multiple first
 		NodeList nodes = null;
