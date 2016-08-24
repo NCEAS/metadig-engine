@@ -8,7 +8,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 import org.eclipse.persistence.oxm.annotations.XmlCDATA;
 
-@XmlRootElement
+@XmlRootElement(namespace="https://nceas.ucsb.edu/mdqe")
 public class Check {
 	
 	private String id;

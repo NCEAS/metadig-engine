@@ -5,7 +5,7 @@ import java.util.List;
 
 import javax.xml.bind.annotation.XmlRootElement;
 
-@XmlRootElement
+@XmlRootElement(namespace="https://nceas.ucsb.edu/mdqe")
 public class Run {
 	
 	private String id;

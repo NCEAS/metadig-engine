@@ -116,6 +116,25 @@
 					<target>1.8</target>
 				</configuration>
 			</plugin>
+			<plugin>
+			    <groupId>org.codehaus.mojo</groupId>
+			    <artifactId>jaxb2-maven-plugin</artifactId>
+			    <version>1.6</version>
+			    <executions>
+			        <execution>
+			            <goals>
+			                <goal>schemagen</goal>
+			            </goals>
+			            <phase>generate-resources</phase>
+			            <configuration>
+			                <includes>
+			                    <include>edu/ucsb/nceas/mdqengine/model/*.java</include>
+			                </includes>
+			                <outputDirectory>${project.build.directory}/schemas</outputDirectory>
+			            </configuration>
+			        </execution>
+			    </executions>
+			</plugin>
 		</plugins>
 	</build>
 </project>
