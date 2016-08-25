@@ -41,3 +41,6 @@
 - Informational
     - Data head and tail display
     - Outlier plots
+- Data formats
+  - Data objects are in non-proprietary formats
+  - Data objects do not have funky stuff like margin calculations
