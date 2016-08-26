@@ -202,9 +202,19 @@ public class XMLDialect {
 	}
 	
 	private Result postProcess(Result result) {
-	
-		// check if we need to encode the output value
+		// Return the result as-is if there are no outputs to post-process
+		if (result.getOutput() == null) {
+			log.debug("Skipping postProcess step because this result's output is null.");
+			return(result);
+		}
+
+		// Post-process each output (if needed)
 		for (Output output: result.getOutput()) {
+			if (output == null) {
+				log.debug("Output was null.");
+				continue;
+			}
+
 			String value = output.getValue();
 			if (value != null) {
 				Path path = null;
@@ -230,7 +240,6 @@ public class XMLDialect {
 		}
 		
 		return result;
-		
 	}
 	
 	/**
