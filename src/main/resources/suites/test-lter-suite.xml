@@ -1200,7 +1200,7 @@ def call():
 	  		ggsave(path, plot = g, width = 6, height = 6)
 
   			mdq_result <- list(status = "SUCCESS",
-            output = list(list(value = path, type = "image/png")))
+            			       output = list(list(value = path, type = "image/png")))
 		]]></code>
 	</check>
 </suite>
