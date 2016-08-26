@@ -44,3 +44,5 @@
 - Data formats
   - Data objects are in non-proprietary formats
   - Data objects do not have funky stuff like margin calculations
+- Miscellaneous (move this liste items into other headers as appropriate):
+  - Metadata document is schema valid
