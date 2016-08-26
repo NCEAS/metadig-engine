@@ -410,14 +410,21 @@ public class XMLDialectTest {
 	@Test
 	public void testSelectorNullIfNotFound() {
 		/* If the XPath expression provided by a selector does not match any path in the document, the `name` of the
-		 * selector should should still be defined and available to the check code and the value should be set to
-		 * NULL. */
+		 * selector should should still be defined and available to the check code and the value should be set to the
+		 * whatever that environment's concept of NULL is. */
 
 		// Set up a test check
 		// TODO: Make this test cover all environments, not just 'rscript'
-		Check check = new Check();
-		check.setCode("mdq_result <- list(status = ifelse(is.null(test), 'SUCCESS', 'FAILURE'), output=list(list(value=TRUE)))");
-		check.setEnvironment("rscript");
+
+		// RScript
+		Check rscript_check = new Check();
+		rscript_check.setCode("mdq_result <- list(status = ifelse(is.null(test), 'SUCCESS', 'FAILURE'), output=list(list(value=TRUE)))");
+		rscript_check.setEnvironment("rscript");
+
+		// Python
+		Check python_check = new Check();
+		python_check.setCode("def call():\n\tglobal status; status = 'SUCCESS' if test is None else 'FAILURE';");
+		python_check.setEnvironment("python");
 
 		Selector selector = new Selector();
 		selector.setName("test");
@@ -425,7 +432,9 @@ public class XMLDialectTest {
 
 		List<Selector> selectors = new ArrayList<Selector>();
 		selectors.add(selector);
-		check.setSelector(selectors);
+
+		rscript_check.setSelector(selectors);
+		python_check.setSelector(selectors);
 
 		// Grab XML doc to test against
 		InputStream input = this.getClass().getResourceAsStream("/test-docs/eml.1.1.xml");
@@ -440,8 +449,12 @@ public class XMLDialectTest {
 
 		// Run check and test it
 		try {
-			Result result = xml.runCheck(check);
-			assertEquals(Status.SUCCESS, result.getStatus());
+			Result rscript_result = xml.runCheck(rscript_check);
+			assertEquals(Status.SUCCESS, rscript_result.getStatus());
+
+			Result python_result = xml.runCheck(python_check);
+			assertEquals(Status.SUCCESS, python_result.getStatus());
+
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
