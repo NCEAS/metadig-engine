@@ -62,7 +62,7 @@ public class InMemoryStore implements MDQStore{
 					String xml = IOUtils.toString(url.openStream(), "UTF-8");
 					suite = (Suite) XmlMarshaller.fromXml(xml, Suite.class);
 				} catch (JAXBException | IOException e) {
-					log.warn("Could not load suite: " + e.getMessage());
+					log.warn("Could not load suite: " + e.getMessage() + " at path " + resource.getFilename() + ".");
 					continue;
 				}
 				this.createSuite(suite);
@@ -88,7 +88,7 @@ public class InMemoryStore implements MDQStore{
 					String xml = IOUtils.toString(url.openStream(), "UTF-8");
 					check = (Check) XmlMarshaller.fromXml(xml, Check.class);
 				} catch (JAXBException | IOException e) {
-					log.warn("Could not load check: " + e.getMessage());
+					log.warn("Could not load check: " + e.getMessage() + " at path " + resource.getFilename() + ".");
 					continue;
 				}
 				this.createCheck(check);
