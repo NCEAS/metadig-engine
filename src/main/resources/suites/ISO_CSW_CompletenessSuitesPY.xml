@@ -1,23 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<root>
-  <suite>
-    <check>
-      <id>Keyword_ISO</id>
-      <name>KeywordPresent</name>
-      <description>Checks to see if at least one Keyword concept exists.</description>
-      <environment>python</environment>
-      <dialect>
-        <name>iso</name>
-        <xpath>boolean(/*[local-name() = 'iso'])</xpath>
-      </dialect>
-      <type>metadata</type>
-      <level>REQUIRED</level>
-      <selector>
-        <name>Keyword</name>
-        <xpath>/*/gmd:identificationInfo/*/gmd:descriptiveKeywords/gmd:MD_Keywords/gmd:keyword | /*/gmd:identificationInfo/*/gmd:descriptiveKeywords/gmd:MD_Keywords[normalize-space(gmd:type/gmd:MD_KeywordTypeCode)='place']/gmd:keyword/gco:CharacterString | /*/gmd:identificationInfo/*/gmd:descriptiveKeywords/gmd:MD_Keywords[normalize-space(gmd:type/gmd:MD_KeywordTypeCode)='instrument']/gmd:keyword/gco:CharacterString |
-          /*/gmd:identificationInfo/*/gmd:descriptiveKeywords/gmd:MD_Keywords[normalize-space(gmd:type/gmd:MD_KeywordTypeCode)='platform']/gmd:keyword/gco:CharacterString | /*/gmd:identificationInfo/*/gmd:descriptiveKeywords/gmd:MD_Keywords[normalize-space(gmd:type/gmd:MD_KeywordTypeCode)='project']/gmd:keyword/gco:CharacterString</xpath>
-      </selector>
-      <code><![CDATA[
+<suite>
+  <check>
+    <id>CSWCoreQueryables_Keyword_ISO</id>
+    <name>KeywordPresent</name>
+    <description>Checks to see if at least one Keyword concept exists.</description>
+    <environment>python</environment>
+    <dialect>
+      <name>iso</name>
+      <xpath>boolean(/*[local-name() = 'MI_Metadata | MD_Metadata'])</xpath>
+    </dialect>
+    <type>metadata</type>
+    <level>REQUIRED</level>
+    <selector>
+      <name>Keyword</name>
+      <xpath>/*/gmd:identificationInfo/*/gmd:descriptiveKeywords/gmd:MD_Keywords/gmd:keyword | /*/gmd:identificationInfo/*/gmd:descriptiveKeywords/gmd:MD_Keywords[normalize-space(gmd:type/gmd:MD_KeywordTypeCode)='place']/gmd:keyword/gco:CharacterString | /*/gmd:identificationInfo/*/gmd:descriptiveKeywords/gmd:MD_Keywords[normalize-space(gmd:type/gmd:MD_KeywordTypeCode)='instrument']/gmd:keyword/gco:CharacterString |
+        /*/gmd:identificationInfo/*/gmd:descriptiveKeywords/gmd:MD_Keywords[normalize-space(gmd:type/gmd:MD_KeywordTypeCode)='platform']/gmd:keyword/gco:CharacterString | /*/gmd:identificationInfo/*/gmd:descriptiveKeywords/gmd:MD_Keywords[normalize-space(gmd:type/gmd:MD_KeywordTypeCode)='project']/gmd:keyword/gco:CharacterString</xpath>
+    </selector>
+    <code><![CDATA[
 def call():
   global output
   global status
@@ -30,23 +29,23 @@ def call():
   output = "Keyword concept is not present"
   return False
       ]]></code>
-    </check>
-    <check>
-      <id>ResourceTitle_ISO</id>
-      <name>ResourceTitlePresent</name>
-      <description>Checks to see if at least one Resource Title concept exists.</description>
-      <environment>python</environment>
-      <dialect>
-        <name>iso</name>
-        <xpath>boolean(/*[local-name() = 'iso'])</xpath>
-      </dialect>
-      <type>metadata</type>
-      <level>REQUIRED</level>
-      <selector>
-        <name>ResourceTitle</name>
-        <xpath>/*/gmd:identificationInfo/*/gmd:citation/gmd:CI_Citation/gmd:title/gco:CharacterString</xpath>
-      </selector>
-      <code><![CDATA[
+  </check>
+  <check>
+    <id>CSWCoreQueryables_ResourceTitle_ISO</id>
+    <name>ResourceTitlePresent</name>
+    <description>Checks to see if at least one Resource Title concept exists.</description>
+    <environment>python</environment>
+    <dialect>
+      <name>iso</name>
+      <xpath>boolean(/*[local-name() = 'MI_Metadata | MD_Metadata'])</xpath>
+    </dialect>
+    <type>metadata</type>
+    <level>REQUIRED</level>
+    <selector>
+      <name>ResourceTitle</name>
+      <xpath>/*/gmd:identificationInfo/*/gmd:citation/gmd:CI_Citation/gmd:title/gco:CharacterString</xpath>
+    </selector>
+    <code><![CDATA[
 def call():
   global output
   global status
@@ -59,23 +58,23 @@ def call():
   output = "Resource Title concept is not present"
   return False
       ]]></code>
-    </check>
-    <check>
-      <id>Abstract_ISO</id>
-      <name>AbstractPresent</name>
-      <description>Checks to see if at least one Abstract concept exists.</description>
-      <environment>python</environment>
-      <dialect>
-        <name>iso</name>
-        <xpath>boolean(/*[local-name() = 'iso'])</xpath>
-      </dialect>
-      <type>metadata</type>
-      <level>REQUIRED</level>
-      <selector>
-        <name>Abstract</name>
-        <xpath>/*/gmd:identificationInfo/*/gmd:abstract/gco:CharacterString</xpath>
-      </selector>
-      <code><![CDATA[
+  </check>
+  <check>
+    <id>CSWCoreQueryables_Abstract_ISO</id>
+    <name>AbstractPresent</name>
+    <description>Checks to see if at least one Abstract concept exists.</description>
+    <environment>python</environment>
+    <dialect>
+      <name>iso</name>
+      <xpath>boolean(/*[local-name() = 'MI_Metadata | MD_Metadata'])</xpath>
+    </dialect>
+    <type>metadata</type>
+    <level>REQUIRED</level>
+    <selector>
+      <name>Abstract</name>
+      <xpath>/*/gmd:identificationInfo/*/gmd:abstract/gco:CharacterString</xpath>
+    </selector>
+    <code><![CDATA[
 def call():
   global output
   global status
@@ -88,23 +87,23 @@ def call():
   output = "Abstract concept is not present"
   return False
       ]]></code>
-    </check>
-    <check>
-      <id>ResourceFormat_ISO</id>
-      <name>ResourceFormatPresent</name>
-      <description>Checks to see if at least one Resource Format concept exists.</description>
-      <environment>python</environment>
-      <dialect>
-        <name>iso</name>
-        <xpath>boolean(/*[local-name() = 'iso'])</xpath>
-      </dialect>
-      <type>metadata</type>
-      <level>REQUIRED</level>
-      <selector>
-        <name>ResourceFormat</name>
-        <xpath>//gmd:resourceFormat/gmd:MD_Format/gmd:name/gco:CharacterString</xpath>
-      </selector>
-      <code><![CDATA[
+  </check>
+  <check>
+    <id>CSWCoreQueryables_ResourceFormat_ISO</id>
+    <name>ResourceFormatPresent</name>
+    <description>Checks to see if at least one Resource Format concept exists.</description>
+    <environment>python</environment>
+    <dialect>
+      <name>iso</name>
+      <xpath>boolean(/*[local-name() = 'MI_Metadata | MD_Metadata'])</xpath>
+    </dialect>
+    <type>metadata</type>
+    <level>REQUIRED</level>
+    <selector>
+      <name>ResourceFormat</name>
+      <xpath>//gmd:resourceFormat/gmd:MD_Format/gmd:name/gco:CharacterString</xpath>
+    </selector>
+    <code><![CDATA[
 def call():
   global output
   global status
@@ -117,23 +116,23 @@ def call():
   output = "Resource Format concept is not present"
   return False
       ]]></code>
-    </check>
-    <check>
-      <id>MetadataIdentifier_ISO</id>
-      <name>MetadataIdentifierPresent</name>
-      <description>Checks to see if at least one Metadata Identifier concept exists.</description>
-      <environment>python</environment>
-      <dialect>
-        <name>iso</name>
-        <xpath>boolean(/*[local-name() = 'iso'])</xpath>
-      </dialect>
-      <type>metadata</type>
-      <level>REQUIRED</level>
-      <selector>
-        <name>MetadataIdentifier</name>
-        <xpath>/*/gmd:fileIdentifier/gco:CharacterString</xpath>
-      </selector>
-      <code><![CDATA[
+  </check>
+  <check>
+    <id>CSWCoreQueryables_MetadataIdentifier_ISO</id>
+    <name>MetadataIdentifierPresent</name>
+    <description>Checks to see if at least one Metadata Identifier concept exists.</description>
+    <environment>python</environment>
+    <dialect>
+      <name>iso</name>
+      <xpath>boolean(/*[local-name() = 'MI_Metadata | MD_Metadata'])</xpath>
+    </dialect>
+    <type>metadata</type>
+    <level>REQUIRED</level>
+    <selector>
+      <name>MetadataIdentifier</name>
+      <xpath>/*/gmd:fileIdentifier/gco:CharacterString</xpath>
+    </selector>
+    <code><![CDATA[
 def call():
   global output
   global status
@@ -146,23 +145,23 @@ def call():
   output = "Metadata Identifier concept is not present"
   return False
       ]]></code>
-    </check>
-    <check>
-      <id>MetadataModifiedDate_ISO</id>
-      <name>MetadataModifiedDatePresent</name>
-      <description>Checks to see if at least one Metadata Modified Date concept exists.</description>
-      <environment>python</environment>
-      <dialect>
-        <name>iso</name>
-        <xpath>boolean(/*[local-name() = 'iso'])</xpath>
-      </dialect>
-      <type>metadata</type>
-      <level>REQUIRED</level>
-      <selector>
-        <name>MetadataModifiedDate</name>
-        <xpath>/*/gmd:dateStamp/gco:Date | /*/gmd:dateStamp/gco:DateTime</xpath>
-      </selector>
-      <code><![CDATA[
+  </check>
+  <check>
+    <id>CSWCoreQueryables_MetadataModifiedDate_ISO</id>
+    <name>MetadataModifiedDatePresent</name>
+    <description>Checks to see if at least one Metadata Modified Date concept exists.</description>
+    <environment>python</environment>
+    <dialect>
+      <name>iso</name>
+      <xpath>boolean(/*[local-name() = 'MI_Metadata | MD_Metadata'])</xpath>
+    </dialect>
+    <type>metadata</type>
+    <level>REQUIRED</level>
+    <selector>
+      <name>MetadataModifiedDate</name>
+      <xpath>/*/gmd:dateStamp/gco:Date | /*/gmd:dateStamp/gco:DateTime</xpath>
+    </selector>
+    <code><![CDATA[
 def call():
   global output
   global status
@@ -175,23 +174,23 @@ def call():
   output = "Metadata Modified Date concept is not present"
   return False
       ]]></code>
-    </check>
-    <check>
-      <id>ResourceType_ISO</id>
-      <name>ResourceTypePresent</name>
-      <description>Checks to see if at least one Resource Type concept exists.</description>
-      <environment>python</environment>
-      <dialect>
-        <name>iso</name>
-        <xpath>boolean(/*[local-name() = 'iso'])</xpath>
-      </dialect>
-      <type>metadata</type>
-      <level>REQUIRED</level>
-      <selector>
-        <name>ResourceType</name>
-        <xpath>/*/gmd:hierarchyLevel/gmd:MD_ScopeCode</xpath>
-      </selector>
-      <code><![CDATA[
+  </check>
+  <check>
+    <id>CSWCoreQueryables_ResourceType_ISO</id>
+    <name>ResourceTypePresent</name>
+    <description>Checks to see if at least one Resource Type concept exists.</description>
+    <environment>python</environment>
+    <dialect>
+      <name>iso</name>
+      <xpath>boolean(/*[local-name() = 'MI_Metadata | MD_Metadata'])</xpath>
+    </dialect>
+    <type>metadata</type>
+    <level>REQUIRED</level>
+    <selector>
+      <name>ResourceType</name>
+      <xpath>/*/gmd:hierarchyLevel/gmd:MD_ScopeCode</xpath>
+    </selector>
+    <code><![CDATA[
 def call():
   global output
   global status
@@ -204,23 +203,23 @@ def call():
   output = "Resource Type concept is not present"
   return False
       ]]></code>
-    </check>
-    <check>
-      <id>BoundingBox_ISO</id>
-      <name>BoundingBoxPresent</name>
-      <description>Checks to see if at least one Bounding Box concept exists.</description>
-      <environment>python</environment>
-      <dialect>
-        <name>iso</name>
-        <xpath>boolean(/*[local-name() = 'iso'])</xpath>
-      </dialect>
-      <type>metadata</type>
-      <level>REQUIRED</level>
-      <selector>
-        <name>BoundingBox</name>
-        <xpath>/*/gmd:identificationInfo/*/gmd:extent/gmd:EX_Extent/gmd:geographicElement/gmd:EX_GeographicBoundingBox//* | /*/gmd:identificationInfo/srv:SV_ServiceIdentification/srv:extent/gmd:EX_Extent/gmd:geographicElement/gmd:EX_GeographicBoundingBox//*</xpath>
-      </selector>
-      <code><![CDATA[
+  </check>
+  <check>
+    <id>CSWCoreQueryables_BoundingBox_ISO</id>
+    <name>BoundingBoxPresent</name>
+    <description>Checks to see if at least one Bounding Box concept exists.</description>
+    <environment>python</environment>
+    <dialect>
+      <name>iso</name>
+      <xpath>boolean(/*[local-name() = 'MI_Metadata | MD_Metadata'])</xpath>
+    </dialect>
+    <type>metadata</type>
+    <level>REQUIRED</level>
+    <selector>
+      <name>BoundingBox</name>
+      <xpath>/*/gmd:identificationInfo/*/gmd:extent/gmd:EX_Extent/gmd:geographicElement/gmd:EX_GeographicBoundingBox//* | /*/gmd:identificationInfo/srv:SV_ServiceIdentification/srv:extent/gmd:EX_Extent/gmd:geographicElement/gmd:EX_GeographicBoundingBox//*</xpath>
+    </selector>
+    <code><![CDATA[
 def call():
   global output
   global status
@@ -233,23 +232,23 @@ def call():
   output = "Bounding Box concept is not present"
   return False
       ]]></code>
-    </check>
-    <check>
-      <id>CoordinateReferenceSystem(CRS)_ISO</id>
-      <name>CoordinateReferenceSystem(CRS)Present</name>
-      <description>Checks to see if at least one Coordinate Reference System (CRS) concept exists.</description>
-      <environment>python</environment>
-      <dialect>
-        <name>iso</name>
-        <xpath>boolean(/*[local-name() = 'iso'])</xpath>
-      </dialect>
-      <type>metadata</type>
-      <level>REQUIRED</level>
-      <selector>
-        <name>CoordinateReferenceSystem(CRS)</name>
-        <xpath>/*/gmd:referenceSystemInfo/gmd:MD_ReferenceSystem/gmd:referenceSystemIdentifier/gmd:RS_Identifier/gmd:code | /*/gmd:referenceSystemInfo/gmd:MD_ReferenceSystem/gmd:referenceSystemIdentifier/gmd:RS_Identifier/gmd:codeSpace</xpath>
-      </selector>
-      <code><![CDATA[
+  </check>
+  <check>
+    <id>CSWCoreQueryables_CoordinateReferenceSystem(CRS)_ISO</id>
+    <name>CoordinateReferenceSystem(CRS)Present</name>
+    <description>Checks to see if at least one Coordinate Reference System (CRS) concept exists.</description>
+    <environment>python</environment>
+    <dialect>
+      <name>iso</name>
+      <xpath>boolean(/*[local-name() = 'MI_Metadata | MD_Metadata'])</xpath>
+    </dialect>
+    <type>metadata</type>
+    <level>REQUIRED</level>
+    <selector>
+      <name>CoordinateReferenceSystem(CRS)</name>
+      <xpath>/*/gmd:referenceSystemInfo/gmd:MD_ReferenceSystem/gmd:referenceSystemIdentifier/gmd:RS_Identifier/gmd:code | /*/gmd:referenceSystemInfo/gmd:MD_ReferenceSystem/gmd:referenceSystemIdentifier/gmd:RS_Identifier/gmd:codeSpace</xpath>
+    </selector>
+    <code><![CDATA[
 def call():
   global output
   global status
@@ -262,23 +261,23 @@ def call():
   output = "Coordinate Reference System (CRS) concept is not present"
   return False
       ]]></code>
-    </check>
-    <check>
-      <id>Association_ISO</id>
-      <name>AssociationPresent</name>
-      <description>Checks to see if at least one Association concept exists.</description>
-      <environment>python</environment>
-      <dialect>
-        <name>iso</name>
-        <xpath>boolean(/*[local-name() = 'iso'])</xpath>
-      </dialect>
-      <type>metadata</type>
-      <level>REQUIRED</level>
-      <selector>
-        <name>Association</name>
-        <xpath>/*/gmd:identificationInfo/*/gmd:aggregationInfo/gmd:MD_AggregateInformation | /*/gmd:dataQualityInfo/gmd:DQ_DataQuality/gmd:lineage/gmd:LI_Lineage/gmd:source | /*/gmd:dataQualityInfo/gmd:DQ_DataQuality/gmd:lineage/gmi:LE_Lineage/gmd:source</xpath>
-      </selector>
-      <code><![CDATA[
+  </check>
+  <check>
+    <id>CSWCoreQueryables_Association_ISO</id>
+    <name>AssociationPresent</name>
+    <description>Checks to see if at least one Association concept exists.</description>
+    <environment>python</environment>
+    <dialect>
+      <name>iso</name>
+      <xpath>boolean(/*[local-name() = 'MI_Metadata | MD_Metadata'])</xpath>
+    </dialect>
+    <type>metadata</type>
+    <level>REQUIRED</level>
+    <selector>
+      <name>Association</name>
+      <xpath>/*/gmd:identificationInfo/*/gmd:aggregationInfo/gmd:MD_AggregateInformation | /*/gmd:dataQualityInfo/gmd:DQ_DataQuality/gmd:lineage/gmd:LI_Lineage/gmd:source | /*/gmd:dataQualityInfo/gmd:DQ_DataQuality/gmd:lineage/gmi:LE_Lineage/gmd:source</xpath>
+    </selector>
+    <code><![CDATA[
 def call():
   global output
   global status
@@ -291,710 +290,5 @@ def call():
   output = "Association concept is not present"
   return False
       ]]></code>
-    </check>
-  </suite>
-  <suite>
-    <check>
-      <id>ResourceTitle_ISO</id>
-      <name>ResourceTitlePresent</name>
-      <description>Checks to see if at least one Resource Title concept exists.</description>
-      <environment>python</environment>
-      <dialect>
-        <name>iso</name>
-        <xpath>boolean(/*[local-name() = 'iso'])</xpath>
-      </dialect>
-      <type>metadata</type>
-      <level>REQUIRED</level>
-      <selector>
-        <name>ResourceTitle</name>
-        <xpath>/*/gmd:identificationInfo/*/gmd:citation/gmd:CI_Citation/gmd:title/gco:CharacterString</xpath>
-      </selector>
-      <code><![CDATA[
-def call():
-  global output
-  global status
-  # Message is set when an error occurs.
-  output = "The concept Resource Title is present."
-  if(len(Resource Title) > 0):
-    status = "SUCCESS"
-    return True
-  status = "FAILURE"
-  output = "Resource Title concept is not present"
-  return False
-      ]]></code>
-    </check>
-    <check>
-      <id>Author/Originator_ISO</id>
-      <name>Author/OriginatorPresent</name>
-      <description>Checks to see if at least one Author / Originator concept exists.</description>
-      <environment>python</environment>
-      <dialect>
-        <name>iso</name>
-        <xpath>boolean(/*[local-name() = 'iso'])</xpath>
-      </dialect>
-      <type>metadata</type>
-      <level>REQUIRED</level>
-      <selector>
-        <name>Author/Originator</name>
-        <xpath>/*/gmd:identificationInfo/*/gmd:citation/gmd:CI_Citation/gmd:citedResponsibleParty/gmd:CI_ResponsibleParty[normalize-space(gmd:role/gmd:CI_RoleCode)='author'] | /*/gmd:identificationInfo/*/gmd:citation/gmd:CI_Citation/gmd:citedResponsibleParty/gmd:CI_ResponsibleParty[normalize-space(gmd:role/gmd:CI_RoleCode)='originator'] |
-          /*/gmd:identificationInfo/*/gmd:citation/gmd:CI_Citation/gmd:citedResponsibleParty/gmd:CI_ResponsibleParty[normalize-space(gmd:role/gmd:CI_RoleCode)='principalInvestigator']</xpath>
-      </selector>
-      <code><![CDATA[
-def call():
-  global output
-  global status
-  # Message is set when an error occurs.
-  output = "The concept Author / Originator is present."
-  if(len(Author / Originator) > 0):
-    status = "SUCCESS"
-    return True
-  status = "FAILURE"
-  output = "Author / Originator concept is not present"
-  return False
-      ]]></code>
-    </check>
-    <check>
-      <id>Keyword_ISO</id>
-      <name>KeywordPresent</name>
-      <description>Checks to see if at least one Keyword concept exists.</description>
-      <environment>python</environment>
-      <dialect>
-        <name>iso</name>
-        <xpath>boolean(/*[local-name() = 'iso'])</xpath>
-      </dialect>
-      <type>metadata</type>
-      <level>REQUIRED</level>
-      <selector>
-        <name>Keyword</name>
-        <xpath>/*/gmd:identificationInfo/*/gmd:descriptiveKeywords/gmd:MD_Keywords/gmd:keyword | /*/gmd:identificationInfo/*/gmd:descriptiveKeywords/gmd:MD_Keywords[normalize-space(gmd:type/gmd:MD_KeywordTypeCode)='place']/gmd:keyword/gco:CharacterString | /*/gmd:identificationInfo/*/gmd:descriptiveKeywords/gmd:MD_Keywords[normalize-space(gmd:type/gmd:MD_KeywordTypeCode)='instrument']/gmd:keyword/gco:CharacterString |
-          /*/gmd:identificationInfo/*/gmd:descriptiveKeywords/gmd:MD_Keywords[normalize-space(gmd:type/gmd:MD_KeywordTypeCode)='platform']/gmd:keyword/gco:CharacterString | /*/gmd:identificationInfo/*/gmd:descriptiveKeywords/gmd:MD_Keywords[normalize-space(gmd:type/gmd:MD_KeywordTypeCode)='project']/gmd:keyword/gco:CharacterString</xpath>
-      </selector>
-      <code><![CDATA[
-def call():
-  global output
-  global status
-  # Message is set when an error occurs.
-  output = "The concept Keyword is present."
-  if(len(Keyword) > 0):
-    status = "SUCCESS"
-    return True
-  status = "FAILURE"
-  output = "Keyword concept is not present"
-  return False
-      ]]></code>
-    </check>
-    <check>
-      <id>Abstract_ISO</id>
-      <name>AbstractPresent</name>
-      <description>Checks to see if at least one Abstract concept exists.</description>
-      <environment>python</environment>
-      <dialect>
-        <name>iso</name>
-        <xpath>boolean(/*[local-name() = 'iso'])</xpath>
-      </dialect>
-      <type>metadata</type>
-      <level>REQUIRED</level>
-      <selector>
-        <name>Abstract</name>
-        <xpath>/*/gmd:identificationInfo/*/gmd:abstract/gco:CharacterString</xpath>
-      </selector>
-      <code><![CDATA[
-def call():
-  global output
-  global status
-  # Message is set when an error occurs.
-  output = "The concept Abstract is present."
-  if(len(Abstract) > 0):
-    status = "SUCCESS"
-    return True
-  status = "FAILURE"
-  output = "Abstract concept is not present"
-  return False
-      ]]></code>
-    </check>
-    <check>
-      <id>Publisher_ISO</id>
-      <name>PublisherPresent</name>
-      <description>Checks to see if at least one Publisher concept exists.</description>
-      <environment>python</environment>
-      <dialect>
-        <name>iso</name>
-        <xpath>boolean(/*[local-name() = 'iso'])</xpath>
-      </dialect>
-      <type>metadata</type>
-      <level>REQUIRED</level>
-      <selector>
-        <name>Publisher</name>
-        <xpath>//gmd:CI_ResponsibleParty[normalize-space(gmd:role/gmd:CI_RoleCode)='publisher']/gmd:organisationName/gco:CharacterString</xpath>
-      </selector>
-      <code><![CDATA[
-def call():
-  global output
-  global status
-  # Message is set when an error occurs.
-  output = "The concept Publisher is present."
-  if(len(Publisher) > 0):
-    status = "SUCCESS"
-    return True
-  status = "FAILURE"
-  output = "Publisher concept is not present"
-  return False
-      ]]></code>
-    </check>
-    <check>
-      <id>ContributorName_ISO</id>
-      <name>ContributorNamePresent</name>
-      <description>Checks to see if at least one Contributor Name concept exists.</description>
-      <environment>python</environment>
-      <dialect>
-        <name>iso</name>
-        <xpath>boolean(/*[local-name() = 'iso'])</xpath>
-      </dialect>
-      <type>metadata</type>
-      <level>REQUIRED</level>
-      <selector>
-        <name>ContributorName</name>
-        <xpath>/*/gmd:identificationInfo/*/gmd:citation/gmd:CI_Citation/gmd:citedResponsibleParty/gmd:CI_ResponsibleParty[not(normalize-space(gmd:role/gmd:CI_RoleCode[.='author' or .='principalInvestigator' or .='originator']))]//*[contains(name(),'Name')]/gco:CharacterString</xpath>
-      </selector>
-      <code><![CDATA[
-def call():
-  global output
-  global status
-  # Message is set when an error occurs.
-  output = "The concept Contributor Name is present."
-  if(len(Contributor Name) > 0):
-    status = "SUCCESS"
-    return True
-  status = "FAILURE"
-  output = "Contributor Name concept is not present"
-  return False
-      ]]></code>
-    </check>
-    <check>
-      <id>MetadataModifiedDate_ISO</id>
-      <name>MetadataModifiedDatePresent</name>
-      <description>Checks to see if at least one Metadata Modified Date concept exists.</description>
-      <environment>python</environment>
-      <dialect>
-        <name>iso</name>
-        <xpath>boolean(/*[local-name() = 'iso'])</xpath>
-      </dialect>
-      <type>metadata</type>
-      <level>REQUIRED</level>
-      <selector>
-        <name>MetadataModifiedDate</name>
-        <xpath>/*/gmd:dateStamp/gco:Date | /*/gmd:dateStamp/gco:DateTime</xpath>
-      </selector>
-      <code><![CDATA[
-def call():
-  global output
-  global status
-  # Message is set when an error occurs.
-  output = "The concept Metadata Modified Date is present."
-  if(len(Metadata Modified Date) > 0):
-    status = "SUCCESS"
-    return True
-  status = "FAILURE"
-  output = "Metadata Modified Date concept is not present"
-  return False
-      ]]></code>
-    </check>
-    <check>
-      <id>ResourceType_ISO</id>
-      <name>ResourceTypePresent</name>
-      <description>Checks to see if at least one Resource Type concept exists.</description>
-      <environment>python</environment>
-      <dialect>
-        <name>iso</name>
-        <xpath>boolean(/*[local-name() = 'iso'])</xpath>
-      </dialect>
-      <type>metadata</type>
-      <level>REQUIRED</level>
-      <selector>
-        <name>ResourceType</name>
-        <xpath>/*/gmd:hierarchyLevel/gmd:MD_ScopeCode</xpath>
-      </selector>
-      <code><![CDATA[
-def call():
-  global output
-  global status
-  # Message is set when an error occurs.
-  output = "The concept Resource Type is present."
-  if(len(Resource Type) > 0):
-    status = "SUCCESS"
-    return True
-  status = "FAILURE"
-  output = "Resource Type concept is not present"
-  return False
-      ]]></code>
-    </check>
-    <check>
-      <id>ResourceFormat_ISO</id>
-      <name>ResourceFormatPresent</name>
-      <description>Checks to see if at least one Resource Format concept exists.</description>
-      <environment>python</environment>
-      <dialect>
-        <name>iso</name>
-        <xpath>boolean(/*[local-name() = 'iso'])</xpath>
-      </dialect>
-      <type>metadata</type>
-      <level>REQUIRED</level>
-      <selector>
-        <name>ResourceFormat</name>
-        <xpath>//gmd:resourceFormat/gmd:MD_Format/gmd:name/gco:CharacterString</xpath>
-      </selector>
-      <code><![CDATA[
-def call():
-  global output
-  global status
-  # Message is set when an error occurs.
-  output = "The concept Resource Format is present."
-  if(len(Resource Format) > 0):
-    status = "SUCCESS"
-    return True
-  status = "FAILURE"
-  output = "Resource Format concept is not present"
-  return False
-      ]]></code>
-    </check>
-    <check>
-      <id>MetadataIdentifier_ISO</id>
-      <name>MetadataIdentifierPresent</name>
-      <description>Checks to see if at least one Metadata Identifier concept exists.</description>
-      <environment>python</environment>
-      <dialect>
-        <name>iso</name>
-        <xpath>boolean(/*[local-name() = 'iso'])</xpath>
-      </dialect>
-      <type>metadata</type>
-      <level>REQUIRED</level>
-      <selector>
-        <name>MetadataIdentifier</name>
-        <xpath>/*/gmd:fileIdentifier/gco:CharacterString</xpath>
-      </selector>
-      <code><![CDATA[
-def call():
-  global output
-  global status
-  # Message is set when an error occurs.
-  output = "The concept Metadata Identifier is present."
-  if(len(Metadata Identifier) > 0):
-    status = "SUCCESS"
-    return True
-  status = "FAILURE"
-  output = "Metadata Identifier concept is not present"
-  return False
-      ]]></code>
-    </check>
-    <check>
-      <id>SourceCitation_ISO</id>
-      <name>SourceCitationPresent</name>
-      <description>Checks to see if at least one Source Citation concept exists.</description>
-      <environment>python</environment>
-      <dialect>
-        <name>iso</name>
-        <xpath>boolean(/*[local-name() = 'iso'])</xpath>
-      </dialect>
-      <type>metadata</type>
-      <level>REQUIRED</level>
-      <selector>
-        <name>SourceCitation</name>
-        <xpath>/*/gmd:dataQualityInfo/gmd:DQ_DataQuality/gmd:lineage/gmd:LI_Lineage/gmd:source/gmd:LI_Source/gmd:sourceCitation/gmd:CI_Citation | /*/gmd:dataQualityInfo/gmd:DQ_DataQuality/gmd:lineage/gmd:LI_Lineage/gmd:processStep/gmd:LI_ProcessStep/gmd:source/gmd:LI_Source/gmd:sourceCitation/gmd:CI_Citation</xpath>
-      </selector>
-      <code><![CDATA[
-def call():
-  global output
-  global status
-  # Message is set when an error occurs.
-  output = "The concept Source Citation is present."
-  if(len(Source Citation) > 0):
-    status = "SUCCESS"
-    return True
-  status = "FAILURE"
-  output = "Source Citation concept is not present"
-  return False
-      ]]></code>
-    </check>
-    <check>
-      <id>MetadataLanguage_ISO</id>
-      <name>MetadataLanguagePresent</name>
-      <description>Checks to see if at least one Metadata Language concept exists.</description>
-      <environment>python</environment>
-      <dialect>
-        <name>iso</name>
-        <xpath>boolean(/*[local-name() = 'iso'])</xpath>
-      </dialect>
-      <type>metadata</type>
-      <level>REQUIRED</level>
-      <selector>
-        <name>MetadataLanguage</name>
-        <xpath>/*/gmd:language/gco:CharacterString | /*/gmd:language/gmd:LanguageCode</xpath>
-      </selector>
-      <code><![CDATA[
-def call():
-  global output
-  global status
-  # Message is set when an error occurs.
-  output = "The concept Metadata Language is present."
-  if(len(Metadata Language) > 0):
-    status = "SUCCESS"
-    return True
-  status = "FAILURE"
-  output = "Metadata Language concept is not present"
-  return False
-      ]]></code>
-    </check>
-    <check>
-      <id>RelatedResourceCitation_ISO</id>
-      <name>RelatedResourceCitationPresent</name>
-      <description>Checks to see if at least one Related Resource Citation concept exists.</description>
-      <environment>python</environment>
-      <dialect>
-        <name>iso</name>
-        <xpath>boolean(/*[local-name() = 'iso'])</xpath>
-      </dialect>
-      <type>metadata</type>
-      <level>REQUIRED</level>
-      <selector>
-        <name>RelatedResourceCitation</name>
-        <xpath>/*/gmd:identificationInfo/*/gmd:aggregationInfo/gmd:MD_AggregateInformation/gmd:aggregateDataSetName/gmd:CI_Citation | /*/gmd:identificationInfo/srv:SV_ServiceIdentification/gmd:aggregationInfo/gmd:MD_AggregateInformation/gmd:aggregateDataSetName/gmd:CI_Citation</xpath>
-      </selector>
-      <code><![CDATA[
-def call():
-  global output
-  global status
-  # Message is set when an error occurs.
-  output = "The concept Related Resource Citation is present."
-  if(len(Related Resource Citation) > 0):
-    status = "SUCCESS"
-    return True
-  status = "FAILURE"
-  output = "Related Resource Citation concept is not present"
-  return False
-      ]]></code>
-    </check>
-    <check>
-      <id>BoundingBox_ISO</id>
-      <name>BoundingBoxPresent</name>
-      <description>Checks to see if at least one Bounding Box concept exists.</description>
-      <environment>python</environment>
-      <dialect>
-        <name>iso</name>
-        <xpath>boolean(/*[local-name() = 'iso'])</xpath>
-      </dialect>
-      <type>metadata</type>
-      <level>REQUIRED</level>
-      <selector>
-        <name>BoundingBox</name>
-        <xpath>/*/gmd:identificationInfo/*/gmd:extent/gmd:EX_Extent/gmd:geographicElement/gmd:EX_GeographicBoundingBox//* | /*/gmd:identificationInfo/srv:SV_ServiceIdentification/srv:extent/gmd:EX_Extent/gmd:geographicElement/gmd:EX_GeographicBoundingBox//*</xpath>
-      </selector>
-      <code><![CDATA[
-def call():
-  global output
-  global status
-  # Message is set when an error occurs.
-  output = "The concept Bounding Box is present."
-  if(len(Bounding Box) > 0):
-    status = "SUCCESS"
-    return True
-  status = "FAILURE"
-  output = "Bounding Box concept is not present"
-  return False
-      ]]></code>
-    </check>
-    <check>
-      <id>Rights_ISO</id>
-      <name>RightsPresent</name>
-      <description>Checks to see if at least one Rights concept exists.</description>
-      <environment>python</environment>
-      <dialect>
-        <name>iso</name>
-        <xpath>boolean(/*[local-name() = 'iso'])</xpath>
-      </dialect>
-      <type>metadata</type>
-      <level>REQUIRED</level>
-      <selector>
-        <name>Rights</name>
-        <xpath>/*/gmd:identificationInfo/*/gmd:resourceConstraints/gmd:MD_LegalConstraints</xpath>
-      </selector>
-      <code><![CDATA[
-def call():
-  global output
-  global status
-  # Message is set when an error occurs.
-  output = "The concept Rights is present."
-  if(len(Rights) > 0):
-    status = "SUCCESS"
-    return True
-  status = "FAILURE"
-  output = "Rights concept is not present"
-  return False
-      ]]></code>
-    </check>
-  </suite>
-  <suite>
-    <check>
-      <id>ResourceRevisionDate_ISO</id>
-      <name>ResourceRevisionDatePresent</name>
-      <description>Checks to see if at least one Resource Revision Date concept exists.</description>
-      <environment>python</environment>
-      <dialect>
-        <name>iso</name>
-        <xpath>boolean(/*[local-name() = 'iso'])</xpath>
-      </dialect>
-      <type>metadata</type>
-      <level>OPTIONAL</level>
-      <selector>
-        <name>ResourceRevisionDate</name>
-        <xpath>//gmd:CI_Citation/gmd:date/gmd:CI_Date[normalize-space(gmd:dateType/gmd:CI_DateTypeCode)='revision']/gmd:date/gco:Date | //gmd:CI_Citation/gmd:date/gmd:CI_Date[normalize-space(gmd:dateType/gmd:CI_DateTypeCode)='revision']/gmd:date/gco:DateTime</xpath>
-      </selector>
-      <code><![CDATA[
-def call():
-  global output
-  global status
-  # Message is set when an error occurs.
-  output = "The concept Resource Revision Date is present."
-  if(len(Resource Revision Date) > 0):
-    status = "SUCCESS"
-    return True
-  status = "FAILURE"
-  output = "Resource Revision Date concept is not present"
-  return False
-      ]]></code>
-    </check>
-    <check>
-      <id>ResourceCreation/RevisionDate_ISO</id>
-      <name>ResourceCreation/RevisionDatePresent</name>
-      <description>Checks to see if at least one Resource Creation/Revision Date concept exists.</description>
-      <environment>python</environment>
-      <dialect>
-        <name>iso</name>
-        <xpath>boolean(/*[local-name() = 'iso'])</xpath>
-      </dialect>
-      <type>metadata</type>
-      <level>OPTIONAL</level>
-      <selector>
-        <name>ResourceCreation/RevisionDate</name>
-        <xpath>/*/gmd:identificationInfo/*/gmd:citation/gmd:CI_Citation/gmd:date/gmd:CI_Date[normalize-space(gmd:dateType/gmd:CI_DateTypeCode)='creation']/gmd:date/gco:Date | /*/gmd:identificationInfo/*/gmd:citation/gmd:CI_Citation/gmd:date/gmd:CI_Date[normalize-space(gmd:dateType/gmd:CI_DateTypeCode)='creation']/gmd:date/gco:DateTime | /*/gmd:identificationInfo/*/gmd:citation/gmd:CI_Citation/gmd:date/gmd:CI_Date[normalize-space(gmd:dateType/gmd:CI_DateTypeCode)='revision']/gmd:date/gco:Date |
-          /*/gmd:identificationInfo/*/gmd:citation/gmd:CI_Citation/gmd:date/gmd:CI_Date[normalize-space(gmd:dateType/gmd:CI_DateTypeCode)='revision']/gmd:date/gco:DateTime | /*/gmd:identificationInfo/*/gmd:citation/gmd:CI_Citation/gmd:date/gmd:CI_Date[normalize-space(gmd:dateType/gmd:CI_DateTypeCode)='publication']/gmd:date/gco:Date |
-          /*/gmd:identificationInfo/*/gmd:citation/gmd:CI_Citation/gmd:date/gmd:CI_Date[normalize-space(gmd:dateType/gmd:CI_DateTypeCode)='publication']/gmd:date/gco:DateTime</xpath>
-      </selector>
-      <code><![CDATA[
-def call():
-  global output
-  global status
-  # Message is set when an error occurs.
-  output = "The concept Resource Creation/Revision Date is present."
-  if(len(Resource Creation/Revision Date) > 0):
-    status = "SUCCESS"
-    return True
-  status = "FAILURE"
-  output = "Resource Creation/Revision Date concept is not present"
-  return False
-      ]]></code>
-    </check>
-    <check>
-      <id>PublicationDate_ISO</id>
-      <name>PublicationDatePresent</name>
-      <description>Checks to see if at least one Publication Date concept exists.</description>
-      <environment>python</environment>
-      <dialect>
-        <name>iso</name>
-        <xpath>boolean(/*[local-name() = 'iso'])</xpath>
-      </dialect>
-      <type>metadata</type>
-      <level>OPTIONAL</level>
-      <selector>
-        <name>PublicationDate</name>
-        <xpath>//gmd:CI_Citation/gmd:date/gmd:CI_Date[normalize-space(gmd:dateType/gmd:CI_DateTypeCode)='publication']/gmd:date/gco:Date | //gmd:CI_Citation/gmd:date/gmd:CI_Date[normalize-space(gmd:dateType/gmd:CI_DateTypeCode)='publication']/gmd:date/gco:DateTime</xpath>
-      </selector>
-      <code><![CDATA[
-def call():
-  global output
-  global status
-  # Message is set when an error occurs.
-  output = "The concept Publication Date is present."
-  if(len(Publication Date) > 0):
-    status = "SUCCESS"
-    return True
-  status = "FAILURE"
-  output = "Publication Date concept is not present"
-  return False
-      ]]></code>
-    </check>
-    <check>
-      <id>OrganizationName_ISO</id>
-      <name>OrganizationNamePresent</name>
-      <description>Checks to see if at least one Organization Name concept exists.</description>
-      <environment>python</environment>
-      <dialect>
-        <name>iso</name>
-        <xpath>boolean(/*[local-name() = 'iso'])</xpath>
-      </dialect>
-      <type>metadata</type>
-      <level>OPTIONAL</level>
-      <selector>
-        <name>OrganizationName</name>
-        <xpath>//gmd:CI_ResponsibleParty/gmd:organisationName/gco:CharacterString</xpath>
-      </selector>
-      <code><![CDATA[
-def call():
-  global output
-  global status
-  # Message is set when an error occurs.
-  output = "The concept Organization Name is present."
-  if(len(Organization Name) > 0):
-    status = "SUCCESS"
-    return True
-  status = "FAILURE"
-  output = "Organization Name concept is not present"
-  return False
-      ]]></code>
-    </check>
-    <check>
-      <id>SecurityConstraints_ISO</id>
-      <name>SecurityConstraintsPresent</name>
-      <description>Checks to see if at least one Security Constraints concept exists.</description>
-      <environment>python</environment>
-      <dialect>
-        <name>iso</name>
-        <xpath>boolean(/*[local-name() = 'iso'])</xpath>
-      </dialect>
-      <type>metadata</type>
-      <level>OPTIONAL</level>
-      <selector>
-        <name>SecurityConstraints</name>
-        <xpath>/*/gmd:identificationInfo//*/gmd:resourceConstraints/gmd:MD_SecurityConstraints</xpath>
-      </selector>
-      <code><![CDATA[
-def call():
-  global output
-  global status
-  # Message is set when an error occurs.
-  output = "The concept Security Constraints is present."
-  if(len(Security Constraints) > 0):
-    status = "SUCCESS"
-    return True
-  status = "FAILURE"
-  output = "Security Constraints concept is not present"
-  return False
-      ]]></code>
-    </check>
-    <check>
-      <id>MetadataLanguage_ISO</id>
-      <name>MetadataLanguagePresent</name>
-      <description>Checks to see if at least one Metadata Language concept exists.</description>
-      <environment>python</environment>
-      <dialect>
-        <name>iso</name>
-        <xpath>boolean(/*[local-name() = 'iso'])</xpath>
-      </dialect>
-      <type>metadata</type>
-      <level>OPTIONAL</level>
-      <selector>
-        <name>MetadataLanguage</name>
-        <xpath>/*/gmd:language/gco:CharacterString | /*/gmd:language/gmd:LanguageCode</xpath>
-      </selector>
-      <code><![CDATA[
-def call():
-  global output
-  global status
-  # Message is set when an error occurs.
-  output = "The concept Metadata Language is present."
-  if(len(Metadata Language) > 0):
-    status = "SUCCESS"
-    return True
-  status = "FAILURE"
-  output = "Metadata Language concept is not present"
-  return False
-      ]]></code>
-    </check>
-    <check>
-      <id>ResourceIdentifier_ISO</id>
-      <name>ResourceIdentifierPresent</name>
-      <description>Checks to see if at least one Resource Identifier concept exists.</description>
-      <environment>python</environment>
-      <dialect>
-        <name>iso</name>
-        <xpath>boolean(/*[local-name() = 'iso'])</xpath>
-      </dialect>
-      <type>metadata</type>
-      <level>OPTIONAL</level>
-      <selector>
-        <name>ResourceIdentifier</name>
-        <xpath>/*/gmd:identificationInfo/*/gmd:citation/gmd:CI_Citation/gmd:identifier/gmd:MD_Identifier/gmd:code/gco:CharacterString</xpath>
-      </selector>
-      <code><![CDATA[
-def call():
-  global output
-  global status
-  # Message is set when an error occurs.
-  output = "The concept Resource Identifier is present."
-  if(len(Resource Identifier) > 0):
-    status = "SUCCESS"
-    return True
-  status = "FAILURE"
-  output = "Resource Identifier concept is not present"
-  return False
-      ]]></code>
-    </check>
-    <check>
-      <id>ParentIdentifier_ISO</id>
-      <name>ParentIdentifierPresent</name>
-      <description>Checks to see if at least one Parent Identifier concept exists.</description>
-      <environment>python</environment>
-      <dialect>
-        <name>iso</name>
-        <xpath>boolean(/*[local-name() = 'iso'])</xpath>
-      </dialect>
-      <type>metadata</type>
-      <level>OPTIONAL</level>
-      <selector>
-        <name>ParentIdentifier</name>
-        <xpath>/*/gmd:identificationInfo/*/gmd:aggregationInfo/gmd:MD_AggregateInformation[gmd:associationType/gmd:DS_AssociationTypeCode='LargerWorkCitation']/gmd:aggregateDataSetIdentifier/gmd:MD_Identifier/gmd:code/gco:CharacterString</xpath>
-      </selector>
-      <code><![CDATA[
-def call():
-  global output
-  global status
-  # Message is set when an error occurs.
-  output = "The concept Parent Identifier is present."
-  if(len(Parent Identifier) > 0):
-    status = "SUCCESS"
-    return True
-  status = "FAILURE"
-  output = "Parent Identifier concept is not present"
-  return False
-      ]]></code>
-    </check>
-    <check>
-      <id>KeywordType_ISO</id>
-      <name>KeywordTypePresent</name>
-      <description>Checks to see if at least one Keyword Type concept exists.</description>
-      <environment>python</environment>
-      <dialect>
-        <name>iso</name>
-        <xpath>boolean(/*[local-name() = 'iso'])</xpath>
-      </dialect>
-      <type>metadata</type>
-      <level>OPTIONAL</level>
-      <selector>
-        <name>KeywordType</name>
-        <xpath>/*/gmd:identificationInfo/*/gmd:descriptiveKeywords/gmd:MD_Keywords/gmd:type/gmd:MD_KeywordTypeCode</xpath>
-      </selector>
-      <code><![CDATA[
-def call():
-  global output
-  global status
-  # Message is set when an error occurs.
-  output = "The concept Keyword Type is present."
-  if(len(Keyword Type) > 0):
-    status = "SUCCESS"
-    return True
-  status = "FAILURE"
-  output = "Keyword Type concept is not present"
-  return False
-      ]]></code>
-    </check>
-  </suite>
-</root>
+  </check>
+</suite>
