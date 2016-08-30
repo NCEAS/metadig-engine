@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<check>
+  <id>identifier.is.present</id>
+  <name>Identifier is present</name>
+  <type>metadata</type>
+  <selector>
+    <name>identifier</name>
+    <xpath>/eml/@packageId |
+      /*/gmd:fileIdentifier/gco:CharacterString</xpath>
+  </selector>
+  <code><![CDATA[
+if (length(identifier) > 0) {
+mdq_result <- list(status = "SUCCESS",
+                   output = list(list(value = "Identifier was present.")))
+} else {
+mdq_result <- list(status = "FAILURE",
+                   output = list(list(value = "Identifier was not present.")))
+}
+    ]]>
+  </code>
+</check>
