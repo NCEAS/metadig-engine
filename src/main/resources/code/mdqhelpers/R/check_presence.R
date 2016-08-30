@@ -10,11 +10,9 @@
 #' @examples
 check_presence <- function(x) {
   name <- paste(substitute(x), collapse = "")
-  cat(paste0("Check presence of ", name, "\n"))
-    if (!is(x, "list")) {
-    status <- "FAILURE"
-    message <- paste0("Object '", name, "' was not a list, which is the expected type.")
-  } else if (length(x) == 0) {
+  if (!is(x, "list")) stop(paste0("The passed in object '", name, "' is not a list and it must be."))
+
+ if (length(x) == 0) {
     status <- "FAILURE"
     message <- paste0("Object '", name, "' was of length zero when it was expected to be of length one.")
   } else if (length(x) > 1) {
