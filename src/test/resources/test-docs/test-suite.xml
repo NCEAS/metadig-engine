@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<suite xmlns="https://nceas.ucsb.edu/mdqe">
+<mdq:suite xmlns:mdq="https://nceas.ucsb.edu/mdqe">
    <check>
       <code><![CDATA[nchar(title) > 10]]></code>
       <environment>r</environment>
@@ -41,4 +41,4 @@
    </check>
    <id>suite.2.1</id>      
    <name>Testing suite</name>
-</suite>
+</mdq:suite>

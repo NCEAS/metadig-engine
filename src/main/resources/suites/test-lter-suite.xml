@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<suite>
+<mdq:suite xmlns:mdq="https://nceas.ucsb.edu/mdqe">
 	<id>test-lter-suite.1.1</id>
 	<name>mdqengine provisional test suite for LTER</name>
 	<check>
@@ -1203,4 +1203,4 @@ def call():
             			       output = list(list(value = path, type = "image/png")))
 		]]></code>
 	</check>
-</suite>
+</mdq:suite>
