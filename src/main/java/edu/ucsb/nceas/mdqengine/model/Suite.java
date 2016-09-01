@@ -1,5 +1,6 @@
 package edu.ucsb.nceas.mdqengine.model;
 
+import java.util.Collections;
 import java.util.List;
 
 import javax.xml.bind.annotation.XmlRootElement;
@@ -30,7 +31,11 @@ public class Suite {
 	}
 
 	public List<Check> getCheck() {
-		return check;
+		if (check == null) {
+			return Collections.<Check>emptyList();
+		} else {
+			return check;
+		}
 	}
 
 	public void setCheck(List<Check> check) {

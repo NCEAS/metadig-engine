@@ -4,20 +4,30 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import edu.ucsb.nceas.mdqengine.model.*;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.junit.Test;
 
-import edu.ucsb.nceas.mdqengine.model.Run;
-import edu.ucsb.nceas.mdqengine.model.RunFactory;
-import edu.ucsb.nceas.mdqengine.model.SuiteFactory;
-import edu.ucsb.nceas.mdqengine.model.Suite;
-
 public class SuiteTest {
 	
 	protected Log log = LogFactory.getLog(this.getClass());
-	
+
+	@Test
+	public void testIterateWithNoChecks() {
+		try {
+			Suite suite = new Suite();
+
+			for (Check check: suite.getCheck()) {
+				continue;
+			}
+
+		} catch (Exception e) {
+			fail(e.getMessage());
+		}
+	}
+
 	@Test
 	public void testJsonRoundTrip() {
 
