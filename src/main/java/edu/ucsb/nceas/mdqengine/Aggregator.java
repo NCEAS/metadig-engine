@@ -129,7 +129,7 @@ public class Aggregator {
 	
 	private File graphIt(String runContent, String format) {
 
-		log.debug("Tabular Results: \n" + runContent);
+		log.trace("Tabular Results: \n" + runContent);
 
 		File batchFile = null;
 		File outputFile = null;
