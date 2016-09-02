@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<check>
+<mdq:check xmlns:mdq="https://nceas.ucsb.edu/mdqe">
+	<environment>rscript</environment>
   <id>identifier.is.doi</id>
   <name>Identifier is a DOI.</name>
   <type>metadata</type>
@@ -29,4 +30,4 @@ if (length(identifier) == 0) {
   }
 }
   ]]></code>
-</check>
+</mdq:check>

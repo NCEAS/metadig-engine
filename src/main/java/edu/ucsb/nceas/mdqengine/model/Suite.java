@@ -31,11 +31,12 @@ public class Suite {
 	}
 
 	public List<Check> getCheck() {
-		if (check == null) {
-			return Collections.<Check>emptyList();
-		} else {
-			return check;
-		}
+		return check;
+//		if (check == null) {
+//			return Collections.<Check>emptyList();
+//		} else {
+//			return check;
+//		}
 	}
 
 	public void setCheck(List<Check> check) {

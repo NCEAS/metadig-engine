@@ -3,11 +3,12 @@ package edu.ucsb.nceas.mdqengine.serialize;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-
 import edu.ucsb.nceas.mdqengine.model.*;
+
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.junit.Ignore;
 import org.junit.Test;
 
 public class SuiteTest {
@@ -15,6 +16,7 @@ public class SuiteTest {
 	protected Log log = LogFactory.getLog(this.getClass());
 
 	@Test
+	@Ignore
 	public void testIterateWithNoChecks() {
 		try {
 			Suite suite = new Suite();
@@ -66,6 +68,8 @@ public class SuiteTest {
 			log.debug("XML serialization: " + xml);
 			Suite r = (Suite) XmlMarshaller.fromXml(xml, Suite.class);
 			assertEquals(suite.getName(), r.getName());
+			assertEquals(suite.getCheck().size(), r.getCheck().size());
+
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
