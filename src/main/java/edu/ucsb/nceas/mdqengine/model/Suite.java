@@ -5,7 +5,7 @@ import java.util.List;
 
 import javax.xml.bind.annotation.XmlRootElement;
 
-@XmlRootElement(namespace="https://nceas.ucsb.edu/mdqe")
+@XmlRootElement
 public class Suite {
 	
 	private String id;
