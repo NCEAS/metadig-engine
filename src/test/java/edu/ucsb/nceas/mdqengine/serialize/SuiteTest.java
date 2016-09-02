@@ -16,13 +16,14 @@ public class SuiteTest {
 	protected Log log = LogFactory.getLog(this.getClass());
 
 	@Test
-	@Ignore
 	public void testIterateWithNoChecks() {
 		try {
 			Suite suite = new Suite();
 
-			for (Check check: suite.getCheck()) {
-				continue;
+			if (suite.getCheck() != null) {
+				for (Check check: suite.getCheck()) {
+					continue;
+				}
 			}
 
 		} catch (Exception e) {
