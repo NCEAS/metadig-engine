@@ -3,9 +3,12 @@ package edu.ucsb.nceas.mdqengine.model;
 import java.util.Date;
 import java.util.List;
 
+import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlType;
 
 @XmlRootElement
+@XmlType(propOrder = {"id", "timestamp", "objectIdentifier", "metadata", "suiteId", "result"})
 public class Run {
 	
 	private String id;
@@ -20,6 +23,7 @@ public class Run {
 		
 	private Metadata metadata;
 
+	@XmlElement(required = true)
 	public String getId() {
 		return id;
 	}
@@ -28,6 +32,7 @@ public class Run {
 		this.id = id;
 	}
 
+	@XmlElement(required = true)
 	public Date getTimestamp() {
 		return timestamp;
 	}
@@ -36,6 +41,7 @@ public class Run {
 		this.timestamp = timestamp;
 	}
 
+	@XmlElement(required = false)
 	public List<Result> getResult() {
 		return result;
 	}
@@ -44,6 +50,7 @@ public class Run {
 		this.result = result;
 	}
 
+	@XmlElement(required = false)
 	public String getObjectIdentifier() {
 		return objectIdentifier;
 	}
@@ -52,6 +59,7 @@ public class Run {
 		this.objectIdentifier = objectIdentifier;
 	}
 
+	@XmlElement(required = false)
 	public Metadata getMetadata() {
 		return metadata;
 	}
@@ -60,6 +68,7 @@ public class Run {
 		this.metadata = metadata;
 	}
 
+	@XmlElement(required = false)
 	public String getSuiteId() {
 		return suiteId;
 	}
