@@ -3,7 +3,6 @@ package edu.ucsb.nceas.mdqengine.processor;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
-import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
@@ -14,10 +13,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 
 import javax.script.ScriptException;
-import javax.xml.namespace.NamespaceContext;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -46,11 +43,11 @@ import org.xml.sax.SAXException;
 import edu.ucsb.nceas.mdqengine.dispatch.Dispatcher;
 import edu.ucsb.nceas.mdqengine.model.Check;
 import edu.ucsb.nceas.mdqengine.model.Dialect;
+import edu.ucsb.nceas.mdqengine.model.Namespace;
 import edu.ucsb.nceas.mdqengine.model.Output;
 import edu.ucsb.nceas.mdqengine.model.Result;
 import edu.ucsb.nceas.mdqengine.model.Selector;
 import edu.ucsb.nceas.mdqengine.model.Status;
-import edu.ucsb.nceas.mdqengine.serialize.JsonMarshaller;
 
 public class XMLDialect {
 	
@@ -286,14 +283,14 @@ public class XMLDialect {
 		XPath xpath = xPathfactory.newXPath();
 		
 		// handle namespace prefixes
-		Map<String, String> namespaces = selector.getNamespace();
+		List<Namespace> namespaces = selector.getNamespace();
 		if (namespaces != null) {
 			SimpleNamespaceContext nsContext = new SimpleNamespaceContext();
-			Iterator<Entry<String, String>> nsIter = namespaces.entrySet().iterator();
+			Iterator<Namespace> nsIter = namespaces.iterator();
 			while (nsIter.hasNext()) {
-				Entry<String, String> entry = nsIter.next();
-				String prefix = entry.getKey();
-				String uri = entry.getValue();
+				Namespace entry = nsIter.next();
+				String prefix = entry.getPrefix();
+				String uri = entry.getUri();
 				nsContext.bindNamespaceUri(prefix, uri);
 			}
 			xpath.setNamespaceContext(nsContext);	

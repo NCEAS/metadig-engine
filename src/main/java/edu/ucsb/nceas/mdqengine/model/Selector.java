@@ -1,14 +1,15 @@
 package edu.ucsb.nceas.mdqengine.model;
 
-import java.util.Map;
+import java.util.List;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlType;
 
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(propOrder = {"name", "xpath", "namespace", "subSelector"})
+@XmlType(propOrder = {"name", "xpath", "subSelector", "namespace"})
 public class Selector {
 	
 	@XmlElement(required = true)
@@ -17,7 +18,8 @@ public class Selector {
 	@XmlElement(required = true)
 	private String xpath;
 	
-	private Map<String, String> namespace;
+	@XmlElementWrapper(name = "namespaces", required = false)
+	private List<Namespace> namespace;
 	
 	@XmlElement(required = false)
 	private Selector subSelector;
@@ -46,11 +48,11 @@ public class Selector {
 		this.subSelector = subSelector;
 	}
 
-	public Map<String, String> getNamespace() {
+	public List<Namespace> getNamespace() {
 		return namespace;
 	}
 
-	public void setNamespace(Map<String, String> namespace) {
+	public void setNamespace(List<Namespace> namespace) {
 		this.namespace = namespace;
 	}
 
