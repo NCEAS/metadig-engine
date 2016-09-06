@@ -1,0 +1,17 @@
+<check>
+  <id>geographic.description</id>
+  <name>Geographic Coverage description is present at the dataset level</name>
+  <level>required</level>
+  <dialect>
+    <name>eml</name>
+    <xpath>boolean(/*[local-name() = 'eml'])</xpath>
+  </dialect>
+  <selector>
+    <name>description</name>
+    <xpath>/eml/dataset/coverage/geographicCoverage/geographicDescription</xpath>
+  </selector>
+  <code>
+    library(metadig)
+    check_presence(description)
+  </code>
+</check>

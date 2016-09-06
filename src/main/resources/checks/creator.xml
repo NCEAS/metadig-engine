@@ -1,17 +1,17 @@
 <check>
-  <id>contact.is.present</id>
-  <name>Contact is present</name>
+  <id>creator</id>
+  <name>Creator is present</name>
   <level>required</level>
   <dialect>
     <name>eml</name>
     <xpath>boolean(/*[local-name() = 'eml'])</xpath>
   </dialect>
   <selector>
-    <name>contact</name>
-    <xpath>/eml/dataset/contact</xpath>
+    <name>creator</name>
+    <xpath>/eml/dataset/creator</xpath>
   </selector>
   <code>
     library(metadig)
-    check_presence(contact)
+    check_presence(creator)
   </code>
 </check>

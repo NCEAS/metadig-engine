@@ -1,0 +1,17 @@
+<check>
+  <id>contact</id>
+  <name>Contact is present</name>
+  <level>required</level>
+  <dialect>
+    <name>eml</name>
+    <xpath>boolean(/*[local-name() = 'eml'])</xpath>
+  </dialect>
+  <selector>
+    <name>contact</name>
+    <xpath>/eml/dataset/contact</xpath>
+  </selector>
+  <code>
+    library(metadig)
+    check_presence(contact)
+  </code>
+</check>

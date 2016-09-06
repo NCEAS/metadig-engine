@@ -1,0 +1,17 @@
+<check>
+  <id>bounding.coordinates</id>
+  <name>Geographic Coverage description has bounding coordinates</name>
+  <level>required</level>
+  <dialect>
+    <name>eml</name>
+    <xpath>boolean(/*[local-name() = 'eml'])</xpath>
+  </dialect>
+  <selector>
+    <name>coordinates</name>
+    <xpath>/eml/dataset/coverage/geographicCoverage/boundingCoordinates</xpath>
+  </selector>
+  <code>
+    library(metadig)
+    check_presence(coordinates)
+  </code>
+</check>

@@ -1,0 +1,17 @@
+<check>
+  <id>pub.date</id>
+  <name>Publication date is present</name>
+  <level>required</level>
+  <dialect>
+    <name>eml</name>
+    <xpath>boolean(/*[local-name() = 'eml'])</xpath>
+  </dialect>
+  <selector>
+    <name>pub_date</name>
+    <xpath>/eml/dataset/pubDate</xpath>
+  </selector>
+  <code>
+    library(metadig)
+    check_presence(pub_date)
+  </code>
+</check>

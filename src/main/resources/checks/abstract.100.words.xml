@@ -1,0 +1,36 @@
+<check>
+  <id>abstract.100.words</id>
+  <name>Abstract is at least 100 words long.</name>
+  <level>required</level>
+  <dialect>
+    <name>eml</name>
+    <xpath>boolean(/*[local-name() = 'eml'])</xpath>
+  </dialect>
+  <selector>
+    <name>abstract</name>
+    <xpath>/eml/dataset/abstract</xpath>
+  </selector>
+  <code>
+    if (length(abstract) == 0) {
+      status <- "FAILURE"
+      message <- "No abstract elements were found."
+    } else if (length(abstract) > 1) {
+      status <- "FAILURE"
+      message <- "More than one abstract element was found when one was expected."
+    } else {
+      library(stringr)
+      tokens <- str_split(abstract[[1]])
+
+      if (length(tokens) >= 100) {
+        status <- "SUCCESS"
+        message <- paste0("The abstract was ", length(tokens), " long which is sufficient.")
+      } else {
+        status <- "FAILURE"
+        message <- paste0("The abstract was only ", length(tokens), " long but 100 was expected.")
+      }
+    }
+
+    mdq_result <- list(status = status,
+                       output = list(list(value = message)))
+  </code>
+</check>
