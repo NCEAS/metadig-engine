@@ -4,27 +4,16 @@
   <name>Arctic Data Center Quality Suite</name>
   <description>This is a provisional Arctic Data Center Quality Suite. It is modeled after the submission guidelines used on the Arctic Data Center (arcticdata.io).</description>
   <check>
-    <name>Title is present</name>
-    <description>A title must be present and be of non-zero length.</description>
-    <level>required</level>
-    <selector>
-      <name>title</name>
-      <xpath>/eml/dataset/title</xpath>
-    </selector>
-    <environment>rscript</environment>
-    <code><![CDATA[if (is.null(title)) {
-  status <- "FAILURE"
-  output <- "A title element was not found."
-} else if (length(title) != 1) {
-  status <- "FAILURE"
-  output <- paste0(length(title), " titles found when exactly one was expected.")
-} else if (nchar(title) <= 0) {
-  status <- "FAILURE"
-  output <- paste0("The title was of length '", nchar(title), "' but a length greater than zero was expected.")
-} else {
-  status <- "SUCCESS"
-  output <- "A title was found and its length was greater than zero."
-}]]></code>
+    <ref>title</ref>
+  </check>
+  <check>
+    <id>creator.is.present</id>
+  </check>
+  <check>
+    <id>contact.is.present</id>
+  </check>
+  <check>
+    <id>abstract.100.words</id>
   </check>
   <check>
     <name>One or more NSF award numbers is present</name>
@@ -91,85 +80,4 @@ if (all(is_found)) {
 }
 ]]></code>
   </check>
-  <check>
-    <id>creator.is.present</id>
-  </check>
-  <check>
-    <id>contact.is.present</id>
-  </check>
-  <check>
-    <name>Abstract is greater than 100 words in length</name>
-    <level>required</level>
-    <selector>
-      <name>abstract</name>
-      <xpath>/eml/dataset/abstract</xpath>
-    </selector>
-    <environment>rscript</environment>
-    <code><![CDATA[
-# Define a function to determine abstract length
-abstract_length <- function(abstract) length(strsplit(abstract, " ")[[1]])
-
-if (is.null(abstract)) {
-  status <- "FAILURE"
-  output <- "The abstract was was not found."
-} else if (length(abstract) != 1) {
-  status <- "FAILURE"
-  output <- paste0("Expected there to be a single abstract but found ", length(abstract), " abstract(s).")
-} else if (abstract_length(abstract) <= 100) {
-  status <- "FALIURE"
-  output <- paste0("Expected the abstract to be over 100 words in length but it was ", abstract_length(abstract), " word(s) in length instead.")
-} else {
-  status <- "SUCCESS"
-  output <- "The abstract has more than 100 words in it."
-}
-    ]]></code>
-  </check>
-  <!--<check>-->
-    <!--<name>One or more keywords are present</name>-->
-    <!--<level>optional</level>-->
-  <!--</check>-->
-  <!--<check>-->
-    <!--<name>Temporal coverage has at least a start year</name>-->
-    <!--<level>required</level>-->
-  <!--</check>-->
-  <!--<check>-->
-    <!--<name>Geographic coverage description is present</name>-->
-    <!--<level>required</level>-->
-  <!--</check>-->
-  <!--<check>-->
-    <!--<name>Geographic coverage has at least one pair of coordinates</name>-->
-    <!--<level>required</level>-->
-  <!--</check>-->
-  <!--<check>-->
-    <!--<name>Taxonomic coverage is present</name>-->
-    <!--<level>optional</level>-->
-  <!--</check>-->
-  <!--<check>-->
-    <!--<name>At least one method step is present</name>-->
-    <!--<level>optional</level>-->
-  <!--</check>-->
-  <!-- <check>
-    <name>Extent of Study Description???</name>
-    <level>optional</level>
-  </check> -->
-  <!-- <check>
-    <name>Sampling description</name>
-    <level>optional</level>
-  </check> -->
-  <!--<check>-->
-    <!--<name>One or more alternate identifiers are present</name>-->
-    <!--<level>optional</level>-->
-  <!--</check>-->
-  <!--<check>-->
-    <!--<name>A data medium is either Digital, Hardcopy, or Other</name>-->
-    <!--<level>required</level>-->
-  <!--</check>-->
-  <!--<check>-->
-    <!--<name>Usage rights is either CC-0 1.0 or CC-BY 4.0</name>-->
-    <!--<level>REQUIRED</level>-->
-  <!--</check>-->
-  <!--<check>-->
-    <!--<name>Additional information is entered</name>-->
-    <!--<level>optional</level>-->
-  <!--</check>-->
 </mdq:suite>
