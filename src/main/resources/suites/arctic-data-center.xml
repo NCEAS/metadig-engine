@@ -7,15 +7,49 @@
     <ref>title</ref>
   </check>
   <check>
-    <id>creator.is.present</id>
+    <ref>check-dataset.11.1</ref>
   </check>
   <check>
-    <id>contact.is.present</id>
+    <ref>creator.is.present</ref>
   </check>
   <check>
-    <id>abstract.100.words</id>
+    <ref>contact.is.present</ref>
   </check>
   <check>
+    <ref>abstract.100.words</ref>
+  </check>
+  <check>
+    <ref>usage.is.cc</ref>
+  </check>
+  <check>
+    <ref>check-dataset.6.1</ref>
+  </check>
+  <check>
+    <ref>temporal.coverage</ref>
+  </check>
+  <check>
+    <ref>geographic.description</ref>
+  </check>
+  <check>
+    <ref>bounding.coordinates</ref>
+  </check>
+  <check>
+    <ref>check-dataset.10.1</ref>
+  </check>
+  <check>
+    <ref>check-dataset.7.1</ref>
+  </check>
+  <check>
+    <ref>checkp-dataset.3.1</ref>
+  </check>
+  <check>
+    <ref>check-dataset.13.1</ref>
+  </check>
+  <check>
+    <ref>pub.date</ref>
+  </check>
+  <check>
+    <id>nsf.award.numbers.present</id>
     <name>One or more NSF award numbers is present</name>
     <description>One or more NSF award numbers must be entered.</description>
     <level>required</level>
@@ -39,6 +73,7 @@
 }]]></code>
   </check>
   <check>
+    <id>nsf.award.numbers.in.nsf.database</id>
     <name>NSF awards in database</name>
     <description>All entered NSF award numbers are present in the NSF award database.</description>
     <level>required</level>
