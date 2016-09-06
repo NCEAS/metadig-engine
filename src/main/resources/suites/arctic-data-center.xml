@@ -49,6 +49,9 @@
     <ref>pub.date</ref>
   </check>
   <check>
+    <ref>temporal.start.year</ref>
+  </check>
+  <check>
     <id>nsf.award.numbers.present</id>
     <name>One or more NSF award numbers is present</name>
     <description>One or more NSF award numbers must be entered.</description>

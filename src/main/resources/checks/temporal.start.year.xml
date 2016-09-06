@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mdq:check xmlns:mdq="https://nceas.ucsb.edu/mdqe">
+  <id>temporal.start.year</id>
+  <name>Temporal coverage has a start year</name>
+  <level>required</level>
+  <dialect>
+    <name>eml</name>
+    <xpath>boolean(/*[local-name() = 'eml'])</xpath>
+  </dialect>
+  <selector>
+    <name>begin_date</name>
+    <xpath>/eml/dataset/temporalCoverage/rangeOfDates/beginDate/calendarDate</xpath>
+  </selector>
+  <environment>rscript</environment>
+  <code><![CDATA[
+    library(metadig)
+    check_presence(begin_date)
+  ]]></code>
+</mdq:check>
