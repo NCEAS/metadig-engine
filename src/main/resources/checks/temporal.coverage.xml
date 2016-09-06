@@ -1,4 +1,5 @@
-<check>
+<?xml version="1.0" encoding="UTF-8"?>
+<mdq:check xmlns:mdq="https://nceas.ucsb.edu/mdqe">
   <id>temporal.coverage</id>
   <name>Temporal coverage is present at the dataset level</name>
   <level>required</level>
@@ -14,4 +15,4 @@
     library(metadig)
     check_presence(temporal)
   </code>
-</check>
+</mdq:check>

@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mdq:check xmlns:mdq="https://nceas.ucsb.edu/mdqe">
+  <id>non.proprietary.formats</id>
+  <name>Dataset uses non-proprietary formats</name>
+  <level>optional</level>
+  <dialect>
+    <name>eml</name>
+    <xpath>boolean(/*[local-name() = 'eml'])</xpath>
+  </dialect>
+  <selector>
+    <name>entities</name>
+    <xpath>/eml/dataset/otherEntity</xpath>
+    <subSelector>
+      <name>formatNames</name>
+      <xpath>.//formatName</xpath>
+    </subSelector>
+  </selector>
+  <code><![CDATA[
+library(stringr)
+
+patterns <- c("openxmlformats-officedocument", "ms-excel", "msword", "ms-powerpoint")
+detections <- lapply(formats, function(format) { str_detect(format, patterns) })
+matched <- vapply(detections, function(d) any(d), TRUE)
+
+if (any(matched)) {
+  messages <- paste0("The following format, '", formats[which(matched)], "', is proprietary.")
+
+  mdq_result <- list(status = "FAILURE",
+                     output = lapply(messages, function(message) { list(value = message) } ))
+
+} else {
+  mdq_result <- list(status = "SUCCESS",
+                     output = list(list(value = "All formats appear to be non-proprietary.")))
+}
+]]></code>
+</mdq:check>

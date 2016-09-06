@@ -1,4 +1,5 @@
-<check>
+<?xml version="1.0" encoding="UTF-8"?>
+<mdq:check xmlns:mdq="https://nceas.ucsb.edu/mdqe">
   <id>title</id>
   <name>Title is present</name>
   <level>required</level>
@@ -14,4 +15,4 @@
     library(metadig)
     check_presence(title)
   </code>
-</check>
+</mdq:check>

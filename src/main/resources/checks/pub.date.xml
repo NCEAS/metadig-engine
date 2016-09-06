@@ -1,5 +1,5 @@
-<check>
-  <id>pub.date</id>
+<?xml version="1.0" encoding="UTF-8"?>
+<mdq:check xmlns:mdq="https://nceas.ucsb.edu/mdqe">  <id>pub.date</id>
   <name>Publication date is present</name>
   <level>required</level>
   <dialect>
@@ -14,4 +14,4 @@
     library(metadig)
     check_presence(pub_date)
   </code>
-</check>
+</mdq:check>

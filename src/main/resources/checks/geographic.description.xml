@@ -1,4 +1,5 @@
-<check>
+<?xml version="1.0" encoding="UTF-8"?>
+<mdq:check xmlns:mdq="https://nceas.ucsb.edu/mdqe">
   <id>geographic.description</id>
   <name>Geographic Coverage description is present at the dataset level</name>
   <level>required</level>
@@ -14,4 +15,4 @@
     library(metadig)
     check_presence(description)
   </code>
-</check>
+</mdq:check>

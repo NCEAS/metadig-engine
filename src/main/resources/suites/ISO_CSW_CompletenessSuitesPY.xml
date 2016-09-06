@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<suite>
+<mdq:suite xmlns:mdq="https://nceas.ucsb.edu/mdqe">
   <check>
     <id>CSWCoreQueryables_Keyword_ISO</id>
     <name>KeywordPresent</name>
@@ -291,4 +291,4 @@ def call():
   return False
       ]]></code>
   </check>
-</suite>
+</mdq:suite>

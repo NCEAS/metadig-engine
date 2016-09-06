@@ -1,4 +1,5 @@
-<check>
+<?xml version="1.0" encoding="UTF-8"?>
+<mdq:check xmlns:mdq="https://nceas.ucsb.edu/mdqe">
   <id>abstract.100.words</id>
   <name>Abstract is at least 100 words long.</name>
   <level>required</level>
@@ -10,7 +11,7 @@
     <name>abstract</name>
     <xpath>/eml/dataset/abstract</xpath>
   </selector>
-  <code>
+  <code><![CDATA[
     if (length(abstract) == 0) {
       status <- "FAILURE"
       message <- "No abstract elements were found."
@@ -32,5 +33,5 @@
 
     mdq_result <- list(status = status,
                        output = list(list(value = message)))
-  </code>
-</check>
+  ]]></code>
+</mdq:check>

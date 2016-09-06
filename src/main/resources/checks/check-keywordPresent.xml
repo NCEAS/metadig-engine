@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<check>
+<mdq:check xmlns:mdq="https://nceas.ucsb.edu/mdqe">
 	<id>check-keywordPresent</id>
 	<name>keywordPresent</name>
 	<description>Checks to see if at least one keyword is present. The LTER
@@ -33,4 +33,4 @@ def call():
   return False
 call()
 	]]></code>
-</check>
+</mdq:check>

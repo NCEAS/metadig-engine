@@ -1,4 +1,5 @@
-<suite>
+<?xml version="1.0" encoding="UTF-8"?>
+<mdq:suite xmlns:mdq="https://nceas.ucsb.edu/mdqe">
   <id>arctic.data.center</id>
   <name>Arctic Data Center Quality Suite</name>
   <description>This is a provisional Arctic Data Center Quality Suite. It is modeled after the submission guidelines used on the Arctic Data Center (arcticdata.io).</description>
@@ -171,4 +172,4 @@ if (is.null(abstract)) {
     <!--<name>Additional information is entered</name>-->
     <!--<level>optional</level>-->
   <!--</check>-->
-</suite>
+</mdq:suite>
