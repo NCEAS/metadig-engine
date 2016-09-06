@@ -11,8 +11,9 @@
     <name>coordinates</name>
     <xpath>/eml/dataset/coverage/geographicCoverage/boundingCoordinates</xpath>
   </selector>
-  <code>
+  <environment>rscript</environment>
+  <code><![CDATA[
     library(metadig)
     check_presence(coordinates)
-  </code>
+  ]]></code>
 </mdq:check>

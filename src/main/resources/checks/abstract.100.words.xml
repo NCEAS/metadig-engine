@@ -11,6 +11,7 @@
     <name>abstract</name>
     <xpath>/eml/dataset/abstract</xpath>
   </selector>
+  <environment>rscript</environment>
   <code><![CDATA[
     if (length(abstract) == 0) {
       status <- "FAILURE"

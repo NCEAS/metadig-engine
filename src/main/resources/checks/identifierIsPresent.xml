@@ -8,6 +8,7 @@
     <xpath>/eml/@packageId |
       /*/gmd:fileIdentifier/gco:CharacterString</xpath>
   </selector>
+  <environment>rscript</environment>
   <code><![CDATA[
 if (length(identifier) > 0) {
 mdq_result <- list(status = "SUCCESS",
@@ -17,5 +18,5 @@ mdq_result <- list(status = "FAILURE",
                    output = list(list(value = "Identifier was not present.")))
 }
     ]]>
-  </code>
+  ]]></code>
 </mdq:check>

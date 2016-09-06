@@ -11,8 +11,9 @@
     <name>title</name>
     <xpath>/eml/dataset/title</xpath>
   </selector>
-  <code>
+  <environment>rscript</environment>
+  <code><![CDATA[
     library(metadig)
     check_presence(title)
-  </code>
+  ]]></code>
 </mdq:check>

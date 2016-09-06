@@ -11,8 +11,9 @@
     <name>description</name>
     <xpath>/eml/dataset/coverage/geographicCoverage/geographicDescription</xpath>
   </selector>
-  <code>
+  <environment>rscript</environment>
+  <code><![CDATA[
     library(metadig)
     check_presence(description)
-  </code>
+  ]]></code>
 </mdq:check>

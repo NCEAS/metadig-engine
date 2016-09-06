@@ -11,8 +11,9 @@
     <name>contact</name>
     <xpath>/eml/dataset/contact</xpath>
   </selector>
-  <code>
+  <environment>rscript</environment>
+  <code><![CDATA[
     library(metadig)
     check_presence(contact)
-  </code>
+  ]]></code>
 </mdq:check>

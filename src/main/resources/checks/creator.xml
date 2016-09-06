@@ -11,8 +11,9 @@
     <name>creator</name>
     <xpath>/eml/dataset/creator</xpath>
   </selector>
-  <code>
+  <environment>rscript</environment>
+  <code><![CDATA[
     library(metadig)
     check_presence(creator)
-  </code>
+  ]]></code>
 </mdq:check>

@@ -10,8 +10,9 @@
     <name>pub_date</name>
     <xpath>/eml/dataset/pubDate</xpath>
   </selector>
-  <code>
+  <environment>rscript</environment>
+  <code><![CDATA[
     library(metadig)
     check_presence(pub_date)
-  </code>
+  ]]></code>
 </mdq:check>

@@ -15,6 +15,7 @@
       <xpath>.//formatName</xpath>
     </subSelector>
   </selector>
+  <environment>rscript</environment>
   <code><![CDATA[
 library(stringr)
 

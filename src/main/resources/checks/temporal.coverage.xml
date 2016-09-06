@@ -11,8 +11,9 @@
     <name>temporal</name>
     <xpath>/eml/dataset/coverage/temporalCoverage</xpath>
   </selector>
-  <code>
+  <environment>rscript</environment>
+  <code><![CDATA[
     library(metadig)
     check_presence(temporal)
-  </code>
+  ]]></code>
 </mdq:check>

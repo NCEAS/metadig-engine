@@ -8,6 +8,7 @@
     <name>identifier</name>
     <xpath>/eml/@packageId</xpath>
   </selector>
+	<environment>rscript</environment>
   <code><![CDATA[
 library(stringr)
 
