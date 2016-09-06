@@ -104,16 +104,12 @@ if (all(is_found)) {
 }
 ]]></code>
   </check>
-
-  <!-- creator -->
-  <!--<check>-->
-    <!--<name>Creator is present</name>-->
-    <!--<level>required</level>-->
-  <!--</check>-->
-  <!--<check>-->
-    <!--<name>Contact is present</name>-->
-    <!--<level>required</level>-->
-  <!--</check>-->
+  <check>
+    <id>creator.is.present</id>
+  </check>
+  <check>
+    <id>contact.is.present</id>
+  </check>
   <check>
     <name>Abstract is greater than 100 words in length</name>
     <level>required</level>

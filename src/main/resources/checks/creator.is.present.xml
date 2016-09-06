@@ -1,0 +1,17 @@
+<check>
+  <id>creator.is.present</id>
+  <name>Creator is present</name>
+  <level>required</level>
+  <dialect>
+    <name>eml</name>
+    <xpath>boolean(/*[local-name() = 'eml'])</xpath>
+  </dialect>
+  <selector>
+    <name>creator</name>
+    <xpath>/eml/dataset/creator</xpath>
+  </selector>
+  <code>
+    library(metadig)
+    check_presence(creator)
+  </code>
+</check>
