@@ -127,11 +127,13 @@
 			            </goals>
 			            <phase>generate-resources</phase>
 			            <configuration>
+			            	<verbose>true</verbose>
 			            	<createJavaDocAnnotations>false</createJavaDocAnnotations>
 			                <sources>
 			                    <source>src/main/java/edu/ucsb/nceas/mdqengine/model</source>
 			                </sources>
-			                <outputDirectory>${project.build.directory}/schemas</outputDirectory>
+			                <outputDirectory>${basedir}/src/main/resources/schemas</outputDirectory>
+			                <!-- <outputDirectory>${project.build.directory}/schemas</outputDirectory> -->
 			            </configuration>
 			        </execution>
 			    </executions>

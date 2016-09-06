@@ -32,7 +32,7 @@ public class Check {
 	
 	private List<URL> library;
 	
-	private boolean inheritState = false;
+	private Boolean inheritState = false;
 	
 	private List<Selector> selector;
 	
@@ -133,11 +133,11 @@ public class Check {
 	}
 
 	@XmlElement(required = false)
-	public boolean isInheritState() {
+	public Boolean isInheritState() {
 		return inheritState;
 	}
 
-	public void setInheritState(boolean inheritState) {
+	public void setInheritState(Boolean inheritState) {
 		this.inheritState = inheritState;
 	}
 }

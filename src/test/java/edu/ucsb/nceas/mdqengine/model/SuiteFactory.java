@@ -7,6 +7,7 @@ import java.util.List;
 import javax.xml.bind.JAXBException;
 
 import org.apache.commons.io.IOUtils;
+import org.xml.sax.SAXException;
 
 import edu.ucsb.nceas.mdqengine.model.Check;
 import edu.ucsb.nceas.mdqengine.model.Suite;
@@ -15,7 +16,7 @@ import edu.ucsb.nceas.mdqengine.serialize.XmlMarshaller;
 
 public class SuiteFactory {
 	
-	public static Suite getLTERSuite() throws IOException, JAXBException {
+	public static Suite getLTERSuite() throws IOException, JAXBException, SAXException {
 		String xmlStr = IOUtils.toString(SuiteFactory.class.getResourceAsStream("/suites/test-lter-suite.xml"), "UTF-8");
 		Suite suite = (Suite) XmlMarshaller.fromXml(xmlStr, Suite.class);
 		return suite;

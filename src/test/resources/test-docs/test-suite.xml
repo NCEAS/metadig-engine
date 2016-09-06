@@ -1,44 +1,43 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<mdq:suite xmlns:mdq="https://nceas.ucsb.edu/mdqe">
+<mdq:suite xmlns:mdq="https://nceas.ucsb.edu/mdqe" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="https://nceas.ucsb.edu/mdqe /Users/leinfelder/git/mdqengine/src/main/resources/schemas/schema1.xsd">
+	<id>suite.2.1</id>      
+	<name>Testing suite</name>
    <check>
-      <code><![CDATA[nchar(title) > 10]]></code>
-      <environment>r</environment>
       <id>check.1.1</id>      
-      <level>OPTIONAL</level>
       <name>Title Length</name>
       <description>Checks that title is longer than 10 characters</description>
+      <type>metadata</type>
+      <level>OPTIONAL</level>
+      <environment>r</environment>
+      <code><![CDATA[nchar(title) > 10]]></code>      
       <selector>
          <name>title</name>
          <xpath>//dataset/title</xpath>
       </selector>
-      <type>metadata</type>
    </check>
    <check>
-      <code><![CDATA[entityCount > 0]]></code>
-      <environment>JavaScript</environment>
-      <id>check.2.1</id>      
-      <level>INFO</level>
+      <id>check.2.1</id>
       <name>Entity Count</name>
       <description>Checks that there are 1 or more data entities in the data package</description>
+      <type>data</type>      
+      <level>INFO</level>
+      <environment>JavaScript</environment>
+      <code><![CDATA[entityCount > 0]]></code>
       <selector>
          <name>entityCount</name>
          <xpath>count(//dataset/dataTable | //dataset/otherEntity)</xpath>
       </selector>
-      <type>data</type>      
    </check>
    <check>
-      <code><![CDATA[any(duplicated(attributeNames))]]></code>
-      <environment>r</environment>
-      <id>check.3.1</id>      
-      <level>REQUIRED</level>
+      <id>check.3.1</id>  
       <name>Unique attribute names</name>
       <description>Checks that all attribute names are unique across datapackage</description>
+      <level>REQUIRED</level>
+      <environment>r</environment>
+      <code><![CDATA[any(duplicated(attributeNames))]]></code>
       <selector>
          <name>attributeNames</name>
          <xpath>//attribute/attributeName</xpath>
       </selector>
-      
    </check>
-   <id>suite.2.1</id>      
-   <name>Testing suite</name>
 </mdq:suite>
