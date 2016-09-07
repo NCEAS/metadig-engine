@@ -7,12 +7,14 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 
 @XmlRootElement
-@XmlType(propOrder = {"id", "name", "check"})
+@XmlType(propOrder = {"id", "name", "description", "check"})
 public class Suite {
 	
 	private String id;
 
 	private String name;
+	
+	private String description;
 	
 	private List<Check> check;
 
@@ -32,6 +34,15 @@ public class Suite {
 
 	public void setName(String name) {
 		this.name = name;
+	}
+
+	@XmlElement(required = false)
+	public String getDescription() {
+		return description;
+	}
+
+	public void setDescription(String description) {
+		this.description = description;
 	}
 
 	@XmlElement(required = true)
