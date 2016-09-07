@@ -1,73 +1,78 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<mdq:suite xmlns:mdq="https://nceas.ucsb.edu/mdqe">
+<mdq:suite xmlns:mdq="https://nceas.ucsb.edu/mdqe" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="https://nceas.ucsb.edu/mdqe /Users/leinfelder/git/mdqengine/src/main/resources/schemas/schema1.xsd">
     <id>lter-in-r</id>
     <name>mdqengine provisional test suite for LTER written in R</name>
 
     <check>
+      <id>package_id_pattern</id>
       <name>package_id_pattern</name>
-      <level>ERROR</level>
-      <selector>
-          <name>package_id</name>
-          <xpath>/eml/@packageId</xpath>
-      </selector>
+      <level>REQUIRED</level>
       <environment>r</environment>
       <code><![CDATA[
           length(strsplit(package_id, "\\.")[[1]]) == 3
       ]]></code>
+      <selector>
+          <name>package_id</name>
+          <xpath>/eml/@packageId</xpath>
+      </selector>
     </check>
 
     <check>
+      <id>eml_version</id>
       <name>eml_version</name>
-      <level>ERROR</level>
-      <selector>
-          <name>eml_version</name>
-          <xpath>/eml/namespace::*[name()='eml']</xpath>
-      </selector>
+      <level>REQUIRED</level>
       <environment>r</environment>
       <code><![CDATA[
           eml_version == "eml://ecoinformatics.org/eml-2.1.0" || eml_version == "eml://ecoinformatics.org/eml-2.1.1"
       ]]></code>
+      <selector>
+          <name>eml_version</name>
+          <xpath>/eml/namespace::*[name()='eml']</xpath>
+      </selector>
     </check>
 
     <check>
+      <id>methods_element_present</id>
       <name>methods_element_present</name>
-      <level>ERROR</level>
-      <selector>
-          <name>methods</name>
-          <xpath>/eml/dataset/methods</xpath>
-      </selector>
+      <level>REQUIRED</level>
       <environment>r</environment>
       <code><![CDATA[
         length(methods) > 0
       ]]></code>
+      <selector>
+          <name>methods</name>
+          <xpath>/eml/dataset/methods</xpath>
+      </selector>
     </check>
 
     <check>
+      <id>title_length_is_sufficient</id>
       <name>title_length_is_sufficient</name>
-      <level>ERROR</level>
-      <selector>
-          <name>title</name>
-          <xpath>/eml/dataset/title</xpath>
-      </selector>
+      <level>REQUIRED</level>
       <environment>r</environment>
       <code><![CDATA[
         words <- strsplit(title, " ")[[1]]
         length(words) >= 7 && length(words) <= 20
       ]]></code>
+      <selector>
+          <name>title</name>
+          <xpath>/eml/dataset/title</xpath>
+      </selector>
     </check>
 
     <check>
+      <id>dataset_abstract_length_is_sufficient</id>
       <name>dataset_abstract_length_is_sufficient</name>
-      <level>ERROR</level>
-      <selector>
-          <name>abstract</name>
-          <xpath>/eml/dataset/abstract</xpath>
-      </selector>
+      <level>REQUIRED</level>
       <environment>r</environment>
       <code><![CDATA[
         words <- strsplit(abstract, " ")[[1]]
         length(words) >= 20
       ]]></code>
+      <selector>
+          <name>abstract</name>
+          <xpath>/eml/dataset/abstract</xpath>
+      </selector>
     </check>
 
 </mdq:suite>

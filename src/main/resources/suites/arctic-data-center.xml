@@ -1,65 +1,108 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<mdq:suite xmlns:mdq="https://nceas.ucsb.edu/mdqe">
+<mdq:suite xmlns:mdq="https://nceas.ucsb.edu/mdqe" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="https://nceas.ucsb.edu/mdqe /Users/leinfelder/git/mdqengine/src/main/resources/schemas/schema1.xsd">
   <id>arctic.data.center</id>
   <name>Arctic Data Center Quality Suite</name>
-  <description>This is a provisional Arctic Data Center Quality Suite. It is modeled after the submission guidelines used on the Arctic Data Center (arcticdata.io).</description>
   <check>
-    <ref>title</ref>
+    <id>title</id>
+    <name></name>
+    <level>INFO</level>
+   	<environment>rscript</environment>
   </check>
   <check>
-    <ref>check-dataset.11.1</ref>
+    <id>check-dataset.11.1</id>
+    <name></name>
+    <level>INFO</level>
+   	<environment>rscript</environment>
   </check>
   <check>
-    <ref>creator.is.present</ref>
+    <id>creator.is.present</id>
+    <name></name>
+    <level>INFO</level>
+   	<environment>rscript</environment>
   </check>
   <check>
-    <ref>contact.is.present</ref>
+    <id>contact.is.present</id>
+    <name></name>
+    <level>INFO</level>
+   	<environment>rscript</environment>
   </check>
   <check>
-    <ref>abstract.100.words</ref>
+    <id>abstract.100.words</id>
+    <name></name>
+    <level>INFO</level>
+   	<environment>rscript</environment>
   </check>
   <check>
-    <ref>usage.is.cc</ref>
+    <id>usage.is.cc</id>
+    <name></name>
+    <level>INFO</level>
+   	<environment>rscript</environment>
   </check>
   <check>
-    <ref>check-dataset.6.1</ref>
+    <id>check-dataset.6.1</id>
+    <name></name>
+    <level>INFO</level>
+   	<environment>rscript</environment>
   </check>
   <check>
-    <ref>temporal.coverage</ref>
+    <id>temporal.coverage</id>
+    <name></name>
+    <level>INFO</level>
+   	<environment>rscript</environment>
   </check>
   <check>
-    <ref>geographic.description</ref>
+    <id>geographic.description</id>
+    <name></name>
+    <level>INFO</level>
+   	<environment>rscript</environment>
   </check>
   <check>
-    <ref>bounding.coordinates</ref>
+    <id>bounding.coordinates</id>
+    <name></name>
+    <level>INFO</level>
+   	<environment>rscript</environment>
   </check>
   <check>
-    <ref>check-dataset.10.1</ref>
+    <id>check-dataset.10.1</id>
+    <name></name>
+    <level>INFO</level>
+   	<environment>rscript</environment>
   </check>
   <check>
-    <ref>check-dataset.7.1</ref>
+    <id>check-dataset.7.1</id>
+    <name></name>
+    <level>INFO</level>
+   	<environment>rscript</environment>
   </check>
   <check>
-    <ref>checkp-dataset.3.1</ref>
+    <id>checkp-dataset.3.1</id>
+    <name></name>
+    <level>INFO</level>
+   	<environment>rscript</environment>
   </check>
   <check>
-    <ref>check-dataset.13.1</ref>
+    <id>check-dataset.13.1</id>
+    <name></name>
+    <level>INFO</level>
+   	<environment>rscript</environment>
   </check>
   <check>
-    <ref>pub.date</ref>
+    <id>pub.date</id>
+    <name></name>
+    <level>INFO</level>
+   	<environment>rscript</environment>
   </check>
   <check>
-    <ref>temporal.start.year</ref>
+    <id>temporal.start.year</id>
+    <name></name>
+    <level>INFO</level>
+   	<environment>rscript</environment>
   </check>
   <check>
     <id>nsf.award.numbers.present</id>
     <name>One or more NSF award numbers is present</name>
     <description>One or more NSF award numbers must be entered.</description>
-    <level>required</level>
-    <selector>
-      <name>awards</name>
-      <xpath>/eml/dataset/project/funding/para</xpath>
-    </selector>
+    <level>REQUIRED</level>
     <environment>rscript</environment>
     <code><![CDATA[if (is.null(awards)) {
   status <- "FAILURE"
@@ -74,16 +117,16 @@
   status <- "SUCCESS"
   output <- paste0("A total of ", length(awards), " valid NSF award number(s) was/were found.")
 }]]></code>
+	<selector>
+      <name>awards</name>
+      <xpath>/eml/dataset/project/funding/para</xpath>
+    </selector>
   </check>
   <check>
     <id>nsf.award.numbers.in.nsf.database</id>
     <name>NSF awards in database</name>
     <description>All entered NSF award numbers are present in the NSF award database.</description>
-    <level>required</level>
-    <selector>
-      <name>awards</name>
-      <xpath>/eml/dataset/project/funding/para</xpath>
-    </selector>
+    <level>REQUIRED</level>
     <environment>rscript</environment>
     <code><![CDATA[
 library(httr)
@@ -117,5 +160,9 @@ if (all(is_found)) {
                      output = lapply(outputs, function(message) { list(value = message)}))
 }
 ]]></code>
+	<selector>
+      <name>awards</name>
+      <xpath>/eml/dataset/project/funding/para</xpath>
+    </selector>
   </check>
 </mdq:suite>
