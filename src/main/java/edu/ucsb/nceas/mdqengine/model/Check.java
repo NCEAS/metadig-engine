@@ -4,6 +4,8 @@ import java.net.URL;
 import java.util.Arrays;
 import java.util.List;
 
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
@@ -11,34 +13,43 @@ import javax.xml.bind.annotation.XmlType;
 import org.eclipse.persistence.oxm.annotations.XmlCDATA;
 
 @XmlRootElement
+@XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(propOrder = {"id", "name", "description", "type", "level", "environment", "code", "library", "inheritState", "selector", "dialect"})
 public class Check {
 	
+	@XmlElement(required = true)
 	private String id;
 
+	@XmlElement(required = false)
 	private String name;
 	
 	@XmlCDATA
 	private String description;
 
+	@XmlElement(required = false)
 	private String type;
 	
+	@XmlElement(required = false)
 	private Level level;
-	
+
+	@XmlElement(required = false)
 	private String environment;
 
 	@XmlCDATA
 	private String code;
 	
+	@XmlElement(required = false)
 	private List<URL> library;
 	
+	@XmlElement(required = false)
 	private Boolean inheritState = false;
 	
+	@XmlElement(required = false)
 	private List<Selector> selector;
 	
+	@XmlElement(required = false)
 	private List<Dialect> dialect;
 
-	@XmlElement(required = true)
 	public String getId() {
 		return id;
 	}
@@ -47,7 +58,6 @@ public class Check {
 		this.id = id;
 	}
 
-	@XmlElement(required = true)
 	public String getName() {
 		return name;
 	}
@@ -56,7 +66,6 @@ public class Check {
 		this.name = name;
 	}
 
-	@XmlElement(required = false)
 	public String getDescription() {
 		return description;
 	}
@@ -65,7 +74,6 @@ public class Check {
 		this.description = description;
 	}
 
-	@XmlElement(required = false)
 	public String getType() {
 		return type;
 	}
@@ -74,7 +82,6 @@ public class Check {
 		this.type = type;
 	}
 
-	@XmlElement(required = true)
 	public Level getLevel() {
 		return level;
 	}
@@ -83,7 +90,6 @@ public class Check {
 		this.level = level;
 	}
 
-	@XmlElement(required = true)
 	public String getEnvironment() {
 		return environment;
 	}
@@ -92,7 +98,6 @@ public class Check {
 		this.environment = environment;
 	}
 
-	@XmlElement(required = false)
 	public String getCode() {
 		return code;
 	}
@@ -101,7 +106,6 @@ public class Check {
 		this.code = code;
 	}
 
-	@XmlElement(required = false)
 	public List<Selector> getSelector() {
 		return selector;
 	}
@@ -110,7 +114,6 @@ public class Check {
 		this.selector = selector;
 	}
 
-	@XmlElement(required = false)
 	public List<Dialect> getDialect() {
 		return dialect;
 	}
@@ -119,7 +122,6 @@ public class Check {
 		this.dialect = dialect;
 	}
 
-	@XmlElement(required = false)
 	public List<URL> getLibrary() {
 		return library;
 	}
@@ -132,7 +134,6 @@ public class Check {
 		this.library = library;
 	}
 
-	@XmlElement(required = false)
 	public Boolean isInheritState() {
 		return inheritState;
 	}

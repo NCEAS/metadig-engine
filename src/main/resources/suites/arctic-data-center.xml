@@ -5,99 +5,51 @@
   <description>This is a provisional Arctic Data Center Quality Suite. It is modeled after the submission guidelines used on the Arctic Data Center (arcticdata.io).</description>
   <check>
     <id>title</id>
-    <name></name>
-    <level>INFO</level>
-   	<environment>rscript</environment>
   </check>
   <check>
     <id>check-dataset.11.1</id>
-    <name></name>
-    <level>INFO</level>
-   	<environment>rscript</environment>
   </check>
   <check>
     <id>creator.is.present</id>
-    <name></name>
-    <level>INFO</level>
-   	<environment>rscript</environment>
   </check>
   <check>
     <id>contact.is.present</id>
-    <name></name>
-    <level>INFO</level>
-   	<environment>rscript</environment>
   </check>
   <check>
     <id>abstract.100.words</id>
-    <name></name>
-    <level>INFO</level>
-   	<environment>rscript</environment>
   </check>
   <check>
     <id>usage.is.cc</id>
-    <name></name>
-    <level>INFO</level>
-   	<environment>rscript</environment>
   </check>
   <check>
     <id>check-dataset.6.1</id>
-    <name></name>
-    <level>INFO</level>
-   	<environment>rscript</environment>
   </check>
   <check>
     <id>temporal.coverage</id>
-    <name></name>
-    <level>INFO</level>
-   	<environment>rscript</environment>
   </check>
   <check>
     <id>geographic.description</id>
-    <name></name>
-    <level>INFO</level>
-   	<environment>rscript</environment>
   </check>
   <check>
     <id>bounding.coordinates</id>
-    <name></name>
-    <level>INFO</level>
-   	<environment>rscript</environment>
   </check>
   <check>
     <id>check-dataset.10.1</id>
-    <name></name>
-    <level>INFO</level>
-   	<environment>rscript</environment>
   </check>
   <check>
     <id>check-dataset.7.1</id>
-    <name></name>
-    <level>INFO</level>
-   	<environment>rscript</environment>
   </check>
   <check>
     <id>checkp-dataset.3.1</id>
-    <name></name>
-    <level>INFO</level>
-   	<environment>rscript</environment>
   </check>
   <check>
     <id>check-dataset.13.1</id>
-    <name></name>
-    <level>INFO</level>
-   	<environment>rscript</environment>
   </check>
   <check>
     <id>pub.date</id>
-    <name></name>
-    <level>INFO</level>
-   	<environment>rscript</environment>
   </check>
   <check>
     <id>temporal.start.year</id>
-    <name></name>
-    <level>INFO</level>
-   	<environment>rscript</environment>
   </check>
   <check>
     <id>nsf.award.numbers.present</id>

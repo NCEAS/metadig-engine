@@ -3,27 +3,35 @@ package edu.ucsb.nceas.mdqengine.model;
 import java.util.Date;
 import java.util.List;
 
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 
 @XmlRootElement
+@XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(propOrder = {"id", "timestamp", "objectIdentifier", "metadata", "suiteId", "result"})
 public class Run {
 	
+	@XmlElement(required = true)
 	private String id;
 
+	@XmlElement(required = true)
 	private Date timestamp;
 	
+	@XmlElement(required = false)
 	private String objectIdentifier;
 		
+	@XmlElement(required = false)
 	private List<Result> result;
 	
+	@XmlElement(required = false)
 	private String suiteId;
 		
+	@XmlElement(required = false)
 	private Metadata metadata;
 
-	@XmlElement(required = true)
 	public String getId() {
 		return id;
 	}
@@ -32,7 +40,6 @@ public class Run {
 		this.id = id;
 	}
 
-	@XmlElement(required = true)
 	public Date getTimestamp() {
 		return timestamp;
 	}
@@ -41,7 +48,6 @@ public class Run {
 		this.timestamp = timestamp;
 	}
 
-	@XmlElement(required = false)
 	public List<Result> getResult() {
 		return result;
 	}
@@ -50,7 +56,6 @@ public class Run {
 		this.result = result;
 	}
 
-	@XmlElement(required = false)
 	public String getObjectIdentifier() {
 		return objectIdentifier;
 	}
@@ -59,7 +64,6 @@ public class Run {
 		this.objectIdentifier = objectIdentifier;
 	}
 
-	@XmlElement(required = false)
 	public Metadata getMetadata() {
 		return metadata;
 	}
@@ -68,7 +72,6 @@ public class Run {
 		this.metadata = metadata;
 	}
 
-	@XmlElement(required = false)
 	public String getSuiteId() {
 		return suiteId;
 	}
