@@ -1,13 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<mdq:check xmlns:mdq="https://nceas.ucsb.edu/mdqe">
+<mdq:check xmlns:mdq="https://nceas.ucsb.edu/mdqe" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="https://nceas.ucsb.edu/mdqe /Users/leinfelder/git/mdqengine/src/main/resources/schemas/schema1.xsd">
   <id>identifier.is.present</id>
   <name>Identifier is present</name>
   <type>metadata</type>
-  <selector>
-    <name>identifier</name>
-    <xpath>/eml/@packageId |
-      /*/gmd:fileIdentifier/gco:CharacterString</xpath>
-  </selector>
+  <level>REQUIRED</level>
   <environment>rscript</environment>
   <code><![CDATA[
 if (length(identifier) > 0) {
@@ -18,5 +14,10 @@ mdq_result <- list(status = "FAILURE",
                    output = list(list(value = "Identifier was not present.")))
 }
     ]]>
-  ]]></code>
+  </code>
+  <selector>
+    <name>identifier</name>
+    <xpath>/eml/@packageId |
+      /*/gmd:fileIdentifier/gco:CharacterString</xpath>
+  </selector>
 </mdq:check>
