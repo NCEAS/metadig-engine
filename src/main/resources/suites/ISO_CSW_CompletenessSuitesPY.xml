@@ -1,21 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<mdq:suite xmlns:mdq="https://nceas.ucsb.edu/mdqe">
+<mdq:suite xmlns:mdq="https://nceas.ucsb.edu/mdqe" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="https://nceas.ucsb.edu/mdqe ../schemas/schema1.xsd">
+	<id>iso.csw.completeness.suite</id>
+	<name>ISO CSW Completeness Suite</name>
   <check>
     <id>CSWCoreQueryables_Keyword_ISO</id>
     <name>KeywordPresent</name>
     <description>Checks to see if at least one Keyword concept exists.</description>
-    <environment>python</environment>
-    <dialect>
-      <name>iso</name>
-      <xpath>boolean(/*[local-name() = 'MI_Metadata | MD_Metadata'])</xpath>
-    </dialect>
     <type>metadata</type>
     <level>REQUIRED</level>
-    <selector>
-      <name>Keyword</name>
-      <xpath>/*/gmd:identificationInfo/*/gmd:descriptiveKeywords/gmd:MD_Keywords/gmd:keyword | /*/gmd:identificationInfo/*/gmd:descriptiveKeywords/gmd:MD_Keywords[normalize-space(gmd:type/gmd:MD_KeywordTypeCode)='place']/gmd:keyword/gco:CharacterString | /*/gmd:identificationInfo/*/gmd:descriptiveKeywords/gmd:MD_Keywords[normalize-space(gmd:type/gmd:MD_KeywordTypeCode)='instrument']/gmd:keyword/gco:CharacterString |
-        /*/gmd:identificationInfo/*/gmd:descriptiveKeywords/gmd:MD_Keywords[normalize-space(gmd:type/gmd:MD_KeywordTypeCode)='platform']/gmd:keyword/gco:CharacterString | /*/gmd:identificationInfo/*/gmd:descriptiveKeywords/gmd:MD_Keywords[normalize-space(gmd:type/gmd:MD_KeywordTypeCode)='project']/gmd:keyword/gco:CharacterString</xpath>
-    </selector>
+    <environment>python</environment>
     <code><![CDATA[
 def call():
   global output
@@ -29,22 +22,23 @@ def call():
   output = "Keyword concept is not present"
   return False
       ]]></code>
+      <selector>
+      <name>Keyword</name>
+      <xpath>/*/gmd:identificationInfo/*/gmd:descriptiveKeywords/gmd:MD_Keywords/gmd:keyword | /*/gmd:identificationInfo/*/gmd:descriptiveKeywords/gmd:MD_Keywords[normalize-space(gmd:type/gmd:MD_KeywordTypeCode)='place']/gmd:keyword/gco:CharacterString | /*/gmd:identificationInfo/*/gmd:descriptiveKeywords/gmd:MD_Keywords[normalize-space(gmd:type/gmd:MD_KeywordTypeCode)='instrument']/gmd:keyword/gco:CharacterString |
+        /*/gmd:identificationInfo/*/gmd:descriptiveKeywords/gmd:MD_Keywords[normalize-space(gmd:type/gmd:MD_KeywordTypeCode)='platform']/gmd:keyword/gco:CharacterString | /*/gmd:identificationInfo/*/gmd:descriptiveKeywords/gmd:MD_Keywords[normalize-space(gmd:type/gmd:MD_KeywordTypeCode)='project']/gmd:keyword/gco:CharacterString</xpath>
+    </selector>
+      <dialect>
+      <name>iso</name>
+      <xpath>boolean(/*[local-name() = 'MI_Metadata | MD_Metadata'])</xpath>
+    </dialect>
   </check>
   <check>
     <id>CSWCoreQueryables_ResourceTitle_ISO</id>
     <name>ResourceTitlePresent</name>
     <description>Checks to see if at least one Resource Title concept exists.</description>
-    <environment>python</environment>
-    <dialect>
-      <name>iso</name>
-      <xpath>boolean(/*[local-name() = 'MI_Metadata | MD_Metadata'])</xpath>
-    </dialect>
     <type>metadata</type>
     <level>REQUIRED</level>
-    <selector>
-      <name>ResourceTitle</name>
-      <xpath>/*/gmd:identificationInfo/*/gmd:citation/gmd:CI_Citation/gmd:title/gco:CharacterString</xpath>
-    </selector>
+    <environment>python</environment>
     <code><![CDATA[
 def call():
   global output
@@ -58,22 +52,22 @@ def call():
   output = "Resource Title concept is not present"
   return False
       ]]></code>
+      <selector>
+      <name>ResourceTitle</name>
+      <xpath>/*/gmd:identificationInfo/*/gmd:citation/gmd:CI_Citation/gmd:title/gco:CharacterString</xpath>
+    </selector>
+      <dialect>
+      <name>iso</name>
+      <xpath>boolean(/*[local-name() = 'MI_Metadata | MD_Metadata'])</xpath>
+    </dialect>
   </check>
   <check>
     <id>CSWCoreQueryables_Abstract_ISO</id>
     <name>AbstractPresent</name>
     <description>Checks to see if at least one Abstract concept exists.</description>
-    <environment>python</environment>
-    <dialect>
-      <name>iso</name>
-      <xpath>boolean(/*[local-name() = 'MI_Metadata | MD_Metadata'])</xpath>
-    </dialect>
     <type>metadata</type>
     <level>REQUIRED</level>
-    <selector>
-      <name>Abstract</name>
-      <xpath>/*/gmd:identificationInfo/*/gmd:abstract/gco:CharacterString</xpath>
-    </selector>
+    <environment>python</environment>
     <code><![CDATA[
 def call():
   global output
@@ -87,22 +81,22 @@ def call():
   output = "Abstract concept is not present"
   return False
       ]]></code>
+      <selector>
+      <name>Abstract</name>
+      <xpath>/*/gmd:identificationInfo/*/gmd:abstract/gco:CharacterString</xpath>
+    </selector>
+    <dialect>
+      <name>iso</name>
+      <xpath>boolean(/*[local-name() = 'MI_Metadata | MD_Metadata'])</xpath>
+    </dialect>
   </check>
   <check>
     <id>CSWCoreQueryables_ResourceFormat_ISO</id>
     <name>ResourceFormatPresent</name>
     <description>Checks to see if at least one Resource Format concept exists.</description>
-    <environment>python</environment>
-    <dialect>
-      <name>iso</name>
-      <xpath>boolean(/*[local-name() = 'MI_Metadata | MD_Metadata'])</xpath>
-    </dialect>
     <type>metadata</type>
     <level>REQUIRED</level>
-    <selector>
-      <name>ResourceFormat</name>
-      <xpath>//gmd:resourceFormat/gmd:MD_Format/gmd:name/gco:CharacterString</xpath>
-    </selector>
+    <environment>python</environment>
     <code><![CDATA[
 def call():
   global output
@@ -116,22 +110,22 @@ def call():
   output = "Resource Format concept is not present"
   return False
       ]]></code>
+      <selector>
+      <name>ResourceFormat</name>
+      <xpath>//gmd:resourceFormat/gmd:MD_Format/gmd:name/gco:CharacterString</xpath>
+    </selector>
+    <dialect>
+      <name>iso</name>
+      <xpath>boolean(/*[local-name() = 'MI_Metadata | MD_Metadata'])</xpath>
+    </dialect>
   </check>
   <check>
     <id>CSWCoreQueryables_MetadataIdentifier_ISO</id>
     <name>MetadataIdentifierPresent</name>
     <description>Checks to see if at least one Metadata Identifier concept exists.</description>
-    <environment>python</environment>
-    <dialect>
-      <name>iso</name>
-      <xpath>boolean(/*[local-name() = 'MI_Metadata | MD_Metadata'])</xpath>
-    </dialect>
     <type>metadata</type>
     <level>REQUIRED</level>
-    <selector>
-      <name>MetadataIdentifier</name>
-      <xpath>/*/gmd:fileIdentifier/gco:CharacterString</xpath>
-    </selector>
+    <environment>python</environment>
     <code><![CDATA[
 def call():
   global output
@@ -145,22 +139,22 @@ def call():
   output = "Metadata Identifier concept is not present"
   return False
       ]]></code>
+      <selector>
+      <name>MetadataIdentifier</name>
+      <xpath>/*/gmd:fileIdentifier/gco:CharacterString</xpath>
+    </selector>
+      <dialect>
+      <name>iso</name>
+      <xpath>boolean(/*[local-name() = 'MI_Metadata | MD_Metadata'])</xpath>
+    </dialect>
   </check>
   <check>
     <id>CSWCoreQueryables_MetadataModifiedDate_ISO</id>
     <name>MetadataModifiedDatePresent</name>
-    <description>Checks to see if at least one Metadata Modified Date concept exists.</description>
-    <environment>python</environment>
-    <dialect>
-      <name>iso</name>
-      <xpath>boolean(/*[local-name() = 'MI_Metadata | MD_Metadata'])</xpath>
-    </dialect>
+    <description>Checks to see if at least one Metadata Modified Date concept exists.</description>    
     <type>metadata</type>
     <level>REQUIRED</level>
-    <selector>
-      <name>MetadataModifiedDate</name>
-      <xpath>/*/gmd:dateStamp/gco:Date | /*/gmd:dateStamp/gco:DateTime</xpath>
-    </selector>
+    <environment>python</environment>
     <code><![CDATA[
 def call():
   global output
@@ -174,22 +168,22 @@ def call():
   output = "Metadata Modified Date concept is not present"
   return False
       ]]></code>
+      <selector>
+      <name>MetadataModifiedDate</name>
+      <xpath>/*/gmd:dateStamp/gco:Date | /*/gmd:dateStamp/gco:DateTime</xpath>
+    </selector>
+      <dialect>
+      <name>iso</name>
+      <xpath>boolean(/*[local-name() = 'MI_Metadata | MD_Metadata'])</xpath>
+    </dialect>
   </check>
   <check>
     <id>CSWCoreQueryables_ResourceType_ISO</id>
     <name>ResourceTypePresent</name>
     <description>Checks to see if at least one Resource Type concept exists.</description>
-    <environment>python</environment>
-    <dialect>
-      <name>iso</name>
-      <xpath>boolean(/*[local-name() = 'MI_Metadata | MD_Metadata'])</xpath>
-    </dialect>
     <type>metadata</type>
     <level>REQUIRED</level>
-    <selector>
-      <name>ResourceType</name>
-      <xpath>/*/gmd:hierarchyLevel/gmd:MD_ScopeCode</xpath>
-    </selector>
+    <environment>python</environment>
     <code><![CDATA[
 def call():
   global output
@@ -203,22 +197,22 @@ def call():
   output = "Resource Type concept is not present"
   return False
       ]]></code>
+      <selector>
+      <name>ResourceType</name>
+      <xpath>/*/gmd:hierarchyLevel/gmd:MD_ScopeCode</xpath>
+    </selector>
+      <dialect>
+      <name>iso</name>
+      <xpath>boolean(/*[local-name() = 'MI_Metadata | MD_Metadata'])</xpath>
+    </dialect>
   </check>
   <check>
     <id>CSWCoreQueryables_BoundingBox_ISO</id>
     <name>BoundingBoxPresent</name>
     <description>Checks to see if at least one Bounding Box concept exists.</description>
-    <environment>python</environment>
-    <dialect>
-      <name>iso</name>
-      <xpath>boolean(/*[local-name() = 'MI_Metadata | MD_Metadata'])</xpath>
-    </dialect>
     <type>metadata</type>
     <level>REQUIRED</level>
-    <selector>
-      <name>BoundingBox</name>
-      <xpath>/*/gmd:identificationInfo/*/gmd:extent/gmd:EX_Extent/gmd:geographicElement/gmd:EX_GeographicBoundingBox//* | /*/gmd:identificationInfo/srv:SV_ServiceIdentification/srv:extent/gmd:EX_Extent/gmd:geographicElement/gmd:EX_GeographicBoundingBox//*</xpath>
-    </selector>
+    <environment>python</environment>
     <code><![CDATA[
 def call():
   global output
@@ -232,22 +226,22 @@ def call():
   output = "Bounding Box concept is not present"
   return False
       ]]></code>
+      <selector>
+      <name>BoundingBox</name>
+      <xpath>/*/gmd:identificationInfo/*/gmd:extent/gmd:EX_Extent/gmd:geographicElement/gmd:EX_GeographicBoundingBox//* | /*/gmd:identificationInfo/srv:SV_ServiceIdentification/srv:extent/gmd:EX_Extent/gmd:geographicElement/gmd:EX_GeographicBoundingBox//*</xpath>
+    </selector>
+      <dialect>
+      <name>iso</name>
+      <xpath>boolean(/*[local-name() = 'MI_Metadata | MD_Metadata'])</xpath>
+    </dialect>
   </check>
   <check>
     <id>CSWCoreQueryables_CoordinateReferenceSystem(CRS)_ISO</id>
     <name>CoordinateReferenceSystem(CRS)Present</name>
     <description>Checks to see if at least one Coordinate Reference System (CRS) concept exists.</description>
-    <environment>python</environment>
-    <dialect>
-      <name>iso</name>
-      <xpath>boolean(/*[local-name() = 'MI_Metadata | MD_Metadata'])</xpath>
-    </dialect>
     <type>metadata</type>
     <level>REQUIRED</level>
-    <selector>
-      <name>CoordinateReferenceSystem(CRS)</name>
-      <xpath>/*/gmd:referenceSystemInfo/gmd:MD_ReferenceSystem/gmd:referenceSystemIdentifier/gmd:RS_Identifier/gmd:code | /*/gmd:referenceSystemInfo/gmd:MD_ReferenceSystem/gmd:referenceSystemIdentifier/gmd:RS_Identifier/gmd:codeSpace</xpath>
-    </selector>
+    <environment>python</environment>
     <code><![CDATA[
 def call():
   global output
@@ -261,22 +255,22 @@ def call():
   output = "Coordinate Reference System (CRS) concept is not present"
   return False
       ]]></code>
+      <selector>
+      <name>CoordinateReferenceSystem(CRS)</name>
+      <xpath>/*/gmd:referenceSystemInfo/gmd:MD_ReferenceSystem/gmd:referenceSystemIdentifier/gmd:RS_Identifier/gmd:code | /*/gmd:referenceSystemInfo/gmd:MD_ReferenceSystem/gmd:referenceSystemIdentifier/gmd:RS_Identifier/gmd:codeSpace</xpath>
+    </selector>
+      <dialect>
+      <name>iso</name>
+      <xpath>boolean(/*[local-name() = 'MI_Metadata | MD_Metadata'])</xpath>
+    </dialect>
   </check>
   <check>
     <id>CSWCoreQueryables_Association_ISO</id>
     <name>AssociationPresent</name>
     <description>Checks to see if at least one Association concept exists.</description>
-    <environment>python</environment>
-    <dialect>
-      <name>iso</name>
-      <xpath>boolean(/*[local-name() = 'MI_Metadata | MD_Metadata'])</xpath>
-    </dialect>
     <type>metadata</type>
     <level>REQUIRED</level>
-    <selector>
-      <name>Association</name>
-      <xpath>/*/gmd:identificationInfo/*/gmd:aggregationInfo/gmd:MD_AggregateInformation | /*/gmd:dataQualityInfo/gmd:DQ_DataQuality/gmd:lineage/gmd:LI_Lineage/gmd:source | /*/gmd:dataQualityInfo/gmd:DQ_DataQuality/gmd:lineage/gmi:LE_Lineage/gmd:source</xpath>
-    </selector>
+    <environment>python</environment>
     <code><![CDATA[
 def call():
   global output
@@ -290,5 +284,13 @@ def call():
   output = "Association concept is not present"
   return False
       ]]></code>
+      <selector>
+      <name>Association</name>
+      <xpath>/*/gmd:identificationInfo/*/gmd:aggregationInfo/gmd:MD_AggregateInformation | /*/gmd:dataQualityInfo/gmd:DQ_DataQuality/gmd:lineage/gmd:LI_Lineage/gmd:source | /*/gmd:dataQualityInfo/gmd:DQ_DataQuality/gmd:lineage/gmi:LE_Lineage/gmd:source</xpath>
+    </selector>
+      <dialect>
+      <name>iso</name>
+      <xpath>boolean(/*[local-name() = 'MI_Metadata | MD_Metadata'])</xpath>
+    </dialect>
   </check>
 </mdq:suite>
