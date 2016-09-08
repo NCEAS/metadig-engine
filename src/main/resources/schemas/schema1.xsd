@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<xs:schema version="1.0" targetNamespace="https://nceas.ucsb.edu/mdqe" xmlns:tns="https://nceas.ucsb.edu/mdqe" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+  <xs:element name="check" type="tns:check"/>
+
+  <xs:element name="run" type="tns:run"/>
+
+  <xs:element name="suite" type="tns:suite"/>
+
+  <xs:complexType name="check">
+    <xs:sequence>
+      <xs:element name="id" type="xs:string"/>
+      <xs:element name="name" type="xs:string" minOccurs="0"/>
+      <xs:element name="description" type="xs:string" minOccurs="0"/>
+      <xs:element name="type" type="xs:string" minOccurs="0"/>
+      <xs:element name="level" type="tns:level" minOccurs="0"/>
+      <xs:element name="environment" type="xs:string" minOccurs="0"/>
+      <xs:element name="code" type="xs:string" minOccurs="0"/>
+      <xs:element name="library" type="xs:anyURI" minOccurs="0" maxOccurs="unbounded"/>
+      <xs:element name="inheritState" type="xs:boolean" minOccurs="0"/>
+      <xs:element name="selector" type="tns:selector" minOccurs="0" maxOccurs="unbounded"/>
+      <xs:element name="dialect" type="tns:dialect" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="selector">
+    <xs:sequence>
+      <xs:element name="name" type="xs:string"/>
+      <xs:element name="xpath" type="xs:string"/>
+      <xs:element name="subSelector" type="tns:selector" minOccurs="0"/>
+      <xs:element name="namespaces" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="namespace" type="tns:namespace" nillable="true" minOccurs="0" maxOccurs="unbounded"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="namespace">
+    <xs:sequence>
+      <xs:element name="prefix" type="xs:string" minOccurs="0"/>
+      <xs:element name="uri" type="xs:string" minOccurs="0"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="dialect">
+    <xs:sequence>
+      <xs:element name="name" type="xs:string" minOccurs="0"/>
+      <xs:element name="xpath" type="xs:string" minOccurs="0"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="metadata">
+    <xs:sequence>
+      <xs:element name="dataUrl" type="xs:string" minOccurs="0"/>
+      <xs:element name="datasource" type="xs:string" minOccurs="0"/>
+      <xs:element name="formatId" type="xs:string" minOccurs="0"/>
+      <xs:element name="funder" type="xs:string" minOccurs="0"/>
+      <xs:element name="rightsHolder" type="xs:string" minOccurs="0"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="output">
+    <xs:sequence>
+      <xs:element name="type" type="xs:string" minOccurs="0"/>
+      <xs:element name="value" type="xs:string" minOccurs="0"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="result">
+    <xs:sequence>
+      <xs:element name="check" type="tns:check" minOccurs="0"/>
+      <xs:element name="output" type="tns:output" nillable="true" minOccurs="0" maxOccurs="unbounded"/>
+      <xs:element name="status" type="tns:status" minOccurs="0"/>
+      <xs:element name="timestamp" type="xs:dateTime" minOccurs="0"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="run">
+    <xs:sequence>
+      <xs:element name="id" type="xs:string"/>
+      <xs:element name="timestamp" type="xs:dateTime"/>
+      <xs:element name="objectIdentifier" type="xs:string" minOccurs="0"/>
+      <xs:element name="metadata" type="tns:metadata" minOccurs="0"/>
+      <xs:element name="suiteId" type="xs:string" minOccurs="0"/>
+      <xs:element name="result" type="tns:result" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="suite">
+    <xs:sequence>
+      <xs:element name="id" type="xs:string"/>
+      <xs:element name="name" type="xs:string"/>
+      <xs:element name="description" type="xs:string" minOccurs="0"/>
+      <xs:element name="check" type="tns:check" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:simpleType name="level">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="REQUIRED"/>
+      <xs:enumeration value="INFO"/>
+      <xs:enumeration value="OPTIONAL"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="status">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="ERROR"/>
+      <xs:enumeration value="FAILURE"/>
+      <xs:enumeration value="SKIP"/>
+      <xs:enumeration value="SUCCESS"/>
+    </xs:restriction>
+  </xs:simpleType>
+</xs:schema>
+
