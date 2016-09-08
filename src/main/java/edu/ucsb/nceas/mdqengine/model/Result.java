@@ -4,14 +4,30 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+
+@XmlAccessorType(XmlAccessType.FIELD)
 public class Result {
 	
+	/**
+	 * The check that was run
+	 */
 	private Check check;
 		
+	/**
+	 * The timestamp of the check execution
+	 */
 	private Date timestamp;
 		
+	/**
+	 * The list of output value[s] from the check execution
+	 */
 	private List<Output> output;
 	
+	/**
+	 * The status of the check run, constrained to the Status enum
+	 */
 	private Status status;
 
 	public List<Output> getOutput() {

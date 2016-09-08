@@ -8,19 +8,46 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlType;
 
+/**
+ * Selectors are used to extract value[s] from metadata documents using XPath expressions.
+ * @author leinfelder
+ *
+ */
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(propOrder = {"name", "xpath", "subSelector", "namespace"})
 public class Selector {
 	
+	/**
+	 * The selector name is used to create a variable in the environment specified by
+	 * Check.environment and should be a valid variable for that target environment.
+	 * reserved tokens like 'var', 'int', 'public', etc.. should be avoided.
+	 */
 	@XmlElement(required = true)
 	private String name;
 	
+	/**
+	 * The xpath expression use to extract value[s] from the document for this named 
+	 * selector.
+	 * The xpath will often be a compound expression to cover a variety of metadata dialects.
+	 * For example, the notion of a "title" can be stored in many different ways depending 
+	 * on the metadata standard used, but conceptually the value can be checked exactly the same
+	 * no matter where or how it is serialized in metadata.
+	 */
 	@XmlElement(required = true)
 	private String xpath;
 	
+	/**
+	 * The optional namespace list can be used to map namespace prefixes to full namespace uris.
+	 * This is useful if your xpath expressions utilize namespace prefixes and you don not want to 
+	 * loose the disambiguation that they provide, say, by using local-name() predicates.
+	 */
 	@XmlElementWrapper(name = "namespaces", required = false)
 	private List<Namespace> namespace;
 	
+	/**
+	 * Subselectors can be used when access to complex structures is required and the structure needs to be 
+	 * preserved. Often is is used to return lists of lists (e.g., when examining attributes of multiple entities).
+	 */
 	@XmlElement(required = false)
 	private Selector subSelector;
 
