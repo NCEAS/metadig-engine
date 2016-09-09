@@ -30,6 +30,8 @@ import org.xml.sax.SAXException;
 
 import edu.ucsb.nceas.mdqengine.dispatch.MDQCache;
 import edu.ucsb.nceas.mdqengine.model.Check;
+import edu.ucsb.nceas.mdqengine.model.Output;
+import edu.ucsb.nceas.mdqengine.model.Status;
 import edu.ucsb.nceas.mdqengine.model.Suite;
 import edu.ucsb.nceas.mdqengine.model.Result;
 import edu.ucsb.nceas.mdqengine.model.Run;
@@ -117,7 +119,20 @@ public class MDQEngine {
 			// is this a reference to existing check?
 			if (check.getCode() == null && check.getId() != null) {
 				// then load it
-				check = store.getCheck(check.getId());
+				Check origCheck = check;
+				check = store.getCheck(origCheck.getId());
+				
+				// handle missing references gracefully
+				if (check == null) {
+					String msg = "Could not locate referenced check in store: " + origCheck.getId();
+					log.warn(msg);
+					Result r = new Result();
+					r.setCheck(origCheck);
+					r.setStatus(Status.SKIP);
+					r.setOutput(new Output(msg));
+					results.add(r);
+					continue;
+				}
 			}
 			Result result = xml.runCheck(check);
 			results.add(result);
