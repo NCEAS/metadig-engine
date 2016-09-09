@@ -19,6 +19,49 @@ makeSingleDocPlot <- function(x) {
     group_by(pid, type, status, level) %>%
     summarize(proportion = length(status) / unique(denom)[1])
 
+    groupfn <- function(result) {
+      color <- NULL
+
+      if (result$level == "INFO") {
+        color <- "BLUE"
+        return(color)
+      }
+
+      if (result$status == "SKIP") {
+        color <- "BLUE"
+        return(color)
+      }
+
+      if (result$status == "SUCCESS") {
+        color <- "GREEN"
+        return(color)
+      }
+
+      if (result$status == "FAILURE") {
+        color <- "RED"
+
+        if (result$level == "OPTIONAL") {
+          color <- "ORANGE"
+        }
+      }
+
+      if (result$status == "ERROR") {
+        color <- "ORANGE"
+
+        if (result$level == "REQUIRED") {
+          color <- "RED"
+        }
+      }
+
+      color
+    }
+
+    for (i in seq_len(nrow(results_summarized))) {
+      results_summarized[i,"color"] <- groupfn(results_summarized[i,])
+    }
+
+    results_summarized$color <- factor(results_summarized$color, levels = c("GREEN", "BLUE", "ORANGE", "RED"), ordered = TRUE)
+
 
   g <- ggplot(results_summarized, aes(level, proportion, fill = status)) +
     geom_bar(stat = "identity") +
