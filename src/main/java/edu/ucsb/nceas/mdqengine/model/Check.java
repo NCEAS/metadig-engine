@@ -106,8 +106,8 @@ public class Check {
 	 * Selectors are used to extract certain parts of the metadata document and make those values available to the Check.code.
 	 * Each selector should have a unique name within the same check since the Selector.name is used to create a global variable in the
 	 * scripting environment. The code can then reference that variable name (exactly!) and gain access to the value (if it exists).
-	 * The variables can be strings, numbers, booleans and lists of those types. When a selector does locate a value in the 
-	 * document, a null value (however that is represented in the particular script environment) will be provided.
+	 * The variables can be strings, numbers, booleans and lists of those types. When a selector does not locate a value in the document, 
+	 * a `null` value will be provided (however that is represented in the particular script environment).
 	 */
 	@XmlElement(required = false)
 	private List<Selector> selector;

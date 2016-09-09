@@ -26,7 +26,7 @@ public class Selector {
 	private String name;
 	
 	/**
-	 * The xpath expression use to extract value[s] from the document for this named 
+	 * The xpath expression is used to extract value[s] from the document for this named 
 	 * selector.
 	 * The xpath will often be a compound expression to cover a variety of metadata dialects.
 	 * For example, the notion of a "title" can be stored in many different ways depending 
