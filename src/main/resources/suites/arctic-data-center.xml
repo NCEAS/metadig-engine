@@ -7,7 +7,7 @@
     <id>check.title.1</id>
   </check>
   <check>
-    <id>check.creator.is.present.1</id>
+    <id>check.creator.present.1</id>
   </check>
   <check>
     <id>check.contact.1</id>
