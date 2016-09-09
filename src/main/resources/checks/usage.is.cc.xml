@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <mdq:check xmlns:mdq="https://nceas.ucsb.edu/mdqe" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="https://nceas.ucsb.edu/mdqe ../schemas/schema1.xsd">
-  <id>usage.is.cc</id>
+  <id>check.usage.is.cc.1</id>
   <name>Usage is Creative Commons</name>
   <level>REQUIRED</level>
   <environment>rscript</environment>
