@@ -110,6 +110,7 @@ public class MDQEngine {
 		
 		// make a run to capture results
 		Run run = new Run();
+		run.setSuiteId(suite.getId());
 		run.setId(UUID.randomUUID().toString());
 		run.setTimestamp(Calendar.getInstance().getTime());
 		List<Result> results = new ArrayList<Result>();
