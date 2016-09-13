@@ -13,14 +13,14 @@
       message <- "More than one abstract element was found when one was expected."
     } else {
       library(stringr)
-      tokens <- str_split(abstract[[1]])
+      tokens <- str_split(abstract, " ")[[1]]
 
       if (length(tokens) >= 100) {
         status <- "SUCCESS"
-        message <- paste0("The abstract was ", length(tokens), " long which is sufficient.")
+        message <- paste0("The abstract was ", length(tokens), " word(s) long which is sufficient.")
       } else {
         status <- "FAILURE"
-        message <- paste0("The abstract was only ", length(tokens), " long but 100 was expected.")
+        message <- paste0("The abstract was only ", length(tokens), " word(s) long but 100 or more was requried.")
       }
     }
 
