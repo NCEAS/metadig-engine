@@ -4,6 +4,7 @@
   <name>Missing Value Codes</name>
   <description><![CDATA[Missing value codes should be present for all attributes. Note that this only checks for the presence of the <missingValueCode> element in each <attribute> element and does not check the sanity of what's provided there.]]></description>
   <type>interpretation</type>
+  <level>OPTIONAL</level>
   <environment>rscript</environment>
   <code><![CDATA[
 library(metadig)
