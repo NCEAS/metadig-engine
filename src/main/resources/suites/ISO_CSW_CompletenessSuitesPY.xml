@@ -6,7 +6,7 @@
     <id>CSWCoreQueryables_Keyword_ISO</id>
     <name>KeywordPresent</name>
     <description>Checks to see if at least one Keyword concept exists.</description>
-    <type>metadata</type>
+    <type>discovery</type>
     <level>REQUIRED</level>
     <environment>python</environment>
     <code><![CDATA[
@@ -36,7 +36,7 @@ def call():
     <id>CSWCoreQueryables_ResourceTitle_ISO</id>
     <name>ResourceTitlePresent</name>
     <description>Checks to see if at least one Resource Title concept exists.</description>
-    <type>metadata</type>
+    <type>identification</type>
     <level>REQUIRED</level>
     <environment>python</environment>
     <code><![CDATA[
@@ -65,7 +65,7 @@ def call():
     <id>CSWCoreQueryables_Abstract_ISO</id>
     <name>AbstractPresent</name>
     <description>Checks to see if at least one Abstract concept exists.</description>
-    <type>metadata</type>
+    <type>discovery</type>
     <level>REQUIRED</level>
     <environment>python</environment>
     <code><![CDATA[
@@ -94,7 +94,7 @@ def call():
     <id>CSWCoreQueryables_ResourceFormat_ISO</id>
     <name>ResourceFormatPresent</name>
     <description>Checks to see if at least one Resource Format concept exists.</description>
-    <type>metadata</type>
+    <type>interpretation</type>
     <level>REQUIRED</level>
     <environment>python</environment>
     <code><![CDATA[
@@ -123,7 +123,7 @@ def call():
     <id>CSWCoreQueryables_MetadataIdentifier_ISO</id>
     <name>MetadataIdentifierPresent</name>
     <description>Checks to see if at least one Metadata Identifier concept exists.</description>
-    <type>metadata</type>
+    <type>identification</type>
     <level>REQUIRED</level>
     <environment>python</environment>
     <code><![CDATA[
@@ -152,7 +152,7 @@ def call():
     <id>CSWCoreQueryables_MetadataModifiedDate_ISO</id>
     <name>MetadataModifiedDatePresent</name>
     <description>Checks to see if at least one Metadata Modified Date concept exists.</description>
-    <type>metadata</type>
+    <type>discovery</type>
     <level>REQUIRED</level>
     <environment>python</environment>
     <code><![CDATA[
@@ -181,7 +181,7 @@ def call():
     <id>CSWCoreQueryables_ResourceType_ISO</id>
     <name>ResourceTypePresent</name>
     <description>Checks to see if at least one Resource Type concept exists.</description>
-    <type>metadata</type>
+    <type>discovery</type>
     <level>REQUIRED</level>
     <environment>python</environment>
     <code><![CDATA[
@@ -210,7 +210,7 @@ def call():
     <id>CSWCoreQueryables_BoundingBox_ISO</id>
     <name>BoundingBoxPresent</name>
     <description>Checks to see if at least one Bounding Box concept exists.</description>
-    <type>metadata</type>
+    <type>discovery</type>
     <level>REQUIRED</level>
     <environment>python</environment>
     <code><![CDATA[
@@ -239,7 +239,7 @@ def call():
     <id>CSWCoreQueryables_CoordinateReferenceSystem(CRS)_ISO</id>
     <name>CoordinateReferenceSystem(CRS)Present</name>
     <description>Checks to see if at least one Coordinate Reference System (CRS) concept exists.</description>
-    <type>metadata</type>
+    <type>discovery</type>
     <level>REQUIRED</level>
     <environment>python</environment>
     <code><![CDATA[
@@ -268,7 +268,7 @@ def call():
     <id>CSWCoreQueryables_Association_ISO</id>
     <name>AssociationPresent</name>
     <description>Checks to see if at least one Association concept exists.</description>
-    <type>metadata</type>
+    <type>identification</type>
     <level>REQUIRED</level>
     <environment>python</environment>
     <code><![CDATA[
