@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mdq:check xmlns:mdq="https://nceas.ucsb.edu/mdqe" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="https://nceas.ucsb.edu/mdqe ../schemas/schema1.xsd">
+  <id>missing.value.codes.1</id>
+  <name>Missing Value Codes are present on all attributes in the document.</name>
+  <description><![CDATA[>Note that this only checks for the presence of the <missingValueCode> element in each <attribute> element and does not check the sanity of what's provided there.]]></description>
+  <environment>rscript</environment>
+  <code><![CDATA[
+library(metadig)
+
+if (any(is.na(codes))) {
+failure(paste0("The following attributes were missing missingValueCode elements which may indicate a problem: ", paste0(names[is.na(codes)], collapse = ", ")))
+} else {
+success("All attributes have missingValueCode elements.")
+}
+]]></code>
+  <selector>
+    <name>names</name>
+    <xpath>/eml/dataset/dataTable/attributeList/attribute</xpath>
+    <subSelector>
+      <name>...</name>
+      <xpath>./attributeName</xpath>
+    </subSelector>
+  </selector>
+  <selector>
+    <name>codes</name>
+    <xpath>/eml/dataset/dataTable/attributeList/attribute</xpath>
+    <subSelector>
+      <name>...</name>
+      <xpath>./missingValueCode</xpath>
+    </subSelector>
+  </selector>
+</mdq:check>

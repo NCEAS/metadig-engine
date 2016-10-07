@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mdq:check xmlns:mdq="https://nceas.ucsb.edu/mdqe" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="https://nceas.ucsb.edu/mdqe ../schemas/schema1.xsd">
+	<id>check.creator.has.orcid.1</id>
+	<name>Check that creator has ORCID, email and address</name>
+	<description>Check if the creator contains a userId ORCID, email and address.</description>
+	<level>INFO</level>
+	<environment>rscript</environment>
+	<code><![CDATA[
+check <- function() {
+  library(base)
+  # These variables are defined by the MQE from the <xpath> selectors.
+  # "creatorPresent" - the dataset creator
+  # "userId"         - the dataset creator/userId
+  # "emailPresent"   - the creator email
+  # "addressPresent" - the creator address
+  if(!creatorPresent) {
+    return(list(status="SKIP", output="The 'creator' element is not present, can not check for an ORCID, electronicMailAddress or address."))
+  }
+  
+  # There could be multiple creators, but just one creator with a 'userId' will satisfy this check
+  if(is.null(userId)) {
+    # Should this be a SKIP?
+    return(list(status="FAILURE", output="The 'creator/userId' element not present, can not check for an ORCID"))
+  }
+  
+  hasORCID <- grepl("^\\s*http://orcid.org", userId, perl=T) || grepl("^\\s*ORCID", userId, perl=T)
+  if(!hasORCID) {
+    return(list(status="FAILURE", output="The 'creator/userId' element does not contains an ORCID"))
+  }
+  
+  # There could be multiple creators, but just one creator with an 'email' will satisfy this check
+  if(!emailPresent) {
+    return(list(status="FAILURE", output="The 'creator/electronicMailAddress' element is not present"))
+  } 
+  
+  # There could be multiple creators, but just one creator with an 'address' will satisfy this check
+  if(!addressPresent) {
+    return(list(status="FAILURE", output="The 'creator/address' element is not present"))
+  } 
+  
+  return(list(status="SUCCESS", output="The 'creator' element has a 'userId' ORCID, 'electronicMailAddress' and 'address' elements"))
+}
+
+result <- check()
+mdq_result <- list(status=result$status, output=list(list(value=result$output))) 
+]]></code>
+  <selector>
+		 <name>creatorPresent</name>
+		 <xpath>boolean(/*[local-name() = 'eml']/dataset/creator)</xpath>
+	 </selector>
+  <selector>
+		 <name>userId</name>
+		 <xpath>/*[local-name() = 'eml']/dataset/creator/userId</xpath>
+	 </selector>
+  <selector>
+		 <name>emailPresent</name>
+		 <xpath>boolean(/*[local-name() = 'eml']/dataset/creator/electronicMailAddress)</xpath>
+	 </selector>
+  <selector>
+		 <name>addressPresent</name>
+		 <xpath>boolean(/*[local-name() = 'eml']/dataset/creator/address)</xpath>
+	 </selector>
+	 <dialect>
+		 <name>eml</name>
+		 <xpath>boolean(/*[local-name() = 'eml'])</xpath>
+	 </dialect>
+</mdq:check>

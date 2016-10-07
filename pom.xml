@@ -138,6 +138,37 @@
 			        </execution>
 			    </executions>
 			</plugin>
+			<!--
+			The following plugin builds a JAR file with dependencies that automatically runs the main() method of the
+			MDQEngine. This allows me to run a Suite against a document like:
+
+		   		java -jar target/mdqengine-1.0.0-SNAPSHOT-jar-with-dependencies.jar $SUITE $DOC
+
+			Taken pretty much verbatim from http://maven.apache.org/plugins/maven-assembly-plugin/usage.html.
+			-->
+			<plugin>
+				<artifactId>maven-assembly-plugin</artifactId>
+				<version>2.6</version>
+				<configuration>
+					<descriptorRefs>
+						<descriptorRef>jar-with-dependencies</descriptorRef>
+					</descriptorRefs>
+					<archive>
+						<manifest>
+							<mainClass>edu.ucsb.nceas.mdqengine.MDQEngine</mainClass>
+						</manifest>
+					</archive>
+				</configuration>
+				<executions>
+					<execution>
+						<id>make-assembly</id>
+						<phase>package</phase>
+						<goals>
+							<goal>single</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
 		</plugins>
 	</build>
 </project>

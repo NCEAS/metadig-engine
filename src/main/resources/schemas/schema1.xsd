@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:tns="https://nceas.ucsb.edu/mdqe" targetNamespace="https://nceas.ucsb.edu/mdqe" version="1.0">
+<xs:schema version="1.0" targetNamespace="https://nceas.ucsb.edu/mdqe" xmlns:tns="https://nceas.ucsb.edu/mdqe" xmlns:xs="http://www.w3.org/2001/XMLSchema">
 
   <xs:element name="check" type="tns:check"/>
 
@@ -8,139 +8,30 @@
   <xs:element name="suite" type="tns:suite"/>
 
   <xs:complexType name="check">
-<xs:annotation>
-<xs:documentation><![CDATA[Checks do the heavy lifting of QC checking. The general idea is that they are fed one or more 
-values from the document being QCed - using Selectors - and then run some code on those value[s].
-
-(author): leinfelder]]></xs:documentation>
-</xs:annotation>
     <xs:sequence>
-      <xs:element name="id" type="xs:string">
-<xs:annotation>
-<xs:documentation><![CDATA[The unique identifier for the check. The id can be used to reference previously defined checks
-within the same MDQ engine store. This is useful for common checks that should be shared 
-across Suites]]></xs:documentation>
-</xs:annotation>
-</xs:element>
-      <xs:element minOccurs="0" name="name" type="xs:string">
-<xs:annotation>
-<xs:documentation><![CDATA[The short, but useful, name of the check. This will typically be how we colloquially refer to the check.]]></xs:documentation>
-</xs:annotation>
-</xs:element>
-      <xs:element minOccurs="0" name="description" type="xs:string">
-<xs:annotation>
-<xs:documentation><![CDATA[The longer more detailed explanation of what the check is doing. This might even include pseudo code or a summary of
-the actions performed by the Check.code]]></xs:documentation>
-</xs:annotation>
-</xs:element>
-      <xs:element minOccurs="0" name="type" type="xs:string">
-<xs:annotation>
-<xs:documentation><![CDATA[The type is meant to categorize the check. While we have not defined a vocabulary for check types, we envision some examples as:
-metadata, data, congruency. Currently, check writers are able to use any string they desire.]]></xs:documentation>
-</xs:annotation>
-</xs:element>
-      <xs:element minOccurs="0" name="level" type="tns:level">
-<xs:annotation>
-<xs:documentation><![CDATA[The level indicates how important this check is and must pull from the controlled Level vocabulary (INFO, OPTIONAL, REQUIRED).
-The level will help us better summarize the check results. For example, a REQUIRED check that fails is more severe than an INFO check
-that fails.]]></xs:documentation>
-</xs:annotation>
-</xs:element>
-      <xs:element minOccurs="0" name="environment" type="xs:string">
-<xs:annotation>
-<xs:documentation><![CDATA[The environment specifies what language the check code should be dispatched to. The environment, code and library elements should all 
-agree so that syntax and dependencies can be appropriately met. This field is case-insensitive.
-Current options include: 
-'r' (the Renjin engine), 
-'rscript' (RScript command line), 
-'JavaScript' (the JavaScript engine)
-'python' (the Jython engine)
-'Java' (Java class implementations of Callable<Result>)]]></xs:documentation>
-</xs:annotation>
-</xs:element>
-      <xs:element minOccurs="0" name="code" type="xs:string">
-<xs:annotation>
-<xs:documentation><![CDATA[The for scripted environments (not 'Java') this is the code to be executed. When Check.environment is 'Java' this will be the fully qualified class 
-name of the Callable<Result> implementation.
-The script code can take a few different forms, but should minimally return some value that will be captured as a single Result.output.
-The simplest form is just a series of script statements with the final statement returning the desired value for Result.output.
-Alternatively, a call() function can be defined that returns the desired Result.output. This function will be called automatically if no output is found when executing the
-script as a series of statements.
-If both output and status need to be returned, the code can set 'output' and 'status' variables and those will be included in the Result.
-Finally - for greatest control - a full instance of the Result class can be returned in which case the code writer is responsible for setting the appropriate Result fields in a 
-variable named 'mdq_result'.]]></xs:documentation>
-</xs:annotation>
-</xs:element>
-      <xs:element maxOccurs="unbounded" minOccurs="0" name="library" type="xs:anyURI">
-<xs:annotation>
-<xs:documentation><![CDATA[One or more external script libraries can be included using their URL. Caution should be taken that these URLs are trusted so that 
-malicious code cannot be executed by the engine.]]></xs:documentation>
-</xs:annotation>
-</xs:element>
-      <xs:element minOccurs="0" name="inheritState" type="xs:boolean">
-<xs:annotation>
-<xs:documentation><![CDATA[Be default, each check is entirely independent and does not share the script environment of any previously executed checks in the Suite.
-If checks need to reference variables or functions defined in earlier checks within the same suite, they can set this flag to 'true'.
-Care should be taken when inheriting state such that variable name collisions do not cause unintended results.]]></xs:documentation>
-</xs:annotation>
-</xs:element>
-      <xs:element maxOccurs="unbounded" minOccurs="0" name="selector" type="tns:selector">
-<xs:annotation>
-<xs:documentation><![CDATA[Selectors are used to extract certain parts of the metadata document and make those values available to the Check.code.
-Each selector should have a unique name within the same check since the Selector.name is used to create a global variable in the
-scripting environment. The code can then reference that variable name (exactly!) and gain access to the value (if it exists).
-The variables can be strings, numbers, booleans and lists of those types. When a selector does locate a value in the 
-document, a null value (however that is represented in the particular script environment) will be provided.]]></xs:documentation>
-</xs:annotation>
-</xs:element>
-      <xs:element maxOccurs="unbounded" minOccurs="0" name="dialect" type="tns:dialect">
-<xs:annotation>
-<xs:documentation><![CDATA[The optional dialect list can be used to identify checks as only pertaining to specific metadata types.
-Instead of constraining this to a pre-determined list of dialects, they are self-defined by Dialect.xpath 
-such that a dialect can use any xpath expression to determine if a document is indeed that dialect.
-Typically, we will use namespace comparisons, but there is technically no limit of how a dialect can determine 
-what it is.
-If a document is in the dialect list, the check will not be run and Result.status will be set to Status.SKIP.
-If no Dialect[s] are provided, it is assumed that the check applies to any and all metadata documents.]]></xs:documentation>
-</xs:annotation>
-</xs:element>
+      <xs:element name="id" type="xs:string"/>
+      <xs:element name="name" type="xs:string" minOccurs="0"/>
+      <xs:element name="description" type="xs:string" minOccurs="0"/>
+      <xs:element name="type" type="xs:string" minOccurs="0"/>
+      <xs:element name="level" type="tns:level" minOccurs="0"/>
+      <xs:element name="environment" type="xs:string" minOccurs="0"/>
+      <xs:element name="code" type="xs:string" minOccurs="0"/>
+      <xs:element name="library" type="xs:anyURI" minOccurs="0" maxOccurs="unbounded"/>
+      <xs:element name="inheritState" type="xs:boolean" minOccurs="0"/>
+      <xs:element name="selector" type="tns:selector" minOccurs="0" maxOccurs="unbounded"/>
+      <xs:element name="dialect" type="tns:dialect" minOccurs="0" maxOccurs="unbounded"/>
     </xs:sequence>
   </xs:complexType>
 
   <xs:complexType name="selector">
-<xs:annotation>
-<xs:documentation><![CDATA[Selectors are used to extract value[s] from metadata documents using XPath expressions.
-
-(author): leinfelder]]></xs:documentation>
-</xs:annotation>
     <xs:sequence>
-      <xs:element name="name" type="xs:string">
-<xs:annotation>
-<xs:documentation><![CDATA[The selector name is used to create a variable in the environment specified by
-Check.environment and should be a valid variable for that target environment.
-reserved tokens like 'var', 'int', 'public', etc.. should be avoided.]]></xs:documentation>
-</xs:annotation>
-</xs:element>
-      <xs:element name="xpath" type="xs:string">
-<xs:annotation>
-<xs:documentation><![CDATA[The xpath expression use to extract value[s] from the document for this named 
-selector.
-The xpath will often be a compound expression to cover a variety of metadata dialects.
-For example, the notion of a "title" can be stored in many different ways depending 
-on the metadata standard used, but conceptually the value can be checked exactly the same
-no matter where or how it is serialized in metadata.]]></xs:documentation>
-</xs:annotation>
-</xs:element>
-      <xs:element minOccurs="0" name="subSelector" type="tns:selector">
-<xs:annotation>
-<xs:documentation><![CDATA[Subselectors can be used when access to complex structures is required and the structure needs to be 
-preserved. Often is is used to return lists of lists (e.g., when examining attributes of multiple entities).]]></xs:documentation>
-</xs:annotation>
-</xs:element>
-      <xs:element minOccurs="0" name="namespaces">
+      <xs:element name="name" type="xs:string"/>
+      <xs:element name="xpath" type="xs:string"/>
+      <xs:element name="subSelector" type="tns:selector" minOccurs="0"/>
+      <xs:element name="namespaces" minOccurs="0">
         <xs:complexType>
           <xs:sequence>
-            <xs:element maxOccurs="unbounded" minOccurs="0" name="namespace" nillable="true" type="tns:namespace"/>
+            <xs:element name="namespace" type="tns:namespace" nillable="true" minOccurs="0" maxOccurs="unbounded"/>
           </xs:sequence>
         </xs:complexType>
       </xs:element>
@@ -148,187 +39,82 @@ preserved. Often is is used to return lists of lists (e.g., when examining attri
   </xs:complexType>
 
   <xs:complexType name="namespace">
-<xs:annotation>
-<xs:documentation><![CDATA[The namespace maps a full uri to a prefix.
-
-(author): leinfelder]]></xs:documentation>
-</xs:annotation>
     <xs:simpleContent>
       <xs:extension base="xs:string">
-        <xs:attribute name="prefix" type="xs:string" use="required">
-<xs:annotation>
-<xs:documentation><![CDATA[The namespace prefix. This should match the prefix used in XPath expression[s]]]></xs:documentation>
-</xs:annotation>
-</xs:attribute>
+        <xs:attribute name="prefix" type="xs:string" use="required"/>
       </xs:extension>
     </xs:simpleContent>
   </xs:complexType>
 
   <xs:complexType name="dialect">
     <xs:sequence>
-      <xs:element minOccurs="0" name="name" type="xs:string">
-<xs:annotation>
-<xs:documentation><![CDATA[The name or label to associate with this dialect definition]]></xs:documentation>
-</xs:annotation>
-</xs:element>
-      <xs:element minOccurs="0" name="xpath" type="xs:string">
-<xs:annotation>
-<xs:documentation><![CDATA[The XPath expression that is used to determine if a document is of this dialect.
-The expression should evaluate to a boolean value, where true indicates the document 
-is of this dialect.]]></xs:documentation>
-</xs:annotation>
-</xs:element>
+      <xs:element name="name" type="xs:string" minOccurs="0"/>
+      <xs:element name="xpath" type="xs:string" minOccurs="0"/>
     </xs:sequence>
   </xs:complexType>
 
   <xs:complexType name="metadata">
-<xs:annotation>
-<xs:documentation><![CDATA[Captures additional information about the document being QCed.
-Intended to be used in conjunction with a Run  to more easily 
-analyze the results
-
-(author): leinfelder]]></xs:documentation>
-</xs:annotation>
     <xs:sequence>
-      <xs:element minOccurs="0" name="dataUrl" type="xs:string"/>
-      <xs:element minOccurs="0" name="datasource" type="xs:string"/>
-      <xs:element minOccurs="0" name="formatId" type="xs:string"/>
-      <xs:element minOccurs="0" name="funder" type="xs:string"/>
-      <xs:element minOccurs="0" name="rightsHolder" type="xs:string"/>
+      <xs:element name="dataUrl" type="xs:string" minOccurs="0"/>
+      <xs:element name="datasource" type="xs:string" minOccurs="0"/>
+      <xs:element name="formatId" type="xs:string" minOccurs="0"/>
+      <xs:element name="funder" type="xs:string" minOccurs="0"/>
+      <xs:element name="rightsHolder" type="xs:string" minOccurs="0"/>
     </xs:sequence>
   </xs:complexType>
 
   <xs:complexType name="output">
-<xs:annotation>
-<xs:documentation><![CDATA[The output of check code is captured as Output. Many kinds of output are allowed:
-Scalar values( e.g., message strings, numbers, booleans)
-Complex structures serialized as strings (e.g., lists, tabular data, JSON)
-Base64 encoded binary data (e.g., png images)
-The type attribute should be used to indicate the kind of output value
-
-(author): leinfelder]]></xs:documentation>
-</xs:annotation>
     <xs:simpleContent>
       <xs:extension base="xs:string">
-        <xs:attribute name="type" type="xs:string">
-<xs:annotation>
-<xs:documentation><![CDATA[The type of output value. If omitted, a scalar string value will be assumed.
-Standard MIME-types should be used if including binary base64 encoded data.]]></xs:documentation>
-</xs:annotation>
-</xs:attribute>
+        <xs:attribute name="type" type="xs:string"/>
       </xs:extension>
     </xs:simpleContent>
   </xs:complexType>
 
   <xs:complexType name="result">
     <xs:sequence>
-      <xs:element minOccurs="0" name="check" type="tns:check">
-<xs:annotation>
-<xs:documentation><![CDATA[The check that was run]]></xs:documentation>
-</xs:annotation>
-</xs:element>
-      <xs:element minOccurs="0" name="timestamp" type="xs:dateTime">
-<xs:annotation>
-<xs:documentation><![CDATA[The timestamp of the check execution]]></xs:documentation>
-</xs:annotation>
-</xs:element>
-      <xs:element maxOccurs="unbounded" minOccurs="0" name="output" nillable="true" type="tns:output">
-<xs:annotation>
-<xs:documentation><![CDATA[The list of output value[s] from the check execution]]></xs:documentation>
-</xs:annotation>
-</xs:element>
-      <xs:element minOccurs="0" name="status" type="tns:status">
-<xs:annotation>
-<xs:documentation><![CDATA[The status of the check run, constrained to the Status enum]]></xs:documentation>
-</xs:annotation>
-</xs:element>
+      <xs:element name="check" type="tns:check" minOccurs="0"/>
+      <xs:element name="timestamp" type="xs:dateTime" minOccurs="0"/>
+      <xs:element name="output" type="tns:output" nillable="true" minOccurs="0" maxOccurs="unbounded"/>
+      <xs:element name="status" type="tns:status" minOccurs="0"/>
     </xs:sequence>
   </xs:complexType>
 
   <xs:complexType name="run">
     <xs:sequence>
-      <xs:element name="id" type="xs:string">
-<xs:annotation>
-<xs:documentation><![CDATA[The unique identifier for the QC run. This will likely be long and opaque
-(like a UUID) considering the quantity of runs that will likely be performed 
-over the content in a large repository.]]></xs:documentation>
-</xs:annotation>
-</xs:element>
-      <xs:element name="timestamp" type="xs:dateTime">
-<xs:annotation>
-<xs:documentation><![CDATA[The timestamp of the QC run]]></xs:documentation>
-</xs:annotation>
-</xs:element>
-      <xs:element minOccurs="0" name="objectIdentifier" type="xs:string">
-<xs:annotation>
-<xs:documentation><![CDATA[The identifier of the metadata document that was QCed.
-This is optional since in some cases, we will be performing 
-QC on objects that are being actively edited/created and 
-do not yet exist with persistent identifiers.]]></xs:documentation>
-</xs:annotation>
-</xs:element>
-      <xs:element minOccurs="0" name="metadata" type="tns:metadata">
-<xs:annotation>
-<xs:documentation><![CDATA[Additional information about the document that was QCed.
-This can be helpful when analyzing and aggregating batches of run results.]]></xs:documentation>
-</xs:annotation>
-</xs:element>
-      <xs:element minOccurs="0" name="suiteId" type="xs:string">
-<xs:annotation>
-<xs:documentation><![CDATA[The identifier for the suite that was run]]></xs:documentation>
-</xs:annotation>
-</xs:element>
-      <xs:element maxOccurs="unbounded" minOccurs="0" name="result" type="tns:result">
-<xs:annotation>
-<xs:documentation><![CDATA[The list of results for this run. Results contain the check that was run and 
-the outcome of the check.]]></xs:documentation>
-</xs:annotation>
-</xs:element>
+      <xs:element name="id" type="xs:string"/>
+      <xs:element name="timestamp" type="xs:dateTime"/>
+      <xs:element name="objectIdentifier" type="xs:string" minOccurs="0"/>
+      <xs:element name="metadata" type="tns:metadata" minOccurs="0"/>
+      <xs:element name="suiteId" type="xs:string" minOccurs="0"/>
+      <xs:element name="result" type="tns:result" minOccurs="0" maxOccurs="unbounded"/>
     </xs:sequence>
   </xs:complexType>
 
   <xs:complexType name="suite">
     <xs:sequence>
-      <xs:element name="id" type="xs:string">
-<xs:annotation>
-<xs:documentation><![CDATA[The unique identifier for the suite. This should be unique, at the very least, 
-within the scope of the MDQ engine store. It will be used to identify which
-suite[s] to run on metadata documents and for organizing QC results.]]></xs:documentation>
-</xs:annotation>
-</xs:element>
-      <xs:element name="name" type="xs:string">
-<xs:annotation>
-<xs:documentation><![CDATA[A short and useful name for the suite that will be displayed in 
-user interfaces and reports.]]></xs:documentation>
-</xs:annotation>
-</xs:element>
-      <xs:element minOccurs="0" name="description" type="xs:string">
-<xs:annotation>
-<xs:documentation><![CDATA[A comprehensive sumary of the suite and what it is intended to check.]]></xs:documentation>
-</xs:annotation>
-</xs:element>
-      <xs:element maxOccurs="unbounded" name="check" type="tns:check">
-<xs:annotation>
-<xs:documentation><![CDATA[The list of checks to be performed. A suite must have at least one check.]]></xs:documentation>
-</xs:annotation>
-</xs:element>
+      <xs:element name="id" type="xs:string"/>
+      <xs:element name="name" type="xs:string"/>
+      <xs:element name="description" type="xs:string" minOccurs="0"/>
+      <xs:element name="check" type="tns:check" maxOccurs="unbounded"/>
     </xs:sequence>
   </xs:complexType>
 
   <xs:simpleType name="level">
     <xs:restriction base="xs:string">
-      <xs:enumeration value="INFO"/>
       <xs:enumeration value="OPTIONAL"/>
       <xs:enumeration value="REQUIRED"/>
+      <xs:enumeration value="INFO"/>
     </xs:restriction>
   </xs:simpleType>
 
   <xs:simpleType name="status">
     <xs:restriction base="xs:string">
-      <xs:enumeration value="ERROR"/>
       <xs:enumeration value="SUCCESS"/>
-      <xs:enumeration value="FAILURE"/>
+      <xs:enumeration value="ERROR"/>
       <xs:enumeration value="SKIP"/>
+      <xs:enumeration value="FAILURE"/>
     </xs:restriction>
   </xs:simpleType>
 </xs:schema>
+
