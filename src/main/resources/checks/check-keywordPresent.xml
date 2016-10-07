@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <mdq:check xmlns:mdq="https://nceas.ucsb.edu/mdqe" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="https://nceas.ucsb.edu/mdqe ../schemas/schema1.xsd">
 	<id>check.keyword.present.1</id>
-	<name>keywordPresent</name>
-	<description>Checks to see if at least one keyword is present. The LTER
+	<name>Keywords present</name>
+	<description>At least one keyword should be present. The LTER
 		portal allows searches on keywords. This check is a precursor for
 		checking on keywords from the controlled vocabulary.</description>
-	<type>metadata</type>
+	<type>discovery</type>
 	<level>OPTIONAL</level>
 	<environment>python</environment>
 	<code><![CDATA[

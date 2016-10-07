@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <mdq:check xmlns:mdq="https://nceas.ucsb.edu/mdqe" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="https://nceas.ucsb.edu/mdqe ../schemas/schema1.xsd">
   <id>enumerated.domains.1</id>
-  <name>Enumerated Domains Defined</name>
-  <type>INFO</type>
+  <name>Enumerated domain</name>
+  <description>Enumerated domains should be defined</description>
+  <type>interpretation</type>
   <level>OPTIONAL</level>
   <environment>rscript</environment>
   <code><![CDATA[

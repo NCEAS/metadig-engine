@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <mdq:check xmlns:mdq="https://nceas.ucsb.edu/mdqe" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="https://nceas.ucsb.edu/mdqe ../schemas/schema1.xsd">
 	<id>check.creator.has.orcid.1</id>
-	<name>Check that creator has ORCID, email and address</name>
-	<description>Check if the creator contains a userId ORCID, email and address.</description>
+	<name>Creator has ORCID</name>
+	<description>The creator field should contain an ORCID, email and address.</description>
+	<type>identification</type>  
 	<level>INFO</level>
 	<environment>rscript</environment>
 	<code><![CDATA[

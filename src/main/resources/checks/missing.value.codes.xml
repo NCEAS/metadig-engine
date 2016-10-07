@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <mdq:check xmlns:mdq="https://nceas.ucsb.edu/mdqe" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="https://nceas.ucsb.edu/mdqe ../schemas/schema1.xsd">
   <id>missing.value.codes.1</id>
-  <name>Missing Value Codes are present on all attributes in the document.</name>
-  <description><![CDATA[>Note that this only checks for the presence of the <missingValueCode> element in each <attribute> element and does not check the sanity of what's provided there.]]></description>
+  <name>Missing Value Codes</name>
+  <description><![CDATA[Missing value codes should be present for all attributes. Note that this only checks for the presence of the <missingValueCode> element in each <attribute> element and does not check the sanity of what's provided there.]]></description>
+  <type>interpretation</type>
   <environment>rscript</environment>
   <code><![CDATA[
 library(metadig)

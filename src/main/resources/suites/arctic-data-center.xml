@@ -41,8 +41,9 @@
   </check>
   <check>
     <id>check.nsf.award.numbers.present.1</id>
-    <name>One or more NSF award numbers is present</name>
+    <name>NSF award numbers</name>
     <description>One or more NSF award numbers must be entered.</description>
+    <type>identification</type>
     <level>REQUIRED</level>
     <environment>rscript</environment>
     <code><![CDATA[if (is.null(awards)) {
@@ -74,7 +75,8 @@
   <check>
     <id>check.nsf.award.numbers.in.nsf.database.1</id>
     <name>NSF awards in database</name>
-    <description>All entered NSF award numbers are present in the NSF award database.</description>
+    <description>All entered NSF award numbers should be present in the NSF award database.</description>
+    <type>identification</type>
     <level>REQUIRED</level>
     <environment>rscript</environment>
     <code><![CDATA[
