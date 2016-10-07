@@ -12,7 +12,7 @@
   ]]></code>
   <selector>
     <name>begin_date</name>
-    <xpath>/eml/dataset/temporalCoverage/rangeOfDates/beginDate/calendarDate</xpath>
+    <xpath>/eml/dataset/coverage/temporalCoverage/rangeOfDates/beginDate/calendarDate | /eml/dataset/coverage/temporalCoverage/singleDateTime/calendarDate</xpath>
   </selector>
   <dialect>
     <name>eml</name>
