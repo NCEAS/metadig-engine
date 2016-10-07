@@ -29,7 +29,7 @@ def call():
     </selector>
     <dialect>
       <name>iso</name>
-      <xpath>boolean(/*[local-name() = 'MI_Metadata | MD_Metadata'])</xpath>
+      <xpath>boolean(/*[local-name() = 'MI_Metadata' or local-name() = 'MD_Metadata'])</xpath>
     </dialect>
   </check>
   <check>
@@ -58,7 +58,7 @@ def call():
     </selector>
     <dialect>
       <name>iso</name>
-      <xpath>boolean(/*[local-name() = 'MI_Metadata | MD_Metadata'])</xpath>
+      <xpath>boolean(/*[local-name() = 'MI_Metadata' or local-name() = 'MD_Metadata'])</xpath>
     </dialect>
   </check>
   <check>
@@ -87,7 +87,7 @@ def call():
     </selector>
     <dialect>
       <name>iso</name>
-      <xpath>boolean(/*[local-name() = 'MI_Metadata | MD_Metadata'])</xpath>
+      <xpath>boolean(/*[local-name() = 'MI_Metadata' or local-name() = 'MD_Metadata'])</xpath>
     </dialect>
   </check>
   <check>
@@ -116,7 +116,7 @@ def call():
     </selector>
     <dialect>
       <name>iso</name>
-      <xpath>boolean(/*[local-name() = 'MI_Metadata | MD_Metadata'])</xpath>
+      <xpath>boolean(/*[local-name() = 'MI_Metadata' or local-name() = 'MD_Metadata'])</xpath>
     </dialect>
   </check>
   <check>
@@ -145,7 +145,7 @@ def call():
     </selector>
     <dialect>
       <name>iso</name>
-      <xpath>boolean(/*[local-name() = 'MI_Metadata | MD_Metadata'])</xpath>
+      <xpath>boolean(/*[local-name() = 'MI_Metadata' or local-name() = 'MD_Metadata'])</xpath>
     </dialect>
   </check>
   <check>
@@ -174,7 +174,7 @@ def call():
     </selector>
     <dialect>
       <name>iso</name>
-      <xpath>boolean(/*[local-name() = 'MI_Metadata | MD_Metadata'])</xpath>
+      <xpath>boolean(/*[local-name() = 'MI_Metadata' or local-name() = 'MD_Metadata'])</xpath>
     </dialect>
   </check>
   <check>
@@ -203,7 +203,7 @@ def call():
     </selector>
     <dialect>
       <name>iso</name>
-      <xpath>boolean(/*[local-name() = 'MI_Metadata | MD_Metadata'])</xpath>
+      <xpath>boolean(/*[local-name() = 'MI_Metadata' or local-name() = 'MD_Metadata'])</xpath>
     </dialect>
   </check>
   <check>
@@ -232,7 +232,7 @@ def call():
     </selector>
     <dialect>
       <name>iso</name>
-      <xpath>boolean(/*[local-name() = 'MI_Metadata | MD_Metadata'])</xpath>
+      <xpath>boolean(/*[local-name() = 'MI_Metadata' or local-name() = 'MD_Metadata'])</xpath>
     </dialect>
   </check>
   <check>
@@ -261,7 +261,7 @@ def call():
     </selector>
     <dialect>
       <name>iso</name>
-      <xpath>boolean(/*[local-name() = 'MI_Metadata | MD_Metadata'])</xpath>
+      <xpath>boolean(/*[local-name() = 'MI_Metadata' or local-name() = 'MD_Metadata'])</xpath>
     </dialect>
   </check>
   <check>
@@ -290,7 +290,7 @@ def call():
     </selector>
     <dialect>
       <name>iso</name>
-      <xpath>boolean(/*[local-name() = 'MI_Metadata | MD_Metadata'])</xpath>
+      <xpath>boolean(/*[local-name() = 'MI_Metadata' or local-name() = 'MD_Metadata'])</xpath>
     </dialect>
   </check>
 </mdq:suite>
