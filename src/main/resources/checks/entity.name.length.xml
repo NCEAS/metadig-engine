@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mdq:check xmlns:mdq="https://nceas.ucsb.edu/mdqe"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="https://nceas.ucsb.edu/mdqe ../schemas/schema1.xsd">
+	<id>check.entity.name.length.1</id>
+	<name>Entity name length</name>
+	<description>Length of entity name is less than 100 characters.</description>
+	<type>metadata</type>
+	<level>INFO</level>
+	<environment>rscript</environment>
+	<code><![CDATA[
+    check <- function() {
+      library(base)
+      # Variables defined by MQE
+      # "entityCount" - the number of entities in the dataset
+      # "entityNames" - the entity names for the dataset entities (dataTables)
+      maxEntityNameLength <- 100
+      
+      message(sprintf("count: %s", entityCount))
+      # Make sure entity count is typed correctly
+      if(!is.null(entityCount)) {
+        entityCount <- as.integer(entityCount)
+      } else {
+        return(list(status = "FAILURE", output = sprintf("Entity count connot be determined, so the check is unable to determine entity name lengths.")))
+      }
+      
+      # Assume that the check will pass, but one problem will cause failure
+      status <- "SUCCESS"
+      if(is.null(entityNames) || entityCount == 0) {
+        return(list(status = "FAILURE", output = sprintf("No entity names found, so the check is unable to determine entity name lengths.")))
+      }
+      
+      # The dataset may have multiple entities, so check each one
+      errEntityNames <- list()
+      for (iEntity in 1:entityCount) {
+        thisEntityName <- entityNames[[iEntity]]
+        if (nchar(thisEntityName) > maxEntityNameLength) {
+          errEntityNames[[length(errEntityNames)+1]] <- thisEntityName
+        }
+      }
+      
+      if(length(errEntityNames) > 0) {
+         if(length(errEntityNames) > 1) {
+           msg <- sprintf("%d entities have names longer than %d characters.", length(errEntityNames), maxEntityNameLength)
+         } else {
+           msg <- sprintf("%d entity has a name longer that %d characters.", length(errEntityNames), maxEntityNameLength)
+         }
+         return(list(status = "FAILURE", output = msg))
+      } else {
+        return(list(status = "SUCCESS", output = sprintf("All entity names are less that %s characters." , maxEntityNameLength))) 
+      }
+    }
+    result <- check()
+    mdq_result <- list(status=result$status, output=list(list(value=result$output)))
+        ]]></code>
+	<selector>
+		<name>entityCount</name>
+		<xpath>count(/*[local-name() = 'eml']/dataset/dataTable)</xpath>
+	</selector>
+	<selector>
+		<name>entityNames</name>
+		<xpath>/*[local-name() = 'eml']/dataset/dataTable</xpath>
+		<subSelector>
+			<name>entityNamesSubSelector</name>
+			<xpath>./entityName</xpath>
+		</subSelector>
+	</selector>
+	<dialect>
+		<name>eml</name>
+		<xpath>boolean(/*[local-name() = 'eml'])</xpath>
+	</dialect>
+</mdq:check>
