@@ -10,6 +10,8 @@ import java.util.List;
 
 import javax.xml.parsers.ParserConfigurationException;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.junit.Test;
 import org.junit.Ignore;
 
@@ -19,11 +21,14 @@ import edu.ucsb.nceas.mdqengine.model.Check;
 import edu.ucsb.nceas.mdqengine.model.Dialect;
 import edu.ucsb.nceas.mdqengine.model.Level;
 import edu.ucsb.nceas.mdqengine.model.Result;
+import edu.ucsb.nceas.mdqengine.model.Output;
 import edu.ucsb.nceas.mdqengine.model.Selector;
 import edu.ucsb.nceas.mdqengine.model.Status;
 
 public class XMLDialectTest {
-	
+
+	private Log log = LogFactory.getLog(this.getClass());
+
 	private String emlId = "doi:10.5063/F10V89RP";
 	
 	private String emlIdSingleTable = "knb-lter-sbc.18.18";
@@ -459,4 +464,58 @@ public class XMLDialectTest {
 			e.printStackTrace();
 		}
 	}
+
+	@Test
+	public void testXpathsOnISODocs() {
+		Check check = new Check();
+		check.setCode("def call():\n" +
+				"\tglobal status\n" +
+				"\tglobal output\n" +
+				"\tif x is not None:\n" +
+				"\t\tstatus = 'SUCCESS'\n" +
+				"\t\toutput = 'x is {}'.format(x)\n" +
+				"\t\treturn True\n" +
+				"\telse:\n" +
+				"\t\tstatus = 'FAILURE'\n" +
+				"\t\toutput = 'x is {}'.format(x)\n" +
+				"\t\treturn False\n");
+
+		check.setEnvironment("python");
+
+		// Create a selector and add it to the check
+		Selector selector = new Selector();
+		selector.setName("x");
+		// TODO: Make this selector use wildcards. I made it simpler to test. -- bdm
+		selector.setXpath("//gco:CharacterString");
+		List<Selector> selectors = new ArrayList<Selector>();
+		selectors.add(selector);
+		check.setSelector(selectors);
+
+		// Test doc
+		InputStream input = this.getClass().getResourceAsStream("/test-docs/iso19139.xml");
+		XMLDialect xml = null;
+
+		try {
+			xml = new XMLDialect(input);
+		} catch (SAXException | IOException | ParserConfigurationException e) {
+			// TODO Auto-generated catch block
+			fail(e.getMessage());
+		}
+
+		// Run check and test it
+		try {
+			Result result = xml.runCheck(check);
+			List<Output> output = result.getOutput();
+
+			// TODO: Remove this debug line -- bdm
+			log.debug("The value of the first output is '" + output.get(0).getValue() + "'.");
+
+			assertEquals(Status.SUCCESS, result.getStatus());
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+	}
+
 }
