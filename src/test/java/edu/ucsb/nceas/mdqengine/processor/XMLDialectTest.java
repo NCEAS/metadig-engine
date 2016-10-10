@@ -466,12 +466,12 @@ public class XMLDialectTest {
 	}
 
 	@Test
-	public void testXpathsOnISODocs() {
+	public void testWildcardXpathsOnISODocs() {
 		Check check = new Check();
 		check.setCode("def call():\n" +
 				"\tglobal status\n" +
 				"\tglobal output\n" +
-				"\tif x is not None:\n" +
+				"\tif x is not None and len(x) > 0:\n" +
 				"\t\tstatus = 'SUCCESS'\n" +
 				"\t\toutput = 'x is {}'.format(x)\n" +
 				"\t\treturn True\n" +
@@ -485,8 +485,7 @@ public class XMLDialectTest {
 		// Create a selector and add it to the check
 		Selector selector = new Selector();
 		selector.setName("x");
-		// TODO: Make this selector use wildcards. I made it simpler to test. -- bdm
-		selector.setXpath("//gco:CharacterString");
+		selector.setXpath("/*/identificationInfo/*/descriptiveKeywords/MD_Keywords/keyword/CharacterString/text()");
 		List<Selector> selectors = new ArrayList<Selector>();
 		selectors.add(selector);
 		check.setSelector(selectors);
@@ -506,10 +505,6 @@ public class XMLDialectTest {
 		try {
 			Result result = xml.runCheck(check);
 			List<Output> output = result.getOutput();
-
-			// TODO: Remove this debug line -- bdm
-			log.debug("The value of the first output is '" + output.get(0).getValue() + "'.");
-
 			assertEquals(Status.SUCCESS, result.getStatus());
 
 		} catch (Exception e) {
