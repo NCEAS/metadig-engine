@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mdq:check xmlns:mdq="https://nceas.ucsb.edu/mdqe"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="https://nceas.ucsb.edu/mdqe ../schemas/schema1.xsd">
+	<id>check.methods.present.1</id>
+	<name>Methods present</name>
+	<description>All datasets should contain a methods element, at a minimum a link to a separate methods doc.</description>
+	<type>metadata</type>
+	<level>OPTIONAL</level>
+	<environment>rscript</environment>
+	<code><![CDATA[
+check <- function() {
+    # Check that a <methods> element is present for the dataset.
+    if(methodsPresent) {
+        status <- "SUCCESS"
+        output <- "A methods element is present"
+    } else {
+        status <- "FAILURE"
+        output <- "A methods element is not present"
+    }
+    mdq_result <- list(status=status, output=list(list(value=output)))
+    return (mdq_result)
+}
+
+mdq_result <- check()
+      ]]></code>
+	<selector>
+		<name>methodsPresent</name>
+		<xpath>boolean(/*[local-name() = 'eml']/dataset/methods)</xpath>
+	</selector>
+	<dialect>
+		<name>eml</name>
+		<xpath>boolean(/*[local-name() = 'eml'])</xpath>
+	</dialect>
+</mdq:check>
