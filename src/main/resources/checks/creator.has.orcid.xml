@@ -18,48 +18,65 @@ check <- function() {
     return(list(status="SKIP", output="The 'creator' element is not present, can not check for an ORCID, electronicMailAddress or address."))
   }
   
+  # Assume that the check will succeed, until proven otherwise.
+  # The output messages will be gathered into a list
+  status <- "SUCCESS"
+  values <- list()
+  
   # There could be multiple creators, but just one creator with a 'userId' will satisfy this check
   if(is.null(userId)) {
     # Should this be a SKIP?
-    return(list(status="FAILURE", output="The 'creator/userId' element not present, can not check for an ORCID"))
+    status <- "FAILURE"
+    values[[length(values)+1]] <- list(value="A 'creator/userId' element not present, can not check for an ORCID")
+  } else {
+    # creator/userId is present, so check if it is an orcid
+    hasORCID <- grepl("^\\s*http://orcid.org", userId, perl=T) || grepl("^\\s*ORCID", userId, perl=T)
+    if(hasORCID) {
+      values[[length(values)+1]] <- list(value="A 'creator/userId' contains an ORCID")
+    } else {
+      status <- "FAILURE"
+      values[[length(values)+1]] <- list(value="A 'creator/userId' does not contains an ORCID")
+    }
   }
   
-  hasORCID <- grepl("^\\s*http://orcid.org", userId, perl=T) || grepl("^\\s*ORCID", userId, perl=T)
-  if(!hasORCID) {
-    return(list(status="FAILURE", output="The 'creator/userId' element does not contains an ORCID"))
+  # There could be multiple creator, but just one creator with an 'email' will satisfy this check
+  if(emailPresent) {
+    values[[length(values)+1]] <- list(value="A 'creator/electronicMailAddress' is present")
+  } else {
+    status <- "FAILURE"
+    values[[length(values)+1]] <- list(value="A 'creator/electronicMailAddress' element is not present")
+  } 
+  
+  # There could be multiple creator, but just one creator with an 'address' will satisfy this check
+  if(addressPresent) {
+    values[[length(values)+1]] <- list(value="A 'creator/address' element is present")
+  } else {
+    status <- "FAILURE"
+    values[[length(values)+1]] <- list(value="A 'creator/address' element is not present")
   }
   
-  # There could be multiple creators, but just one creator with an 'email' will satisfy this check
-  if(!emailPresent) {
-    return(list(status="FAILURE", output="The 'creator/electronicMailAddress' element is not present"))
-  } 
+  return(list(status=status, values=values))
   
-  # There could be multiple creators, but just one creator with an 'address' will satisfy this check
-  if(!addressPresent) {
-    return(list(status="FAILURE", output="The 'creator/address' element is not present"))
-  } 
-  
-  return(list(status="SUCCESS", output="The 'creator' element has a 'userId' ORCID, 'electronicMailAddress' and 'address' elements"))
 }
 
 result <- check()
-mdq_result <- list(status=result$status, output=list(list(value=result$output))) 
+mdq_result <- list(status=result$status, output=result$values)
 ]]></code>
   <selector>
 		 <name>creatorPresent</name>
-		 <xpath>boolean(/*[local-name() = 'eml']/dataset/creator)</xpath>
+		 <xpath>boolean(/eml/dataset/creator)</xpath>
 	 </selector>
   <selector>
 		 <name>userId</name>
-		 <xpath>/*[local-name() = 'eml']/dataset/creator/userId</xpath>
+		 <xpath>/eml/dataset/creator/userId</xpath>
 	 </selector>
   <selector>
 		 <name>emailPresent</name>
-		 <xpath>boolean(/*[local-name() = 'eml']/dataset/creator/electronicMailAddress)</xpath>
+		 <xpath>boolean(/eml/dataset/creator/electronicMailAddress)</xpath>
 	 </selector>
   <selector>
 		 <name>addressPresent</name>
-		 <xpath>boolean(/*[local-name() = 'eml']/dataset/creator/address)</xpath>
+		 <xpath>boolean(/eml/dataset/creator/address)</xpath>
 	 </selector>
 	 <dialect>
 		 <name>eml</name>
