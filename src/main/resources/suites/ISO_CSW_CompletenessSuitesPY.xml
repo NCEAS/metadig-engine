@@ -24,8 +24,8 @@ def call():
       ]]></code>
     <selector>
       <name>Keyword</name>
-      <xpath>/*/gmd:identificationInfo/*/gmd:descriptiveKeywords/gmd:MD_Keywords/gmd:keyword | /*/gmd:identificationInfo/*/gmd:descriptiveKeywords/gmd:MD_Keywords[normalize-space(gmd:type/gmd:MD_KeywordTypeCode)='place']/gmd:keyword/gco:CharacterString | /*/gmd:identificationInfo/*/gmd:descriptiveKeywords/gmd:MD_Keywords[normalize-space(gmd:type/gmd:MD_KeywordTypeCode)='instrument']/gmd:keyword/gco:CharacterString |
-        /*/gmd:identificationInfo/*/gmd:descriptiveKeywords/gmd:MD_Keywords[normalize-space(gmd:type/gmd:MD_KeywordTypeCode)='platform']/gmd:keyword/gco:CharacterString | /*/gmd:identificationInfo/*/gmd:descriptiveKeywords/gmd:MD_Keywords[normalize-space(gmd:type/gmd:MD_KeywordTypeCode)='project']/gmd:keyword/gco:CharacterString</xpath>
+      <xpath>/*/identificationInfo/*/descriptiveKeywords/MD_Keywords/keyword | /*/identificationInfo/*/descriptiveKeywords/MD_Keywords[normalize-space(type/MD_KeywordTypeCode)='place']/keyword/CharacterString | /*/identificationInfo/*/descriptiveKeywords/MD_Keywords[normalize-space(type/MD_KeywordTypeCode)='instrument']/keyword/CharacterString |
+        /*/identificationInfo/*/descriptiveKeywords/MD_Keywords[normalize-space(type/MD_KeywordTypeCode)='platform']/keyword/CharacterString | /*/identificationInfo/*/descriptiveKeywords/MD_Keywords[normalize-space(type/MD_KeywordTypeCode)='project']/keyword/CharacterString</xpath>
     </selector>
     <dialect>
       <name>iso</name>
@@ -54,7 +54,7 @@ def call():
       ]]></code>
     <selector>
       <name>ResourceTitle</name>
-      <xpath>/*/gmd:identificationInfo/*/gmd:citation/gmd:CI_Citation/gmd:title/gco:CharacterString</xpath>
+      <xpath>/*/identificationInfo/*/citation/CI_Citation/title/CharacterString</xpath>
     </selector>
     <dialect>
       <name>iso</name>
@@ -83,7 +83,7 @@ def call():
       ]]></code>
     <selector>
       <name>Abstract</name>
-      <xpath>/*/gmd:identificationInfo/*/gmd:abstract/gco:CharacterString</xpath>
+      <xpath>/*/identificationInfo/*/abstract/CharacterString</xpath>
     </selector>
     <dialect>
       <name>iso</name>
@@ -112,7 +112,7 @@ def call():
       ]]></code>
     <selector>
       <name>ResourceFormat</name>
-      <xpath>//gmd:resourceFormat/gmd:MD_Format/gmd:name/gco:CharacterString</xpath>
+      <xpath>//resourceFormat/MD_Format/name/CharacterString</xpath>
     </selector>
     <dialect>
       <name>iso</name>
@@ -141,7 +141,7 @@ def call():
       ]]></code>
     <selector>
       <name>MetadataIdentifier</name>
-      <xpath>/*/gmd:fileIdentifier/gco:CharacterString</xpath>
+      <xpath>/*/fileIdentifier/CharacterString</xpath>
     </selector>
     <dialect>
       <name>iso</name>
@@ -170,7 +170,7 @@ def call():
       ]]></code>
     <selector>
       <name>MetadataModifiedDate</name>
-      <xpath>/*/gmd:dateStamp/gco:Date | /*/gmd:dateStamp/gco:DateTime</xpath>
+      <xpath>/*/dateStamp/Date | /*/dateStamp/DateTime</xpath>
     </selector>
     <dialect>
       <name>iso</name>
@@ -199,7 +199,7 @@ def call():
       ]]></code>
     <selector>
       <name>ResourceType</name>
-      <xpath>/*/gmd:hierarchyLevel/gmd:MD_ScopeCode</xpath>
+      <xpath>/*/hierarchyLevel/MD_ScopeCode</xpath>
     </selector>
     <dialect>
       <name>iso</name>
@@ -228,7 +228,7 @@ def call():
       ]]></code>
     <selector>
       <name>BoundingBox</name>
-      <xpath>/*/gmd:identificationInfo/*/gmd:extent/gmd:EX_Extent/gmd:geographicElement/gmd:EX_GeographicBoundingBox//* | /*/gmd:identificationInfo/srv:SV_ServiceIdentification/srv:extent/gmd:EX_Extent/gmd:geographicElement/gmd:EX_GeographicBoundingBox//*</xpath>
+      <xpath>/*/identificationInfo/*/extent/EX_Extent/geographicElement/EX_GeographicBoundingBox//* | /*/identificationInfo/SV_ServiceIdentification/extent/EX_Extent/geographicElement/EX_GeographicBoundingBox//*</xpath>
     </selector>
     <dialect>
       <name>iso</name>
@@ -257,7 +257,7 @@ def call():
       ]]></code>
     <selector>
       <name>CoordinateReferenceSystem(CRS)</name>
-      <xpath>/*/gmd:referenceSystemInfo/gmd:MD_ReferenceSystem/gmd:referenceSystemIdentifier/gmd:RS_Identifier/gmd:code | /*/gmd:referenceSystemInfo/gmd:MD_ReferenceSystem/gmd:referenceSystemIdentifier/gmd:RS_Identifier/gmd:codeSpace</xpath>
+      <xpath>/*/referenceSystemInfo/MD_ReferenceSystem/referenceSystemIdentifier/RS_Identifier/code | /*/referenceSystemInfo/MD_ReferenceSystem/referenceSystemIdentifier/RS_Identifier/codeSpace</xpath>
     </selector>
     <dialect>
       <name>iso</name>
@@ -286,7 +286,7 @@ def call():
       ]]></code>
     <selector>
       <name>Association</name>
-      <xpath>/*/gmd:identificationInfo/*/gmd:aggregationInfo/gmd:MD_AggregateInformation | /*/gmd:dataQualityInfo/gmd:DQ_DataQuality/gmd:lineage/gmd:LI_Lineage/gmd:source | /*/gmd:dataQualityInfo/gmd:DQ_DataQuality/gmd:lineage/gmi:LE_Lineage/gmd:source</xpath>
+      <xpath>/*/identificationInfo/*/aggregationInfo/MD_AggregateInformation | /*/dataQualityInfo/DQ_DataQuality/lineage/LI_Lineage/source | /*/dataQualityInfo/DQ_DataQuality/lineage/LE_Lineage/source</xpath>
     </selector>
     <dialect>
       <name>iso</name>
