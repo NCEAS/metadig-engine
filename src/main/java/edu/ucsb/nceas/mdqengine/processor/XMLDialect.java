@@ -66,6 +66,9 @@ public class XMLDialect {
 	public XMLDialect(InputStream input) throws SAXException, IOException, ParserConfigurationException {
 		
 		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+		// TODO: enabling namespace awareness can be quite brudensome on check authors.
+		//log.debug("isNamespaceAware: " + builder.isNamespaceAware());
+		//factory.setNamespaceAware(true);
 		DocumentBuilder builder = factory.newDocumentBuilder();
 		document = builder.parse(input);
 		
