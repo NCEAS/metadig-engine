@@ -64,6 +64,9 @@
     <id>enumerated.domains.1</id>
   </check>
   <check>
+    <id>data.head.and.tail.1</id>
+  </check>
+  <check>
     <id>check.nsf.award.numbers.present.1</id>
     <name>NSF award numbers</name>
     <description>One or more NSF award numbers must be entered.</description>
