@@ -3,6 +3,7 @@
   <id>check.dataset.title.length.1</id>
   <name>Dataset title length is sufficient</name>
   <description>Check that the dataset title is greater than 7 words and less than 20.</description>
+  <type>identification</type>
   <level>REQUIRED</level>
   <environment>rscript</environment>
   <code><![CDATA[
