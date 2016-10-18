@@ -5,3 +5,6 @@ svglite
 digest
 RCurl
 httr
+readxl
+data.table
+metadig: NCEAS/metadig-r
