@@ -3,6 +3,8 @@
   <id>data.head.and.tail.1</id>
   <name>Data head and tail</name>
   <description>Show the first and last rows of tabular data. For each data object referenced in the metadata, attempts to download, read, then display the first and last ten lines.</description>
+  <type>interpretation</type>
+  <level>INFO</level>  
   <environment>rscript</environment>
   <code><![CDATA[
 library(metadig)
