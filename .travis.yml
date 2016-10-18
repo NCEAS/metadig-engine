@@ -7,7 +7,7 @@ before_install:
   - gpg -a --export E084DAB9 | sudo apt-key add -
   - sudo apt-get -qq update
   - sudo apt-get install -y r-base
-  - sudo apt-get install -y curl
+  - sudo apt-get install -y curl libcurl4-openssl-dev libcairo-dev
   - sudo R CMD BATCH --vanilla install-r-packages.R
 env:
 - R_LIBS_USER="~/R"
