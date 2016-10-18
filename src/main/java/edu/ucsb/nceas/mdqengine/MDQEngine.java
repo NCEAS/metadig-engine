@@ -59,6 +59,7 @@ public class MDQEngine {
 	 * Executes the given suite for a given object 
 	 * @param suite
 	 * @param input the InputStream for the object to QC
+	 * @param params optional additional parameters to make available for the suite
 	 * @return the Run results for this execution
 	 * @throws MalformedURLException
 	 * @throws IOException
@@ -67,7 +68,7 @@ public class MDQEngine {
 	 * @throws XPathExpressionException
 	 * @throws ScriptException
 	 */
-	public Run runSuite(Suite suite, InputStream input) 
+	public Run runSuite(Suite suite, InputStream input, Map<String, Object> params) 
 			throws MalformedURLException, IOException, SAXException, 
 			ParserConfigurationException, XPathExpressionException, ScriptException {
 			
@@ -75,36 +76,9 @@ public class MDQEngine {
 
 		String content = IOUtils.toString(input, "UTF-8");
 		String metadataContent = content;
-		Map<String, String> dataUrls = null;
-		
-		// check if this is an ORE package
-		boolean tryORE = false;
-		if (tryORE) {
-			DataPackage dp = null;
-			try {
-				
-				// parse as ORE
-				dp = DataPackage.deserializePackage(content);
-				
-				// assume single metadata item in package
-				List<Identifier> dataIds = dp.getMetadataMap().values().iterator().next();
-				Identifier metadataId = dp.getMetadataMap().keySet().iterator().next();
-				dataUrls = new HashMap<String, String>();
-				for (Identifier id: dataIds) {
-					dataUrls.put(id.getValue(), RESOLVE_PREFIX + id.getValue());
-				}
-				//  fetch the metadata content for checker
-				metadataContent = IOUtils.toString(dp.get(metadataId).getData(), "UTF-8");
-				
-			} catch (Exception e) {
-				// guess it is not an ORE!
-				log.warn("Input does not appear to be an ORE package, defaulting to metadata parsing. " + e.getCause());
-				metadataContent = content;
-			}
-		}
 		
 		XMLDialect xml = new XMLDialect(IOUtils.toInputStream(metadataContent, "UTF-8"));
-		xml.setDataUrls(dataUrls);
+		xml.setParams(params);
 		Path tempDir = Files.createTempDirectory("mdq_run");
 		xml.setDirectory(tempDir.toFile().getAbsolutePath());
 		
@@ -153,6 +127,7 @@ public class MDQEngine {
 	 * Executes the given check for a given object
 	 * @param suite
 	 * @param input the InputStream for the object to QC
+	 * @param params optional additional parameters to make available for the check
 	 * @return the Run results for this execution
 	 * @throws MalformedURLException
 	 * @throws IOException
@@ -161,17 +136,16 @@ public class MDQEngine {
 	 * @throws XPathExpressionException
 	 * @throws ScriptException
 	 */
-	public Run runCheck(Check check, InputStream input) 
+	public Run runCheck(Check check, InputStream input, Map<String, Object> params) 
 			throws MalformedURLException, IOException, SAXException, 
 			ParserConfigurationException, XPathExpressionException, ScriptException {
 			
 
 		String content = IOUtils.toString(input, "UTF-8");
 		String metadataContent = content;
-		Map<String, String> dataUrls = null;
 		
 		XMLDialect xml = new XMLDialect(IOUtils.toInputStream(metadataContent, "UTF-8"));
-		xml.setDataUrls(dataUrls);
+		xml.setParams(params);
 		Path tempDir = Files.createTempDirectory("mdq_run");
 		xml.setDirectory(tempDir.toFile().getAbsolutePath());
 		
@@ -216,7 +190,7 @@ public class MDQEngine {
 			String xml = IOUtils.toString(new FileInputStream(args[0]), "UTF-8");
 			Suite suite = (Suite) XmlMarshaller.fromXml(xml , Suite.class);
 			InputStream input = new FileInputStream(args[1]);
-			Run run = engine.runSuite(suite, input);
+			Run run = engine.runSuite(suite, input, null);
 			System.out.println(XmlMarshaller.toXml(run));
 		} catch (Exception e) {
 			// TODO Auto-generated catch block

@@ -93,7 +93,7 @@ public class MDQStoreTest {
 			InputStream input = new URL(metadataURL).openStream();
 			
 			Suite suite = SuiteFactory.getMockSuite();
-			Run run = mdqe.runSuite(suite, input);
+			Run run = mdqe.runSuite(suite, input, null);
 			store.createRun(run);
 			
 			Run r = store.getRun(run.getId());
@@ -122,7 +122,7 @@ public class MDQStoreTest {
 			checkRef.setId(checkId );
 			suite.getCheck().add(checkRef);
 			mdqe.setStore(store);
-			Run run = mdqe.runSuite(suite, input);
+			Run run = mdqe.runSuite(suite, input, null);
 			int checkCount = 0;
 			for (Result r: run.getResult()) {
 				Check c = r.getCheck();

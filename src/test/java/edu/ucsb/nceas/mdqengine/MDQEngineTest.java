@@ -70,7 +70,7 @@ public class MDQEngineTest {
 			String metadataURL = "https://cn.dataone.org/cn/v2/object/" + id;
 			InputStream input = new URL(metadataURL).openStream();
 			// run the suite on it
-			run = mdqe.runSuite(suite, input);
+			run = mdqe.runSuite(suite, input, null);
 			run.setObjectIdentifier(id);
 			log.trace("Run results JSON: " + JsonMarshaller.toJson(run));
 		} catch (Exception e) {
@@ -92,7 +92,7 @@ public class MDQEngineTest {
 			String packageURL = "https://cn.dataone.org/cn/v2/object/" + packageId;
 			InputStream input = new URL(packageURL).openStream();
 			// run the suite on it
-			run = mdqe.runSuite(suite, input);
+			run = mdqe.runSuite(suite, input, null);
 			run.setObjectIdentifier(packageId);
 			log.trace("Run results XML: " + XmlMarshaller.toXml(run));
 		} catch (Exception e) {

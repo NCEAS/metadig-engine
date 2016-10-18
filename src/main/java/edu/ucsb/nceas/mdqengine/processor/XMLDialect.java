@@ -55,7 +55,7 @@ public class XMLDialect {
 	
 	private XPathFactory xPathfactory;
 	
-	private Map<String, String> dataUrls;
+	private Map<String, Object> params;
 	
 	private String directory;
 	
@@ -102,9 +102,9 @@ public class XMLDialect {
 			// TODO: string seems like only viable option for all env
 			variables.put("document", toXmlString(document));
 			
-			// make dataUrls available to the check if we have them
-			if (this.dataUrls != null) {
-				variables.put("dataUrls", dataUrls);
+			// make extra parameters available to the check if we have them
+			if (this.params != null) {
+				variables.put("mdq_params", params);
 			}
 			
 			// give the check a place to write files during the run
@@ -363,12 +363,12 @@ public class XMLDialect {
 		return result;
 	}
 
-	public Map<String, String> getDataUrls() {
-		return dataUrls;
+	public Map<String, Object> getParams() {
+		return params;
 	}
 
-	public void setDataUrls(Map<String, String> dataUrls) {
-		this.dataUrls = dataUrls;
+	public void setParams(Map<String, Object> params) {
+		this.params = params;
 	}
 	
 	public void setDirectory(String dir) {

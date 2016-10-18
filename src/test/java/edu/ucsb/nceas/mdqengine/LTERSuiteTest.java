@@ -68,7 +68,7 @@ public class LTERSuiteTest{
 			log.error("metadata URL: " + metadataURL);
 			InputStream input = new URL(metadataURL).openStream();
 			// run the suite on it
-			run = mdqe.runSuite(suite, input);
+			run = mdqe.runSuite(suite, input, null);
 			run.setObjectIdentifier(metadataId);
 			log.trace("Run results XML: " + XmlMarshaller.toXml(run));
 			

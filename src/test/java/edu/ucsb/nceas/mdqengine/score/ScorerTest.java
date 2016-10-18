@@ -43,7 +43,7 @@ public class ScorerTest {
 			String metadataURL = "https://cn.dataone.org/cn/v2/object/" + id;
 			InputStream input = new URL(metadataURL).openStream();
 			// run the suite on it
-			run = mdqe.runSuite(suite, input);
+			run = mdqe.runSuite(suite, input, null);
 			run.setObjectIdentifier(id);
 			
 			log.debug("Run score: " + Scorer.getCompositeScore(run));
