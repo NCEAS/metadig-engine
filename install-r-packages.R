@@ -2,7 +2,8 @@
 
 # Install devtools if it isn't already
 if (!("devtools" %in% installed.packages())) {
-  install.packages("devtools")
+  cat(paste("Installing devtools"), "\n")
+  install.packages("devtools", repo = "http://cran.rstudio.com")
 }
 
 # Install packages
@@ -17,6 +18,7 @@ from_gh <- packages[grep("/", packages)]
 
 for (pkg in from_cran) {
   if (pkg %in% installed.packages()) next
+  cat(paste("Installing", pkg), "\n")
   install.packages(pkg, repo = "http://cran.rstudio.com")
 }
 
@@ -26,5 +28,6 @@ for (pkg in from_gh) {
   pkg_repo <- pkg_parts[[1]][2]
 
   if (pkg_name %in% installed.packages()) next
+  cat(paste("Installing", pkg_name), "\n")
   devtools::install_github(pkg_repo)
 }
