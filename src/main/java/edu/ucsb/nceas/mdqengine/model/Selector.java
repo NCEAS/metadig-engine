@@ -4,6 +4,7 @@ import java.util.List;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlType;
@@ -35,6 +36,12 @@ public class Selector {
 	 */
 	@XmlElement(required = true)
 	private String xpath;
+	
+	/**
+	 * Specifies whether or not this selector should be namespace aware or not.
+	 */
+	@XmlAttribute(required = false)
+	private Boolean namespaceAware;
 	
 	/**
 	 * The optional namespace list can be used to map namespace prefixes to full namespace uris.
@@ -81,6 +88,14 @@ public class Selector {
 
 	public void setNamespace(List<Namespace> namespace) {
 		this.namespace = namespace;
+	}
+
+	public boolean isNamespaceAware() {
+		return namespaceAware == null ? false: namespaceAware;
+	}
+
+	public void setNamespaceAware(boolean namespaceAware) {
+		this.namespaceAware = namespaceAware;
 	}
 
 }

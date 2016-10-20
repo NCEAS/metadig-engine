@@ -36,6 +36,7 @@
         </xs:complexType>
       </xs:element>
     </xs:sequence>
+    <xs:attribute name="namespaceAware" type="xs:boolean"/>
   </xs:complexType>
 
   <xs:complexType name="namespace">
@@ -102,8 +103,8 @@
 
   <xs:simpleType name="level">
     <xs:restriction base="xs:string">
-      <xs:enumeration value="OPTIONAL"/>
       <xs:enumeration value="REQUIRED"/>
+      <xs:enumeration value="OPTIONAL"/>
       <xs:enumeration value="INFO"/>
     </xs:restriction>
   </xs:simpleType>
@@ -111,8 +112,8 @@
   <xs:simpleType name="status">
     <xs:restriction base="xs:string">
       <xs:enumeration value="SUCCESS"/>
-      <xs:enumeration value="ERROR"/>
       <xs:enumeration value="SKIP"/>
+      <xs:enumeration value="ERROR"/>
       <xs:enumeration value="FAILURE"/>
     </xs:restriction>
   </xs:simpleType>

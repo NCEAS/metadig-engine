@@ -1,5 +1,6 @@
 package edu.ucsb.nceas.mdqengine.processor;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
@@ -53,9 +54,13 @@ public class XMLDialect {
 	
 	private Document document;
 	
+	private Document nsAwareDocument;
+
 	private XPathFactory xPathfactory;
 	
 	private Map<String, Object> params;
+		
+	private Map<String,Namespace> namespaces = new HashMap<String, Namespace>();
 	
 	private String directory;
 	
@@ -64,16 +69,54 @@ public class XMLDialect {
 	public static Log log = LogFactory.getLog(XMLDialect.class);
 	
 	public XMLDialect(InputStream input) throws SAXException, IOException, ParserConfigurationException {
-		
 		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-		// TODO: enabling namespace awareness can be quite brudensome on check authors.
-		//log.debug("isNamespaceAware: " + builder.isNamespaceAware());
-		//factory.setNamespaceAware(true);
+		factory.setNamespaceAware(false);
 		DocumentBuilder builder = factory.newDocumentBuilder();
-		document = builder.parse(input);
+		
+		DocumentBuilderFactory nsFactory = DocumentBuilderFactory.newInstance();
+		nsFactory.setNamespaceAware(true);
+		DocumentBuilder nsBuilder = nsFactory.newDocumentBuilder();
+		
+		byte[] bytes = IOUtils.toByteArray(input);
+		
+		document = builder.parse(new ByteArrayInputStream(bytes));
+		nsAwareDocument = nsBuilder.parse(new ByteArrayInputStream(bytes));
+
+		// please let garbage collection take this space back
+		bytes = null;
 		
 		xPathfactory = XPathFactory.newInstance();
+		
+		// now we can extract the namespaces from the source document
+		this.extractNamespaces();
 
+	}
+	
+	private void extractNamespaces() {
+		XPath xpath = xPathfactory.newXPath();
+		NodeList nodes = null;
+		try {
+			//String selectorPath = "//*[namespace-uri()]/concat(substring-before(name(), ':'),':',namespace-uri())";
+			String selectorPath = "//*[namespace-uri()]";
+
+			nodes = (NodeList) xpath.evaluate(selectorPath , this.nsAwareDocument, XPathConstants.NODESET);
+			if (nodes != null && nodes.getLength() > 0) {
+				for (int i = 0; i <nodes.getLength(); i++) {
+					Node node = nodes.item(i);
+					String uri = node.getNamespaceURI();
+					String prefix = node.getPrefix();
+					
+					Namespace ns = new Namespace();
+					ns.setPrefix(prefix);
+					ns.setUri(uri);
+					if (!this.namespaces.containsKey(uri)) {
+						this.namespaces.put(uri, ns);
+					}
+				}
+			}
+		} catch (XPathExpressionException e) {
+			log.error("Could not extract the namespaces from document", e);
+		}
 	}
 	
 	public Result runCheck(Check check) throws XPathExpressionException {
@@ -90,8 +133,13 @@ public class XMLDialect {
 			if (check.getSelector() != null) {
 				for (Selector selector: check.getSelector()) {
 					
+					Document docToUse = document;
+					if (selector.isNamespaceAware()) {
+						docToUse = nsAwareDocument;
+					}
+					
 					String name = selector.getName();
-					Object value = this.selectPath(selector, document);
+					Object value = this.selectPath(selector, docToUse);
 					
 					// make available in script
 					variables.put(name, value);
@@ -285,11 +333,17 @@ public class XMLDialect {
 		String selectorPath = selector.getXpath();
 		XPath xpath = xPathfactory.newXPath();
 		
-		// handle namespace prefixes
-		List<Namespace> namespaces = selector.getNamespace();
-		if (namespaces != null) {
+		// combine the found namespaces and any additional ones
+		List<Namespace> selectorNamespaces = selector.getNamespace();
+		if (selectorNamespaces == null) {
+			selectorNamespaces = new ArrayList<Namespace>();
+		}
+		selectorNamespaces.addAll(this.namespaces.values());
+
+		// do we have any to actually set now?
+		if (selectorNamespaces != null) {
 			SimpleNamespaceContext nsContext = new SimpleNamespaceContext();
-			Iterator<Namespace> nsIter = namespaces.iterator();
+			Iterator<Namespace> nsIter = selectorNamespaces.iterator();
 			while (nsIter.hasNext()) {
 				Namespace entry = nsIter.next();
 				String prefix = entry.getPrefix();
