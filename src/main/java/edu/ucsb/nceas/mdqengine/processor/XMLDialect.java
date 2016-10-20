@@ -333,21 +333,29 @@ public class XMLDialect {
 		String selectorPath = selector.getXpath();
 		XPath xpath = xPathfactory.newXPath();
 		
-		// combine the found namespaces and any additional ones
-		List<Namespace> selectorNamespaces = selector.getNamespace();
-		if (selectorNamespaces == null) {
-			selectorNamespaces = new ArrayList<Namespace>();
+		// combine the found namespaces and any additional ones asserted by selector. order matters here
+		List<Namespace> selectorNamespaces = new ArrayList<Namespace>();
+		
+		if (this.namespaces.values() != null) {
+			selectorNamespaces.addAll(this.namespaces.values());
 		}
-		selectorNamespaces.addAll(this.namespaces.values());
+		if (selector.getNamespace() != null) {
+			selectorNamespaces.addAll(selector.getNamespace());
+		}
 
 		// do we have any to actually set now?
-		if (selectorNamespaces != null) {
+		if (selectorNamespaces != null && selectorNamespaces.size() > 0) {
 			SimpleNamespaceContext nsContext = new SimpleNamespaceContext();
 			Iterator<Namespace> nsIter = selectorNamespaces.iterator();
 			while (nsIter.hasNext()) {
 				Namespace entry = nsIter.next();
 				String prefix = entry.getPrefix();
 				String uri = entry.getUri();
+				// make sure we are overriding the found namespace[s] with the asserted ones
+				String existing = nsContext.getNamespaceURI(prefix);
+				if (existing == null) {
+					nsContext.removeBinding(prefix);
+				}
 				nsContext.bindNamespaceUri(prefix, uri);
 			}
 			xpath.setNamespaceContext(nsContext);	
