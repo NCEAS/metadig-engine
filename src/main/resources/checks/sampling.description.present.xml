@@ -5,7 +5,7 @@
 	<id>check.sampling.description.present.1</id>
 	<name>Sampling description present</name>
 	<description>Checks if a sampling description is present in the methods section.</description>
-	<type>metadata</type>
+	<type>interpretation</type>
 	<level>OPTIONAL</level>
 	<environment>rscript</environment>
 	<code><![CDATA[

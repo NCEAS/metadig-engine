@@ -5,7 +5,7 @@
 	<id>check.sampling.study.extent.present.1</id>
 	<name>Sampling extent description present</name>
 	<description>Checks that a sampling study extent is present.</description>
-	<type>metadata</type>
+	<type>interpretation</type>
 	<level>OPTIONAL</level>
 	<environment>rscript</environment>
 	<code><![CDATA[

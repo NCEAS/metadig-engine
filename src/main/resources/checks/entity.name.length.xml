@@ -5,7 +5,7 @@
 	<id>check.entity.name.length.1</id>
 	<name>Entity name length</name>
 	<description>Length of entity name is less than 100 characters.</description>
-	<type>metadata</type>
+	<type>identification</type>
 	<level>INFO</level>
 	<environment>rscript</environment>
 	<code><![CDATA[

@@ -5,7 +5,7 @@
 	<id>check.taxonomic.coverage.1</id>
 	<name>Taxonomic coverage present</name>
 	<description>Check that a taxonomic coverage exists at the dataset level, or at least one entity's level, or one attribute's level.</description>
-	<type>metadata</type>
+	<type>discovery</type>
 	<level>INFO</level>
 	<environment>rscript</environment>
 	<code><![CDATA[
