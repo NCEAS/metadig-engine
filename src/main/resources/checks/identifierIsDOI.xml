@@ -11,20 +11,21 @@ library(stringr)
 
 if (length(identifier) == 0) {
   mdq_result <- list(status = "FAILURE",
-                     output = list(list(value = "Identifier was not found.")))
+                     output = list(list(value = "No identifier was found.")))
 } else if (length(identifier) > 1) {
   mdq_result <- list(status = "FAILURE",
                      output = list(list(value = "More that one identifier was found when a single one was expected.")))
 } else {
-  doi_pattern = "doi:10\\.\\d+\\.?\\d{0,}\\/.+"
-  is_doi = str_detect(identifier, doi_pattern)
+  doi_patterns = c("doi:10\\..+",
+                   "http:\\/\\/(dx.)?doi\\.org\\/10\\..+")
+  is_doi = any(str_detect(identifier, doi_patterns))
 
   if (is_doi) {
     mdq_result <- list(status = "SUCCESS",
-                       output = list(list(value = "Found one identifier and it looks like a DOI.")))
+                       output = list(list(value = "The identifier looks like a DOI.")))
   } else {
     mdq_result <- list(status = "FAILURE",
-                       output = list(list(value = paste0("The identifier '", identifier, "' does not look like a DOI. It was compared against the regular expression '", doi_pattern, "'."))))
+                       output = list(list(value = paste0("The identifier '", identifier, "' does not look like a DOI."))))
   }
 }
   ]]></code>
