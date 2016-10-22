@@ -6,10 +6,15 @@
   <type>identification</type>
   <level>REQUIRED</level>
   <environment>rscript</environment>
-  <code>
+<code><![CDATA[
     library(metadig)
-    check_presence(creator)
-  </code>
+
+    if (length(creator) <= 0) {
+      failure("No creator(s) were found.")
+    } else {
+      success("One or more creators were found.")
+    }
+  ]]></code>
   <selector>
     <name>creator</name>
     <xpath>/eml/dataset/creator</xpath>
@@ -18,5 +23,5 @@
     <name>eml</name>
     <xpath>boolean(/*[local-name() = 'eml'])</xpath>
   </dialect>
-  
+
 </mdq:check>
