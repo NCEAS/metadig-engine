@@ -17,7 +17,8 @@ if (length(identifier) == 0) {
                      output = list(list(value = "More that one identifier was found when a single one was expected.")))
 } else {
   doi_patterns = c("doi:10\\..+",
-                   "http:\\/\\/(dx.)?doi\\.org\\/10\\..+")
+                   "http(s)?:\\/\\/(dx.)?doi\\.org\\/(doi\\:)?10\\..+")
+
   is_doi = any(str_detect(identifier, doi_patterns))
 
   if (is_doi) {
