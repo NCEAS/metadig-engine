@@ -6,10 +6,15 @@
   <type>identification</type>
   <level>REQUIRED</level>
   <environment>rscript</environment>
-  <code>
+  <code><![CDATA[
     library(metadig)
-    check_presence(title)
-  </code>
+
+    if (length(title) <= 0) {
+      failure("No title(s) were found.")
+    } else {
+      success("One or more titles were found.")
+    }
+  ]]></code>
   <selector>
     <name>title</name>
     <xpath>/eml/dataset/title</xpath>
