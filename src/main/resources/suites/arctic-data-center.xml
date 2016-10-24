@@ -49,7 +49,19 @@
     <id>check.sampling.description.present.1</id>
   </check>
   <check>
+    <id>check.entity.name.present.1</id>
+  </check>
+  <check>
+    <id>check.attribute.definition.sufficient.1</id>
+  </check>
+  <check>
     <id>check.sampling.study.extent.present.1</id>
+  </check>
+  <check>
+    <id>check.entity.attributes.present.1</id>
+  </check>
+  <check>
+    <id>check.attribute.definitions.differ.1</id>
   </check>
   <check>
     <id>check.temporal.start.year.1</id>
