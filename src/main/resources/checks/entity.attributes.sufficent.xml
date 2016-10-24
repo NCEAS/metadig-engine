@@ -5,6 +5,7 @@
 	<id>check.attribute.definition.sufficient.1</id>
 	<name>Attribute definition is sufficient.</name>
 	<description>Check that each attribute definition is greater that 4 words.</description>
+	<type>interpretation</type>
 	<level>REQUIRED</level>
 	<environment>rscript</environment>
 	<code><![CDATA[

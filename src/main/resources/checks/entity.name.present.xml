@@ -5,6 +5,7 @@
 	<id>check.entity.name.present.1</id>
 	<name>Check that an entity name, description, format, size, checksum is present</name>
 	<description>Check that each data entity has a name, description, format, size, checksum.</description>
+	<type>interpretation</type>
 	<level>REQUIRED</level>
 	<environment>rscript</environment>
 	<code><![CDATA[
