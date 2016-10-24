@@ -400,9 +400,15 @@ public class XMLDialect {
 			}  
 		} catch (XPathExpressionException xpee) {
 			log.warn("Defaulting to single value selection: " + xpee.getCause().getMessage());
+			
 			// try just a single value
-			value = xpath.evaluate(selectorPath, contextNode);
-			value = retypeObject(value);
+			try {
+				value = xpath.evaluate(selectorPath, contextNode);
+				value = retypeObject(value);
+			} catch (XPathExpressionException xpee2) {
+				log.error("Could not select single value with given Xpath: " + xpee2.getCause().getMessage());
+				value = null;
+			}
 		}
 		
 		return value;
