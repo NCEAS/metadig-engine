@@ -19,6 +19,6 @@ mdq_result <- list(status = "FAILURE",
   <selector>
     <name>identifier</name>
     <xpath>/eml/@packageId |
-      /*/gmd:fileIdentifier/gco:CharacterString</xpath>
+      /*/fileIdentifier/CharacterString</xpath>
   </selector>
 </mdq:check>
