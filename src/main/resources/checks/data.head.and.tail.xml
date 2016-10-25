@@ -28,7 +28,18 @@ if (length(names) <= 0) {
 
     # Convert ecogrid URis to DataONE resolve URIs
     url <- gsub("ecogrid:/knb/", "https://cn.dataone.org/cn/v2/resolve/", urls[i])
-    path <- mdq_get(url)
+
+    path <- tryCatch({
+      mdq_get(url, FALSE)
+    },
+    error = function(e) {
+      e
+    })
+
+    if (inherits(path, "error")) {
+      save_output(paste0("Something went wrong when trying to download ", names[i]))
+      next
+    }
 
     x <- tryCatch({
       if (formats[i] == "text/csv") {
