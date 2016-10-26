@@ -9,7 +9,7 @@
   <code><![CDATA[
 library(metadig)
 
-if (any(na.omit(as.numeric(north_bound_coordinates)) > 45)) {
+if (any(na.omit(as.numeric(north_bound_coordinates)) >= 45)) {
   success("At least one geographic coverage element was in the Arctic.")
 } else {
   failure("No geographic coverage elements are in the Arctic.")
