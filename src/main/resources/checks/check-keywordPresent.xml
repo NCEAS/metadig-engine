@@ -6,15 +6,15 @@
 		portal allows searches on keywords. This check is a precursor for
 		checking on keywords from the controlled vocabulary.</description>
 	<type>discovery</type>
-	<level>OPTIONAL</level>
+	<level>REQUIRED</level>
 	<environment>python</environment>
 	<code><![CDATA[
 def call():
   global output
   global status
 
-  # Message is set when an error occurs.
-  output = "Keywords are not present"
+  # Assume success
+  output = "Keywords are present"
 
   if(len(keywords) > 0):
     status = "SUCCESS"
