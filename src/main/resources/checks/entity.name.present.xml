@@ -27,6 +27,7 @@ check <- function() {
   # Set quote style to simple quotes
   quoteStyle <- getOption("useFancyQuotes")
   options("useFanceyQuotes" = FALSE)
+  skip <- FALSE
   if (length(entityName) > 0) {
     for(iEntity in 1:length(entityName)) {
       # Assume that the check will succeed, until proven otherwise.
@@ -61,11 +62,17 @@ check <- function() {
         outputList[[length(outputList)+1]] <- list(value=sprintf("Entity '%s' is missing these elements: %s", thisEntityName, paste(sQuote(unlist(undefEl)), collapse=", ")))
       }
     }
+  } else {
+      # No data entities were selected by the xpath, so tell the user no check was performed and set status to SKIP
+      outputList[[length(outputList)+1]] <- list(value=sprintf("No data entities are available for checking."))
+      skip <- TRUE
   }
   
   options("useFancyQuotes" = quoteStyle)
+  # If nt output was set, then the check passed, otherwise have to check for SKIP or FAILURE
   if(length(outputList) > 0) {
-    return(list(status="FAILURE", values=outputList))
+    if(skip) status <- "SKIP" else status <- "FAILURE"
+    return(list(status=status, values=outputList))
   } else {
     return(list(status="SUCCESS", values=list(value=sprintf("All %d entities have a name, description, format, size and checksum", length(entityName)))))
   }
