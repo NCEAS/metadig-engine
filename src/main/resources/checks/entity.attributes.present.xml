@@ -18,6 +18,8 @@ check <- function() {
   # "entityAttributesPresent" - the names of each data entity
   
   outputList <- list()
+  quoteStyle <- getOption("useFancyQuotes")
+  options("useFanceyQuotes" = FALSE)
   # Assume that the check will succeed, until proven otherwise.
   # The dataset may have multiple entities, so check each one. All entities are checked
   # so mdqe can report to the user about all entities, not just the one that failed.
@@ -28,10 +30,10 @@ check <- function() {
       
       # Check entityName is defined for current entity
       if(isDefined("entityName", entityName, iEntity)) {
+        thisEntityName <- sprintf("%s", entityName[[iEntity]])
+      } else {
         undefEls[[length(undefEls)+1]] <- "name"
         thisEntityName <- sprintf("%d", iEntity)
-      } else {
-        thisEntityName <- sprintf("%s", entityName[[iEntity]])
       }
 
       if(isDefined("entityAttributesPresent", entityAttributesPresent, iEntity)) {
