@@ -16,7 +16,6 @@
       # "entityNames" - the entity names for the dataset entities (dataTables)
       maxEntityNameLength <- 100
       
-      message(sprintf("count: %s", entityCount))
       # Make sure entity count is typed correctly
       if(!is.null(entityCount)) {
         entityCount <- as.integer(entityCount)
