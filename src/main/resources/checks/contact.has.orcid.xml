@@ -15,7 +15,7 @@ check <- function() {
   # "emailPresent"   - the contact email
   # "addressPresent" - the contact address
   if(!contactPresent) {
-    return(list(status="FAILURE", output="A 'contact' element is not present, can not check for an ORCID, electronicMailAddress or address."))
+    return(list(status="FAILURE", output="A 'contact' element is not present, so unable to check for an ORCID, electronicMailAddress or address."))
   }
   
   # Assume that the check will succeed, until proven otherwise.
@@ -27,32 +27,32 @@ check <- function() {
   if(is.null(userId)) {
     # Should this be a SKIP?
     status <- "FAILURE"
-    values[[length(values)+1]] <- list(value="A 'contact/userId' element not present, can not check for an ORCID")
+    values[[length(values)+1]] <- list(value="A user identifier for any contact is not present, unable to check for an ORCID")
   } else {
     # contact/userId is present, so check if it is an orcid
     hasORCID <- grepl("^\\s*http(s)?://(dx\\.)?doi\\.org/(doi:)?10\\..+", userId, perl=T) || grepl("^\\s*doi:10\\..+", userId, perl=T)
     if(hasORCID) {
-      values[[length(values)+1]] <- list(value="A 'contact/userId' contains an ORCID")
+      values[[length(values)+1]] <- list(value="The user identifier for a contact contains an ORCID")
     } else {
       status <- "FAILURE"
-      values[[length(values)+1]] <- list(value="A 'contact/userId' does not contain an ORCID")
+      values[[length(values)+1]] <- list(value="The user identifier for any contact does not contain an ORCID")
     }
   }
   
   # There could be multiple contact, but just one contact with an 'email' will satisfy this check
   if(emailPresent) {
-    values[[length(values)+1]] <- list(value="A 'contact/electronicMailAddress' is present")
+    values[[length(values)+1]] <- list(value="An email address for a contact is present")
   } else {
     status <- "FAILURE"
-    values[[length(values)+1]] <- list(value="A 'contact/electronicMailAddress' element is not present")
+    values[[length(values)+1]] <- list(value="An email address for any contact is not present")
   } 
   
   # There could be multiple contact, but just one contact with an 'address' will satisfy this check
   if(addressPresent) {
-    values[[length(values)+1]] <- list(value="A 'contact/address' element is present")
+    values[[length(values)+1]] <- list(value="An address for a contact is present")
   } else {
     status <- "FAILURE"
-    values[[length(values)+1]] <- list(value="A 'contact/address' element is not present")
+    values[[length(values)+1]] <- list(value="An address for any contact is not present")
   }
   
   return(list(status=status, values=values))

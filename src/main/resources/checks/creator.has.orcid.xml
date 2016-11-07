@@ -15,7 +15,7 @@ check <- function() {
   # "emailPresent"   - the creator email
   # "addressPresent" - the creator address
   if(!creatorPresent) {
-    return(list(status="SKIP", output="The 'creator' element is not present, can not check for an ORCID, electronicMailAddress or address."))
+    return(list(status="SKIP", output="A creator entry is not present, unable to check for an ORCID, email or address."))
   }
   
   # Assume that the check will succeed, until proven otherwise.
@@ -27,32 +27,32 @@ check <- function() {
   if(is.null(userId)) {
     # Should this be a SKIP?
     status <- "FAILURE"
-    values[[length(values)+1]] <- list(value="A 'creator/userId' element not present, can not check for an ORCID")
+    values[[length(values)+1]] <- list(value="A user identifier for any creator is not present, so a check for an ORCID cannot be made")
   } else {
     # creator/userId is present, so check if it is an orcid
     hasORCID <- grepl("^\\s*http(s)?://(dx\\.)?doi\\.org/(doi:)?10\\..+", userId, perl=T) || grepl("^\\s*doi:10\\..+", userId, perl=T)
     if(hasORCID) {
-      values[[length(values)+1]] <- list(value="A 'creator/userId' contains an ORCID")
+      values[[length(values)+1]] <- list(value="The user identifier for a creator is an ORCID")
     } else {
       status <- "FAILURE"
-      values[[length(values)+1]] <- list(value="A 'creator/userId' does not contains an ORCID")
+      values[[length(values)+1]] <- list(value="The user identifier for any creator does not contains an ORCID")
     }
   }
   
   # There could be multiple creator, but just one creator with an 'email' will satisfy this check
   if(emailPresent) {
-    values[[length(values)+1]] <- list(value="A 'creator/electronicMailAddress' is present")
+    values[[length(values)+1]] <- list(value="An email address for a creator is present")
   } else {
     status <- "FAILURE"
-    values[[length(values)+1]] <- list(value="A 'creator/electronicMailAddress' element is not present")
+    values[[length(values)+1]] <- list(value="An email address for any creator is not present")
   } 
   
   # There could be multiple creator, but just one creator with an 'address' will satisfy this check
   if(addressPresent) {
-    values[[length(values)+1]] <- list(value="A 'creator/address' element is present")
+    values[[length(values)+1]] <- list(value="An address for a creator is present")
   } else {
     status <- "FAILURE"
-    values[[length(values)+1]] <- list(value="A 'creator/address' element is not present")
+    values[[length(values)+1]] <- list(value="An address for any creator is not present")
   }
   
   return(list(status=status, values=values))
