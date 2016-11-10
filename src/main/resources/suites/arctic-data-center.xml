@@ -4,9 +4,6 @@
   <name>Arctic Data Center Quality Suite</name>
   <description>This is a provisional Arctic Data Center Quality Suite. It is modeled after the submission guidelines used on the Arctic Data Center (arcticdata.io).</description>
   <check>
-    <id>check.title.1</id>
-  </check>
-  <check>
     <id>check.creator.present.1</id>
   </check>
   <check>
@@ -64,9 +61,6 @@
     <id>check.attribute.definitions.differ.1</id>
   </check>
   <check>
-    <id>check.temporal.start.year.1</id>
-  </check>
-  <check>
     <id>check.methods.present.1</id>
   </check>
   <check>
@@ -84,88 +78,10 @@
   <check>
     <id>pair.plot.1</id>
   </check>
-  <check>
-    <id>check.nsf.award.numbers.present.1</id>
-    <name>NSF award numbers</name>
-    <description>One or more NSF award numbers must be entered.</description>
-    <type>identification</type>
-    <level>REQUIRED</level>
-    <environment>rscript</environment>
-    <code><![CDATA[if (is.null(awards)) {
-  status <- "FAILURE"
-  output <- "No award numbers were found."
-  mdq_result <- list(status = status,
-                     output = list(list(value = output)))
-} else if (length(title) < 1) {
-  status <- "FAILURE"
-  output <- paste0(length(title), " award number(s) found when at least one was expected.")
-  mdq_result <- list(status = status,
-                     output = list(list(value = output)))
-} else if (any(nchar(awards) <= 0)) {
-  status <- "FAILURE"
-  output <- paste0("The following award numbers were of zero length: ", which(nchar(awards) <= 0, "."))
-  mdq_result <- list(status = status,
-                     output = list(list(value = output)))
-} else {
-  status <- "SUCCESS"
-  output <- paste0("A total of ", length(awards), " valid NSF award number(s) was/were found.")
-  mdq_result <- list(status = status,
-                     output = list(list(value = output)))
-}]]></code>
-    <selector>
-      <name>awards</name>
-      <xpath>/eml/dataset/project/funding/para</xpath>
-    </selector>
-  </check>
-  <check>
-    <id>check.nsf.award.numbers.in.nsf.database.1</id>
-    <name>NSF awards in database</name>
-    <description>All entered NSF award numbers should be present in the NSF award database.</description>
-    <type>identification</type>
-    <level>REQUIRED</level>
-    <environment>rscript</environment>
-    <code><![CDATA[
-library(httr)
-
-if (is.null(awards)) {
-  mdq_result <- list(status = "SKIP",
-                     output = list(list(value = "No NSF award numbers were found in the metadata document so this check was skipped.")))
-
-} else {
-  # Clean up each award string so we can pass it to the HTTP API
-  awards <- trimws(gsub("nsf award", "", tolower(awards)))
-
-  # Search for each award
-  responses <- lapply(awards, function(award) {
-    tryCatch({
-      req <- GET(paste0("https://arcticdata.io/api.nsf.gov/services/v1/awards.json?id=", award))
-      stopifnot(req$status_code == 200) # Throw an error if the HTTP status isn't 200
-      content(req)
-    },
-    error = function(e) {
-      list()
-    })
-  })
-
-  # Determine if each award was found
-  is_found <- sapply(responses, function(r) ifelse(!is.null(r$response$award) && length(r$response$award) == 1, TRUE, FALSE))
-
-
-  if (all(is_found)) {
-    mdq_result <- list(status = "SUCCESS",
-                       output = list(list(value = "All award numbers were found in the NSF award database.")))
-  } else {
-
-    outputs <- paste0("The award number '", awards[!is_found], "' was not found in the NSF award database.")
-    mdq_result <- list(status = "FAILURE",
-                       output = lapply(outputs, function(message) { list(value = message)}))
-  }
-}
-
-]]></code>
-    <selector>
-      <name>awards</name>
-      <xpath>/eml/dataset/project/funding/para</xpath>
-    </selector>
-  </check>
+<check>
+    <id>check.nsf.award.numbers.present.1</id> 
+ </check>
+<check>
+  <id>>check.nsf.award.numbers.in.nsf.database.1</id>
+</check>
 </mdq:suite>
