@@ -9,8 +9,10 @@
   <code><![CDATA[
 library(stringr)
 
-phrases <- c("This work is licensed under the Creative Commons Attribution 4.0 International License.\nTo view a copy of this license, visit http://creativecommons.org/licenses/by/4.0/.",
-             "This work is dedicated to the public domain under the Creative Commons Universal 1.0 Public Domain Dedication.\nTo view a copy of this dedication, visit https://creativecommons.org/publicdomain/zero/1.0/.")
+# CC-BY: This work is licensed under the Creative Commons Attribution 4.0 International License.\nTo view a copy of this license, visit http://creativecommons.org/licenses/by/4.0/."
+# CC-0:"This work is dedicated to the public domain under the Creative Commons Universal 1.0 Public Domain Dedication.\nTo view a copy of this dedication, visit https://creativecommons.org/publicdomain/zero/1.0/."
+
+phrases <- c("http://creativecommons.org/licenses/by/4.0", "https://creativecommons.org/publicdomain/zero/1.0")
 
 if (length(rights) == 0) {
   status <- "FAILURE"
@@ -19,9 +21,12 @@ if (length(rights) == 0) {
   status <- "FAILURE"
   message <- "More than one license was found which was an unexpected state."
 } else {
-  if (any(str_detect(rights[[1]], phrases))) {
+  if (str_detect(rights[[1]], phrases[[1]])) {
     status <- "SUCCESS"
-    message <- "The document is explicitly licensed with a Creative Commons CC-0 or CC-BY license."
+    message <- "The document is explicitly licensed with a Creative Commons CC-BY license."
+  } else if (str_detect(rights[[1]], phrases[[2]])) {
+    status <- "SUCCESS"
+    message <- "The document is explicitly licensed with a Creative Commons CC-0 license."
   } else {
     status <- "FAILURE"
     message <- "The document is not explicitly licensed with a Creative Commons CC-0 or CC-BY license."
