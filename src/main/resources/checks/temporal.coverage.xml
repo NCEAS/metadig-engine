@@ -6,13 +6,32 @@
   <type>discovery</type>
   <level>REQUIRED</level>
   <environment>rscript</environment>
-  <code>
-    library(metadig)
-    check_presence(temporal)
-  </code>
+  <code><![CDATA[
+  check <- function() {
+    if(!coveragePresent) {
+      return(list(status = "FAILURE", output = sprintf("A dataset temporal coverage is not present, so unable to check for coverage starting date.")))
+    }
+    
+    if(!beginDatePresent) {
+      return(list(status = "FAILURE", output = sprintf("A dataset temporal coverage starting date is not present.")))
+    } else {
+      return(list(status = "SUCCESS", output = sprintf("A dataset temporal coverage starting date is present.")))
+    }
+  }
+  result <- check()
+  mdq_result <- list(status=result$status, output=list(list(value=result$output)))
+  ]]></code>
   <selector>
-    <name>temporal</name>
+    <name>coveragePresent</name>
+    <xpath>boolean(/eml/dataset/coverage/temporalCoverage)</xpath>
+  </selector>
+  <selector>
+    <name>coverage</name>
     <xpath>/eml/dataset/coverage/temporalCoverage</xpath>
+  </selector>
+  <selector>
+    <name>beginDatePresent</name>
+    <xpath>boolean(/eml/dataset/coverage/temporalCoverage/rangeOfDates/beginDate/calendarDate | /eml/dataset/coverage/temporalCoverage/singleDateTime/calendarDate)</xpath>
   </selector>
   <dialect>
     <name>eml</name>
