@@ -3,8 +3,8 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="https://nceas.ucsb.edu/mdqe ../schemas/schema1.xsd">
 	<id>check.entity.attributes.present.1</id>
-	<name>Check that an each entity has attributes.</name>
-	<description>Check that each data entity attributes.</description>
+	<name>Check that an each entity has a name and attributes.</name>
+	<description>Check that each data entity has attributes.</description>
 	<type>interpretation</type>
 	<level>REQUIRED</level>
 	<environment>rscript</environment>
@@ -13,52 +13,40 @@
 check <- function() {
   library(base)
   library(metadig)
-  # varialbe defined by MQE from the <xpath> selectors.
+  # variables defined by MQE from the <xpath> selectors.
   # "entityName" - the names of each data entity
+  # "entityType" - the type of data entity, e.g. "dataTable", "spatialVector", etc.
   # "entityAttributesPresent" - the names of each data entity
   
-  skip <- FALSE
   outputList <- list()
-  quoteStyle <- getOption("useFancyQuotes")
-  options("useFanceyQuotes" = FALSE)
   # Assume that the check will succeed, until proven otherwise.
-  # The dataset may have multiple entities, so check each one. All entities are checked
-  # so mdqe can report to the user about all entities, not just the one that failed.
+  # The dataset may have multiple entities, so check each one. 
+  status <- "SUCCESS"
   if (length(entityName) > 0) {
     for(iEntity in 1:length(entityName)) {
-      # Assume that the check will succeed, until proven otherwise.
-      undefEls <- list()
-      
+      thisEntityType <- entityType[[iEntity]]
       # Check entityName is defined for current entity
       if(isDefined("entityName", entityName, iEntity)) {
         thisEntityName <- sprintf("%s", entityName[[iEntity]])
       } else {
-        undefEls[[length(undefEls)+1]] <- "name"
         thisEntityName <- sprintf("%d", iEntity)
       }
 
-      if(isDefined("entityAttributesPresent", entityAttributesPresent, iEntity)) {
-        undefEls[[length(undefEls)+1]] <- "attributes"
-      }
-
-      # Store output for this entity if it didn't pass a check. We will only report on entities that don't have
-      # all the elements we are checking for.
-      if(length(undefEls) > 0) {
-        outputList[[length(outputList)+1]] <- list(value=sprintf("Entity %s is missing %s", thisEntityName, paste(sQuote(unlist(undefEls)), collapse=", ")))
+      if(!entityAttributesPresent[[iEntity]]) {
+        outputList[[length(outputList)+1]] <- list(value=sprintf("The %s '%s' does not have attributes defined.", thisEntityType, thisEntityName))
       }
     }
   } else {
       # No data entities were selected by the xpath, so tell the user no check was performed.
-      outputList[[length(outputList)+1]] <- list(value=sprintf("No data entities are available for checking."))
-      skip <- TRUE
+      outputList[[length(outputList)+1]] <- list(value=sprintf("No data entities are present, so uanble to check for attributes."))
+      return(list(status="SKIP", values=outputList))
   }
   
   # If no output was set, then the check passed, otherwise have to check for SKIP or FAILURE
   if(length(outputList) > 0) {
-    if(skip) status <- "SKIP" else status <- "FAILURE"
-    return(list(status=status, values=outputList))
+    return(list(status="FAILURE", values=outputList))
   } else {
-    return(list(status="SUCCESS", values=list(value=sprintf("All %d entities that require attributes have them.", length(entityName)))))
+    return(list(status="SUCCESS", values=list(list(value=sprintf("All %s data entities have attributes defined.", length(entityName))))))
   }
 }
 
@@ -71,15 +59,19 @@ mdq_result <- list(status=result$status, output=result$values)
 		and therefor no 'blank' values. -->
 	<selector>
 		<name>entityName</name>
-		<xpath>/*[local-name()='eml']/dataset/*[self::dataTable|self::spatialRaster|self::spatialVector|self::storedProcedure|self::view|self::otherEntity]</xpath>
+		<xpath>/eml/dataset/*[self::dataTable|self::spatialRaster|self::spatialVector|self::storedProcedure|self::view|self::otherEntity]</xpath>
 		<subSelector>
 			<name>entityNameSubSelector</name>
 			<xpath>./entityName</xpath>
 		</subSelector>
 	</selector>
 	<selector>
+		<name>entityType</name>
+		<xpath>name(/eml/dataset/*[self::dataTable|self::spatialRaster|self::spatialVector|self::storedProcedure|self::view|self::otherEntity])</xpath>
+	</selector>
+	<selector>
 		<name>entityAttributesPresent</name>
-		<xpath>/*[local-name() = 'eml']/dataset/*[self::dataTable|self::spatialRaster|self::spatialVector|self::storedProcedure|self::view|self::otherEntity]</xpath>
+		<xpath>/eml/dataset/*[self::dataTable|self::spatialRaster|self::spatialVector|self::storedProcedure|self::view|self::otherEntity]</xpath>
 		<subSelector>
 			<name>entityAttributesSubSelector</name>
 			<xpath>boolean(./attributeList/attribute)</xpath>
