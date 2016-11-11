@@ -59,12 +59,12 @@ check <- function() {
       # Store output for this entity if it didn't pass a check. We will only report on entities that don't have
       # all the elements we are checking for.
       if(length(undefEl) > 0) {
-        outputList[[length(outputList)+1]] <- list(value=sprintf("Entity '%s' is missing these elements: %s", thisEntityName, paste(sQuote(unlist(undefEl)), collapse=", ")))
+        outputList[[length(outputList)+1]] <- list(value=sprintf("Entity '%s' is missing these items: %s", thisEntityName, paste(sQuote(unlist(undefEl)), collapse=", ")))
       }
     }
   } else {
       # No data entities were selected by the xpath, so tell the user no check was performed and set status to SKIP
-      outputList[[length(outputList)+1]] <- list(value=sprintf("No data entities are available for checking."))
+      outputList[[length(outputList)+1]] <- list(value=sprintf("No data entities are present, so unable to check entity 'name', 'format', etc"))
       skip <- TRUE
   }
   
@@ -74,7 +74,7 @@ check <- function() {
     if(skip) status <- "SKIP" else status <- "FAILURE"
     return(list(status=status, values=outputList))
   } else {
-    return(list(status="SUCCESS", values=list(value=sprintf("All %d entities have a name, description, format, size and checksum", length(entityName)))))
+    return(list(status="SUCCESS", values=list(value=sprintf("All %d data entities have a name, description, format, size and checksum", length(entityName)))))
   }
 }
 
@@ -87,7 +87,7 @@ mdq_result <- list(status=result$status, output=result$values)
 		and therefor no 'blank' values. -->
 	<selector>
 		<name>entityName</name>
-		<xpath>/*[local-name() = 'eml']/dataset/*[self::dataTable|self::spatialRaster|self::spatialVector|self::storedProcedure|self::view|self::otherEntity]</xpath>
+		<xpath>/eml/dataset/*[self::dataTable|self::spatialRaster|self::spatialVector|self::storedProcedure|self::view|self::otherEntity]</xpath>
 		<subSelector>
 			<name>entityNameSubSelector</name>
 			<xpath>./entityName</xpath>
@@ -95,7 +95,7 @@ mdq_result <- list(status=result$status, output=result$values)
 	</selector>
 	<selector>
 		<name>entityDescriptionPresent</name>
-		<xpath>/*[local-name() = 'eml']/dataset/*[self::dataTable|self::spatialRaster|self::spatialVector|self::storedProcedure|self::view|self::otherEntity]</xpath>
+		<xpath>/eml/dataset/*[self::dataTable|self::spatialRaster|self::spatialVector|self::storedProcedure|self::view|self::otherEntity]</xpath>
 		<subSelector>
 			<name>entityDescriptionSubSelector</name>
 			<xpath>boolean(./entityDescription)</xpath>
@@ -103,7 +103,7 @@ mdq_result <- list(status=result$status, output=result$values)
 	</selector>
 	<selector>
 		<name>entitySizePresent</name>
-		<xpath>/*[local-name() = 'eml']/dataset/*[self::dataTable|self::spatialRaster|self::spatialVector|self::storedProcedure|self::view|self::otherEntity]</xpath>
+		<xpath>/eml/dataset/*[self::dataTable|self::spatialRaster|self::spatialVector|self::storedProcedure|self::view|self::otherEntity]</xpath>
 		<subSelector>
 			<name>entitySizeSubSelector</name>
 			<xpath>boolean(./physical/size)</xpath>
@@ -111,7 +111,7 @@ mdq_result <- list(status=result$status, output=result$values)
 	</selector>
 	<selector>
 		<name>entityFormatPresent</name>
-		<xpath>/*[local-name() = 'eml']/dataset/*[self::dataTable|self::spatialRaster|self::spatialVector|self::storedProcedure|self::view|self::otherEntity]</xpath>
+		<xpath>/eml/dataset/*[self::dataTable|self::spatialRaster|self::spatialVector|self::storedProcedure|self::view|self::otherEntity]</xpath>
 		<subSelector>
 			<name>entityFormatPresentSubSelector</name>
 			<xpath>boolean(./physical/dataFormat)</xpath>
@@ -119,7 +119,7 @@ mdq_result <- list(status=result$status, output=result$values)
 	</selector>
 	<selector>
 		<name>entityChecksumPresent</name>
-		<xpath>/*[local-name() = 'eml']/dataset/*[self::dataTable|self::spatialRaster|self::spatialVector|self::storedProcedure|self::view|self::otherEntity]</xpath>
+		<xpath>/eml/dataset/*[self::dataTable|self::spatialRaster|self::spatialVector|self::storedProcedure|self::view|self::otherEntity]</xpath>
 		<subSelector>
 			<name>entityChecksumPresentSubSelector</name>
 			<xpath>boolean(./physical/authentication)</xpath>
