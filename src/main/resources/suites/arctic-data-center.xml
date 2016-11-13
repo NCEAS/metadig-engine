@@ -7,13 +7,13 @@
     <id>check.creator.present.1</id>
   </check>
   <check>
-    <id>check.creator.has.orcid.1</id>
+    <id>check.creator.info.1</id>
   </check>
   <check>
     <id>check.contact.1</id>
   </check>
   <check>
-    <id>check.contact.has.orcid.1</id>
+    <id>check.contact.info.1</id>
   </check>
   <check>
     <id>check.abstract.100.words.1</id>
