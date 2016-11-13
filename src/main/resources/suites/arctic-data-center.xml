@@ -46,6 +46,9 @@
     <id>check.sampling.description.present.1</id>
   </check>
   <check>
+    <id>check.entity.present.1</id>
+  </check>
+  <check>
     <id>check.entity.name.present.1</id>
   </check>
   <check>
