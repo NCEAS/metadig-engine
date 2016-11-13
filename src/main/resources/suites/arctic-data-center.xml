@@ -4,6 +4,12 @@
   <name>Arctic Data Center Quality Suite</name>
   <description>This is a provisional Arctic Data Center Quality Suite. It is modeled after the submission guidelines used on the Arctic Data Center (arcticdata.io).</description>
   <check>
+      <id>check.nsf.award.numbers.present.1</id> 
+   </check>
+  <check>
+    <id>>check.nsf.award.numbers.in.nsf.database.1</id>
+  </check>
+  <check>
     <id>check.creator.present.1</id>
   </check>
   <check>
@@ -81,10 +87,4 @@
   <check>
     <id>pair.plot.1</id>
   </check>
-<check>
-    <id>check.nsf.award.numbers.present.1</id> 
- </check>
-<check>
-  <id>>check.nsf.award.numbers.in.nsf.database.1</id>
-</check>
 </mdq:suite>
