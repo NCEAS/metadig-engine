@@ -6,28 +6,47 @@
 	<name>Methods present</name>
 	<description>All datasets should contain a methods element, at a minimum a link to a separate methods doc.</description>
 	<type>interpretation</type>
-	<level>OPTIONAL</level>
+	<level>INFO</level>
 	<environment>rscript</environment>
 	<code><![CDATA[
 check <- function() {
-    # Check that a <methods> element is present for the dataset.
-    if(methodsPresent) {
-        status <- "SUCCESS"
-        output <- "A methods element is present"
-    } else {
-        status <- "FAILURE"
-        output <- "A methods element is not present"
+    # Recommended minimum word count
+    minWordCount <- 7
+    # Recommended max word count
+    maxWordCount <- 20
+
+    # Check that a <methods> section is present for the dataset.
+    if(!methodsPresent) {
+      status <- "FAILURE"
+      output <- "A methods section is not present, so unable to check methods description."
+      return(list(status = status, output = output))
     }
-    mdq_result <- list(status=status, output=list(list(value=output)))
-    return (mdq_result)
+    #list(status=status, output=list(list(value=output)))
+    
+    # Now check that the methodStep descriptions are greater that 7 words
+    if(length(methodsDescription) > 0) {
+    wordCount <- length(unlist(strsplit(methodDescription, "\\s+", perl=T)))
+
+    } 
+    
+    
+    
+    return(list(status = status, output = output))
+
 }
 
-mdq_result <- check()
+  result <- check()
+  mdq_result <- list(status=result$status, output=list(list(value=result$output)))
       ]]></code>
 	<selector>
 		<name>methodsPresent</name>
-		<xpath>boolean(/*[local-name() = 'eml']/dataset/methods)</xpath>
+		<xpath>boolean(/eml/dataset/methods)</xpath>
 	</selector>
+	<selector>
+		<name>methodsDescription</name>
+		<xpath>/eml/dataset/methods/methodStep/description/para/text())</xpath>
+	</selector>
+
 	<dialect>
 		<name>eml</name>
 		<xpath>boolean(/*[local-name() = 'eml'])</xpath>
