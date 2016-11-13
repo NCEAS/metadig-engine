@@ -26,7 +26,7 @@ if (length(identifier) == 0) {
                        output = list(list(value = "The identifier looks like a DOI.")))
   } else {
     mdq_result <- list(status = "FAILURE",
-                       output = list(list(value = paste0("The identifier '", identifier, "' does not look like a DOI."))))
+                       output = list(list(value = paste0("The identifier '", identifier, "' does not look like a DOI. Note that a DOI will be assigned to this dataset when it has been reviewed and approved."))))
   }
 }
   ]]></code>
