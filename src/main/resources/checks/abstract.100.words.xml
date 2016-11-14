@@ -9,10 +9,10 @@
   <code><![CDATA[
     if (length(abstract) == 0) {
       status <- "FAILURE"
-      message <- "No abstract elements were found."
+      message <- "No abstract sections were found."
     } else if (length(abstract) > 1) {
       status <- "FAILURE"
-      message <- "More than one abstract element was found when one was expected."
+      message <- "More than one abstract section was found when one was expected."
     } else {
       library(stringr)
       tokens <- str_split(abstract, " ")[[1]]

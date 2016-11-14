@@ -2,7 +2,7 @@
 <mdq:check xmlns:mdq="https://nceas.ucsb.edu/mdqe" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="https://nceas.ucsb.edu/mdqe ../schemas/schema1.xsd">
   <id>coverage.in.arctic.1</id>
   <name>Coverage includes that Arctic</name>
-  <description>Checks to see if at least one geographic coverage element intersects with the Arctic, which is defined as the area north of 45° N latitude.</description>
+  <description>Checks to see if at least one geographic coverage intersects with the Arctic, which is defined as the area north of 45° N latitude.</description>
   <type>interpretation</type>
   <level>INFO</level>
   <environment>rscript</environment>
@@ -10,9 +10,9 @@
 library(metadig)
 
 if (any(na.omit(as.numeric(north_bound_coordinates)) >= 45)) {
-  success("At least one geographic coverage element was in the Arctic.")
+  success("At least one geographic coverage is in the Arctic.")
 } else {
-  failure("No geographic coverage elements are in the Arctic.")
+  failure("No geographic coverage is in the Arctic.")
 }
   ]]></code>
   <selector>

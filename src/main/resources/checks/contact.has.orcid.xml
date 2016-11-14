@@ -10,12 +10,12 @@
 check <- function() {
   library(base)
   # These variables are defined by the MQE from the <xpath> selectors.
-  # "contactPresent" - is the dataset contact element present
+  # "contactPresent" - is the dataset contact present
   # "userId"         - the dataset contact/userId
   # "emailPresent"   - the contact email
   # "addressPresent" - the contact address
   if(!contactPresent) {
-    return(list(status="FAILURE", output="A 'contact' element is not present, so unable to check for an ORCID, electronicMailAddress or address."))
+    return(list(status="FAILURE", output="A 'contact' is not present, so unable to check for an ORCID, electronicMailAddress or address."))
   }
   
   # Assume that the check will succeed, until proven otherwise.

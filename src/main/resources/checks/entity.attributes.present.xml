@@ -54,7 +54,7 @@ result <- check()
 mdq_result <- list(status=result$status, output=result$values) 
 ]]></code>
 
-	<!-- Don't need a subSelector for entityName, as this element is required, 
+	<!-- Don't need a subSelector for entityName, as this is required, 
 		so their won't be entities that are selected that don't have this value, 
 		and therefor no 'blank' values. -->
 	<selector>

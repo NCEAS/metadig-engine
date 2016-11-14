@@ -4,7 +4,7 @@
 	xsi:schemaLocation="https://nceas.ucsb.edu/mdqe ../schemas/schema1.xsd">
 	<id>check.methods.present.1</id>
 	<name>Methods present</name>
-	<description>All datasets should contain a methods element, at a minimum a link to a separate methods doc.</description>
+	<description>All datasets should contain a methods section, or a link to a separate methods doc.</description>
 	<type>interpretation</type>
 	<level>OPTIONAL</level>
 	<environment>rscript</environment>

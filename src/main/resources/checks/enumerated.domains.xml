@@ -16,14 +16,14 @@ for (i in idxs) {
   # Check the <code> element
   for (code in codes[i]) {
     if (is.null(code) || nchar(code) <= 0) {
-      failure(paste0("A code for the attribute ", names[i], " (id: ", id[i], ") was undefined. This is either because the <code> element was missing or did not contain any content."))
+      failure(paste0("A code for the attribute ", names[i], " (id: ", id[i], ") was undefined. This is either because the <code> was missing or did not contain any content."))
     }
   }
 
   # Check the <definition> element
   for (definition in definitions[i]) {
     if (is.null(definition) || nchar(definition) <= 0) {
-      failure(paste0("A definition for the attribute ", names[i], " (id: ", ids[i], ") was undefined. This is either because the <definition> element was missing or did not contain any content."))
+      failure(paste0("A definition for the attribute ", names[i], " (id: ", ids[i], ") was undefined. This is either because the <definition> was missing or did not contain any content."))
     }
   }
 }

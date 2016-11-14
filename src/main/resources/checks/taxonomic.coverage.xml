@@ -38,7 +38,7 @@
 		<name>datasetTaxonomicCoverage</name>
 		<xpath>boolean(/*[local-name() = 'eml']/dataset/coverage/taxonomicCoverage)</xpath>
 	</selector>
-	<!-- Taxonomic coverage at the entity level. Use the required element 'entityName' 
+	<!-- Taxonomic coverage at the entity level. Use the required 'entityName' 
 		to ensure that entities are being selected. -->
 	<selector>
 		<name>entityTaxonomicCoverage</name>
