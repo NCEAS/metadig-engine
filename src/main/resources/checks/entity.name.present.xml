@@ -25,14 +25,12 @@ check <- function() {
   # The dataset may have multiple entities, so check each one. All entities are checked
   # so mdqe can report to the user about all entities, not just the one that failed.
   # Set quote style to simple quotes
-  quoteStyle <- getOption("useFancyQuotes")
-  options("useFanceyQuotes" = FALSE)
   skip <- FALSE
   if (length(entityName) > 0) {
     for(iEntity in 1:length(entityName)) {
       # Assume that the check will succeed, until proven otherwise.
       undefEl <- list()
-      thisEntityType <- entityType[[1]]
+      thisEntityType <- entityType[[iEntity]]
       
       if(!isDefined("entityName", entityName, iEntity)) {
         undefEl[[length(undefEl)+1]] <- "name"
@@ -69,7 +67,6 @@ check <- function() {
       skip <- TRUE
   }
   
-  options("useFancyQuotes" = quoteStyle)
   # If nt output was set, then the check passed, otherwise have to check for SKIP or FAILURE
   if(length(outputList) > 0) {
     if(skip) status <- "SKIP" else status <- "FAILURE"
@@ -88,15 +85,15 @@ mdq_result <- list(status=result$status, output=result$values)
 		and therefor no 'blank' values. -->
 	<selector>
 		<name>entityName</name>
-		<xpath>/eml/dataset/*[self::dataTable|self::spatialRaster|self::spatialVector|self::storedProcedure|self::view|self::otherEntity]</xpath>
-		<subSelector>
-			<name>entityNameSubSelector</name>
-			<xpath>./entityName</xpath>
-		</subSelector>
+		<xpath>/eml/dataset/*[self::dataTable|self::spatialRaster|self::spatialVector|self::storedProcedure|self::view|self::otherEntity]/entityName</xpath>
 	</selector>
 	<selector>
 		<name>entityType</name>
-		<xpath>name(/eml/dataset/*[self::dataTable|self::spatialRaster|self::spatialVector|self::storedProcedure|self::view|self::otherEntity])</xpath>
+		<xpath>/eml/dataset/*[self::dataTable|self::spatialRaster|self::spatialVector|self::storedProcedure|self::view|self::otherEntity]</xpath>
+		<subSelector>
+		<name>et</name>
+		<xpath>name(.)</xpath>
+		</subSelector>
 	</selector>
 	<selector>
 		<name>entityDescriptionPresent</name>
