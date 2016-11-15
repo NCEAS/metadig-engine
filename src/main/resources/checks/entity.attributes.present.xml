@@ -19,6 +19,7 @@ check <- function() {
   # "entityAttributesPresent" - the names of each data entity
   
   outputList <- list()
+  
   if(!entityPresent) {
     return(list(status="SKIP", values=list(list(value="No dataTables (and related attributes) are present."))))
   }
@@ -33,13 +34,7 @@ check <- function() {
   status <- "SUCCESS"
   if (length(entityName) > 0) {
     for(iEntity in 1:length(entityName)) {
-      # Check entityName is defined for current entity
-      if(isDefined("entityName", entityName, iEntity)) {
-        thisEntityName <- sprintf("%s", entityName[[iEntity]])
-      } else {
-        thisEntityName <- sprintf("%d", iEntity)
-      }
-
+      thisEntityName <- entityName[[iEntity]]
       thisEntityType <- entityType[[iEntity]]
 
       if(!entityAttributesPresent[[iEntity]]) {
@@ -69,27 +64,32 @@ mdq_result <- list(status=result$status, output=result$values)
 		and therefor no 'blank' values. -->
 	<selector>
 		<name>attributesPresent</name>
-		<xpath>boolean(/eml/dataset/*[self::dataTable|self::spatialRaster|self::spatialVector|self::storedProcedure|self::view|self::otherEntity]/attributeList/attribute)</xpath>
+		<!-- <xpath>boolean(/eml/dataset/*[self::dataTable|self::spatialRaster|self::spatialVector|self::storedProcedure|self::view|self::otherEntity]/attributeList/attribute)</xpath> -->
+		<xpath>boolean(/eml/dataset/dataTable/attributeList/attribute)</xpath>
 	</selector>
 	<selector>
 		<name>entityPresent</name>
-		<xpath>boolean(/eml/dataset/*[self::dataTable|self::spatialRaster|self::spatialVector|self::storedProcedure|self::view|self::otherEntity])</xpath>
+		<!-- <xpath>boolean(/eml/dataset/*[self::dataTable|self::spatialRaster|self::spatialVector|self::storedProcedure|self::view|self::otherEntity])</xpath> -->
+		<xpath>boolean(/eml/dataset/dataTable)</xpath>
 	</selector>
 	<selector>
 		<name>entityName</name>
-		<xpath>/eml/dataset/*[self::dataTable|self::spatialRaster|self::spatialVector|self::storedProcedure|self::view|self::otherEntity]</xpath>
-		<subSelector>
-			<name>entityNameSubSelector</name>
-			<xpath>./entityName</xpath>
-		</subSelector>
+		<!-- <xpath>/eml/dataset/*[self::dataTable|self::spatialRaster|self::spatialVector|self::storedProcedure|self::view|self::otherEntity]/entityName</xpath> -->
+		<xpath>/eml/dataset/dataTable/entityName</xpath>
 	</selector>
 	<selector>
 		<name>entityType</name>
-		<xpath>name(/eml/dataset/*[self::dataTable|self::spatialRaster|self::spatialVector|self::storedProcedure|self::view|self::otherEntity])</xpath>
+		<!-- <xpath>/eml/dataset/*[self::dataTable|self::spatialRaster|self::spatialVector|self::storedProcedure|self::view|self::otherEntity]</xpath> -->
+		<xpath>/eml/dataset/dataTable</xpath>
+		<subSelector>
+			<name>et</name>
+			<xpath>name(.)</xpath>
+		</subSelector>
 	</selector>
 	<selector>
 		<name>entityAttributesPresent</name>
-		<xpath>/eml/dataset/*[self::dataTable|self::spatialRaster|self::spatialVector|self::storedProcedure|self::view|self::otherEntity]</xpath>
+		<!-- <xpath>/eml/dataset/*[self::dataTable|self::spatialRaster|self::spatialVector|self::storedProcedure|self::view|self::otherEntity]</xpath> -->
+		<xpath>/eml/dataset/dataTable</xpath>
 		<subSelector>
 			<name>entityAttributesSubSelector</name>
 			<xpath>boolean(./attributeList/attribute)</xpath>
