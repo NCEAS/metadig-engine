@@ -24,13 +24,14 @@ check <- function() {
   status <- "SUCCESS"
   if (length(entityName) > 0) {
     for(iEntity in 1:length(entityName)) {
-      thisEntityType <- entityType[[iEntity]]
       # Check entityName is defined for current entity
       if(isDefined("entityName", entityName, iEntity)) {
         thisEntityName <- sprintf("%s", entityName[[iEntity]])
       } else {
         thisEntityName <- sprintf("%d", iEntity)
       }
+
+      thisEntityType <- entityType[[iEntity]]
 
       if(!entityAttributesPresent[[iEntity]]) {
         outputList[[length(outputList)+1]] <- list(value=sprintf("The %s '%s' does not have attributes defined.", thisEntityType, thisEntityName))
@@ -57,6 +58,14 @@ mdq_result <- list(status=result$status, output=result$values)
 	<!-- Don't need a subSelector for entityName, as this is required, 
 		so their won't be entities that are selected that don't have this value, 
 		and therefor no 'blank' values. -->
+	<selector>
+		<name>attributesPresent</name>
+		<xpath>boolean(/eml/dataset/*[self::dataTable|self::spatialRaster|self::spatialVector|self::storedProcedure|self::view|self::otherEntity]/attributeList/attribute)</xpath>
+	</selector>
+	<selector>
+		<name>entityPresent</name>
+		<xpath>boolean(/eml/dataset/*[self::dataTable|self::spatialRaster|self::spatialVector|self::storedProcedure|self::view|self::otherEntity])</xpath>
+	</selector>
 	<selector>
 		<name>entityName</name>
 		<xpath>/eml/dataset/*[self::dataTable|self::spatialRaster|self::spatialVector|self::storedProcedure|self::view|self::otherEntity]</xpath>

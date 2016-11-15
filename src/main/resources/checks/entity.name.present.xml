@@ -32,6 +32,7 @@ check <- function() {
     for(iEntity in 1:length(entityName)) {
       # Assume that the check will succeed, until proven otherwise.
       undefEl <- list()
+      thisEntityType <- entityType[[1]]
       
       if(!isDefined("entityName", entityName, iEntity)) {
         undefEl[[length(undefEl)+1]] <- "name"
@@ -92,6 +93,10 @@ mdq_result <- list(status=result$status, output=result$values)
 			<name>entityNameSubSelector</name>
 			<xpath>./entityName</xpath>
 		</subSelector>
+	</selector>
+	<selector>
+		<name>entityType</name>
+		<xpath>name(/eml/dataset/*[self::dataTable|self::spatialRaster|self::spatialVector|self::storedProcedure|self::view|self::otherEntity])</xpath>
 	</selector>
 	<selector>
 		<name>entityDescriptionPresent</name>

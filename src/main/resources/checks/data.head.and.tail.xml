@@ -71,7 +71,7 @@ success()
 ]]></code>
   <selector>
     <name>names</name>
-    <xpath>//dataset/otherEntity</xpath>
+    <xpath>/eml/dataset/*[self::dataTable|self::otherEntity]</xpath>
     <subSelector>
       <name>...</name>
       <xpath>./entityName</xpath>
@@ -79,7 +79,7 @@ success()
   </selector>
   <selector>
     <name>formats</name>
-    <xpath>//dataset/otherEntity</xpath>
+    <xpath>/eml/dataset/*[self::dataTable|self::otherEntity]</xpath>
     <subSelector>
       <name>...</name>
       <xpath>.//formatName</xpath>
@@ -87,7 +87,7 @@ success()
   </selector>
   <selector>
     <name>urls</name>
-    <xpath>//dataset/otherEntity</xpath>
+    <xpath>/eml/dataset/*[self::dataTable|self::otherEntity]</xpath>
     <subSelector>
       <name>...</name>
       <xpath>.//distribution/online/url</xpath>
