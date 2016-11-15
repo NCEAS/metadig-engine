@@ -16,7 +16,7 @@ for (i in idxs) {
   # Check the <code> element
   for (code in codes[i]) {
     if (is.null(code) || nchar(code) <= 0) {
-      failure(paste0("A code for the attribute ", names[i], " (id: ", id[i], ") was undefined. This is either because the <code> was missing or did not contain any content."))
+      failure(paste0("A code for the attribute ", names[i], " (id: ", ids[i], ") was undefined. This is either because the <code> was missing or did not contain any content."))
     }
   }
 
