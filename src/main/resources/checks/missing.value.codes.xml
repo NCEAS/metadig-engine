@@ -2,33 +2,80 @@
 <mdq:check xmlns:mdq="https://nceas.ucsb.edu/mdqe" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="https://nceas.ucsb.edu/mdqe ../schemas/schema1.xsd">
   <id>missing.value.codes.1</id>
   <name>Missing Value Codes</name>
-  <description><![CDATA[Missing value codes should be present for all attributes. Note that this only checks for the presence of the <missingValueCode> element in each <attribute> element and does not check the sanity of what's provided there.]]></description>
+  <description><![CDATA[Missing value codes should be present for all attributes. Note that this only checks for the presence of a <missingValueCode> in each <attribute> and does not check the validity of the code values.]]></description>
   <type>interpretation</type>
   <level>OPTIONAL</level>
   <environment>rscript</environment>
   <code><![CDATA[
 library(metadig)
 
-if (any(is.na(codes))) {
-failure(paste0("The following attributes were missing missingValueCode elements which may indicate a problem: ", paste0(names[is.na(codes)], collapse = ", ")))
-} else {
-success("All attributes have missingValueCode elements.")
+check <- function() {
+  # Skip check if no dataTables
+  if(length(entityName) == 0) {
+    return(list(status="SKIP", values=list(list(value="No dataTables are present, so cannot check attribute 'missing value codes'"))))
+  }
+
+  # Skip check if no attributes present
+  if(!attributesPresent) {
+    return(list(status="SKIP", values=list(list(value="No dataTable attributes are present, so cannot check missing value codes"))))
+  }
+  
+  status <- "SUCCESS"
+  outputList <- list()
+  totalCount <- 0
+  # Check the attribute
+  # Check each dataTable for count of attributes with missing value codes defined
+  for(iEntity in 1:length(entityName)) {
+    thisEntityName <- entityName[[iEntity]]
+    missingCodeCount <- 0
+    thisAttrCount <- attributeCount[[iEntity]]
+    thisCodeCount <- codeCount[[iEntity]] 
+    # This dataTable is deficient in 'missing value codes'
+    if(thisCodeCount < thisAttrCount) {
+      status <- "FAILURE"
+      missingCodeCount <- thisAttrCount - thisCodeCount
+      outputList[[length(outputList)+1]] <- list(value=sprintf("dataTable '%s' does not have 'missing value codes' defined for %d of %d attributes", thisEntityName, missingCodeCount, thisCodeCount))
+    } 
+  }
+
+  # Did we find any deficient dataTables?
+  if(length(outputList > 0)) {
+    return(list(status=status, values=outputList))
+  } else {
+    return(list(status="SUCCESS", values=list(list(value=sprintf("All attributes for all dataTables have 'missing value codes' defined.")))))
+  }
 }
-]]></code>
-  <selector>
-    <name>names</name>
-    <xpath>/eml/dataset/dataTable/attributeList/attribute</xpath>
-    <subSelector>
-      <name>...</name>
-      <xpath>./attributeName</xpath>
-    </subSelector>
-  </selector>
-  <selector>
-    <name>codes</name>
-    <xpath>/eml/dataset/dataTable/attributeList/attribute</xpath>
-    <subSelector>
-      <name>...</name>
-      <xpath>./missingValueCode</xpath>
-    </subSelector>
-  </selector>
+result <- check()
+mdq_result <- list(status=result$status, output=result$values) 
+  
+  ]]></code>
+	<selector>
+		<name>attributesPresent</name>
+		<xpath>boolean(/eml/dataset/dataTable/attributeList/attribute)</xpath>
+	</selector>
+	<selector>
+		<name>entityName</name>
+		<xpath>/eml/dataset/dataTable</xpath>
+		<subSelector>
+			<name>entityNameSubSelector</name>
+			<xpath>./entityName</xpath>
+		</subSelector>
+	</selector>
+	<selector>
+		<name>codeCount</name>
+		<xpath>/eml/dataset/dataTable</xpath>
+		<subSelector>
+			<name>...</name>
+			<xpath>count(./attributeList/attribute/missingValueCode)</xpath>
+		</subSelector>
+	</selector>
+	<selector>
+		<name>attributeCount</name>
+		<xpath>/eml/dataset/dataTable</xpath>
+		<subSelector>
+			<name>...</name>
+			<xpath>count(./attributeList/attribute)</xpath>
+		</subSelector>
+	</selector>
+
 </mdq:check>
