@@ -15,6 +15,16 @@ check <- function() {
   # "attributeName" - the names of each data entity
   # "attributeDefinition" - the names of each data entity
   
+  # Skip check if no dataTables
+  if(!entityPresent) {
+    return(list(status="SKIP", values=list(value="No dataTables are present, so cannot check if attribute names and definition differ.")))
+  }
+
+  # Skip check if no attributes present
+  if(!attributesPresent) {
+    return(list(status="SKIP", values=list(value="No dataTable attributes are present, so cannot check if attribute names and definitions differ.")))
+  } 
+  
   values <- list()
   attrCount <- 0
   if (length(attributeName) > 0) {
@@ -49,6 +59,14 @@ mdq_result <- list(status=result$status, output=list(result$values))
 	<!-- Don't need a subSelector for entityName, as this element is required, 
 		so their won't be entities that are selected that don't have this value, 
 		and therefor no 'blank' values. -->
+	<selector>
+		<name>attributesPresent</name>
+		<xpath>boolean(/eml/dataset/dataTable/attributeList/attribute)</xpath>
+	</selector>
+	<selector>
+		<name>entityPresent</name>
+		<xpath>boolean(/eml/dataset/dataTable)</xpath>
+	</selector>
 	<selector>
 		<name>attributeName</name>
 		<xpath>/eml/dataset/dataTable/attributeList/attribute</xpath>
