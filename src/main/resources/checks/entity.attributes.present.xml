@@ -6,7 +6,7 @@
 	<name>Check that an each entity has a name and attributes.</name>
 	<description>Check that each data entity has attributes.</description>
 	<type>interpretation</type>
-	<level>REQUIRED</level>
+	<level>OPTIONAL</level>
 	<environment>rscript</environment>
 	<code><![CDATA[
 	

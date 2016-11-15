@@ -6,7 +6,7 @@
 	<name>Methods present</name>
 	<description>All datasets should contain a methods section, or a link to a separate methods doc.</description>
 	<type>interpretation</type>
-	<level>OPTIONAL</level>
+	<level>REQUIRED</level>
 	<environment>rscript</environment>
 	<code><![CDATA[
 library(metadig)

@@ -6,7 +6,7 @@
 	<name>Attribute name differs from attribute description.</name>
 	<description>Check that each entity name and definition are not identical.</description>
 	<type>interpretation</type>
-	<level>REQUIRED</level>
+	<level>OPTIONAL</level>
 	<environment>rscript</environment>
 	<code><![CDATA[
 check <- function() {

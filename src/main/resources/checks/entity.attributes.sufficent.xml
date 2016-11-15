@@ -6,7 +6,7 @@
 	<name>Attribute definition is sufficient.</name>
 	<description>Check that each attribute definition is greater that 4 words.</description>
 	<type>interpretation</type>
-	<level>REQUIRED</level>
+	<level>OPTIONAL</level>
 	<environment>rscript</environment>
 	<code><![CDATA[
 check <- function() {
