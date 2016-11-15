@@ -50,6 +50,11 @@
     result <- check()
     mdq_result <- list(status=result$status, output=list(list(value=result$output)))
         ]]></code>
+        
+    <selector>
+		<name>entityPresent</name>
+	    <xpath>boolean(/eml/dataset/dataTable)</xpath>
+	</selector>
 	<selector>
 		<name>entityCount</name>
 		<xpath>count(/*[local-name() = 'eml']/dataset/dataTable)</xpath>

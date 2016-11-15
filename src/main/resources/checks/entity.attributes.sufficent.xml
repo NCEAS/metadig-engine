@@ -4,7 +4,7 @@
 	xsi:schemaLocation="https://nceas.ucsb.edu/mdqe ../schemas/schema1.xsd">
 	<id>check.attribute.definition.sufficient.1</id>
 	<name>Attribute definition is sufficient.</name>
-	<description>Check that each attribute definition is greater that 4 words.</description>
+	<description>Check that each attribute definition has greater that 4 words.</description>
 	<type>interpretation</type>
 	<level>OPTIONAL</level>
 	<environment>rscript</environment>
@@ -16,7 +16,17 @@ check <- function() {
   # "attributeDefinition" - the names of each data entity
   
   minWordCount <- 4
-    
+  
+   # Skip check if no dataTables
+  if(!entityPresent) {
+    return(list(status="SKIP", values=list(value="No dataTables are present, so cannot check attribute definition word counts.")))
+  }
+
+  # Skip check if no attributes present
+  if(!attributesPresent) {
+    return(list(status="SKIP", values=list(value="No dataTable attributes are present, so cannot check attribute definition word counts.")))
+  } 
+
   values <- list()
   attrCount <- 0
   if (length(attributeName) > 0) {
@@ -37,12 +47,10 @@ check <- function() {
   options("useFanceyQuotes" = FALSE)
   
   if(length(values) > 0) {
-    return(list(status="FAILURE", values=list(value=sprintf("These attributes have definitions shorter than %d words: %s", minWordCount, paste(sQuote(unlist(values)), collapse=", ")))))
+    return(list(status="FAILURE", values=list(value=sprintf("These dataTable attributes have definitions shorter than %d words: %s", minWordCount, paste(sQuote(unlist(values)), collapse=", ")))))
   } else {
-    return(list(status="SUCCESS", values=list(value=sprintf("All %d attributes have sufficient definitions", attrCount))))
+    return(list(status="SUCCESS", values=list(value=sprintf("All %d dataTable attributes have sufficient definitions", attrCount))))
   }
-
-  options("useFancyQuotes" = quoteStyle)
 }
 
 result <- check()
@@ -52,6 +60,14 @@ mdq_result <- list(status=result$status, output=list(result$values))
 	<!-- Don't need a subSelector for entityName, as this element is required, 
 		so their won't be entities that are selected that don't have this value, 
 		and therefor no 'blank' values. -->
+	<selector>
+		<name>attributesPresent</name>
+		<xpath>boolean(/eml/dataset/dataTable/attributeList/attribute)</xpath>
+	</selector>
+	<selector>
+		<name>entityPresent</name>
+		<xpath>boolean(/eml/dataset/dataTable)</xpath>
+	</selector>
 	<selector>
 		<name>attributeName</name>
 		<xpath>/eml/dataset/dataTable/attributeList/attribute</xpath>

@@ -19,6 +19,15 @@ check <- function() {
   # "entityAttributesPresent" - the names of each data entity
   
   outputList <- list()
+  if(!entityPresent) {
+    return(list(status="SKIP", values=list(list(value="No dataTables (and related attributes) are present."))))
+  }
+
+  # Skip check if no attributes present
+  if(!attributesPresent) {
+    return(list(status="SKIP", values=list(list(value="No dataTable attributes are present."))))
+  }  
+  
   # Assume that the check will succeed, until proven otherwise.
   # The dataset may have multiple entities, so check each one. 
   status <- "SUCCESS"
