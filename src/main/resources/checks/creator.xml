@@ -23,6 +23,10 @@
     <name>creator</name>
     <xpath>/eml/dataset/creator</xpath>
   </selector>
+  <selector>
+    <name>creatorCount</name>
+    <xpath>count(/eml/dataset/creator)</xpath>
+  </selector>
   <dialect>
     <name>eml</name>
     <xpath>boolean(/*[local-name() = 'eml'])</xpath>

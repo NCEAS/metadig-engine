@@ -23,6 +23,10 @@
     <name>contact</name>
     <xpath>/eml/dataset/contact</xpath>
   </selector>
+  <selector>
+    <name>contactCount</name>
+    <xpath>count(/eml/dataset/contact)</xpath>
+  </selector>
   <dialect>
     <name>eml</name>
     <xpath>boolean(/*[local-name() = 'eml'])</xpath>
