@@ -2,7 +2,7 @@
 <mdq:check xmlns:mdq="https://nceas.ucsb.edu/mdqe"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="https://nceas.ucsb.edu/mdqe ../schemas/schema1.xsd">
-	<id>check.attribute.definitions.differ.1</id>
+	<id>check.attribute.name.differs.1</id>
 	<name>Attribute name differs from attribute description.</name>
 	<description>Check that each entity name and definition are not identical.</description>
 	<type>interpretation</type>
