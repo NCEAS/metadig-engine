@@ -10,9 +10,13 @@
     library(metadig)
 
     if (length(creator) <= 0) {
-      failure("No creator(s) were found.")
+      failure("No creators are present.")
     } else {
-      success("One or more creators were found.")
+      if(creatorCount == 1) {
+        success("1 creator is present.")
+      } else {
+        success(sprintf("%d creators are present.", creatorCount))
+      }
     }
   ]]></code>
   <selector>

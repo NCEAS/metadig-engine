@@ -9,10 +9,10 @@
   <code><![CDATA[
 if (length(identifier) > 0) {
 mdq_result <- list(status = "SUCCESS",
-                   output = list(list(value = "Identifier was present.")))
+                   output = list(list(value = "An identifier is present.")))
 } else {
 mdq_result <- list(status = "FAILURE",
-                   output = list(list(value = "Identifier was not present.")))
+                   output = list(list(value = "An identifier is not present.")))
 }
     ]]>
   </code>

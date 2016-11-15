@@ -10,9 +10,13 @@
     library(metadig)
 
     if (length(contact) <= 0) {
-      failure("No contact(s) were found.")
+      failure("No contacts are present.")
     } else {
-      success("One or more contacts were found.")
+      if(contactCount == 1) {
+        success("1 contact is present.")
+      } else {
+        success(sprintf("%d contacts are present.", contactCount))
+      }
     }
   ]]></code>
   <selector>

@@ -13,7 +13,7 @@ library(httr)
 
 if (is.null(awards)) {
   mdq_result <- list(status = "SKIP",
-                     output = list(list(value = "No NSF award numbers were found in the metadata document so this check was skipped.")))
+                     output = list(list(value = "No NSF award numbers are present in the metadata document so this check was skipped.")))
 
 } else {
   # Clean up each award string so we can pass it to the HTTP API

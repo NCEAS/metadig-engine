@@ -12,17 +12,17 @@
       message <- "No abstract sections were found."
     } else if (length(abstract) > 1) {
       status <- "FAILURE"
-      message <- "More than one abstract section was found when one was expected."
+      message <- "More than one abstract section is present, only one is allowed."
     } else {
       library(stringr)
       tokens <- str_split(abstract, " ")[[1]]
 
       if (length(tokens) >= 100) {
         status <- "SUCCESS"
-        message <- paste0("The abstract was ", length(tokens), " word(s) long which is sufficient.")
+        message <- paste0("The abstract is ", length(tokens), " word(s) long which is sufficient.")
       } else {
         status <- "FAILURE"
-        message <- paste0("The abstract was only ", length(tokens), " word(s) long but 100 or more was requried.")
+        message <- paste0("The abstract is only ", length(tokens), " word(s) long but 100 or more is requried.")
       }
     }
 

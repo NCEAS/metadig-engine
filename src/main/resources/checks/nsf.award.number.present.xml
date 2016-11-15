@@ -29,11 +29,9 @@ if (is.null(awards)) {
   status <- "SUCCESS"
   output <- ""
   if(length(output) > 1) {
-    #output <- paste0("These ", length(awards), " NSF award numbers were found: ", sQuote(unlist(awards)))
-    output <- paste0("These ", " 1 NSF award numbers were found: ")
+    output <- paste0("These ", length(awards), " NSF award numbers were found: ", sQuote(unlist(awards)))
   } else {
-    #output <- paste0("This single NSF award number was found: ", sQuote(unlist(awards)))
-    output <- paste0("This single NSF award number was found: ", "foo")))
+    output <- paste0("This single NSF award number was found: ", sQuote(unlist(awards)))
   }
   mdq_result <- list(status = status,
                      output = list(list(value = output)))
