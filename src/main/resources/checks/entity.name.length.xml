@@ -16,11 +16,9 @@
       # "entityNames" - the entity names for the dataset entities (dataTables)
       maxEntityNameLength <- 100
       
-      # Make sure entity count is typed correctly
-      if(!is.null(entityCount)) {
-        entityCount <- as.integer(entityCount)
-      } else {
-        return(list(status = "FAILURE", output = sprintf("Entity count connot be determined, so the check is unable to determine entity name lengths.")))
+      # Skip check if no dataTables
+      if(!entityPresent) {
+        return(list(status="SKIP", output = "No dataTables are present, so unable to check entity name lenghts."))
       }
       
       # Assume that the check will pass, but one problem will cause failure

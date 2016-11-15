@@ -59,7 +59,7 @@ check <- function() {
       # Store output for this entity if it didn't pass a check. We will only report on entities that don't have
       # all the elements we are checking for.
       if(length(undefEl) > 0) {
-        outputList[[length(outputList)+1]] <- list(value=sprintf("Entity '%s' is missing these items: %s", thisEntityName, paste(sQuote(unlist(undefEl)), collapse=", ")))
+        outputList[[length(outputList)+1]] <- list(value=sprintf("%s '%s' is missing these items: %s", thisEntityType, thisEntityName, paste(sQuote(unlist(undefEl)), collapse=", ")))
       }
     }
   } else {

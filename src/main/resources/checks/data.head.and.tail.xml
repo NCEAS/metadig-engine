@@ -18,7 +18,7 @@ supported_formats <- c("text/csv",
                      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
 
 if (length(names) <= 0) {
-  success("No data files were described in this document so nothing was done.")
+  success("No data files were described in this document so no head/tail display was created.")
 } else {
   for (i in seq_along(names)) {
     if (!(formats[i] %in% supported_formats)) {

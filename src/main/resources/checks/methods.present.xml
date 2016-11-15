@@ -40,7 +40,7 @@ check <- function() {
     if (badStepCount > 0) {
         return(list(status="FAILURE", output=sprintf("%d of %d method step descriptions have fewer than the minimum recommended %d words", badStepCount, methodStepCount, minWordCount)))
     } else {
-        return(list(status="SUCCESS", output=sprintf("All %s method step descriptions have sufficient descriptions (> %d words)", methodStepCount, minWordCount)))
+        return(list(status="SUCCESS", output=sprintf("All method step descriptions are sufficient (> %d words).", minWordCount)))
     }
 }
 result <- check()

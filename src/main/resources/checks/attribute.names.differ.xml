@@ -44,9 +44,9 @@ check <- function() {
   options("useFanceyQuotes" = FALSE)
   
   if(length(values) > 0) {
-    return(list(status="FAILURE", values=list(value=sprintf("These attributes have identical names and definitions: %s", paste(sQuote(unlist(values)), collapse=", ")))))
+    return(list(status="FAILURE", values=list(value=sprintf("These dataTable attributes have identical names and definitions: %s", paste(sQuote(unlist(values)), collapse=", ")))))
   } else {
-    return(list(status="SUCCESS", values=list(value=sprintf("All %d attributes have valid definitions", attrCount))))
+    return(list(status="SUCCESS", values=list(value=sprintf("All %d dataTable attributes have valid definitions", attrCount))))
   }
 
   options("useFancyQuotes" = quoteStyle)
