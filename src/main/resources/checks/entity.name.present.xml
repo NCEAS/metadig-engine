@@ -6,7 +6,7 @@
 	<name>Check that an entity name, description, format, size, checksum is present</name>
 	<description>Check that each data entity has a name, description, format, size, checksum.</description>
 	<type>interpretation</type>
-	<level>REQUIRED</level>
+	<level>INFO</level>
 	<environment>rscript</environment>
 	<code><![CDATA[
 
