@@ -3,9 +3,8 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="https://nceas.ucsb.edu/mdqe ../schemas/schema1.xsd">
 	<id>check.nsf.award.numbers.present.1</id>
-	<name>NSF award numbers</name>
-	<description>One or more NSF award numbers must be entered.
-	</description>
+	<name>award numbers</name>
+	<description>One or more award numbers must be entered.</description>
 	<type>identification</type>
 	<level>REQUIRED</level>
 	<environment>rscript</environment>
@@ -17,22 +16,17 @@ if (is.null(awards)) {
                      output = list(list(value = output)))
 } else if (length(title) < 1) {
   status <- "FAILURE"
-  output <- paste0(length(title), " award number(s) found when at least one was expected.")
+  output <- paste0("No award numbers were found when one or more were expected.")
   mdq_result <- list(status = status,
                      output = list(list(value = output)))
-} else if (any(nchar(awards) <= 0)) {
+} else if (all(nchar(awards) <= 0)) {
   status <- "FAILURE"
-  output <- paste0("The following award numbers were of zero length: ", which(nchar(awards) <= 0, "."))
+  output <- "Of the award numbers found, none were non-zero in length."
   mdq_result <- list(status = status,
                      output = list(list(value = output)))
 } else {
   status <- "SUCCESS"
-  output <- ""
-  if(length(output) > 1) {
-    output <- paste0("These ", length(awards), " NSF award numbers were found: ", sQuote(unlist(awards)))
-  } else {
-    output <- paste0("This single NSF award number was found: ", sQuote(unlist(awards)))
-  }
+  output <- "At least one award number was found."
   mdq_result <- list(status = status,
                      output = list(list(value = output)))
 }]]></code>
