@@ -8,7 +8,12 @@
   <environment>rscript</environment>
   <code>
     library(metadig)
-    check_presence(coordinates)
+    
+    if (length(coordinates) >= 1) {
+      success("A set of bounding coordinates describing the geographic coverage of this dataset is present.")
+    } else {
+      failure("A set of bounding coordinates describing the geographic coverage of this dataset is not present.")
+    }
   </code>
   <selector>
     <name>coordinates</name>
