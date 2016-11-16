@@ -20,10 +20,18 @@ check <- function() {
   status <- "SUCCESS"
   
   # Output number of creators that have email addresses
-  values[[length(values)+1]] <- list(value=sprintf("%d of %d creators have email addresses.", emailCount, creatorCount))
+  if(emailCount == creatorCount) {
+    values[[length(values)+1]] <- list(value=sprintf("All creators have email addresses.", creatorCount))
+  } else {
+    values[[length(values)+1]] <- list(value=sprintf("%d of %d creators have email addresses.", emailCount, creatorCount))
+  }
   
   # Output number of creators that have addresses
-  values[[length(values)+1]] <- list(value=sprintf("%d of %d creators have addresses.", addressCount, creatorCount))
+  if(addressCount == creatorCount) {
+    values[[length(values)+1]] <- list(value=sprintf("All creators have addresses.", creatorCount))
+  } else {
+    values[[length(values)+1]] <- list(value=sprintf("%d of %d creators have addresses.", addressCount, creatorCount))
+  }
 
   return(list(status=status, values=values))
 }

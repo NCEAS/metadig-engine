@@ -17,12 +17,12 @@ check <- function() {
   
   # Skip check if no dataTables
   if(!entityPresent) {
-    return(list(status="SKIP", values=list(value="No dataTables are present, so cannot check if attribute names and definition differ.")))
+    return(list(status="SKIP", values=list(value="No data table descriptions are present, so cannot check if attribute names and definition differ.")))
   }
 
   # Skip check if no attributes present
   if(!attributesPresent) {
-    return(list(status="SKIP", values=list(value="No dataTable attributes are present, so cannot check if attribute names and definitions differ.")))
+    return(list(status="SKIP", values=list(value="No data table attributes are present, so cannot check if attribute names and definitions differ.")))
   } 
   
   values <- list()
@@ -44,9 +44,9 @@ check <- function() {
   options("useFanceyQuotes" = FALSE)
   
   if(length(values) > 0) {
-    return(list(status="FAILURE", values=list(value=sprintf("These dataTable attributes have identical names and definitions: %s", paste(sQuote(unlist(values)), collapse=", ")))))
+    return(list(status="FAILURE", values=list(value=sprintf("These data table descriptions attributes have identical names and definitions: %s", paste(sQuote(unlist(values)), collapse=", ")))))
   } else {
-    return(list(status="SUCCESS", values=list(value=sprintf("All %d dataTable attributes have valid definitions", attrCount))))
+    return(list(status="SUCCESS", values=list(value=sprintf("All data table attributes have valid definitions"))))
   }
 
   options("useFancyQuotes" = quoteStyle)

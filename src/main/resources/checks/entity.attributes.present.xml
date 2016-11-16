@@ -21,12 +21,12 @@ check <- function() {
   outputList <- list()
   
   if(!entityPresent) {
-    return(list(status="SKIP", values=list(list(value="No dataTables (and related attributes) are present."))))
+    return(list(status="SKIP", values=list(list(value="No data table descriptions (and related attributes) are present."))))
   }
 
   # Skip check if no attributes present
   if(!attributesPresent) {
-    return(list(status="SKIP", values=list(list(value="No dataTable attributes are present."))))
+    return(list(status="SKIP", values=list(list(value="No data table attributes are present."))))
   }  
   
   # Assume that the check will succeed, until proven otherwise.
@@ -35,15 +35,15 @@ check <- function() {
   if (length(entityName) > 0) {
     for(iEntity in 1:length(entityName)) {
       thisEntityName <- entityName[[iEntity]]
-      thisEntityType <- entityType[[iEntity]]
+      #thisEntityType <- entityType[[iEntity]]
 
       if(!entityAttributesPresent[[iEntity]]) {
-        outputList[[length(outputList)+1]] <- list(value=sprintf("The %s '%s' does not have attributes defined.", thisEntityType, thisEntityName))
+        outputList[[length(outputList)+1]] <- list(value=sprintf("The data table description '%s' does not have attributes defined.", thisEntityName))
       }
     }
   } else {
       # No data entities were selected by the xpath, so tell the user no check was performed.
-      outputList[[length(outputList)+1]] <- list(value=sprintf("No data entities are present, so uanble to check for attributes."))
+      outputList[[length(outputList)+1]] <- list(value=sprintf("No data table descriptions are present, so uanble to check for attributes."))
       return(list(status="SKIP", values=outputList))
   }
   
@@ -51,7 +51,7 @@ check <- function() {
   if(length(outputList) > 0) {
     return(list(status="FAILURE", values=outputList))
   } else {
-    return(list(status="SUCCESS", values=list(list(value=sprintf("All %s data entities have attributes defined.", length(entityName))))))
+    return(list(status="SUCCESS", values=list(list(value=sprintf("All data table descriptions have attributes defined.")))))
   }
 }
 

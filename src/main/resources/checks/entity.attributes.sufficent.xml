@@ -19,12 +19,12 @@ check <- function() {
   
    # Skip check if no dataTables
   if(!entityPresent) {
-    return(list(status="SKIP", values=list(value="No dataTables are present, so cannot check attribute definition word counts.")))
+    return(list(status="SKIP", values=list(value="No data table descriptions are present, so cannot check attribute definition word counts.")))
   }
 
   # Skip check if no attributes present
   if(!attributesPresent) {
-    return(list(status="SKIP", values=list(value="No dataTable attributes are present, so cannot check attribute definition word counts.")))
+    return(list(status="SKIP", values=list(value="No data table description attributes are present, so cannot check attribute definition word counts.")))
   } 
 
   values <- list()
@@ -47,9 +47,9 @@ check <- function() {
   options("useFanceyQuotes" = FALSE)
   
   if(length(values) > 0) {
-    return(list(status="FAILURE", values=list(value=sprintf("These dataTable attributes have definitions shorter than %d words: %s", minWordCount, paste(sQuote(unlist(values)), collapse=", ")))))
+    return(list(status="FAILURE", values=list(value=sprintf("These data table description attributes have definitions shorter than %d words: %s", minWordCount, paste(sQuote(unlist(values)), collapse=", ")))))
   } else {
-    return(list(status="SUCCESS", values=list(value=sprintf("All %d dataTable attributes have sufficient definitions", attrCount))))
+    return(list(status="SUCCESS", values=list(value=sprintf("All data table description attributes have sufficient definitions"))))
   }
 }
 

@@ -29,7 +29,7 @@
     } else if (wordCount > maxWordCount) {
       return(list(status = "ERROR", output = sprintf("The number of words in the dataset's title is %d. The maximum recommended word count is %s.", wordCount, maxWordCount))) 
     } else {
-      return(list(status = "SUCCESS", output = sprintf("The number of words in the dataset's title sufficient because it is between %d and %d words long.", minWordCount, maxWordCount))) 
+      return(list(status = "SUCCESS", output = sprintf("The number of words in the dataset's title is sufficient because it is between %d and %d words long.", minWordCount, maxWordCount))) 
     }
   }
   result <- check()

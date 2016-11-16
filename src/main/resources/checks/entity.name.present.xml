@@ -58,12 +58,12 @@ check <- function() {
       # Store output for this entity if it didn't pass a check. We will only report on entities that don't have
       # all the elements we are checking for.
       if(length(undefEl) > 0) {
-        outputList[[length(outputList)+1]] <- list(value=sprintf("%s '%s' is missing these items: %s", thisEntityType, thisEntityName, paste(sQuote(unlist(undefEl)), collapse=", ")))
+        outputList[[length(outputList)+1]] <- list(value=sprintf("Description for '%s' is missing these items: %s", thisEntityName, paste(sQuote(unlist(undefEl)), collapse=", ")))
       }
     }
   } else {
       # No data entities were selected by the xpath, so tell the user no check was performed and set status to SKIP
-      outputList[[length(outputList)+1]] <- list(value=sprintf("No data entities are present, so unable to check entity 'name', 'format', etc"))
+      outputList[[length(outputList)+1]] <- list(value=sprintf("No data descriptions are present, so unable to check entity 'name', 'format', etc"))
       skip <- TRUE
   }
   
@@ -72,7 +72,7 @@ check <- function() {
     if(skip) status <- "SKIP" else status <- "FAILURE"
     return(list(status=status, values=outputList))
   } else {
-    return(list(status="SUCCESS", values=list(value=sprintf("All %d data entities have a name, description, format, size and checksum", length(entityName)))))
+    return(list(status="SUCCESS", values=list(value=sprintf("All data description sections have a name, description, format, size and checksum"))))
   }
 }
 

@@ -28,7 +28,7 @@ for (i in idxs) {
   }
 }
 
-success("All enumeratedDomains found had codes and definitions.")
+success("All enumerated domain descriptions found had codes and definitions.")
 ]]></code>
   <selector>
     <name>ids</name>

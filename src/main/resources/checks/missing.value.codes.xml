@@ -12,12 +12,12 @@ library(metadig)
 check <- function() {
   # Skip check if no dataTables
   if(length(entityName) == 0) {
-    return(list(status="SKIP", values=list(list(value="No dataTables are present, so cannot check attribute 'missing value codes'"))))
+    return(list(status="SKIP", values=list(list(value="No data table descriptions are present, so cannot check attribute 'missing value codes'"))))
   }
 
   # Skip check if no attributes present
   if(!attributesPresent) {
-    return(list(status="SKIP", values=list(list(value="No dataTable attributes are present, so cannot check missing value codes"))))
+    return(list(status="SKIP", values=list(list(value="No data table attributes are present, so cannot check missing value codes"))))
   }
   
   status <- "SUCCESS"
@@ -34,7 +34,7 @@ check <- function() {
     if(thisCodeCount < thisAttrCount) {
       status <- "FAILURE"
       missingCodeCount <- thisAttrCount - thisCodeCount
-      outputList[[length(outputList)+1]] <- list(value=sprintf("dataTable '%s' does not have 'missing value codes' defined for %d of %d attributes", thisEntityName, missingCodeCount, thisCodeCount))
+      outputList[[length(outputList)+1]] <- list(value=sprintf("Data table description '%s' does not have 'missing value codes' defined for %d of %d attributes", thisEntityName, missingCodeCount, thisCodeCount))
     } 
   }
 
@@ -42,7 +42,7 @@ check <- function() {
   if(length(outputList > 0)) {
     return(list(status=status, values=outputList))
   } else {
-    return(list(status="SUCCESS", values=list(list(value=sprintf("All attributes for all dataTables have 'missing value codes' defined.")))))
+    return(list(status="SUCCESS", values=list(list(value=sprintf("All attributes for all data table descriptions have 'missing value codes' defined.")))))
   }
 }
 result <- check()
