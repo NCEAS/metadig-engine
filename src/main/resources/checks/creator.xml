@@ -13,7 +13,7 @@
       failure("No creators are present.")
     } else {
       if(creatorCount == 1) {
-        success("1 creator is present.")
+        success("One creator is present.")
       } else {
         success(sprintf("%d creators are present.", creatorCount))
       }

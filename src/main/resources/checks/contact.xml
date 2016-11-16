@@ -13,7 +13,7 @@
       failure("No contacts are present.")
     } else {
       if(contactCount == 1) {
-        success("1 contact is present.")
+        success("One contact is present.")
       } else {
         success(sprintf("%d contacts are present.", contactCount))
       }
