@@ -4,7 +4,7 @@
   <name>DOI Identifier</name>
   <description>Identifier should be a DOI.</description>
   <type>identification</type>
-  <level>INFO</level>
+  <level>OPTIONAL</level>
   <environment>rscript</environment>
   <code><![CDATA[
 library(stringr)
