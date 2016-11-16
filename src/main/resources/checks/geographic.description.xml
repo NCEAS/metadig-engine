@@ -8,7 +8,12 @@
   <environment>rscript</environment>
   <code>
     library(metadig)
-    check_presence(description)
+    
+    if (length(description) >= 1) {
+      success("A textual description of the geographic coverage of this dataset is present.")
+    } else {
+      failure("A textual description of the geographic coverage of this dataset is not present.")
+    }
   </code>
   <selector>
     <name>description</name>
