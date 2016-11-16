@@ -8,7 +8,12 @@
   <environment>rscript</environment>
   <code>
     library(metadig)
-    check_presence(pub_date)
+    
+    if (length(pub_date) >= 1) {
+      success("A publication date is present.")
+    } else {
+      failure("A publication data is not present.") 
+    }
   </code>
   <selector>
     <name>pub_date</name>
