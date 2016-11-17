@@ -12,7 +12,7 @@
     if (length(pub_date) >= 1) {
       success("A publication date is present.")
     } else {
-      failure("A publication data is not present.") 
+      failure("A publication date is not present.") 
     }
   </code>
   <selector>
