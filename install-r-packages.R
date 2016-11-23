@@ -1,4 +1,17 @@
-# Install all the R packages in 'r-packages.txt'
+# Install all the R packages
+
+# The packages we're going to install
+packages_cran <- c("jsonlite",
+                   "dplyr",
+                   "ggplot2",
+                   "svglite",
+                   "digest",
+                   "RCurl",
+                   "httr",
+                   "readxl",
+                   "data.table")
+
+packages_github <- list("metadig" = "NCEAS/metadig-r")
 
 # Install devtools if it isn't already
 if (!("devtools" %in% installed.packages())) {
@@ -7,27 +20,16 @@ if (!("devtools" %in% installed.packages())) {
 }
 
 # Install packages
-package_file <- "r-packages.txt"
-stopifnot(file.exists(package_file))
-packages <- readLines(package_file)
-
-# Split packages into those installable from CRAN and those installable
-# from GitHub
-from_cran <- packages[grep("/", packages, invert=TRUE)]
-from_gh <- packages[grep("/", packages)]
-
-for (pkg in from_cran) {
+for (pkg in packages_cran) {
   if (pkg %in% installed.packages()) next
   cat(paste("Installing", pkg), "\n")
   install.packages(pkg, repo = "http://cran.rstudio.com")
 }
 
-for (pkg in from_gh) {
-  pkg_parts <- strsplit(pkg, ": ")
-  pkg_name <- pkg_parts[[1]][1]
-  pkg_repo <- pkg_parts[[1]][2]
+for (pkg in names(packages_github)) {
+  pkg_repo <- packages_github[[pkg]]
 
-  if (pkg_name %in% installed.packages()) next
-  cat(paste("Installing", pkg_name), "\n")
+  if (pkg %in% installed.packages()) next
+  cat(paste("Installing", pkg), "\n")
   devtools::install_github(pkg_repo)
 }

@@ -2,6 +2,7 @@
 The Java project for MetaDig
 
 [![Build Status](https://travis-ci.org/NCEAS/mdqengine.svg?branch=master)](https://travis-ci.org/NCEAS/mdqengine)
+[![BuildStatus](https://circleci.com/gh/NCEAS/mdqengine.png?circle-token=FIXME)](https://circleci.com/gh/NCEAS/mdqengine)
 
 The MDQ Engine is a flexible engine to managing and executing metadata quality checks on a wide variety of metadata documents.
 Quality Checks are organized into Suites that can be stored and managed by the engine before ultimately being run against input metadata documents.
