@@ -22,12 +22,12 @@
     maxWordCount <- 20
 
     wordCount <- length(unlist(strsplit(datasetTitle, "\\s+", perl=T)))
-    if (wordCount <= strictMinCount) {
+    if (wordCount < strictMinCount) {
       return(list(status = "FAILURE", output = sprintf("The number of words in the dataset's title is %d. The mininum required word count is %s.", wordCount, minWordCount))) 
-    } else if (wordCount <= minWordCount) {
-      return(list(status = "ERROR", output = sprintf("The number of words in the dataset's title is %d. The mininum recommended word count is %s.", wordCount, minWordCount))) 
+    } else if (wordCount < minWordCount) {
+      return(list(status = "FAILURE", output = sprintf("The number of words in the dataset's title is %d. The mininum recommended word count is %s.", wordCount, minWordCount))) 
     } else if (wordCount > maxWordCount) {
-      return(list(status = "ERROR", output = sprintf("The number of words in the dataset's title is %d. The maximum recommended word count is %s.", wordCount, maxWordCount))) 
+      return(list(status = "FAILURE", output = sprintf("The number of words in the dataset's title is %d. The maximum recommended word count is %s.", wordCount, maxWordCount))) 
     } else {
       return(list(status = "SUCCESS", output = sprintf("The number of words in the dataset's title is sufficient because it is between %d and %d words long.", minWordCount, maxWordCount))) 
     }
