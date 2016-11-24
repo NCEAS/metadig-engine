@@ -25,7 +25,7 @@ public class RDispatcherTest {
 	
 	private Dispatcher dispatcher = null;
 
-	private String dataUrl = "https://cn.dataone.org/cn/v2/resolve/doi:10.5063/AA/wolkovich.29.1";
+	private String dataUrl = "https://knb.ecoinformatics.org/knb/d1/mn/v2/object/doi:10.5063/AA/wolkovich.29.1";
 
 	@Before
 	public void init() {
