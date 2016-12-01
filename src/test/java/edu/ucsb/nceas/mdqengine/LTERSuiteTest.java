@@ -13,6 +13,7 @@ import org.apache.commons.logging.LogFactory;
 import org.dataone.client.v2.CNode;
 import org.dataone.client.v2.itk.D1Client;
 import org.dataone.configuration.Settings;
+import org.dataone.service.types.v2.SystemMetadata;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -67,8 +68,9 @@ public class LTERSuiteTest{
 			String metadataURL = "https://cn.dataone.org/cn/v2/object/" + metadataId;
 			log.error("metadata URL: " + metadataURL);
 			InputStream input = new URL(metadataURL).openStream();
+			SystemMetadata sysMeta = null;
 			// run the suite on it
-			run = mdqe.runSuite(suite, input, null);
+			run = mdqe.runSuite(suite, input, null, sysMeta);
 			run.setObjectIdentifier(metadataId);
 			log.trace("Run results XML: " + XmlMarshaller.toXml(run));
 			

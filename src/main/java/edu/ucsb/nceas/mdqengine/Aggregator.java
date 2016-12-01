@@ -187,7 +187,7 @@ public class Aggregator {
 		File output = null;
 		String runContent = null;
 		try {
-			Run run = engine.runSuite(suite, input, null);
+			Run run = engine.runSuite(suite, input, null, null);
 			runContent = toCSV(run);
 			output = graphIt(runContent, format);
 		} catch (Exception e) {
@@ -256,7 +256,7 @@ public class Aggregator {
 						@Override
 						public Run call() throws Exception {
 							InputStream input = new URL(finalDataUrl).openStream();
-							Run run = engine.runSuite(suite, input, null);
+							Run run = engine.runSuite(suite, input, null, null);
 							run.setObjectIdentifier(id);
 							run.setMetadata(metadata);
 							run.setSuiteId(suite.getId());

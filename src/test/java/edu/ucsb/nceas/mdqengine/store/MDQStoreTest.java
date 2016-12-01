@@ -7,6 +7,7 @@ import java.net.URL;
 import java.util.Calendar;
 import java.util.Collection;
 
+import org.dataone.service.types.v2.SystemMetadata;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -91,9 +92,10 @@ public class MDQStoreTest {
 			
 			String metadataURL = "https://knb.ecoinformatics.org/knb/d1/mn/v2/object/" + id;
 			InputStream input = new URL(metadataURL).openStream();
+			SystemMetadata sysMeta = null;
 			
 			Suite suite = SuiteFactory.getMockSuite();
-			Run run = mdqe.runSuite(suite, input, null);
+			Run run = mdqe.runSuite(suite, input, null, sysMeta);
 			store.createRun(run);
 			
 			Run r = store.getRun(run.getId());
@@ -115,6 +117,7 @@ public class MDQStoreTest {
 			
 			String metadataURL = "https://knb.ecoinformatics.org/knb/d1/mn/v2/object/" + id;
 			InputStream input = new URL(metadataURL).openStream();
+			SystemMetadata sysMeta = null;
 			
 			Suite suite = SuiteFactory.getMockSuite();
 			Check checkRef = new Check();
@@ -122,7 +125,7 @@ public class MDQStoreTest {
 			checkRef.setId(checkId );
 			suite.getCheck().add(checkRef);
 			mdqe.setStore(store);
-			Run run = mdqe.runSuite(suite, input, null);
+			Run run = mdqe.runSuite(suite, input, null, sysMeta);
 			int checkCount = 0;
 			for (Result r: run.getResult()) {
 				Check c = r.getCheck();

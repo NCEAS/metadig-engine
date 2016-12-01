@@ -26,10 +26,13 @@ import org.apache.commons.logging.LogFactory;
 import org.dataone.client.v2.itk.DataPackage;
 import org.dataone.configuration.Settings;
 import org.dataone.service.types.v1.Identifier;
+import org.dataone.service.types.v2.SystemMetadata;
+import org.dataone.service.util.TypeMarshaller;
 import org.xml.sax.SAXException;
 
 import edu.ucsb.nceas.mdqengine.dispatch.MDQCache;
 import edu.ucsb.nceas.mdqengine.model.Check;
+import edu.ucsb.nceas.mdqengine.model.Metadata;
 import edu.ucsb.nceas.mdqengine.model.Output;
 import edu.ucsb.nceas.mdqengine.model.Status;
 import edu.ucsb.nceas.mdqengine.model.Suite;
@@ -68,7 +71,7 @@ public class MDQEngine {
 	 * @throws XPathExpressionException
 	 * @throws ScriptException
 	 */
-	public Run runSuite(Suite suite, InputStream input, Map<String, Object> params) 
+	public Run runSuite(Suite suite, InputStream input, Map<String, Object> params, SystemMetadata sysMeta) 
 			throws MalformedURLException, IOException, SAXException, 
 			ParserConfigurationException, XPathExpressionException, ScriptException {
 			
@@ -113,6 +116,17 @@ public class MDQEngine {
 			results.add(result);
 		}
 		run.setResult(results);
+		
+		// track metadata about the document that is QCed
+		if (sysMeta != null) {
+			Metadata metadata = new Metadata();
+			metadata.setDatasource(sysMeta.getOriginMemberNode().getValue());
+			metadata.setFormatId(sysMeta.getFormatId().getValue());
+			//metadata.setFunder(funder);
+			metadata.setRightsHolder(sysMeta.getRightsHolder().getValue());
+			run.setMetadata(metadata);
+		}
+		
 		
 		log.trace("Run results: " + JsonMarshaller.toJson(run));
 		
@@ -190,7 +204,7 @@ public class MDQEngine {
 			String xml = IOUtils.toString(new FileInputStream(args[0]), "UTF-8");
 			Suite suite = (Suite) XmlMarshaller.fromXml(xml , Suite.class);
 			InputStream input = new FileInputStream(args[1]);
-			Run run = engine.runSuite(suite, input, null);
+			Run run = engine.runSuite(suite, input, null, null);
 			System.out.println(XmlMarshaller.toXml(run));
 		} catch (Exception e) {
 			// TODO Auto-generated catch block

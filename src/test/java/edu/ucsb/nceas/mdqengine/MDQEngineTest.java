@@ -9,6 +9,7 @@ import java.net.URL;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.dataone.configuration.Settings;
+import org.dataone.service.types.v2.SystemMetadata;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -69,8 +70,9 @@ public class MDQEngineTest {
 			log.error("CN URL: " + cnURL);
 			String metadataURL = "https://cn.dataone.org/cn/v2/object/" + id;
 			InputStream input = new URL(metadataURL).openStream();
+			SystemMetadata sysMeta = null;
 			// run the suite on it
-			run = mdqe.runSuite(suite, input, null);
+			run = mdqe.runSuite(suite, input, null, sysMeta);
 			run.setObjectIdentifier(id);
 			log.trace("Run results JSON: " + JsonMarshaller.toJson(run));
 		} catch (Exception e) {
@@ -91,8 +93,9 @@ public class MDQEngineTest {
 			String packageId = "resourceMap_tao.1.1";
 			String packageURL = "https://cn.dataone.org/cn/v2/object/" + packageId;
 			InputStream input = new URL(packageURL).openStream();
+			SystemMetadata sysMeta = null;
 			// run the suite on it
-			run = mdqe.runSuite(suite, input, null);
+			run = mdqe.runSuite(suite, input, null, sysMeta);
 			run.setObjectIdentifier(packageId);
 			log.trace("Run results XML: " + XmlMarshaller.toXml(run));
 		} catch (Exception e) {
