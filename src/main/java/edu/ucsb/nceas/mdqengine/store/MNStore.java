@@ -43,6 +43,8 @@ import edu.ucsb.nceas.mdqengine.serialize.XmlMarshaller;
 
 public class MNStore implements MDQStore {
 
+	public static final String MDQ_NS = "https://nceas.ucsb.edu/mdqe";
+	
 	protected Log log = LogFactory.getLog(this.getClass());
 
 	private MNode node = null;
@@ -88,7 +90,7 @@ public class MNStore implements MDQStore {
 		
 		// for now, just use the classname
 		ObjectFormatIdentifier formatId = new ObjectFormatIdentifier();
-		formatId.setValue(model.getClass().getCanonicalName());
+		formatId.setValue(MDQ_NS + "#" + model.getClass().getSimpleName().toLowerCase());
 		sysMeta.setFormatId(formatId);
 		
 		// roles
@@ -106,7 +108,7 @@ public class MNStore implements MDQStore {
 		String obj = XmlMarshaller.toXml(model);
 		sysMeta.setSize(BigInteger.valueOf(obj.getBytes("UTF-8").length));
 		sysMeta.setChecksum(ChecksumUtil.checksum(obj.getBytes("UTF-8"), "MD5"));
-		sysMeta.setFileName(model.getClass().getSimpleName() + ".xml");
+		sysMeta.setFileName(model.getClass().getSimpleName().toLowerCase() + ".xml");
 
 		// timestamps
 		Date now = Calendar.getInstance().getTime();
@@ -134,7 +136,9 @@ public class MNStore implements MDQStore {
 		Collection<String> results = new ArrayList<String>();
 		try {
 			// query system for object
-			String solrQuery = "q=" + URLEncoder.encode("formatId:\"" + clazz.getCanonicalName() + "\"", "UTF-8");
+			String formatId = MDQ_NS + "#" + clazz.getSimpleName().toLowerCase();
+
+			String solrQuery = "q=" + URLEncoder.encode("formatId:\"" + formatId + "\"", "UTF-8");
 			solrQuery += URLEncoder.encode("-obsoletedBy:*", "UTF-8");
 			solrQuery += "&fl=id,seriesId&wt=json&rows=10000";
 			log.debug("solrQuery = " + solrQuery);
