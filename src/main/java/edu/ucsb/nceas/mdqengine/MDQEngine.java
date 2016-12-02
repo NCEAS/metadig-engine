@@ -1,8 +1,6 @@
 package edu.ucsb.nceas.mdqengine;
 
-import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
@@ -10,7 +8,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -19,29 +16,26 @@ import javax.script.ScriptException;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.xpath.XPathExpressionException;
 
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.dataone.client.v2.itk.DataPackage;
 import org.dataone.configuration.Settings;
-import org.dataone.service.types.v1.Identifier;
 import org.dataone.service.types.v2.SystemMetadata;
-import org.dataone.service.util.TypeMarshaller;
 import org.xml.sax.SAXException;
 
 import edu.ucsb.nceas.mdqengine.dispatch.MDQCache;
 import edu.ucsb.nceas.mdqengine.model.Check;
 import edu.ucsb.nceas.mdqengine.model.Metadata;
 import edu.ucsb.nceas.mdqengine.model.Output;
-import edu.ucsb.nceas.mdqengine.model.Status;
-import edu.ucsb.nceas.mdqengine.model.Suite;
 import edu.ucsb.nceas.mdqengine.model.Result;
 import edu.ucsb.nceas.mdqengine.model.Run;
+import edu.ucsb.nceas.mdqengine.model.Status;
+import edu.ucsb.nceas.mdqengine.model.Suite;
 import edu.ucsb.nceas.mdqengine.processor.XMLDialect;
 import edu.ucsb.nceas.mdqengine.serialize.JsonMarshaller;
 import edu.ucsb.nceas.mdqengine.serialize.XmlMarshaller;
 import edu.ucsb.nceas.mdqengine.store.InMemoryStore;
+import edu.ucsb.nceas.mdqengine.store.MNStore;
 
 public class MDQEngine {
 	
@@ -50,11 +44,14 @@ public class MDQEngine {
 	/**
 	 * Default store uses the in-memory implementation
 	 */
-	private MDQStore store = new InMemoryStore();
+	private MDQStore store = null;
 	
 	protected Log log = LogFactory.getLog(this.getClass());
 	
 	public MDQEngine() {
+		 store = new InMemoryStore();
+		 //store = new MNStore();
+		 
 		MDQCache.initialize(null);
 	}
 
