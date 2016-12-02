@@ -1,0 +1,1474 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mdq:run xmlns:mdq="https://nceas.ucsb.edu/mdqe" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="https://nceas.ucsb.edu/mdqe /Users/leinfelder/git/mdqengine/src/main/resources/schemas/schema1.xsd">
+   <id>6988e8f8-9e68-4db8-b19b-71602ff419dc</id>
+   <timestamp>2016-12-01T17:28:26.154-08:00</timestamp>
+   <objectIdentifier>eml.1.1</objectIdentifier>
+   <metadata>
+      	<dataUrl>blah</dataUrl>
+      	<datasource>urn:node:KNB</datasource>
+      	<formatId>eml://ecoinformatics.org/eml-2.1.1</formatId>
+      	<funder>NSF</funder>
+      	<rightsHolder>CN=Ben Leinfelder A10096,O=Google,C=US,DC=cilogon,DC=org</rightsHolder>
+   </metadata>
+   <suiteId>arctic.data.center.suite.1</suiteId>
+   <result>
+      <check>
+         <id>check.nsf.award.numbers.present.1</id>
+         <name>award numbers</name>
+         <description><![CDATA[One or more award numbers must be entered.]]></description>
+         <type>identification</type>
+         <level>REQUIRED</level>
+         <environment>rscript</environment>
+         <code><![CDATA[
+if (is.null(awards)) {
+  status <- "FAILURE"
+  output <- "No award numbers were found."
+  mdq_result <- list(status = status,
+                     output = list(list(value = output)))
+} else if (length(title) < 1) {
+  status <- "FAILURE"
+  output <- paste0("No award numbers were found when one or more were expected.")
+  mdq_result <- list(status = status,
+                     output = list(list(value = output)))
+} else if (all(nchar(awards) <= 0)) {
+  status <- "FAILURE"
+  output <- "Of the award numbers found, none were non-zero in length."
+  mdq_result <- list(status = status,
+                     output = list(list(value = output)))
+} else {
+  status <- "SUCCESS"
+  output <- "At least one award number was found."
+  mdq_result <- list(status = status,
+                     output = list(list(value = output)))
+}]]></code>
+         <inheritState>false</inheritState>
+         <selector>
+            <name>awards</name>
+            <xpath>/eml/dataset/project/funding//para</xpath>
+         </selector>
+      </check>
+      <timestamp>2016-12-01T17:28:26.583-08:00</timestamp>
+      <output><![CDATA[No award numbers were found.]]></output>
+      <status>FAILURE</status>
+   </result>
+   <result>
+      <check>
+         <id>check.nsf.award.numbers.in.nsf.database.1</id>
+         <name>NSF awards in database</name>
+         <description><![CDATA[All entered NSF award numbers should be present in the NSF award database.]]></description>
+         <type>identification</type>
+         <level>OPTIONAL</level>
+         <environment>rscript</environment>
+         <code><![CDATA[
+library(httr)
+NSFawardLength <- 7
+
+if (is.null(awards)) {
+  mdq_result <- list(status = "SKIP",
+                     output = list(list(value = "No NSF award numbers are present in the metadata document so this check was skipped.")))
+
+} else {
+  # Clean up each award string so we can pass it to the HTTP API
+  awards <- trimws(gsub("nsf award", "", tolower(awards)))
+  # Make sure that all award numbers are the correct number of characters
+  # The number may have been stripped of leading zeros, so add them back
+  # in if necessary.
+  awardFormat <- paste0("%0", NSFawardLength, "d")
+  awards <- lapply(awards, function(x) {
+    award <- x
+    if(nchar(x) < NSFawardLength) {
+        award <- sprintf(awardFormat, as.integer(x)) 
+    }
+    as.character(award)
+  })
+
+  # Search for each award
+  responses <- lapply(awards, function(award) {
+    tryCatch({
+      req <- GET(paste0("https://arcticdata.io/api.nsf.gov/services/v1/awards.json?id=", award))
+      stopifnot(req$status_code == 200) # Throw an error if the HTTP status isn't 200
+      content(req)
+    },
+    error = function(e) {
+      list()
+    })
+  })
+
+  # Determine if each award was found
+  is_found <- sapply(responses, function(r) ifelse(!is.null(r$response$award) && length(r$response$award) == 1, TRUE, FALSE))
+
+
+  if (all(is_found)) {
+    mdq_result <- list(status = "SUCCESS",
+                       output = list(list(value = "All award numbers were found in the NSF award database.")))
+  } else {
+
+    outputs <- paste0("The award number '", awards[!is_found], "' was not found in the NSF award database.")
+    mdq_result <- list(status = "ERROR",
+    
+                       output = lapply(outputs, function(message) { list(value = message)}))
+  }
+}
+
+]]></code>
+         <inheritState>false</inheritState>
+         <selector>
+            <name>awards</name>
+            <xpath>/eml/dataset/project/funding//para</xpath>
+         </selector>
+      </check>
+      <timestamp>2016-12-01T17:28:26.825-08:00</timestamp>
+      <output><![CDATA[No NSF award numbers are present in the metadata document so this check was skipped.]]></output>
+      <status>SKIP</status>
+   </result>
+   <result>
+      <check>
+         <id>check.creator.present.1</id>
+         <name>Creator</name>
+         <description><![CDATA[Creator should be present]]></description>
+         <type>identification</type>
+         <level>REQUIRED</level>
+         <environment>rscript</environment>
+         <code><![CDATA[
+    library(metadig)
+
+    if (length(creator) <= 0) {
+      failure("No creators are present.")
+    } else {
+      if(creatorCount == 1) {
+        success("One creator is present.")
+      } else {
+        success(sprintf("%d creators are present.", creatorCount))
+      }
+    }
+  ]]></code>
+         <inheritState>false</inheritState>
+         <selector>
+            <name>creator</name>
+            <xpath>/eml/dataset/creator</xpath>
+         </selector>
+         <selector>
+            <name>creatorCount</name>
+            <xpath>count(/eml/dataset/creator)</xpath>
+         </selector>
+         <dialect>
+            <name>eml</name>
+            <xpath>boolean(/*[local-name() = 'eml'])</xpath>
+         </dialect>
+      </check>
+      <timestamp>2016-12-01T17:28:27.061-08:00</timestamp>
+      <output type="text"><![CDATA[One creator is present.]]></output>
+      <status>SUCCESS</status>
+   </result>
+   <result>
+      <check>
+         <id>check.creator.info.1</id>
+         <name>Check creator information</name>
+         <description><![CDATA[Check if the creator contains an email and address.]]></description>
+         <type>identification</type>
+         <level>INFO</level>
+         <environment>rscript</environment>
+         <code><![CDATA[
+check <- function() {
+  library(base)
+  values <- list()
+  if(creatorCount == 0) {
+    values[[length(values)+1]] <- list(value=sprintf("A 'creator' is not present, so unable to check email and address."))
+    return(list(status="FAILURE", values=values))
+  }
+  
+  # Assume that the check will succeed, until proven otherwise.
+  # The output messages will be gathered into a list
+  status <- "SUCCESS"
+  
+  # Output number of creators that have email addresses
+  if(emailCount == creatorCount) {
+    values[[length(values)+1]] <- list(value=sprintf("All creators have email addresses.", creatorCount))
+  } else {
+    values[[length(values)+1]] <- list(value=sprintf("%d of %d creators have email addresses.", emailCount, creatorCount))
+  }
+  
+  # Output number of creators that have addresses
+  if(addressCount == creatorCount) {
+    values[[length(values)+1]] <- list(value=sprintf("All creators have addresses.", creatorCount))
+  } else {
+    values[[length(values)+1]] <- list(value=sprintf("%d of %d creators have addresses.", addressCount, creatorCount))
+  }
+
+  return(list(status=status, values=values))
+}
+
+result <- check()
+mdq_result <- list(status=result$status, output=result$values)
+]]></code>
+         <inheritState>false</inheritState>
+         <selector>
+            <name>creatorCount</name>
+            <xpath>count(/eml/dataset/creator)</xpath>
+         </selector>
+         <selector>
+            <name>emailCount</name>
+            <xpath>count(/eml/dataset/creator/electronicMailAddress)</xpath>
+         </selector>
+         <selector>
+            <name>addressCount</name>
+            <xpath>count(/eml/dataset/creator/address)</xpath>
+         </selector>
+         <dialect>
+            <name>eml</name>
+            <xpath>boolean(/*[local-name() = 'eml'])</xpath>
+         </dialect>
+      </check>
+      <timestamp>2016-12-01T17:28:27.283-08:00</timestamp>
+      <output><![CDATA[0 of 1 creators have email addresses.]]></output>
+      <output><![CDATA[0 of 1 creators have addresses.]]></output>
+      <status>SUCCESS</status>
+   </result>
+   <result>
+      <check>
+         <id>check.contact.1</id>
+         <name>Contact</name>
+         <description><![CDATA[Contact should be present]]></description>
+         <type>identification</type>
+         <level>REQUIRED</level>
+         <environment>rscript</environment>
+         <code><![CDATA[
+    library(metadig)
+
+    if (length(contact) <= 0) {
+      failure("No contacts are present.")
+    } else {
+      if(contactCount == 1) {
+        success("One contact is present.")
+      } else {
+        success(sprintf("%d contacts are present.", contactCount))
+      }
+    }
+  ]]></code>
+         <inheritState>false</inheritState>
+         <selector>
+            <name>contact</name>
+            <xpath>/eml/dataset/contact</xpath>
+         </selector>
+         <selector>
+            <name>contactCount</name>
+            <xpath>count(/eml/dataset/contact)</xpath>
+         </selector>
+         <dialect>
+            <name>eml</name>
+            <xpath>boolean(/*[local-name() = 'eml'])</xpath>
+         </dialect>
+      </check>
+      <timestamp>2016-12-01T17:28:27.492-08:00</timestamp>
+      <output type="text"><![CDATA[One contact is present.]]></output>
+      <status>SUCCESS</status>
+   </result>
+   <result>
+      <check>
+         <id>check.contact.info.1</id>
+         <name>Check contact information</name>
+         <description><![CDATA[Check if the contact contains an email and address.]]></description>
+         <type>identification</type>
+         <level>INFO</level>
+         <environment>rscript</environment>
+         <code><![CDATA[
+check <- function() {
+  library(base)
+  values <- list()
+  if(contactCount == 0) {
+    values[[length(values)+1]] <- list(value=sprintf("A 'contact' is not present, so unable to check email and address."))
+    return(list(status="FAILURE", values=values))
+  }
+  
+  # Assume that the check will succeed, until proven otherwise.
+  # The output messages will be gathered into a list
+  status <- "SUCCESS"
+  
+  # Output number of contacts that have email addresses
+  if(emailCount == contactCount) {
+    values[[length(values)+1]] <- list(value=sprintf("All contacts have email addresses."))
+  } else {
+    values[[length(values)+1]] <- list(value=sprintf("%d of %d contacts have email addresses.", emailCount, contactCount))
+  }
+  
+  # Output number of contact that have addresses
+  if(addressCount == contactCount) {
+    values[[length(values)+1]] <- list(value=sprintf("All contacts have addresses."))
+  } else {
+    values[[length(values)+1]] <- list(value=sprintf("%d of %d contacts have addresses.", addressCount, contactCount))
+  }
+  
+  return(list(status=status, values=values))
+}
+
+result <- check()
+mdq_result <- list(status=result$status, output=result$values)
+]]></code>
+         <inheritState>false</inheritState>
+         <selector>
+            <name>contactCount</name>
+            <xpath>count(/eml/dataset/contact)</xpath>
+         </selector>
+         <selector>
+            <name>emailCount</name>
+            <xpath>count(/eml/dataset/contact/electronicMailAddress)</xpath>
+         </selector>
+         <selector>
+            <name>addressCount</name>
+            <xpath>count(/eml/dataset/contact/address)</xpath>
+         </selector>
+         <dialect>
+            <name>eml</name>
+            <xpath>boolean(/*[local-name() = 'eml'])</xpath>
+         </dialect>
+      </check>
+      <timestamp>2016-12-01T17:28:27.701-08:00</timestamp>
+      <output><![CDATA[0 of 1 contacts have email addresses.]]></output>
+      <output><![CDATA[0 of 1 contacts have addresses.]]></output>
+      <status>SUCCESS</status>
+   </result>
+   <result>
+      <check>
+         <id>check.abstract.100.words.1</id>
+         <name>Abstract length</name>
+         <description><![CDATA[Abstract should be at least 100 words long.]]></description>
+         <type>discovery</type>
+         <level>REQUIRED</level>
+         <environment>rscript</environment>
+         <code><![CDATA[
+    if (length(abstract) == 0) {
+      status <- "FAILURE"
+      message <- "No abstract sections were found."
+    } else if (length(abstract) > 1) {
+      status <- "FAILURE"
+      message <- "More than one abstract section is present, only one is allowed."
+    } else {
+      library(stringr)
+      tokens <- str_split(abstract, " ")[[1]]
+
+      if (length(tokens) >= 100) {
+        status <- "SUCCESS"
+        message <- paste0("The abstract is ", length(tokens), " word(s) long which is sufficient.")
+      } else {
+        status <- "FAILURE"
+        message <- paste0("The abstract is only ", length(tokens), " word(s) long but 100 or more is requried.")
+      }
+    }
+
+    mdq_result <- list(status = status,
+                       output = list(list(value = message)))
+  ]]></code>
+         <inheritState>false</inheritState>
+         <selector>
+            <name>abstract</name>
+            <xpath>/eml/dataset/abstract</xpath>
+         </selector>
+         <dialect>
+            <name>eml</name>
+            <xpath>boolean(/*[local-name() = 'eml'])</xpath>
+         </dialect>
+      </check>
+      <timestamp>2016-12-01T17:28:27.894-08:00</timestamp>
+      <output><![CDATA[No abstract sections were found.]]></output>
+      <status>FAILURE</status>
+   </result>
+   <result>
+      <check>
+         <id>check.dataset.title.length.1</id>
+         <name>Dataset title length is sufficient</name>
+         <description><![CDATA[Check that the dataset title is greater than 7 words and less than 20.]]></description>
+         <type>identification</type>
+         <level>REQUIRED</level>
+         <environment>rscript</environment>
+         <code><![CDATA[
+  check <- function() {
+    library(base)
+
+    if(!titlePresent) {
+      return(list(status = "FAILURE", output = sprintf("The dataset title is not present, so the check is unable to determine title word length.")))
+    }
+
+    # Required minimum word count for title
+    strictMinCount <- 5
+    # Recommended minimum word count
+    minWordCount <- 7
+    # Recommended max word count
+    maxWordCount <- 20
+
+    wordCount <- length(unlist(strsplit(datasetTitle, "\\s+", perl=T)))
+    if (wordCount < strictMinCount) {
+      return(list(status = "FAILURE", output = sprintf("The number of words in the dataset's title is %d. The minimum required word count is %s.", wordCount, minWordCount))) 
+    } else if (wordCount < minWordCount) {
+      return(list(status = "FAILURE", output = sprintf("The number of words in the dataset's title is %d. The minimum recommended word count is %s.", wordCount, minWordCount))) 
+    } else if (wordCount > maxWordCount) {
+      return(list(status = "FAILURE", output = sprintf("The number of words in the dataset's title is %d. The maximum recommended word count is %s.", wordCount, maxWordCount))) 
+    } else {
+      return(list(status = "SUCCESS", output = sprintf("The number of words in the dataset's title is sufficient because it is between %d and %d words long.", minWordCount, maxWordCount))) 
+    }
+  }
+  result <- check()
+  mdq_result <- list(status=result$status, output=list(list(value=result$output)))
+  ]]></code>
+         <inheritState>false</inheritState>
+         <selector>
+            <name>titlePresent</name>
+            <xpath>boolean(/eml/dataset/title)</xpath>
+         </selector>
+         <selector>
+            <name>datasetTitle</name>
+            <xpath>/eml/dataset/title</xpath>
+         </selector>
+         <dialect>
+            <name>eml</name>
+            <xpath>boolean(/*[local-name() = 'eml'])</xpath>
+         </dialect>
+      </check>
+      <timestamp>2016-12-01T17:28:28.1-08:00</timestamp>
+      <output><![CDATA[The number of words in the dataset's title is 2. The minimum required word count is 7.]]></output>
+      <status>FAILURE</status>
+   </result>
+   <result>
+      <check>
+         <id>check.identifier.is.present.1</id>
+         <name>Identifier present</name>
+         <description><![CDATA[Identifier should be present.]]></description>
+         <type>identification</type>
+         <level>REQUIRED</level>
+         <environment>rscript</environment>
+         <code><![CDATA[
+if (length(identifier) > 0) {
+mdq_result <- list(status = "SUCCESS",
+                   output = list(list(value = "An identifier is present.")))
+} else {
+mdq_result <- list(status = "FAILURE",
+                   output = list(list(value = "An identifier is not present.")))
+}
+    
+  ]]></code>
+         <inheritState>false</inheritState>
+         <selector>
+            <name>identifier</name>
+            <xpath>/eml/@packageId |
+      /*/fileIdentifier/CharacterString</xpath>
+         </selector>
+      </check>
+      <timestamp>2016-12-01T17:28:28.31-08:00</timestamp>
+      <output><![CDATA[An identifier is present.]]></output>
+      <status>SUCCESS</status>
+   </result>
+   <result>
+      <check>
+         <id>check.identifier.is.doi.1</id>
+         <name>DOI Identifier</name>
+         <description><![CDATA[Identifier should be a DOI.]]></description>
+         <type>identification</type>
+         <level>OPTIONAL</level>
+         <environment>rscript</environment>
+         <code><![CDATA[
+library(stringr)
+
+if (length(identifier) == 0) {
+  mdq_result <- list(status = "FAILURE",
+                     output = list(list(value = "No identifier was found.")))
+} else if (length(identifier) > 1) {
+  mdq_result <- list(status = "FAILURE",
+                     output = list(list(value = "More that one identifier was found when a single one was expected.")))
+} else {
+  doi_patterns = c("doi:10\\..+",
+                   "http(s)?:\\/\\/(dx.)?doi\\.org\\/(doi\\:)?10\\..+")
+
+  is_doi = any(str_detect(identifier, doi_patterns))
+
+  if (is_doi) {
+    mdq_result <- list(status = "SUCCESS",
+                       output = list(list(value = "The identifier looks like a DOI.")))
+  } else {
+    mdq_result <- list(status = "FAILURE",
+                       output = list(list(value = paste0("The identifier '", identifier, "' does not look like a DOI. Note that a DOI will be assigned to this dataset when it has been reviewed and approved."))))
+  }
+}
+  ]]></code>
+         <inheritState>false</inheritState>
+         <selector>
+            <name>identifier</name>
+            <xpath>/eml/@packageId</xpath>
+         </selector>
+      </check>
+      <timestamp>2016-12-01T17:28:28.59-08:00</timestamp>
+      <output><![CDATA[The identifier 'tao.1.1' does not look like a DOI. Note that a DOI will be assigned to this dataset when it has been reviewed and approved.]]></output>
+      <status>FAILURE</status>
+   </result>
+   <result>
+      <check>
+         <id>check.usage.is.cc.1</id>
+         <name>Usage</name>
+         <description><![CDATA[Usage should be Creative Commons]]></description>
+         <type>identification</type>
+         <level>REQUIRED</level>
+         <environment>rscript</environment>
+         <code><![CDATA[
+library(stringr)
+
+# CC-BY: This work is licensed under the Creative Commons Attribution 4.0 International License.\nTo view a copy of this license, visit http://creativecommons.org/licenses/by/4.0/."
+# CC-0:"This work is dedicated to the public domain under the Creative Commons Universal 1.0 Public Domain Dedication.\nTo view a copy of this dedication, visit https://creativecommons.org/publicdomain/zero/1.0/."
+
+phrases <- c("http://creativecommons.org/licenses/by/4.0", "https://creativecommons.org/publicdomain/zero/1.0")
+
+if (length(rights) == 0) {
+  status <- "FAILURE"
+  message <- "The document is not licensed with a Creative Commons CC-0 or CC-BY license."
+} else if (length(rights) > 1) {
+  status <- "FAILURE"
+  message <- "More than one license was found which was an unexpected state."
+} else {
+  if (str_detect(rights[[1]], phrases[[1]])) {
+    status <- "SUCCESS"
+    message <- "The document is licensed with a Creative Commons CC-BY license."
+  } else if (str_detect(rights[[1]], phrases[[2]])) {
+    status <- "SUCCESS"
+    message <- "The document is licensed with a Creative Commons CC-0 license."
+  } else {
+    status <- "FAILURE"
+    message <- "The document is not licensed with a Creative Commons CC-0 or CC-BY license."
+  }
+}
+
+mdq_result <- list(status = status,
+                   output = list(list(value = message)))
+  ]]></code>
+         <inheritState>false</inheritState>
+         <selector>
+            <name>rights</name>
+            <xpath>/eml/dataset/intellectualRights/para</xpath>
+         </selector>
+         <dialect>
+            <name>eml</name>
+            <xpath>boolean(/*[local-name() = 'eml'])</xpath>
+         </dialect>
+      </check>
+      <timestamp>2016-12-01T17:28:28.831-08:00</timestamp>
+      <output><![CDATA[The document is not licensed with a Creative Commons CC-0 or CC-BY license.]]></output>
+      <status>FAILURE</status>
+   </result>
+   <result>
+      <check>
+         <id>check.temporal.coverage.1</id>
+         <name>Temporal coverage</name>
+         <description><![CDATA[Temporal coverage should be present at the dataset level]]></description>
+         <type>discovery</type>
+         <level>REQUIRED</level>
+         <environment>rscript</environment>
+         <code><![CDATA[
+  check <- function() {
+    if(!coveragePresent) {
+      return(list(status = "FAILURE", output = sprintf("A description of this dataset's temporal coverage is not present.")))
+    } else {
+      return(list(status = "SUCCESS", output = sprintf("A description of this dataset's temporal coverage is present.")))
+    }
+  }
+  result <- check()
+  mdq_result <- list(status=result$status, output=list(list(value=result$output)))
+  ]]></code>
+         <inheritState>false</inheritState>
+         <selector>
+            <name>coveragePresent</name>
+            <xpath>boolean(/eml/dataset/coverage/temporalCoverage)</xpath>
+         </selector>
+         <dialect>
+            <name>eml</name>
+            <xpath>boolean(/*[local-name() = 'eml'])</xpath>
+         </dialect>
+      </check>
+      <timestamp>2016-12-01T17:28:29.058-08:00</timestamp>
+      <output><![CDATA[A description of this dataset's temporal coverage is not present.]]></output>
+      <status>FAILURE</status>
+   </result>
+   <result>
+      <check>
+         <id>check.geographic.description.1</id>
+         <name>Geographic coverage description</name>
+         <description><![CDATA[Geographic coverage description should be present at the dataset level.]]></description>
+         <type>discovery</type>
+         <level>REQUIRED</level>
+         <environment>rscript</environment>
+         <code><![CDATA[
+    library(metadig)
+    
+    if (length(description) >= 1) {
+      success("A textual description of the geographic coverage of this dataset is present.")
+    } else {
+      failure("A textual description of the geographic coverage of this dataset is not present.")
+    }
+  ]]></code>
+         <inheritState>false</inheritState>
+         <selector>
+            <name>description</name>
+            <xpath>/eml/dataset/coverage/geographicCoverage/geographicDescription</xpath>
+         </selector>
+         <dialect>
+            <name>eml</name>
+            <xpath>boolean(/*[local-name() = 'eml'])</xpath>
+         </dialect>
+      </check>
+      <timestamp>2016-12-01T17:28:29.27-08:00</timestamp>
+      <output type="text"><![CDATA[A textual description of the geographic coverage of this dataset is not present.]]></output>
+      <status>FAILURE</status>
+   </result>
+   <result>
+      <check>
+         <id>check.bounding.coordinates.1</id>
+         <name>Geographic coverage coordinates</name>
+         <description><![CDATA[Geographic Coverage should contain bounding coordinates.]]></description>
+         <type>discovery</type>
+         <level>REQUIRED</level>
+         <environment>rscript</environment>
+         <code><![CDATA[
+    library(metadig)
+    
+    if (length(coordinates) >= 1) {
+      success("A set of bounding coordinates describing the geographic coverage of this dataset is present.")
+    } else {
+      failure("A set of bounding coordinates describing the geographic coverage of this dataset is not present.")
+    }
+  ]]></code>
+         <inheritState>false</inheritState>
+         <selector>
+            <name>coordinates</name>
+            <xpath>/eml/dataset/coverage/geographicCoverage/boundingCoordinates</xpath>
+         </selector>
+         <dialect>
+            <name>eml</name>
+            <xpath>boolean(/*[local-name() = 'eml'])</xpath>
+         </dialect>
+      </check>
+      <timestamp>2016-12-01T17:28:29.472-08:00</timestamp>
+      <output type="text"><![CDATA[A set of bounding coordinates describing the geographic coverage of this dataset is not present.]]></output>
+      <status>FAILURE</status>
+   </result>
+   <result>
+      <check>
+         <id>check.pub.date.1</id>
+         <name>Publication date</name>
+         <description><![CDATA[Publication date should be present]]></description>
+         <type>identification</type>
+         <level>REQUIRED</level>
+         <environment>rscript</environment>
+         <code><![CDATA[
+    library(metadig)
+    
+    if (length(pub_date) >= 1) {
+      success("A publication date is present.")
+    } else {
+      failure("A publication date is not present.") 
+    }
+  ]]></code>
+         <inheritState>false</inheritState>
+         <selector>
+            <name>pub_date</name>
+            <xpath>/eml/dataset/pubDate</xpath>
+         </selector>
+         <dialect>
+            <name>eml</name>
+            <xpath>boolean(/*[local-name() = 'eml'])</xpath>
+         </dialect>
+      </check>
+      <timestamp>2016-12-01T17:28:29.68-08:00</timestamp>
+      <output type="text"><![CDATA[A publication date is not present.]]></output>
+      <status>FAILURE</status>
+   </result>
+   <result>
+      <check>
+         <id>check.sampling.description.present.1</id>
+         <name>Sampling description present</name>
+         <description><![CDATA[Checks if a sampling description is present in the methods section.]]></description>
+         <type>interpretation</type>
+         <level>OPTIONAL</level>
+         <environment>rscript</environment>
+         <code><![CDATA[
+    check <- function() {
+      library(base)
+      # These variables are defined by the MQE from the <xpath> selectors.
+      # "samplingDescriptionPresent" - is a methods sampling description present?
+      if(samplingDescriptionPresent) {
+        return(list(status="SUCCESS", output="A sampling description is present in the methods section."))
+      } else {
+        return(list(status="FAILURE", output="A sampling description is not present in the methods section."))
+      }
+    }
+  
+    result <- check()
+    mdq_result <- list(status=result$status, output=list(list(value=result$output)))    
+    ]]></code>
+         <inheritState>false</inheritState>
+         <selector>
+            <name>samplingDescriptionPresent</name>
+            <xpath>boolean(/eml/dataset/methods/sampling/samplingDescription)</xpath>
+         </selector>
+         <dialect>
+            <name>eml</name>
+            <xpath>boolean(/*[local-name() = 'eml'])</xpath>
+         </dialect>
+      </check>
+      <timestamp>2016-12-01T17:28:29.877-08:00</timestamp>
+      <output><![CDATA[A sampling description is not present in the methods section.]]></output>
+      <status>FAILURE</status>
+   </result>
+   <result>
+      <check>
+         <id>check.entity.present.1</id>
+         <name>Data entity present check.</name>
+         <description><![CDATA[Check that a data entity is present.]]></description>
+         <type>interpretation</type>
+         <level>OPTIONAL</level>
+         <environment>rscript</environment>
+         <code><![CDATA[
+check <- function() {
+  library(base)
+  library(metadig)
+  # variables defined by MQE from the <xpath> selectors.
+  # "entityPresent" - is a data entity present?
+  
+  outputList <- list()
+  status <- "SUCCESS"
+  # Assume that the check will succeed, until proven otherwise.
+  # The dataset may have multiple entities, so check each one. 
+  if(entityPresent) {
+    if (entityCount == 1) {
+      outputList[[length(outputList)+1]] <- list(value=sprintf("1 data description is present."))
+    } else {
+      outputList[[length(outputList)+1]] <- list(value=sprintf("%d data descriptions are present", entityCount))
+    }
+    return(list(status=status, values=outputList))
+  } else {
+    outputList[[length(outputList)+1]] <- list(value=sprintf("No data descriptions are present."))
+    return(list(status="FAILURE", values=outputList))
+  }
+}
+
+result <- check()
+mdq_result <- list(status=result$status, output=result$values) 
+]]></code>
+         <inheritState>false</inheritState>
+         <selector>
+            <name>entityPresent</name>
+            <xpath>boolean(/eml/dataset/*[self::dataTable|self::spatialRaster|self::spatialVector|self::storedProcedure|self::view|self::otherEntity])</xpath>
+         </selector>
+         <selector>
+            <name>entityCount</name>
+            <xpath>count(/eml/dataset/*[self::dataTable|self::spatialRaster|self::spatialVector|self::storedProcedure|self::view|self::otherEntity])</xpath>
+         </selector>
+         <dialect>
+            <name>eml</name>
+            <xpath>boolean(/*[local-name() = 'eml'])</xpath>
+         </dialect>
+      </check>
+      <timestamp>2016-12-01T17:28:30.086-08:00</timestamp>
+      <output><![CDATA[1 data description is present.]]></output>
+      <status>SUCCESS</status>
+   </result>
+   <result>
+      <check>
+         <id>check.entity.name.present.1</id>
+         <name>Check that an entity name, description, format, size, checksum is present</name>
+         <description><![CDATA[Check that each data entity has a name, description, format, size, checksum.]]></description>
+         <type>interpretation</type>
+         <level>INFO</level>
+         <environment>rscript</environment>
+         <code><![CDATA[
+
+check <- function() {
+  library(base)
+  library(metadig)
+  # varialbe defined by MQE from the <xpath> selectors.
+  # "entityName" - the names of each data entity
+  # "entityDescriptionPresent" - is the names of each data entity present
+  # "entityFormatPresent" - is the description for the entity present
+  # "entitySizePresent" - is the description for the entity present
+  # 'entityChecksumPresent" - is the checksum value (e.g. SHA1, MD5) of the entity present
+  
+  outputList <- list()
+  # Assume that the check will succeed, until proven otherwise.
+  # The dataset may have multiple entities, so check each one. All entities are checked
+  # so mdqe can report to the user about all entities, not just the one that failed.
+  # Set quote style to simple quotes
+  skip <- FALSE
+  if (length(entityName) > 0) {
+    for(iEntity in 1:length(entityName)) {
+      # Assume that the check will succeed, until proven otherwise.
+      undefEl <- list()
+      thisEntityType <- entityType[[iEntity]]
+      
+      if(!isDefined("entityName", entityName, iEntity)) {
+        undefEl[[length(undefEl)+1]] <- "name"
+        thisEntityName <- sprintf("%d", iEntity)
+      } else {
+        thisEntityName <- sprintf("%s", entityName[[iEntity]])
+      }
+      
+      if(!isTrueVal("entityFormatPresent", entityFormatPresent, iEntity)) {
+        undefEl[[length(undefEl)+1]] <- "format"
+      }
+
+      if(!isTrueVal("entitySizePresent", entitySizePresent, iEntity)) {
+        undefEl[[length(undefEl)+1]] <- "size"
+      }
+
+      if(!isTrueVal("entityDescriptionPresent", entityDescriptionPresent, iEntity)) {
+        undefEl[[length(undefEl)+1]] <- "description"
+      }
+
+      if(!isTrueVal("entityChecksumPresent", entityChecksumPresent, iEntity)) {
+        undefEl[[length(undefEl)+1]] <- "checksum (authentication)"
+      }
+
+      # Store output for this entity if it didn't pass a check. We will only report on entities that don't have
+      # all the elements we are checking for.
+      if(length(undefEl) > 0) {
+        outputList[[length(outputList)+1]] <- list(value=sprintf("Description for '%s' is missing these items: %s", thisEntityName, paste(sQuote(unlist(undefEl)), collapse=", ")))
+      }
+    }
+  } else {
+      # No data entities were selected by the xpath, so tell the user no check was performed and set status to SKIP
+      outputList[[length(outputList)+1]] <- list(value=sprintf("No data descriptions are present, so unable to check entity 'name', 'format', etc"))
+      skip <- TRUE
+  }
+  
+  # If nt output was set, then the check passed, otherwise have to check for SKIP or FAILURE
+  if(length(outputList) > 0) {
+    if(skip) status <- "SKIP" else status <- "FAILURE"
+    return(list(status=status, values=outputList))
+  } else {
+    return(list(status="SUCCESS", values=list(value=sprintf("All data description sections have a name, description, format, size and checksum"))))
+  }
+}
+
+result <- check()
+mdq_result <- list(status=result$status, output=result$values) 
+]]></code>
+         <inheritState>false</inheritState>
+         <selector>
+            <name>entityName</name>
+            <xpath>/eml/dataset/*[self::dataTable|self::spatialRaster|self::spatialVector|self::storedProcedure|self::view|self::otherEntity]/entityName</xpath>
+         </selector>
+         <selector>
+            <name>entityType</name>
+            <xpath>/eml/dataset/*[self::dataTable|self::spatialRaster|self::spatialVector|self::storedProcedure|self::view|self::otherEntity]</xpath>
+            <subSelector>
+               <name>et</name>
+               <xpath>name(.)</xpath>
+            </subSelector>
+         </selector>
+         <selector>
+            <name>entityDescriptionPresent</name>
+            <xpath>/eml/dataset/*[self::dataTable|self::spatialRaster|self::spatialVector|self::storedProcedure|self::view|self::otherEntity]</xpath>
+            <subSelector>
+               <name>entityDescriptionSubSelector</name>
+               <xpath>boolean(./entityDescription)</xpath>
+            </subSelector>
+         </selector>
+         <selector>
+            <name>entitySizePresent</name>
+            <xpath>/eml/dataset/*[self::dataTable|self::spatialRaster|self::spatialVector|self::storedProcedure|self::view|self::otherEntity]</xpath>
+            <subSelector>
+               <name>entitySizeSubSelector</name>
+               <xpath>boolean(./physical/size)</xpath>
+            </subSelector>
+         </selector>
+         <selector>
+            <name>entityFormatPresent</name>
+            <xpath>/eml/dataset/*[self::dataTable|self::spatialRaster|self::spatialVector|self::storedProcedure|self::view|self::otherEntity]</xpath>
+            <subSelector>
+               <name>entityFormatPresentSubSelector</name>
+               <xpath>boolean(./physical/dataFormat)</xpath>
+            </subSelector>
+         </selector>
+         <selector>
+            <name>entityChecksumPresent</name>
+            <xpath>/eml/dataset/*[self::dataTable|self::spatialRaster|self::spatialVector|self::storedProcedure|self::view|self::otherEntity]</xpath>
+            <subSelector>
+               <name>entityChecksumPresentSubSelector</name>
+               <xpath>boolean(./physical/authentication)</xpath>
+            </subSelector>
+         </selector>
+         <dialect>
+            <name>eml</name>
+            <xpath>boolean(/*[local-name() = 'eml'])</xpath>
+         </dialect>
+      </check>
+      <timestamp>2016-12-01T17:28:30.307-08:00</timestamp>
+      <output><![CDATA[Error: could not find function "isDefined"
+Execution halted
+]]></output>
+      <status>ERROR</status>
+   </result>
+   <result>
+      <check>
+         <id>check.entity.attributes.present.1</id>
+         <name>Check that an each entity has a name and attributes.</name>
+         <description><![CDATA[Check that each data entity has attributes.]]></description>
+         <type>interpretation</type>
+         <level>OPTIONAL</level>
+         <environment>rscript</environment>
+         <code><![CDATA[
+	
+check <- function() {
+  library(base)
+  library(metadig)
+  # variables defined by MQE from the <xpath> selectors.
+  # "entityName" - the names of each data entity
+  # "entityType" - the type of data entity, e.g. "dataTable", "spatialVector", etc.
+  # "entityAttributesPresent" - the names of each data entity
+  
+  outputList <- list()
+  
+  if(!entityPresent) {
+    return(list(status="SKIP", values=list(list(value="No data table descriptions (and related attributes) are present."))))
+  }
+
+  # Skip check if no attributes present
+  if(!attributesPresent) {
+    return(list(status="SKIP", values=list(list(value="No data table attributes are present."))))
+  }  
+  
+  # Assume that the check will succeed, until proven otherwise.
+  # The dataset may have multiple entities, so check each one. 
+  status <- "SUCCESS"
+  if (length(entityName) > 0) {
+    for(iEntity in 1:length(entityName)) {
+      thisEntityName <- entityName[[iEntity]]
+      #thisEntityType <- entityType[[iEntity]]
+
+      if(!entityAttributesPresent[[iEntity]]) {
+        outputList[[length(outputList)+1]] <- list(value=sprintf("The data table description '%s' does not have attributes defined.", thisEntityName))
+      }
+    }
+  } else {
+      # No data entities were selected by the xpath, so tell the user no check was performed.
+      outputList[[length(outputList)+1]] <- list(value=sprintf("No data table descriptions are present, so uanble to check for attributes."))
+      return(list(status="SKIP", values=outputList))
+  }
+  
+  # If no output was set, then the check passed, otherwise have to check for SKIP or FAILURE
+  if(length(outputList) > 0) {
+    return(list(status="FAILURE", values=outputList))
+  } else {
+    return(list(status="SUCCESS", values=list(list(value=sprintf("All data table descriptions have attributes defined.")))))
+  }
+}
+
+result <- check()
+mdq_result <- list(status=result$status, output=result$values) 
+]]></code>
+         <inheritState>false</inheritState>
+         <selector>
+            <name>attributesPresent</name>
+            <xpath>boolean(/eml/dataset/dataTable/attributeList/attribute)</xpath>
+         </selector>
+         <selector>
+            <name>entityPresent</name>
+            <xpath>boolean(/eml/dataset/dataTable)</xpath>
+         </selector>
+         <selector>
+            <name>entityName</name>
+            <xpath>/eml/dataset/dataTable/entityName</xpath>
+         </selector>
+         <selector>
+            <name>entityType</name>
+            <xpath>/eml/dataset/dataTable</xpath>
+            <subSelector>
+               <name>et</name>
+               <xpath>name(.)</xpath>
+            </subSelector>
+         </selector>
+         <selector>
+            <name>entityAttributesPresent</name>
+            <xpath>/eml/dataset/dataTable</xpath>
+            <subSelector>
+               <name>entityAttributesSubSelector</name>
+               <xpath>boolean(./attributeList/attribute)</xpath>
+            </subSelector>
+         </selector>
+         <dialect>
+            <name>eml</name>
+            <xpath>boolean(/*[local-name() = 'eml'])</xpath>
+         </dialect>
+      </check>
+      <timestamp>2016-12-01T17:28:30.516-08:00</timestamp>
+      <output><![CDATA[All data table descriptions have attributes defined.]]></output>
+      <status>SUCCESS</status>
+   </result>
+   <result>
+      <check>
+         <id>check.attribute.definition.sufficient.1</id>
+         <name>Attribute definition is sufficient.</name>
+         <description><![CDATA[Check that each attribute definition has greater that 4 words.]]></description>
+         <type>interpretation</type>
+         <level>OPTIONAL</level>
+         <environment>rscript</environment>
+         <code><![CDATA[
+check <- function() {
+  library(base)
+  # varialbe defined by MQE from the <xpath> selectors.
+  # "attributeName" - the names of each data entity
+  # "attributeDefinition" - the names of each data entity
+  
+  minWordCount <- 4
+  
+   # Skip check if no dataTables
+  if(!entityPresent) {
+    return(list(status="SKIP", values=list(value="No data table descriptions are present, so cannot check attribute definition word counts.")))
+  }
+
+  # Skip check if no attributes present
+  if(!attributesPresent) {
+    return(list(status="SKIP", values=list(value="No data table description attributes are present, so cannot check attribute definition word counts.")))
+  } 
+
+  values <- list()
+  attrCount <- 0
+  if (length(attributeName) > 0) {
+    for(iAttr in 1:length(attributeName)) {
+      attrName <- tolower(as.character(attributeName[[iAttr]]))
+      attrDef <- tolower(as.character(attributeDefinition[[iAttr]]))
+      if(!is.na(attrName) && !is.na(attrDef)) {
+        attrCount <- attrCount + 1
+        wordCount <- length(unlist(strsplit(attrDef, "\\s+", perl=T)))
+        if(wordCount < minWordCount) {
+          values[[length(values)+1]] <- attributeName[[iAttr]]
+        }
+      }
+    }
+  }
+  
+  quoteStyle <- getOption("useFancyQuotes")
+  options("useFanceyQuotes" = FALSE)
+  
+  if(length(values) > 0) {
+    return(list(status="FAILURE", values=list(value=sprintf("These data table description attributes have definitions shorter than %d words: %s", minWordCount, paste(sQuote(unlist(values)), collapse=", ")))))
+  } else {
+    return(list(status="SUCCESS", values=list(value=sprintf("All data table description attributes have sufficient definitions"))))
+  }
+}
+
+result <- check()
+mdq_result <- list(status=result$status, output=list(result$values))
+]]></code>
+         <inheritState>false</inheritState>
+         <selector>
+            <name>attributesPresent</name>
+            <xpath>boolean(/eml/dataset/dataTable/attributeList/attribute)</xpath>
+         </selector>
+         <selector>
+            <name>entityPresent</name>
+            <xpath>boolean(/eml/dataset/dataTable)</xpath>
+         </selector>
+         <selector>
+            <name>attributeName</name>
+            <xpath>/eml/dataset/dataTable/attributeList/attribute</xpath>
+            <subSelector>
+               <name>attributeNameSubSelector</name>
+               <xpath>./attributeName</xpath>
+            </subSelector>
+         </selector>
+         <selector>
+            <name>attributeDefinition</name>
+            <xpath>/eml/dataset/dataTable/attributeList/attribute</xpath>
+            <subSelector>
+               <name>attributeDefinitionSubSelector</name>
+               <xpath>./attributeDefinition</xpath>
+            </subSelector>
+         </selector>
+         <dialect>
+            <name>eml</name>
+            <xpath>boolean(/*[local-name() = 'eml'])</xpath>
+         </dialect>
+      </check>
+      <timestamp>2016-12-01T17:28:30.731-08:00</timestamp>
+      <output><![CDATA[These data table description attributes have definitions shorter than 4 words: ‘DATE’, ‘TIME’, ‘T_AIR’, ‘RH’, ‘DEW’, ‘BARO’, ‘WD’, ‘WS’, ‘RAIN’, ‘SOL’, ‘SOL_SUM’]]></output>
+      <status>FAILURE</status>
+   </result>
+   <result>
+      <check>
+         <id>check.sampling.study.extent.present.1</id>
+         <name>Sampling extent description present</name>
+         <description><![CDATA[Checks that a sampling study extent is present.]]></description>
+         <type>interpretation</type>
+         <level>OPTIONAL</level>
+         <environment>rscript</environment>
+         <code><![CDATA[
+    check <- function() {
+      library(base)
+      # These variables are defined by the MQE from the <xpath> selectors.
+      # "extendDescriptionPresent" - is a methods sampling description present?
+      if(extentDescriptionPresent) {
+        return(list(status="SUCCESS", output="A sampling study extent description is present in the methods section."))
+      } else {
+        return(list(status="FAILURE", output="A sampling study extent description is not present in the methods section."))
+      }
+    }
+  
+    result <- check()
+    mdq_result <- list(status=result$status, output=list(list(value=result$output)))    
+    ]]></code>
+         <inheritState>false</inheritState>
+         <selector>
+            <name>extentDescriptionPresent</name>
+            <xpath>boolean(/eml/dataset/methods/sampling/studyExtent/description)</xpath>
+         </selector>
+         <dialect>
+            <name>eml</name>
+            <xpath>boolean(/*[local-name() = 'eml'])</xpath>
+         </dialect>
+      </check>
+      <timestamp>2016-12-01T17:28:30.926-08:00</timestamp>
+      <output><![CDATA[A sampling study extent description is not present in the methods section.]]></output>
+      <status>FAILURE</status>
+   </result>
+   <result>
+      <check>
+         <id>check.attribute.name.differs.1</id>
+         <name>Attribute name differs from attribute description.</name>
+         <description><![CDATA[Check that each entity name and definition are not identical.]]></description>
+         <type>interpretation</type>
+         <level>OPTIONAL</level>
+         <environment>rscript</environment>
+         <code><![CDATA[
+check <- function() {
+  library(base)
+  # varialbe defined by MQE from the <xpath> selectors.
+  # "attributeName" - the names of each data entity
+  # "attributeDefinition" - the names of each data entity
+  
+  # Skip check if no dataTables
+  if(!entityPresent) {
+    return(list(status="SKIP", values=list(value="No data table descriptions are present, so cannot check if attribute names and definition differ.")))
+  }
+
+  # Skip check if no attributes present
+  if(!attributesPresent) {
+    return(list(status="SKIP", values=list(value="No data table attributes are present, so cannot check if attribute names and definitions differ.")))
+  } 
+  
+  values <- list()
+  attrCount <- 0
+  if (length(attributeName) > 0) {
+    for(iAttr in 1:length(attributeName)) {
+      attrName <- tolower(as.character(attributeName[[iAttr]]))
+      attrDef <- tolower(as.character(attributeDefinition[[iAttr]]))
+      if(!is.na(attrName) && !is.na(attrDef)) {
+        attrCount <- attrCount + 1
+        if(attrName == attrDef) {
+          values[[length(values)+1]] <- attributeName[[iAttr]]
+        }
+      }
+    }
+  }
+  
+  quoteStyle <- getOption("useFancyQuotes")
+  options("useFanceyQuotes" = FALSE)
+  
+  if(length(values) > 0) {
+    return(list(status="FAILURE", values=list(value=sprintf("These data table descriptions attributes have identical names and definitions: %s", paste(sQuote(unlist(values)), collapse=", ")))))
+  } else {
+    return(list(status="SUCCESS", values=list(value=sprintf("All data table attributes have valid definitions"))))
+  }
+
+  options("useFancyQuotes" = quoteStyle)
+}
+
+result <- check()
+mdq_result <- list(status=result$status, output=list(result$values))
+]]></code>
+         <inheritState>false</inheritState>
+         <selector>
+            <name>attributesPresent</name>
+            <xpath>boolean(/eml/dataset/dataTable/attributeList/attribute)</xpath>
+         </selector>
+         <selector>
+            <name>entityPresent</name>
+            <xpath>boolean(/eml/dataset/dataTable)</xpath>
+         </selector>
+         <selector>
+            <name>attributeName</name>
+            <xpath>/eml/dataset/dataTable/attributeList/attribute</xpath>
+            <subSelector>
+               <name>attributeNameSubSelector</name>
+               <xpath>./attributeName</xpath>
+            </subSelector>
+         </selector>
+         <selector>
+            <name>attributeDefinition</name>
+            <xpath>/eml/dataset/dataTable/attributeList/attribute</xpath>
+            <subSelector>
+               <name>attributeDefinitionSubSelector</name>
+               <xpath>./attributeDefinition</xpath>
+            </subSelector>
+         </selector>
+         <dialect>
+            <name>eml</name>
+            <xpath>boolean(/*[local-name() = 'eml'])</xpath>
+         </dialect>
+      </check>
+      <timestamp>2016-12-01T17:28:31.141-08:00</timestamp>
+      <output><![CDATA[All data table attributes have valid definitions]]></output>
+      <status>SUCCESS</status>
+   </result>
+   <result>
+      <check>
+         <id>check.methods.present.1</id>
+         <name>Methods present</name>
+         <description><![CDATA[All datasets should contain a methods section, or a link to a separate methods doc.]]></description>
+         <type>interpretation</type>
+         <level>REQUIRED</level>
+         <environment>rscript</environment>
+         <code><![CDATA[
+library(metadig)
+library(base)
+
+check <- function() {
+    badStepCount <- 0
+    # Recommended minimum word count
+    minWordCount <- 7
+    # Recommended max word count
+    maxWordCount <- 20
+    
+    # Check that a <methods> section is present for the dataset.
+    if(!methodsPresent) {
+        return(list(status = "FAILURE", output = sprintf("A methods section is not present, so unable to check method step descriptions word count.")))
+    }
+    
+    if (methodStepCount > 0) {
+        for(iDescr in 1:length(methodStepDescription)) {
+            thisDescr <- methodStepDescription[[iDescr]]
+            wordCount <- length(unlist(strsplit(thisDescr, "\\s+", perl=T)))
+            if (wordCount < minWordCount) {
+                badStepCount <- badStepCount + 1
+            }
+        }
+    } else {
+        # No methodSteps defined (shouldn't happen, it's a required element for methods)
+        return(list(status="FAILURE", output=sprintf("No method step descriptions are present.")))
+    }
+    
+    if (badStepCount > 0) {
+        return(list(status="FAILURE", output=sprintf("%d of %d method step descriptions have fewer than the minimum recommended %d words", badStepCount, methodStepCount, minWordCount)))
+    } else {
+        return(list(status="SUCCESS", output=sprintf("All method step descriptions are sufficient (> %d words).", minWordCount)))
+    }
+}
+result <- check()
+mdq_result <- list(status=result$status, output=list(list(value=result$output)))
+]]></code>
+         <inheritState>false</inheritState>
+         <selector>
+            <name>methodsPresent</name>
+            <xpath>boolean(/eml/dataset/methods)</xpath>
+         </selector>
+         <selector>
+            <name>methodStepCount</name>
+            <xpath>count(/eml/dataset/methods/methodStep)</xpath>
+         </selector>
+         <selector>
+            <name>methodStepDescription</name>
+            <xpath>/eml/dataset/methods/methodStep</xpath>
+            <subSelector>
+               <name>msd</name>
+               <xpath>./description//para/text()</xpath>
+            </subSelector>
+         </selector>
+         <dialect>
+            <name>eml</name>
+            <xpath>boolean(/*[local-name() = 'eml'])</xpath>
+         </dialect>
+      </check>
+      <timestamp>2016-12-01T17:28:31.352-08:00</timestamp>
+      <output><![CDATA[A methods section is not present, so unable to check method step descriptions word count.]]></output>
+      <status>FAILURE</status>
+   </result>
+   <result>
+      <check>
+         <id>missing.value.codes.1</id>
+         <name>Missing Value Codes</name>
+         <description><![CDATA[Missing value codes should be present for all attributes. Note that this only checks for the presence of a <missingValueCode> in each <attribute> and does not check the validity of the code values.]]></description>
+         <type>interpretation</type>
+         <level>OPTIONAL</level>
+         <environment>rscript</environment>
+         <code><![CDATA[
+library(metadig)
+
+check <- function() {
+  # Skip check if no dataTables
+  if(length(entityName) == 0) {
+    return(list(status="SKIP", values=list(list(value="No data table descriptions are present, so cannot check attribute 'missing value codes'"))))
+  }
+
+  # Skip check if no attributes present
+  if(!attributesPresent) {
+    return(list(status="SKIP", values=list(list(value="No data table attributes are present, so cannot check missing value codes"))))
+  }
+  
+  status <- "SUCCESS"
+  outputList <- list()
+  totalCount <- 0
+  # Check the attribute
+  # Check each dataTable for count of attributes with missing value codes defined
+  for(iEntity in 1:length(entityName)) {
+    thisEntityName <- entityName[[iEntity]]
+    missingCodeCount <- 0
+    thisAttrCount <- attributeCount[[iEntity]]
+    thisCodeCount <- codeCount[[iEntity]] 
+    # This dataTable is deficient in 'missing value codes'
+    if(thisCodeCount < thisAttrCount) {
+      status <- "FAILURE"
+      missingCodeCount <- thisAttrCount - thisCodeCount
+      outputList[[length(outputList)+1]] <- list(value=sprintf("Data table description '%s' does not have 'missing value codes' defined for %d of %d attributes", thisEntityName, missingCodeCount, thisCodeCount))
+    } 
+  }
+
+  # Did we find any deficient dataTables?
+  if(length(outputList > 0)) {
+    return(list(status=status, values=outputList))
+  } else {
+    return(list(status="SUCCESS", values=list(list(value=sprintf("All attributes for all data table descriptions have 'missing value codes' defined.")))))
+  }
+}
+result <- check()
+mdq_result <- list(status=result$status, output=result$values) 
+  
+  ]]></code>
+         <inheritState>false</inheritState>
+         <selector>
+            <name>attributesPresent</name>
+            <xpath>boolean(/eml/dataset/dataTable/attributeList/attribute)</xpath>
+         </selector>
+         <selector>
+            <name>entityName</name>
+            <xpath>/eml/dataset/dataTable</xpath>
+            <subSelector>
+               <name>entityNameSubSelector</name>
+               <xpath>./entityName</xpath>
+            </subSelector>
+         </selector>
+         <selector>
+            <name>codeCount</name>
+            <xpath>/eml/dataset/dataTable</xpath>
+            <subSelector>
+               <name>...</name>
+               <xpath>count(./attributeList/attribute/missingValueCode)</xpath>
+            </subSelector>
+         </selector>
+         <selector>
+            <name>attributeCount</name>
+            <xpath>/eml/dataset/dataTable</xpath>
+            <subSelector>
+               <name>...</name>
+               <xpath>count(./attributeList/attribute)</xpath>
+            </subSelector>
+         </selector>
+      </check>
+      <timestamp>2016-12-01T17:28:31.569-08:00</timestamp>
+      <output><![CDATA[Data table description 'Datos Meteorologicos' does not have 'missing value codes' defined for 11 of 0 attributes]]></output>
+      <status>FAILURE</status>
+   </result>
+   <result>
+      <check>
+         <id>enumerated.domains.1</id>
+         <name>Enumerated domain</name>
+         <description><![CDATA[Enumerated domains should be defined]]></description>
+         <type>interpretation</type>
+         <level>OPTIONAL</level>
+         <environment>rscript</environment>
+         <code><![CDATA[
+library(metadig)
+
+# Find the <attribute> elements that have enumerated domains in them
+idxs <- which(!is.na(enumerated_domains))
+
+for (i in idxs) {
+  # Check the <code> element
+  for (code in codes[i]) {
+    if (is.null(code) || nchar(code) <= 0) {
+      failure(paste0("A code for the attribute ", names[i], " (id: ", ids[i], ") was undefined. This is either because the <code> was missing or did not contain any content."))
+    }
+  }
+
+  # Check the <definition> element
+  for (definition in definitions[i]) {
+    if (is.null(definition) || nchar(definition) <= 0) {
+      failure(paste0("A definition for the attribute ", names[i], " (id: ", ids[i], ") was undefined. This is either because the <definition> was missing or did not contain any content."))
+    }
+  }
+}
+
+success("All enumerated domain descriptions found had codes and definitions.")
+]]></code>
+         <inheritState>false</inheritState>
+         <selector>
+            <name>ids</name>
+            <xpath>/eml/dataset/dataTable/attributeList/attribute/@id</xpath>
+         </selector>
+         <selector>
+            <name>names</name>
+            <xpath>/eml/dataset/dataTable/attributeList/attribute</xpath>
+            <subSelector>
+               <name>...</name>
+               <xpath>./attributeName</xpath>
+            </subSelector>
+         </selector>
+         <selector>
+            <name>enumerated_domains</name>
+            <xpath>/eml/dataset/dataTable/attributeList/attribute</xpath>
+            <subSelector>
+               <name>...</name>
+               <xpath>./measurementScale/nominal/nonNumericDomain/enumeratedDomain</xpath>
+            </subSelector>
+         </selector>
+         <selector>
+            <name>codes</name>
+            <xpath>/eml/dataset/dataTable/attributeList/attribute</xpath>
+            <subSelector>
+               <name>...</name>
+               <xpath>./measurementScale/nominal/nonNumericDomain/enumeratedDomain/codeDefinition/code</xpath>
+            </subSelector>
+         </selector>
+         <selector>
+            <name>definitions</name>
+            <xpath>/eml/dataset/dataTable/attributeList/attribute</xpath>
+            <subSelector>
+               <name>...</name>
+               <xpath>./measurementScale/nominal/nonNumericDomain/enumeratedDomain/codeDefinition/definition</xpath>
+            </subSelector>
+         </selector>
+      </check>
+      <timestamp>2016-12-01T17:28:31.792-08:00</timestamp>
+      <output type="text"><![CDATA[All enumerated domain descriptions found had codes and definitions.]]></output>
+      <status>SUCCESS</status>
+   </result>
+   <result>
+      <check>
+         <id>coverage.in.arctic.1</id>
+         <name>Coverage includes that Arctic</name>
+         <description><![CDATA[Checks to see if at least one geographic coverage intersects with the Arctic, which is defined as the area north of 45° N latitude.]]></description>
+         <type>interpretation</type>
+         <level>INFO</level>
+         <environment>rscript</environment>
+         <code><![CDATA[
+library(metadig)
+
+if (any(na.omit(as.numeric(north_bound_coordinates)) >= 45)) {
+  success("At least one geographic coverage is in the Arctic.")
+} else {
+  failure("No geographic coverage is in the Arctic.")
+}
+  ]]></code>
+         <inheritState>false</inheritState>
+         <selector>
+            <name>north_bound_coordinates</name>
+            <xpath>//coverage//geographicCoverage/boundingCoordinates/northBoundingCoordinate</xpath>
+         </selector>
+      </check>
+      <timestamp>2016-12-01T17:28:31.995-08:00</timestamp>
+      <output type="text"><![CDATA[No geographic coverage is in the Arctic.]]></output>
+      <status>FAILURE</status>
+   </result>
+</mdq:run>
