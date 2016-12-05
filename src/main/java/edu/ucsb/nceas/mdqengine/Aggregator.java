@@ -111,9 +111,9 @@ public class Aggregator {
 			}
 			
 			// save to MN?
-			boolean save = false;
+			String mnUrl = null;
 			if (args.length > 2) {
-				save = true;
+				mnUrl = args[2];
 			}
 
 			// parse the query syntax
@@ -124,8 +124,8 @@ public class Aggregator {
 			Aggregator aggregator = new Aggregator();
 			List<Run> runs = aggregator.runBatch(params, suite);
 			
-			if (save) {
-				MNStore mnStore = new MNStore();
+			if (mnUrl != null) {
+				MNStore mnStore = new MNStore(mnUrl);
 				for (Run run: runs) {
 					mnStore.createRun(run);
 				}
