@@ -35,6 +35,8 @@ import org.apache.http.client.utils.URLEncodedUtils;
 import org.dataone.client.v2.CNode;
 import org.dataone.client.v2.MNode;
 import org.dataone.client.v2.itk.D1Client;
+import org.dataone.service.types.v2.SystemMetadata;
+import org.dataone.service.util.TypeMarshaller;
 
 import edu.ucsb.nceas.mdqengine.dispatch.Dispatcher;
 import edu.ucsb.nceas.mdqengine.dispatch.RDispatcher;
@@ -46,6 +48,7 @@ import edu.ucsb.nceas.mdqengine.model.Run;
 import edu.ucsb.nceas.mdqengine.model.Status;
 import edu.ucsb.nceas.mdqengine.model.Suite;
 import edu.ucsb.nceas.mdqengine.serialize.XmlMarshaller;
+import edu.ucsb.nceas.mdqengine.store.MNStore;
 
 public class Aggregator {
 	
@@ -93,14 +96,13 @@ public class Aggregator {
 	private MDQEngine engine = new MDQEngine();
 	
 	/**
-	 * run and graph given suite on a corpus returned by optional query param (solr)
+	 * run batch and save to MN
 	 * @param args
 	 */
 	public static void main(String args[]) {
 		
 		// default query
 		String query = "q=formatId:\"eml://ecoinformatics.org/eml-2.1.1\" ";
-		String format = "pdf";
 		try {
 			
 			// use optional query arg
@@ -108,9 +110,10 @@ public class Aggregator {
 				query = args[1];
 			}
 			
-			// use optional format arg
+			// save to MN?
+			boolean save = false;
 			if (args.length > 2) {
-				format = args[2];
+				save = true;
 			}
 
 			// parse the query syntax
@@ -119,8 +122,19 @@ public class Aggregator {
 			String xml = IOUtils.toString(new FileInputStream(args[0]), "UTF-8");
 			Suite suite = (Suite) XmlMarshaller.fromXml(xml , Suite.class);
 			Aggregator aggregator = new Aggregator();
-			aggregator.graphBatch(params, suite, format);
-
+			List<Run> runs = aggregator.runBatch(params, suite);
+			
+			if (save) {
+				MNStore mnStore = new MNStore();
+				for (Run run: runs) {
+					mnStore.createRun(run);
+				}
+			} else {
+				// write the aggregate content to the file
+				String runContent = toCSV(runs.toArray(new Run[] {}));
+				System.out.println(runContent);
+			}
+			
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -174,7 +188,10 @@ public class Aggregator {
 
 		String runContent = null;
 		try {
-			runContent = this.runBatch(params, suite);
+			// get the completed runs
+			List<Run> runs = this.runBatch(params, suite);
+			// write the aggregate content to the file
+			runContent = toCSV(runs.toArray(new Run[] {}));
 		} catch (IOException e) {
 			log.error("Could not generate batch run results: " + e.getMessage());
 			return null;
@@ -204,13 +221,10 @@ public class Aggregator {
 	 * @return
 	 * @throws IOException
 	 */
-	public String runBatch(List<NameValuePair> params, Suite suite) throws IOException {
+	public List<Run> runBatch(List<NameValuePair> params, Suite suite) throws IOException {
 		
 		ExecutorService executor = Executors.newCachedThreadPool();
 		List<Future<Run>> futures = new ArrayList<Future<Run>>();
-
-		
-		String results = null;
 		
 		List<Run> runs = new ArrayList<Run>();
 		
@@ -223,10 +237,14 @@ public class Aggregator {
 				CSVRecord docRecord = recordIter.next();
 				String id = docRecord.get("id");
 				String dataUrl = null;
+				String metadataUrl = null;
+
 				if (baseUrl != null) {
 					dataUrl = baseUrl + "/v2/object/" + id;
+					metadataUrl = baseUrl + "/v2/meta/" + id;
 				} else if (docRecord.isSet("dataUrl"))  {
 					dataUrl = docRecord.get("dataUrl");
+					metadataUrl = dataUrl.replace("/object/", "/meta/");
 				} else {
 					// have to skip if we can't retrieve it
 					continue;
@@ -250,13 +268,23 @@ public class Aggregator {
 				try {
 					
 					final String finalDataUrl = dataUrl;
+					final String finalMetadataUrl = metadataUrl;
+
 					// run asynch in thread
 					Callable<Run> runner = new Callable<Run>() {
 						
 						@Override
 						public Run call() throws Exception {
 							InputStream input = new URL(finalDataUrl).openStream();
-							Run run = engine.runSuite(suite, input, null, null);
+							
+							SystemMetadata sysMeta = null;
+							try {
+								InputStream smInput = new URL(finalMetadataUrl).openStream();
+								sysMeta = TypeMarshaller.unmarshalTypeFromStream(SystemMetadata.class, smInput);
+							} catch (Exception e) {
+								log.error("Could not retrieve SystemMetadata from: " + finalMetadataUrl, e);
+							}
+							Run run = engine.runSuite(suite, input, null, sysMeta);
 							run.setObjectIdentifier(id);
 							run.setMetadata(metadata);
 							run.setSuiteId(suite.getId());
@@ -292,12 +320,10 @@ public class Aggregator {
 				}
 			}
 			
-			// write the aggregate content to the file
-			results = toCSV(runs.toArray(new Run[] {}));
-			//IOUtils.write(runContent, new FileOutputStream(file), "UTF-8");
+			
 		}
 							
-		return results;
+		return runs;
 		
 	}
 

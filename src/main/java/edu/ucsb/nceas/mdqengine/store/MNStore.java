@@ -54,9 +54,17 @@ public class MNStore implements MDQStore {
 	private String mnURL = null;
 	
 	public MNStore() {
+		this(null);
+	}
+	
+	public MNStore(String baseUrl) {
 		
 		// use the desired MN
-		mnURL = Settings.getConfiguration().getString("mn.baseurl", "https://mn-demo-8.test.dataone.org/knb/d1/mn/");
+		if (baseUrl == null) {
+			mnURL = Settings.getConfiguration().getString("mn.baseurl", "https://mn-demo-8.test.dataone.org/knb/d1/mn/");
+		} else {
+			mnURL = baseUrl;
+		}
 		try {
 			node = D1Client.getMN(mnURL);
 		} catch (ServiceFailure e) {
@@ -88,7 +96,7 @@ public class MNStore implements MDQStore {
 		sysMeta.setSeriesId(seriesId);
 		sysMeta.setSerialVersion(BigInteger.ONE);		
 		
-		// for now, just use the classname
+		// use the simple classname added to the NS
 		ObjectFormatIdentifier formatId = new ObjectFormatIdentifier();
 		formatId.setValue(MDQ_NS + "#" + model.getClass().getSimpleName().toLowerCase());
 		sysMeta.setFormatId(formatId);
