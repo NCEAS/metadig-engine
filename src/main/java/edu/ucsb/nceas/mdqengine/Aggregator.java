@@ -95,6 +95,16 @@ public class Aggregator {
 		
 	private MDQEngine engine = new MDQEngine();
 	
+	private String baseUrl = null;
+
+	public Aggregator() {
+		this(null);
+	}
+		
+	public Aggregator(String baseUrl) {
+		this.baseUrl = baseUrl;
+	}
+	
 	/**
 	 * run batch and save to MN
 	 * @param args
@@ -111,9 +121,9 @@ public class Aggregator {
 			}
 			
 			// save to MN?
-			String mnUrl = null;
+			String baseUrl = null;
 			if (args.length > 2) {
-				mnUrl = args[2];
+				baseUrl = args[2];
 			}
 
 			// parse the query syntax
@@ -121,11 +131,11 @@ public class Aggregator {
 			
 			String xml = IOUtils.toString(new FileInputStream(args[0]), "UTF-8");
 			Suite suite = (Suite) XmlMarshaller.fromXml(xml , Suite.class);
-			Aggregator aggregator = new Aggregator();
+			Aggregator aggregator = new Aggregator(baseUrl);
 			List<Run> runs = aggregator.runBatch(params, suite);
 			
-			if (mnUrl != null) {
-				MNStore mnStore = new MNStore(mnUrl);
+			if (baseUrl != null) {
+				MNStore mnStore = new MNStore(baseUrl);
 				for (Run run: runs) {
 					mnStore.createRun(run);
 				}
@@ -227,9 +237,7 @@ public class Aggregator {
 		List<Future<Run>> futures = new ArrayList<Future<Run>>();
 		
 		List<Run> runs = new ArrayList<Run>();
-		
-		String baseUrl = this.getBaseUrl(params);
-				
+						
 		CSVParser docsCsv = this.queryCSV(params);
 		if (docsCsv != null) {
 			Iterator<CSVRecord> recordIter = docsCsv.iterator();
@@ -327,37 +335,17 @@ public class Aggregator {
 		
 	}
 
-	
-	private String getBaseUrl(List<NameValuePair> pairs) {
-		for (NameValuePair param: pairs) {
-			String name = param.getName();
-			String value = param.getValue();
-
-			// use this for determining which server to query if present
-			if (name.equals("baseUrl")) {
-				return value;
-			}
-		}
-		return null;
-	}
-
 	private CSVParser queryCSV(List<NameValuePair> pairs) {
 		
 		try {
 			// query system for object
 			String solrQuery = "?";
-			String baseUrl = null;
 			
 			// add the user-supplied parameters, for ones that are allowed
 			for (NameValuePair param: pairs) {
 				String name = param.getName();
 				String value = param.getValue();
 
-				// use this for determining which server to query if present
-				if (name.equals("baseUrl")) {
-					baseUrl = value;
-					continue;
-				}
 				if (!ArrayUtils.contains(ignoredParams, name)) {
 					solrQuery += "&" + name + "=" + URLEncoder.encode(value, "UTF-8");
 					
