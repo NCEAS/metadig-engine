@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<mdq:check xmlns:mdq="https://nceas.ucsb.edu/mdqe"
+<mdq:check xmlns:mdq="https://nceas.ucsb.edu/mdqe/v1"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="https://nceas.ucsb.edu/mdqe ../schemas/schema1.xsd">
+	xsi:schemaLocation="https://nceas.ucsb.edu/mdqe/v1 ../schemas/schema1.xsd">
 	<id>check.entity.attributes.present.1</id>
 	<name>Check that an each entity has a name and attributes.</name>
 	<description>Check that each data entity has attributes.</description>

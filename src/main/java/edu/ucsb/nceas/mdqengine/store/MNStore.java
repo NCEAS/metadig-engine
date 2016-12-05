@@ -43,7 +43,7 @@ import edu.ucsb.nceas.mdqengine.serialize.XmlMarshaller;
 
 public class MNStore implements MDQStore {
 
-	public static final String MDQ_NS = "https://nceas.ucsb.edu/mdqe";
+	public static final String MDQ_NS = "https://nceas.ucsb.edu/mdqe/v1";
 	
 	protected Log log = LogFactory.getLog(this.getClass());
 

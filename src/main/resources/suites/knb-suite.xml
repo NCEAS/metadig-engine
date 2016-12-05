@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<mdq:suite xmlns:mdq="https://nceas.ucsb.edu/mdqe" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="https://nceas.ucsb.edu/mdqe ../schemas/schema1.xsd">
+<mdq:suite xmlns:mdq="https://nceas.ucsb.edu/mdqe/v1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="https://nceas.ucsb.edu/mdqe/v1 ../schemas/schema1.xsd">
   <id>knb.suite.1</id>
   <name>KNB Quality Suite</name>
   <description>This is a provisional KNB Quality Suite.</description>

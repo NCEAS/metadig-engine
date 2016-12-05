@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<xs:schema version="1.0" targetNamespace="https://nceas.ucsb.edu/mdqe" xmlns:tns="https://nceas.ucsb.edu/mdqe" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+<xs:schema version="1.0" targetNamespace="https://nceas.ucsb.edu/mdqe/v1" xmlns:tns="https://nceas.ucsb.edu/mdqe/v1" xmlns:xs="http://www.w3.org/2001/XMLSchema">
 
   <xs:element name="check" type="tns:check"/>
 
@@ -103,18 +103,18 @@
 
   <xs:simpleType name="level">
     <xs:restriction base="xs:string">
-      <xs:enumeration value="REQUIRED"/>
       <xs:enumeration value="OPTIONAL"/>
+      <xs:enumeration value="REQUIRED"/>
       <xs:enumeration value="INFO"/>
     </xs:restriction>
   </xs:simpleType>
 
   <xs:simpleType name="status">
     <xs:restriction base="xs:string">
-      <xs:enumeration value="SUCCESS"/>
-      <xs:enumeration value="SKIP"/>
-      <xs:enumeration value="ERROR"/>
       <xs:enumeration value="FAILURE"/>
+      <xs:enumeration value="ERROR"/>
+      <xs:enumeration value="SKIP"/>
+      <xs:enumeration value="SUCCESS"/>
     </xs:restriction>
   </xs:simpleType>
 </xs:schema>
