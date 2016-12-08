@@ -91,7 +91,7 @@ public class Aggregator {
 	};
 	
 	
-	protected Log log = LogFactory.getLog(this.getClass());
+	public static Log log = LogFactory.getLog(Aggregator.class);
 		
 	private MDQEngine engine = new MDQEngine();
 	
@@ -115,15 +115,15 @@ public class Aggregator {
 		String query = "q=formatId:\"eml://ecoinformatics.org/eml-2.1.1\" ";
 		try {
 			
-			// use optional query arg
-			if (args.length > 1) {
-				query = args[1];
-			}
-			
 			// save to MN?
 			String baseUrl = null;
+			if (args.length > 1) {
+				baseUrl = args[1];
+			}
+			
+			// use optional query arg
 			if (args.length > 2) {
-				baseUrl = args[2];
+				query = args[2];
 			}
 
 			// parse the query syntax
@@ -137,13 +137,17 @@ public class Aggregator {
 			if (baseUrl != null) {
 				MNStore mnStore = new MNStore(baseUrl);
 				for (Run run: runs) {
+					log.warn("saving run to Node store: " + run.getId());
 					mnStore.createRun(run);
+					//break; //just one for testing
 				}
 			} else {
 				// write the aggregate content to the file
 				String runContent = toCSV(runs.toArray(new Run[] {}));
 				System.out.println(runContent);
 			}
+			
+			System.exit(0);
 			
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -342,17 +346,22 @@ public class Aggregator {
 			String solrQuery = "?";
 			
 			// add the user-supplied parameters, for ones that are allowed
+			int count = 0;
 			for (NameValuePair param: pairs) {
 				String name = param.getName();
 				String value = param.getValue();
 
 				if (!ArrayUtils.contains(ignoredParams, name)) {
-					solrQuery += "&" + name + "=" + URLEncoder.encode(value, "UTF-8");
+					if (count > 0 ) {
+						solrQuery += "&";
+					}
+					solrQuery += name + "=" + URLEncoder.encode(value, "UTF-8");
 					
 					// make sure we only include current objects in case the user has not specified such
 					if (name.equals("q") && !solrQuery.contains("obsoletedBy")) {
 						solrQuery += URLEncoder.encode(" -obsoletedBy:* ", "UTF-8");
 					}
+					count++;
 				}
 			}
 			
