@@ -12,7 +12,7 @@ library(stringr)
 # CC-BY: This work is licensed under the Creative Commons Attribution 4.0 International License.\nTo view a copy of this license, visit http://creativecommons.org/licenses/by/4.0/."
 # CC-0:"This work is dedicated to the public domain under the Creative Commons Universal 1.0 Public Domain Dedication.\nTo view a copy of this dedication, visit https://creativecommons.org/publicdomain/zero/1.0/."
 
-phrases <- c("http://creativecommons.org/licenses/by/4.0", "https://creativecommons.org/publicdomain/zero/1.0")
+phrases <- c("http[s]*://creativecommons.org/licenses/by/4.0", "http[s]*://creativecommons.org/publicdomain/zero/1.0")
 
 if (length(rights) == 0) {
   status <- "FAILURE"
@@ -38,7 +38,8 @@ mdq_result <- list(status = status,
   ]]></code>
   <selector>
     <name>rights</name>
-    <xpath>/eml/dataset/intellectualRights/para</xpath>
+    <!--  Remove blank text nodes from consideration -->
+    <xpath>/eml/dataset/intellectualRights//text()[not(self::text()[not(normalize-space())])]</xpath>
   </selector>
   <dialect>
     <name>eml</name>
