@@ -22,7 +22,12 @@
 		</creator>
 		<contact scope="document">
 			<references>Rodrigo.Torrens</references>
-		</contact>		
+		</contact>
+		<project>
+			<title>Blah</title>
+			<personnel><organizationName>Blah</organizationName><role>originator</role></personnel>
+			<funding><para>NSF 1234</para></funding>
+		</project>		
 		<dataTable scope="document">
 			<entityName>Datos Meteorologicos</entityName>
 			<entityDescription>Dtos Estacion meteorologica La Hechicera para e?

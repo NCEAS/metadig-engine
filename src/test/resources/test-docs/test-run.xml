@@ -1471,4 +1471,34 @@ if (any(na.omit(as.numeric(north_bound_coordinates)) >= 45)) {
       <output type="text"><![CDATA[No geographic coverage is in the Arctic.]]></output>
       <status>FAILURE</status>
    </result>
+   <result>
+      <check>
+         <id>check.echo.funder.1</id>
+         <name>Funder</name>
+         <description><![CDATA[Check for extracting funder from the metadata for result indexing and analysis.]]></description>
+         <type>identification</type>
+         <level>INFO</level>
+         <environment>rscript</environment>
+         <code><![CDATA[
+if (is.null(awards)) {
+  status <- "SUCCESS"
+  output <- "NA"
+  mdq_result <- list(status = status,
+                     output = list(list(value = output)))
+} else {
+  status <- "SUCCESS"
+  output <- awards
+  mdq_result <- list(status = status,
+                     output = list(list(value = output)))
+}]]></code>
+         <inheritState>false</inheritState>
+         <selector>
+            <name>awards</name>
+            <xpath>/eml/dataset/project/funding//para</xpath>
+         </selector>
+      </check>
+      <timestamp>2016-12-13T12:43:18.3-08:00</timestamp>
+      <output><![CDATA[NSF 1234]]></output>
+      <status>SUCCESS</status>
+   </result>
 </mdq:run>
