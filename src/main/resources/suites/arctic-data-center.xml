@@ -81,4 +81,7 @@
   <check>
     <id>coverage.in.arctic.1</id>
   </check>
+  <check>
+  	<id>check.echo.funder.1</id>
+  </check>
 </mdq:suite>
