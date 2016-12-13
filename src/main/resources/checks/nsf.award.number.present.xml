@@ -14,7 +14,7 @@ if (is.null(awards)) {
   output <- "No award numbers were found."
   mdq_result <- list(status = status,
                      output = list(list(value = output)))
-} else if (length(title) < 1) {
+} else if (length(awards) < 1) {
   status <- "FAILURE"
   output <- paste0("No award numbers were found when one or more were expected.")
   mdq_result <- list(status = status,
