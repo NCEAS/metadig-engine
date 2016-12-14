@@ -26,7 +26,11 @@
 		<project>
 			<title>Blah</title>
 			<personnel><organizationName>Blah</organizationName><role>originator</role></personnel>
-			<funding><para>NSF 1234</para></funding>
+			<funding>
+				<para>NSF 1234</para>
+				<para>NSF 5678</para>
+				<para>NSF 9999</para>
+			</funding>
 		</project>		
 		<dataTable scope="document">
 			<entityName>Datos Meteorologicos</entityName>

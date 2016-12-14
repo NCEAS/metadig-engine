@@ -1480,7 +1480,7 @@ if (any(na.omit(as.numeric(north_bound_coordinates)) >= 45)) {
          <level>INFO</level>
          <environment>rscript</environment>
          <code><![CDATA[
-if (is.null(awards)) {
+if (length(awards) <= 0) {
   status <- "SUCCESS"
   output <- "NA"
   mdq_result <- list(status = status,
