@@ -16,7 +16,7 @@ if (is.null(awards)) {
                      output = list(list(value = output)))
 } else {
   status <- "SUCCESS"
-  output <- awards
+  output <- awards[[1]]
   mdq_result <- list(status = status,
                      output = list(list(value = output)))
 }]]></code>
