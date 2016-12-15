@@ -15,10 +15,10 @@ if (is.null(awards)) {
   mdq_result <- list(status = status,
                      output = list(list(value = output)))
 } else {
-  status <- "SUCCESS"
-  output <- awards[[1]]
+  status <- "SUCCESS"  
   mdq_result <- list(status = status,
-                     output = list(list(value = output)))
+                     output = lapply(awards, function(message) { list(value = message)}))
+                     
 }]]></code>
 	<selector>
 		<name>awards</name>
