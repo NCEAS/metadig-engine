@@ -112,7 +112,9 @@ public class Aggregator {
 	public static void main(String args[]) {
 		
 		// default query
-		String query = "q=formatId:\"eml://ecoinformatics.org/eml-2.1.1\" ";
+		String query = "q=formatId:\"eml://ecoinformatics.org/eml-2.0.1\" ";
+		//String query = "q=id:\"arctic.1.1\" ";
+		
 		try {
 			
 			// save to MN?
@@ -125,6 +127,10 @@ public class Aggregator {
 			if (args.length > 2) {
 				query = args[2];
 			}
+			
+			log.warn("baseUrl: " + baseUrl);
+			log.warn("query: " + query);
+
 
 			// parse the query syntax
 			List<NameValuePair> params = URLEncodedUtils.parse(query, Charset.forName("UTF-8"));
@@ -237,7 +243,9 @@ public class Aggregator {
 	 */
 	public List<Run> runBatch(List<NameValuePair> params, Suite suite) throws IOException {
 		
-		ExecutorService executor = Executors.newCachedThreadPool();
+		//ExecutorService executor = Executors.newCachedThreadPool();
+		ExecutorService executor = Executors.newFixedThreadPool(100);
+
 		List<Future<Run>> futures = new ArrayList<Future<Run>>();
 		
 		List<Run> runs = new ArrayList<Run>();
@@ -254,9 +262,10 @@ public class Aggregator {
 				if (baseUrl != null) {
 					dataUrl = baseUrl + "/v2/object/" + id;
 					metadataUrl = baseUrl + "/v2/meta/" + id;
-				} else if (docRecord.isSet("dataUrl"))  {
-					dataUrl = docRecord.get("dataUrl");
-					metadataUrl = dataUrl.replace("/object/", "/meta/");
+					log.debug("fetching object from: " + dataUrl);
+//				} else if (docRecord.isSet("dataUrl"))  {
+//					dataUrl = docRecord.get("dataUrl");
+//					metadataUrl = dataUrl.replace("/object/", "/meta/");
 				} else {
 					// have to skip if we can't retrieve it
 					continue;
@@ -378,7 +387,7 @@ public class Aggregator {
 				solrQuery += "&sort=dateUploaded%20desc";
 			}
 			if (!solrQuery.contains("rows")) {
-				solrQuery += "&rows=10";
+				solrQuery += "&rows=1000";
 			}
 			
 			// add additional required parameters
