@@ -79,6 +79,7 @@ public class MDQEngine {
 		
 		XMLDialect xml = new XMLDialect(IOUtils.toInputStream(metadataContent, "UTF-8"));
 		xml.setParams(params);
+		xml.setSystemMetadata(sysMeta);
 		Path tempDir = Files.createTempDirectory("mdq_run");
 		xml.setDirectory(tempDir.toFile().getAbsolutePath());
 		
@@ -147,7 +148,7 @@ public class MDQEngine {
 	 * @throws XPathExpressionException
 	 * @throws ScriptException
 	 */
-	public Run runCheck(Check check, InputStream input, Map<String, Object> params) 
+	public Run runCheck(Check check, InputStream input, Map<String, Object> params, SystemMetadata sysMeta) 
 			throws MalformedURLException, IOException, SAXException, 
 			ParserConfigurationException, XPathExpressionException, ScriptException {
 			
@@ -157,6 +158,7 @@ public class MDQEngine {
 		
 		XMLDialect xml = new XMLDialect(IOUtils.toInputStream(metadataContent, "UTF-8"));
 		xml.setParams(params);
+		xml.setSystemMetadata(sysMeta);
 		Path tempDir = Files.createTempDirectory("mdq_run");
 		xml.setDirectory(tempDir.toFile().getAbsolutePath());
 		

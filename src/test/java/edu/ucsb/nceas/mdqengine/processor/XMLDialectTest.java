@@ -12,9 +12,10 @@ import javax.xml.parsers.ParserConfigurationException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.dataone.service.types.v2.SystemMetadata;
+import org.dataone.service.util.TypeMarshaller;
 import org.junit.Test;
 import org.junit.Ignore;
-
 import org.xml.sax.SAXException;
 
 import edu.ucsb.nceas.mdqengine.model.Check;
@@ -246,6 +247,49 @@ public class XMLDialectTest {
 			// run check
 			Result result = xml.runCheck(check);
 			log.debug("Result output: " + result.getOutput().get(0).getValue());
+			assertEquals(result.getOutput().get(0).getValue(), Status.SUCCESS, result.getStatus());
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+			fail(e.getMessage());
+		}
+			
+	}
+	
+	@Test
+	public void testGroupLookup() {
+
+		Check check = new Check();
+		
+		// selector not important
+		Selector selector = new Selector();
+		selector.setName("value");
+		selector.setXpath("/eml:eml/dataset/title");
+
+		List<Selector> selectors = new ArrayList<Selector>();
+		selectors.add(selector);
+		check.setSelector(selectors);
+		
+		check.setCode(GroupLookupCheck.class.getName());
+		check.setEnvironment("Java");
+		check.setLevel(Level.REQUIRED);
+		check.setName("Group lookup");
+				
+		//  run the check on valid EML that declares schemaLocation
+		try {
+			
+			// parse the metadata content
+			InputStream input = this.getClass().getResourceAsStream("/test-docs/eml.1.1.xml");
+			XMLDialect xml = new XMLDialect(input);
+			
+			// parse the systemMetadata content
+			InputStream smInput = this.getClass().getResourceAsStream("/test-docs/eml.1.1.sysMeta.xml");
+			SystemMetadata systemMetadata = TypeMarshaller.unmarshalTypeFromStream(SystemMetadata.class, smInput);
+			xml.setSystemMetadata(systemMetadata);
+			
+			// run check
+			Result result = xml.runCheck(check);
+			log.debug("First result output: " + result.getOutput().get(0).getValue());
 			assertEquals(result.getOutput().get(0).getValue(), Status.SUCCESS, result.getStatus());
 			
 		} catch (Exception e) {

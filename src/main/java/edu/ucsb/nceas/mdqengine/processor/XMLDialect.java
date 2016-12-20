@@ -1,6 +1,7 @@
 package edu.ucsb.nceas.mdqengine.processor;
 
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
@@ -35,6 +36,8 @@ import org.apache.commons.lang.BooleanUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.dataone.service.types.v2.SystemMetadata;
+import org.dataone.service.util.TypeMarshaller;
 import org.springframework.util.xml.SimpleNamespaceContext;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
@@ -55,6 +58,8 @@ public class XMLDialect {
 	private Document document;
 	
 	private Document nsAwareDocument;
+	
+	private SystemMetadata systemMetadata;
 
 	private XPathFactory xPathfactory;
 	
@@ -150,6 +155,17 @@ public class XMLDialect {
 			// TODO: string seems like only viable option for all env
 			variables.put("document", toXmlString(document));
 			
+			// include system metadata if available
+			if (this.systemMetadata != null) {
+				try {
+					ByteArrayOutputStream baos = new ByteArrayOutputStream();
+					TypeMarshaller.marshalTypeToOutputStream(systemMetadata, baos);
+					variables.put("systemMetadata", baos.toString("UTF-8"));
+				} catch (Exception e) {
+					log.error("Could not serialize SystemMetadata for check", e);
+				}
+			}
+						
 			// make extra parameters available to the check if we have them
 			if (this.params != null) {
 				variables.put("mdq_params", params);
@@ -443,6 +459,14 @@ public class XMLDialect {
 		this .directory = dir;
 	}
 	
+	public SystemMetadata getSystemMetadata() {
+		return systemMetadata;
+	}
+
+	public void setSystemMetadata(SystemMetadata systemMetadata) {
+		this.systemMetadata = systemMetadata;
+	}
+
 	private String toXmlString(Document document) {
 		try {
 		    Transformer transformer = TransformerFactory.newInstance().newTransformer();

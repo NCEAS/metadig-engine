@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<ns3:systemMetadata xmlns:ns2="http://ns.dataone.org/service/types/v1" xmlns:ns3="http://ns.dataone.org/service/types/v2.0">
+    <serialVersion>1</serialVersion>
+    <identifier>eml.1.1</identifier>
+    <formatId>eml://ecoinformatics.org/eml-2.1.1</formatId>
+    <size>10959</size>
+    <checksum algorithm="MD5">0775b5e25cd425398acd94b3512e51eb</checksum>
+    <submitter>uid=kepler,o=unaffiliated,dc=ecoinformatics,dc=org</submitter>
+    <rightsHolder>CN=Matt Jones A729,O=Google,C=US,DC=cilogon,DC=org</rightsHolder>
+    <accessPolicy>
+        <allow>
+            <subject>public</subject>
+            <permission>read</permission>
+        </allow>
+        <allow>
+            <subject>CN=arctic-data-admins,DC=dataone,DC=org</subject>
+            <permission>read</permission>
+            <permission>write</permission>
+            <permission>changePermission</permission>
+        </allow>
+        <allow>
+            <subject>CN=Matt Jones A729,O=Google,C=US,DC=cilogon,DC=org</subject>
+            <permission>read</permission>
+            <permission>write</permission>
+            <permission>changePermission</permission>
+        </allow>
+    </accessPolicy>
+    <replicationPolicy replicationAllowed="false"/>
+    <archived>false</archived>
+    <dateUploaded>2016-10-07T23:00:00.000+00:00</dateUploaded>
+    <dateSysMetadataModified>2016-10-07T22:13:50.910+00:00</dateSysMetadataModified>
+    <originMemberNode>urn:node:mnTestIOEaas</originMemberNode>
+    <authoritativeMemberNode>urn:node:mnTestIOEaas</authoritativeMemberNode>
+</ns3:systemMetadata>
