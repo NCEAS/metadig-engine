@@ -84,6 +84,15 @@
   <check>
   	<id>check.echo.funder.1</id>
   </check>
+   <check>
+  	<id>check.echo.rightsHolder.1</id>
+  </check>
+   <check>
+  	<id>check.echo.datasource.1</id>
+  </check>
+   <check>
+  	<id>check.echo.formatId.1</id>
+  </check>
   <check>
   	<id>check.lookup.group.1</id>
   </check>
