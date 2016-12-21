@@ -11,7 +11,7 @@ import javax.xml.bind.annotation.XmlType;
 
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(propOrder = {"id", "timestamp", "objectIdentifier", "metadata", "suiteId", "result"})
+@XmlType(propOrder = {"id", "timestamp", "objectIdentifier", "suiteId", "result"})
 public class Run {
 	
 	/**
@@ -50,13 +50,6 @@ public class Run {
 	@XmlElement(required = false)
 	private String suiteId;
 	
-	/**
-	 * Additional information about the document that was QCed.
-	 * This can be helpful when analyzing and aggregating batches of run results.
-	 */
-	@XmlElement(required = false)
-	private Metadata metadata;
-
 	public String getId() {
 		return id;
 	}
@@ -87,14 +80,6 @@ public class Run {
 
 	public void setObjectIdentifier(String objectIdentifier) {
 		this.objectIdentifier = objectIdentifier;
-	}
-
-	public Metadata getMetadata() {
-		return metadata;
-	}
-
-	public void setMetadata(Metadata metadata) {
-		this.metadata = metadata;
 	}
 
 	public String getSuiteId() {

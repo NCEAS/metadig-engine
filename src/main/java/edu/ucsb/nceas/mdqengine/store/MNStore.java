@@ -37,7 +37,6 @@ import org.dataone.service.types.v2.SystemMetadata;
 
 import edu.ucsb.nceas.mdqengine.MDQStore;
 import edu.ucsb.nceas.mdqengine.model.Check;
-import edu.ucsb.nceas.mdqengine.model.Metadata;
 import edu.ucsb.nceas.mdqengine.model.Suite;
 import edu.ucsb.nceas.mdqengine.model.Run;
 import edu.ucsb.nceas.mdqengine.serialize.XmlMarshaller;
@@ -103,16 +102,7 @@ public class MNStore implements MDQStore {
 		sysMeta.setFormatId(formatId);
 		
 		// roles
-		sysMeta.setRightsHolder(session.getSubject());
-		// for runs, use the original object's rightsholder
-		if (model instanceof Run) {
-			Metadata meta = ((Run)model).getMetadata();
-			if (meta != null && meta.getRightsHolder() != null) {
-				Subject originalRightsHolder = new Subject();
-				originalRightsHolder.setValue(meta.getRightsHolder());
-				sysMeta.setRightsHolder(originalRightsHolder);
-			}
-		}
+		sysMeta.setRightsHolder(session.getSubject());	
 		sysMeta.setSubmitter(session.getSubject());
 		sysMeta.setAuthoritativeMemberNode(node.getNodeId());
 		sysMeta.setOriginMemberNode(node.getNodeId());

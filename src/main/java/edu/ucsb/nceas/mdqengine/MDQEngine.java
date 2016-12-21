@@ -25,7 +25,6 @@ import org.xml.sax.SAXException;
 
 import edu.ucsb.nceas.mdqengine.dispatch.MDQCache;
 import edu.ucsb.nceas.mdqengine.model.Check;
-import edu.ucsb.nceas.mdqengine.model.Metadata;
 import edu.ucsb.nceas.mdqengine.model.Output;
 import edu.ucsb.nceas.mdqengine.model.Result;
 import edu.ucsb.nceas.mdqengine.model.Run;
@@ -114,18 +113,7 @@ public class MDQEngine {
 			results.add(result);
 		}
 		run.setResult(results);
-		
-		// track metadata about the document that is QCed
-		if (sysMeta != null) {
-			Metadata metadata = new Metadata();
-			metadata.setDatasource(sysMeta.getOriginMemberNode().getValue());
-			metadata.setFormatId(sysMeta.getFormatId().getValue());
-			//metadata.setFunder(funder);
-			metadata.setRightsHolder(sysMeta.getRightsHolder().getValue());
-			run.setMetadata(metadata);
-		}
-		
-		
+
 		log.trace("Run results: " + JsonMarshaller.toJson(run));
 		
 		// clean up

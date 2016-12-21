@@ -54,16 +54,6 @@
     </xs:sequence>
   </xs:complexType>
 
-  <xs:complexType name="metadata">
-    <xs:sequence>
-      <xs:element name="dataUrl" type="xs:string" minOccurs="0"/>
-      <xs:element name="datasource" type="xs:string" minOccurs="0"/>
-      <xs:element name="formatId" type="xs:string" minOccurs="0"/>
-      <xs:element name="funder" type="xs:string" minOccurs="0"/>
-      <xs:element name="rightsHolder" type="xs:string" minOccurs="0"/>
-    </xs:sequence>
-  </xs:complexType>
-
   <xs:complexType name="output">
     <xs:simpleContent>
       <xs:extension base="xs:string">
@@ -86,7 +76,6 @@
       <xs:element name="id" type="xs:string"/>
       <xs:element name="timestamp" type="xs:dateTime"/>
       <xs:element name="objectIdentifier" type="xs:string" minOccurs="0"/>
-      <xs:element name="metadata" type="tns:metadata" minOccurs="0"/>
       <xs:element name="suiteId" type="xs:string" minOccurs="0"/>
       <xs:element name="result" type="tns:result" minOccurs="0" maxOccurs="unbounded"/>
     </xs:sequence>
@@ -104,17 +93,17 @@
   <xs:simpleType name="level">
     <xs:restriction base="xs:string">
       <xs:enumeration value="OPTIONAL"/>
-      <xs:enumeration value="REQUIRED"/>
       <xs:enumeration value="INFO"/>
+      <xs:enumeration value="REQUIRED"/>
     </xs:restriction>
   </xs:simpleType>
 
   <xs:simpleType name="status">
     <xs:restriction base="xs:string">
-      <xs:enumeration value="FAILURE"/>
       <xs:enumeration value="ERROR"/>
-      <xs:enumeration value="SKIP"/>
+      <xs:enumeration value="FAILURE"/>
       <xs:enumeration value="SUCCESS"/>
+      <xs:enumeration value="SKIP"/>
     </xs:restriction>
   </xs:simpleType>
 </xs:schema>

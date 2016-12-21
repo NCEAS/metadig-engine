@@ -1,8 +1,6 @@
 package edu.ucsb.nceas.mdqengine;
 
-import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -10,11 +8,8 @@ import java.net.URL;
 import java.net.URLEncoder;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -24,7 +19,6 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
-import org.apache.commons.csv.CSVPrinter;
 import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.ArrayUtils;
@@ -35,43 +29,15 @@ import org.apache.http.client.utils.URLEncodedUtils;
 import org.dataone.client.v2.CNode;
 import org.dataone.client.v2.MNode;
 import org.dataone.client.v2.itk.D1Client;
-import org.dataone.configuration.Settings;
 import org.dataone.service.types.v2.SystemMetadata;
 import org.dataone.service.util.TypeMarshaller;
 
-import edu.ucsb.nceas.mdqengine.dispatch.Dispatcher;
-import edu.ucsb.nceas.mdqengine.dispatch.RDispatcher;
-import edu.ucsb.nceas.mdqengine.model.Check;
-import edu.ucsb.nceas.mdqengine.model.Level;
-import edu.ucsb.nceas.mdqengine.model.Metadata;
-import edu.ucsb.nceas.mdqengine.model.Result;
 import edu.ucsb.nceas.mdqengine.model.Run;
-import edu.ucsb.nceas.mdqengine.model.Status;
 import edu.ucsb.nceas.mdqengine.model.Suite;
 import edu.ucsb.nceas.mdqengine.serialize.XmlMarshaller;
 import edu.ucsb.nceas.mdqengine.store.MNStore;
 
 public class Aggregator {
-	
-	public static String[] runColumns = {
-		"runId",
-		"suiteId",
-		"checkId",
-		"checkName",
-		"type",
-		"environment",
-		"level",
-		"status",
-		"output",
-		"timestamp",
-		"pid",
-		"formatId",
-		"datasource",
-		"dataUrl",
-		"rightsHolder"
-		//, "funder"
-
-	};
 	
 	public static String[] docColumns = {
 		"id",
@@ -153,8 +119,7 @@ public class Aggregator {
 				}
 			} else {
 				// write the aggregate content to the file
-				String runContent = toCSV(runs.toArray(new Run[] {}));
-				System.out.println(runContent);
+				System.out.println(runs);
 			}
 			
 			System.exit(0);
@@ -163,79 +128,6 @@ public class Aggregator {
 			e.printStackTrace();
 		}
 
-	}
-	
-	private File graphIt(String runContent, String format) {
-
-		log.trace("Tabular Results: \n" + runContent);
-
-		File batchFile = null;
-		File outputFile = null;
-
-		try {
-
-			//  try doing some analysis
-			InputStream scriptStream = this.getClass().getResourceAsStream("/code/plot.R");
-			String code = IOUtils.toString(scriptStream, "UTF-8");
-
-			// save the batch as a file for reading in R
-			batchFile = File.createTempFile("mdqe_batch", ".csv");
-			IOUtils.write(runContent, new FileOutputStream(batchFile), "UTF-8");
-			String input = batchFile.getAbsolutePath();
-			String output = input.replace("csv", format);
-			
-			// use our dispatcher to call the plotting code
-			Dispatcher dispatcher = new RDispatcher();
-			Map<String, Object> variables = new HashMap<String, Object>();
-			variables.put("inputPath", input);
-			variables.put("outputPath", output);
-
-			Result result = dispatcher.dispatch(variables, code);
-			assert result.getStatus().equals(Status.SUCCESS);
-			
-			outputFile = new File(output);
-			log.info("Plot available here: \n" + output);
-					
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} finally {
-			batchFile.delete();
-			//outputFile.deleteOnExit();
-		}
-		
-		return outputFile;
-		
-	}
-	
-	public File graphBatch(List<NameValuePair> params, Suite suite, String format) {
-
-		String runContent = null;
-		try {
-			// get the completed runs
-			List<Run> runs = this.runBatch(params, suite);
-			// write the aggregate content to the file
-			runContent = toCSV(runs.toArray(new Run[] {}));
-		} catch (IOException e) {
-			log.error("Could not generate batch run results: " + e.getMessage());
-			return null;
-		}
-
-		return graphIt(runContent, format);
-	}
-	
-	public File graphSingle(InputStream input, Suite suite, String format) {
-		File output = null;
-		String runContent = null;
-		try {
-			Run run = engine.runSuite(suite, input, null, null);
-			runContent = toCSV(run);
-			output = graphIt(runContent, format);
-		} catch (Exception e) {
-			log.error("Could not graph check suite on given content: " + e.getMessage());
-		}
-		return output;
-		
 	}
 	
 	/**
@@ -274,22 +166,7 @@ public class Aggregator {
 					// have to skip if we can't retrieve it
 					continue;
 				}
-				String formatId = docRecord.get("formatId");
-				String datasource = docRecord.get("datasource");
-				String rightsHolder = docRecord.get("rightsHolder");
-				// TODO: add funder to solr index?
-				String funder = null;
-				if (docRecord.isSet("funder")) {
-					funder = docRecord.get("funder");
-				}
 				
-				Metadata metadata = new Metadata();
-				metadata.setDatasource(datasource);
-				metadata.setDataUrl(dataUrl);
-				metadata.setFormatId(formatId);
-				metadata.setRightsHolder(rightsHolder);
-				metadata.setFunder(funder);
-
 				try {
 					
 					final String finalDataUrl = dataUrl;
@@ -311,7 +188,6 @@ public class Aggregator {
 							}
 							Run run = engine.runSuite(suite, input, null, sysMeta);
 							run.setObjectIdentifier(id);
-							run.setMetadata(metadata);
 							run.setSuiteId(suite.getId());
 							return run;
 						}
@@ -428,76 +304,6 @@ public class Aggregator {
 		return null;
 	}
 	
-	/**
-	 * Output the run[s] as a set of CSV records
-	 * @param run
-	 * @return
-	 * @throws IOException 
-	 */
-	public static String toCSV(Run... runs) throws IOException {
-		
-		StringBuffer sb = new StringBuffer();
-		CSVPrinter csv = CSVFormat.DEFAULT.withHeader(runColumns).print(sb);
-
-		for (Run run: runs) {
-			String pid = run.getObjectIdentifier();
-			String runId = run.getId();
-			String suiteId = run.getSuiteId();
-
-			Date timestamp = run.getTimestamp();
 	
-			for (Result result: run.getResult()) {
-				
-				Check check = result.getCheck();
-				String checkId = check.getId();
-				String checkName = check.getName();
-
-				String type = check.getType();
-				String environment = check.getEnvironment();
-				Level level = check.getLevel();
-				
-				Status status = result.getStatus();
-				String output = result.getOutput().get(0).getValue();
-				
-				Metadata metadata = run.getMetadata();
-				String formatId = null;
-				String datasource = null;
-				String dataUrl = null;
-				String rightsHolder = null;
-				if (metadata != null) {
-					formatId = metadata.getFormatId();
-					datasource = metadata.getDatasource();
-					dataUrl = metadata.getDataUrl();
-					rightsHolder = metadata.getRightsHolder();
-				}
-				
-				// create a csv record from this entry
-				csv.printRecord(
-						runId,
-						suiteId,
-						checkId,
-						checkName,
-						type,
-						environment,
-						level,
-						status,
-						output,
-						timestamp,
-						
-						// document  info
-						pid,
-						formatId,
-						datasource,
-						dataUrl,
-						rightsHolder
-						
-						);
-				
-			}
-		}
-		
-		return sb.toString();
-		
-	}
 
 }
