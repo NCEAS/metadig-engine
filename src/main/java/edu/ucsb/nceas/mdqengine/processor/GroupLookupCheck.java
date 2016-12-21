@@ -45,13 +45,19 @@ public class GroupLookupCheck implements Callable<Result> {
 				SubjectInfo subjectInfo = D1Client.getCN().getSubjectInfo(null, subject);
 				if (subjectInfo != null && subjectInfo.getPersonList() != null && subjectInfo.getPersonList().size() > 0) {
 					Person person = subjectInfo.getPerson(0);
-					if (person.getIsMemberOfList() != null && person.getIsMemberOfList().size() > 0) {
-						for (Subject group: person.getIsMemberOfList()) {
-							String groupSubject = group.getValue();
-							log.debug("Found group: " + groupSubject);
-							groups.add(new Output(groupSubject));
+					// get if we are looking up a person or a group
+					if (person.getSubject().equals(subject)) {
+						if (person.getIsMemberOfList() != null && person.getIsMemberOfList().size() > 0) {
+							for (Subject group: person.getIsMemberOfList()) {
+								String groupSubject = group.getValue();
+								log.debug("Found group: " + groupSubject);
+								groups.add(new Output(groupSubject));
+							}
+							result.setOutput(groups);
 						}
-						result.setOutput(groups);
+					} else {
+						// it must be a group already
+						result.setOutput(new Output(subject.getValue()));
 					}
 				}
 			} catch (Exception e) {
