@@ -35,6 +35,7 @@ import org.apache.http.client.utils.URLEncodedUtils;
 import org.dataone.client.v2.CNode;
 import org.dataone.client.v2.MNode;
 import org.dataone.client.v2.itk.D1Client;
+import org.dataone.configuration.Settings;
 import org.dataone.service.types.v2.SystemMetadata;
 import org.dataone.service.util.TypeMarshaller;
 
@@ -111,9 +112,12 @@ public class Aggregator {
 	 */
 	public static void main(String args[]) {
 		
+		// use sandbox CN for this
+		//Settings.getConfiguration().setProperty("D1Client.CN_URL", "https://cn-sandbox.test.dataone.org/cn");
+		
 		// default query
-		String query = "q=formatId:\"eml://ecoinformatics.org/eml-2.0.1\" ";
-		//String query = "q=id:\"arctic.1.1\" ";
+		String query = "q=formatId:\"eml://ecoinformatics.org/eml-2.1.1\" ";
+		//String query = "q=rightsHolder:\"CN=Lauren Walker A10489,O=Google,C=US,DC=cilogon,DC=org\" +formatId:\"eml://ecoinformatics.org/eml-2.1.1\"";
 		
 		try {
 			
@@ -387,7 +391,7 @@ public class Aggregator {
 				solrQuery += "&sort=dateUploaded%20desc";
 			}
 			if (!solrQuery.contains("rows")) {
-				solrQuery += "&rows=1000";
+				solrQuery += "&rows=10";
 			}
 			
 			// add additional required parameters
