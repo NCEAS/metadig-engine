@@ -26,10 +26,10 @@ public class EchoCheck implements Callable<Result> {
 		
 		if (this.value != null && this.value.length() > 0) {
 			result.setStatus(Status.SUCCESS);
+			result.setOutput(new Output(this.value));
 		} else {
 			result.setStatus(Status.FAILURE);
 		}
-		result.setOutput(new Output("Found value:" + this.value));
 		
 		return result;
 		
