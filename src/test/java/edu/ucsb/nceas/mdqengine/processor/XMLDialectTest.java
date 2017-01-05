@@ -300,6 +300,49 @@ public class XMLDialectTest {
 	}
 	
 	@Test
+	public void testAwardLookup() {
+
+		Check check = new Check();
+		
+		// selector for award id
+		Selector selector = new Selector();
+		selector.setName("awards");
+		selector.setXpath("/eml/dataset/project/funding//para");
+
+		List<Selector> selectors = new ArrayList<Selector>();
+		selectors.add(selector);
+		check.setSelector(selectors);
+		
+		check.setCode(AwardLookupCheck.class.getName());
+		check.setEnvironment("Java");
+		check.setLevel(Level.REQUIRED);
+		check.setName("Award lookup");
+				
+		//  run the check 
+		try {
+			
+			// parse the metadata content
+			InputStream input = this.getClass().getResourceAsStream("/test-docs/eml.1.1.xml");
+			XMLDialect xml = new XMLDialect(input);
+			
+			// parse the systemMetadata content
+			InputStream smInput = this.getClass().getResourceAsStream("/test-docs/eml.1.1.sysMeta.xml");
+			SystemMetadata systemMetadata = TypeMarshaller.unmarshalTypeFromStream(SystemMetadata.class, smInput);
+			xml.setSystemMetadata(systemMetadata);
+			
+			// run check
+			Result result = xml.runCheck(check);
+			log.debug("First result output: " + result.getOutput().get(0).getValue());
+			assertEquals(result.getOutput().get(0).getValue(), Status.SUCCESS, result.getStatus());
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+			fail(e.getMessage());
+		}
+			
+	}
+	
+	@Test
 	public void testLibrary() {
 
 		Check check = new Check();
