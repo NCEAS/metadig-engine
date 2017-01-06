@@ -100,6 +100,9 @@ public class AwardLookupCheck implements Callable<Result> {
 					outputs.add(new Output(id));
 					outputs.add(new Output(fundProgramName));
 					outputs.add(new Output(primaryProgram));
+					
+					// look up cross ref info as well
+					outputs.addAll(this.lookupCrossRef(id));
 
 				} catch (Exception e) {
 					log.error("Could not look up award " + awardId, e);
@@ -118,6 +121,25 @@ public class AwardLookupCheck implements Callable<Result> {
 		
 		return result;
 		
+	}
+	
+	// TODO: implement this in a way that makes sense
+	private List<Output> lookupCrossRef(String awardId) {
+		
+		List<Output> outputs = new ArrayList<Output>();
+
+		// find the funder using a work with this awardId
+		// TODO: I don't think this is the best way to get at funder info
+		String worksUrl = "http://api.crossref.org/works?rows=1&filter=award.number:" + awardId;
+
+		// message.items[0].funder[x].DOI
+		String funderDOI = null;
+		String funderId = null; //funderDOI.substring(funderDOI.lastIndexOf("/"));
+		
+		// find the org hierarchy for the funder
+		String funderUrl = "http://api.crossref.org/funders/" + funderId;
+
+		return outputs;
 	}
 
 	public Object getAwards() {
