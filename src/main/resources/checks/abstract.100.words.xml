@@ -31,10 +31,14 @@
   ]]></code>
   <selector>
     <name>abstract</name>
-    <xpath>/eml/dataset/abstract</xpath>
+    <xpath>/eml/dataset/abstract | /*/identificationInfo/*/abstract/CharacterString</xpath>
   </selector>
   <dialect>
     <name>eml</name>
     <xpath>boolean(/*[local-name() = 'eml'])</xpath>
   </dialect>
+  <dialect>
+      <name>iso</name>
+      <xpath>boolean(/*[local-name() = 'MI_Metadata' or local-name() = 'MD_Metadata'])</xpath>
+    </dialect>
 </mdq:check>

@@ -28,11 +28,20 @@ call()
 	
 	<selector>
 		<name>keywords</name>
-		<xpath>/eml/dataset/keywordSet/keyword</xpath>
+		<xpath>
+		(/eml/dataset/keywordSet/keyword)
+		|
+		(/*/identificationInfo/*/descriptiveKeywords/MD_Keywords/keyword | /*/identificationInfo/*/descriptiveKeywords/MD_Keywords[normalize-space(type/MD_KeywordTypeCode)='place']/keyword/CharacterString | /*/identificationInfo/*/descriptiveKeywords/MD_Keywords[normalize-space(type/MD_KeywordTypeCode)='instrument']/keyword/CharacterString |
+        /*/identificationInfo/*/descriptiveKeywords/MD_Keywords[normalize-space(type/MD_KeywordTypeCode)='platform']/keyword/CharacterString | /*/identificationInfo/*/descriptiveKeywords/MD_Keywords[normalize-space(type/MD_KeywordTypeCode)='project']/keyword/CharacterString)
+        </xpath>
 	</selector>
 	
 	<dialect>
 		<name>eml</name>
 		<xpath>boolean(/*[local-name() = 'eml'])</xpath>
 	</dialect>
+	<dialect>
+		<name>iso</name>
+    	<xpath>boolean(/*[local-name() = 'MI_Metadata' or local-name() = 'MD_Metadata'])</xpath>
+  </dialect>
 </mdq:check>

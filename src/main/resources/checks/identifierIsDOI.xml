@@ -32,6 +32,10 @@ if (length(identifier) == 0) {
   ]]></code>
    <selector>
     <name>identifier</name>
-    <xpath>/eml/@packageId</xpath>
+    <xpath>
+    (/eml/@packageId)
+    |
+    (/*/fileIdentifier/CharacterString)
+    </xpath>
   </selector>
 </mdq:check>
