@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mdq:suite xmlns:mdq="https://nceas.ucsb.edu/mdqe" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.w3.org/2001/XMLSchema-instance">
+    <suite>
+        <id>ACDD_highlyRecommended_ACDD_ISO</id>
+    </suite>
+    <suite>
+        <id>ACDD_recommended_ACDD_ISO</id>
+    </suite>
+    <suite>
+        <id>ACDD_suggested_ACDD_ISO</id>
+    </suite>
+</mdq:suite>
