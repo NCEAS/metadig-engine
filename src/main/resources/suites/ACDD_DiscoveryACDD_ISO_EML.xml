@@ -11,20 +11,23 @@
     <environment>python</environment>
     <code><![CDATA[
 def call():
-  global output
-  global status
-  # Message is set when an error occurs.
-  output = "The concept ResourceTitle is present."
-  if(len(ResourceTitle) > 0):
-    status = "SUCCESS"
-    return True
-  status = "FAILURE"
-  output = "ResourceTitle concept is not present"
-  return False
+    global output
+    global status
+
+    output = "The concept ResourceTitle is present."
+
+    if(ResourceTitle is not None and len(ResourceTitle) > 0):
+        status = "SUCCESS"
+        return True
+
+    status = "FAILURE"
+    output = "ResourceTitle concept is not present"
+
+    return False
       ]]></code>
     <selector>
       <name>ResourceTitle</name>
-      <xpath>/*/gmd:identificationInfo/*/gmd:citation/gmd:CI_Citation/gmd:title//* | /eml:eml/*/title | /netcdf/attribute[@name='title']/@value</xpath>
+      <xpath>(/*/identificationInfo/*/citation/CI_Citation/title//*) | (/eml/*/title) | (/netcdf/attribute[@name='title']/@value)</xpath>
     </selector>
     <dialect>
       <name>acdd</name>
@@ -32,7 +35,7 @@ def call():
     </dialect>
     <dialect>
       <name>iso</name>
-      <xpath>boolean(/*[local-name() = 'MI_Metadata' | local-name() = 'MD_Metadata'])</xpath>
+      <xpath>boolean(/*[local-name() = 'MI_Metadata' or local-name() = 'MD_Metadata'])</xpath>
     </dialect>
     <dialect>
       <name>eml</name>
