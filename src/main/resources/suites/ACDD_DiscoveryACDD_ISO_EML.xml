@@ -11,19 +11,19 @@
     <environment>python</environment>
     <code><![CDATA[
 def call():
-    global output
-    global status
-
-    output = "The concept ResourceTitle is present."
-
-    if(ResourceTitle is not None and len(ResourceTitle) > 0):
-        status = "SUCCESS"
-        return True
-
-    status = "FAILURE"
-    output = "ResourceTitle concept is not present"
-
-    return False
+  global output
+  global status
+ 
+  output = "The concept ResourceTitle is present."
+                                        
+  if(ResourceTitle is not None and len(ResourceTitle) > 0):
+    status = "SUCCESS"
+    return True
+    
+  status = "FAILURE"
+  output = "ResourceTitle concept is not present"
+  
+  return False
       ]]></code>
     <selector>
       <name>ResourceTitle</name>
@@ -53,18 +53,21 @@ def call():
 def call():
   global output
   global status
-  # Message is set when an error occurs.
+ 
   output = "The concept Abstract is present."
-  if(len(Abstract) > 0):
+                                        
+  if(Abstract is not None and len(Abstract) > 0):
     status = "SUCCESS"
     return True
+    
   status = "FAILURE"
   output = "Abstract concept is not present"
+  
   return False
       ]]></code>
     <selector>
       <name>Abstract</name>
-      <xpath>/*/gmd:identificationInfo/*/gmd:abstract//* | /eml:eml/*/abstract | /netcdf/attribute[@name='summary']/@value</xpath>
+      <xpath>(/*/identificationInfo/*/abstract//*) | (/eml/*/abstract) | (/netcdf/attribute[@name='summary']/@value)</xpath>
     </selector>
     <dialect>
       <name>acdd</name>
@@ -72,7 +75,7 @@ def call():
     </dialect>
     <dialect>
       <name>iso</name>
-      <xpath>boolean(/*[local-name() = 'MI_Metadata' | local-name() = 'MD_Metadata'])</xpath>
+      <xpath>boolean(/*[local-name() = 'MI_Metadata' or local-name() = 'MD_Metadata'])</xpath>
     </dialect>
     <dialect>
       <name>eml</name>
@@ -90,19 +93,21 @@ def call():
 def call():
   global output
   global status
-  # Message is set when an error occurs.
+ 
   output = "The concept Keyword is present."
-  if(len(Keyword) > 0):
+                                        
+  if(Keyword is not None and len(Keyword) > 0):
     status = "SUCCESS"
     return True
+    
   status = "FAILURE"
   output = "Keyword concept is not present"
+  
   return False
       ]]></code>
     <selector>
       <name>Keyword</name>
-      <xpath>/*/gmd:identificationInfo/*/gmd:descriptiveKeywords/gmd:MD_Keywords/gmd:keyword | /*/gmd:identificationInfo/*/gmd:descriptiveKeywords/gmd:MD_Keywords[normalize-space(gmd:type/gmd:MD_KeywordTypeCode)='place']/gmd:keyword//* | /*/gmd:identificationInfo/*/gmd:descriptiveKeywords/gmd:MD_Keywords[normalize-space(gmd:type/gmd:MD_KeywordTypeCode)='instrument']/gmd:keyword//* |
-        /*/gmd:identificationInfo/*/gmd:descriptiveKeywords/gmd:MD_Keywords[normalize-space(gmd:type/gmd:MD_KeywordTypeCode)='platform']/gmd:keyword//* | /*/gmd:identificationInfo/*/gmd:descriptiveKeywords/gmd:MD_Keywords[normalize-space(gmd:type/gmd:MD_KeywordTypeCode)='project']/gmd:keyword//* | /eml:eml/*/keywordSet/keyword | /netcdf/attribute[@name='keywords']/@value</xpath>
+      <xpath>(/*/identificationInfo/*/descriptiveKeywords/MD_Keywords/keyword) | (/*/identificationInfo/*/descriptiveKeywords/MD_Keywords[normalize-space(type/MD_KeywordTypeCode)='place']/keyword//*) | (/*/identificationInfo/*/descriptiveKeywords/MD_Keywords[normalize-space(type/MD_KeywordTypeCode)='instrument']/keyword//*) | (/*/identificationInfo/*/descriptiveKeywords/MD_Keywords[normalize-space(type/MD_KeywordTypeCode)='platform']/keyword//*) | (/*/identificationInfo/*/descriptiveKeywords/MD_Keywords[normalize-space(type/MD_KeywordTypeCode)='project']/keyword//*) | (/eml/*/keywordSet/keyword) | (/netcdf/attribute[@name='keywords']/@value)</xpath>
     </selector>
     <dialect>
       <name>acdd</name>
@@ -110,14 +115,14 @@ def call():
     </dialect>
     <dialect>
       <name>iso</name>
-      <xpath>boolean(/*[local-name() = 'MI_Metadata' | local-name() = 'MD_Metadata'])</xpath>
+      <xpath>boolean(/*[local-name() = 'MI_Metadata' or local-name() = 'MD_Metadata'])</xpath>
     </dialect>
     <dialect>
       <name>eml</name>
       <xpath>boolean(/*[local-name() = 'eml'])</xpath>
     </dialect>
   </check>
-<check>
+ <check>
     <id>ACDD_recommended_ResourceIdentifier_ACDD_ISO_EML</id>
     <name>ResourceIdentifierPresent</name>
     <description>Checks to see if at least one Resource Identifier concept exists.</description>
@@ -128,18 +133,21 @@ def call():
 def call():
   global output
   global status
-  # Message is set when an error occurs.
+ 
   output = "The concept ResourceIdentifier is present."
-  if(len(ResourceIdentifier) > 0):
+                                        
+  if(ResourceIdentifier is not None and len(ResourceIdentifier) > 0):
     status = "SUCCESS"
     return True
+    
   status = "FAILURE"
   output = "ResourceIdentifier concept is not present"
+  
   return False
       ]]></code>
     <selector>
       <name>ResourceIdentifier</name>
-      <xpath>/*/gmd:identificationInfo/*/gmd:citation/gmd:CI_Citation/gmd:identifier/gmd:MD_Identifier/gmd:code//* | /eml:eml/@packageId | /netcdf/attribute[@name='id']/@value</xpath>
+      <xpath>(/*/identificationInfo/*/citation/CI_Citation/identifier/MD_Identifier/code//*) | (/eml/@packageId) | (/netcdf/attribute[@name='id']/@value)</xpath>
     </selector>
     <dialect>
       <name>acdd</name>
@@ -147,7 +155,7 @@ def call():
     </dialect>
     <dialect>
       <name>iso</name>
-      <xpath>boolean(/*[local-name() = 'MI_Metadata' | local-name() = 'MD_Metadata'])</xpath>
+      <xpath>boolean(/*[local-name() = 'MI_Metadata' or local-name() = 'MD_Metadata'])</xpath>
     </dialect>
     <dialect>
       <name>eml</name>
@@ -165,18 +173,21 @@ def call():
 def call():
   global output
   global status
-  # Message is set when an error occurs.
+ 
   output = "The concept NamingAuthority is present."
-  if(len(NamingAuthority) > 0):
+                                        
+  if(NamingAuthority is not None and len(NamingAuthority) > 0):
     status = "SUCCESS"
     return True
+    
   status = "FAILURE"
   output = "NamingAuthority concept is not present"
+  
   return False
       ]]></code>
     <selector>
       <name>NamingAuthority</name>
-      <xpath>/*/gmd:identificationInfo/*/gmd:citation/gmd:CI_Citation/gmd:identifier/gmd:MD_Identifier/gmd:authority | /netcdf/attribute[@name='naming_authority']/@value</xpath>
+      <xpath>(/*/identificationInfo/*/citation/CI_Citation/identifier/MD_Identifier/authority) | (/netcdf/attribute[@name='naming_authority']/@value)</xpath>
     </selector>
     <dialect>
       <name>acdd</name>
@@ -184,7 +195,7 @@ def call():
     </dialect>
     <dialect>
       <name>iso</name>
-      <xpath>boolean(/*[local-name() = 'MI_Metadata' | local-name() = 'MD_Metadata'])</xpath>
+      <xpath>boolean(/*[local-name() = 'MI_Metadata' or local-name() = 'MD_Metadata'])</xpath>
     </dialect>
     <dialect>
       <name>eml</name>
@@ -202,18 +213,21 @@ def call():
 def call():
   global output
   global status
-  # Message is set when an error occurs.
+ 
   output = "The concept KeywordVocabulary is present."
-  if(len(KeywordVocabulary) > 0):
+                                        
+  if(KeywordVocabulary is not None and len(KeywordVocabulary) > 0):
     status = "SUCCESS"
     return True
+    
   status = "FAILURE"
   output = "KeywordVocabulary concept is not present"
+  
   return False
       ]]></code>
     <selector>
       <name>KeywordVocabulary</name>
-      <xpath>/*/gmd:identificationInfo/*/gmd:descriptiveKeywords/gmd:MD_Keywords/gmd:thesaurusName | /eml:eml/*/keywordSet/keywordThesaurus | /netcdf/attribute[@name='keyword_vocabulary']/@value</xpath>
+      <xpath>(/*/identificationInfo/*/descriptiveKeywords/MD_Keywords/thesaurusName) | (/eml/*/keywordSet/keywordThesaurus) | (/netcdf/attribute[@name='keyword_vocabulary']/@value)</xpath>
     </selector>
     <dialect>
       <name>acdd</name>
@@ -221,7 +235,7 @@ def call():
     </dialect>
     <dialect>
       <name>iso</name>
-      <xpath>boolean(/*[local-name() = 'MI_Metadata' | local-name() = 'MD_Metadata'])</xpath>
+      <xpath>boolean(/*[local-name() = 'MI_Metadata' or local-name() = 'MD_Metadata'])</xpath>
     </dialect>
     <dialect>
       <name>eml</name>
@@ -239,18 +253,21 @@ def call():
 def call():
   global output
   global status
-  # Message is set when an error occurs.
+ 
   output = "The concept CommonDataModelDatatype is present."
-  if(len(CommonDataModelDatatype) > 0):
+                                        
+  if(CommonDataModelDatatype is not None and len(CommonDataModelDatatype) > 0):
     status = "SUCCESS"
     return True
+    
   status = "FAILURE"
   output = "CommonDataModelDatatype concept is not present"
+  
   return False
       ]]></code>
     <selector>
       <name>CommonDataModelDatatype</name>
-      <xpath>/*/gmd:identificationInfo/*/gmd:spatialRepresentationType/gmd:MD_SpatialRepresentationTypeCode | /netcdf/attribute[@name='cdm_data_type']/@value</xpath>
+      <xpath>(/*/identificationInfo/*/spatialRepresentationType/MD_SpatialRepresentationTypeCode) | (/netcdf/attribute[@name='cdm_data_type']/@value)</xpath>
     </selector>
     <dialect>
       <name>acdd</name>
@@ -258,7 +275,7 @@ def call():
     </dialect>
     <dialect>
       <name>iso</name>
-      <xpath>boolean(/*[local-name() = 'MI_Metadata' | local-name() = 'MD_Metadata'])</xpath>
+      <xpath>boolean(/*[local-name() = 'MI_Metadata' or local-name() = 'MD_Metadata'])</xpath>
     </dialect>
     <dialect>
       <name>eml</name>
@@ -276,18 +293,21 @@ def call():
 def call():
   global output
   global status
-  # Message is set when an error occurs.
+ 
   output = "The concept LineageStatement is present."
-  if(len(LineageStatement) > 0):
+                                        
+  if(LineageStatement is not None and len(LineageStatement) > 0):
     status = "SUCCESS"
     return True
+    
   status = "FAILURE"
   output = "LineageStatement concept is not present"
+  
   return False
       ]]></code>
     <selector>
       <name>LineageStatement</name>
-      <xpath>/*/gmd:dataQualityInfo/gmd:DQ_DataQuality/gmd:lineage/gmd:LI_Lineage/gmd:statement//* | /netcdf/attribute[@name='history']/@value</xpath>
+      <xpath>(/*/dataQualityInfo/DQ_DataQuality/lineage/LI_Lineage/statement//*) | (/netcdf/attribute[@name='history']/@value)</xpath>
     </selector>
     <dialect>
       <name>acdd</name>
@@ -295,7 +315,7 @@ def call():
     </dialect>
     <dialect>
       <name>iso</name>
-      <xpath>boolean(/*[local-name() = 'MI_Metadata' | local-name() = 'MD_Metadata'])</xpath>
+      <xpath>boolean(/*[local-name() = 'MI_Metadata' or local-name() = 'MD_Metadata'])</xpath>
     </dialect>
     <dialect>
       <name>eml</name>
@@ -313,18 +333,21 @@ def call():
 def call():
   global output
   global status
-  # Message is set when an error occurs.
+ 
   output = "The concept SupplementalInformation is present."
-  if(len(SupplementalInformation) > 0):
+                                        
+  if(SupplementalInformation is not None and len(SupplementalInformation) > 0):
     status = "SUCCESS"
     return True
+    
   status = "FAILURE"
   output = "SupplementalInformation concept is not present"
+  
   return False
       ]]></code>
     <selector>
       <name>SupplementalInformation</name>
-      <xpath>/*/gmd:identificationInfo/*/gmd:supplementalInformation//* | /eml:eml/*/additionalInfo | /netcdf/attribute[@name='comment']/@value</xpath>
+      <xpath>(/*/identificationInfo/*/supplementalInformation//*) | (/eml/*/additionalInfo) | (/netcdf/attribute[@name='comment']/@value)</xpath>
     </selector>
     <dialect>
       <name>acdd</name>
@@ -332,7 +355,7 @@ def call():
     </dialect>
     <dialect>
       <name>iso</name>
-      <xpath>boolean(/*[local-name() = 'MI_Metadata' | local-name() = 'MD_Metadata'])</xpath>
+      <xpath>boolean(/*[local-name() = 'MI_Metadata' or local-name() = 'MD_Metadata'])</xpath>
     </dialect>
     <dialect>
       <name>eml</name>
@@ -350,20 +373,21 @@ def call():
 def call():
   global output
   global status
-  # Message is set when an error occurs.
+ 
   output = "The concept ResourceCreation/RevisionDate is present."
-  if(len(ResourceCreation/RevisionDate) > 0):
+                                        
+  if(ResourceCreation/RevisionDate is not None and len(ResourceCreation/RevisionDate) > 0):
     status = "SUCCESS"
     return True
+    
   status = "FAILURE"
   output = "ResourceCreation/RevisionDate concept is not present"
+  
   return False
       ]]></code>
     <selector>
       <name>ResourceCreation/RevisionDate</name>
-      <xpath>/*/gmd:identificationInfo/*/gmd:citation/gmd:CI_Citation/gmd:date/gmd:CI_Date[normalize-space(gmd:dateType/gmd:CI_DateTypeCode)='creation']/gmd:date/gco:Date | /*/gmd:identificationInfo/*/gmd:citation/gmd:CI_Citation/gmd:date/gmd:CI_Date[normalize-space(gmd:dateType/gmd:CI_DateTypeCode)='creation']/gmd:date/gco:DateTime | /*/gmd:identificationInfo/*/gmd:citation/gmd:CI_Citation/gmd:date/gmd:CI_Date[normalize-space(gmd:dateType/gmd:CI_DateTypeCode)='revision']/gmd:date/gco:Date |
-        /*/gmd:identificationInfo/*/gmd:citation/gmd:CI_Citation/gmd:date/gmd:CI_Date[normalize-space(gmd:dateType/gmd:CI_DateTypeCode)='revision']/gmd:date/gco:DateTime | /*/gmd:identificationInfo/*/gmd:citation/gmd:CI_Citation/gmd:date/gmd:CI_Date[normalize-space(gmd:dateType/gmd:CI_DateTypeCode)='publication']/gmd:date/gco:Date | /*/gmd:identificationInfo/*/gmd:citation/gmd:CI_Citation/gmd:date/gmd:CI_Date[normalize-space(gmd:dateType/gmd:CI_DateTypeCode)='publication']/gmd:date/gco:DateTime
-        | /eml:eml/*/maintenance/changeHistory/changeDate | /eml:eml/*/pubDate | /netcdf/attribute[@name='date_created']/@value</xpath>
+      <xpath>(/*/identificationInfo/*/citation/CI_Citation/date/CI_Date[normalize-space(dateType/CI_DateTypeCode)='creation']/date/Date) | (/*/identificationInfo/*/citation/CI_Citation/date/CI_Date[normalize-space(dateType/CI_DateTypeCode)='creation']/date/DateTime) | (/*/identificationInfo/*/citation/CI_Citation/date/CI_Date[normalize-space(dateType/CI_DateTypeCode)='revision']/date/Date) | (/*/identificationInfo/*/citation/CI_Citation/date/CI_Date[normalize-space(dateType/CI_DateTypeCode)='revision']/date/DateTime) | (/*/identificationInfo/*/citation/CI_Citation/date/CI_Date[normalize-space(dateType/CI_DateTypeCode)='publication']/date/Date) | (/*/identificationInfo/*/citation/CI_Citation/date/CI_Date[normalize-space(dateType/CI_DateTypeCode)='publication']/date/DateTime) | (/eml/*/maintenance/changeHistory/changeDate | /eml/*/pubDate) | (/netcdf/attribute[@name='date_created']/@value)</xpath>
     </selector>
     <dialect>
       <name>acdd</name>
@@ -371,7 +395,7 @@ def call():
     </dialect>
     <dialect>
       <name>iso</name>
-      <xpath>boolean(/*[local-name() = 'MI_Metadata' | local-name() = 'MD_Metadata'])</xpath>
+      <xpath>boolean(/*[local-name() = 'MI_Metadata' or local-name() = 'MD_Metadata'])</xpath>
     </dialect>
     <dialect>
       <name>eml</name>
@@ -389,18 +413,21 @@ def call():
 def call():
   global output
   global status
-  # Message is set when an error occurs.
+ 
   output = "The concept ResourceContact is present."
-  if(len(ResourceContact) > 0):
+                                        
+  if(ResourceContact is not None and len(ResourceContact) > 0):
     status = "SUCCESS"
     return True
+    
   status = "FAILURE"
   output = "ResourceContact concept is not present"
+  
   return False
       ]]></code>
     <selector>
       <name>ResourceContact</name>
-      <xpath>/*/gmd:identificationInfo/*/gmd:pointOfContact | /eml:eml/*/contact | /netcdf/attribute[@name='creator_name']/@value</xpath>
+      <xpath>(/*/identificationInfo/*/pointOfContact) | (/eml/*/contact) | (/netcdf/attribute[@name='creator_name']/@value)</xpath>
     </selector>
     <dialect>
       <name>acdd</name>
@@ -408,7 +435,7 @@ def call():
     </dialect>
     <dialect>
       <name>iso</name>
-      <xpath>boolean(/*[local-name() = 'MI_Metadata' | local-name() = 'MD_Metadata'])</xpath>
+      <xpath>boolean(/*[local-name() = 'MI_Metadata' or local-name() = 'MD_Metadata'])</xpath>
     </dialect>
     <dialect>
       <name>eml</name>
@@ -426,18 +453,21 @@ def call():
 def call():
   global output
   global status
-  # Message is set when an error occurs.
+ 
   output = "The concept Author/OriginatorWorldWideWebAddress is present."
-  if(len(Author/OriginatorWorldWideWebAddress) > 0):
+                                        
+  if(Author/OriginatorWorldWideWebAddress is not None and len(Author/OriginatorWorldWideWebAddress) > 0):
     status = "SUCCESS"
     return True
+    
   status = "FAILURE"
   output = "Author/OriginatorWorldWideWebAddress concept is not present"
+  
   return False
       ]]></code>
     <selector>
       <name>Author/OriginatorWorldWideWebAddress</name>
-      <xpath>//gmd:CI_Citation/gmd:citedResponsibleParty/gmd:CI_ResponsibleParty[normalize-space(gmd:role/gmd:CI_RoleCode)='author']/gmd:contactInfo/gmd:CI_Contact/gmd:onlineResource/gmd:CI_OnlineResource/gmd:linkage/gmd:URL | /eml:eml/*/creator/electronicMailAddress | /netcdf/attribute[@name='creator_url']/@value</xpath>
+      <xpath>(//CI_Citation/citedResponsibleParty/CI_ResponsibleParty[normalize-space(role/CI_RoleCode)='author']/contactInfo/CI_Contact/onlineResource/CI_OnlineResource/linkage/URL) | (/eml/*/creator/electronicMailAddress) | (/netcdf/attribute[@name='creator_url']/@value)</xpath>
     </selector>
     <dialect>
       <name>acdd</name>
@@ -445,7 +475,7 @@ def call():
     </dialect>
     <dialect>
       <name>iso</name>
-      <xpath>boolean(/*[local-name() = 'MI_Metadata' | local-name() = 'MD_Metadata'])</xpath>
+      <xpath>boolean(/*[local-name() = 'MI_Metadata' or local-name() = 'MD_Metadata'])</xpath>
     </dialect>
     <dialect>
       <name>eml</name>
@@ -463,18 +493,21 @@ def call():
 def call():
   global output
   global status
-  # Message is set when an error occurs.
+ 
   output = "The concept Author/OriginatorEmailAddress is present."
-  if(len(Author/OriginatorEmailAddress) > 0):
+                                        
+  if(Author/OriginatorEmailAddress is not None and len(Author/OriginatorEmailAddress) > 0):
     status = "SUCCESS"
     return True
+    
   status = "FAILURE"
   output = "Author/OriginatorEmailAddress concept is not present"
+  
   return False
       ]]></code>
     <selector>
       <name>Author/OriginatorEmailAddress</name>
-      <xpath>/*/gmd:identificationInfo/*/gmd:citation/gmd:CI_Citation/gmd:citedResponsibleParty/gmd:CI_ResponsibleParty[normalize-space(gmd:role/gmd:CI_RoleCode)='author']/gmd:contactInfo/gmd:CI_Contact/gmd:address/gmd:CI_Address/gmd:electronicMailAddress//* | /eml:eml/*/creator/onlineUrl | /netcdf/attribute[@name='creator_email']/@value</xpath>
+      <xpath>(/*/identificationInfo/*/citation/CI_Citation/citedResponsibleParty/CI_ResponsibleParty[normalize-space(role/CI_RoleCode)='author']/contactInfo/CI_Contact/address/CI_Address/electronicMailAddress//*) | (/eml/*/creator/onlineUrl) | (/netcdf/attribute[@name='creator_email']/@value)</xpath>
     </selector>
     <dialect>
       <name>acdd</name>
@@ -482,7 +515,7 @@ def call():
     </dialect>
     <dialect>
       <name>iso</name>
-      <xpath>boolean(/*[local-name() = 'MI_Metadata' | local-name() = 'MD_Metadata'])</xpath>
+      <xpath>boolean(/*[local-name() = 'MI_Metadata' or local-name() = 'MD_Metadata'])</xpath>
     </dialect>
     <dialect>
       <name>eml</name>
@@ -500,18 +533,21 @@ def call():
 def call():
   global output
   global status
-  # Message is set when an error occurs.
+ 
   output = "The concept OriginatingOrganization is present."
-  if(len(OriginatingOrganization) > 0):
+                                        
+  if(OriginatingOrganization is not None and len(OriginatingOrganization) > 0):
     status = "SUCCESS"
     return True
+    
   status = "FAILURE"
   output = "OriginatingOrganization concept is not present"
+  
   return False
       ]]></code>
     <selector>
       <name>OriginatingOrganization</name>
-      <xpath>/*/gmd:identificationInfo/*/gmd:citation/gmd:CI_Citation/gmd:citedResponsibleParty/gmd:CI_ResponsibleParty[normalize-space(gmd:role/gmd:CI_RoleCode)='author']/gmd:organisationName//* | /*/gmd:identificationInfo/*/gmd:citation/gmd:CI_Citation/gmd:citedResponsibleParty/gmd:CI_ResponsibleParty[normalize-space(gmd:role/gmd:CI_RoleCode)='originator']/gmd:organisationName//* | /eml:eml/*/creator/organizationName | /netcdf/attribute[@name='institution']/@value</xpath>
+      <xpath>(/*/identificationInfo/*/citation/CI_Citation/citedResponsibleParty/CI_ResponsibleParty[normalize-space(role/CI_RoleCode)='author']/organisationName//*) | (/*/identificationInfo/*/citation/CI_Citation/citedResponsibleParty/CI_ResponsibleParty[normalize-space(role/CI_RoleCode)='originator']/organisationName//*) | (/eml/*/creator/organizationName) | (/netcdf/attribute[@name='institution']/@value)</xpath>
     </selector>
     <dialect>
       <name>acdd</name>
@@ -519,7 +555,7 @@ def call():
     </dialect>
     <dialect>
       <name>iso</name>
-      <xpath>boolean(/*[local-name() = 'MI_Metadata' | local-name() = 'MD_Metadata'])</xpath>
+      <xpath>boolean(/*[local-name() = 'MI_Metadata' or local-name() = 'MD_Metadata'])</xpath>
     </dialect>
     <dialect>
       <name>eml</name>
@@ -537,19 +573,21 @@ def call():
 def call():
   global output
   global status
-  # Message is set when an error occurs.
+ 
   output = "The concept ProjectName is present."
-  if(len(ProjectName) > 0):
+                                        
+  if(ProjectName is not None and len(ProjectName) > 0):
     status = "SUCCESS"
     return True
+    
   status = "FAILURE"
   output = "ProjectName concept is not present"
+  
   return False
       ]]></code>
     <selector>
       <name>ProjectName</name>
-      <xpath>/*/gmd:identificationInfo/*/gmd:aggregationInfo/gmd:MD_AggregateInformation[normalize-space(gmd:associationType/gmd:DS_AssociationTypeCode)='largerWorkCitation' and normalize-space(gmd:initiativeType/gmd:DS_InitiativeTypeCode)='project']/gmd:aggregateDataSetName/gmd:CI_Citation/gmd:title//* | /*/gmd:identificationInfo/*/gmd:descriptiveKeywords/gmd:MD_Keywords[normalize-space(gmd:type/gmd:MD_KeywordTypeCode)='project']/gmd:keyword//* |
-        /gmi:MI_Metadata/gmi:acquisitionInformation/gmi:MI_AcquisitionInformation/gmi:operation/gmi:MI_Operation/gmi:citation/gmd:CI_Citation//* | /eml:eml/*/creator/electronicMailAddress | /netcdf/attribute[@name='project']/@value</xpath>
+      <xpath>(/*/identificationInfo/*/aggregationInfo/MD_AggregateInformation[normalize-space(associationType/DS_AssociationTypeCode)='largerWorkCitation' and normalize-space(initiativeType/DS_InitiativeTypeCode)='project']/aggregateDataSetName/CI_Citation/title//*) | (/*/identificationInfo/*/descriptiveKeywords/MD_Keywords[normalize-space(type/MD_KeywordTypeCode)='project']/keyword//*) | (/MI_Metadata/acquisitionInformation/MI_AcquisitionInformation/operation/MI_Operation/citation/CI_Citation//*) | (/eml/*/creator/electronicMailAddress) | (/netcdf/attribute[@name='project']/@value)</xpath>
     </selector>
     <dialect>
       <name>acdd</name>
@@ -557,7 +595,7 @@ def call():
     </dialect>
     <dialect>
       <name>iso</name>
-      <xpath>boolean(/*[local-name() = 'MI_Metadata' | local-name() = 'MD_Metadata'])</xpath>
+      <xpath>boolean(/*[local-name() = 'MI_Metadata' or local-name() = 'MD_Metadata'])</xpath>
     </dialect>
     <dialect>
       <name>eml</name>
@@ -575,18 +613,21 @@ def call():
 def call():
   global output
   global status
-  # Message is set when an error occurs.
+ 
   output = "The concept ProcessingLevel is present."
-  if(len(ProcessingLevel) > 0):
+                                        
+  if(ProcessingLevel is not None and len(ProcessingLevel) > 0):
     status = "SUCCESS"
     return True
+    
   status = "FAILURE"
   output = "ProcessingLevel concept is not present"
+  
   return False
       ]]></code>
     <selector>
       <name>ProcessingLevel</name>
-      <xpath>/*/gmd:contentInfo/*/gmd:processingLevelCode/gmd:MD_Identifier/gmd:code//* | /netcdf/attribute[@name='processing_level']/@value</xpath>
+      <xpath>(/*/contentInfo/*/processingLevelCode/MD_Identifier/code//*) | (/netcdf/attribute[@name='processing_level']/@value)</xpath>
     </selector>
     <dialect>
       <name>acdd</name>
@@ -594,7 +635,7 @@ def call():
     </dialect>
     <dialect>
       <name>iso</name>
-      <xpath>boolean(/*[local-name() = 'MI_Metadata' | local-name() = 'MD_Metadata'])</xpath>
+      <xpath>boolean(/*[local-name() = 'MI_Metadata' or local-name() = 'MD_Metadata'])</xpath>
     </dialect>
     <dialect>
       <name>eml</name>
@@ -612,18 +653,21 @@ def call():
 def call():
   global output
   global status
-  # Message is set when an error occurs.
+ 
   output = "The concept Acknowledgement is present."
-  if(len(Acknowledgement) > 0):
+                                        
+  if(Acknowledgement is not None and len(Acknowledgement) > 0):
     status = "SUCCESS"
     return True
+    
   status = "FAILURE"
   output = "Acknowledgement concept is not present"
+  
   return False
       ]]></code>
     <selector>
       <name>Acknowledgement</name>
-      <xpath>/*/gmd:identificationInfo/*/gmd:credit//* | /netcdf/attribute[@name='acknowledgement']/@value</xpath>
+      <xpath>(/*/identificationInfo/*/credit//*) | (/netcdf/attribute[@name='acknowledgement']/@value)</xpath>
     </selector>
     <dialect>
       <name>acdd</name>
@@ -631,7 +675,7 @@ def call():
     </dialect>
     <dialect>
       <name>iso</name>
-      <xpath>boolean(/*[local-name() = 'MI_Metadata' | local-name() = 'MD_Metadata'])</xpath>
+      <xpath>boolean(/*[local-name() = 'MI_Metadata' or local-name() = 'MD_Metadata'])</xpath>
     </dialect>
     <dialect>
       <name>eml</name>
@@ -649,18 +693,21 @@ def call():
 def call():
   global output
   global status
-  # Message is set when an error occurs.
+ 
   output = "The concept BoundingBox is present."
-  if(len(BoundingBox) > 0):
+                                        
+  if(BoundingBox is not None and len(BoundingBox) > 0):
     status = "SUCCESS"
     return True
+    
   status = "FAILURE"
   output = "BoundingBox concept is not present"
+  
   return False
       ]]></code>
     <selector>
       <name>BoundingBox</name>
-      <xpath>/*/gmd:identificationInfo/*/gmd:extent/gmd:EX_Extent/gmd:geographicElement/gmd:EX_GeographicBoundingBox//* | /*/gmd:identificationInfo/srv:SV_ServiceIdentification/srv:extent/gmd:EX_Extent/gmd:geographicElement/gmd:EX_GeographicBoundingBox//* | /eml:eml/*/coverage/geographicCoverage/boundingCoordinates | /netcdf/attribute[@name='geospatial_lat_max']</xpath>
+      <xpath>(/*/identificationInfo/*/extent/EX_Extent/geographicElement/EX_GeographicBoundingBox//*) | (/*/identificationInfo/SV_ServiceIdentification/extent/EX_Extent/geographicElement/EX_GeographicBoundingBox//*) | (/eml/*/coverage/geographicCoverage/boundingCoordinates) | (/netcdf/attribute[@name='geospatial_lat_max'])</xpath>
     </selector>
     <dialect>
       <name>acdd</name>
@@ -668,7 +715,7 @@ def call():
     </dialect>
     <dialect>
       <name>iso</name>
-      <xpath>boolean(/*[local-name() = 'MI_Metadata' | local-name() = 'MD_Metadata'])</xpath>
+      <xpath>boolean(/*[local-name() = 'MI_Metadata' or local-name() = 'MD_Metadata'])</xpath>
     </dialect>
     <dialect>
       <name>eml</name>
@@ -686,18 +733,21 @@ def call():
 def call():
   global output
   global status
-  # Message is set when an error occurs.
+ 
   output = "The concept SouthernmostLatitude is present."
-  if(len(SouthernmostLatitude) > 0):
+                                        
+  if(SouthernmostLatitude is not None and len(SouthernmostLatitude) > 0):
     status = "SUCCESS"
     return True
+    
   status = "FAILURE"
   output = "SouthernmostLatitude concept is not present"
+  
   return False
       ]]></code>
     <selector>
       <name>SouthernmostLatitude</name>
-      <xpath>/*/gmd:identificationInfo/*/gmd:extent/gmd:EX_Extent/gmd:geographicElement/gmd:EX_GeographicBoundingBox/gmd:southBoundLatitude/gco:Decimal | /eml:eml/*/coverage/geographicCoverage/boundingCoordinates/southBoundingCoordinate | /netcdf/attribute[@name='geospatial_lat_min']/@value</xpath>
+      <xpath>(/*/identificationInfo/*/extent/EX_Extent/geographicElement/EX_GeographicBoundingBox/southBoundLatitude/Decimal) | (/eml/*/coverage/geographicCoverage/boundingCoordinates/southBoundingCoordinate) | (/netcdf/attribute[@name='geospatial_lat_min']/@value)</xpath>
     </selector>
     <dialect>
       <name>acdd</name>
@@ -705,7 +755,7 @@ def call():
     </dialect>
     <dialect>
       <name>iso</name>
-      <xpath>boolean(/*[local-name() = 'MI_Metadata' | local-name() = 'MD_Metadata'])</xpath>
+      <xpath>boolean(/*[local-name() = 'MI_Metadata' or local-name() = 'MD_Metadata'])</xpath>
     </dialect>
     <dialect>
       <name>eml</name>
@@ -723,18 +773,21 @@ def call():
 def call():
   global output
   global status
-  # Message is set when an error occurs.
+ 
   output = "The concept NorthernmostLatitude is present."
-  if(len(NorthernmostLatitude) > 0):
+                                        
+  if(NorthernmostLatitude is not None and len(NorthernmostLatitude) > 0):
     status = "SUCCESS"
     return True
+    
   status = "FAILURE"
   output = "NorthernmostLatitude concept is not present"
+  
   return False
       ]]></code>
     <selector>
       <name>NorthernmostLatitude</name>
-      <xpath>/*/gmd:identificationInfo/*/gmd:extent/gmd:EX_Extent/gmd:geographicElement/gmd:EX_GeographicBoundingBox/gmd:northBoundLatitude/gco:Decimal | /eml:eml/*/coverage/geographicCoverage/boundingCoordinates/northBoundingCoordinate | /netcdf/attribute[@name='geospatial_lat_max']/@value</xpath>
+      <xpath>(/*/identificationInfo/*/extent/EX_Extent/geographicElement/EX_GeographicBoundingBox/northBoundLatitude/Decimal) | (/eml/*/coverage/geographicCoverage/boundingCoordinates/northBoundingCoordinate) | (/netcdf/attribute[@name='geospatial_lat_max']/@value)</xpath>
     </selector>
     <dialect>
       <name>acdd</name>
@@ -742,7 +795,7 @@ def call():
     </dialect>
     <dialect>
       <name>iso</name>
-      <xpath>boolean(/*[local-name() = 'MI_Metadata' | local-name() = 'MD_Metadata'])</xpath>
+      <xpath>boolean(/*[local-name() = 'MI_Metadata' or local-name() = 'MD_Metadata'])</xpath>
     </dialect>
     <dialect>
       <name>eml</name>
@@ -760,18 +813,21 @@ def call():
 def call():
   global output
   global status
-  # Message is set when an error occurs.
+ 
   output = "The concept WesternmostLongitude is present."
-  if(len(WesternmostLongitude) > 0):
+                                        
+  if(WesternmostLongitude is not None and len(WesternmostLongitude) > 0):
     status = "SUCCESS"
     return True
+    
   status = "FAILURE"
   output = "WesternmostLongitude concept is not present"
+  
   return False
       ]]></code>
     <selector>
       <name>WesternmostLongitude</name>
-      <xpath>/*/gmd:identificationInfo/*/gmd:extent/gmd:EX_Extent/gmd:geographicElement/gmd:EX_GeographicBoundingBox/gmd:westBoundLongitude/gco:Decimal | /eml:eml/*/coverage/geographicCoverage/boundingCoordinates/westBoundingCoordinate | /netcdf/attribute[@name='geospatial_lon_min']/@value</xpath>
+      <xpath>(/*/identificationInfo/*/extent/EX_Extent/geographicElement/EX_GeographicBoundingBox/westBoundLongitude/Decimal) | (/eml/*/coverage/geographicCoverage/boundingCoordinates/westBoundingCoordinate) | (/netcdf/attribute[@name='geospatial_lon_min']/@value)</xpath>
     </selector>
     <dialect>
       <name>acdd</name>
@@ -779,7 +835,7 @@ def call():
     </dialect>
     <dialect>
       <name>iso</name>
-      <xpath>boolean(/*[local-name() = 'MI_Metadata' | local-name() = 'MD_Metadata'])</xpath>
+      <xpath>boolean(/*[local-name() = 'MI_Metadata' or local-name() = 'MD_Metadata'])</xpath>
     </dialect>
     <dialect>
       <name>eml</name>
@@ -797,18 +853,21 @@ def call():
 def call():
   global output
   global status
-  # Message is set when an error occurs.
+ 
   output = "The concept EasternmostLongitude is present."
-  if(len(EasternmostLongitude) > 0):
+                                        
+  if(EasternmostLongitude is not None and len(EasternmostLongitude) > 0):
     status = "SUCCESS"
     return True
+    
   status = "FAILURE"
   output = "EasternmostLongitude concept is not present"
+  
   return False
       ]]></code>
     <selector>
       <name>EasternmostLongitude</name>
-      <xpath>/*/gmd:identificationInfo/*/gmd:extent/gmd:EX_Extent/gmd:geographicElement/gmd:EX_GeographicBoundingBox/gmd:eastBoundLongitude/gco:Decimal | /eml:eml/*/coverage/geographicCoverage/boundingCoordinates/eastBoundingCoordinate | /netcdf/attribute[@name='geospatial_lon_max']/@value</xpath>
+      <xpath>(/*/identificationInfo/*/extent/EX_Extent/geographicElement/EX_GeographicBoundingBox/eastBoundLongitude/Decimal) | (/eml/*/coverage/geographicCoverage/boundingCoordinates/eastBoundingCoordinate) | (/netcdf/attribute[@name='geospatial_lon_max']/@value)</xpath>
     </selector>
     <dialect>
       <name>acdd</name>
@@ -816,7 +875,7 @@ def call():
     </dialect>
     <dialect>
       <name>iso</name>
-      <xpath>boolean(/*[local-name() = 'MI_Metadata' | local-name() = 'MD_Metadata'])</xpath>
+      <xpath>boolean(/*[local-name() = 'MI_Metadata' or local-name() = 'MD_Metadata'])</xpath>
     </dialect>
     <dialect>
       <name>eml</name>
@@ -834,18 +893,21 @@ def call():
 def call():
   global output
   global status
-  # Message is set when an error occurs.
+ 
   output = "The concept StartTime is present."
-  if(len(StartTime) > 0):
+                                        
+  if(StartTime is not None and len(StartTime) > 0):
     status = "SUCCESS"
     return True
+    
   status = "FAILURE"
   output = "StartTime concept is not present"
+  
   return False
       ]]></code>
     <selector>
       <name>StartTime</name>
-      <xpath>/*/gmd:identificationInfo/*/gmd:extent/gmd:EX_Extent/gmd:temporalElement/gmd:EX_TemporalExtent/gmd:extent/gml:TimePeriod/gml:beginPosition | /eml:eml/*/coverage/temporalCoverage/rangeOfDates/beginDate/calendarDate | /netcdf/attribute[@name='time_coverage_start']/@value</xpath>
+      <xpath>(/*/identificationInfo/*/extent/EX_Extent/temporalElement/EX_TemporalExtent/extent/TimePeriod/beginPosition) | (/eml/*/coverage/temporalCoverage/rangeOfDates/beginDate/calendarDate) | (/netcdf/attribute[@name='time_coverage_start']/@value)</xpath>
     </selector>
     <dialect>
       <name>acdd</name>
@@ -853,7 +915,7 @@ def call():
     </dialect>
     <dialect>
       <name>iso</name>
-      <xpath>boolean(/*[local-name() = 'MI_Metadata' | local-name() = 'MD_Metadata'])</xpath>
+      <xpath>boolean(/*[local-name() = 'MI_Metadata' or local-name() = 'MD_Metadata'])</xpath>
     </dialect>
     <dialect>
       <name>eml</name>
@@ -871,18 +933,21 @@ def call():
 def call():
   global output
   global status
-  # Message is set when an error occurs.
+ 
   output = "The concept EndTime is present."
-  if(len(EndTime) > 0):
+                                        
+  if(EndTime is not None and len(EndTime) > 0):
     status = "SUCCESS"
     return True
+    
   status = "FAILURE"
   output = "EndTime concept is not present"
+  
   return False
       ]]></code>
     <selector>
       <name>EndTime</name>
-      <xpath>/*/gmd:identificationInfo/*/gmd:extent/gmd:EX_Extent/gmd:temporalElement/gmd:EX_TemporalExtent/gmd:extent/gml:TimePeriod/gml:endPosition | /eml:eml/*/coverage/temporalCoverage/rangeOfDates/endDate | /netcdf/attribute[@name='time_coverage_end']/@value</xpath>
+      <xpath>(/*/identificationInfo/*/extent/EX_Extent/temporalElement/EX_TemporalExtent/extent/TimePeriod/endPosition) | (/eml/*/coverage/temporalCoverage/rangeOfDates/endDate) | (/netcdf/attribute[@name='time_coverage_end']/@value)</xpath>
     </selector>
     <dialect>
       <name>acdd</name>
@@ -890,7 +955,7 @@ def call():
     </dialect>
     <dialect>
       <name>iso</name>
-      <xpath>boolean(/*[local-name() = 'MI_Metadata' | local-name() = 'MD_Metadata'])</xpath>
+      <xpath>boolean(/*[local-name() = 'MI_Metadata' or local-name() = 'MD_Metadata'])</xpath>
     </dialect>
     <dialect>
       <name>eml</name>
@@ -908,18 +973,21 @@ def call():
 def call():
   global output
   global status
-  # Message is set when an error occurs.
+ 
   output = "The concept VerticalMinimum is present."
-  if(len(VerticalMinimum) > 0):
+                                        
+  if(VerticalMinimum is not None and len(VerticalMinimum) > 0):
     status = "SUCCESS"
     return True
+    
   status = "FAILURE"
   output = "VerticalMinimum concept is not present"
+  
   return False
       ]]></code>
     <selector>
       <name>VerticalMinimum</name>
-      <xpath>/*/gmd:identificationInfo/*/gmd:extent/gmd:EX_Extent/gmd:verticalElement/gmd:EX_VerticalExtent/gmd:minimumValue/gco:Real | /eml:eml/*/coverage/geographicCoverage/boundingCoordinates/boundingAltitudes/altitudeMinimum | /netcdf/attribute[@name='geospatial_vertical_min']/@value</xpath>
+      <xpath>(/*/identificationInfo/*/extent/EX_Extent/verticalElement/EX_VerticalExtent/minimumValue/Real) | (/eml/*/coverage/geographicCoverage/boundingCoordinates/boundingAltitudes/altitudeMinimum) | (/netcdf/attribute[@name='geospatial_vertical_min']/@value)</xpath>
     </selector>
     <dialect>
       <name>acdd</name>
@@ -927,7 +995,7 @@ def call():
     </dialect>
     <dialect>
       <name>iso</name>
-      <xpath>boolean(/*[local-name() = 'MI_Metadata' | local-name() = 'MD_Metadata'])</xpath>
+      <xpath>boolean(/*[local-name() = 'MI_Metadata' or local-name() = 'MD_Metadata'])</xpath>
     </dialect>
     <dialect>
       <name>eml</name>
@@ -945,18 +1013,21 @@ def call():
 def call():
   global output
   global status
-  # Message is set when an error occurs.
+ 
   output = "The concept TemporalExtent is present."
-  if(len(TemporalExtent) > 0):
+                                        
+  if(TemporalExtent is not None and len(TemporalExtent) > 0):
     status = "SUCCESS"
     return True
+    
   status = "FAILURE"
   output = "TemporalExtent concept is not present"
+  
   return False
       ]]></code>
     <selector>
       <name>TemporalExtent</name>
-      <xpath>/*/gmd:identificationInfo/*/gmd:extent/gmd:EX_Extent/gmd:temporalElement/gmd:EX_TemporalExtent//* | /eml:eml/*/coverage/temporalCoverage | /netcdf/attribute[@name='time_coverage_duration']/@value</xpath>
+      <xpath>(/*/identificationInfo/*/extent/EX_Extent/temporalElement/EX_TemporalExtent//*) | (/eml/*/coverage/temporalCoverage) | (/netcdf/attribute[@name='time_coverage_duration']/@value)</xpath>
     </selector>
     <dialect>
       <name>acdd</name>
@@ -964,7 +1035,7 @@ def call():
     </dialect>
     <dialect>
       <name>iso</name>
-      <xpath>boolean(/*[local-name() = 'MI_Metadata' | local-name() = 'MD_Metadata'])</xpath>
+      <xpath>boolean(/*[local-name() = 'MI_Metadata' or local-name() = 'MD_Metadata'])</xpath>
     </dialect>
     <dialect>
       <name>eml</name>
@@ -982,18 +1053,21 @@ def call():
 def call():
   global output
   global status
-  # Message is set when an error occurs.
+ 
   output = "The concept TemporalResolution is present."
-  if(len(TemporalResolution) > 0):
+                                        
+  if(TemporalResolution is not None and len(TemporalResolution) > 0):
     status = "SUCCESS"
     return True
+    
   status = "FAILURE"
   output = "TemporalResolution concept is not present"
+  
   return False
       ]]></code>
     <selector>
       <name>TemporalResolution</name>
-      <xpath>/eml:eml/*/coverage/temporalCoverage//*/units | /netcdf/attribute[@name='time_coverage_resolution']/@value</xpath>
+      <xpath>(/eml/*/coverage/temporalCoverage//*/units) | (/netcdf/attribute[@name='time_coverage_resolution']/@value)</xpath>
     </selector>
     <dialect>
       <name>acdd</name>
@@ -1001,7 +1075,7 @@ def call():
     </dialect>
     <dialect>
       <name>iso</name>
-      <xpath>boolean(/*[local-name() = 'MI_Metadata' | local-name() = 'MD_Metadata'])</xpath>
+      <xpath>boolean(/*[local-name() = 'MI_Metadata' or local-name() = 'MD_Metadata'])</xpath>
     </dialect>
     <dialect>
       <name>eml</name>
@@ -1019,18 +1093,21 @@ def call():
 def call():
   global output
   global status
-  # Message is set when an error occurs.
+ 
   output = "The concept StandardNameVocabulary is present."
-  if(len(StandardNameVocabulary) > 0):
+                                        
+  if(StandardNameVocabulary is not None and len(StandardNameVocabulary) > 0):
     status = "SUCCESS"
     return True
+    
   status = "FAILURE"
   output = "StandardNameVocabulary concept is not present"
+  
   return False
       ]]></code>
     <selector>
       <name>StandardNameVocabulary</name>
-      <xpath>/*/gmd:identificationInfo/*/gmd:descriptiveKeywords/gmd:MD_Keywords/gmd:thesaurusName/gmd:CI_Citation/gmd:title//* | /netcdf/variable/attribute[@name='standard_name_vocabulary']/@value</xpath>
+      <xpath>(/*/identificationInfo/*/descriptiveKeywords/MD_Keywords/thesaurusName/CI_Citation/title//*) | (/netcdf/variable/attribute[@name='standard_name_vocabulary']/@value)</xpath>
     </selector>
     <dialect>
       <name>acdd</name>
@@ -1038,7 +1115,7 @@ def call():
     </dialect>
     <dialect>
       <name>iso</name>
-      <xpath>boolean(/*[local-name() = 'MI_Metadata' | local-name() = 'MD_Metadata'])</xpath>
+      <xpath>boolean(/*[local-name() = 'MI_Metadata' or local-name() = 'MD_Metadata'])</xpath>
     </dialect>
     <dialect>
       <name>eml</name>
@@ -1056,18 +1133,21 @@ def call():
 def call():
   global output
   global status
-  # Message is set when an error occurs.
+ 
   output = "The concept VerticalMaximum is present."
-  if(len(VerticalMaximum) > 0):
+                                        
+  if(VerticalMaximum is not None and len(VerticalMaximum) > 0):
     status = "SUCCESS"
     return True
+    
   status = "FAILURE"
   output = "VerticalMaximum concept is not present"
+  
   return False
       ]]></code>
     <selector>
       <name>VerticalMaximum</name>
-      <xpath>/*/gmd:identificationInfo/*/gmd:extent/gmd:EX_Extent/gmd:verticalElement/gmd:EX_VerticalExtent/gmd:maximumValue/gco:Real | /eml:eml/*/coverage/geographicCoverage/boundingCoordinates/boundingAltitudes/altitudeMaximum | /netcdf/attribute[@name='geospatial_vertical_max']/@value</xpath>
+      <xpath>(/*/identificationInfo/*/extent/EX_Extent/verticalElement/EX_VerticalExtent/maximumValue/Real) | (/eml/*/coverage/geographicCoverage/boundingCoordinates/boundingAltitudes/altitudeMaximum) | (/netcdf/attribute[@name='geospatial_vertical_max']/@value)</xpath>
     </selector>
     <dialect>
       <name>acdd</name>
@@ -1075,7 +1155,7 @@ def call():
     </dialect>
     <dialect>
       <name>iso</name>
-      <xpath>boolean(/*[local-name() = 'MI_Metadata' | local-name() = 'MD_Metadata'])</xpath>
+      <xpath>boolean(/*[local-name() = 'MI_Metadata' or local-name() = 'MD_Metadata'])</xpath>
     </dialect>
     <dialect>
       <name>eml</name>
@@ -1093,18 +1173,21 @@ def call():
 def call():
   global output
   global status
-  # Message is set when an error occurs.
+ 
   output = "The concept ResourceAccessConstraints is present."
-  if(len(ResourceAccessConstraints) > 0):
+                                        
+  if(ResourceAccessConstraints is not None and len(ResourceAccessConstraints) > 0):
     status = "SUCCESS"
     return True
+    
   status = "FAILURE"
   output = "ResourceAccessConstraints concept is not present"
+  
   return False
       ]]></code>
     <selector>
       <name>ResourceAccessConstraints</name>
-      <xpath>/*/gmd:identificationInfo/*/gmd:resourceConstraints/gmd:MD_LegalConstraints/gmd:accessConstraints/gmd:MD_RestrictionCode | /*/gmd:identificationInfo/*/gmd:resourceConstraints/gmd:MD_LegalConstraints/gmd:otherConstraints//* | /eml:eml/access | /netcdf/variable/attribute[@name='license']/@value</xpath>
+      <xpath>(/*/identificationInfo/*/resourceConstraints/MD_LegalConstraints/accessConstraints/MD_RestrictionCode) | (/*/identificationInfo/*/resourceConstraints/MD_LegalConstraints/otherConstraints//*) | (/eml/access) | (/netcdf/variable/attribute[@name='license']/@value)</xpath>
     </selector>
     <dialect>
       <name>acdd</name>
@@ -1112,7 +1195,7 @@ def call():
     </dialect>
     <dialect>
       <name>iso</name>
-      <xpath>boolean(/*[local-name() = 'MI_Metadata' | local-name() = 'MD_Metadata'])</xpath>
+      <xpath>boolean(/*[local-name() = 'MI_Metadata' or local-name() = 'MD_Metadata'])</xpath>
     </dialect>
     <dialect>
       <name>eml</name>
@@ -1130,19 +1213,21 @@ def call():
 def call():
   global output
   global status
-  # Message is set when an error occurs.
+ 
   output = "The concept ContributorName is present."
-  if(len(ContributorName) > 0):
+                                        
+  if(ContributorName is not None and len(ContributorName) > 0):
     status = "SUCCESS"
     return True
+    
   status = "FAILURE"
   output = "ContributorName concept is not present"
+  
   return False
       ]]></code>
     <selector>
       <name>ContributorName</name>
-      <xpath>/*/gmd:identificationInfo/*/gmd:citation/gmd:CI_Citation/gmd:citedResponsibleParty/gmd:CI_ResponsibleParty[not(normalize-space(gmd:role/gmd:CI_RoleCode[.='author' or .='principalInvestigator' or .='originator']))]//*[contains(name(),'Name')]//* | /*/gmd:identificationInfo/*/gmd:citation/gmd:CI_Citation/gmd:citedResponsibleParty/gmd:CI_ResponsibleParty[normalize-space(gmd:role/gmd:CI_RoleCode)='contributor']//*[contains(name(),'Name')]//* | /eml:eml/*/associatedParty |
-        /netcdf/attribute[@name='contributor_name']/@value</xpath>
+      <xpath>(/*/identificationInfo/*/citation/CI_Citation/citedResponsibleParty/CI_ResponsibleParty[not(normalize-space(role/CI_RoleCode[.='author' or .='principalInvestigator' or .='originator']))]//*[contains(name(),'Name')]//*) | (/*/identificationInfo/*/citation/CI_Citation/citedResponsibleParty/CI_ResponsibleParty[normalize-space(role/CI_RoleCode)='contributor']//*[contains(name(),'Name')]//*) | (/eml/*/associatedParty) | (/netcdf/attribute[@name='contributor_name']/@value)</xpath>
     </selector>
     <dialect>
       <name>acdd</name>
@@ -1150,7 +1235,7 @@ def call():
     </dialect>
     <dialect>
       <name>iso</name>
-      <xpath>boolean(/*[local-name() = 'MI_Metadata' | local-name() = 'MD_Metadata'])</xpath>
+      <xpath>boolean(/*[local-name() = 'MI_Metadata' or local-name() = 'MD_Metadata'])</xpath>
     </dialect>
     <dialect>
       <name>eml</name>
@@ -1168,18 +1253,21 @@ def call():
 def call():
   global output
   global status
-  # Message is set when an error occurs.
+ 
   output = "The concept ContributorRole is present."
-  if(len(ContributorRole) > 0):
+                                        
+  if(ContributorRole is not None and len(ContributorRole) > 0):
     status = "SUCCESS"
     return True
+    
   status = "FAILURE"
   output = "ContributorRole concept is not present"
+  
   return False
       ]]></code>
     <selector>
       <name>ContributorRole</name>
-      <xpath>/*/gmd:identificationInfo/*/gmd:citation/gmd:CI_Citation/gmd:citedResponsibleParty/gmd:CI_ResponsibleParty[not(normalize-space(gmd:role/gmd:CI_RoleCode)[.='author' or .='principalInvestigator' or .='originator'])]/gmd:role/gmd:CI_RoleCode | /*/gmd:identificationInfo/*/gmd:citation/gmd:CI_Citation/gmd:citedResponsibleParty/gmd:CI_ResponsibleParty/gmd:role[gmd:CI_RoleCode='contributor'] | /eml:eml/*/*/role | /netcdf/attribute[@name='contributor_role']/@value</xpath>
+      <xpath>(/*/identificationInfo/*/citation/CI_Citation/citedResponsibleParty/CI_ResponsibleParty[not(normalize-space(role/CI_RoleCode)[.='author' or .='principalInvestigator' or .='originator'])]/role/CI_RoleCode) | (/*/identificationInfo/*/citation/CI_Citation/citedResponsibleParty/CI_ResponsibleParty/role[CI_RoleCode='contributor']) | (/eml/*/*/role) | (/netcdf/attribute[@name='contributor_role']/@value)</xpath>
     </selector>
     <dialect>
       <name>acdd</name>
@@ -1187,7 +1275,7 @@ def call():
     </dialect>
     <dialect>
       <name>iso</name>
-      <xpath>boolean(/*[local-name() = 'MI_Metadata' | local-name() = 'MD_Metadata'])</xpath>
+      <xpath>boolean(/*[local-name() = 'MI_Metadata' or local-name() = 'MD_Metadata'])</xpath>
     </dialect>
     <dialect>
       <name>eml</name>
@@ -1205,18 +1293,21 @@ def call():
 def call():
   global output
   global status
-  # Message is set when an error occurs.
+ 
   output = "The concept Publisher is present."
-  if(len(Publisher) > 0):
+                                        
+  if(Publisher is not None and len(Publisher) > 0):
     status = "SUCCESS"
     return True
+    
   status = "FAILURE"
   output = "Publisher concept is not present"
+  
   return False
       ]]></code>
     <selector>
       <name>Publisher</name>
-      <xpath>//gmd:CI_ResponsibleParty[normalize-space(gmd:role/gmd:CI_RoleCode)='publisher']/gmd:organisationName//* | /eml:eml/*/publisher | /netcdf/attribute[@name='publisher_name']/@value</xpath>
+      <xpath>(//CI_ResponsibleParty[normalize-space(role/CI_RoleCode)='publisher']/organisationName//*) | (/eml/*/publisher) | (/netcdf/attribute[@name='publisher_name']/@value)</xpath>
     </selector>
     <dialect>
       <name>acdd</name>
@@ -1224,7 +1315,7 @@ def call():
     </dialect>
     <dialect>
       <name>iso</name>
-      <xpath>boolean(/*[local-name() = 'MI_Metadata' | local-name() = 'MD_Metadata'])</xpath>
+      <xpath>boolean(/*[local-name() = 'MI_Metadata' or local-name() = 'MD_Metadata'])</xpath>
     </dialect>
     <dialect>
       <name>eml</name>
@@ -1242,18 +1333,21 @@ def call():
 def call():
   global output
   global status
-  # Message is set when an error occurs.
+ 
   output = "The concept PublisherURL is present."
-  if(len(PublisherURL) > 0):
+                                        
+  if(PublisherURL is not None and len(PublisherURL) > 0):
     status = "SUCCESS"
     return True
+    
   status = "FAILURE"
   output = "PublisherURL concept is not present"
+  
   return False
       ]]></code>
     <selector>
       <name>PublisherURL</name>
-      <xpath>//gmd:CI_Citation/gmd:citedResponsibleParty/gmd:CI_ResponsibleParty[gmd:role/gmd:CI_RoleCode ='publisher']/gmd:contactInfo/gmd:CI_Contact/gmd:onlineResource/gmd:CI_OnlineResource/gmd:linkage/gmd:URL | /eml:eml/*/publisher/electronicMailAddress | /netcdf/attribute[@name='publisher_url']/@value</xpath>
+      <xpath>(//CI_Citation/citedResponsibleParty/CI_ResponsibleParty[role/CI_RoleCode ='publisher']/contactInfo/CI_Contact/onlineResource/CI_OnlineResource/linkage/URL) | (/eml/*/publisher/electronicMailAddress) | (/netcdf/attribute[@name='publisher_url']/@value)</xpath>
     </selector>
     <dialect>
       <name>acdd</name>
@@ -1261,7 +1355,7 @@ def call():
     </dialect>
     <dialect>
       <name>iso</name>
-      <xpath>boolean(/*[local-name() = 'MI_Metadata' | local-name() = 'MD_Metadata'])</xpath>
+      <xpath>boolean(/*[local-name() = 'MI_Metadata' or local-name() = 'MD_Metadata'])</xpath>
     </dialect>
     <dialect>
       <name>eml</name>
@@ -1279,18 +1373,21 @@ def call():
 def call():
   global output
   global status
-  # Message is set when an error occurs.
+ 
   output = "The concept PublisherE-Mail is present."
-  if(len(PublisherE-Mail) > 0):
+                                        
+  if(PublisherE-Mail is not None and len(PublisherE-Mail) > 0):
     status = "SUCCESS"
     return True
+    
   status = "FAILURE"
   output = "PublisherE-Mail concept is not present"
+  
   return False
       ]]></code>
     <selector>
       <name>PublisherE-Mail</name>
-      <xpath>//gmd:CI_Citation/gmd:citedResponsibleParty/gmd:CI_ResponsibleParty[gmd:role/gmd:CI_RoleCode ='publisher']/gmd:contactInfo/gmd:address/gmd:CI_Address/gmd:electronicMailAddress//* | /eml:eml/*/publisher/electronicMailAddress | /netcdf/attribute[@name='publisher_email']/@value</xpath>
+      <xpath>(//CI_Citation/citedResponsibleParty/CI_ResponsibleParty[role/CI_RoleCode ='publisher']/contactInfo/address/CI_Address/electronicMailAddress//*) | (/eml/*/publisher/electronicMailAddress) | (/netcdf/attribute[@name='publisher_email']/@value)</xpath>
     </selector>
     <dialect>
       <name>acdd</name>
@@ -1298,7 +1395,7 @@ def call():
     </dialect>
     <dialect>
       <name>iso</name>
-      <xpath>boolean(/*[local-name() = 'MI_Metadata' | local-name() = 'MD_Metadata'])</xpath>
+      <xpath>boolean(/*[local-name() = 'MI_Metadata' or local-name() = 'MD_Metadata'])</xpath>
     </dialect>
     <dialect>
       <name>eml</name>
