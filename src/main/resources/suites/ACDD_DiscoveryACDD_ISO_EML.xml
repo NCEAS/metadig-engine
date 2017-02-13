@@ -72,7 +72,7 @@ def call():
     </dialect>
     <dialect>
       <name>iso</name>
-      <xpath>boolean(/*[local-name() = 'MI_Metadata' | local-name() = 'MD_Metadata'])</xpath>
+      <xpath>boolean(/*[local-name() = 'MI_Metadata' or local-name() = 'MD_Metadata'])</xpath>
     </dialect>
     <dialect>
       <name>eml</name>
@@ -110,7 +110,7 @@ def call():
     </dialect>
     <dialect>
       <name>iso</name>
-      <xpath>boolean(/*[local-name() = 'MI_Metadata' | local-name() = 'MD_Metadata'])</xpath>
+      <xpath>boolean(/*[local-name() = 'MI_Metadata' or local-name() = 'MD_Metadata'])</xpath>
     </dialect>
     <dialect>
       <name>eml</name>
@@ -147,7 +147,7 @@ def call():
     </dialect>
     <dialect>
       <name>iso</name>
-      <xpath>boolean(/*[local-name() = 'MI_Metadata' | local-name() = 'MD_Metadata'])</xpath>
+      <xpath>boolean(/*[local-name() = 'MI_Metadata' or local-name() = 'MD_Metadata'])</xpath>
     </dialect>
     <dialect>
       <name>eml</name>
@@ -184,7 +184,7 @@ def call():
     </dialect>
     <dialect>
       <name>iso</name>
-      <xpath>boolean(/*[local-name() = 'MI_Metadata' | local-name() = 'MD_Metadata'])</xpath>
+      <xpath>boolean(/*[local-name() = 'MI_Metadata' or local-name() = 'MD_Metadata'])</xpath>
     </dialect>
     <dialect>
       <name>eml</name>
@@ -221,7 +221,7 @@ def call():
     </dialect>
     <dialect>
       <name>iso</name>
-      <xpath>boolean(/*[local-name() = 'MI_Metadata' | local-name() = 'MD_Metadata'])</xpath>
+      <xpath>boolean(/*[local-name() = 'MI_Metadata' or local-name() = 'MD_Metadata'])</xpath>
     </dialect>
     <dialect>
       <name>eml</name>
@@ -258,7 +258,7 @@ def call():
     </dialect>
     <dialect>
       <name>iso</name>
-      <xpath>boolean(/*[local-name() = 'MI_Metadata' | local-name() = 'MD_Metadata'])</xpath>
+      <xpath>boolean(/*[local-name() = 'MI_Metadata' or local-name() = 'MD_Metadata'])</xpath>
     </dialect>
     <dialect>
       <name>eml</name>
@@ -295,7 +295,7 @@ def call():
     </dialect>
     <dialect>
       <name>iso</name>
-      <xpath>boolean(/*[local-name() = 'MI_Metadata' | local-name() = 'MD_Metadata'])</xpath>
+      <xpath>boolean(/*[local-name() = 'MI_Metadata' or local-name() = 'MD_Metadata'])</xpath>
     </dialect>
     <dialect>
       <name>eml</name>
@@ -332,7 +332,7 @@ def call():
     </dialect>
     <dialect>
       <name>iso</name>
-      <xpath>boolean(/*[local-name() = 'MI_Metadata' | local-name() = 'MD_Metadata'])</xpath>
+      <xpath>boolean(/*[local-name() = 'MI_Metadata' or local-name() = 'MD_Metadata'])</xpath>
     </dialect>
     <dialect>
       <name>eml</name>
@@ -351,16 +351,16 @@ def call():
   global output
   global status
   # Message is set when an error occurs.
-  output = "The concept ResourceCreation/RevisionDate is present."
-  if(len(ResourceCreation/RevisionDate) > 0):
+  output = "The concept ResourceCreation_RevisionDate is present."
+  if(len(ResourceCreation_RevisionDate) > 0):
     status = "SUCCESS"
     return True
   status = "FAILURE"
-  output = "ResourceCreation/RevisionDate concept is not present"
+  output = "ResourceCreation_RevisionDate concept is not present"
   return False
       ]]></code>
     <selector>
-      <name>ResourceCreation/RevisionDate</name>
+      <name>ResourceCreation_RevisionDate</name>
       <xpath>/*/gmd:identificationInfo/*/gmd:citation/gmd:CI_Citation/gmd:date/gmd:CI_Date[normalize-space(gmd:dateType/gmd:CI_DateTypeCode)='creation']/gmd:date/gco:Date | /*/gmd:identificationInfo/*/gmd:citation/gmd:CI_Citation/gmd:date/gmd:CI_Date[normalize-space(gmd:dateType/gmd:CI_DateTypeCode)='creation']/gmd:date/gco:DateTime | /*/gmd:identificationInfo/*/gmd:citation/gmd:CI_Citation/gmd:date/gmd:CI_Date[normalize-space(gmd:dateType/gmd:CI_DateTypeCode)='revision']/gmd:date/gco:Date |
         /*/gmd:identificationInfo/*/gmd:citation/gmd:CI_Citation/gmd:date/gmd:CI_Date[normalize-space(gmd:dateType/gmd:CI_DateTypeCode)='revision']/gmd:date/gco:DateTime | /*/gmd:identificationInfo/*/gmd:citation/gmd:CI_Citation/gmd:date/gmd:CI_Date[normalize-space(gmd:dateType/gmd:CI_DateTypeCode)='publication']/gmd:date/gco:Date | /*/gmd:identificationInfo/*/gmd:citation/gmd:CI_Citation/gmd:date/gmd:CI_Date[normalize-space(gmd:dateType/gmd:CI_DateTypeCode)='publication']/gmd:date/gco:DateTime
         | /eml:eml/*/maintenance/changeHistory/changeDate | /eml:eml/*/pubDate | /netcdf/attribute[@name='date_created']/@value</xpath>
@@ -371,7 +371,7 @@ def call():
     </dialect>
     <dialect>
       <name>iso</name>
-      <xpath>boolean(/*[local-name() = 'MI_Metadata' | local-name() = 'MD_Metadata'])</xpath>
+      <xpath>boolean(/*[local-name() = 'MI_Metadata' or local-name() = 'MD_Metadata'])</xpath>
     </dialect>
     <dialect>
       <name>eml</name>
@@ -408,7 +408,7 @@ def call():
     </dialect>
     <dialect>
       <name>iso</name>
-      <xpath>boolean(/*[local-name() = 'MI_Metadata' | local-name() = 'MD_Metadata'])</xpath>
+      <xpath>boolean(/*[local-name() = 'MI_Metadata' or local-name() = 'MD_Metadata'])</xpath>
     </dialect>
     <dialect>
       <name>eml</name>
@@ -427,16 +427,16 @@ def call():
   global output
   global status
   # Message is set when an error occurs.
-  output = "The concept Author/OriginatorWorldWideWebAddress is present."
-  if(len(Author/OriginatorWorldWideWebAddress) > 0):
+  output = "The concept Author_OriginatorWorldWideWebAddress is present."
+  if(len(Author_OriginatorWorldWideWebAddress) > 0):
     status = "SUCCESS"
     return True
   status = "FAILURE"
-  output = "Author/OriginatorWorldWideWebAddress concept is not present"
+  output = "Author_OriginatorWorldWideWebAddress concept is not present"
   return False
       ]]></code>
     <selector>
-      <name>Author/OriginatorWorldWideWebAddress</name>
+      <name>Author_OriginatorWorldWideWebAddress</name>
       <xpath>//gmd:CI_Citation/gmd:citedResponsibleParty/gmd:CI_ResponsibleParty[normalize-space(gmd:role/gmd:CI_RoleCode)='author']/gmd:contactInfo/gmd:CI_Contact/gmd:onlineResource/gmd:CI_OnlineResource/gmd:linkage/gmd:URL | /eml:eml/*/creator/electronicMailAddress | /netcdf/attribute[@name='creator_url']/@value</xpath>
     </selector>
     <dialect>
@@ -445,7 +445,7 @@ def call():
     </dialect>
     <dialect>
       <name>iso</name>
-      <xpath>boolean(/*[local-name() = 'MI_Metadata' | local-name() = 'MD_Metadata'])</xpath>
+      <xpath>boolean(/*[local-name() = 'MI_Metadata' or local-name() = 'MD_Metadata'])</xpath>
     </dialect>
     <dialect>
       <name>eml</name>
@@ -464,16 +464,16 @@ def call():
   global output
   global status
   # Message is set when an error occurs.
-  output = "The concept Author/OriginatorEmailAddress is present."
-  if(len(Author/OriginatorEmailAddress) > 0):
+  output = "The concept Author_OriginatorEmailAddress is present."
+  if(len(Author_OriginatorEmailAddress) > 0):
     status = "SUCCESS"
     return True
   status = "FAILURE"
-  output = "Author/OriginatorEmailAddress concept is not present"
+  output = "Author_OriginatorEmailAddress concept is not present"
   return False
       ]]></code>
     <selector>
-      <name>Author/OriginatorEmailAddress</name>
+      <name>Author_OriginatorEmailAddress</name>
       <xpath>/*/gmd:identificationInfo/*/gmd:citation/gmd:CI_Citation/gmd:citedResponsibleParty/gmd:CI_ResponsibleParty[normalize-space(gmd:role/gmd:CI_RoleCode)='author']/gmd:contactInfo/gmd:CI_Contact/gmd:address/gmd:CI_Address/gmd:electronicMailAddress//* | /eml:eml/*/creator/onlineUrl | /netcdf/attribute[@name='creator_email']/@value</xpath>
     </selector>
     <dialect>
@@ -482,7 +482,7 @@ def call():
     </dialect>
     <dialect>
       <name>iso</name>
-      <xpath>boolean(/*[local-name() = 'MI_Metadata' | local-name() = 'MD_Metadata'])</xpath>
+      <xpath>boolean(/*[local-name() = 'MI_Metadata' or local-name() = 'MD_Metadata'])</xpath>
     </dialect>
     <dialect>
       <name>eml</name>
@@ -519,7 +519,7 @@ def call():
     </dialect>
     <dialect>
       <name>iso</name>
-      <xpath>boolean(/*[local-name() = 'MI_Metadata' | local-name() = 'MD_Metadata'])</xpath>
+      <xpath>boolean(/*[local-name() = 'MI_Metadata' or local-name() = 'MD_Metadata'])</xpath>
     </dialect>
     <dialect>
       <name>eml</name>
@@ -557,7 +557,7 @@ def call():
     </dialect>
     <dialect>
       <name>iso</name>
-      <xpath>boolean(/*[local-name() = 'MI_Metadata' | local-name() = 'MD_Metadata'])</xpath>
+      <xpath>boolean(/*[local-name() = 'MI_Metadata' or local-name() = 'MD_Metadata'])</xpath>
     </dialect>
     <dialect>
       <name>eml</name>
@@ -594,7 +594,7 @@ def call():
     </dialect>
     <dialect>
       <name>iso</name>
-      <xpath>boolean(/*[local-name() = 'MI_Metadata' | local-name() = 'MD_Metadata'])</xpath>
+      <xpath>boolean(/*[local-name() = 'MI_Metadata' or local-name() = 'MD_Metadata'])</xpath>
     </dialect>
     <dialect>
       <name>eml</name>
@@ -631,7 +631,7 @@ def call():
     </dialect>
     <dialect>
       <name>iso</name>
-      <xpath>boolean(/*[local-name() = 'MI_Metadata' | local-name() = 'MD_Metadata'])</xpath>
+      <xpath>boolean(/*[local-name() = 'MI_Metadata' or local-name() = 'MD_Metadata'])</xpath>
     </dialect>
     <dialect>
       <name>eml</name>
@@ -668,7 +668,7 @@ def call():
     </dialect>
     <dialect>
       <name>iso</name>
-      <xpath>boolean(/*[local-name() = 'MI_Metadata' | local-name() = 'MD_Metadata'])</xpath>
+      <xpath>boolean(/*[local-name() = 'MI_Metadata' or local-name() = 'MD_Metadata'])</xpath>
     </dialect>
     <dialect>
       <name>eml</name>
@@ -705,7 +705,7 @@ def call():
     </dialect>
     <dialect>
       <name>iso</name>
-      <xpath>boolean(/*[local-name() = 'MI_Metadata' | local-name() = 'MD_Metadata'])</xpath>
+      <xpath>boolean(/*[local-name() = 'MI_Metadata' or local-name() = 'MD_Metadata'])</xpath>
     </dialect>
     <dialect>
       <name>eml</name>
@@ -742,7 +742,7 @@ def call():
     </dialect>
     <dialect>
       <name>iso</name>
-      <xpath>boolean(/*[local-name() = 'MI_Metadata' | local-name() = 'MD_Metadata'])</xpath>
+      <xpath>boolean(/*[local-name() = 'MI_Metadata' or local-name() = 'MD_Metadata'])</xpath>
     </dialect>
     <dialect>
       <name>eml</name>
@@ -779,7 +779,7 @@ def call():
     </dialect>
     <dialect>
       <name>iso</name>
-      <xpath>boolean(/*[local-name() = 'MI_Metadata' | local-name() = 'MD_Metadata'])</xpath>
+      <xpath>boolean(/*[local-name() = 'MI_Metadata' or local-name() = 'MD_Metadata'])</xpath>
     </dialect>
     <dialect>
       <name>eml</name>
@@ -816,7 +816,7 @@ def call():
     </dialect>
     <dialect>
       <name>iso</name>
-      <xpath>boolean(/*[local-name() = 'MI_Metadata' | local-name() = 'MD_Metadata'])</xpath>
+      <xpath>boolean(/*[local-name() = 'MI_Metadata' or local-name() = 'MD_Metadata'])</xpath>
     </dialect>
     <dialect>
       <name>eml</name>
@@ -853,7 +853,7 @@ def call():
     </dialect>
     <dialect>
       <name>iso</name>
-      <xpath>boolean(/*[local-name() = 'MI_Metadata' | local-name() = 'MD_Metadata'])</xpath>
+      <xpath>boolean(/*[local-name() = 'MI_Metadata' or local-name() = 'MD_Metadata'])</xpath>
     </dialect>
     <dialect>
       <name>eml</name>
@@ -890,7 +890,7 @@ def call():
     </dialect>
     <dialect>
       <name>iso</name>
-      <xpath>boolean(/*[local-name() = 'MI_Metadata' | local-name() = 'MD_Metadata'])</xpath>
+      <xpath>boolean(/*[local-name() = 'MI_Metadata' or local-name() = 'MD_Metadata'])</xpath>
     </dialect>
     <dialect>
       <name>eml</name>
@@ -927,7 +927,7 @@ def call():
     </dialect>
     <dialect>
       <name>iso</name>
-      <xpath>boolean(/*[local-name() = 'MI_Metadata' | local-name() = 'MD_Metadata'])</xpath>
+      <xpath>boolean(/*[local-name() = 'MI_Metadata' or local-name() = 'MD_Metadata'])</xpath>
     </dialect>
     <dialect>
       <name>eml</name>
@@ -964,7 +964,7 @@ def call():
     </dialect>
     <dialect>
       <name>iso</name>
-      <xpath>boolean(/*[local-name() = 'MI_Metadata' | local-name() = 'MD_Metadata'])</xpath>
+      <xpath>boolean(/*[local-name() = 'MI_Metadata' or local-name() = 'MD_Metadata'])</xpath>
     </dialect>
     <dialect>
       <name>eml</name>
@@ -1001,7 +1001,7 @@ def call():
     </dialect>
     <dialect>
       <name>iso</name>
-      <xpath>boolean(/*[local-name() = 'MI_Metadata' | local-name() = 'MD_Metadata'])</xpath>
+      <xpath>boolean(/*[local-name() = 'MI_Metadata' or local-name() = 'MD_Metadata'])</xpath>
     </dialect>
     <dialect>
       <name>eml</name>
@@ -1038,7 +1038,7 @@ def call():
     </dialect>
     <dialect>
       <name>iso</name>
-      <xpath>boolean(/*[local-name() = 'MI_Metadata' | local-name() = 'MD_Metadata'])</xpath>
+      <xpath>boolean(/*[local-name() = 'MI_Metadata' or local-name() = 'MD_Metadata'])</xpath>
     </dialect>
     <dialect>
       <name>eml</name>
@@ -1075,7 +1075,7 @@ def call():
     </dialect>
     <dialect>
       <name>iso</name>
-      <xpath>boolean(/*[local-name() = 'MI_Metadata' | local-name() = 'MD_Metadata'])</xpath>
+      <xpath>boolean(/*[local-name() = 'MI_Metadata' or local-name() = 'MD_Metadata'])</xpath>
     </dialect>
     <dialect>
       <name>eml</name>
@@ -1112,7 +1112,7 @@ def call():
     </dialect>
     <dialect>
       <name>iso</name>
-      <xpath>boolean(/*[local-name() = 'MI_Metadata' | local-name() = 'MD_Metadata'])</xpath>
+      <xpath>boolean(/*[local-name() = 'MI_Metadata' or local-name() = 'MD_Metadata'])</xpath>
     </dialect>
     <dialect>
       <name>eml</name>
@@ -1150,7 +1150,7 @@ def call():
     </dialect>
     <dialect>
       <name>iso</name>
-      <xpath>boolean(/*[local-name() = 'MI_Metadata' | local-name() = 'MD_Metadata'])</xpath>
+      <xpath>boolean(/*[local-name() = 'MI_Metadata' or local-name() = 'MD_Metadata'])</xpath>
     </dialect>
     <dialect>
       <name>eml</name>
@@ -1187,7 +1187,7 @@ def call():
     </dialect>
     <dialect>
       <name>iso</name>
-      <xpath>boolean(/*[local-name() = 'MI_Metadata' | local-name() = 'MD_Metadata'])</xpath>
+      <xpath>boolean(/*[local-name() = 'MI_Metadata' or local-name() = 'MD_Metadata'])</xpath>
     </dialect>
     <dialect>
       <name>eml</name>
@@ -1224,7 +1224,7 @@ def call():
     </dialect>
     <dialect>
       <name>iso</name>
-      <xpath>boolean(/*[local-name() = 'MI_Metadata' | local-name() = 'MD_Metadata'])</xpath>
+      <xpath>boolean(/*[local-name() = 'MI_Metadata' or local-name() = 'MD_Metadata'])</xpath>
     </dialect>
     <dialect>
       <name>eml</name>
@@ -1261,7 +1261,7 @@ def call():
     </dialect>
     <dialect>
       <name>iso</name>
-      <xpath>boolean(/*[local-name() = 'MI_Metadata' | local-name() = 'MD_Metadata'])</xpath>
+      <xpath>boolean(/*[local-name() = 'MI_Metadata' or local-name() = 'MD_Metadata'])</xpath>
     </dialect>
     <dialect>
       <name>eml</name>
@@ -1280,16 +1280,16 @@ def call():
   global output
   global status
   # Message is set when an error occurs.
-  output = "The concept PublisherE-Mail is present."
-  if(len(PublisherE-Mail) > 0):
+  output = "The concept PublisherEMail is present."
+  if(len(PublisherEMail) > 0):
     status = "SUCCESS"
     return True
   status = "FAILURE"
-  output = "PublisherE-Mail concept is not present"
+  output = "PublisherEMail concept is not present"
   return False
       ]]></code>
     <selector>
-      <name>PublisherE-Mail</name>
+      <name>PublisherEMail</name>
       <xpath>//gmd:CI_Citation/gmd:citedResponsibleParty/gmd:CI_ResponsibleParty[gmd:role/gmd:CI_RoleCode ='publisher']/gmd:contactInfo/gmd:address/gmd:CI_Address/gmd:electronicMailAddress//* | /eml:eml/*/publisher/electronicMailAddress | /netcdf/attribute[@name='publisher_email']/@value</xpath>
     </selector>
     <dialect>
@@ -1298,7 +1298,7 @@ def call():
     </dialect>
     <dialect>
       <name>iso</name>
-      <xpath>boolean(/*[local-name() = 'MI_Metadata' | local-name() = 'MD_Metadata'])</xpath>
+      <xpath>boolean(/*[local-name() = 'MI_Metadata' or local-name() = 'MD_Metadata'])</xpath>
     </dialect>
     <dialect>
       <name>eml</name>
