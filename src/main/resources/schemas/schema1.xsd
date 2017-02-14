@@ -86,24 +86,31 @@
       <xs:element name="id" type="xs:string"/>
       <xs:element name="name" type="xs:string"/>
       <xs:element name="description" type="xs:string" minOccurs="0"/>
+      <xs:element name="namespaces" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="namespace" type="tns:namespace" nillable="true" minOccurs="0" maxOccurs="unbounded"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
       <xs:element name="check" type="tns:check" maxOccurs="unbounded"/>
     </xs:sequence>
   </xs:complexType>
 
   <xs:simpleType name="level">
     <xs:restriction base="xs:string">
+      <xs:enumeration value="REQUIRED"/>
       <xs:enumeration value="OPTIONAL"/>
       <xs:enumeration value="INFO"/>
-      <xs:enumeration value="REQUIRED"/>
     </xs:restriction>
   </xs:simpleType>
 
   <xs:simpleType name="status">
     <xs:restriction base="xs:string">
-      <xs:enumeration value="ERROR"/>
-      <xs:enumeration value="FAILURE"/>
-      <xs:enumeration value="SUCCESS"/>
       <xs:enumeration value="SKIP"/>
+      <xs:enumeration value="SUCCESS"/>
+      <xs:enumeration value="FAILURE"/>
+      <xs:enumeration value="ERROR"/>
     </xs:restriction>
   </xs:simpleType>
 </xs:schema>

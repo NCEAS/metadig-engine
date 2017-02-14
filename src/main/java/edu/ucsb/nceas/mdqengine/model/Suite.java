@@ -5,12 +5,13 @@ import java.util.List;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(propOrder = {"id", "name", "description", "check"})
+@XmlType(propOrder = {"id", "name", "description", "namespace", "check"})
 public class Suite {
 	
 	/**
@@ -33,6 +34,14 @@ public class Suite {
 	 */
 	@XmlElement(required = false)
 	private String description;
+	
+	/**
+	 * The optional namespace list can be used to map namespace prefixes to full namespace uris.
+	 * This is useful if your xpath expressions utilize namespace prefixes and you don not want to 
+	 * loose the disambiguation that they provide, say, by using local-name() predicates.
+	 */
+	@XmlElementWrapper(name = "namespaces", required = false)
+	private List<Namespace> namespace;
 	
 	/**
 	 * The list of checks to be performed. A suite must have at least one check.
@@ -70,6 +79,14 @@ public class Suite {
 
 	public void setCheck(List<Check> check) {
 		this.check = check;
+	}
+	
+	public List<Namespace> getNamespace() {
+		return namespace;
+	}
+
+	public void setNamespace(List<Namespace> namespace) {
+		this.namespace = namespace;
 	}
 
 }

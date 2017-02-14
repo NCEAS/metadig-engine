@@ -81,6 +81,8 @@ public class MDQEngine {
 		xml.setSystemMetadata(sysMeta);
 		Path tempDir = Files.createTempDirectory("mdq_run");
 		xml.setDirectory(tempDir.toFile().getAbsolutePath());
+		// include the default namespaces from the suite
+		xml.mergeNamespaces(suite.getNamespace());
 		
 		// make a run to capture results
 		Run run = new Run();

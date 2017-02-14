@@ -124,6 +124,15 @@ public class XMLDialect {
 		}
 	}
 	
+	// include additional namespaces
+	public void mergeNamespaces(List<Namespace> namespaces) {
+		if (namespaces != null) {
+			for (Namespace namespace: namespaces) {
+				this.namespaces.put(namespace.getPrefix(), namespace);
+			}
+		}
+	}
+	
 	public Result runCheck(Check check) throws XPathExpressionException {
 		
 		Result result = null;
