@@ -8,6 +8,12 @@
 	<namespace prefix="gmd">http://www.isotc211.org/2005/gmd</namespace>
 	<namespace prefix="gml">http://www.opengis.net/gml/3.2</namespace>
 	<namespace prefix="gmx">http://www.isotc211.org/2005/gmx</namespace>
+	<namespace prefix="xlink">http://www.w3.org/1999/xlink</namespace>
+	<namespace prefix="gss">http://www.isotc211.org/2005/gss</namespace>
+	<namespace prefix="gts">http://www.isotc211.org/2005/gts</namespace>
+	<namespace prefix="gsr">http://www.isotc211.org/2005/gsr</namespace>
+	<namespace prefix="gmi">http://www.isotc211.org/2005/gmi</namespace>
+	<namespace prefix="srv">http://www.isotc211.org/2005/srv</namespace> 
   </namespaces>
   <check>
     <id>ACDD_highlyRecommended_ResourceTitle_ACDD_ISO_EML</id>
@@ -69,7 +75,7 @@ def call():
   output = "Abstract concept is not present"
   return False
       ]]></code>
-    <selector>
+    <selector namespaceAware="true">
       <name>Abstract</name>
       <xpath>/*/gmd:identificationInfo/*/gmd:abstract//* | /eml:eml/*/abstract | /netcdf/attribute[@name='summary']/@value</xpath>
     </selector>
@@ -106,7 +112,7 @@ def call():
   output = "Keyword concept is not present"
   return False
       ]]></code>
-    <selector>
+    <selector namespaceAware="true">
       <name>Keyword</name>
       <xpath>/*/gmd:identificationInfo/*/gmd:descriptiveKeywords/gmd:MD_Keywords/gmd:keyword | /*/gmd:identificationInfo/*/gmd:descriptiveKeywords/gmd:MD_Keywords[normalize-space(gmd:type/gmd:MD_KeywordTypeCode)='place']/gmd:keyword//* | /*/gmd:identificationInfo/*/gmd:descriptiveKeywords/gmd:MD_Keywords[normalize-space(gmd:type/gmd:MD_KeywordTypeCode)='instrument']/gmd:keyword//* |
         /*/gmd:identificationInfo/*/gmd:descriptiveKeywords/gmd:MD_Keywords[normalize-space(gmd:type/gmd:MD_KeywordTypeCode)='platform']/gmd:keyword//* | /*/gmd:identificationInfo/*/gmd:descriptiveKeywords/gmd:MD_Keywords[normalize-space(gmd:type/gmd:MD_KeywordTypeCode)='project']/gmd:keyword//* | /eml:eml/*/keywordSet/keyword | /netcdf/attribute[@name='keywords']/@value</xpath>
@@ -144,7 +150,7 @@ def call():
   output = "ResourceIdentifier concept is not present"
   return False
       ]]></code>
-    <selector>
+    <selector namespaceAware="true">
       <name>ResourceIdentifier</name>
       <xpath>/*/gmd:identificationInfo/*/gmd:citation/gmd:CI_Citation/gmd:identifier/gmd:MD_Identifier/gmd:code//* | /eml:eml/@packageId | /netcdf/attribute[@name='id']/@value</xpath>
     </selector>
@@ -181,7 +187,7 @@ def call():
   output = "NamingAuthority concept is not present"
   return False
       ]]></code>
-    <selector>
+    <selector namespaceAware="true">
       <name>NamingAuthority</name>
       <xpath>/*/gmd:identificationInfo/*/gmd:citation/gmd:CI_Citation/gmd:identifier/gmd:MD_Identifier/gmd:authority | /netcdf/attribute[@name='naming_authority']/@value</xpath>
     </selector>
@@ -218,7 +224,7 @@ def call():
   output = "KeywordVocabulary concept is not present"
   return False
       ]]></code>
-    <selector>
+    <selector namespaceAware="true">
       <name>KeywordVocabulary</name>
       <xpath>/*/gmd:identificationInfo/*/gmd:descriptiveKeywords/gmd:MD_Keywords/gmd:thesaurusName | /eml:eml/*/keywordSet/keywordThesaurus | /netcdf/attribute[@name='keyword_vocabulary']/@value</xpath>
     </selector>
@@ -255,7 +261,7 @@ def call():
   output = "CommonDataModelDatatype concept is not present"
   return False
       ]]></code>
-    <selector>
+    <selector namespaceAware="true">
       <name>CommonDataModelDatatype</name>
       <xpath>/*/gmd:identificationInfo/*/gmd:spatialRepresentationType/gmd:MD_SpatialRepresentationTypeCode | /netcdf/attribute[@name='cdm_data_type']/@value</xpath>
     </selector>
@@ -292,7 +298,7 @@ def call():
   output = "LineageStatement concept is not present"
   return False
       ]]></code>
-    <selector>
+    <selector namespaceAware="true">
       <name>LineageStatement</name>
       <xpath>/*/gmd:dataQualityInfo/gmd:DQ_DataQuality/gmd:lineage/gmd:LI_Lineage/gmd:statement//* | /netcdf/attribute[@name='history']/@value</xpath>
     </selector>
@@ -329,7 +335,7 @@ def call():
   output = "SupplementalInformation concept is not present"
   return False
       ]]></code>
-    <selector>
+    <selector namespaceAware="true">
       <name>SupplementalInformation</name>
       <xpath>/*/gmd:identificationInfo/*/gmd:supplementalInformation//* | /eml:eml/*/additionalInfo | /netcdf/attribute[@name='comment']/@value</xpath>
     </selector>
@@ -366,7 +372,7 @@ def call():
   output = "ResourceCreation_RevisionDate concept is not present"
   return False
       ]]></code>
-    <selector>
+    <selector namespaceAware="true">
       <name>ResourceCreation_RevisionDate</name>
       <xpath>/*/gmd:identificationInfo/*/gmd:citation/gmd:CI_Citation/gmd:date/gmd:CI_Date[normalize-space(gmd:dateType/gmd:CI_DateTypeCode)='creation']/gmd:date/gco:Date | /*/gmd:identificationInfo/*/gmd:citation/gmd:CI_Citation/gmd:date/gmd:CI_Date[normalize-space(gmd:dateType/gmd:CI_DateTypeCode)='creation']/gmd:date/gco:DateTime | /*/gmd:identificationInfo/*/gmd:citation/gmd:CI_Citation/gmd:date/gmd:CI_Date[normalize-space(gmd:dateType/gmd:CI_DateTypeCode)='revision']/gmd:date/gco:Date |
         /*/gmd:identificationInfo/*/gmd:citation/gmd:CI_Citation/gmd:date/gmd:CI_Date[normalize-space(gmd:dateType/gmd:CI_DateTypeCode)='revision']/gmd:date/gco:DateTime | /*/gmd:identificationInfo/*/gmd:citation/gmd:CI_Citation/gmd:date/gmd:CI_Date[normalize-space(gmd:dateType/gmd:CI_DateTypeCode)='publication']/gmd:date/gco:Date | /*/gmd:identificationInfo/*/gmd:citation/gmd:CI_Citation/gmd:date/gmd:CI_Date[normalize-space(gmd:dateType/gmd:CI_DateTypeCode)='publication']/gmd:date/gco:DateTime
@@ -405,7 +411,7 @@ def call():
   output = "ResourceContact concept is not present"
   return False
       ]]></code>
-    <selector>
+    <selector namespaceAware="true">
       <name>ResourceContact</name>
       <xpath>/*/gmd:identificationInfo/*/gmd:pointOfContact | /eml:eml/*/contact | /netcdf/attribute[@name='creator_name']/@value</xpath>
     </selector>
@@ -442,7 +448,7 @@ def call():
   output = "Author_OriginatorWorldWideWebAddress concept is not present"
   return False
       ]]></code>
-    <selector>
+    <selector namespaceAware="true">
       <name>Author_OriginatorWorldWideWebAddress</name>
       <xpath>//gmd:CI_Citation/gmd:citedResponsibleParty/gmd:CI_ResponsibleParty[normalize-space(gmd:role/gmd:CI_RoleCode)='author']/gmd:contactInfo/gmd:CI_Contact/gmd:onlineResource/gmd:CI_OnlineResource/gmd:linkage/gmd:URL | /eml:eml/*/creator/electronicMailAddress | /netcdf/attribute[@name='creator_url']/@value</xpath>
     </selector>
@@ -479,7 +485,7 @@ def call():
   output = "Author_OriginatorEmailAddress concept is not present"
   return False
       ]]></code>
-    <selector>
+    <selector namespaceAware="true">
       <name>Author_OriginatorEmailAddress</name>
       <xpath>/*/gmd:identificationInfo/*/gmd:citation/gmd:CI_Citation/gmd:citedResponsibleParty/gmd:CI_ResponsibleParty[normalize-space(gmd:role/gmd:CI_RoleCode)='author']/gmd:contactInfo/gmd:CI_Contact/gmd:address/gmd:CI_Address/gmd:electronicMailAddress//* | /eml:eml/*/creator/onlineUrl | /netcdf/attribute[@name='creator_email']/@value</xpath>
     </selector>
@@ -516,7 +522,7 @@ def call():
   output = "OriginatingOrganization concept is not present"
   return False
       ]]></code>
-    <selector>
+    <selector namespaceAware="true">
       <name>OriginatingOrganization</name>
       <xpath>/*/gmd:identificationInfo/*/gmd:citation/gmd:CI_Citation/gmd:citedResponsibleParty/gmd:CI_ResponsibleParty[normalize-space(gmd:role/gmd:CI_RoleCode)='author']/gmd:organisationName//* | /*/gmd:identificationInfo/*/gmd:citation/gmd:CI_Citation/gmd:citedResponsibleParty/gmd:CI_ResponsibleParty[normalize-space(gmd:role/gmd:CI_RoleCode)='originator']/gmd:organisationName//* | /eml:eml/*/creator/organizationName | /netcdf/attribute[@name='institution']/@value</xpath>
     </selector>
@@ -553,7 +559,7 @@ def call():
   output = "ProjectName concept is not present"
   return False
       ]]></code>
-    <selector>
+    <selector namespaceAware="true">
       <name>ProjectName</name>
       <xpath>/*/gmd:identificationInfo/*/gmd:aggregationInfo/gmd:MD_AggregateInformation[normalize-space(gmd:associationType/gmd:DS_AssociationTypeCode)='largerWorkCitation' and normalize-space(gmd:initiativeType/gmd:DS_InitiativeTypeCode)='project']/gmd:aggregateDataSetName/gmd:CI_Citation/gmd:title//* | /*/gmd:identificationInfo/*/gmd:descriptiveKeywords/gmd:MD_Keywords[normalize-space(gmd:type/gmd:MD_KeywordTypeCode)='project']/gmd:keyword//* |
         /gmi:MI_Metadata/gmi:acquisitionInformation/gmi:MI_AcquisitionInformation/gmi:operation/gmi:MI_Operation/gmi:citation/gmd:CI_Citation//* | /eml:eml/*/creator/electronicMailAddress | /netcdf/attribute[@name='project']/@value</xpath>
@@ -591,7 +597,7 @@ def call():
   output = "ProcessingLevel concept is not present"
   return False
       ]]></code>
-    <selector>
+    <selector namespaceAware="true">
       <name>ProcessingLevel</name>
       <xpath>/*/gmd:contentInfo/*/gmd:processingLevelCode/gmd:MD_Identifier/gmd:code//* | /netcdf/attribute[@name='processing_level']/@value</xpath>
     </selector>
@@ -628,7 +634,7 @@ def call():
   output = "Acknowledgement concept is not present"
   return False
       ]]></code>
-    <selector>
+    <selector namespaceAware="true">
       <name>Acknowledgement</name>
       <xpath>/*/gmd:identificationInfo/*/gmd:credit//* | /netcdf/attribute[@name='acknowledgement']/@value</xpath>
     </selector>
@@ -665,7 +671,7 @@ def call():
   output = "BoundingBox concept is not present"
   return False
       ]]></code>
-    <selector>
+    <selector namespaceAware="true">
       <name>BoundingBox</name>
       <xpath>/*/gmd:identificationInfo/*/gmd:extent/gmd:EX_Extent/gmd:geographicElement/gmd:EX_GeographicBoundingBox//* | /*/gmd:identificationInfo/srv:SV_ServiceIdentification/srv:extent/gmd:EX_Extent/gmd:geographicElement/gmd:EX_GeographicBoundingBox//* | /eml:eml/*/coverage/geographicCoverage/boundingCoordinates | /netcdf/attribute[@name='geospatial_lat_max']</xpath>
     </selector>
@@ -702,7 +708,7 @@ def call():
   output = "SouthernmostLatitude concept is not present"
   return False
       ]]></code>
-    <selector>
+    <selector namespaceAware="true">
       <name>SouthernmostLatitude</name>
       <xpath>/*/gmd:identificationInfo/*/gmd:extent/gmd:EX_Extent/gmd:geographicElement/gmd:EX_GeographicBoundingBox/gmd:southBoundLatitude/gco:Decimal | /eml:eml/*/coverage/geographicCoverage/boundingCoordinates/southBoundingCoordinate | /netcdf/attribute[@name='geospatial_lat_min']/@value</xpath>
     </selector>
@@ -739,7 +745,7 @@ def call():
   output = "NorthernmostLatitude concept is not present"
   return False
       ]]></code>
-    <selector>
+    <selector namespaceAware="true">
       <name>NorthernmostLatitude</name>
       <xpath>/*/gmd:identificationInfo/*/gmd:extent/gmd:EX_Extent/gmd:geographicElement/gmd:EX_GeographicBoundingBox/gmd:northBoundLatitude/gco:Decimal | /eml:eml/*/coverage/geographicCoverage/boundingCoordinates/northBoundingCoordinate | /netcdf/attribute[@name='geospatial_lat_max']/@value</xpath>
     </selector>
@@ -776,7 +782,7 @@ def call():
   output = "WesternmostLongitude concept is not present"
   return False
       ]]></code>
-    <selector>
+    <selector namespaceAware="true">
       <name>WesternmostLongitude</name>
       <xpath>/*/gmd:identificationInfo/*/gmd:extent/gmd:EX_Extent/gmd:geographicElement/gmd:EX_GeographicBoundingBox/gmd:westBoundLongitude/gco:Decimal | /eml:eml/*/coverage/geographicCoverage/boundingCoordinates/westBoundingCoordinate | /netcdf/attribute[@name='geospatial_lon_min']/@value</xpath>
     </selector>
@@ -813,7 +819,7 @@ def call():
   output = "EasternmostLongitude concept is not present"
   return False
       ]]></code>
-    <selector>
+    <selector namespaceAware="true">
       <name>EasternmostLongitude</name>
       <xpath>/*/gmd:identificationInfo/*/gmd:extent/gmd:EX_Extent/gmd:geographicElement/gmd:EX_GeographicBoundingBox/gmd:eastBoundLongitude/gco:Decimal | /eml:eml/*/coverage/geographicCoverage/boundingCoordinates/eastBoundingCoordinate | /netcdf/attribute[@name='geospatial_lon_max']/@value</xpath>
     </selector>
@@ -850,7 +856,7 @@ def call():
   output = "StartTime concept is not present"
   return False
       ]]></code>
-    <selector>
+    <selector namespaceAware="true">
       <name>StartTime</name>
       <xpath>/*/gmd:identificationInfo/*/gmd:extent/gmd:EX_Extent/gmd:temporalElement/gmd:EX_TemporalExtent/gmd:extent/gml:TimePeriod/gml:beginPosition | /eml:eml/*/coverage/temporalCoverage/rangeOfDates/beginDate/calendarDate | /netcdf/attribute[@name='time_coverage_start']/@value</xpath>
     </selector>
@@ -887,7 +893,7 @@ def call():
   output = "EndTime concept is not present"
   return False
       ]]></code>
-    <selector>
+    <selector namespaceAware="true">
       <name>EndTime</name>
       <xpath>/*/gmd:identificationInfo/*/gmd:extent/gmd:EX_Extent/gmd:temporalElement/gmd:EX_TemporalExtent/gmd:extent/gml:TimePeriod/gml:endPosition | /eml:eml/*/coverage/temporalCoverage/rangeOfDates/endDate | /netcdf/attribute[@name='time_coverage_end']/@value</xpath>
     </selector>
@@ -924,7 +930,7 @@ def call():
   output = "VerticalMinimum concept is not present"
   return False
       ]]></code>
-    <selector>
+    <selector namespaceAware="true">
       <name>VerticalMinimum</name>
       <xpath>/*/gmd:identificationInfo/*/gmd:extent/gmd:EX_Extent/gmd:verticalElement/gmd:EX_VerticalExtent/gmd:minimumValue/gco:Real | /eml:eml/*/coverage/geographicCoverage/boundingCoordinates/boundingAltitudes/altitudeMinimum | /netcdf/attribute[@name='geospatial_vertical_min']/@value</xpath>
     </selector>
@@ -961,7 +967,7 @@ def call():
   output = "TemporalExtent concept is not present"
   return False
       ]]></code>
-    <selector>
+    <selector namespaceAware="true">
       <name>TemporalExtent</name>
       <xpath>/*/gmd:identificationInfo/*/gmd:extent/gmd:EX_Extent/gmd:temporalElement/gmd:EX_TemporalExtent//* | /eml:eml/*/coverage/temporalCoverage | /netcdf/attribute[@name='time_coverage_duration']/@value</xpath>
     </selector>
@@ -998,7 +1004,7 @@ def call():
   output = "TemporalResolution concept is not present"
   return False
       ]]></code>
-    <selector>
+    <selector namespaceAware="true">
       <name>TemporalResolution</name>
       <xpath>/eml:eml/*/coverage/temporalCoverage//*/units | /netcdf/attribute[@name='time_coverage_resolution']/@value</xpath>
     </selector>
@@ -1035,7 +1041,7 @@ def call():
   output = "StandardNameVocabulary concept is not present"
   return False
       ]]></code>
-    <selector>
+    <selector namespaceAware="true">
       <name>StandardNameVocabulary</name>
       <xpath>/*/gmd:identificationInfo/*/gmd:descriptiveKeywords/gmd:MD_Keywords/gmd:thesaurusName/gmd:CI_Citation/gmd:title//* | /netcdf/variable/attribute[@name='standard_name_vocabulary']/@value</xpath>
     </selector>
@@ -1072,7 +1078,7 @@ def call():
   output = "VerticalMaximum concept is not present"
   return False
       ]]></code>
-    <selector>
+    <selector namespaceAware="true">
       <name>VerticalMaximum</name>
       <xpath>/*/gmd:identificationInfo/*/gmd:extent/gmd:EX_Extent/gmd:verticalElement/gmd:EX_VerticalExtent/gmd:maximumValue/gco:Real | /eml:eml/*/coverage/geographicCoverage/boundingCoordinates/boundingAltitudes/altitudeMaximum | /netcdf/attribute[@name='geospatial_vertical_max']/@value</xpath>
     </selector>
@@ -1109,7 +1115,7 @@ def call():
   output = "ResourceAccessConstraints concept is not present"
   return False
       ]]></code>
-    <selector>
+    <selector namespaceAware="true">
       <name>ResourceAccessConstraints</name>
       <xpath>/*/gmd:identificationInfo/*/gmd:resourceConstraints/gmd:MD_LegalConstraints/gmd:accessConstraints/gmd:MD_RestrictionCode | /*/gmd:identificationInfo/*/gmd:resourceConstraints/gmd:MD_LegalConstraints/gmd:otherConstraints//* | /eml:eml/access | /netcdf/variable/attribute[@name='license']/@value</xpath>
     </selector>
@@ -1146,7 +1152,7 @@ def call():
   output = "ContributorName concept is not present"
   return False
       ]]></code>
-    <selector>
+    <selector namespaceAware="true">
       <name>ContributorName</name>
       <xpath>/*/gmd:identificationInfo/*/gmd:citation/gmd:CI_Citation/gmd:citedResponsibleParty/gmd:CI_ResponsibleParty[not(normalize-space(gmd:role/gmd:CI_RoleCode[.='author' or .='principalInvestigator' or .='originator']))]//*[contains(name(),'Name')]//* | /*/gmd:identificationInfo/*/gmd:citation/gmd:CI_Citation/gmd:citedResponsibleParty/gmd:CI_ResponsibleParty[normalize-space(gmd:role/gmd:CI_RoleCode)='contributor']//*[contains(name(),'Name')]//* | /eml:eml/*/associatedParty |
         /netcdf/attribute[@name='contributor_name']/@value</xpath>
@@ -1184,7 +1190,7 @@ def call():
   output = "ContributorRole concept is not present"
   return False
       ]]></code>
-    <selector>
+    <selector namespaceAware="true">
       <name>ContributorRole</name>
       <xpath>/*/gmd:identificationInfo/*/gmd:citation/gmd:CI_Citation/gmd:citedResponsibleParty/gmd:CI_ResponsibleParty[not(normalize-space(gmd:role/gmd:CI_RoleCode)[.='author' or .='principalInvestigator' or .='originator'])]/gmd:role/gmd:CI_RoleCode | /*/gmd:identificationInfo/*/gmd:citation/gmd:CI_Citation/gmd:citedResponsibleParty/gmd:CI_ResponsibleParty/gmd:role[gmd:CI_RoleCode='contributor'] | /eml:eml/*/*/role | /netcdf/attribute[@name='contributor_role']/@value</xpath>
     </selector>
@@ -1221,7 +1227,7 @@ def call():
   output = "Publisher concept is not present"
   return False
       ]]></code>
-    <selector>
+    <selector namespaceAware="true">
       <name>Publisher</name>
       <xpath>//gmd:CI_ResponsibleParty[normalize-space(gmd:role/gmd:CI_RoleCode)='publisher']/gmd:organisationName//* | /eml:eml/*/publisher | /netcdf/attribute[@name='publisher_name']/@value</xpath>
     </selector>
@@ -1258,7 +1264,7 @@ def call():
   output = "PublisherURL concept is not present"
   return False
       ]]></code>
-    <selector>
+    <selector namespaceAware="true">
       <name>PublisherURL</name>
       <xpath>//gmd:CI_Citation/gmd:citedResponsibleParty/gmd:CI_ResponsibleParty[gmd:role/gmd:CI_RoleCode ='publisher']/gmd:contactInfo/gmd:CI_Contact/gmd:onlineResource/gmd:CI_OnlineResource/gmd:linkage/gmd:URL | /eml:eml/*/publisher/electronicMailAddress | /netcdf/attribute[@name='publisher_url']/@value</xpath>
     </selector>
@@ -1295,7 +1301,7 @@ def call():
   output = "PublisherEMail concept is not present"
   return False
       ]]></code>
-    <selector>
+    <selector namespaceAware="true">
       <name>PublisherEMail</name>
       <xpath>//gmd:CI_Citation/gmd:citedResponsibleParty/gmd:CI_ResponsibleParty[gmd:role/gmd:CI_RoleCode ='publisher']/gmd:contactInfo/gmd:address/gmd:CI_Address/gmd:electronicMailAddress//* | /eml:eml/*/publisher/electronicMailAddress | /netcdf/attribute[@name='publisher_email']/@value</xpath>
     </selector>
