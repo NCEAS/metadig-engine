@@ -81,6 +81,7 @@
   <check>
     <id>coverage.in.arctic.1</id>
   </check>
+  <!--  THESE ARE FOR INDEXING/FACETING
   <check>
   	<id>check.echo.funder.1</id>
   </check>
@@ -99,4 +100,5 @@
   <check>
   	<id>check.lookup.award.1</id>
   </check>
+  -->
 </mdq:suite>
