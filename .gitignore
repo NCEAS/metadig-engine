@@ -1,2 +1,6 @@
 target
 src/main/resources/schemas/META-INF
+/.settings/org.eclipse.jdt.core.prefs
+/.classpath
+/.DS_Store
+/.project
