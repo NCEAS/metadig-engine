@@ -15,7 +15,10 @@
       message <- "More than one abstract section is present, only one is allowed."
     } else {
       library(stringr)
-      tokens <- str_split(abstract, " ")[[1]]
+      # Trim whitespace, split abstract on whitespace
+      tokens <- trimws(str_split(abstract, "\\s+")[[1]], which="both")
+      # Remove blank elements (subtly and irritatingly different than whitespace)
+      tokens <- tokens[tokens != ""]
 
       if (length(tokens) >= 100) {
         status <- "SUCCESS"
