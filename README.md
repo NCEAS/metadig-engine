@@ -17,8 +17,7 @@ Below is a brief description of the common check elements to get started writing
 
 * Environment
 
-	The MDQ engine allows checks to be written in a few different languages depending on the needs and complexity of the check or the 
-	expertise of the check author. Supported environments include:
+	The MDQ engine allows checks to be written in a few different languages depending on the needs and complexity of the check or the expertise of the check author. Supported environments include:
 	- R
 	- Python
 	- JavaScript
@@ -59,12 +58,22 @@ Sometimes it will be useful to maintain the script environment state (variables 
 So you have written a check and validated it against the MDQE schema? Great!
 You can place the XML file in the 'checks' resource directory where it will automatically be loaded when the MDQ engine next initializes.
 The same is true of suites; they are included in the 'suites' resource directory.
-If you would like to reuse previously-defined checks, you may reference them my id from within your suite and they will be fully included in the suite that references them without having to duplicate XML code.
+If you would like to reuse previously-defined checks, you may reference them by id from within your suite and they will be fully included in the suite that references them without having to duplicate XML code.
 	
 ## Running your suites
 
-It is probably easiest to develop checks within an editor devoted your the script syntax you have chosen before placing the code in a check or suite XML document. You can also test the code by setting variable as you would expect them to be initialized by the selectors in your check. This will be a quicker way to identify interpretation and runtime issues before ever using the MDQ engine at all.
+It is probably easiest to develop checks within an editor devoted your the script syntax you have chosen before placing the code in a check or suite XML document. You can also test the code by setting variables as you would expect them to be initialized by the selectors in your check. This will be a quicker way to identify interpretation and runtime issues before ever using the MDQ engine at all.
 
 Once you are satisfied with your check code, you can run a suite (one or more checks in a suite) using the command line:
 
 `mvn exec:java -Dexec.mainClass="edu.ucsb.nceas.mdqengine.MDQEngine" -Dexec.args="<path-to-suite.xml> <path-to-metadata.xml>"`
+
+
+## Using the library elsewhere
+
+There are two options for utilizing MDQ features in other projects. The mdqengine artifcat can be included in other Maven projects like any other dependency and all public classes and methods will be readily available to that project.
+
+For Metacat, we have used a looser coupling in that there is no build dependency. Metacat can be configured to interact with the MDQ webapp through the defined REST API that it exposes. So, for example, any time a new metadata document is added to Metacat, we submit the document to the MDQ via the REST API and then save the returned results as another object in that Metacat repository. See the mdq-webapp project for details on the MDQ REST API.
+
+
+
