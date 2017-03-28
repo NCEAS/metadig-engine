@@ -3,15 +3,16 @@ package edu.ucsb.nceas.mdqengine.store;
 import java.io.IOException;
 import java.net.URL;
 import java.util.Collection;
-import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 
 import javax.xml.bind.JAXBException;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.dataone.configuration.Settings;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.xml.sax.SAXException;
@@ -45,12 +46,19 @@ public class InMemoryStore implements MDQStore{
 	
 	private void init() {
 		
+		String additionalDir = Settings.getConfiguration().getString("mdq.store.directory", null);
+		
 		PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
 		
 		Resource[] suiteResources = null;
 		// load all the resources from local files
 		try {
 			suiteResources  = resolver.getResources("classpath*:/suites/*.xml");
+			// do we have an additional location for these?
+			if (additionalDir != null) {
+				Resource[] additionalSuiteResources = resolver.getResources("file://" + additionalDir + "/suites/*.xml");
+				suiteResources = (Resource[]) ArrayUtils.addAll(suiteResources, additionalSuiteResources);
+			}
 		} catch (IOException e) {
 			log.error("Could not read local suite resources: " + e.getMessage(), e);
 		}
@@ -76,6 +84,11 @@ public class InMemoryStore implements MDQStore{
 		// load all the resources from local files
 		try {
 			checkResources  = resolver.getResources("classpath*:/checks/*.xml");
+			// do we have an additional location for these?
+			if (additionalDir != null) {
+				Resource[] additionalCheckResources = resolver.getResources("file://" + additionalDir + "/checks/*.xml");
+				checkResources = (Resource[]) ArrayUtils.addAll(checkResources, additionalCheckResources);
+			}
 		} catch (IOException e) {
 			log.error("Could not read local check resources: " + e.getMessage(), e);
 		}
