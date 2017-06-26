@@ -1,0 +1,571 @@
+<?xml version="1.0" encoding="UTF-8"?><mdq:suite xmlns:mdq="https://nceas.ucsb.edu/mdqe/v1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="https://nceas.ucsb.edu/mdqe/v1 ../schemas/schema1.xsd"><id>ISO_Reference_Understanding</id><name>ISO_Reference_Understanding</name><check><id>ISO_ExternalRefs_ParentMetadataReference_ISO_ISO-1_DIF_ECHO_DCITE_EML_CSDGM_BDP_Mercury_ONEdcx</id><name>ParentMetadataReferencePresent</name><description>Checks to see if at least one Parent Metadata Reference concept exists.</description><type>ISO_ExternalRefs</type><level>OPTIONAL</level><environment>python</environment><code><![CDATA[
+def call():
+  global output
+  global status
+ 
+  output = "The concept ParentMetadataReference is present."
+                                        
+  if(ParentMetadataReference is not None and len(str(ParentMetadataReference)) > 0):
+    status = "SUCCESS"
+    return True
+    
+  status = "FAILURE"
+  output = "ParentMetadataReference concept is not present"
+  
+  return False
+      ]]></code><selector><name>ParentMetadataReference</name><xpath>((/MD_Metadata/parentMetadata/CI_Citation)</xpath></selector><dialect><name>iso</name><xpath>boolean(/*[local-name() = 'MI_Metadata' or local-name() = 'MD_Metadata'])</xpath></dialect><dialect><name>iso-1</name><xpath>boolean(/*[local-name() = 'mdb:MD_Metadata'])</xpath></dialect><dialect><name>dif</name><xpath>boolean(/*[local-name() = 'dif:DIF'])</xpath></dialect><dialect><name>echo</name><xpath>boolean(/*[local-name() = '*'])</xpath></dialect><dialect><name>dcite</name><xpath>boolean(/*[local-name() = 'dcite:resource'])</xpath></dialect><dialect><name>eml</name><xpath>boolean(/*[local-name() = 'eml'])</xpath></dialect><dialect><name>csdgm</name><xpath>boolean(/*[local-name() = 'csdgm:metadata'])</xpath></dialect><dialect><name>bdp</name><xpath>boolean(/*[local-name() = 'bdp:metadata'])</xpath></dialect><dialect><name>mercury</name><xpath>boolean(/*[local-name() = 'mercury:metadata'])</xpath></dialect><dialect><name>onedcx</name><xpath>boolean(/*[local-name() = ''])</xpath></dialect></check><check><id>ISO_ExternalRefs_MetadataStandardCitation_ISO_ISO-1_DIF_ECHO_DCITE_EML_CSDGM_BDP_Mercury_ONEdcx</id><name>MetadataStandardCitationPresent</name><description>Checks to see if at least one Metadata Standard Citation concept exists.</description><type>ISO_ExternalRefs</type><level>OPTIONAL</level><environment>python</environment><code><![CDATA[
+def call():
+  global output
+  global status
+ 
+  output = "The concept MetadataStandardCitation is present."
+                                        
+  if(MetadataStandardCitation is not None and len(str(MetadataStandardCitation)) > 0):
+    status = "SUCCESS"
+    return True
+    
+  status = "FAILURE"
+  output = "MetadataStandardCitation concept is not present"
+  
+  return False
+      ]]></code><selector><name>MetadataStandardCitation</name><xpath>(/MD_Metadata/metadataStandard) or (/*/metadataStandardName) or (/DIF/Metadata_Name) or (/metadata/metainfo/metstdn) or (/metadata/metainfo/metstdn) or (/metadata/metainfo/metstdn)</xpath></selector><dialect><name>iso</name><xpath>boolean(/*[local-name() = 'MI_Metadata' or local-name() = 'MD_Metadata'])</xpath></dialect><dialect><name>iso-1</name><xpath>boolean(/*[local-name() = 'mdb:MD_Metadata'])</xpath></dialect><dialect><name>dif</name><xpath>boolean(/*[local-name() = 'dif:DIF'])</xpath></dialect><dialect><name>echo</name><xpath>boolean(/*[local-name() = '*'])</xpath></dialect><dialect><name>dcite</name><xpath>boolean(/*[local-name() = 'dcite:resource'])</xpath></dialect><dialect><name>eml</name><xpath>boolean(/*[local-name() = 'eml'])</xpath></dialect><dialect><name>csdgm</name><xpath>boolean(/*[local-name() = 'csdgm:metadata'])</xpath></dialect><dialect><name>bdp</name><xpath>boolean(/*[local-name() = 'bdp:metadata'])</xpath></dialect><dialect><name>mercury</name><xpath>boolean(/*[local-name() = 'mercury:metadata'])</xpath></dialect><dialect><name>onedcx</name><xpath>boolean(/*[local-name() = ''])</xpath></dialect></check><check><id>ISO_ExternalRefs_MetadataProfileCitation_ISO_ISO-1_DIF_ECHO_DCITE_EML_CSDGM_BDP_Mercury_ONEdcx</id><name>MetadataProfileCitationPresent</name><description>Checks to see if at least one Metadata Profile Citation concept exists.</description><type>ISO_ExternalRefs</type><level>OPTIONAL</level><environment>python</environment><code><![CDATA[
+def call():
+  global output
+  global status
+ 
+  output = "The concept MetadataProfileCitation is present."
+                                        
+  if(MetadataProfileCitation is not None and len(str(MetadataProfileCitation)) > 0):
+    status = "SUCCESS"
+    return True
+    
+  status = "FAILURE"
+  output = "MetadataProfileCitation concept is not present"
+  
+  return False
+      ]]></code><selector><name>MetadataProfileCitation</name><xpath>(/MD_Metadata/metadataProfile/CI_Citation) or (/metadata/metainfo/metextns) or (/metadata/metainfo/metextns)</xpath></selector><dialect><name>iso</name><xpath>boolean(/*[local-name() = 'MI_Metadata' or local-name() = 'MD_Metadata'])</xpath></dialect><dialect><name>iso-1</name><xpath>boolean(/*[local-name() = 'mdb:MD_Metadata'])</xpath></dialect><dialect><name>dif</name><xpath>boolean(/*[local-name() = 'dif:DIF'])</xpath></dialect><dialect><name>echo</name><xpath>boolean(/*[local-name() = '*'])</xpath></dialect><dialect><name>dcite</name><xpath>boolean(/*[local-name() = 'dcite:resource'])</xpath></dialect><dialect><name>eml</name><xpath>boolean(/*[local-name() = 'eml'])</xpath></dialect><dialect><name>csdgm</name><xpath>boolean(/*[local-name() = 'csdgm:metadata'])</xpath></dialect><dialect><name>bdp</name><xpath>boolean(/*[local-name() = 'bdp:metadata'])</xpath></dialect><dialect><name>mercury</name><xpath>boolean(/*[local-name() = 'mercury:metadata'])</xpath></dialect><dialect><name>onedcx</name><xpath>boolean(/*[local-name() = ''])</xpath></dialect></check><check><id>ISO_ExternalRefs_AlternateMetadataCitation_ISO_ISO-1_DIF_ECHO_DCITE_EML_CSDGM_BDP_Mercury_ONEdcx</id><name>AlternateMetadataCitationPresent</name><description>Checks to see if at least one Alternate Metadata Citation concept exists.</description><type>ISO_ExternalRefs</type><level>OPTIONAL</level><environment>python</environment><code><![CDATA[
+def call():
+  global output
+  global status
+ 
+  output = "The concept AlternateMetadataCitation is present."
+                                        
+  if(AlternateMetadataCitation is not None and len(str(AlternateMetadataCitation)) > 0):
+    status = "SUCCESS"
+    return True
+    
+  status = "FAILURE"
+  output = "AlternateMetadataCitation concept is not present"
+  
+  return False
+      ]]></code><selector><name>AlternateMetadataCitation</name><xpath>((/MD_Metadata/alternativeMetadataReference/CI_Citation)</xpath></selector><dialect><name>iso</name><xpath>boolean(/*[local-name() = 'MI_Metadata' or local-name() = 'MD_Metadata'])</xpath></dialect><dialect><name>iso-1</name><xpath>boolean(/*[local-name() = 'mdb:MD_Metadata'])</xpath></dialect><dialect><name>dif</name><xpath>boolean(/*[local-name() = 'dif:DIF'])</xpath></dialect><dialect><name>echo</name><xpath>boolean(/*[local-name() = '*'])</xpath></dialect><dialect><name>dcite</name><xpath>boolean(/*[local-name() = 'dcite:resource'])</xpath></dialect><dialect><name>eml</name><xpath>boolean(/*[local-name() = 'eml'])</xpath></dialect><dialect><name>csdgm</name><xpath>boolean(/*[local-name() = 'csdgm:metadata'])</xpath></dialect><dialect><name>bdp</name><xpath>boolean(/*[local-name() = 'bdp:metadata'])</xpath></dialect><dialect><name>mercury</name><xpath>boolean(/*[local-name() = 'mercury:metadata'])</xpath></dialect><dialect><name>onedcx</name><xpath>boolean(/*[local-name() = ''])</xpath></dialect></check><check><id>ISO_ExternalRefs_ResourceCitation_ISO_ISO-1_DIF_ECHO_DCITE_EML_CSDGM_BDP_Mercury_ONEdcx</id><name>ResourceCitationPresent</name><description>Checks to see if at least one Resource Citation concept exists.</description><type>ISO_ExternalRefs</type><level>OPTIONAL</level><environment>python</environment><code><![CDATA[
+def call():
+  global output
+  global status
+ 
+  output = "The concept ResourceCitation is present."
+                                        
+  if(ResourceCitation is not None and len(str(ResourceCitation)) > 0):
+    status = "SUCCESS"
+    return True
+    
+  status = "FAILURE"
+  output = "ResourceCitation concept is not present"
+  
+  return False
+      ]]></code><selector><name>ResourceCitation</name><xpath>(/MD_Metadata/identificationInfo/SV_ServiceIdentification/citation/CI_Citation//*) or (/*/identificationInfo/*/citation/CI_Citation/otherCitationDetails//*) or (/*/CitationForExternalPublication) or (/*/LongName) or (/*/Data_Set_Citation) or (/metadata/idinfo/citation/citeinfo) or (/eml/citation) or (/metadata/idinfo/citation/citeinfo) or (/metadata/idinfo/citation/citeinfo)</xpath></selector><dialect><name>iso</name><xpath>boolean(/*[local-name() = 'MI_Metadata' or local-name() = 'MD_Metadata'])</xpath></dialect><dialect><name>iso-1</name><xpath>boolean(/*[local-name() = 'mdb:MD_Metadata'])</xpath></dialect><dialect><name>dif</name><xpath>boolean(/*[local-name() = 'dif:DIF'])</xpath></dialect><dialect><name>echo</name><xpath>boolean(/*[local-name() = '*'])</xpath></dialect><dialect><name>dcite</name><xpath>boolean(/*[local-name() = 'dcite:resource'])</xpath></dialect><dialect><name>eml</name><xpath>boolean(/*[local-name() = 'eml'])</xpath></dialect><dialect><name>csdgm</name><xpath>boolean(/*[local-name() = 'csdgm:metadata'])</xpath></dialect><dialect><name>bdp</name><xpath>boolean(/*[local-name() = 'bdp:metadata'])</xpath></dialect><dialect><name>mercury</name><xpath>boolean(/*[local-name() = 'mercury:metadata'])</xpath></dialect><dialect><name>onedcx</name><xpath>boolean(/*[local-name() = ''])</xpath></dialect></check><check><id>ISO_ExternalRefs_AdditionalResourceDocumentation_ISO_ISO-1_DIF_ECHO_DCITE_EML_CSDGM_BDP_Mercury_ONEdcx</id><name>AdditionalResourceDocumentationPresent</name><description>Checks to see if at least one Additional Resource Documentation concept exists.</description><type>ISO_ExternalRefs</type><level>OPTIONAL</level><environment>python</environment><code><![CDATA[
+def call():
+  global output
+  global status
+ 
+  output = "The concept AdditionalResourceDocumentation is present."
+                                        
+  if(AdditionalResourceDocumentation is not None and len(str(AdditionalResourceDocumentation)) > 0):
+    status = "SUCCESS"
+    return True
+    
+  status = "FAILURE"
+  output = "AdditionalResourceDocumentation concept is not present"
+  
+  return False
+      ]]></code><selector><name>AdditionalResourceDocumentation</name><xpath>(/MD_Metadata/identificationInfo/MD_DataIdentification/additionalDocumentation/CI_Citation) or (/MD_Metadata/identificationInfo/SV_ServiceIdentification/additionalDocumentation/CI_Citation)</xpath></selector><dialect><name>iso</name><xpath>boolean(/*[local-name() = 'MI_Metadata' or local-name() = 'MD_Metadata'])</xpath></dialect><dialect><name>iso-1</name><xpath>boolean(/*[local-name() = 'mdb:MD_Metadata'])</xpath></dialect><dialect><name>dif</name><xpath>boolean(/*[local-name() = 'dif:DIF'])</xpath></dialect><dialect><name>echo</name><xpath>boolean(/*[local-name() = '*'])</xpath></dialect><dialect><name>dcite</name><xpath>boolean(/*[local-name() = 'dcite:resource'])</xpath></dialect><dialect><name>eml</name><xpath>boolean(/*[local-name() = 'eml'])</xpath></dialect><dialect><name>csdgm</name><xpath>boolean(/*[local-name() = 'csdgm:metadata'])</xpath></dialect><dialect><name>bdp</name><xpath>boolean(/*[local-name() = 'bdp:metadata'])</xpath></dialect><dialect><name>mercury</name><xpath>boolean(/*[local-name() = 'mercury:metadata'])</xpath></dialect><dialect><name>onedcx</name><xpath>boolean(/*[local-name() = ''])</xpath></dialect></check><check><id>ISO_ExternalRefs_KeywordVocabularyCitation_ISO_ISO-1_DIF_ECHO_DCITE_EML_CSDGM_BDP_Mercury_ONEdcx</id><name>KeywordVocabularyCitationPresent</name><description>Checks to see if at least one Keyword Vocabulary Citation concept exists.</description><type>ISO_ExternalRefs</type><level>OPTIONAL</level><environment>python</environment><code><![CDATA[
+def call():
+  global output
+  global status
+ 
+  output = "The concept KeywordVocabularyCitation is present."
+                                        
+  if(KeywordVocabularyCitation is not None and len(str(KeywordVocabularyCitation)) > 0):
+    status = "SUCCESS"
+    return True
+    
+  status = "FAILURE"
+  output = "KeywordVocabularyCitation concept is not present"
+  
+  return False
+      ]]></code><selector><name>KeywordVocabularyCitation</name><xpath>(/MD_Metadata/identificationInfo/MD_DataIdentification/descriptiveKeywords/MD_Keywords/thesaurusName/CI_Citation) or (/MD_Metadata/identificationInfo/SV_ServiceIdentification/descriptiveKeywords/MD_Keywords/thesaurusName/CI_Citation) or (/*/identificationInfo/*/descriptiveKeywords/MD_Keywords/thesaurusName/CI_Citation) or (/*/identificationInfo/SV_ServiceIdentification/descriptiveKeywords/MD_Keywords/thesaurusName/CI_Citation)</xpath></selector><dialect><name>iso</name><xpath>boolean(/*[local-name() = 'MI_Metadata' or local-name() = 'MD_Metadata'])</xpath></dialect><dialect><name>iso-1</name><xpath>boolean(/*[local-name() = 'mdb:MD_Metadata'])</xpath></dialect><dialect><name>dif</name><xpath>boolean(/*[local-name() = 'dif:DIF'])</xpath></dialect><dialect><name>echo</name><xpath>boolean(/*[local-name() = '*'])</xpath></dialect><dialect><name>dcite</name><xpath>boolean(/*[local-name() = 'dcite:resource'])</xpath></dialect><dialect><name>eml</name><xpath>boolean(/*[local-name() = 'eml'])</xpath></dialect><dialect><name>csdgm</name><xpath>boolean(/*[local-name() = 'csdgm:metadata'])</xpath></dialect><dialect><name>bdp</name><xpath>boolean(/*[local-name() = 'bdp:metadata'])</xpath></dialect><dialect><name>mercury</name><xpath>boolean(/*[local-name() = 'mercury:metadata'])</xpath></dialect><dialect><name>onedcx</name><xpath>boolean(/*[local-name() = ''])</xpath></dialect></check><check><id>ISO_ExternalRefs_KeywordOntologyCitation_ISO_ISO-1_DIF_ECHO_DCITE_EML_CSDGM_BDP_Mercury_ONEdcx</id><name>KeywordOntologyCitationPresent</name><description>Checks to see if at least one Keyword Ontology Citation concept exists.</description><type>ISO_ExternalRefs</type><level>OPTIONAL</level><environment>python</environment><code><![CDATA[
+def call():
+  global output
+  global status
+ 
+  output = "The concept KeywordOntologyCitation is present."
+                                        
+  if(KeywordOntologyCitation is not None and len(str(KeywordOntologyCitation)) > 0):
+    status = "SUCCESS"
+    return True
+    
+  status = "FAILURE"
+  output = "KeywordOntologyCitation concept is not present"
+  
+  return False
+      ]]></code><selector><name>KeywordOntologyCitation</name><xpath>(/MD_Metadata/identificationInfo/MD_DataIdentification/descriptiveKeywords/MD_Keywords/keywordClass/MD_KeywordClass/ontology/CI_Citation) or (/MD_Metadata/identificationInfo/SV_ServiceIdentification/descriptiveKeywords/MD_Keywords/keywordClass/MD_KeywordClass/ontology/CI_Citation)</xpath></selector><dialect><name>iso</name><xpath>boolean(/*[local-name() = 'MI_Metadata' or local-name() = 'MD_Metadata'])</xpath></dialect><dialect><name>iso-1</name><xpath>boolean(/*[local-name() = 'mdb:MD_Metadata'])</xpath></dialect><dialect><name>dif</name><xpath>boolean(/*[local-name() = 'dif:DIF'])</xpath></dialect><dialect><name>echo</name><xpath>boolean(/*[local-name() = '*'])</xpath></dialect><dialect><name>dcite</name><xpath>boolean(/*[local-name() = 'dcite:resource'])</xpath></dialect><dialect><name>eml</name><xpath>boolean(/*[local-name() = 'eml'])</xpath></dialect><dialect><name>csdgm</name><xpath>boolean(/*[local-name() = 'csdgm:metadata'])</xpath></dialect><dialect><name>bdp</name><xpath>boolean(/*[local-name() = 'bdp:metadata'])</xpath></dialect><dialect><name>mercury</name><xpath>boolean(/*[local-name() = 'mercury:metadata'])</xpath></dialect><dialect><name>onedcx</name><xpath>boolean(/*[local-name() = ''])</xpath></dialect></check><check><id>ISO_ExternalRefs_AdditionalUsageDocumentation_ISO_ISO-1_DIF_ECHO_DCITE_EML_CSDGM_BDP_Mercury_ONEdcx</id><name>AdditionalUsageDocumentationPresent</name><description>Checks to see if at least one Additional Usage Documentation concept exists.</description><type>ISO_ExternalRefs</type><level>OPTIONAL</level><environment>python</environment><code><![CDATA[
+def call():
+  global output
+  global status
+ 
+  output = "The concept AdditionalUsageDocumentation is present."
+                                        
+  if(AdditionalUsageDocumentation is not None and len(str(AdditionalUsageDocumentation)) > 0):
+    status = "SUCCESS"
+    return True
+    
+  status = "FAILURE"
+  output = "AdditionalUsageDocumentation concept is not present"
+  
+  return False
+      ]]></code><selector><name>AdditionalUsageDocumentation</name><xpath>(/MD_Metadata/identificationInfo/MD_DataIdentification/resourceSpecificUsage/MD_Usage/additionalDocumentation/CI_Citation) or (/MD_Metadata/identificationInfo/SV_ServiceIdentification/resourceSpecificUsage/MD_Usage/additionalDocumentation/CI_Citation)</xpath></selector><dialect><name>iso</name><xpath>boolean(/*[local-name() = 'MI_Metadata' or local-name() = 'MD_Metadata'])</xpath></dialect><dialect><name>iso-1</name><xpath>boolean(/*[local-name() = 'mdb:MD_Metadata'])</xpath></dialect><dialect><name>dif</name><xpath>boolean(/*[local-name() = 'dif:DIF'])</xpath></dialect><dialect><name>echo</name><xpath>boolean(/*[local-name() = '*'])</xpath></dialect><dialect><name>dcite</name><xpath>boolean(/*[local-name() = 'dcite:resource'])</xpath></dialect><dialect><name>eml</name><xpath>boolean(/*[local-name() = 'eml'])</xpath></dialect><dialect><name>csdgm</name><xpath>boolean(/*[local-name() = 'csdgm:metadata'])</xpath></dialect><dialect><name>bdp</name><xpath>boolean(/*[local-name() = 'bdp:metadata'])</xpath></dialect><dialect><name>mercury</name><xpath>boolean(/*[local-name() = 'mercury:metadata'])</xpath></dialect><dialect><name>onedcx</name><xpath>boolean(/*[local-name() = ''])</xpath></dialect></check><check><id>ISO_ExternalRefs_IdentifiedIssuesCitation_ISO_ISO-1_DIF_ECHO_DCITE_EML_CSDGM_BDP_Mercury_ONEdcx</id><name>IdentifiedIssuesCitationPresent</name><description>Checks to see if at least one Identified Issues Citation concept exists.</description><type>ISO_ExternalRefs</type><level>OPTIONAL</level><environment>python</environment><code><![CDATA[
+def call():
+  global output
+  global status
+ 
+  output = "The concept IdentifiedIssuesCitation is present."
+                                        
+  if(IdentifiedIssuesCitation is not None and len(str(IdentifiedIssuesCitation)) > 0):
+    status = "SUCCESS"
+    return True
+    
+  status = "FAILURE"
+  output = "IdentifiedIssuesCitation concept is not present"
+  
+  return False
+      ]]></code><selector><name>IdentifiedIssuesCitation</name><xpath>(/MD_Metadata/identificationInfo/MD_DataIdentification/resourceSpecificUsage/MD_Usage/identifiedIssues/CI_Citation) or (/MD_Metadata/identificationInfo/SV_ServiceIdentification/resourceSpecificUsage/MD_Usage/identifiedIssues/CI_Citation)</xpath></selector><dialect><name>iso</name><xpath>boolean(/*[local-name() = 'MI_Metadata' or local-name() = 'MD_Metadata'])</xpath></dialect><dialect><name>iso-1</name><xpath>boolean(/*[local-name() = 'mdb:MD_Metadata'])</xpath></dialect><dialect><name>dif</name><xpath>boolean(/*[local-name() = 'dif:DIF'])</xpath></dialect><dialect><name>echo</name><xpath>boolean(/*[local-name() = '*'])</xpath></dialect><dialect><name>dcite</name><xpath>boolean(/*[local-name() = 'dcite:resource'])</xpath></dialect><dialect><name>eml</name><xpath>boolean(/*[local-name() = 'eml'])</xpath></dialect><dialect><name>csdgm</name><xpath>boolean(/*[local-name() = 'csdgm:metadata'])</xpath></dialect><dialect><name>bdp</name><xpath>boolean(/*[local-name() = 'bdp:metadata'])</xpath></dialect><dialect><name>mercury</name><xpath>boolean(/*[local-name() = 'mercury:metadata'])</xpath></dialect><dialect><name>onedcx</name><xpath>boolean(/*[local-name() = ''])</xpath></dialect></check><check><id>ISO_ExternalRefs_RelatedResourceCitation_ISO_ISO-1_DIF_ECHO_DCITE_EML_CSDGM_BDP_Mercury_ONEdcx</id><name>RelatedResourceCitationPresent</name><description>Checks to see if at least one Related Resource Citation concept exists.</description><type>ISO_ExternalRefs</type><level>OPTIONAL</level><environment>python</environment><code><![CDATA[
+def call():
+  global output
+  global status
+ 
+  output = "The concept RelatedResourceCitation is present."
+                                        
+  if(RelatedResourceCitation is not None and len(str(RelatedResourceCitation)) > 0):
+    status = "SUCCESS"
+    return True
+    
+  status = "FAILURE"
+  output = "RelatedResourceCitation concept is not present"
+  
+  return False
+      ]]></code><selector><name>RelatedResourceCitation</name><xpath>(/MD_Metadata/identificationInfo/MD_DataIdentification/associatedResource/MD_AssociatedResource/name/CI_Citation) or (/MD_Metadata/identificationInfo/SV_ServiceIdentification/associatedResource/MD_AssociatedResource/name/CI_Citation) or (/*/identificationInfo/*/aggregationInfo/MD_AggregateInformation/aggregateDataSetName/CI_Citation) or (/*/identificationInfo/SV_ServiceIdentification/aggregationInfo/MD_AggregateInformation/aggregateDataSetName/CI_Citation) or (/*/CollectionAssociations/CollectionAssociation[CollectionType!='Input']) or (/metadata/idinfo/citation/citeinfo/lworkcit) or (/eml/*/project) or (/metadata/idinfo/citation/citeinfo/lworkcit) or (/metadata/idinfo/citation/citeinfo/lworkcit)</xpath></selector><dialect><name>iso</name><xpath>boolean(/*[local-name() = 'MI_Metadata' or local-name() = 'MD_Metadata'])</xpath></dialect><dialect><name>iso-1</name><xpath>boolean(/*[local-name() = 'mdb:MD_Metadata'])</xpath></dialect><dialect><name>dif</name><xpath>boolean(/*[local-name() = 'dif:DIF'])</xpath></dialect><dialect><name>echo</name><xpath>boolean(/*[local-name() = '*'])</xpath></dialect><dialect><name>dcite</name><xpath>boolean(/*[local-name() = 'dcite:resource'])</xpath></dialect><dialect><name>eml</name><xpath>boolean(/*[local-name() = 'eml'])</xpath></dialect><dialect><name>csdgm</name><xpath>boolean(/*[local-name() = 'csdgm:metadata'])</xpath></dialect><dialect><name>bdp</name><xpath>boolean(/*[local-name() = 'bdp:metadata'])</xpath></dialect><dialect><name>mercury</name><xpath>boolean(/*[local-name() = 'mercury:metadata'])</xpath></dialect><dialect><name>onedcx</name><xpath>boolean(/*[local-name() = ''])</xpath></dialect></check><check><id>ISO_ExternalRefs_RelatedMetadataCitation_ISO_ISO-1_DIF_ECHO_DCITE_EML_CSDGM_BDP_Mercury_ONEdcx</id><name>RelatedMetadataCitationPresent</name><description>Checks to see if at least one Related Metadata Citation concept exists.</description><type>ISO_ExternalRefs</type><level>OPTIONAL</level><environment>python</environment><code><![CDATA[
+def call():
+  global output
+  global status
+ 
+  output = "The concept RelatedMetadataCitation is present."
+                                        
+  if(RelatedMetadataCitation is not None and len(str(RelatedMetadataCitation)) > 0):
+    status = "SUCCESS"
+    return True
+    
+  status = "FAILURE"
+  output = "RelatedMetadataCitation concept is not present"
+  
+  return False
+      ]]></code><selector><name>RelatedMetadataCitation</name><xpath>((/MD_Metadata/identificationInfo/MD_DataIdentification/associatedResource/MD_AssociatedResource/metadataReference)</xpath></selector><dialect><name>iso</name><xpath>boolean(/*[local-name() = 'MI_Metadata' or local-name() = 'MD_Metadata'])</xpath></dialect><dialect><name>iso-1</name><xpath>boolean(/*[local-name() = 'mdb:MD_Metadata'])</xpath></dialect><dialect><name>dif</name><xpath>boolean(/*[local-name() = 'dif:DIF'])</xpath></dialect><dialect><name>echo</name><xpath>boolean(/*[local-name() = '*'])</xpath></dialect><dialect><name>dcite</name><xpath>boolean(/*[local-name() = 'dcite:resource'])</xpath></dialect><dialect><name>eml</name><xpath>boolean(/*[local-name() = 'eml'])</xpath></dialect><dialect><name>csdgm</name><xpath>boolean(/*[local-name() = 'csdgm:metadata'])</xpath></dialect><dialect><name>bdp</name><xpath>boolean(/*[local-name() = 'bdp:metadata'])</xpath></dialect><dialect><name>mercury</name><xpath>boolean(/*[local-name() = 'mercury:metadata'])</xpath></dialect><dialect><name>onedcx</name><xpath>boolean(/*[local-name() = ''])</xpath></dialect></check><check><id>ISO_ExternalRefs_ConstraintReference_ISO_ISO-1_DIF_ECHO_DCITE_EML_CSDGM_BDP_Mercury_ONEdcx</id><name>ConstraintReferencePresent</name><description>Checks to see if at least one Constraint Reference concept exists.</description><type>ISO_ExternalRefs</type><level>OPTIONAL</level><environment>python</environment><code><![CDATA[
+def call():
+  global output
+  global status
+ 
+  output = "The concept ConstraintReference is present."
+                                        
+  if(ConstraintReference is not None and len(str(ConstraintReference)) > 0):
+    status = "SUCCESS"
+    return True
+    
+  status = "FAILURE"
+  output = "ConstraintReference concept is not present"
+  
+  return False
+      ]]></code><selector><name>ConstraintReference</name><xpath>(/MD_Metadata/identificationInfo/MD_DataIdentification/resourceConstraints/MD_Constraints/reference/CI_Citation) or (/MD_Metadata/identificationInfo/SV_ServiceIdentification/resourceConstraints/MD_Constraints/reference/CI_Citation) or (/MD_Metadata/metadataConstraints/MD_Constraints/reference/CI_Citation)</xpath></selector><dialect><name>iso</name><xpath>boolean(/*[local-name() = 'MI_Metadata' or local-name() = 'MD_Metadata'])</xpath></dialect><dialect><name>iso-1</name><xpath>boolean(/*[local-name() = 'mdb:MD_Metadata'])</xpath></dialect><dialect><name>dif</name><xpath>boolean(/*[local-name() = 'dif:DIF'])</xpath></dialect><dialect><name>echo</name><xpath>boolean(/*[local-name() = '*'])</xpath></dialect><dialect><name>dcite</name><xpath>boolean(/*[local-name() = 'dcite:resource'])</xpath></dialect><dialect><name>eml</name><xpath>boolean(/*[local-name() = 'eml'])</xpath></dialect><dialect><name>csdgm</name><xpath>boolean(/*[local-name() = 'csdgm:metadata'])</xpath></dialect><dialect><name>bdp</name><xpath>boolean(/*[local-name() = 'bdp:metadata'])</xpath></dialect><dialect><name>mercury</name><xpath>boolean(/*[local-name() = 'mercury:metadata'])</xpath></dialect><dialect><name>onedcx</name><xpath>boolean(/*[local-name() = ''])</xpath></dialect></check><check><id>ISO_ExternalRefs_AdditionalLineageDocumentation_ISO_ISO-1_DIF_ECHO_DCITE_EML_CSDGM_BDP_Mercury_ONEdcx</id><name>AdditionalLineageDocumentationPresent</name><description>Checks to see if at least one Additional Lineage Documentation concept exists.</description><type>ISO_ExternalRefs</type><level>OPTIONAL</level><environment>python</environment><code><![CDATA[
+def call():
+  global output
+  global status
+ 
+  output = "The concept AdditionalLineageDocumentation is present."
+                                        
+  if(AdditionalLineageDocumentation is not None and len(str(AdditionalLineageDocumentation)) > 0):
+    status = "SUCCESS"
+    return True
+    
+  status = "FAILURE"
+  output = "AdditionalLineageDocumentation concept is not present"
+  
+  return False
+      ]]></code><selector><name>AdditionalLineageDocumentation</name><xpath>((/MD_Metadata/resourceLineage/LI_Lineage/additionalDocumentation)</xpath></selector><dialect><name>iso</name><xpath>boolean(/*[local-name() = 'MI_Metadata' or local-name() = 'MD_Metadata'])</xpath></dialect><dialect><name>iso-1</name><xpath>boolean(/*[local-name() = 'mdb:MD_Metadata'])</xpath></dialect><dialect><name>dif</name><xpath>boolean(/*[local-name() = 'dif:DIF'])</xpath></dialect><dialect><name>echo</name><xpath>boolean(/*[local-name() = '*'])</xpath></dialect><dialect><name>dcite</name><xpath>boolean(/*[local-name() = 'dcite:resource'])</xpath></dialect><dialect><name>eml</name><xpath>boolean(/*[local-name() = 'eml'])</xpath></dialect><dialect><name>csdgm</name><xpath>boolean(/*[local-name() = 'csdgm:metadata'])</xpath></dialect><dialect><name>bdp</name><xpath>boolean(/*[local-name() = 'bdp:metadata'])</xpath></dialect><dialect><name>mercury</name><xpath>boolean(/*[local-name() = 'mercury:metadata'])</xpath></dialect><dialect><name>onedcx</name><xpath>boolean(/*[local-name() = ''])</xpath></dialect></check><check><id>ISO_ExternalRefs_ProcessStepReference_ISO_ISO-1_DIF_ECHO_DCITE_EML_CSDGM_BDP_Mercury_ONEdcx</id><name>ProcessStepReferencePresent</name><description>Checks to see if at least one Process Step Reference concept exists.</description><type>ISO_ExternalRefs</type><level>OPTIONAL</level><environment>python</environment><code><![CDATA[
+def call():
+  global output
+  global status
+ 
+  output = "The concept ProcessStepReference is present."
+                                        
+  if(ProcessStepReference is not None and len(str(ProcessStepReference)) > 0):
+    status = "SUCCESS"
+    return True
+    
+  status = "FAILURE"
+  output = "ProcessStepReference concept is not present"
+  
+  return False
+      ]]></code><selector><name>ProcessStepReference</name><xpath>(/MD_Metadata/resourceLineage/LI_Lineage/processStep/LE_ProcessStep/processingInformation/LE_Processing/softwareReference/CI_Citation) or (/MD_Metadata/resourceLineage/LI_Lineage/processStep/LE_ProcessStep/processingInformation/LE_Processing/documentation/CI_Citation) or (/MD_Metadata/resourceLineage/LI_Lineage/processStep/LE_ProcessStep/processingInformation/LE_Processing/algorithm/LE_Algorithm/citation/CI_Citation) or (/MI_Metadata/dataQualityInfo/DQ_DataQuality/lineage/LI_Lineage/processStep/LE_ProcessStep/processingInformation/LE_Processing/softwareReference/CI_Citation) or (/MI_Metadata/dataQualityInfo/DQ_DataQuality/lineage/LI_Lineage/processStep/LE_ProcessStep/processingInformation/LE_Processing/documentation/CI_Citation) or (/MI_Metadata/dataQualityInfo/DQ_DataQuality/lineage/LI_Lineage/processStep/LE_ProcessStep/processingInformation/LE_Processing/algorithm/LE_Algorithm/citation/CI_Citation)</xpath></selector><dialect><name>iso</name><xpath>boolean(/*[local-name() = 'MI_Metadata' or local-name() = 'MD_Metadata'])</xpath></dialect><dialect><name>iso-1</name><xpath>boolean(/*[local-name() = 'mdb:MD_Metadata'])</xpath></dialect><dialect><name>dif</name><xpath>boolean(/*[local-name() = 'dif:DIF'])</xpath></dialect><dialect><name>echo</name><xpath>boolean(/*[local-name() = '*'])</xpath></dialect><dialect><name>dcite</name><xpath>boolean(/*[local-name() = 'dcite:resource'])</xpath></dialect><dialect><name>eml</name><xpath>boolean(/*[local-name() = 'eml'])</xpath></dialect><dialect><name>csdgm</name><xpath>boolean(/*[local-name() = 'csdgm:metadata'])</xpath></dialect><dialect><name>bdp</name><xpath>boolean(/*[local-name() = 'bdp:metadata'])</xpath></dialect><dialect><name>mercury</name><xpath>boolean(/*[local-name() = 'mercury:metadata'])</xpath></dialect><dialect><name>onedcx</name><xpath>boolean(/*[local-name() = ''])</xpath></dialect></check><check><id>ISO_ExternalRefs_SourceCitation_ISO_ISO-1_DIF_ECHO_DCITE_EML_CSDGM_BDP_Mercury_ONEdcx</id><name>SourceCitationPresent</name><description>Checks to see if at least one Source Citation concept exists.</description><type>ISO_ExternalRefs</type><level>OPTIONAL</level><environment>python</environment><code><![CDATA[
+def call():
+  global output
+  global status
+ 
+  output = "The concept SourceCitation is present."
+                                        
+  if(SourceCitation is not None and len(str(SourceCitation)) > 0):
+    status = "SUCCESS"
+    return True
+    
+  status = "FAILURE"
+  output = "SourceCitation concept is not present"
+  
+  return False
+      ]]></code><selector><name>SourceCitation</name><xpath>(/MD_Metadata/resourceLineage/LI_Lineage/source/LE_Source/sourceCitation/CI_Citation) or (/MD_Metadata/resourceLineage/LI_Lineage/processStep/LE_ProcessStep/source/LE_Source/sourceCitation/CI_Citation) or (/*/dataQualityInfo/DQ_DataQuality/lineage/LI_Lineage/source/LI_Source/sourceCitation/CI_Citation) or (/*/dataQualityInfo/DQ_DataQuality/lineage/LI_Lineage/processStep/LI_ProcessStep/source/LI_Source/sourceCitation/CI_Citation) or (/metadata/dataqual/lineage/srcinfo/srccite) or (/metadata/dataqual/lineage/srcinfo/srccite)</xpath></selector><dialect><name>iso</name><xpath>boolean(/*[local-name() = 'MI_Metadata' or local-name() = 'MD_Metadata'])</xpath></dialect><dialect><name>iso-1</name><xpath>boolean(/*[local-name() = 'mdb:MD_Metadata'])</xpath></dialect><dialect><name>dif</name><xpath>boolean(/*[local-name() = 'dif:DIF'])</xpath></dialect><dialect><name>echo</name><xpath>boolean(/*[local-name() = '*'])</xpath></dialect><dialect><name>dcite</name><xpath>boolean(/*[local-name() = 'dcite:resource'])</xpath></dialect><dialect><name>eml</name><xpath>boolean(/*[local-name() = 'eml'])</xpath></dialect><dialect><name>csdgm</name><xpath>boolean(/*[local-name() = 'csdgm:metadata'])</xpath></dialect><dialect><name>bdp</name><xpath>boolean(/*[local-name() = 'bdp:metadata'])</xpath></dialect><dialect><name>mercury</name><xpath>boolean(/*[local-name() = 'mercury:metadata'])</xpath></dialect><dialect><name>onedcx</name><xpath>boolean(/*[local-name() = ''])</xpath></dialect></check><check><id>ISO_ExternalRefs_ParametersCitation_ISO_ISO-1_DIF_ECHO_DCITE_EML_CSDGM_BDP_Mercury_ONEdcx</id><name>ParametersCitationPresent</name><description>Checks to see if at least one Parameters Citation concept exists.</description><type>ISO_ExternalRefs</type><level>OPTIONAL</level><environment>python</environment><code><![CDATA[
+def call():
+  global output
+  global status
+ 
+  output = "The concept ParametersCitation is present."
+                                        
+  if(ParametersCitation is not None and len(str(ParametersCitation)) > 0):
+    status = "SUCCESS"
+    return True
+    
+  status = "FAILURE"
+  output = "ParametersCitation concept is not present"
+  
+  return False
+      ]]></code><selector><name>ParametersCitation</name><xpath>((/MD_Metadata/spatialRepresentationInfo/MD_Georeferenceable/parameterCitation/CI_Citation)</xpath></selector><dialect><name>iso</name><xpath>boolean(/*[local-name() = 'MI_Metadata' or local-name() = 'MD_Metadata'])</xpath></dialect><dialect><name>iso-1</name><xpath>boolean(/*[local-name() = 'mdb:MD_Metadata'])</xpath></dialect><dialect><name>dif</name><xpath>boolean(/*[local-name() = 'dif:DIF'])</xpath></dialect><dialect><name>echo</name><xpath>boolean(/*[local-name() = '*'])</xpath></dialect><dialect><name>dcite</name><xpath>boolean(/*[local-name() = 'dcite:resource'])</xpath></dialect><dialect><name>eml</name><xpath>boolean(/*[local-name() = 'eml'])</xpath></dialect><dialect><name>csdgm</name><xpath>boolean(/*[local-name() = 'csdgm:metadata'])</xpath></dialect><dialect><name>bdp</name><xpath>boolean(/*[local-name() = 'bdp:metadata'])</xpath></dialect><dialect><name>mercury</name><xpath>boolean(/*[local-name() = 'mercury:metadata'])</xpath></dialect><dialect><name>onedcx</name><xpath>boolean(/*[local-name() = ''])</xpath></dialect></check><check><id>ISO_ExternalRefs_FeatureCatalogueCitation_ISO_ISO-1_DIF_ECHO_DCITE_EML_CSDGM_BDP_Mercury_ONEdcx</id><name>FeatureCatalogueCitationPresent</name><description>Checks to see if at least one Feature Catalogue Citation concept exists.</description><type>ISO_ExternalRefs</type><level>OPTIONAL</level><environment>python</environment><code><![CDATA[
+def call():
+  global output
+  global status
+ 
+  output = "The concept FeatureCatalogueCitation is present."
+                                        
+  if(FeatureCatalogueCitation is not None and len(str(FeatureCatalogueCitation)) > 0):
+    status = "SUCCESS"
+    return True
+    
+  status = "FAILURE"
+  output = "FeatureCatalogueCitation concept is not present"
+  
+  return False
+      ]]></code><selector><name>FeatureCatalogueCitation</name><xpath>(/MD_Metadata/contentInfo/MD_FeatureCatalogue/featureCatalogueCitation/CI_Citation) or (/*/contentInfo/MD_FeatureCatalogueDescription/featureCatalogueCitation/CI_Citation)</xpath></selector><dialect><name>iso</name><xpath>boolean(/*[local-name() = 'MI_Metadata' or local-name() = 'MD_Metadata'])</xpath></dialect><dialect><name>iso-1</name><xpath>boolean(/*[local-name() = 'mdb:MD_Metadata'])</xpath></dialect><dialect><name>dif</name><xpath>boolean(/*[local-name() = 'dif:DIF'])</xpath></dialect><dialect><name>echo</name><xpath>boolean(/*[local-name() = '*'])</xpath></dialect><dialect><name>dcite</name><xpath>boolean(/*[local-name() = 'dcite:resource'])</xpath></dialect><dialect><name>eml</name><xpath>boolean(/*[local-name() = 'eml'])</xpath></dialect><dialect><name>csdgm</name><xpath>boolean(/*[local-name() = 'csdgm:metadata'])</xpath></dialect><dialect><name>bdp</name><xpath>boolean(/*[local-name() = 'bdp:metadata'])</xpath></dialect><dialect><name>mercury</name><xpath>boolean(/*[local-name() = 'mercury:metadata'])</xpath></dialect><dialect><name>onedcx</name><xpath>boolean(/*[local-name() = ''])</xpath></dialect></check><check><id>ISO_ExternalRefs_PortrayalCatalogueCitation_ISO_ISO-1_DIF_ECHO_DCITE_EML_CSDGM_BDP_Mercury_ONEdcx</id><name>PortrayalCatalogueCitationPresent</name><description>Checks to see if at least one Portrayal Catalogue Citation concept exists.</description><type>ISO_ExternalRefs</type><level>OPTIONAL</level><environment>python</environment><code><![CDATA[
+def call():
+  global output
+  global status
+ 
+  output = "The concept PortrayalCatalogueCitation is present."
+                                        
+  if(PortrayalCatalogueCitation is not None and len(str(PortrayalCatalogueCitation)) > 0):
+    status = "SUCCESS"
+    return True
+    
+  status = "FAILURE"
+  output = "PortrayalCatalogueCitation concept is not present"
+  
+  return False
+      ]]></code><selector><name>PortrayalCatalogueCitation</name><xpath>(/MD_Metadata/portrayalCatalogueInfo/MD_PortrayalCatalogueReference/portrayalCatalogueCitation/CI_Citation) or (/*/portrayalCatalogueInfo/MD_PortrayalCatalogueReference/portrayalCatalogueCitation/CI_Citation)</xpath></selector><dialect><name>iso</name><xpath>boolean(/*[local-name() = 'MI_Metadata' or local-name() = 'MD_Metadata'])</xpath></dialect><dialect><name>iso-1</name><xpath>boolean(/*[local-name() = 'mdb:MD_Metadata'])</xpath></dialect><dialect><name>dif</name><xpath>boolean(/*[local-name() = 'dif:DIF'])</xpath></dialect><dialect><name>echo</name><xpath>boolean(/*[local-name() = '*'])</xpath></dialect><dialect><name>dcite</name><xpath>boolean(/*[local-name() = 'dcite:resource'])</xpath></dialect><dialect><name>eml</name><xpath>boolean(/*[local-name() = 'eml'])</xpath></dialect><dialect><name>csdgm</name><xpath>boolean(/*[local-name() = 'csdgm:metadata'])</xpath></dialect><dialect><name>bdp</name><xpath>boolean(/*[local-name() = 'bdp:metadata'])</xpath></dialect><dialect><name>mercury</name><xpath>boolean(/*[local-name() = 'mercury:metadata'])</xpath></dialect><dialect><name>onedcx</name><xpath>boolean(/*[local-name() = ''])</xpath></dialect></check><check><id>ISO_ExternalRefs_FormatCitation_ISO_ISO-1_DIF_ECHO_DCITE_EML_CSDGM_BDP_Mercury_ONEdcx</id><name>FormatCitationPresent</name><description>Checks to see if at least one Format Citation concept exists.</description><type>ISO_ExternalRefs</type><level>OPTIONAL</level><environment>python</environment><code><![CDATA[
+def call():
+  global output
+  global status
+ 
+  output = "The concept FormatCitation is present."
+                                        
+  if(FormatCitation is not None and len(str(FormatCitation)) > 0):
+    status = "SUCCESS"
+    return True
+    
+  status = "FAILURE"
+  output = "FormatCitation concept is not present"
+  
+  return False
+      ]]></code><selector><name>FormatCitation</name><xpath>(/MD_Metadata/distributionInfo/MD_Distribution/distributionFormat/MD_Format/formatSpecificationCitation/CI_Citation) or (/MD_Metadata/distributionInfo/MD_Distribution/distributor/MD_Distributor/distributorFormat/MD_Format/formatSpecificationCitation/CI_Citation)</xpath></selector><dialect><name>iso</name><xpath>boolean(/*[local-name() = 'MI_Metadata' or local-name() = 'MD_Metadata'])</xpath></dialect><dialect><name>iso-1</name><xpath>boolean(/*[local-name() = 'mdb:MD_Metadata'])</xpath></dialect><dialect><name>dif</name><xpath>boolean(/*[local-name() = 'dif:DIF'])</xpath></dialect><dialect><name>echo</name><xpath>boolean(/*[local-name() = '*'])</xpath></dialect><dialect><name>dcite</name><xpath>boolean(/*[local-name() = 'dcite:resource'])</xpath></dialect><dialect><name>eml</name><xpath>boolean(/*[local-name() = 'eml'])</xpath></dialect><dialect><name>csdgm</name><xpath>boolean(/*[local-name() = 'csdgm:metadata'])</xpath></dialect><dialect><name>bdp</name><xpath>boolean(/*[local-name() = 'bdp:metadata'])</xpath></dialect><dialect><name>mercury</name><xpath>boolean(/*[local-name() = 'mercury:metadata'])</xpath></dialect><dialect><name>onedcx</name><xpath>boolean(/*[local-name() = ''])</xpath></dialect></check><check><id>ISO_ExternalRefs_MediumReference_ISO_ISO-1_DIF_ECHO_DCITE_EML_CSDGM_BDP_Mercury_ONEdcx</id><name>MediumReferencePresent</name><description>Checks to see if at least one Medium Reference concept exists.</description><type>ISO_ExternalRefs</type><level>OPTIONAL</level><environment>python</environment><code><![CDATA[
+def call():
+  global output
+  global status
+ 
+  output = "The concept MediumReference is present."
+                                        
+  if(MediumReference is not None and len(str(MediumReference)) > 0):
+    status = "SUCCESS"
+    return True
+    
+  status = "FAILURE"
+  output = "MediumReference concept is not present"
+  
+  return False
+      ]]></code><selector><name>MediumReference</name><xpath>((mdb:MD_Metadata/distributionInfo/MD_Distribution/transferOptions/MD_DigitalTransferOptions/offLine/MD_Medium/name/CI_Citation)</xpath></selector><dialect><name>iso</name><xpath>boolean(/*[local-name() = 'MI_Metadata' or local-name() = 'MD_Metadata'])</xpath></dialect><dialect><name>iso-1</name><xpath>boolean(/*[local-name() = 'mdb:MD_Metadata'])</xpath></dialect><dialect><name>dif</name><xpath>boolean(/*[local-name() = 'dif:DIF'])</xpath></dialect><dialect><name>echo</name><xpath>boolean(/*[local-name() = '*'])</xpath></dialect><dialect><name>dcite</name><xpath>boolean(/*[local-name() = 'dcite:resource'])</xpath></dialect><dialect><name>eml</name><xpath>boolean(/*[local-name() = 'eml'])</xpath></dialect><dialect><name>csdgm</name><xpath>boolean(/*[local-name() = 'csdgm:metadata'])</xpath></dialect><dialect><name>bdp</name><xpath>boolean(/*[local-name() = 'bdp:metadata'])</xpath></dialect><dialect><name>mercury</name><xpath>boolean(/*[local-name() = 'mercury:metadata'])</xpath></dialect><dialect><name>onedcx</name><xpath>boolean(/*[local-name() = ''])</xpath></dialect></check><check><id>ISO_ExternalRefs_ApplicationSchemaInformation_ISO_ISO-1_DIF_ECHO_DCITE_EML_CSDGM_BDP_Mercury_ONEdcx</id><name>ApplicationSchemaInformationPresent</name><description>Checks to see if at least one Application Schema Information concept exists.</description><type>ISO_ExternalRefs</type><level>OPTIONAL</level><environment>python</environment><code><![CDATA[
+def call():
+  global output
+  global status
+ 
+  output = "The concept ApplicationSchemaInformation is present."
+                                        
+  if(ApplicationSchemaInformation is not None and len(str(ApplicationSchemaInformation)) > 0):
+    status = "SUCCESS"
+    return True
+    
+  status = "FAILURE"
+  output = "ApplicationSchemaInformation concept is not present"
+  
+  return False
+      ]]></code><selector><name>ApplicationSchemaInformation</name><xpath>((/MD_Metadata/applicationSchemaInfo/MD_ApplicationSchemaInformation/name/CI_Citation)</xpath></selector><dialect><name>iso</name><xpath>boolean(/*[local-name() = 'MI_Metadata' or local-name() = 'MD_Metadata'])</xpath></dialect><dialect><name>iso-1</name><xpath>boolean(/*[local-name() = 'mdb:MD_Metadata'])</xpath></dialect><dialect><name>dif</name><xpath>boolean(/*[local-name() = 'dif:DIF'])</xpath></dialect><dialect><name>echo</name><xpath>boolean(/*[local-name() = '*'])</xpath></dialect><dialect><name>dcite</name><xpath>boolean(/*[local-name() = 'dcite:resource'])</xpath></dialect><dialect><name>eml</name><xpath>boolean(/*[local-name() = 'eml'])</xpath></dialect><dialect><name>csdgm</name><xpath>boolean(/*[local-name() = 'csdgm:metadata'])</xpath></dialect><dialect><name>bdp</name><xpath>boolean(/*[local-name() = 'bdp:metadata'])</xpath></dialect><dialect><name>mercury</name><xpath>boolean(/*[local-name() = 'mercury:metadata'])</xpath></dialect><dialect><name>onedcx</name><xpath>boolean(/*[local-name() = ''])</xpath></dialect></check><check><id>ISO_ExternalRefs_ServiceOperationReference_ISO_ISO-1_DIF_ECHO_DCITE_EML_CSDGM_BDP_Mercury_ONEdcx</id><name>ServiceOperationReferencePresent</name><description>Checks to see if at least one Service Operation Reference concept exists.</description><type>ISO_ExternalRefs</type><level>OPTIONAL</level><environment>python</environment><code><![CDATA[
+def call():
+  global output
+  global status
+ 
+  output = "The concept ServiceOperationReference is present."
+                                        
+  if(ServiceOperationReference is not None and len(str(ServiceOperationReference)) > 0):
+    status = "SUCCESS"
+    return True
+    
+  status = "FAILURE"
+  output = "ServiceOperationReference concept is not present"
+  
+  return False
+      ]]></code><selector><name>ServiceOperationReference</name><xpath>((/MD_Metadata/identificationInfo/SV_ServiceIdentification/operatedDataset/CI_Citation)</xpath></selector><dialect><name>iso</name><xpath>boolean(/*[local-name() = 'MI_Metadata' or local-name() = 'MD_Metadata'])</xpath></dialect><dialect><name>iso-1</name><xpath>boolean(/*[local-name() = 'mdb:MD_Metadata'])</xpath></dialect><dialect><name>dif</name><xpath>boolean(/*[local-name() = 'dif:DIF'])</xpath></dialect><dialect><name>echo</name><xpath>boolean(/*[local-name() = '*'])</xpath></dialect><dialect><name>dcite</name><xpath>boolean(/*[local-name() = 'dcite:resource'])</xpath></dialect><dialect><name>eml</name><xpath>boolean(/*[local-name() = 'eml'])</xpath></dialect><dialect><name>csdgm</name><xpath>boolean(/*[local-name() = 'csdgm:metadata'])</xpath></dialect><dialect><name>bdp</name><xpath>boolean(/*[local-name() = 'bdp:metadata'])</xpath></dialect><dialect><name>mercury</name><xpath>boolean(/*[local-name() = 'mercury:metadata'])</xpath></dialect><dialect><name>onedcx</name><xpath>boolean(/*[local-name() = ''])</xpath></dialect></check><check><id>ISO_ExternalRefs_ServiceProfileReference_ISO_ISO-1_DIF_ECHO_DCITE_EML_CSDGM_BDP_Mercury_ONEdcx</id><name>ServiceProfileReferencePresent</name><description>Checks to see if at least one Service Profile Reference concept exists.</description><type>ISO_ExternalRefs</type><level>OPTIONAL</level><environment>python</environment><code><![CDATA[
+def call():
+  global output
+  global status
+ 
+  output = "The concept ServiceProfileReference is present."
+                                        
+  if(ServiceProfileReference is not None and len(str(ServiceProfileReference)) > 0):
+    status = "SUCCESS"
+    return True
+    
+  status = "FAILURE"
+  output = "ServiceProfileReference concept is not present"
+  
+  return False
+      ]]></code><selector><name>ServiceProfileReference</name><xpath>((/MD_Metadata/identificationInfo/SV_ServiceIdentification/profile/CI_Citation)</xpath></selector><dialect><name>iso</name><xpath>boolean(/*[local-name() = 'MI_Metadata' or local-name() = 'MD_Metadata'])</xpath></dialect><dialect><name>iso-1</name><xpath>boolean(/*[local-name() = 'mdb:MD_Metadata'])</xpath></dialect><dialect><name>dif</name><xpath>boolean(/*[local-name() = 'dif:DIF'])</xpath></dialect><dialect><name>echo</name><xpath>boolean(/*[local-name() = '*'])</xpath></dialect><dialect><name>dcite</name><xpath>boolean(/*[local-name() = 'dcite:resource'])</xpath></dialect><dialect><name>eml</name><xpath>boolean(/*[local-name() = 'eml'])</xpath></dialect><dialect><name>csdgm</name><xpath>boolean(/*[local-name() = 'csdgm:metadata'])</xpath></dialect><dialect><name>bdp</name><xpath>boolean(/*[local-name() = 'bdp:metadata'])</xpath></dialect><dialect><name>mercury</name><xpath>boolean(/*[local-name() = 'mercury:metadata'])</xpath></dialect><dialect><name>onedcx</name><xpath>boolean(/*[local-name() = ''])</xpath></dialect></check><check><id>ISO_ExternalRefs_ServiceStandardCitation_ISO_ISO-1_DIF_ECHO_DCITE_EML_CSDGM_BDP_Mercury_ONEdcx</id><name>ServiceStandardCitationPresent</name><description>Checks to see if at least one Service Standard Citation concept exists.</description><type>ISO_ExternalRefs</type><level>OPTIONAL</level><environment>python</environment><code><![CDATA[
+def call():
+  global output
+  global status
+ 
+  output = "The concept ServiceStandardCitation is present."
+                                        
+  if(ServiceStandardCitation is not None and len(str(ServiceStandardCitation)) > 0):
+    status = "SUCCESS"
+    return True
+    
+  status = "FAILURE"
+  output = "ServiceStandardCitation concept is not present"
+  
+  return False
+      ]]></code><selector><name>ServiceStandardCitation</name><xpath>((/MD_Metadata/identificationInfo/SV_ServiceIdentification/serviceStandard/CI_Citation)</xpath></selector><dialect><name>iso</name><xpath>boolean(/*[local-name() = 'MI_Metadata' or local-name() = 'MD_Metadata'])</xpath></dialect><dialect><name>iso-1</name><xpath>boolean(/*[local-name() = 'mdb:MD_Metadata'])</xpath></dialect><dialect><name>dif</name><xpath>boolean(/*[local-name() = 'dif:DIF'])</xpath></dialect><dialect><name>echo</name><xpath>boolean(/*[local-name() = '*'])</xpath></dialect><dialect><name>dcite</name><xpath>boolean(/*[local-name() = 'dcite:resource'])</xpath></dialect><dialect><name>eml</name><xpath>boolean(/*[local-name() = 'eml'])</xpath></dialect><dialect><name>csdgm</name><xpath>boolean(/*[local-name() = 'csdgm:metadata'])</xpath></dialect><dialect><name>bdp</name><xpath>boolean(/*[local-name() = 'bdp:metadata'])</xpath></dialect><dialect><name>mercury</name><xpath>boolean(/*[local-name() = 'mercury:metadata'])</xpath></dialect><dialect><name>onedcx</name><xpath>boolean(/*[local-name() = ''])</xpath></dialect></check><check><id>ISO_ExternalRefs_ServiceResourceReference_ISO_ISO-1_DIF_ECHO_DCITE_EML_CSDGM_BDP_Mercury_ONEdcx</id><name>ServiceResourceReferencePresent</name><description>Checks to see if at least one Service Resource Reference concept exists.</description><type>ISO_ExternalRefs</type><level>OPTIONAL</level><environment>python</environment><code><![CDATA[
+def call():
+  global output
+  global status
+ 
+  output = "The concept ServiceResourceReference is present."
+                                        
+  if(ServiceResourceReference is not None and len(str(ServiceResourceReference)) > 0):
+    status = "SUCCESS"
+    return True
+    
+  status = "FAILURE"
+  output = "ServiceResourceReference concept is not present"
+  
+  return False
+      ]]></code><selector><name>ServiceResourceReference</name><xpath>((/MD_Metadata/identificationInfo/SV_ServiceIdentification/coupledResource/SV_CoupledResource/resourceReference/CI_Citation)</xpath></selector><dialect><name>iso</name><xpath>boolean(/*[local-name() = 'MI_Metadata' or local-name() = 'MD_Metadata'])</xpath></dialect><dialect><name>iso-1</name><xpath>boolean(/*[local-name() = 'mdb:MD_Metadata'])</xpath></dialect><dialect><name>dif</name><xpath>boolean(/*[local-name() = 'dif:DIF'])</xpath></dialect><dialect><name>echo</name><xpath>boolean(/*[local-name() = '*'])</xpath></dialect><dialect><name>dcite</name><xpath>boolean(/*[local-name() = 'dcite:resource'])</xpath></dialect><dialect><name>eml</name><xpath>boolean(/*[local-name() = 'eml'])</xpath></dialect><dialect><name>csdgm</name><xpath>boolean(/*[local-name() = 'csdgm:metadata'])</xpath></dialect><dialect><name>bdp</name><xpath>boolean(/*[local-name() = 'bdp:metadata'])</xpath></dialect><dialect><name>mercury</name><xpath>boolean(/*[local-name() = 'mercury:metadata'])</xpath></dialect><dialect><name>onedcx</name><xpath>boolean(/*[local-name() = ''])</xpath></dialect></check><check><id>ISO_ExternalRefs_EvaluationProcedure_ISO_ISO-1_DIF_ECHO_DCITE_EML_CSDGM_BDP_Mercury_ONEdcx</id><name>EvaluationProcedurePresent</name><description>Checks to see if at least one Evaluation Procedure concept exists.</description><type>ISO_ExternalRefs</type><level>OPTIONAL</level><environment>python</environment><code><![CDATA[
+def call():
+  global output
+  global status
+ 
+  output = "The concept EvaluationProcedure is present."
+                                        
+  if(EvaluationProcedure is not None and len(str(EvaluationProcedure)) > 0):
+    status = "SUCCESS"
+    return True
+    
+  status = "FAILURE"
+  output = "EvaluationProcedure concept is not present"
+  
+  return False
+      ]]></code><selector><name>EvaluationProcedure</name><xpath>(/MD_Metadata/dataQualityInfo/DQ_DataQuality/report/DQ_Element/evaluationMethod/DQ_EvaluationMethod/evaluationProcedure/CI_Citation) or (/*/dataQualityInfo/DQ_DataQuality/report/DQ_QuantitativeAttributeAccuracy/evaluationProcedure/CI_Citation)</xpath></selector><dialect><name>iso</name><xpath>boolean(/*[local-name() = 'MI_Metadata' or local-name() = 'MD_Metadata'])</xpath></dialect><dialect><name>iso-1</name><xpath>boolean(/*[local-name() = 'mdb:MD_Metadata'])</xpath></dialect><dialect><name>dif</name><xpath>boolean(/*[local-name() = 'dif:DIF'])</xpath></dialect><dialect><name>echo</name><xpath>boolean(/*[local-name() = '*'])</xpath></dialect><dialect><name>dcite</name><xpath>boolean(/*[local-name() = 'dcite:resource'])</xpath></dialect><dialect><name>eml</name><xpath>boolean(/*[local-name() = 'eml'])</xpath></dialect><dialect><name>csdgm</name><xpath>boolean(/*[local-name() = 'csdgm:metadata'])</xpath></dialect><dialect><name>bdp</name><xpath>boolean(/*[local-name() = 'bdp:metadata'])</xpath></dialect><dialect><name>mercury</name><xpath>boolean(/*[local-name() = 'mercury:metadata'])</xpath></dialect><dialect><name>onedcx</name><xpath>boolean(/*[local-name() = ''])</xpath></dialect></check><check><id>ISO_ExternalRefs_EvaluationReferenceDocument_ISO_ISO-1_DIF_ECHO_DCITE_EML_CSDGM_BDP_Mercury_ONEdcx</id><name>EvaluationReferenceDocumentPresent</name><description>Checks to see if at least one Evaluation Reference Document concept exists.</description><type>ISO_ExternalRefs</type><level>OPTIONAL</level><environment>python</environment><code><![CDATA[
+def call():
+  global output
+  global status
+ 
+  output = "The concept EvaluationReferenceDocument is present."
+                                        
+  if(EvaluationReferenceDocument is not None and len(str(EvaluationReferenceDocument)) > 0):
+    status = "SUCCESS"
+    return True
+    
+  status = "FAILURE"
+  output = "EvaluationReferenceDocument concept is not present"
+  
+  return False
+      ]]></code><selector><name>EvaluationReferenceDocument</name><xpath>((/MD_Metadata/dataQualityInfo/DQ_DataQuality/report/DQ_Element/evaluationMethod/DQ_EvaluationMethod/referenceDoc/CI_Citation)</xpath></selector><dialect><name>iso</name><xpath>boolean(/*[local-name() = 'MI_Metadata' or local-name() = 'MD_Metadata'])</xpath></dialect><dialect><name>iso-1</name><xpath>boolean(/*[local-name() = 'mdb:MD_Metadata'])</xpath></dialect><dialect><name>dif</name><xpath>boolean(/*[local-name() = 'dif:DIF'])</xpath></dialect><dialect><name>echo</name><xpath>boolean(/*[local-name() = '*'])</xpath></dialect><dialect><name>dcite</name><xpath>boolean(/*[local-name() = 'dcite:resource'])</xpath></dialect><dialect><name>eml</name><xpath>boolean(/*[local-name() = 'eml'])</xpath></dialect><dialect><name>csdgm</name><xpath>boolean(/*[local-name() = 'csdgm:metadata'])</xpath></dialect><dialect><name>bdp</name><xpath>boolean(/*[local-name() = 'bdp:metadata'])</xpath></dialect><dialect><name>mercury</name><xpath>boolean(/*[local-name() = 'mercury:metadata'])</xpath></dialect><dialect><name>onedcx</name><xpath>boolean(/*[local-name() = ''])</xpath></dialect></check><check><id>ISO_ExternalRefs_EvaluationSpecification_ISO_ISO-1_DIF_ECHO_DCITE_EML_CSDGM_BDP_Mercury_ONEdcx</id><name>EvaluationSpecificationPresent</name><description>Checks to see if at least one Evaluation Specification concept exists.</description><type>ISO_ExternalRefs</type><level>OPTIONAL</level><environment>python</environment><code><![CDATA[
+def call():
+  global output
+  global status
+ 
+  output = "The concept EvaluationSpecification is present."
+                                        
+  if(EvaluationSpecification is not None and len(str(EvaluationSpecification)) > 0):
+    status = "SUCCESS"
+    return True
+    
+  status = "FAILURE"
+  output = "EvaluationSpecification concept is not present"
+  
+  return False
+      ]]></code><selector><name>EvaluationSpecification</name><xpath>((/MD_Metadata/dataQualityInfo/DQ_DataQuality/report/DQ_Element/result/DQ_ConformanceResult/specification/CI_Citation)</xpath></selector><dialect><name>iso</name><xpath>boolean(/*[local-name() = 'MI_Metadata' or local-name() = 'MD_Metadata'])</xpath></dialect><dialect><name>iso-1</name><xpath>boolean(/*[local-name() = 'mdb:MD_Metadata'])</xpath></dialect><dialect><name>dif</name><xpath>boolean(/*[local-name() = 'dif:DIF'])</xpath></dialect><dialect><name>echo</name><xpath>boolean(/*[local-name() = '*'])</xpath></dialect><dialect><name>dcite</name><xpath>boolean(/*[local-name() = 'dcite:resource'])</xpath></dialect><dialect><name>eml</name><xpath>boolean(/*[local-name() = 'eml'])</xpath></dialect><dialect><name>csdgm</name><xpath>boolean(/*[local-name() = 'csdgm:metadata'])</xpath></dialect><dialect><name>bdp</name><xpath>boolean(/*[local-name() = 'bdp:metadata'])</xpath></dialect><dialect><name>mercury</name><xpath>boolean(/*[local-name() = 'mercury:metadata'])</xpath></dialect><dialect><name>onedcx</name><xpath>boolean(/*[local-name() = ''])</xpath></dialect></check><check><id>ISO_ExternalRefs_StandaloneReportCitation_ISO_ISO-1_DIF_ECHO_DCITE_EML_CSDGM_BDP_Mercury_ONEdcx</id><name>StandaloneReportCitationPresent</name><description>Checks to see if at least one Standalone Report Citation concept exists.</description><type>ISO_ExternalRefs</type><level>OPTIONAL</level><environment>python</environment><code><![CDATA[
+def call():
+  global output
+  global status
+ 
+  output = "The concept StandaloneReportCitation is present."
+                                        
+  if(StandaloneReportCitation is not None and len(str(StandaloneReportCitation)) > 0):
+    status = "SUCCESS"
+    return True
+    
+  status = "FAILURE"
+  output = "StandaloneReportCitation concept is not present"
+  
+  return False
+      ]]></code><selector><name>StandaloneReportCitation</name><xpath>((/MD_Metadata/dataQualityInfo/DQ_DataQuality/standaloneQualityReport)</xpath></selector><dialect><name>iso</name><xpath>boolean(/*[local-name() = 'MI_Metadata' or local-name() = 'MD_Metadata'])</xpath></dialect><dialect><name>iso-1</name><xpath>boolean(/*[local-name() = 'mdb:MD_Metadata'])</xpath></dialect><dialect><name>dif</name><xpath>boolean(/*[local-name() = 'dif:DIF'])</xpath></dialect><dialect><name>echo</name><xpath>boolean(/*[local-name() = '*'])</xpath></dialect><dialect><name>dcite</name><xpath>boolean(/*[local-name() = 'dcite:resource'])</xpath></dialect><dialect><name>eml</name><xpath>boolean(/*[local-name() = 'eml'])</xpath></dialect><dialect><name>csdgm</name><xpath>boolean(/*[local-name() = 'csdgm:metadata'])</xpath></dialect><dialect><name>bdp</name><xpath>boolean(/*[local-name() = 'bdp:metadata'])</xpath></dialect><dialect><name>mercury</name><xpath>boolean(/*[local-name() = 'mercury:metadata'])</xpath></dialect><dialect><name>onedcx</name><xpath>boolean(/*[local-name() = ''])</xpath></dialect></check><check><id>ISO_ExternalRefs_AlgorithmCitation_ISO_ISO-1_DIF_ECHO_DCITE_EML_CSDGM_BDP_Mercury_ONEdcx</id><name>AlgorithmCitationPresent</name><description>Checks to see if at least one Algorithm Citation concept exists.</description><type>ISO_ExternalRefs</type><level>OPTIONAL</level><environment>python</environment><code><![CDATA[
+def call():
+  global output
+  global status
+ 
+  output = "The concept AlgorithmCitation is present."
+                                        
+  if(AlgorithmCitation is not None and len(str(AlgorithmCitation)) > 0):
+    status = "SUCCESS"
+    return True
+    
+  status = "FAILURE"
+  output = "AlgorithmCitation concept is not present"
+  
+  return False
+      ]]></code><selector><name>AlgorithmCitation</name><xpath>((/MD_Metadata/resourceLineage/LI_Lineage/processStep/LE_ProcessStep/processingInformation/LE_Processing/algorithm/LE_Algorithm/citation/CI_Citation)</xpath></selector><dialect><name>iso</name><xpath>boolean(/*[local-name() = 'MI_Metadata' or local-name() = 'MD_Metadata'])</xpath></dialect><dialect><name>iso-1</name><xpath>boolean(/*[local-name() = 'mdb:MD_Metadata'])</xpath></dialect><dialect><name>dif</name><xpath>boolean(/*[local-name() = 'dif:DIF'])</xpath></dialect><dialect><name>echo</name><xpath>boolean(/*[local-name() = '*'])</xpath></dialect><dialect><name>dcite</name><xpath>boolean(/*[local-name() = 'dcite:resource'])</xpath></dialect><dialect><name>eml</name><xpath>boolean(/*[local-name() = 'eml'])</xpath></dialect><dialect><name>csdgm</name><xpath>boolean(/*[local-name() = 'csdgm:metadata'])</xpath></dialect><dialect><name>bdp</name><xpath>boolean(/*[local-name() = 'bdp:metadata'])</xpath></dialect><dialect><name>mercury</name><xpath>boolean(/*[local-name() = 'mercury:metadata'])</xpath></dialect><dialect><name>onedcx</name><xpath>boolean(/*[local-name() = ''])</xpath></dialect></check><check><id>ISO_ExternalRefs_ProcessingSoftwareReference_ISO_ISO-1_DIF_ECHO_DCITE_EML_CSDGM_BDP_Mercury_ONEdcx</id><name>ProcessingSoftwareReferencePresent</name><description>Checks to see if at least one Processing Software Reference concept exists.</description><type>ISO_ExternalRefs</type><level>OPTIONAL</level><environment>python</environment><code><![CDATA[
+def call():
+  global output
+  global status
+ 
+  output = "The concept ProcessingSoftwareReference is present."
+                                        
+  if(ProcessingSoftwareReference is not None and len(str(ProcessingSoftwareReference)) > 0):
+    status = "SUCCESS"
+    return True
+    
+  status = "FAILURE"
+  output = "ProcessingSoftwareReference concept is not present"
+  
+  return False
+      ]]></code><selector><name>ProcessingSoftwareReference</name><xpath>((/MD_Metadata/resourceLineage/LI_Lineage/processStep/LE_ProcessStep/processingInformation/LE_Processing/softwareReference/CI_Citation)</xpath></selector><dialect><name>iso</name><xpath>boolean(/*[local-name() = 'MI_Metadata' or local-name() = 'MD_Metadata'])</xpath></dialect><dialect><name>iso-1</name><xpath>boolean(/*[local-name() = 'mdb:MD_Metadata'])</xpath></dialect><dialect><name>dif</name><xpath>boolean(/*[local-name() = 'dif:DIF'])</xpath></dialect><dialect><name>echo</name><xpath>boolean(/*[local-name() = '*'])</xpath></dialect><dialect><name>dcite</name><xpath>boolean(/*[local-name() = 'dcite:resource'])</xpath></dialect><dialect><name>eml</name><xpath>boolean(/*[local-name() = 'eml'])</xpath></dialect><dialect><name>csdgm</name><xpath>boolean(/*[local-name() = 'csdgm:metadata'])</xpath></dialect><dialect><name>bdp</name><xpath>boolean(/*[local-name() = 'bdp:metadata'])</xpath></dialect><dialect><name>mercury</name><xpath>boolean(/*[local-name() = 'mercury:metadata'])</xpath></dialect><dialect><name>onedcx</name><xpath>boolean(/*[local-name() = ''])</xpath></dialect></check><check><id>ISO_ExternalRefs_ProcessingCitation_ISO_ISO-1_DIF_ECHO_DCITE_EML_CSDGM_BDP_Mercury_ONEdcx</id><name>ProcessingCitationPresent</name><description>Checks to see if at least one Processing Citation concept exists.</description><type>ISO_ExternalRefs</type><level>OPTIONAL</level><environment>python</environment><code><![CDATA[
+def call():
+  global output
+  global status
+ 
+  output = "The concept ProcessingCitation is present."
+                                        
+  if(ProcessingCitation is not None and len(str(ProcessingCitation)) > 0):
+    status = "SUCCESS"
+    return True
+    
+  status = "FAILURE"
+  output = "ProcessingCitation concept is not present"
+  
+  return False
+      ]]></code><selector><name>ProcessingCitation</name><xpath>((/MD_Metadata/resourceLineage/LI_Lineage/processStep/LE_ProcessStep/processingInformation/LE_Processing/documentation/CI_Citation)</xpath></selector><dialect><name>iso</name><xpath>boolean(/*[local-name() = 'MI_Metadata' or local-name() = 'MD_Metadata'])</xpath></dialect><dialect><name>iso-1</name><xpath>boolean(/*[local-name() = 'mdb:MD_Metadata'])</xpath></dialect><dialect><name>dif</name><xpath>boolean(/*[local-name() = 'dif:DIF'])</xpath></dialect><dialect><name>echo</name><xpath>boolean(/*[local-name() = '*'])</xpath></dialect><dialect><name>dcite</name><xpath>boolean(/*[local-name() = 'dcite:resource'])</xpath></dialect><dialect><name>eml</name><xpath>boolean(/*[local-name() = 'eml'])</xpath></dialect><dialect><name>csdgm</name><xpath>boolean(/*[local-name() = 'csdgm:metadata'])</xpath></dialect><dialect><name>bdp</name><xpath>boolean(/*[local-name() = 'bdp:metadata'])</xpath></dialect><dialect><name>mercury</name><xpath>boolean(/*[local-name() = 'mercury:metadata'])</xpath></dialect><dialect><name>onedcx</name><xpath>boolean(/*[local-name() = ''])</xpath></dialect></check><check><id>ISO_ExternalRefs_InstrumentCitation_ISO_ISO-1_DIF_ECHO_DCITE_EML_CSDGM_BDP_Mercury_ONEdcx</id><name>InstrumentCitationPresent</name><description>Checks to see if at least one Instrument Citation concept exists.</description><type>ISO_ExternalRefs</type><level>OPTIONAL</level><environment>python</environment><code><![CDATA[
+def call():
+  global output
+  global status
+ 
+  output = "The concept InstrumentCitation is present."
+                                        
+  if(InstrumentCitation is not None and len(str(InstrumentCitation)) > 0):
+    status = "SUCCESS"
+    return True
+    
+  status = "FAILURE"
+  output = "InstrumentCitation concept is not present"
+  
+  return False
+      ]]></code><selector><name>InstrumentCitation</name><xpath>(/gmi:MI_Metadata/gmi:acquisitionInformation/gmi:MI_AcquisitionInformation/gmi:Instrument/*/gmi:citation/gmi:CI_Citation</xpath></selector><dialect><name>iso</name><xpath>boolean(/*[local-name() = 'MI_Metadata' or local-name() = 'MD_Metadata'])</xpath></dialect><dialect><name>iso-1</name><xpath>boolean(/*[local-name() = 'mdb:MD_Metadata'])</xpath></dialect><dialect><name>dif</name><xpath>boolean(/*[local-name() = 'dif:DIF'])</xpath></dialect><dialect><name>echo</name><xpath>boolean(/*[local-name() = '*'])</xpath></dialect><dialect><name>dcite</name><xpath>boolean(/*[local-name() = 'dcite:resource'])</xpath></dialect><dialect><name>eml</name><xpath>boolean(/*[local-name() = 'eml'])</xpath></dialect><dialect><name>csdgm</name><xpath>boolean(/*[local-name() = 'csdgm:metadata'])</xpath></dialect><dialect><name>bdp</name><xpath>boolean(/*[local-name() = 'bdp:metadata'])</xpath></dialect><dialect><name>mercury</name><xpath>boolean(/*[local-name() = 'mercury:metadata'])</xpath></dialect><dialect><name>onedcx</name><xpath>boolean(/*[local-name() = ''])</xpath></dialect></check><check><id>ISO_ExternalRefs_OperationCitation_ISO_ISO-1_DIF_ECHO_DCITE_EML_CSDGM_BDP_Mercury_ONEdcx</id><name>OperationCitationPresent</name><description>Checks to see if at least one Operation Citation concept exists.</description><type>ISO_ExternalRefs</type><level>OPTIONAL</level><environment>python</environment><code><![CDATA[
+def call():
+  global output
+  global status
+ 
+  output = "The concept OperationCitation is present."
+                                        
+  if(OperationCitation is not None and len(str(OperationCitation)) > 0):
+    status = "SUCCESS"
+    return True
+    
+  status = "FAILURE"
+  output = "OperationCitation concept is not present"
+  
+  return False
+      ]]></code><selector><name>OperationCitation</name><xpath>((/MD_Metadata/acquisitionInformation/MI_AcquisitionInformation/operation/MI_Operation/citation/CI_Citation)</xpath></selector><dialect><name>iso</name><xpath>boolean(/*[local-name() = 'MI_Metadata' or local-name() = 'MD_Metadata'])</xpath></dialect><dialect><name>iso-1</name><xpath>boolean(/*[local-name() = 'mdb:MD_Metadata'])</xpath></dialect><dialect><name>dif</name><xpath>boolean(/*[local-name() = 'dif:DIF'])</xpath></dialect><dialect><name>echo</name><xpath>boolean(/*[local-name() = '*'])</xpath></dialect><dialect><name>dcite</name><xpath>boolean(/*[local-name() = 'dcite:resource'])</xpath></dialect><dialect><name>eml</name><xpath>boolean(/*[local-name() = 'eml'])</xpath></dialect><dialect><name>csdgm</name><xpath>boolean(/*[local-name() = 'csdgm:metadata'])</xpath></dialect><dialect><name>bdp</name><xpath>boolean(/*[local-name() = 'bdp:metadata'])</xpath></dialect><dialect><name>mercury</name><xpath>boolean(/*[local-name() = 'mercury:metadata'])</xpath></dialect><dialect><name>onedcx</name><xpath>boolean(/*[local-name() = ''])</xpath></dialect></check><check><id>ISO_ExternalRefs_PlanCitation_ISO_ISO-1_DIF_ECHO_DCITE_EML_CSDGM_BDP_Mercury_ONEdcx</id><name>PlanCitationPresent</name><description>Checks to see if at least one Plan Citation concept exists.</description><type>ISO_ExternalRefs</type><level>OPTIONAL</level><environment>python</environment><code><![CDATA[
+def call():
+  global output
+  global status
+ 
+  output = "The concept PlanCitation is present."
+                                        
+  if(PlanCitation is not None and len(str(PlanCitation)) > 0):
+    status = "SUCCESS"
+    return True
+    
+  status = "FAILURE"
+  output = "PlanCitation concept is not present"
+  
+  return False
+      ]]></code><selector><name>PlanCitation</name><xpath>((/MD_Metadata/acquisitionInformation/MI_AcquisitionInformation/acquisitionPlan/MI_Plan/citation/CI_Citation)</xpath></selector><dialect><name>iso</name><xpath>boolean(/*[local-name() = 'MI_Metadata' or local-name() = 'MD_Metadata'])</xpath></dialect><dialect><name>iso-1</name><xpath>boolean(/*[local-name() = 'mdb:MD_Metadata'])</xpath></dialect><dialect><name>dif</name><xpath>boolean(/*[local-name() = 'dif:DIF'])</xpath></dialect><dialect><name>echo</name><xpath>boolean(/*[local-name() = '*'])</xpath></dialect><dialect><name>dcite</name><xpath>boolean(/*[local-name() = 'dcite:resource'])</xpath></dialect><dialect><name>eml</name><xpath>boolean(/*[local-name() = 'eml'])</xpath></dialect><dialect><name>csdgm</name><xpath>boolean(/*[local-name() = 'csdgm:metadata'])</xpath></dialect><dialect><name>bdp</name><xpath>boolean(/*[local-name() = 'bdp:metadata'])</xpath></dialect><dialect><name>mercury</name><xpath>boolean(/*[local-name() = 'mercury:metadata'])</xpath></dialect><dialect><name>onedcx</name><xpath>boolean(/*[local-name() = ''])</xpath></dialect></check><check><id>ISO_ExternalRefs_PlatformCitation_ISO_ISO-1_DIF_ECHO_DCITE_EML_CSDGM_BDP_Mercury_ONEdcx</id><name>PlatformCitationPresent</name><description>Checks to see if at least one Platform Citation concept exists.</description><type>ISO_ExternalRefs</type><level>OPTIONAL</level><environment>python</environment><code><![CDATA[
+def call():
+  global output
+  global status
+ 
+  output = "The concept PlatformCitation is present."
+                                        
+  if(PlatformCitation is not None and len(str(PlatformCitation)) > 0):
+    status = "SUCCESS"
+    return True
+    
+  status = "FAILURE"
+  output = "PlatformCitation concept is not present"
+  
+  return False
+      ]]></code><selector><name>PlatformCitation</name><xpath>(/gmi:MI_Metadata/gmi:acquisitionInformation/gmi:MI_AcquisitionInformation/gmi:platform/*/gmi:citation/gmi:CI_Citation</xpath></selector><dialect><name>iso</name><xpath>boolean(/*[local-name() = 'MI_Metadata' or local-name() = 'MD_Metadata'])</xpath></dialect><dialect><name>iso-1</name><xpath>boolean(/*[local-name() = 'mdb:MD_Metadata'])</xpath></dialect><dialect><name>dif</name><xpath>boolean(/*[local-name() = 'dif:DIF'])</xpath></dialect><dialect><name>echo</name><xpath>boolean(/*[local-name() = '*'])</xpath></dialect><dialect><name>dcite</name><xpath>boolean(/*[local-name() = 'dcite:resource'])</xpath></dialect><dialect><name>eml</name><xpath>boolean(/*[local-name() = 'eml'])</xpath></dialect><dialect><name>csdgm</name><xpath>boolean(/*[local-name() = 'csdgm:metadata'])</xpath></dialect><dialect><name>bdp</name><xpath>boolean(/*[local-name() = 'bdp:metadata'])</xpath></dialect><dialect><name>mercury</name><xpath>boolean(/*[local-name() = 'mercury:metadata'])</xpath></dialect><dialect><name>onedcx</name><xpath>boolean(/*[local-name() = ''])</xpath></dialect></check><check><id>ISO_ExternalRefs_RequirementCitation_ISO_ISO-1_DIF_ECHO_DCITE_EML_CSDGM_BDP_Mercury_ONEdcx</id><name>RequirementCitationPresent</name><description>Checks to see if at least one Requirement Citation concept exists.</description><type>ISO_ExternalRefs</type><level>OPTIONAL</level><environment>python</environment><code><![CDATA[
+def call():
+  global output
+  global status
+ 
+  output = "The concept RequirementCitation is present."
+                                        
+  if(RequirementCitation is not None and len(str(RequirementCitation)) > 0):
+    status = "SUCCESS"
+    return True
+    
+  status = "FAILURE"
+  output = "RequirementCitation concept is not present"
+  
+  return False
+      ]]></code><selector><name>RequirementCitation</name><xpath>((/MD_Metadata/acquisitionInformation/MI_AcquisitionInformation/acquisitionRequirement/MI_Requirement/citation/CI_Citation)</xpath></selector><dialect><name>iso</name><xpath>boolean(/*[local-name() = 'MI_Metadata' or local-name() = 'MD_Metadata'])</xpath></dialect><dialect><name>iso-1</name><xpath>boolean(/*[local-name() = 'mdb:MD_Metadata'])</xpath></dialect><dialect><name>dif</name><xpath>boolean(/*[local-name() = 'dif:DIF'])</xpath></dialect><dialect><name>echo</name><xpath>boolean(/*[local-name() = '*'])</xpath></dialect><dialect><name>dcite</name><xpath>boolean(/*[local-name() = 'dcite:resource'])</xpath></dialect><dialect><name>eml</name><xpath>boolean(/*[local-name() = 'eml'])</xpath></dialect><dialect><name>csdgm</name><xpath>boolean(/*[local-name() = 'csdgm:metadata'])</xpath></dialect><dialect><name>bdp</name><xpath>boolean(/*[local-name() = 'bdp:metadata'])</xpath></dialect><dialect><name>mercury</name><xpath>boolean(/*[local-name() = 'mercury:metadata'])</xpath></dialect><dialect><name>onedcx</name><xpath>boolean(/*[local-name() = ''])</xpath></dialect></check></mdq:suite>

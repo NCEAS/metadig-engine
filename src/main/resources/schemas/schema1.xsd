@@ -99,18 +99,18 @@
 
   <xs:simpleType name="level">
     <xs:restriction base="xs:string">
-      <xs:enumeration value="REQUIRED"/>
-      <xs:enumeration value="OPTIONAL"/>
       <xs:enumeration value="INFO"/>
+      <xs:enumeration value="OPTIONAL"/>
+      <xs:enumeration value="REQUIRED"/>
     </xs:restriction>
   </xs:simpleType>
 
   <xs:simpleType name="status">
     <xs:restriction base="xs:string">
-      <xs:enumeration value="SKIP"/>
-      <xs:enumeration value="SUCCESS"/>
-      <xs:enumeration value="FAILURE"/>
       <xs:enumeration value="ERROR"/>
+      <xs:enumeration value="SUCCESS"/>
+      <xs:enumeration value="SKIP"/>
+      <xs:enumeration value="FAILURE"/>
     </xs:restriction>
   </xs:simpleType>
 </xs:schema>

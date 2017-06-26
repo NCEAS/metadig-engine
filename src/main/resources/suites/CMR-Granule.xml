@@ -1,0 +1,676 @@
+<?xml version="1.0" encoding="UTF-8"?><mdq:suite xmlns:mdq="https://nceas.ucsb.edu/mdqe/v1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="https://nceas.ucsb.edu/mdqe/v1 ../schemas/schema1.xsd"><id>CMR-Granule</id><name>CMR-Granule</name><check><id>CMR-Granule_Recommended_MetadataLanguage_ISO_ISO-1_DIF_ECHO_DCITE_EML_CSDGM_BDP_Mercury_ONEdcx</id><name>MetadataLanguagePresent</name><description>Checks to see if at least one Metadata Language concept exists.</description><type>CMR-Granule_Recommended</type><level>OPTIONAL</level><environment>python</environment><code><![CDATA[
+def call():
+  global output
+  global status
+ 
+  output = "The concept MetadataLanguage is present."
+                                        
+  if(MetadataLanguage is not None and len(str(MetadataLanguage)) > 0):
+    status = "SUCCESS"
+    return True
+    
+  status = "FAILURE"
+  output = "MetadataLanguage concept is not present"
+  
+  return False
+      ]]></code><selector><name>MetadataLanguage</name><xpath>(/MD_Metadata/defaultLocale/PT_Locale/language/LanguageCode) or (/*/language//*) or (/*/language/LanguageCode) or (/metadata/metainfo/metstdn) or (/metadata/metainfo/metstdn) or (/metadata/metainfo/metstdn)</xpath></selector><dialect><name>iso</name><xpath>boolean(/*[local-name() = 'MI_Metadata' or local-name() = 'MD_Metadata'])</xpath></dialect><dialect><name>iso-1</name><xpath>boolean(/*[local-name() = 'mdb:MD_Metadata'])</xpath></dialect><dialect><name>dif</name><xpath>boolean(/*[local-name() = 'dif:DIF'])</xpath></dialect><dialect><name>echo</name><xpath>boolean(/*[local-name() = '*'])</xpath></dialect><dialect><name>dcite</name><xpath>boolean(/*[local-name() = 'dcite:resource'])</xpath></dialect><dialect><name>eml</name><xpath>boolean(/*[local-name() = 'eml'])</xpath></dialect><dialect><name>csdgm</name><xpath>boolean(/*[local-name() = 'csdgm:metadata'])</xpath></dialect><dialect><name>bdp</name><xpath>boolean(/*[local-name() = 'bdp:metadata'])</xpath></dialect><dialect><name>mercury</name><xpath>boolean(/*[local-name() = 'mercury:metadata'])</xpath></dialect><dialect><name>onedcx</name><xpath>boolean(/*[local-name() = ''])</xpath></dialect></check><check><id>CMR-Granule_Recommended_ResourceAccessConstraints_ISO_ISO-1_DIF_ECHO_DCITE_EML_CSDGM_BDP_Mercury_ONEdcx</id><name>ResourceAccessConstraintsPresent</name><description>Checks to see if at least one Resource Access Constraints concept exists.</description><type>CMR-Granule_Recommended</type><level>OPTIONAL</level><environment>python</environment><code><![CDATA[
+def call():
+  global output
+  global status
+ 
+  output = "The concept ResourceAccessConstraints is present."
+                                        
+  if(ResourceAccessConstraints is not None and len(str(ResourceAccessConstraints)) > 0):
+    status = "SUCCESS"
+    return True
+    
+  status = "FAILURE"
+  output = "ResourceAccessConstraints concept is not present"
+  
+  return False
+      ]]></code><selector><name>ResourceAccessConstraints</name><xpath>(/MD_Metadata/identificationInfo/*/resourceConstraints/MD_LegalConstraints/accessConstraints//*) or (/MD_Metadata/identificationInfo/*/resourceConstraints/MD_LegalConstraints/otherConstraints//*) or (/*/identificationInfo/*/resourceConstraints/MD_LegalConstraints/accessConstraints/MD_RestrictionCode) or (/*/identificationInfo/*/resourceConstraints/MD_LegalConstraints/otherConstraints//*) or (/*/RestrictionFlag) or (/*/RestrictionComment) or (/*/Visible) or (/DIF/Access_Constraints) or (/metadata/idinfo/accconst) or (/eml/access) or (/metadata/idinfo/accconst) or (/metadata/idinfo/accconst)</xpath></selector><dialect><name>iso</name><xpath>boolean(/*[local-name() = 'MI_Metadata' or local-name() = 'MD_Metadata'])</xpath></dialect><dialect><name>iso-1</name><xpath>boolean(/*[local-name() = 'mdb:MD_Metadata'])</xpath></dialect><dialect><name>dif</name><xpath>boolean(/*[local-name() = 'dif:DIF'])</xpath></dialect><dialect><name>echo</name><xpath>boolean(/*[local-name() = '*'])</xpath></dialect><dialect><name>dcite</name><xpath>boolean(/*[local-name() = 'dcite:resource'])</xpath></dialect><dialect><name>eml</name><xpath>boolean(/*[local-name() = 'eml'])</xpath></dialect><dialect><name>csdgm</name><xpath>boolean(/*[local-name() = 'csdgm:metadata'])</xpath></dialect><dialect><name>bdp</name><xpath>boolean(/*[local-name() = 'bdp:metadata'])</xpath></dialect><dialect><name>mercury</name><xpath>boolean(/*[local-name() = 'mercury:metadata'])</xpath></dialect><dialect><name>onedcx</name><xpath>boolean(/*[local-name() = ''])</xpath></dialect></check><check><id>CMR-Granule_Required_DataDates_ISO_ISO-1_DIF_ECHO_DCITE_EML_CSDGM_BDP_Mercury_ONEdcx</id><name>DataDatesPresent</name><description>Checks to see if at least one Data Dates concept exists.</description><type>CMR-Granule_Required</type><level>REQUIRED</level><environment>python</environment><code><![CDATA[
+def call():
+  global output
+  global status
+ 
+  output = "The concept DataDates is present."
+                                        
+  if(DataDates is not None and len(str(DataDates)) > 0):
+    status = "SUCCESS"
+    return True
+    
+  status = "FAILURE"
+  output = "DataDates concept is not present"
+  
+  return False
+      ]]></code><selector><name>DataDates</name><xpath>(/*/DataGranule/ProductionDateTime) or (/*/DeleteTime) or (/*/InsertTime) or (/*/LastUpdate) or (//MD_DataIdentification/citation/CI_Citation/date/CI_Date[normalize-space(gmd:dateType/CI_DateTypeCode)='creation']/date//*) or (//MD_DataIdentification/citation/CI_Citation/date/CI_Date[normalize-space(gmd:dateType/CI_DateTypeCode)='creation']/dateTime//*) or (//MD_DataIdentification/citation/CI_Citation/date/CI_Date[normalize-space(gmd:dateType/CI_DateTypeCode)='revision']/date//*) or (//MD_DataIdentification/citation/CI_Citation/date/CI_Date[normalize-space(gmd:dateType/CI_DateTypeCode)='revision']/dateTime//*) or (//CI_Citation/date/CI_Date[normalize-space(cit:dateType/CI_DateTypeCode)='creation']/date//*) or (//CI_Citation/date/CI_Date[normalize-space(cit:dateType/CI_DateTypeCode)='lastRevision']/date//*) or (//CI_Citation/date/CI_Date[normalize-space(cit:dateType/CI_DateTypeCode)='nextUpdate']/date//*) or (//CI_Citation/date/CI_Date[normalize-space(cit:dateType/CI_DateTypeCode)='expiry']/date//*)</xpath></selector><dialect><name>iso</name><xpath>boolean(/*[local-name() = 'MI_Metadata' or local-name() = 'MD_Metadata'])</xpath></dialect><dialect><name>iso-1</name><xpath>boolean(/*[local-name() = 'mdb:MD_Metadata'])</xpath></dialect><dialect><name>dif</name><xpath>boolean(/*[local-name() = 'dif:DIF'])</xpath></dialect><dialect><name>echo</name><xpath>boolean(/*[local-name() = '*'])</xpath></dialect><dialect><name>dcite</name><xpath>boolean(/*[local-name() = 'dcite:resource'])</xpath></dialect><dialect><name>eml</name><xpath>boolean(/*[local-name() = 'eml'])</xpath></dialect><dialect><name>csdgm</name><xpath>boolean(/*[local-name() = 'csdgm:metadata'])</xpath></dialect><dialect><name>bdp</name><xpath>boolean(/*[local-name() = 'bdp:metadata'])</xpath></dialect><dialect><name>mercury</name><xpath>boolean(/*[local-name() = 'mercury:metadata'])</xpath></dialect><dialect><name>onedcx</name><xpath>boolean(/*[local-name() = ''])</xpath></dialect></check><check><id>CMR-Granule_Recommended_AdditionalAttributes-ContentInformation_ISO_ISO-1_DIF_ECHO_DCITE_EML_CSDGM_BDP_Mercury_ONEdcx</id><name>AdditionalAttributes-ContentInformationPresent</name><description>Checks to see if at least one Additional Attributes - Content Information concept exists.</description><type>CMR-Granule_Recommended</type><level>OPTIONAL</level><environment>python</environment><code><![CDATA[
+def call():
+  global output
+  global status
+ 
+  output = "The concept AdditionalAttributes-ContentInformation is present."
+                                        
+  if(AdditionalAttributes-ContentInformation is not None and len(str(AdditionalAttributes-ContentInformation)) > 0):
+    status = "SUCCESS"
+    return True
+    
+  status = "FAILURE"
+  output = "AdditionalAttributes-ContentInformation concept is not present"
+  
+  return False
+      ]]></code><selector><name>AdditionalAttributes-ContentInformation</name><xpath>(/*/AdditionalAttributes/AdditionalAttribute//*) or (//contentInfo/MD_CoverageDescription/dimension/MD_Band/otherProperty/Record/AdditionalAttributes/AdditionalAttribute[eos:reference/EOS_AdditionalAttributeDescription/type/EOS_AdditionalAttributeTypeCode='contentInformation']/value//*)</xpath></selector><dialect><name>iso</name><xpath>boolean(/*[local-name() = 'MI_Metadata' or local-name() = 'MD_Metadata'])</xpath></dialect><dialect><name>iso-1</name><xpath>boolean(/*[local-name() = 'mdb:MD_Metadata'])</xpath></dialect><dialect><name>dif</name><xpath>boolean(/*[local-name() = 'dif:DIF'])</xpath></dialect><dialect><name>echo</name><xpath>boolean(/*[local-name() = '*'])</xpath></dialect><dialect><name>dcite</name><xpath>boolean(/*[local-name() = 'dcite:resource'])</xpath></dialect><dialect><name>eml</name><xpath>boolean(/*[local-name() = 'eml'])</xpath></dialect><dialect><name>csdgm</name><xpath>boolean(/*[local-name() = 'csdgm:metadata'])</xpath></dialect><dialect><name>bdp</name><xpath>boolean(/*[local-name() = 'bdp:metadata'])</xpath></dialect><dialect><name>mercury</name><xpath>boolean(/*[local-name() = 'mercury:metadata'])</xpath></dialect><dialect><name>onedcx</name><xpath>boolean(/*[local-name() = ''])</xpath></dialect></check><check><id>CMR-Granule_Recommended_AdditionalAttributes-DescriptiveKeywords_ISO_ISO-1_DIF_ECHO_DCITE_EML_CSDGM_BDP_Mercury_ONEdcx</id><name>AdditionalAttributes-DescriptiveKeywordsPresent</name><description>Checks to see if at least one Additional Attributes - Descriptive Keywords concept exists.</description><type>CMR-Granule_Recommended</type><level>OPTIONAL</level><environment>python</environment><code><![CDATA[
+def call():
+  global output
+  global status
+ 
+  output = "The concept AdditionalAttributes-DescriptiveKeywords is present."
+                                        
+  if(AdditionalAttributes-DescriptiveKeywords is not None and len(str(AdditionalAttributes-DescriptiveKeywords)) > 0):
+    status = "SUCCESS"
+    return True
+    
+  status = "FAILURE"
+  output = "AdditionalAttributes-DescriptiveKeywords concept is not present"
+  
+  return False
+      ]]></code><selector><name>AdditionalAttributes-DescriptiveKeywords</name><xpath>(/*/AdditionalAttributes/AdditionalAttribute//*) or (/*/identificationInfo/*/descriptiveKeywords/MD_Keywords[not(contains(gmd:type/MD_KeywordTypeCode,'project')) and not(contains(gmd:type/MD_KeywordTypeCode,'theme')) and not(contains(gmd:type/MD_KeywordTypeCode,'place')) and not(contains(gmd:type/MD_KeywordTypeCode,'platform')) and not(contains(gmd:type/MD_KeywordTypeCode,'dataCent')) and not(contains(gmd:type/MD_KeywordTypeCode,'discipline')) and not(contains(gmd:type/MD_KeywordTypeCode,'stratum')) and not(contains(gmd:type/MD_KeywordTypeCode,'temporal')) and not(contains(gmd:type/MD_KeywordTypeCode,'featureType')) and not(contains(gmd:type/MD_KeywordTypeCode,'process')) and not(contains(gmd:type/MD_KeywordTypeCode,'product')) and not(contains(gmd:type/MD_KeywordTypeCode,'dataResolution')) and not(contains(gmd:type/MD_KeywordTypeCode,'service')) and not(contains(gmd:type/MD_KeywordTypeCode,'instrument'))]/keyword)</xpath></selector><dialect><name>iso</name><xpath>boolean(/*[local-name() = 'MI_Metadata' or local-name() = 'MD_Metadata'])</xpath></dialect><dialect><name>iso-1</name><xpath>boolean(/*[local-name() = 'mdb:MD_Metadata'])</xpath></dialect><dialect><name>dif</name><xpath>boolean(/*[local-name() = 'dif:DIF'])</xpath></dialect><dialect><name>echo</name><xpath>boolean(/*[local-name() = '*'])</xpath></dialect><dialect><name>dcite</name><xpath>boolean(/*[local-name() = 'dcite:resource'])</xpath></dialect><dialect><name>eml</name><xpath>boolean(/*[local-name() = 'eml'])</xpath></dialect><dialect><name>csdgm</name><xpath>boolean(/*[local-name() = 'csdgm:metadata'])</xpath></dialect><dialect><name>bdp</name><xpath>boolean(/*[local-name() = 'bdp:metadata'])</xpath></dialect><dialect><name>mercury</name><xpath>boolean(/*[local-name() = 'mercury:metadata'])</xpath></dialect><dialect><name>onedcx</name><xpath>boolean(/*[local-name() = ''])</xpath></dialect></check><check><id>CMR-Granule_Recommended_AdditionalAttributes-GeographicIdentifier_ISO_ISO-1_DIF_ECHO_DCITE_EML_CSDGM_BDP_Mercury_ONEdcx</id><name>AdditionalAttributes-GeographicIdentifierPresent</name><description>Checks to see if at least one Additional Attributes - Geographic Identifier concept exists.</description><type>CMR-Granule_Recommended</type><level>OPTIONAL</level><environment>python</environment><code><![CDATA[
+def call():
+  global output
+  global status
+ 
+  output = "The concept AdditionalAttributes-GeographicIdentifier is present."
+                                        
+  if(AdditionalAttributes-GeographicIdentifier is not None and len(str(AdditionalAttributes-GeographicIdentifier)) > 0):
+    status = "SUCCESS"
+    return True
+    
+  status = "FAILURE"
+  output = "AdditionalAttributes-GeographicIdentifier concept is not present"
+  
+  return False
+      ]]></code><selector><name>AdditionalAttributes-GeographicIdentifier</name><xpath>(/*/AdditionalAttributes/AdditionalAttribute//*) or (/*/identificationInfo/*/extent/EX_Extent/geographicElement/EX_GeographicDescription/geographicIdentifier/MD_Identifier/code//*)</xpath></selector><dialect><name>iso</name><xpath>boolean(/*[local-name() = 'MI_Metadata' or local-name() = 'MD_Metadata'])</xpath></dialect><dialect><name>iso-1</name><xpath>boolean(/*[local-name() = 'mdb:MD_Metadata'])</xpath></dialect><dialect><name>dif</name><xpath>boolean(/*[local-name() = 'dif:DIF'])</xpath></dialect><dialect><name>echo</name><xpath>boolean(/*[local-name() = '*'])</xpath></dialect><dialect><name>dcite</name><xpath>boolean(/*[local-name() = 'dcite:resource'])</xpath></dialect><dialect><name>eml</name><xpath>boolean(/*[local-name() = 'eml'])</xpath></dialect><dialect><name>csdgm</name><xpath>boolean(/*[local-name() = 'csdgm:metadata'])</xpath></dialect><dialect><name>bdp</name><xpath>boolean(/*[local-name() = 'bdp:metadata'])</xpath></dialect><dialect><name>mercury</name><xpath>boolean(/*[local-name() = 'mercury:metadata'])</xpath></dialect><dialect><name>onedcx</name><xpath>boolean(/*[local-name() = ''])</xpath></dialect></check><check><id>CMR-Granule_Required_ResourceIdentifier_ISO_ISO-1_DIF_ECHO_DCITE_EML_CSDGM_BDP_Mercury_ONEdcx</id><name>ResourceIdentifierPresent</name><description>Checks to see if at least one Resource Identifier concept exists.</description><type>CMR-Granule_Required</type><level>REQUIRED</level><environment>python</environment><code><![CDATA[
+def call():
+  global output
+  global status
+ 
+  output = "The concept ResourceIdentifier is present."
+                                        
+  if(ResourceIdentifier is not None and len(str(ResourceIdentifier)) > 0):
+    status = "SUCCESS"
+    return True
+    
+  status = "FAILURE"
+  output = "ResourceIdentifier concept is not present"
+  
+  return False
+      ]]></code><selector><name>ResourceIdentifier</name><xpath>(/MD_Metadata/identificationInfo/*/citation/CI_Citation/identifier/MD_Identifier/code//*) or (/*/identificationInfo/*/citation/CI_Citation/identifier/MD_Identifier/code//*) or (/*/DataSetId) or (/*/ShortName | /*/LongName) or (/*/GranuleUR) or (/DIF/Data_Set_Citation/Dataset_DOI) or ( /DIF/Entry_ID/Short_Name) or (/eml/@packageId) or (/resource/identifier | /resource/alternateIdentifiers/alternateIdentifier) or (/metadata/mercury/File_ID) or (/metadata/Local-Control-Number)</xpath></selector><dialect><name>iso</name><xpath>boolean(/*[local-name() = 'MI_Metadata' or local-name() = 'MD_Metadata'])</xpath></dialect><dialect><name>iso-1</name><xpath>boolean(/*[local-name() = 'mdb:MD_Metadata'])</xpath></dialect><dialect><name>dif</name><xpath>boolean(/*[local-name() = 'dif:DIF'])</xpath></dialect><dialect><name>echo</name><xpath>boolean(/*[local-name() = '*'])</xpath></dialect><dialect><name>dcite</name><xpath>boolean(/*[local-name() = 'dcite:resource'])</xpath></dialect><dialect><name>eml</name><xpath>boolean(/*[local-name() = 'eml'])</xpath></dialect><dialect><name>csdgm</name><xpath>boolean(/*[local-name() = 'csdgm:metadata'])</xpath></dialect><dialect><name>bdp</name><xpath>boolean(/*[local-name() = 'bdp:metadata'])</xpath></dialect><dialect><name>mercury</name><xpath>boolean(/*[local-name() = 'mercury:metadata'])</xpath></dialect><dialect><name>onedcx</name><xpath>boolean(/*[local-name() = ''])</xpath></dialect></check><check><id>CMR-Granule_Recommended_AdditionalAttributes-Platform_ISO_ISO-1_DIF_ECHO_DCITE_EML_CSDGM_BDP_Mercury_ONEdcx</id><name>AdditionalAttributes-PlatformPresent</name><description>Checks to see if at least one Additional Attributes - Platform concept exists.</description><type>CMR-Granule_Recommended</type><level>OPTIONAL</level><environment>python</environment><code><![CDATA[
+def call():
+  global output
+  global status
+ 
+  output = "The concept AdditionalAttributes-Platform is present."
+                                        
+  if(AdditionalAttributes-Platform is not None and len(str(AdditionalAttributes-Platform)) > 0):
+    status = "SUCCESS"
+    return True
+    
+  status = "FAILURE"
+  output = "AdditionalAttributes-Platform concept is not present"
+  
+  return False
+      ]]></code><selector><name>AdditionalAttributes-Platform</name><xpath>(/*/AdditionalAttributes/AdditionalAttribute//*) or (//platform/EOS_Platform/otherProperty/Record/AdditionalAttributes/AdditionalAttribute[eos:reference/EOS_AdditionalAttributeDescription/type/EOS_AdditionalAttributeTypeCode='platformInformation']/value//*) or (//platform/*/otherProperty/Record/EOS_AdditionalAttributes/additionalAttribute/EOS_AdditionalAttribute[eos:reference/EOS_AdditionalAttributeDescription/type/EOS_AdditionalAttributeTypeCode='platformInformation']/value//*) or (//platform/EOS_Platform/otherProperty/Record/EOS_AdditionalAttributes/additionalAttribute/EOS_AdditionalAttribute[eos:reference/EOS_AdditionalAttributeDescription/type/EOS_AdditionalAttributeTypeCode='platformInformation']/value//*)</xpath></selector><dialect><name>iso</name><xpath>boolean(/*[local-name() = 'MI_Metadata' or local-name() = 'MD_Metadata'])</xpath></dialect><dialect><name>iso-1</name><xpath>boolean(/*[local-name() = 'mdb:MD_Metadata'])</xpath></dialect><dialect><name>dif</name><xpath>boolean(/*[local-name() = 'dif:DIF'])</xpath></dialect><dialect><name>echo</name><xpath>boolean(/*[local-name() = '*'])</xpath></dialect><dialect><name>dcite</name><xpath>boolean(/*[local-name() = 'dcite:resource'])</xpath></dialect><dialect><name>eml</name><xpath>boolean(/*[local-name() = 'eml'])</xpath></dialect><dialect><name>csdgm</name><xpath>boolean(/*[local-name() = 'csdgm:metadata'])</xpath></dialect><dialect><name>bdp</name><xpath>boolean(/*[local-name() = 'bdp:metadata'])</xpath></dialect><dialect><name>mercury</name><xpath>boolean(/*[local-name() = 'mercury:metadata'])</xpath></dialect><dialect><name>onedcx</name><xpath>boolean(/*[local-name() = ''])</xpath></dialect></check><check><id>CMR-Granule_Required_ParentIdentifier_ISO_ISO-1_DIF_ECHO_DCITE_EML_CSDGM_BDP_Mercury_ONEdcx</id><name>ParentIdentifierPresent</name><description>Checks to see if at least one Parent Identifier concept exists.</description><type>CMR-Granule_Required</type><level>REQUIRED</level><environment>python</environment><code><![CDATA[
+def call():
+  global output
+  global status
+ 
+  output = "The concept ParentIdentifier is present."
+                                        
+  if(ParentIdentifier is not None and len(str(ParentIdentifier)) > 0):
+    status = "SUCCESS"
+    return True
+    
+  status = "FAILURE"
+  output = "ParentIdentifier concept is not present"
+  
+  return False
+      ]]></code><selector><name>ParentIdentifier</name><xpath>(/MD_Metadata/identificationInfo/*/associatedResource/MD_AssociatedResource/name/CI_Citation/identifier/MD_Identifier/code//*) or (/*/identificationInfo/*/aggregationInfo/MD_AggregateInformation[gmd:associationType/DS_AssociationTypeCode='LargerWorkCitation']/aggregateDataSetIdentifier/MD_Identifier/code//*) or (/*/Collection/ShortName) or (/*/Collection/VersionId) or (/*/Collection/DataSetId) or (/*/Collection/EntryId) or (/DIF/Parent_DIF) or (/eml/*/project/@id)</xpath></selector><dialect><name>iso</name><xpath>boolean(/*[local-name() = 'MI_Metadata' or local-name() = 'MD_Metadata'])</xpath></dialect><dialect><name>iso-1</name><xpath>boolean(/*[local-name() = 'mdb:MD_Metadata'])</xpath></dialect><dialect><name>dif</name><xpath>boolean(/*[local-name() = 'dif:DIF'])</xpath></dialect><dialect><name>echo</name><xpath>boolean(/*[local-name() = '*'])</xpath></dialect><dialect><name>dcite</name><xpath>boolean(/*[local-name() = 'dcite:resource'])</xpath></dialect><dialect><name>eml</name><xpath>boolean(/*[local-name() = 'eml'])</xpath></dialect><dialect><name>csdgm</name><xpath>boolean(/*[local-name() = 'csdgm:metadata'])</xpath></dialect><dialect><name>bdp</name><xpath>boolean(/*[local-name() = 'bdp:metadata'])</xpath></dialect><dialect><name>mercury</name><xpath>boolean(/*[local-name() = 'mercury:metadata'])</xpath></dialect><dialect><name>onedcx</name><xpath>boolean(/*[local-name() = ''])</xpath></dialect></check><check><id>CMR-Granule_Recommended_AdditionalAttributes-Instrument_ISO_ISO-1_DIF_ECHO_DCITE_EML_CSDGM_BDP_Mercury_ONEdcx</id><name>AdditionalAttributes-InstrumentPresent</name><description>Checks to see if at least one Additional Attributes - Instrument concept exists.</description><type>CMR-Granule_Recommended</type><level>OPTIONAL</level><environment>python</environment><code><![CDATA[
+def call():
+  global output
+  global status
+ 
+  output = "The concept AdditionalAttributes-Instrument is present."
+                                        
+  if(AdditionalAttributes-Instrument is not None and len(str(AdditionalAttributes-Instrument)) > 0):
+    status = "SUCCESS"
+    return True
+    
+  status = "FAILURE"
+  output = "AdditionalAttributes-Instrument concept is not present"
+  
+  return False
+      ]]></code><selector><name>AdditionalAttributes-Instrument</name><xpath>(/*/AdditionalAttributes/AdditionalAttribute//*) or (//instrument/*/otherProperty/Record/AdditionalAttributes/AdditionalAttribute[/reference/EOS_AdditionalAttributeDescription/type/EOS_AdditionalAttributeTypeCode='instrumentInformation']/value//*) or (//instrument/*/otherProperty/Record/EOS_AdditionalAttributes/additionalAttribute/EOS_AdditionalAttribute[eos:reference/EOS_AdditionalAttributeDescription/type/EOS_AdditionalAttributeTypeCode='instrumentInformation']/value//*) or (//platform/EOS_Platform/instrument/EOS_Instrument/otherProperty/Record/EOS_AdditionalAttributes/additionalAttribute/EOS_AdditionalAttribute[/reference/EOS_AdditionalAttributeDescription/type/EOS_AdditionalAttributeTypeCode='instrumentInformation']/value//*)</xpath></selector><dialect><name>iso</name><xpath>boolean(/*[local-name() = 'MI_Metadata' or local-name() = 'MD_Metadata'])</xpath></dialect><dialect><name>iso-1</name><xpath>boolean(/*[local-name() = 'mdb:MD_Metadata'])</xpath></dialect><dialect><name>dif</name><xpath>boolean(/*[local-name() = 'dif:DIF'])</xpath></dialect><dialect><name>echo</name><xpath>boolean(/*[local-name() = '*'])</xpath></dialect><dialect><name>dcite</name><xpath>boolean(/*[local-name() = 'dcite:resource'])</xpath></dialect><dialect><name>eml</name><xpath>boolean(/*[local-name() = 'eml'])</xpath></dialect><dialect><name>csdgm</name><xpath>boolean(/*[local-name() = 'csdgm:metadata'])</xpath></dialect><dialect><name>bdp</name><xpath>boolean(/*[local-name() = 'bdp:metadata'])</xpath></dialect><dialect><name>mercury</name><xpath>boolean(/*[local-name() = 'mercury:metadata'])</xpath></dialect><dialect><name>onedcx</name><xpath>boolean(/*[local-name() = ''])</xpath></dialect></check><check><id>CMR-Granule_Recommended_AdditionalAttributes-QualityInformation_ISO_ISO-1_DIF_ECHO_DCITE_EML_CSDGM_BDP_Mercury_ONEdcx</id><name>AdditionalAttributes-QualityInformationPresent</name><description>Checks to see if at least one Additional Attributes - Quality Information concept exists.</description><type>CMR-Granule_Recommended</type><level>OPTIONAL</level><environment>python</environment><code><![CDATA[
+def call():
+  global output
+  global status
+ 
+  output = "The concept AdditionalAttributes-QualityInformation is present."
+                                        
+  if(AdditionalAttributes-QualityInformation is not None and len(str(AdditionalAttributes-QualityInformation)) > 0):
+    status = "SUCCESS"
+    return True
+    
+  status = "FAILURE"
+  output = "AdditionalAttributes-QualityInformation concept is not present"
+  
+  return False
+      ]]></code><selector><name>AdditionalAttributes-QualityInformation</name><xpath>(/*/AdditionalAttributes/AdditionalAttribute//*) or (//dataQualityInfo/DQ_DataQuality/report/DQ_QuantitativeAttributeAccuracy/result/DQ_QuantitativeResult/value/Record/AdditionalAttributes/AdditionalAttribute[eos:reference/EOS_AdditionalAttributeDescription/type/EOS_AdditionalAttributeTypeCode='qualityInformation']/value//*)</xpath></selector><dialect><name>iso</name><xpath>boolean(/*[local-name() = 'MI_Metadata' or local-name() = 'MD_Metadata'])</xpath></dialect><dialect><name>iso-1</name><xpath>boolean(/*[local-name() = 'mdb:MD_Metadata'])</xpath></dialect><dialect><name>dif</name><xpath>boolean(/*[local-name() = 'dif:DIF'])</xpath></dialect><dialect><name>echo</name><xpath>boolean(/*[local-name() = '*'])</xpath></dialect><dialect><name>dcite</name><xpath>boolean(/*[local-name() = 'dcite:resource'])</xpath></dialect><dialect><name>eml</name><xpath>boolean(/*[local-name() = 'eml'])</xpath></dialect><dialect><name>csdgm</name><xpath>boolean(/*[local-name() = 'csdgm:metadata'])</xpath></dialect><dialect><name>bdp</name><xpath>boolean(/*[local-name() = 'bdp:metadata'])</xpath></dialect><dialect><name>mercury</name><xpath>boolean(/*[local-name() = 'mercury:metadata'])</xpath></dialect><dialect><name>onedcx</name><xpath>boolean(/*[local-name() = ''])</xpath></dialect></check><check><id>CMR-Granule_Optional_ProducerIdentifier_ISO_ISO-1_DIF_ECHO_DCITE_EML_CSDGM_BDP_Mercury_ONEdcx</id><name>ProducerIdentifierPresent</name><description>Checks to see if at least one Producer Identifier concept exists.</description><type>CMR-Granule_Optional</type><level>OPTIONAL</level><environment>python</environment><code><![CDATA[
+def call():
+  global output
+  global status
+ 
+  output = "The concept ProducerIdentifier is present."
+                                        
+  if(ProducerIdentifier is not None and len(str(ProducerIdentifier)) > 0):
+    status = "SUCCESS"
+    return True
+    
+  status = "FAILURE"
+  output = "ProducerIdentifier concept is not present"
+  
+  return False
+      ]]></code><selector><name>ProducerIdentifier</name><xpath>(/MD_Metadata/identificationInfo/*/citation/CI_Citation/identifier/MD_Identifier/code//*[../../codeSpace//*='ProducerGranuleID']) or (/Granule/DataGranule/ProducerGranuleId) or (//identificationInfo/*/citation/CI_Citation/identifier/MD_Identifier[gmd:description//*='ProducerGranuleId']/code//*)</xpath></selector><dialect><name>iso</name><xpath>boolean(/*[local-name() = 'MI_Metadata' or local-name() = 'MD_Metadata'])</xpath></dialect><dialect><name>iso-1</name><xpath>boolean(/*[local-name() = 'mdb:MD_Metadata'])</xpath></dialect><dialect><name>dif</name><xpath>boolean(/*[local-name() = 'dif:DIF'])</xpath></dialect><dialect><name>echo</name><xpath>boolean(/*[local-name() = '*'])</xpath></dialect><dialect><name>dcite</name><xpath>boolean(/*[local-name() = 'dcite:resource'])</xpath></dialect><dialect><name>eml</name><xpath>boolean(/*[local-name() = 'eml'])</xpath></dialect><dialect><name>csdgm</name><xpath>boolean(/*[local-name() = 'csdgm:metadata'])</xpath></dialect><dialect><name>bdp</name><xpath>boolean(/*[local-name() = 'bdp:metadata'])</xpath></dialect><dialect><name>mercury</name><xpath>boolean(/*[local-name() = 'mercury:metadata'])</xpath></dialect><dialect><name>onedcx</name><xpath>boolean(/*[local-name() = ''])</xpath></dialect></check><check><id>CMR-Granule_Optional_ReprocessingPlanNote_ISO_ISO-1_DIF_ECHO_DCITE_EML_CSDGM_BDP_Mercury_ONEdcx</id><name>ReprocessingPlanNotePresent</name><description>Checks to see if at least one Reprocessing Plan Note concept exists.</description><type>CMR-Granule_Optional</type><level>OPTIONAL</level><environment>python</environment><code><![CDATA[
+def call():
+  global output
+  global status
+ 
+  output = "The concept ReprocessingPlanNote is present."
+                                        
+  if(ReprocessingPlanNote is not None and len(str(ReprocessingPlanNote)) > 0):
+    status = "SUCCESS"
+    return True
+    
+  status = "FAILURE"
+  output = "ReprocessingPlanNote concept is not present"
+  
+  return False
+      ]]></code><selector><name>ReprocessingPlanNote</name><xpath>(/Granule/DataGranule/ReprocessingPlanned) or (/*/metadataMaintenance/MD_MaintenanceInformation/maintenanceNote//*)</xpath></selector><dialect><name>iso</name><xpath>boolean(/*[local-name() = 'MI_Metadata' or local-name() = 'MD_Metadata'])</xpath></dialect><dialect><name>iso-1</name><xpath>boolean(/*[local-name() = 'mdb:MD_Metadata'])</xpath></dialect><dialect><name>dif</name><xpath>boolean(/*[local-name() = 'dif:DIF'])</xpath></dialect><dialect><name>echo</name><xpath>boolean(/*[local-name() = '*'])</xpath></dialect><dialect><name>dcite</name><xpath>boolean(/*[local-name() = 'dcite:resource'])</xpath></dialect><dialect><name>eml</name><xpath>boolean(/*[local-name() = 'eml'])</xpath></dialect><dialect><name>csdgm</name><xpath>boolean(/*[local-name() = 'csdgm:metadata'])</xpath></dialect><dialect><name>bdp</name><xpath>boolean(/*[local-name() = 'bdp:metadata'])</xpath></dialect><dialect><name>mercury</name><xpath>boolean(/*[local-name() = 'mercury:metadata'])</xpath></dialect><dialect><name>onedcx</name><xpath>boolean(/*[local-name() = ''])</xpath></dialect></check><check><id>CMR-Granule_Recommended_BrowseURL_ISO_ISO-1_DIF_ECHO_DCITE_EML_CSDGM_BDP_Mercury_ONEdcx</id><name>BrowseURLPresent</name><description>Checks to see if at least one Browse URL concept exists.</description><type>CMR-Granule_Recommended</type><level>OPTIONAL</level><environment>python</environment><code><![CDATA[
+def call():
+  global output
+  global status
+ 
+  output = "The concept BrowseURL is present."
+                                        
+  if(BrowseURL is not None and len(str(BrowseURL)) > 0):
+    status = "SUCCESS"
+    return True
+    
+  status = "FAILURE"
+  output = "BrowseURL concept is not present"
+  
+  return False
+      ]]></code><selector><name>BrowseURL</name><xpath>(/MD_Metadata/identificationInfo/*/graphicOverview/MD_BrowseGraphic/fileName/Anchor/@xlink:href) or (/*/identificationInfo/*/graphicOverview/MD_BrowseGraphic/fileName/FileName/@src) or (/*/AssociatedBrowseImageUrls/ProviderBrowseUrl/URL) or (//OnlineResources/OnlineResource[Type='Browse'] | //OnlineResources/OnlineResource[Type='BROWSE'] | //OnlineResources/OnlineResource[Type='Thumbnail']) or (/DIF/Multimedia_Sample/URL)</xpath></selector><dialect><name>iso</name><xpath>boolean(/*[local-name() = 'MI_Metadata' or local-name() = 'MD_Metadata'])</xpath></dialect><dialect><name>iso-1</name><xpath>boolean(/*[local-name() = 'mdb:MD_Metadata'])</xpath></dialect><dialect><name>dif</name><xpath>boolean(/*[local-name() = 'dif:DIF'])</xpath></dialect><dialect><name>echo</name><xpath>boolean(/*[local-name() = '*'])</xpath></dialect><dialect><name>dcite</name><xpath>boolean(/*[local-name() = 'dcite:resource'])</xpath></dialect><dialect><name>eml</name><xpath>boolean(/*[local-name() = 'eml'])</xpath></dialect><dialect><name>csdgm</name><xpath>boolean(/*[local-name() = 'csdgm:metadata'])</xpath></dialect><dialect><name>bdp</name><xpath>boolean(/*[local-name() = 'bdp:metadata'])</xpath></dialect><dialect><name>mercury</name><xpath>boolean(/*[local-name() = 'mercury:metadata'])</xpath></dialect><dialect><name>onedcx</name><xpath>boolean(/*[local-name() = ''])</xpath></dialect></check><check><id>CMR-Granule_Recommended_BrowseFormat_ISO_ISO-1_DIF_ECHO_DCITE_EML_CSDGM_BDP_Mercury_ONEdcx</id><name>BrowseFormatPresent</name><description>Checks to see if at least one Browse Format concept exists.</description><type>CMR-Granule_Recommended</type><level>OPTIONAL</level><environment>python</environment><code><![CDATA[
+def call():
+  global output
+  global status
+ 
+  output = "The concept BrowseFormat is present."
+                                        
+  if(BrowseFormat is not None and len(str(BrowseFormat)) > 0):
+    status = "SUCCESS"
+    return True
+    
+  status = "FAILURE"
+  output = "BrowseFormat concept is not present"
+  
+  return False
+      ]]></code><selector><name>BrowseFormat</name><xpath>(/MD_Metadata/identificationInfo/*/graphicOverview/MD_BrowseGraphic/fileType//*) or (/*/identificationInfo/*/graphicOverview/MD_BrowseGraphic/fileType//*) or (/*/AssociatedBrowseImageUrls/ProviderBrowseUrl/MimeType) or (/DIF/Multimedia_Sample/Format) or (/metadata/idinfo/browse/browset) or (/metadata/idinfo/browse/browset)</xpath></selector><dialect><name>iso</name><xpath>boolean(/*[local-name() = 'MI_Metadata' or local-name() = 'MD_Metadata'])</xpath></dialect><dialect><name>iso-1</name><xpath>boolean(/*[local-name() = 'mdb:MD_Metadata'])</xpath></dialect><dialect><name>dif</name><xpath>boolean(/*[local-name() = 'dif:DIF'])</xpath></dialect><dialect><name>echo</name><xpath>boolean(/*[local-name() = '*'])</xpath></dialect><dialect><name>dcite</name><xpath>boolean(/*[local-name() = 'dcite:resource'])</xpath></dialect><dialect><name>eml</name><xpath>boolean(/*[local-name() = 'eml'])</xpath></dialect><dialect><name>csdgm</name><xpath>boolean(/*[local-name() = 'csdgm:metadata'])</xpath></dialect><dialect><name>bdp</name><xpath>boolean(/*[local-name() = 'bdp:metadata'])</xpath></dialect><dialect><name>mercury</name><xpath>boolean(/*[local-name() = 'mercury:metadata'])</xpath></dialect><dialect><name>onedcx</name><xpath>boolean(/*[local-name() = ''])</xpath></dialect></check><check><id>CMR-Granule_Recommended_BrowseDescription_ISO_ISO-1_DIF_ECHO_DCITE_EML_CSDGM_BDP_Mercury_ONEdcx</id><name>BrowseDescriptionPresent</name><description>Checks to see if at least one Browse Description concept exists.</description><type>CMR-Granule_Recommended</type><level>OPTIONAL</level><environment>python</environment><code><![CDATA[
+def call():
+  global output
+  global status
+ 
+  output = "The concept BrowseDescription is present."
+                                        
+  if(BrowseDescription is not None and len(str(BrowseDescription)) > 0):
+    status = "SUCCESS"
+    return True
+    
+  status = "FAILURE"
+  output = "BrowseDescription concept is not present"
+  
+  return False
+      ]]></code><selector><name>BrowseDescription</name><xpath>(/MD_Metadata/identificationInfo/*/graphicOverview/MD_BrowseGraphic/fileDescription//*) or (/*/identificationInfo/*/graphicOverview/MD_BrowseGraphic/fileDescription//*) or (/*/AssociatedBrowseImageUrls/ProviderBrowseUrl/Description) or (/DIF/Multimedia_Sample/Description) or (/metadata/idinfo/browse/browsed) or (/metadata/idinfo/browse/browsed)</xpath></selector><dialect><name>iso</name><xpath>boolean(/*[local-name() = 'MI_Metadata' or local-name() = 'MD_Metadata'])</xpath></dialect><dialect><name>iso-1</name><xpath>boolean(/*[local-name() = 'mdb:MD_Metadata'])</xpath></dialect><dialect><name>dif</name><xpath>boolean(/*[local-name() = 'dif:DIF'])</xpath></dialect><dialect><name>echo</name><xpath>boolean(/*[local-name() = '*'])</xpath></dialect><dialect><name>dcite</name><xpath>boolean(/*[local-name() = 'dcite:resource'])</xpath></dialect><dialect><name>eml</name><xpath>boolean(/*[local-name() = 'eml'])</xpath></dialect><dialect><name>csdgm</name><xpath>boolean(/*[local-name() = 'csdgm:metadata'])</xpath></dialect><dialect><name>bdp</name><xpath>boolean(/*[local-name() = 'bdp:metadata'])</xpath></dialect><dialect><name>mercury</name><xpath>boolean(/*[local-name() = 'mercury:metadata'])</xpath></dialect><dialect><name>onedcx</name><xpath>boolean(/*[local-name() = ''])</xpath></dialect></check><check><id>CMR-Granule_Recommended_BrowseFileSize_ISO_ISO-1_DIF_ECHO_DCITE_EML_CSDGM_BDP_Mercury_ONEdcx</id><name>BrowseFileSizePresent</name><description>Checks to see if at least one Browse File Size concept exists.</description><type>CMR-Granule_Recommended</type><level>OPTIONAL</level><environment>python</environment><code><![CDATA[
+def call():
+  global output
+  global status
+ 
+  output = "The concept BrowseFileSize is present."
+                                        
+  if(BrowseFileSize is not None and len(str(BrowseFileSize)) > 0):
+    status = "SUCCESS"
+    return True
+    
+  status = "FAILURE"
+  output = "BrowseFileSize concept is not present"
+  
+  return False
+      ]]></code><selector><name>BrowseFileSize</name><xpath>(/*/AssociatedBrowseImageUrls/ProviderBrowseUrl/FileSize</xpath></selector><dialect><name>iso</name><xpath>boolean(/*[local-name() = 'MI_Metadata' or local-name() = 'MD_Metadata'])</xpath></dialect><dialect><name>iso-1</name><xpath>boolean(/*[local-name() = 'mdb:MD_Metadata'])</xpath></dialect><dialect><name>dif</name><xpath>boolean(/*[local-name() = 'dif:DIF'])</xpath></dialect><dialect><name>echo</name><xpath>boolean(/*[local-name() = '*'])</xpath></dialect><dialect><name>dcite</name><xpath>boolean(/*[local-name() = 'dcite:resource'])</xpath></dialect><dialect><name>eml</name><xpath>boolean(/*[local-name() = 'eml'])</xpath></dialect><dialect><name>csdgm</name><xpath>boolean(/*[local-name() = 'csdgm:metadata'])</xpath></dialect><dialect><name>bdp</name><xpath>boolean(/*[local-name() = 'bdp:metadata'])</xpath></dialect><dialect><name>mercury</name><xpath>boolean(/*[local-name() = 'mercury:metadata'])</xpath></dialect><dialect><name>onedcx</name><xpath>boolean(/*[local-name() = ''])</xpath></dialect></check><check><id>CMR-Granule_Recommended_ProjectName_ISO_ISO-1_DIF_ECHO_DCITE_EML_CSDGM_BDP_Mercury_ONEdcx</id><name>ProjectNamePresent</name><description>Checks to see if at least one Project Name concept exists.</description><type>CMR-Granule_Recommended</type><level>OPTIONAL</level><environment>python</environment><code><![CDATA[
+def call():
+  global output
+  global status
+ 
+  output = "The concept ProjectName is present."
+                                        
+  if(ProjectName is not None and len(str(ProjectName)) > 0):
+    status = "SUCCESS"
+    return True
+    
+  status = "FAILURE"
+  output = "ProjectName concept is not present"
+  
+  return False
+      ]]></code><selector><name>ProjectName</name><xpath>(/MD_Metadata/identificationInfo/*/associatedResource/MD_AssociatedResource[normalize-space(mri:initiativeType/DS_InitiativeTypeCode)='project']/name/CI_Citation/title//*) or (/MD_Metadata/identificationInfo/*/descriptiveKeywords/MD_Keywords[normalize-space(mri:type/MD_KeywordTypeCode)='project']/keyword//*) or (/*/identificationInfo/*/aggregationInfo/MD_AggregateInformation[normalize-space(gmd:associationType/DS_AssociationTypeCode)='largerWorkCitation' and normalize-space(gmd:initiativeType/DS_InitiativeTypeCode)='project']/aggregateDataSetName/CI_Citation/title//*) or (/*/identificationInfo/*/descriptiveKeywords/MD_Keywords[contains(gmd:type/MD_KeywordTypeCode,'project')]/keyword) or (/MI_Metadata/acquisitionInformation/MI_AcquisitionInformation/operation/MI_Operation/citation/CI_Citation//*) or (/*/Campaigns/Campaign/ShortName) or (/*/Campaigns/Campaign/LongName) or (/DIF/Project/Short_Name) or (/DIF/Project/Long_Name) or (/eml/*/creator/electronicMailAddress) or (/metadata/mercury/Project)</xpath></selector><dialect><name>iso</name><xpath>boolean(/*[local-name() = 'MI_Metadata' or local-name() = 'MD_Metadata'])</xpath></dialect><dialect><name>iso-1</name><xpath>boolean(/*[local-name() = 'mdb:MD_Metadata'])</xpath></dialect><dialect><name>dif</name><xpath>boolean(/*[local-name() = 'dif:DIF'])</xpath></dialect><dialect><name>echo</name><xpath>boolean(/*[local-name() = '*'])</xpath></dialect><dialect><name>dcite</name><xpath>boolean(/*[local-name() = 'dcite:resource'])</xpath></dialect><dialect><name>eml</name><xpath>boolean(/*[local-name() = 'eml'])</xpath></dialect><dialect><name>csdgm</name><xpath>boolean(/*[local-name() = 'csdgm:metadata'])</xpath></dialect><dialect><name>bdp</name><xpath>boolean(/*[local-name() = 'bdp:metadata'])</xpath></dialect><dialect><name>mercury</name><xpath>boolean(/*[local-name() = 'mercury:metadata'])</xpath></dialect><dialect><name>onedcx</name><xpath>boolean(/*[local-name() = ''])</xpath></dialect></check><check><id>CMR-Granule_Recommended_CloudCover_ISO_ISO-1_DIF_ECHO_DCITE_EML_CSDGM_BDP_Mercury_ONEdcx</id><name>CloudCoverPresent</name><description>Checks to see if at least one Cloud Cover concept exists.</description><type>CMR-Granule_Recommended</type><level>OPTIONAL</level><environment>python</environment><code><![CDATA[
+def call():
+  global output
+  global status
+ 
+  output = "The concept CloudCover is present."
+                                        
+  if(CloudCover is not None and len(str(CloudCover)) > 0):
+    status = "SUCCESS"
+    return True
+    
+  status = "FAILURE"
+  output = "CloudCover concept is not present"
+  
+  return False
+      ]]></code><selector><name>CloudCover</name><xpath>(/*/CloudCover) or (/*/contentInfo/MD_ImageDescription/cloudCoverPercentage/Real)</xpath></selector><dialect><name>iso</name><xpath>boolean(/*[local-name() = 'MI_Metadata' or local-name() = 'MD_Metadata'])</xpath></dialect><dialect><name>iso-1</name><xpath>boolean(/*[local-name() = 'mdb:MD_Metadata'])</xpath></dialect><dialect><name>dif</name><xpath>boolean(/*[local-name() = 'dif:DIF'])</xpath></dialect><dialect><name>echo</name><xpath>boolean(/*[local-name() = '*'])</xpath></dialect><dialect><name>dcite</name><xpath>boolean(/*[local-name() = 'dcite:resource'])</xpath></dialect><dialect><name>eml</name><xpath>boolean(/*[local-name() = 'eml'])</xpath></dialect><dialect><name>csdgm</name><xpath>boolean(/*[local-name() = 'csdgm:metadata'])</xpath></dialect><dialect><name>bdp</name><xpath>boolean(/*[local-name() = 'bdp:metadata'])</xpath></dialect><dialect><name>mercury</name><xpath>boolean(/*[local-name() = 'mercury:metadata'])</xpath></dialect><dialect><name>onedcx</name><xpath>boolean(/*[local-name() = ''])</xpath></dialect></check><check><id>CMR-Granule_Recommended_DistributionFormat_ISO_ISO-1_DIF_ECHO_DCITE_EML_CSDGM_BDP_Mercury_ONEdcx</id><name>DistributionFormatPresent</name><description>Checks to see if at least one Distribution Format concept exists.</description><type>CMR-Granule_Recommended</type><level>OPTIONAL</level><environment>python</environment><code><![CDATA[
+def call():
+  global output
+  global status
+ 
+  output = "The concept DistributionFormat is present."
+                                        
+  if(DistributionFormat is not None and len(str(DistributionFormat)) > 0):
+    status = "SUCCESS"
+    return True
+    
+  status = "FAILURE"
+  output = "DistributionFormat concept is not present"
+  
+  return False
+      ]]></code><selector><name>DistributionFormat</name><xpath>(/MD_Metadata/distributionInfo/MD_Distribution/distributionFormat/MD_Format) or (/MD_Metadata/distributionInfo/MD_Distribution/distributor/MD_Distributor/distributorFormat/MD_Format) or (/*/distributionInfo/MD_Distribution/distributor/MD_Distributor/distributorFormat/MD_Format/name//*) or (/*/distributionInfo/MD_Distribution/distributionFormat/MD_Format/name//*) or (/*/DataFormat) or (/DIF/Distribution/Distribution_Format) or (/metadata/distInfo/distributor/distorFormat/formatName) or (/metadata/distinfo/stdorder/digform/digtinfo/formname) or (/eml/*/dataTable/physical/dataFormat) or (/resource/formats/format) or (/metadata/distinfo/distributor/distorFormat/formatName) or (/metadata/distinfo/stdorder/digform/digtinfo/formname) or (/metadata/distinfo/distributor/distorFormat/formatName) or (/metadata/distinfo/stdorder/digform/digtinfo/formname)</xpath></selector><dialect><name>iso</name><xpath>boolean(/*[local-name() = 'MI_Metadata' or local-name() = 'MD_Metadata'])</xpath></dialect><dialect><name>iso-1</name><xpath>boolean(/*[local-name() = 'mdb:MD_Metadata'])</xpath></dialect><dialect><name>dif</name><xpath>boolean(/*[local-name() = 'dif:DIF'])</xpath></dialect><dialect><name>echo</name><xpath>boolean(/*[local-name() = '*'])</xpath></dialect><dialect><name>dcite</name><xpath>boolean(/*[local-name() = 'dcite:resource'])</xpath></dialect><dialect><name>eml</name><xpath>boolean(/*[local-name() = 'eml'])</xpath></dialect><dialect><name>csdgm</name><xpath>boolean(/*[local-name() = 'csdgm:metadata'])</xpath></dialect><dialect><name>bdp</name><xpath>boolean(/*[local-name() = 'bdp:metadata'])</xpath></dialect><dialect><name>mercury</name><xpath>boolean(/*[local-name() = 'mercury:metadata'])</xpath></dialect><dialect><name>onedcx</name><xpath>boolean(/*[local-name() = ''])</xpath></dialect></check><check><id>CMR-Granule_Recommended_TransferSize_ISO_ISO-1_DIF_ECHO_DCITE_EML_CSDGM_BDP_Mercury_ONEdcx</id><name>TransferSizePresent</name><description>Checks to see if at least one Transfer Size concept exists.</description><type>CMR-Granule_Recommended</type><level>OPTIONAL</level><environment>python</environment><code><![CDATA[
+def call():
+  global output
+  global status
+ 
+  output = "The concept TransferSize is present."
+                                        
+  if(TransferSize is not None and len(str(TransferSize)) > 0):
+    status = "SUCCESS"
+    return True
+    
+  status = "FAILURE"
+  output = "TransferSize concept is not present"
+  
+  return False
+      ]]></code><selector><name>TransferSize</name><xpath>(/MD_Metadata/distributionInfo/MD_Distribution/distributionFormat/MD_Format/formatDistributor/MD_Distributor/distributorTransferOptions/MD_DigitalTransferOptions/transferSize/Real) or (/MD_Metadata/distributionInfo/MD_Distribution/distributor/MD_Distributor/distributorTransferOptions/MD_DigitalTransferOptions/transferSize/Real) or (/*/distributionInfo/MD_Distribution/distributionFormat/MD_Format/formatDistributor/MD_Distributor/distributorTransferOptions/MD_DigitalTransferOptions/transferSize/Real) or (/*/distributionInfo/MD_Distribution/distributor/MD_Distributor/distributorTransferOptions/MD_DigitalTransferOptions/transferSize/Real) or (/DIF/Distribution/Distribution_Size) or (/*/DataGranule/SizeMBDataGranule) or (/metadata/distinfo/stdorder/digform/digtinfo/transize) or (/eml/*/physical/size) or (/resource/sizes/size) or (/metadata/distinfo/stdorder/digform/digtinfo/transize) or (/metadata/distinfo/stdorder/digform/digtinfo/transize)</xpath></selector><dialect><name>iso</name><xpath>boolean(/*[local-name() = 'MI_Metadata' or local-name() = 'MD_Metadata'])</xpath></dialect><dialect><name>iso-1</name><xpath>boolean(/*[local-name() = 'mdb:MD_Metadata'])</xpath></dialect><dialect><name>dif</name><xpath>boolean(/*[local-name() = 'dif:DIF'])</xpath></dialect><dialect><name>echo</name><xpath>boolean(/*[local-name() = '*'])</xpath></dialect><dialect><name>dcite</name><xpath>boolean(/*[local-name() = 'dcite:resource'])</xpath></dialect><dialect><name>eml</name><xpath>boolean(/*[local-name() = 'eml'])</xpath></dialect><dialect><name>csdgm</name><xpath>boolean(/*[local-name() = 'csdgm:metadata'])</xpath></dialect><dialect><name>bdp</name><xpath>boolean(/*[local-name() = 'bdp:metadata'])</xpath></dialect><dialect><name>mercury</name><xpath>boolean(/*[local-name() = 'mercury:metadata'])</xpath></dialect><dialect><name>onedcx</name><xpath>boolean(/*[local-name() = ''])</xpath></dialect></check><check><id>CMR-Granule_Recommended_DayNightFlag_ISO_ISO-1_DIF_ECHO_DCITE_EML_CSDGM_BDP_Mercury_ONEdcx</id><name>DayNightFlagPresent</name><description>Checks to see if at least one DayNightFlag concept exists.</description><type>CMR-Granule_Recommended</type><level>OPTIONAL</level><environment>python</environment><code><![CDATA[
+def call():
+  global output
+  global status
+ 
+  output = "The concept DayNightFlag is present."
+                                        
+  if(DayNightFlag is not None and len(str(DayNightFlag)) > 0):
+    status = "SUCCESS"
+    return True
+    
+  status = "FAILURE"
+  output = "DayNightFlag concept is not present"
+  
+  return False
+      ]]></code><selector><name>DayNightFlag</name><xpath>(/*/DataGranule/DayNightFlag) or (//contentInfo/MD_CoverageDescription/dimension/MD_Band/otherProperty/Record/AdditionalAttributes/AdditionalAttribute[eos:reference/EOS_AdditionalAttributeDescription/name//*='DayNightFlag']/value//*) or (//contentInfo/MD_CoverageDescription/dimension/MD_Band/otherProperty/Record/AdditionalAttributes/AdditionalAttribute[eos:reference/EOS_AdditionalAttributeDescription/name//*='DayNightFlag']/value//*)</xpath></selector><dialect><name>iso</name><xpath>boolean(/*[local-name() = 'MI_Metadata' or local-name() = 'MD_Metadata'])</xpath></dialect><dialect><name>iso-1</name><xpath>boolean(/*[local-name() = 'mdb:MD_Metadata'])</xpath></dialect><dialect><name>dif</name><xpath>boolean(/*[local-name() = 'dif:DIF'])</xpath></dialect><dialect><name>echo</name><xpath>boolean(/*[local-name() = '*'])</xpath></dialect><dialect><name>dcite</name><xpath>boolean(/*[local-name() = 'dcite:resource'])</xpath></dialect><dialect><name>eml</name><xpath>boolean(/*[local-name() = 'eml'])</xpath></dialect><dialect><name>csdgm</name><xpath>boolean(/*[local-name() = 'csdgm:metadata'])</xpath></dialect><dialect><name>bdp</name><xpath>boolean(/*[local-name() = 'bdp:metadata'])</xpath></dialect><dialect><name>mercury</name><xpath>boolean(/*[local-name() = 'mercury:metadata'])</xpath></dialect><dialect><name>onedcx</name><xpath>boolean(/*[local-name() = ''])</xpath></dialect></check><check><id>CMR-Granule_Optional_PlaceKeyword_ISO_ISO-1_DIF_ECHO_DCITE_EML_CSDGM_BDP_Mercury_ONEdcx</id><name>PlaceKeywordPresent</name><description>Checks to see if at least one Place Keyword concept exists.</description><type>CMR-Granule_Optional</type><level>OPTIONAL</level><environment>python</environment><code><![CDATA[
+def call():
+  global output
+  global status
+ 
+  output = "The concept PlaceKeyword is present."
+                                        
+  if(PlaceKeyword is not None and len(str(PlaceKeyword)) > 0):
+    status = "SUCCESS"
+    return True
+    
+  status = "FAILURE"
+  output = "PlaceKeyword concept is not present"
+  
+  return False
+      ]]></code><selector><name>PlaceKeyword</name><xpath>(/MD_Metadata/identificationInfo/*/descriptiveKeywords/MD_Keywords[normalize-space(mri:type/MD_KeywordTypeCode)='place']/keyword//*) or (/MD_Metadata/identificationInfo/*/extent/EX_Extent/geographicElement/EX_GeographicDescription/geographicIdentifier/MD_Identifier/code//*) or (/*/identificationInfo/*/descriptiveKeywords/MD_Keywords[contains(gmd:type/MD_KeywordTypeCode,'place')]/keyword) or (/*/Spatial/GranuleLocality/LocalityValue) or (/*/SpatialKeywords/Keyword) or (/DIF/Location/Location_Category) or (/DIF/Location/Location_Type) or (/DIF/Location/Location_Subregion1) or (/DIF/Location/Location_Subregion2) or (/DIF/Location/Location_Subregion3) or (/DIF/Location/Detailed_Location) or (/metadata/idinfo/keywords/place/placekey) or (/eml/*/keywordSet/keyword[@keywordType="place"]) or (/metadata/idinfo/keywords/place/placekey) or (/metadata/mercury/Site_Information/Site) or (/metadata/idinfo/keywords/place/placekey)</xpath></selector><dialect><name>iso</name><xpath>boolean(/*[local-name() = 'MI_Metadata' or local-name() = 'MD_Metadata'])</xpath></dialect><dialect><name>iso-1</name><xpath>boolean(/*[local-name() = 'mdb:MD_Metadata'])</xpath></dialect><dialect><name>dif</name><xpath>boolean(/*[local-name() = 'dif:DIF'])</xpath></dialect><dialect><name>echo</name><xpath>boolean(/*[local-name() = '*'])</xpath></dialect><dialect><name>dcite</name><xpath>boolean(/*[local-name() = 'dcite:resource'])</xpath></dialect><dialect><name>eml</name><xpath>boolean(/*[local-name() = 'eml'])</xpath></dialect><dialect><name>csdgm</name><xpath>boolean(/*[local-name() = 'csdgm:metadata'])</xpath></dialect><dialect><name>bdp</name><xpath>boolean(/*[local-name() = 'bdp:metadata'])</xpath></dialect><dialect><name>mercury</name><xpath>boolean(/*[local-name() = 'mercury:metadata'])</xpath></dialect><dialect><name>onedcx</name><xpath>boolean(/*[local-name() = ''])</xpath></dialect></check><check><id>CMR-Granule_Recommended_InputGranule_ISO_ISO-1_DIF_ECHO_DCITE_EML_CSDGM_BDP_Mercury_ONEdcx</id><name>InputGranulePresent</name><description>Checks to see if at least one Input Granule concept exists.</description><type>CMR-Granule_Recommended</type><level>OPTIONAL</level><environment>python</environment><code><![CDATA[
+def call():
+  global output
+  global status
+ 
+  output = "The concept InputGranule is present."
+                                        
+  if(InputGranule is not None and len(str(InputGranule)) > 0):
+    status = "SUCCESS"
+    return True
+    
+  status = "FAILURE"
+  output = "InputGranule concept is not present"
+  
+  return False
+      ]]></code><selector><name>InputGranule</name><xpath>(/*/InputGranules) or (//source/*/sourceCitation/CI_Citation/title/FileName/@src)</xpath></selector><dialect><name>iso</name><xpath>boolean(/*[local-name() = 'MI_Metadata' or local-name() = 'MD_Metadata'])</xpath></dialect><dialect><name>iso-1</name><xpath>boolean(/*[local-name() = 'mdb:MD_Metadata'])</xpath></dialect><dialect><name>dif</name><xpath>boolean(/*[local-name() = 'dif:DIF'])</xpath></dialect><dialect><name>echo</name><xpath>boolean(/*[local-name() = '*'])</xpath></dialect><dialect><name>dcite</name><xpath>boolean(/*[local-name() = 'dcite:resource'])</xpath></dialect><dialect><name>eml</name><xpath>boolean(/*[local-name() = 'eml'])</xpath></dialect><dialect><name>csdgm</name><xpath>boolean(/*[local-name() = 'csdgm:metadata'])</xpath></dialect><dialect><name>bdp</name><xpath>boolean(/*[local-name() = 'bdp:metadata'])</xpath></dialect><dialect><name>mercury</name><xpath>boolean(/*[local-name() = 'mercury:metadata'])</xpath></dialect><dialect><name>onedcx</name><xpath>boolean(/*[local-name() = ''])</xpath></dialect></check><check><id>CMR-Granule_Recommended_InstrumentShortName_ISO_ISO-1_DIF_ECHO_DCITE_EML_CSDGM_BDP_Mercury_ONEdcx</id><name>InstrumentShortNamePresent</name><description>Checks to see if at least one Instrument Short Name concept exists.</description><type>CMR-Granule_Recommended</type><level>OPTIONAL</level><environment>python</environment><code><![CDATA[
+def call():
+  global output
+  global status
+ 
+  output = "The concept InstrumentShortName is present."
+                                        
+  if(InstrumentShortName is not None and len(str(InstrumentShortName)) > 0):
+    status = "SUCCESS"
+    return True
+    
+  status = "FAILURE"
+  output = "InstrumentShortName concept is not present"
+  
+  return False
+      ]]></code><selector><name>InstrumentShortName</name><xpath>(/MD_Metadata/acquisitionInformation/MI_AcquisitionInformation/instrument/*/identifier/MD_Identifier/code//*) or (//instrument/*/identifier/MD_Identifier/code//*) or (/*/Platforms/Platform/Instruments/Instrument/ShortName) or (/DIF/Sensor_Name/Short_Name)</xpath></selector><dialect><name>iso</name><xpath>boolean(/*[local-name() = 'MI_Metadata' or local-name() = 'MD_Metadata'])</xpath></dialect><dialect><name>iso-1</name><xpath>boolean(/*[local-name() = 'mdb:MD_Metadata'])</xpath></dialect><dialect><name>dif</name><xpath>boolean(/*[local-name() = 'dif:DIF'])</xpath></dialect><dialect><name>echo</name><xpath>boolean(/*[local-name() = '*'])</xpath></dialect><dialect><name>dcite</name><xpath>boolean(/*[local-name() = 'dcite:resource'])</xpath></dialect><dialect><name>eml</name><xpath>boolean(/*[local-name() = 'eml'])</xpath></dialect><dialect><name>csdgm</name><xpath>boolean(/*[local-name() = 'csdgm:metadata'])</xpath></dialect><dialect><name>bdp</name><xpath>boolean(/*[local-name() = 'bdp:metadata'])</xpath></dialect><dialect><name>mercury</name><xpath>boolean(/*[local-name() = 'mercury:metadata'])</xpath></dialect><dialect><name>onedcx</name><xpath>boolean(/*[local-name() = ''])</xpath></dialect></check><check><id>CMR-Granule_Optional_TwoDCoordinateSystem_ISO_ISO-1_DIF_ECHO_DCITE_EML_CSDGM_BDP_Mercury_ONEdcx</id><name>TwoDCoordinateSystemPresent</name><description>Checks to see if at least one TwoDCoordinateSystem concept exists.</description><type>CMR-Granule_Optional</type><level>OPTIONAL</level><environment>python</environment><code><![CDATA[
+def call():
+  global output
+  global status
+ 
+  output = "The concept TwoDCoordinateSystem is present."
+                                        
+  if(TwoDCoordinateSystem is not None and len(str(TwoDCoordinateSystem)) > 0):
+    status = "SUCCESS"
+    return True
+    
+  status = "FAILURE"
+  output = "TwoDCoordinateSystem concept is not present"
+  
+  return False
+      ]]></code><selector><name>TwoDCoordinateSystem</name><xpath>(/MD_Metadata/identificationInfo/*/extent/EX_Extent/geographicElement/EX_GeographicDescription/geographicIdentifier) or (/*/identificationInfo/*/extent/EX_Extent/geographicElement/EX_GeographicDescription/geographicIdentifier) or (/*/TwoDCoordinateSystems//*) or (/Granule/TwoDCoordinateSystem//*)</xpath></selector><dialect><name>iso</name><xpath>boolean(/*[local-name() = 'MI_Metadata' or local-name() = 'MD_Metadata'])</xpath></dialect><dialect><name>iso-1</name><xpath>boolean(/*[local-name() = 'mdb:MD_Metadata'])</xpath></dialect><dialect><name>dif</name><xpath>boolean(/*[local-name() = 'dif:DIF'])</xpath></dialect><dialect><name>echo</name><xpath>boolean(/*[local-name() = '*'])</xpath></dialect><dialect><name>dcite</name><xpath>boolean(/*[local-name() = 'dcite:resource'])</xpath></dialect><dialect><name>eml</name><xpath>boolean(/*[local-name() = 'eml'])</xpath></dialect><dialect><name>csdgm</name><xpath>boolean(/*[local-name() = 'csdgm:metadata'])</xpath></dialect><dialect><name>bdp</name><xpath>boolean(/*[local-name() = 'bdp:metadata'])</xpath></dialect><dialect><name>mercury</name><xpath>boolean(/*[local-name() = 'mercury:metadata'])</xpath></dialect><dialect><name>onedcx</name><xpath>boolean(/*[local-name() = ''])</xpath></dialect></check><check><id>CMR-Granule_Recommended_InstrumentOperationModes_ISO_ISO-1_DIF_ECHO_DCITE_EML_CSDGM_BDP_Mercury_ONEdcx</id><name>InstrumentOperationModesPresent</name><description>Checks to see if at least one Instrument Operation Modes concept exists.</description><type>CMR-Granule_Recommended</type><level>OPTIONAL</level><environment>python</environment><code><![CDATA[
+def call():
+  global output
+  global status
+ 
+  output = "The concept InstrumentOperationModes is present."
+                                        
+  if(InstrumentOperationModes is not None and len(str(InstrumentOperationModes)) > 0):
+    status = "SUCCESS"
+    return True
+    
+  status = "FAILURE"
+  output = "InstrumentOperationModes concept is not present"
+  
+  return False
+      ]]></code><selector><name>InstrumentOperationModes</name><xpath>(/*/Platforms/Platform/Instruments/Instrument/OperationModes) or (//instrument/*/otherProperty/Record/EOS_AdditionalAttributes/additionalAttribute/EOS_AdditionalAttribute[eos:reference/EOS_AdditionalAttributeDescription/name//*='OperationMode']/value//*) or (//instrument/*/otherProperty/Record/EOS_AdditionalAttributes/additionalAttribute/EOS_AdditionalAttribute[eos:reference/EOS_AdditionalAttributeDescription/name//*='OperationMode']/value//*)</xpath></selector><dialect><name>iso</name><xpath>boolean(/*[local-name() = 'MI_Metadata' or local-name() = 'MD_Metadata'])</xpath></dialect><dialect><name>iso-1</name><xpath>boolean(/*[local-name() = 'mdb:MD_Metadata'])</xpath></dialect><dialect><name>dif</name><xpath>boolean(/*[local-name() = 'dif:DIF'])</xpath></dialect><dialect><name>echo</name><xpath>boolean(/*[local-name() = '*'])</xpath></dialect><dialect><name>dcite</name><xpath>boolean(/*[local-name() = 'dcite:resource'])</xpath></dialect><dialect><name>eml</name><xpath>boolean(/*[local-name() = 'eml'])</xpath></dialect><dialect><name>csdgm</name><xpath>boolean(/*[local-name() = 'csdgm:metadata'])</xpath></dialect><dialect><name>bdp</name><xpath>boolean(/*[local-name() = 'bdp:metadata'])</xpath></dialect><dialect><name>mercury</name><xpath>boolean(/*[local-name() = 'mercury:metadata'])</xpath></dialect><dialect><name>onedcx</name><xpath>boolean(/*[local-name() = ''])</xpath></dialect></check><check><id>CMR-Granule_Recommended_InstrumentCharacteristicsName_ISO_ISO-1_DIF_ECHO_DCITE_EML_CSDGM_BDP_Mercury_ONEdcx</id><name>InstrumentCharacteristicsNamePresent</name><description>Checks to see if at least one Instrument Characteristics Name concept exists.</description><type>CMR-Granule_Recommended</type><level>OPTIONAL</level><environment>python</environment><code><![CDATA[
+def call():
+  global output
+  global status
+ 
+  output = "The concept InstrumentCharacteristicsName is present."
+                                        
+  if(InstrumentCharacteristicsName is not None and len(str(InstrumentCharacteristicsName)) > 0):
+    status = "SUCCESS"
+    return True
+    
+  status = "FAILURE"
+  output = "InstrumentCharacteristicsName concept is not present"
+  
+  return False
+      ]]></code><selector><name>InstrumentCharacteristicsName</name><xpath>(/MI_Metadata/acquisitionInformation/MI_AcquisitionInformation/instrument/EOS_Instrument/otherProperty/Record/AdditionalAttributes/AdditionalAttribute/reference/EOS_AdditionalAttributeDescription[eos:type/EOS_AdditionalAttributeTypeCode='instrumentInformation']/name//*) or (//instrument/*/otherProperty/Record/EOS_AdditionalAttributes/additionalAttribute/EOS_AdditionalAttribute/reference/EOS_AdditionalAttributeDescription[eos:type/EOS_AdditionalAttributeTypeCode='instrumentInformation']/name//*) or (//instrument/*/otherProperty/Record/EOS_AdditionalAttributes/additionalAttribute/EOS_AdditionalAttribute/reference/EOS_AdditionalAttributeDescription[eos:type/EOS_AdditionalAttributeTypeCode='instrumentInformation']/name//*) or (//platform/EOS_Platform/instrument/EOS_Instrument/otherProperty/Record/EOS_AdditionalAttributes/additionalAttribute/EOS_AdditionalAttribute/reference/EOS_AdditionalAttributeDescription[eos:type/EOS_AdditionalAttributeTypeCode='instrumentInformation']/name//*) or (/*/Platforms/Platform/Instruments/Instrument/Characteristics/Characteristic/Name)</xpath></selector><dialect><name>iso</name><xpath>boolean(/*[local-name() = 'MI_Metadata' or local-name() = 'MD_Metadata'])</xpath></dialect><dialect><name>iso-1</name><xpath>boolean(/*[local-name() = 'mdb:MD_Metadata'])</xpath></dialect><dialect><name>dif</name><xpath>boolean(/*[local-name() = 'dif:DIF'])</xpath></dialect><dialect><name>echo</name><xpath>boolean(/*[local-name() = '*'])</xpath></dialect><dialect><name>dcite</name><xpath>boolean(/*[local-name() = 'dcite:resource'])</xpath></dialect><dialect><name>eml</name><xpath>boolean(/*[local-name() = 'eml'])</xpath></dialect><dialect><name>csdgm</name><xpath>boolean(/*[local-name() = 'csdgm:metadata'])</xpath></dialect><dialect><name>bdp</name><xpath>boolean(/*[local-name() = 'bdp:metadata'])</xpath></dialect><dialect><name>mercury</name><xpath>boolean(/*[local-name() = 'mercury:metadata'])</xpath></dialect><dialect><name>onedcx</name><xpath>boolean(/*[local-name() = ''])</xpath></dialect></check><check><id>CMR-Granule_Optional_QualityStatement_ISO_ISO-1_DIF_ECHO_DCITE_EML_CSDGM_BDP_Mercury_ONEdcx</id><name>QualityStatementPresent</name><description>Checks to see if at least one Quality Statement concept exists.</description><type>CMR-Granule_Optional</type><level>OPTIONAL</level><environment>python</environment><code><![CDATA[
+def call():
+  global output
+  global status
+ 
+  output = "The concept QualityStatement is present."
+                                        
+  if(QualityStatement is not None and len(str(QualityStatement)) > 0):
+    status = "SUCCESS"
+    return True
+    
+  status = "FAILURE"
+  output = "QualityStatement concept is not present"
+  
+  return False
+      ]]></code><selector><name>QualityStatement</name><xpath>(/MD_Metadata/dataQualityInfo/DQ_DataQuality/standaloneQualityReport/DQ_StandaloneQualityReportInformation//*) or (/MD_Metadata/dataQualityInfo/DQ_DataQuality/report//*) or (/MI_Metadata/dataQualityInfo/DQ_DataQuality/report//*) or (/Collection/Temporal/PrecisionOfSeconds) or (/Granule/MeasuredParameters/MeasuredParameter/QAStats//*) or (/Granule/MeasuredParameters/MeasuredParameter/QAFlags//*) or (/DIF/Quality) or (/metadata/dataqual) or (/eml/methods/qualityControl/description) or (/metadata/dataqual) or (/metadata/dataqual)</xpath></selector><dialect><name>iso</name><xpath>boolean(/*[local-name() = 'MI_Metadata' or local-name() = 'MD_Metadata'])</xpath></dialect><dialect><name>iso-1</name><xpath>boolean(/*[local-name() = 'mdb:MD_Metadata'])</xpath></dialect><dialect><name>dif</name><xpath>boolean(/*[local-name() = 'dif:DIF'])</xpath></dialect><dialect><name>echo</name><xpath>boolean(/*[local-name() = '*'])</xpath></dialect><dialect><name>dcite</name><xpath>boolean(/*[local-name() = 'dcite:resource'])</xpath></dialect><dialect><name>eml</name><xpath>boolean(/*[local-name() = 'eml'])</xpath></dialect><dialect><name>csdgm</name><xpath>boolean(/*[local-name() = 'csdgm:metadata'])</xpath></dialect><dialect><name>bdp</name><xpath>boolean(/*[local-name() = 'bdp:metadata'])</xpath></dialect><dialect><name>mercury</name><xpath>boolean(/*[local-name() = 'mercury:metadata'])</xpath></dialect><dialect><name>onedcx</name><xpath>boolean(/*[local-name() = ''])</xpath></dialect></check><check><id>CMR-Granule_Recommended_InstrumentCharacteristicsValue_ISO_ISO-1_DIF_ECHO_DCITE_EML_CSDGM_BDP_Mercury_ONEdcx</id><name>InstrumentCharacteristicsValuePresent</name><description>Checks to see if at least one Instrument Characteristics Value concept exists.</description><type>CMR-Granule_Recommended</type><level>OPTIONAL</level><environment>python</environment><code><![CDATA[
+def call():
+  global output
+  global status
+ 
+  output = "The concept InstrumentCharacteristicsValue is present."
+                                        
+  if(InstrumentCharacteristicsValue is not None and len(str(InstrumentCharacteristicsValue)) > 0):
+    status = "SUCCESS"
+    return True
+    
+  status = "FAILURE"
+  output = "InstrumentCharacteristicsValue concept is not present"
+  
+  return False
+      ]]></code><selector><name>InstrumentCharacteristicsValue</name><xpath>(/MI_Metadata/acquisitionInformation/MI_AcquisitionInformation/instrument/EOS_Instrument/otherProperty/Record/AdditionalAttributes/AdditionalAttribute/value//*) or (//instrument/*/otherProperty/Record/EOS_AdditionalAttributes/additionalAttribute/EOS_AdditionalAttribute[eos:reference/EOS_AdditionalAttributeDescription/type/EOS_AdditionalAttributeTypeCode='instrumentInformation']/value//*) or (//instrument/*/otherProperty/Record/EOS_AdditionalAttributes/additionalAttribute/EOS_AdditionalAttribute[eos:reference/EOS_AdditionalAttributeDescription/type/EOS_AdditionalAttributeTypeCode='instrumentInformation']/value//*) or (//platform/EOS_Platform/instrument/EOS_Instrument/otherProperty/Record/EOS_AdditionalAttributes/additionalAttribute/EOS_AdditionalAttribute[eos:reference/EOS_AdditionalAttributeDescription/type/EOS_AdditionalAttributeTypeCode='instrumentInformation']/value//*) or (/*/Platforms/Platform/Instruments/Instrument/Characteristics/Characteristic/Value)</xpath></selector><dialect><name>iso</name><xpath>boolean(/*[local-name() = 'MI_Metadata' or local-name() = 'MD_Metadata'])</xpath></dialect><dialect><name>iso-1</name><xpath>boolean(/*[local-name() = 'mdb:MD_Metadata'])</xpath></dialect><dialect><name>dif</name><xpath>boolean(/*[local-name() = 'dif:DIF'])</xpath></dialect><dialect><name>echo</name><xpath>boolean(/*[local-name() = '*'])</xpath></dialect><dialect><name>dcite</name><xpath>boolean(/*[local-name() = 'dcite:resource'])</xpath></dialect><dialect><name>eml</name><xpath>boolean(/*[local-name() = 'eml'])</xpath></dialect><dialect><name>csdgm</name><xpath>boolean(/*[local-name() = 'csdgm:metadata'])</xpath></dialect><dialect><name>bdp</name><xpath>boolean(/*[local-name() = 'bdp:metadata'])</xpath></dialect><dialect><name>mercury</name><xpath>boolean(/*[local-name() = 'mercury:metadata'])</xpath></dialect><dialect><name>onedcx</name><xpath>boolean(/*[local-name() = ''])</xpath></dialect></check><check><id>CMR-Granule_Optional_ProcessStepDescription_ISO_ISO-1_DIF_ECHO_DCITE_EML_CSDGM_BDP_Mercury_ONEdcx</id><name>ProcessStepDescriptionPresent</name><description>Checks to see if at least one Process Step Description concept exists.</description><type>CMR-Granule_Optional</type><level>OPTIONAL</level><environment>python</environment><code><![CDATA[
+def call():
+  global output
+  global status
+ 
+  output = "The concept ProcessStepDescription is present."
+                                        
+  if(ProcessStepDescription is not None and len(str(ProcessStepDescription)) > 0):
+    status = "SUCCESS"
+    return True
+    
+  status = "FAILURE"
+  output = "ProcessStepDescription concept is not present"
+  
+  return False
+      ]]></code><selector><name>ProcessStepDescription</name><xpath>(/MD_Metadata/resourceLineage/LI_Lineage/processStep/LI_ProcessStep/description) or (//processStep/*/description) or (/*/DataGranule/ReprocessingActual) or (/metadata/dataqual/lineage/procstep/procdesc) or (/metadata/dataqual/lineage/procstep/procdesc) or (/metadata/dataqual/lineage/procstep/procdesc)</xpath></selector><dialect><name>iso</name><xpath>boolean(/*[local-name() = 'MI_Metadata' or local-name() = 'MD_Metadata'])</xpath></dialect><dialect><name>iso-1</name><xpath>boolean(/*[local-name() = 'mdb:MD_Metadata'])</xpath></dialect><dialect><name>dif</name><xpath>boolean(/*[local-name() = 'dif:DIF'])</xpath></dialect><dialect><name>echo</name><xpath>boolean(/*[local-name() = '*'])</xpath></dialect><dialect><name>dcite</name><xpath>boolean(/*[local-name() = 'dcite:resource'])</xpath></dialect><dialect><name>eml</name><xpath>boolean(/*[local-name() = 'eml'])</xpath></dialect><dialect><name>csdgm</name><xpath>boolean(/*[local-name() = 'csdgm:metadata'])</xpath></dialect><dialect><name>bdp</name><xpath>boolean(/*[local-name() = 'bdp:metadata'])</xpath></dialect><dialect><name>mercury</name><xpath>boolean(/*[local-name() = 'mercury:metadata'])</xpath></dialect><dialect><name>onedcx</name><xpath>boolean(/*[local-name() = ''])</xpath></dialect></check><check><id>CMR-Granule_Recommended_LocalVersionIdentifier_ISO_ISO-1_DIF_ECHO_DCITE_EML_CSDGM_BDP_Mercury_ONEdcx</id><name>LocalVersionIdentifierPresent</name><description>Checks to see if at least one Local Version Identifier concept exists.</description><type>CMR-Granule_Recommended</type><level>OPTIONAL</level><environment>python</environment><code><![CDATA[
+def call():
+  global output
+  global status
+ 
+  output = "The concept LocalVersionIdentifier is present."
+                                        
+  if(LocalVersionIdentifier is not None and len(str(LocalVersionIdentifier)) > 0):
+    status = "SUCCESS"
+    return True
+    
+  status = "FAILURE"
+  output = "LocalVersionIdentifier concept is not present"
+  
+  return False
+      ]]></code><selector><name>LocalVersionIdentifier</name><xpath>(/MD_Metadata/identificationInfo/*/citation/CI_Citation/identifier/MD_Identifier/code//*[../../codeSpace//*='LocalVersionID']) or (/Granule/DataGranule/LocalVersionId) or (//identificationInfo/*/citation/CI_Citation/identifier/MD_Identifier[gmd:description//*='LocalVersionId']/code//*)</xpath></selector><dialect><name>iso</name><xpath>boolean(/*[local-name() = 'MI_Metadata' or local-name() = 'MD_Metadata'])</xpath></dialect><dialect><name>iso-1</name><xpath>boolean(/*[local-name() = 'mdb:MD_Metadata'])</xpath></dialect><dialect><name>dif</name><xpath>boolean(/*[local-name() = 'dif:DIF'])</xpath></dialect><dialect><name>echo</name><xpath>boolean(/*[local-name() = '*'])</xpath></dialect><dialect><name>dcite</name><xpath>boolean(/*[local-name() = 'dcite:resource'])</xpath></dialect><dialect><name>eml</name><xpath>boolean(/*[local-name() = 'eml'])</xpath></dialect><dialect><name>csdgm</name><xpath>boolean(/*[local-name() = 'csdgm:metadata'])</xpath></dialect><dialect><name>bdp</name><xpath>boolean(/*[local-name() = 'bdp:metadata'])</xpath></dialect><dialect><name>mercury</name><xpath>boolean(/*[local-name() = 'mercury:metadata'])</xpath></dialect><dialect><name>onedcx</name><xpath>boolean(/*[local-name() = ''])</xpath></dialect></check><check><id>CMR-Granule_Optional_ProcessStepTime_ISO_ISO-1_DIF_ECHO_DCITE_EML_CSDGM_BDP_Mercury_ONEdcx</id><name>ProcessStepTimePresent</name><description>Checks to see if at least one Process Step Time concept exists.</description><type>CMR-Granule_Optional</type><level>OPTIONAL</level><environment>python</environment><code><![CDATA[
+def call():
+  global output
+  global status
+ 
+  output = "The concept ProcessStepTime is present."
+                                        
+  if(ProcessStepTime is not None and len(str(ProcessStepTime)) > 0):
+    status = "SUCCESS"
+    return True
+    
+  status = "FAILURE"
+  output = "ProcessStepTime concept is not present"
+  
+  return False
+      ]]></code><selector><name>ProcessStepTime</name><xpath>(/MD_Metadata/resourceLineage/LI_Lineage/processStep/LI_ProcessStep/stepDateTime) or (//processStep/*/dateTime) or (/*/DataGranule/ProductionDateTime) or (/metadata/dataqual/lineage/procstep/procdate) or (/metadata/dataqual/lineage/procstep/procdate) or (/metadata/dataqual/lineage/procstep/procdate)</xpath></selector><dialect><name>iso</name><xpath>boolean(/*[local-name() = 'MI_Metadata' or local-name() = 'MD_Metadata'])</xpath></dialect><dialect><name>iso-1</name><xpath>boolean(/*[local-name() = 'mdb:MD_Metadata'])</xpath></dialect><dialect><name>dif</name><xpath>boolean(/*[local-name() = 'dif:DIF'])</xpath></dialect><dialect><name>echo</name><xpath>boolean(/*[local-name() = '*'])</xpath></dialect><dialect><name>dcite</name><xpath>boolean(/*[local-name() = 'dcite:resource'])</xpath></dialect><dialect><name>eml</name><xpath>boolean(/*[local-name() = 'eml'])</xpath></dialect><dialect><name>csdgm</name><xpath>boolean(/*[local-name() = 'csdgm:metadata'])</xpath></dialect><dialect><name>bdp</name><xpath>boolean(/*[local-name() = 'bdp:metadata'])</xpath></dialect><dialect><name>mercury</name><xpath>boolean(/*[local-name() = 'mercury:metadata'])</xpath></dialect><dialect><name>onedcx</name><xpath>boolean(/*[local-name() = ''])</xpath></dialect></check><check><id>CMR-Granule_Recommended_RelatedURL_ISO_ISO-1_DIF_ECHO_DCITE_EML_CSDGM_BDP_Mercury_ONEdcx</id><name>RelatedURLPresent</name><description>Checks to see if at least one Related URL concept exists.</description><type>CMR-Granule_Recommended</type><level>OPTIONAL</level><environment>python</environment><code><![CDATA[
+def call():
+  global output
+  global status
+ 
+  output = "The concept RelatedURL is present."
+                                        
+  if(RelatedURL is not None and len(str(RelatedURL)) > 0):
+    status = "SUCCESS"
+    return True
+    
+  status = "FAILURE"
+  output = "RelatedURL concept is not present"
+  
+  return False
+      ]]></code><selector><name>RelatedURL</name><xpath>(/*/Related_URL/URL) or (/*/Multimedia_Sample/URL) or (/*/OnlineAccessURLs/OnlineAccessURL/URL) or (/*/OnlineResources/OnlineResource/URL) or (/*/AssociatedBrowseImages) or (/*/AssociatedBrowseImageUrls) or (/*/distributionInfo/MD_Distribution/distributor/MD_Distributor/distributorTransferOptions/MD_DigitalTransferOptions/onLine/CI_OnlineResource[not(contains(gmd:function/CI_OnLineFunctionCode,'download'))]) or (/*/distributionInfo/MD_Distribution/transferOptions/MD_DigitalTransferOptions/onLine/CI_OnlineResource[not(contains(gmd:function/CI_OnLineFunctionCode,'download'))]) or (/*/identificationInfo/*/graphicOverview/MD_BrowseGraphic/fileName//*) or (/*/identificationInfo/*/graphicOverview/MD_BrowseGraphic/fileName//*) or (//MD_DigitalTransferOptions/onLine/CI_OnlineResource/linkage//*) or (/MD_Metadata/identificationInfo/*/graphicOverview/MD_BrowseGraphic/fileName//*)</xpath></selector><dialect><name>iso</name><xpath>boolean(/*[local-name() = 'MI_Metadata' or local-name() = 'MD_Metadata'])</xpath></dialect><dialect><name>iso-1</name><xpath>boolean(/*[local-name() = 'mdb:MD_Metadata'])</xpath></dialect><dialect><name>dif</name><xpath>boolean(/*[local-name() = 'dif:DIF'])</xpath></dialect><dialect><name>echo</name><xpath>boolean(/*[local-name() = '*'])</xpath></dialect><dialect><name>dcite</name><xpath>boolean(/*[local-name() = 'dcite:resource'])</xpath></dialect><dialect><name>eml</name><xpath>boolean(/*[local-name() = 'eml'])</xpath></dialect><dialect><name>csdgm</name><xpath>boolean(/*[local-name() = 'csdgm:metadata'])</xpath></dialect><dialect><name>bdp</name><xpath>boolean(/*[local-name() = 'bdp:metadata'])</xpath></dialect><dialect><name>mercury</name><xpath>boolean(/*[local-name() = 'mercury:metadata'])</xpath></dialect><dialect><name>onedcx</name><xpath>boolean(/*[local-name() = ''])</xpath></dialect></check><check><id>CMR-Granule_Optional_PGEName_ISO_ISO-1_DIF_ECHO_DCITE_EML_CSDGM_BDP_Mercury_ONEdcx</id><name>PGENamePresent</name><description>Checks to see if at least one PGE Name concept exists.</description><type>CMR-Granule_Optional</type><level>OPTIONAL</level><environment>python</environment><code><![CDATA[
+def call():
+  global output
+  global status
+ 
+  output = "The concept PGEName is present."
+                                        
+  if(PGEName is not None and len(str(PGEName)) > 0):
+    status = "SUCCESS"
+    return True
+    
+  status = "FAILURE"
+  output = "PGEName concept is not present"
+  
+  return False
+      ]]></code><selector><name>PGEName</name><xpath>(/*/PGEVersionClass/PGEName) or (//processStep/LE_ProcessStep/processingInformation/EOS_Processing/identifier/MD_Identifier/description//*)</xpath></selector><dialect><name>iso</name><xpath>boolean(/*[local-name() = 'MI_Metadata' or local-name() = 'MD_Metadata'])</xpath></dialect><dialect><name>iso-1</name><xpath>boolean(/*[local-name() = 'mdb:MD_Metadata'])</xpath></dialect><dialect><name>dif</name><xpath>boolean(/*[local-name() = 'dif:DIF'])</xpath></dialect><dialect><name>echo</name><xpath>boolean(/*[local-name() = '*'])</xpath></dialect><dialect><name>dcite</name><xpath>boolean(/*[local-name() = 'dcite:resource'])</xpath></dialect><dialect><name>eml</name><xpath>boolean(/*[local-name() = 'eml'])</xpath></dialect><dialect><name>csdgm</name><xpath>boolean(/*[local-name() = 'csdgm:metadata'])</xpath></dialect><dialect><name>bdp</name><xpath>boolean(/*[local-name() = 'bdp:metadata'])</xpath></dialect><dialect><name>mercury</name><xpath>boolean(/*[local-name() = 'mercury:metadata'])</xpath></dialect><dialect><name>onedcx</name><xpath>boolean(/*[local-name() = ''])</xpath></dialect></check><check><id>CMR-Granule_Optional_PGEVersion_ISO_ISO-1_DIF_ECHO_DCITE_EML_CSDGM_BDP_Mercury_ONEdcx</id><name>PGEVersionPresent</name><description>Checks to see if at least one PGE Version concept exists.</description><type>CMR-Granule_Optional</type><level>OPTIONAL</level><environment>python</environment><code><![CDATA[
+def call():
+  global output
+  global status
+ 
+  output = "The concept PGEVersion is present."
+                                        
+  if(PGEVersion is not None and len(str(PGEVersion)) > 0):
+    status = "SUCCESS"
+    return True
+    
+  status = "FAILURE"
+  output = "PGEVersion concept is not present"
+  
+  return False
+      ]]></code><selector><name>PGEVersion</name><xpath>(/*/PGEVersionClass/PGEVersion) or (//processStep/LE_ProcessStep/processingInformation/EOS_Processing/identifier/MD_Identifier/code//*)</xpath></selector><dialect><name>iso</name><xpath>boolean(/*[local-name() = 'MI_Metadata' or local-name() = 'MD_Metadata'])</xpath></dialect><dialect><name>iso-1</name><xpath>boolean(/*[local-name() = 'mdb:MD_Metadata'])</xpath></dialect><dialect><name>dif</name><xpath>boolean(/*[local-name() = 'dif:DIF'])</xpath></dialect><dialect><name>echo</name><xpath>boolean(/*[local-name() = '*'])</xpath></dialect><dialect><name>dcite</name><xpath>boolean(/*[local-name() = 'dcite:resource'])</xpath></dialect><dialect><name>eml</name><xpath>boolean(/*[local-name() = 'eml'])</xpath></dialect><dialect><name>csdgm</name><xpath>boolean(/*[local-name() = 'csdgm:metadata'])</xpath></dialect><dialect><name>bdp</name><xpath>boolean(/*[local-name() = 'bdp:metadata'])</xpath></dialect><dialect><name>mercury</name><xpath>boolean(/*[local-name() = 'mercury:metadata'])</xpath></dialect><dialect><name>onedcx</name><xpath>boolean(/*[local-name() = ''])</xpath></dialect></check><check><id>CMR-Granule_Recommended_PlatformShortName_ISO_ISO-1_DIF_ECHO_DCITE_EML_CSDGM_BDP_Mercury_ONEdcx</id><name>PlatformShortNamePresent</name><description>Checks to see if at least one Platform Short Name concept exists.</description><type>CMR-Granule_Recommended</type><level>OPTIONAL</level><environment>python</environment><code><![CDATA[
+def call():
+  global output
+  global status
+ 
+  output = "The concept PlatformShortName is present."
+                                        
+  if(PlatformShortName is not None and len(str(PlatformShortName)) > 0):
+    status = "SUCCESS"
+    return True
+    
+  status = "FAILURE"
+  output = "PlatformShortName concept is not present"
+  
+  return False
+      ]]></code><selector><name>PlatformShortName</name><xpath>(/MD_Metadata/acquisitionInformation/MI_AcquisitionInformation/platform/*/identifier/MD_Identifier/code//*) or (//platform/*/identifier/MD_Identifier/code//*) or (/*/Platforms/Platform/ShortName) or (/DIF/Source_Name/Short_Name)</xpath></selector><dialect><name>iso</name><xpath>boolean(/*[local-name() = 'MI_Metadata' or local-name() = 'MD_Metadata'])</xpath></dialect><dialect><name>iso-1</name><xpath>boolean(/*[local-name() = 'mdb:MD_Metadata'])</xpath></dialect><dialect><name>dif</name><xpath>boolean(/*[local-name() = 'dif:DIF'])</xpath></dialect><dialect><name>echo</name><xpath>boolean(/*[local-name() = '*'])</xpath></dialect><dialect><name>dcite</name><xpath>boolean(/*[local-name() = 'dcite:resource'])</xpath></dialect><dialect><name>eml</name><xpath>boolean(/*[local-name() = 'eml'])</xpath></dialect><dialect><name>csdgm</name><xpath>boolean(/*[local-name() = 'csdgm:metadata'])</xpath></dialect><dialect><name>bdp</name><xpath>boolean(/*[local-name() = 'bdp:metadata'])</xpath></dialect><dialect><name>mercury</name><xpath>boolean(/*[local-name() = 'mercury:metadata'])</xpath></dialect><dialect><name>onedcx</name><xpath>boolean(/*[local-name() = ''])</xpath></dialect></check><check><id>CMR-Granule_Recommended_PlatformOrbitInformation_ISO_ISO-1_DIF_ECHO_DCITE_EML_CSDGM_BDP_Mercury_ONEdcx</id><name>PlatformOrbitInformationPresent</name><description>Checks to see if at least one Platform Orbit Information concept exists.</description><type>CMR-Granule_Recommended</type><level>OPTIONAL</level><environment>python</environment><code><![CDATA[
+def call():
+  global output
+  global status
+ 
+  output = "The concept PlatformOrbitInformation is present."
+                                        
+  if(PlatformOrbitInformation is not None and len(str(PlatformOrbitInformation)) > 0):
+    status = "SUCCESS"
+    return True
+    
+  status = "FAILURE"
+  output = "PlatformOrbitInformation concept is not present"
+  
+  return False
+      ]]></code><selector><name>PlatformOrbitInformation</name><xpath>(/*/OrbitCalculatedSpatialDomains/OrbitCalculatedSpatialDomain/OrbitModelName) or (/*/OrbitCalculatedSpatialDomains/OrbitCalculatedSpatialDomain/StartOrbitNumber) or (/*/OrbitCalculatedSpatialDomains/OrbitCalculatedSpatialDomain/StopOrbitNumber) or (/*/OrbitCalculatedSpatialDomains/OrbitCalculatedSpatialDomain/EquatorCrossingLongitude) or (/*/OrbitCalculatedSpatialDomains/OrbitCalculatedSpatialDomain/EquatorCrossingLatitude) or (/*/AdditionalAttributes/AdditionalAttribute//*) or (//platform/EOS_Platform/otherProperty/Record/EOS_AdditionalAttributes/additionalAttribute/EOS_AdditionalAttribute[eos:reference/EOS_AdditionalAttributeDescription/name//*='OrbitalModelName']/value//*) or (//platform/EOS_Platform/otherProperty/Record/EOS_AdditionalAttributes/additionalAttribute/EOS_AdditionalAttribute[eos:reference/EOS_AdditionalAttributeDescription/name//*='OrbitNumber']/value//*) or (//platform/EOS_Platform/otherProperty/Record/EOS_AdditionalAttributes/additionalAttribute/EOS_AdditionalAttribute[eos:reference/EOS_AdditionalAttributeDescription/name//*='StartOrbitNumber']/value//*) or (//platform/EOS_Platform/otherProperty/Record/EOS_AdditionalAttributes/additionalAttribute/EOS_AdditionalAttribute[eos:reference/EOS_AdditionalAttributeDescription/name//*='StopOrbitNumber']/value//*) or (//platform/EOS_Platform/otherProperty/Record/EOS_AdditionalAttributes/additionalAttribute/EOS_AdditionalAttribute[eos:reference/EOS_AdditionalAttributeDescription/name//*='EquatorCrossingLongitude']/value//*) or (//platform/EOS_Platform/otherProperty/Record/EOS_AdditionalAttributes/additionalAttribute/EOS_AdditionalAttribute[eos:reference/EOS_AdditionalAttributeDescription/name//*='EquatorCrossingDateTime']/value//*)</xpath></selector><dialect><name>iso</name><xpath>boolean(/*[local-name() = 'MI_Metadata' or local-name() = 'MD_Metadata'])</xpath></dialect><dialect><name>iso-1</name><xpath>boolean(/*[local-name() = 'mdb:MD_Metadata'])</xpath></dialect><dialect><name>dif</name><xpath>boolean(/*[local-name() = 'dif:DIF'])</xpath></dialect><dialect><name>echo</name><xpath>boolean(/*[local-name() = '*'])</xpath></dialect><dialect><name>dcite</name><xpath>boolean(/*[local-name() = 'dcite:resource'])</xpath></dialect><dialect><name>eml</name><xpath>boolean(/*[local-name() = 'eml'])</xpath></dialect><dialect><name>csdgm</name><xpath>boolean(/*[local-name() = 'csdgm:metadata'])</xpath></dialect><dialect><name>bdp</name><xpath>boolean(/*[local-name() = 'bdp:metadata'])</xpath></dialect><dialect><name>mercury</name><xpath>boolean(/*[local-name() = 'mercury:metadata'])</xpath></dialect><dialect><name>onedcx</name><xpath>boolean(/*[local-name() = ''])</xpath></dialect></check><check><id>CMR-Granule_Recommended_SpatialExtent_ISO_ISO-1_DIF_ECHO_DCITE_EML_CSDGM_BDP_Mercury_ONEdcx</id><name>SpatialExtentPresent</name><description>Checks to see if at least one Spatial Extent concept exists.</description><type>CMR-Granule_Recommended</type><level>OPTIONAL</level><environment>python</environment><code><![CDATA[
+def call():
+  global output
+  global status
+ 
+  output = "The concept SpatialExtent is present."
+                                        
+  if(SpatialExtent is not None and len(str(SpatialExtent)) > 0):
+    status = "SUCCESS"
+    return True
+    
+  status = "FAILURE"
+  output = "SpatialExtent concept is not present"
+  
+  return False
+      ]]></code><selector><name>SpatialExtent</name><xpath>(/MD_Metadata/identificationInfo/MD_DataIdentification/extent/EX_Extent/geographicElement//*) or (/*/identificationInfo/*/extent/EX_Extent/geographicElement) or (/*/Spatial/HorizontalSpatialDomain//*) or (/*/VerticalSpatialDomain//*) or (/*/Spatial[SpatialCoverageType='Orbit'] | /*/Spatial[GranuleSpatialRepresentation='ORBIT']) or (/*/OrbitCalculatedSpatialDomains/OrbitCalculatedSpatialDomain//*) or (/DIF/Spatial_Coverage//*) or (/metadata/idinfo/spdom/bounding) or (/eml/*/coverage/geographicCoverage) or (/resource/geoLocations/geoLocation) or (/metadata/idinfo/spdom/bounding) or (/metadata/mercury/Spatial_Extent) or (/metadata/idinfo/spdom/bounding)</xpath></selector><dialect><name>iso</name><xpath>boolean(/*[local-name() = 'MI_Metadata' or local-name() = 'MD_Metadata'])</xpath></dialect><dialect><name>iso-1</name><xpath>boolean(/*[local-name() = 'mdb:MD_Metadata'])</xpath></dialect><dialect><name>dif</name><xpath>boolean(/*[local-name() = 'dif:DIF'])</xpath></dialect><dialect><name>echo</name><xpath>boolean(/*[local-name() = '*'])</xpath></dialect><dialect><name>dcite</name><xpath>boolean(/*[local-name() = 'dcite:resource'])</xpath></dialect><dialect><name>eml</name><xpath>boolean(/*[local-name() = 'eml'])</xpath></dialect><dialect><name>csdgm</name><xpath>boolean(/*[local-name() = 'csdgm:metadata'])</xpath></dialect><dialect><name>bdp</name><xpath>boolean(/*[local-name() = 'bdp:metadata'])</xpath></dialect><dialect><name>mercury</name><xpath>boolean(/*[local-name() = 'mercury:metadata'])</xpath></dialect><dialect><name>onedcx</name><xpath>boolean(/*[local-name() = ''])</xpath></dialect></check><check><id>CMR-Granule_Recommended_TemporalExtent_ISO_ISO-1_DIF_ECHO_DCITE_EML_CSDGM_BDP_Mercury_ONEdcx</id><name>TemporalExtentPresent</name><description>Checks to see if at least one Temporal Extent concept exists.</description><type>CMR-Granule_Recommended</type><level>OPTIONAL</level><environment>python</environment><code><![CDATA[
+def call():
+  global output
+  global status
+ 
+  output = "The concept TemporalExtent is present."
+                                        
+  if(TemporalExtent is not None and len(str(TemporalExtent)) > 0):
+    status = "SUCCESS"
+    return True
+    
+  status = "FAILURE"
+  output = "TemporalExtent concept is not present"
+  
+  return False
+      ]]></code><selector><name>TemporalExtent</name><xpath>(/*/MD_DataIdentification/extent/EX_Extent/temporalElement/EX_TemporalExtent//*) or (/*/identificationInfo/*/extent/EX_Extent/temporalElement/EX_TemporalExtent//*) or (/*/Temporal//*) or (/*/Temporal_Coverage//*) or (/metadata/idinfo/timeperd/timeinfo/rngdates) or (/eml/*/coverage/temporalCoverage) or (/metadata/idinfo/timeperd/timeinfo/rngdates) or (/metadata/mercury[mercury:begdate and mercury:enddate]) or (/metadata/idinfo/timeperd/timeinfo/rngdates)</xpath></selector><dialect><name>iso</name><xpath>boolean(/*[local-name() = 'MI_Metadata' or local-name() = 'MD_Metadata'])</xpath></dialect><dialect><name>iso-1</name><xpath>boolean(/*[local-name() = 'mdb:MD_Metadata'])</xpath></dialect><dialect><name>dif</name><xpath>boolean(/*[local-name() = 'dif:DIF'])</xpath></dialect><dialect><name>echo</name><xpath>boolean(/*[local-name() = '*'])</xpath></dialect><dialect><name>dcite</name><xpath>boolean(/*[local-name() = 'dcite:resource'])</xpath></dialect><dialect><name>eml</name><xpath>boolean(/*[local-name() = 'eml'])</xpath></dialect><dialect><name>csdgm</name><xpath>boolean(/*[local-name() = 'csdgm:metadata'])</xpath></dialect><dialect><name>bdp</name><xpath>boolean(/*[local-name() = 'bdp:metadata'])</xpath></dialect><dialect><name>mercury</name><xpath>boolean(/*[local-name() = 'mercury:metadata'])</xpath></dialect><dialect><name>onedcx</name><xpath>boolean(/*[local-name() = ''])</xpath></dialect></check><check><id>CMR-Granule_Optional_PlatformCharacteristicsName_ISO_ISO-1_DIF_ECHO_DCITE_EML_CSDGM_BDP_Mercury_ONEdcx</id><name>PlatformCharacteristicsNamePresent</name><description>Checks to see if at least one Platform Characteristics Name concept exists.</description><type>CMR-Granule_Optional</type><level>OPTIONAL</level><environment>python</environment><code><![CDATA[
+def call():
+  global output
+  global status
+ 
+  output = "The concept PlatformCharacteristicsName is present."
+                                        
+  if(PlatformCharacteristicsName is not None and len(str(PlatformCharacteristicsName)) > 0):
+    status = "SUCCESS"
+    return True
+    
+  status = "FAILURE"
+  output = "PlatformCharacteristicsName concept is not present"
+  
+  return False
+      ]]></code><selector><name>PlatformCharacteristicsName</name><xpath>(/MI_Metadata/acquisitionInformation/MI_AcquisitionInformation/platform/EOS_Platform/otherProperty/Record/AdditionalAttributes/AdditionalAttribute/reference/EOS_AdditionalAttributeDescription[eos:type/EOS_AdditionalAttributeTypeCode='platformInformation']/name//*) or (//platform/*/otherProperty/Record/EOS_AdditionalAttributes/additionalAttribute/EOS_AdditionalAttribute/reference/EOS_AdditionalAttributeDescription[eos:type/EOS_AdditionalAttributeTypeCode='platformInformation']/name//*) or (/*/Platforms/Platform/Characteristics/Characteristic/Name)</xpath></selector><dialect><name>iso</name><xpath>boolean(/*[local-name() = 'MI_Metadata' or local-name() = 'MD_Metadata'])</xpath></dialect><dialect><name>iso-1</name><xpath>boolean(/*[local-name() = 'mdb:MD_Metadata'])</xpath></dialect><dialect><name>dif</name><xpath>boolean(/*[local-name() = 'dif:DIF'])</xpath></dialect><dialect><name>echo</name><xpath>boolean(/*[local-name() = '*'])</xpath></dialect><dialect><name>dcite</name><xpath>boolean(/*[local-name() = 'dcite:resource'])</xpath></dialect><dialect><name>eml</name><xpath>boolean(/*[local-name() = 'eml'])</xpath></dialect><dialect><name>csdgm</name><xpath>boolean(/*[local-name() = 'csdgm:metadata'])</xpath></dialect><dialect><name>bdp</name><xpath>boolean(/*[local-name() = 'bdp:metadata'])</xpath></dialect><dialect><name>mercury</name><xpath>boolean(/*[local-name() = 'mercury:metadata'])</xpath></dialect><dialect><name>onedcx</name><xpath>boolean(/*[local-name() = ''])</xpath></dialect></check><check><id>CMR-Granule_Optional_PlatformCharacteristicsValue_ISO_ISO-1_DIF_ECHO_DCITE_EML_CSDGM_BDP_Mercury_ONEdcx</id><name>PlatformCharacteristicsValuePresent</name><description>Checks to see if at least one Platform Characteristics Value concept exists.</description><type>CMR-Granule_Optional</type><level>OPTIONAL</level><environment>python</environment><code><![CDATA[
+def call():
+  global output
+  global status
+ 
+  output = "The concept PlatformCharacteristicsValue is present."
+                                        
+  if(PlatformCharacteristicsValue is not None and len(str(PlatformCharacteristicsValue)) > 0):
+    status = "SUCCESS"
+    return True
+    
+  status = "FAILURE"
+  output = "PlatformCharacteristicsValue concept is not present"
+  
+  return False
+      ]]></code><selector><name>PlatformCharacteristicsValue</name><xpath>(/MI_Metadata/acquisitionInformation/MI_AcquisitionInformation/platform/EOS_Platform/otherProperty/Record/AdditionalAttributes/AdditionalAttribute/value//*) or (//platform/*/otherProperty/Record/EOS_AdditionalAttributes/additionalAttribute/EOS_AdditionalAttribute[eos:reference/EOS_AdditionalAttributeDescription/type/EOS_AdditionalAttributeTypeCode='platformInformation']/value//*) or (//platform/*/otherProperty/Record/EOS_AdditionalAttributes/additionalAttribute/EOS_AdditionalAttribute[eos:reference/EOS_AdditionalAttributeDescription/type/EOS_AdditionalAttributeTypeCode='platformInformation']/value//*) or (/*/Platforms/Platform/Characteristics/Characteristic/Value)</xpath></selector><dialect><name>iso</name><xpath>boolean(/*[local-name() = 'MI_Metadata' or local-name() = 'MD_Metadata'])</xpath></dialect><dialect><name>iso-1</name><xpath>boolean(/*[local-name() = 'mdb:MD_Metadata'])</xpath></dialect><dialect><name>dif</name><xpath>boolean(/*[local-name() = 'dif:DIF'])</xpath></dialect><dialect><name>echo</name><xpath>boolean(/*[local-name() = '*'])</xpath></dialect><dialect><name>dcite</name><xpath>boolean(/*[local-name() = 'dcite:resource'])</xpath></dialect><dialect><name>eml</name><xpath>boolean(/*[local-name() = 'eml'])</xpath></dialect><dialect><name>csdgm</name><xpath>boolean(/*[local-name() = 'csdgm:metadata'])</xpath></dialect><dialect><name>bdp</name><xpath>boolean(/*[local-name() = 'bdp:metadata'])</xpath></dialect><dialect><name>mercury</name><xpath>boolean(/*[local-name() = 'mercury:metadata'])</xpath></dialect><dialect><name>onedcx</name><xpath>boolean(/*[local-name() = ''])</xpath></dialect></check><check><id>CMR-Granule_Optional_SensorShortName_ISO_ISO-1_DIF_ECHO_DCITE_EML_CSDGM_BDP_Mercury_ONEdcx</id><name>SensorShortNamePresent</name><description>Checks to see if at least one Sensor Short Name concept exists.</description><type>CMR-Granule_Optional</type><level>OPTIONAL</level><environment>python</environment><code><![CDATA[
+def call():
+  global output
+  global status
+ 
+  output = "The concept SensorShortName is present."
+                                        
+  if(SensorShortName is not None and len(str(SensorShortName)) > 0):
+    status = "SUCCESS"
+    return True
+    
+  status = "FAILURE"
+  output = "SensorShortName concept is not present"
+  
+  return False
+      ]]></code><selector><name>SensorShortName</name><xpath>(//sensor/EOS_Sensor/identifier/MD_Identifier/code//*) or (/*/Platforms/Platform/Instruments/Instrument/Sensors/Sensor/ShortName) or (/metadata/mercury/Parameter_Description/Sensor)</xpath></selector><dialect><name>iso</name><xpath>boolean(/*[local-name() = 'MI_Metadata' or local-name() = 'MD_Metadata'])</xpath></dialect><dialect><name>iso-1</name><xpath>boolean(/*[local-name() = 'mdb:MD_Metadata'])</xpath></dialect><dialect><name>dif</name><xpath>boolean(/*[local-name() = 'dif:DIF'])</xpath></dialect><dialect><name>echo</name><xpath>boolean(/*[local-name() = '*'])</xpath></dialect><dialect><name>dcite</name><xpath>boolean(/*[local-name() = 'dcite:resource'])</xpath></dialect><dialect><name>eml</name><xpath>boolean(/*[local-name() = 'eml'])</xpath></dialect><dialect><name>csdgm</name><xpath>boolean(/*[local-name() = 'csdgm:metadata'])</xpath></dialect><dialect><name>bdp</name><xpath>boolean(/*[local-name() = 'bdp:metadata'])</xpath></dialect><dialect><name>mercury</name><xpath>boolean(/*[local-name() = 'mercury:metadata'])</xpath></dialect><dialect><name>onedcx</name><xpath>boolean(/*[local-name() = ''])</xpath></dialect></check><check><id>CMR-Granule_Optional_SensorCharacteristicsName_ISO_ISO-1_DIF_ECHO_DCITE_EML_CSDGM_BDP_Mercury_ONEdcx</id><name>SensorCharacteristicsNamePresent</name><description>Checks to see if at least one Sensor Characteristics Name concept exists.</description><type>CMR-Granule_Optional</type><level>OPTIONAL</level><environment>python</environment><code><![CDATA[
+def call():
+  global output
+  global status
+ 
+  output = "The concept SensorCharacteristicsName is present."
+                                        
+  if(SensorCharacteristicsName is not None and len(str(SensorCharacteristicsName)) > 0):
+    status = "SUCCESS"
+    return True
+    
+  status = "FAILURE"
+  output = "SensorCharacteristicsName concept is not present"
+  
+  return False
+      ]]></code><selector><name>SensorCharacteristicsName</name><xpath>(/*/Platforms/Platform/Instruments/Instrument/Sensors/Sensor/Characteristics/Characteristic/Name) or (//sensor/EOS_Sensor/otherProperty/Record/EOS_AdditionalAttributes/additionalAttribute/EOS_AdditionalAttribute/reference/EOS_AdditionalAttributeDescription[eos:type/EOS_AdditionalAttributeTypeCode='sensorInformation']/name//*)</xpath></selector><dialect><name>iso</name><xpath>boolean(/*[local-name() = 'MI_Metadata' or local-name() = 'MD_Metadata'])</xpath></dialect><dialect><name>iso-1</name><xpath>boolean(/*[local-name() = 'mdb:MD_Metadata'])</xpath></dialect><dialect><name>dif</name><xpath>boolean(/*[local-name() = 'dif:DIF'])</xpath></dialect><dialect><name>echo</name><xpath>boolean(/*[local-name() = '*'])</xpath></dialect><dialect><name>dcite</name><xpath>boolean(/*[local-name() = 'dcite:resource'])</xpath></dialect><dialect><name>eml</name><xpath>boolean(/*[local-name() = 'eml'])</xpath></dialect><dialect><name>csdgm</name><xpath>boolean(/*[local-name() = 'csdgm:metadata'])</xpath></dialect><dialect><name>bdp</name><xpath>boolean(/*[local-name() = 'bdp:metadata'])</xpath></dialect><dialect><name>mercury</name><xpath>boolean(/*[local-name() = 'mercury:metadata'])</xpath></dialect><dialect><name>onedcx</name><xpath>boolean(/*[local-name() = ''])</xpath></dialect></check><check><id>CMR-Granule_Optional_SensorCharacteristicsValue_ISO_ISO-1_DIF_ECHO_DCITE_EML_CSDGM_BDP_Mercury_ONEdcx</id><name>SensorCharacteristicsValuePresent</name><description>Checks to see if at least one Sensor Characteristics Value concept exists.</description><type>CMR-Granule_Optional</type><level>OPTIONAL</level><environment>python</environment><code><![CDATA[
+def call():
+  global output
+  global status
+ 
+  output = "The concept SensorCharacteristicsValue is present."
+                                        
+  if(SensorCharacteristicsValue is not None and len(str(SensorCharacteristicsValue)) > 0):
+    status = "SUCCESS"
+    return True
+    
+  status = "FAILURE"
+  output = "SensorCharacteristicsValue concept is not present"
+  
+  return False
+      ]]></code><selector><name>SensorCharacteristicsValue</name><xpath>(/*/Platforms/Platform/Instruments/Instrument/Sensors/Sensor/Characteristics/Characteristic/Value) or (//sensor/EOS_Sensor/otherProperty/Record/EOS_AdditionalAttributes/additionalAttribute/EOS_AdditionalAttribute[eos:reference/EOS_AdditionalAttributeDescription/type/EOS_AdditionalAttributeTypeCode='sensorInformation']/value//*)</xpath></selector><dialect><name>iso</name><xpath>boolean(/*[local-name() = 'MI_Metadata' or local-name() = 'MD_Metadata'])</xpath></dialect><dialect><name>iso-1</name><xpath>boolean(/*[local-name() = 'mdb:MD_Metadata'])</xpath></dialect><dialect><name>dif</name><xpath>boolean(/*[local-name() = 'dif:DIF'])</xpath></dialect><dialect><name>echo</name><xpath>boolean(/*[local-name() = '*'])</xpath></dialect><dialect><name>dcite</name><xpath>boolean(/*[local-name() = 'dcite:resource'])</xpath></dialect><dialect><name>eml</name><xpath>boolean(/*[local-name() = 'eml'])</xpath></dialect><dialect><name>csdgm</name><xpath>boolean(/*[local-name() = 'csdgm:metadata'])</xpath></dialect><dialect><name>bdp</name><xpath>boolean(/*[local-name() = 'bdp:metadata'])</xpath></dialect><dialect><name>mercury</name><xpath>boolean(/*[local-name() = 'mercury:metadata'])</xpath></dialect><dialect><name>onedcx</name><xpath>boolean(/*[local-name() = ''])</xpath></dialect></check></mdq:suite>
