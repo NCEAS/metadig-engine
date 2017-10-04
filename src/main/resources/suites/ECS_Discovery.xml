@@ -1,0 +1,586 @@
+<?xml version="1.0" encoding="UTF-8"?><mdq:suite xmlns:mdq="https://nceas.ucsb.edu/mdqe/v1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="https://nceas.ucsb.edu/mdqe/v1 ../schemas/schema1.xsd"><id>ECS_Discovery</id><name>ECS_Discovery</name><check><id>ECS_Discovery-Recommended_Abstract_ISO_ISO-1_DIF_ECHO_DCITE_EML_CSDGM_BDP_Mercury_Onedcx_Dryad</id><name>AbstractPresent</name><description>Checks to see if at least one Abstract concept exists.</description><type>ECS_Discovery-Recommended</type><level>OPTIONAL</level><environment>python</environment><code><![CDATA[
+def call():
+  global output
+  global status
+ 
+  output = "The concept Abstract is present."
+                                        
+  if(Abstract is not None and len(str(Abstract)) > 0):
+    status = "SUCCESS"
+    return True
+    
+  status = "FAILURE"
+  output = "Abstract concept is not present"
+  
+  return False
+      ]]></code><selector><name>Abstract</name><xpath>(/MD_Metadata/identificationInfo/*/abstract//*) or (/metadata/simpleDc/description) or (/metadata/dcTerms/abstract) or (/*/description) or (/*/identificationInfo/*/abstract//*) or (/*/Description) or (/DIF/Summary) or (/DIF/Summary/Abstract) or (/metadata/idinfo/descript/abstract) or (/eml/*/abstract) or (/resource/descriptions/description[@descriptionType='Abstract']) or (/metadata/idinfo/descript/abstract) or (/metadata/idinfo/descript/abstract)</xpath></selector><dialect><name>ISO 19115 and ISO 19115-2 / ISO 19139 and ISO 19139-2</name><xpath>boolean(/*[local-name() = 'MI_Metadata' or local-name() = 'MD_Metadata'])</xpath></dialect><dialect><name>ISO 19115-1 / ISO 19115-3</name><xpath>boolean(/*[local-name() = 'MD_Metadata'])</xpath></dialect><dialect><name>Directory Interchange Format</name><xpath>boolean(/*[local-name() = 'dif'])</xpath></dialect><dialect><name>ECHO</name><xpath>boolean(/*[local-name() = 'granule or local-name() = 'granule'])</xpath></dialect><dialect><name>DataCite 3.1</name><xpath>boolean(/*[local-name() = 'resource'])</xpath></dialect><dialect><name>Ecological Metadata Language</name><xpath>boolean(/*[local-name() = 'eml'])</xpath></dialect><dialect><name>Content Standard for Digital Geospatial Metadata</name><xpath>boolean(/*[local-name() = 'metadata[not(mercury)]/idinfo'])</xpath></dialect><dialect><name>Content Standard for Digital Geospatial Metadata (CSDGM) Biological Data Profile</name><xpath>boolean(/*[local-name() = 'mercury/taxoncl'])</xpath></dialect><dialect><name>Mercury Metadata Standard</name><xpath>boolean(/*[local-name() = 'metadata/mercury'])</xpath></dialect><dialect><name>DataONE Dublin Core Extended v1.0</name><xpath>boolean(/*[local-name() = 'metadata/simpleDc'])</xpath></dialect><dialect><name>Dryad Data Package and Data File Modules</name><xpath>boolean(/*[local-name() = 'DryadDataFile or local-name() = 'DryadDataPackage'])</xpath></dialect></check><check><id>ECS_Discovery-Recommended_ResourceLongName_ISO_ISO-1_DIF_ECHO_DCITE_EML_CSDGM_BDP_Mercury_Onedcx_Dryad</id><name>ResourceLongNamePresent</name><description>Checks to see if at least one Resource Long Name concept exists.</description><type>ECS_Discovery-Recommended</type><level>OPTIONAL</level><environment>python</environment><code><![CDATA[
+def call():
+  global output
+  global status
+ 
+  output = "The concept ResourceLongName is present."
+                                        
+  if(ResourceLongName is not None and len(str(ResourceLongName)) > 0):
+    status = "SUCCESS"
+    return True
+    
+  status = "FAILURE"
+  output = "ResourceLongName concept is not present"
+  
+  return False
+      ]]></code><selector><name>ResourceLongName</name><xpath>(/MD_Metadata/identificationInfo/*/citation/CI_Citation/title//*) or (/*/identificationInfo/*/citation/CI_Citation/title//*) or (/*/LongName) or (/eml/*/title)</xpath></selector><dialect><name>ISO 19115 and ISO 19115-2 / ISO 19139 and ISO 19139-2</name><xpath>boolean(/*[local-name() = 'MI_Metadata' or local-name() = 'MD_Metadata'])</xpath></dialect><dialect><name>ISO 19115-1 / ISO 19115-3</name><xpath>boolean(/*[local-name() = 'MD_Metadata'])</xpath></dialect><dialect><name>Directory Interchange Format</name><xpath>boolean(/*[local-name() = 'dif'])</xpath></dialect><dialect><name>ECHO</name><xpath>boolean(/*[local-name() = 'granule or local-name() = 'granule'])</xpath></dialect><dialect><name>DataCite 3.1</name><xpath>boolean(/*[local-name() = 'resource'])</xpath></dialect><dialect><name>Ecological Metadata Language</name><xpath>boolean(/*[local-name() = 'eml'])</xpath></dialect><dialect><name>Content Standard for Digital Geospatial Metadata</name><xpath>boolean(/*[local-name() = 'metadata[not(mercury)]/idinfo'])</xpath></dialect><dialect><name>Content Standard for Digital Geospatial Metadata (CSDGM) Biological Data Profile</name><xpath>boolean(/*[local-name() = 'mercury/taxoncl'])</xpath></dialect><dialect><name>Mercury Metadata Standard</name><xpath>boolean(/*[local-name() = 'metadata/mercury'])</xpath></dialect><dialect><name>DataONE Dublin Core Extended v1.0</name><xpath>boolean(/*[local-name() = 'metadata/simpleDc'])</xpath></dialect><dialect><name>Dryad Data Package and Data File Modules</name><xpath>boolean(/*[local-name() = 'DryadDataFile or local-name() = 'DryadDataPackage'])</xpath></dialect></check><check><id>ECS_Discovery-Recommended_ResourceTitle_ISO_ISO-1_DIF_ECHO_DCITE_EML_CSDGM_BDP_Mercury_Onedcx_Dryad</id><name>ResourceTitlePresent</name><description>Checks to see if at least one Resource Title concept exists.</description><type>ECS_Discovery-Recommended</type><level>OPTIONAL</level><environment>python</environment><code><![CDATA[
+def call():
+  global output
+  global status
+ 
+  output = "The concept ResourceTitle is present."
+                                        
+  if(ResourceTitle is not None and len(str(ResourceTitle)) > 0):
+    status = "SUCCESS"
+    return True
+    
+  status = "FAILURE"
+  output = "ResourceTitle concept is not present"
+  
+  return False
+      ]]></code><selector><name>ResourceTitle</name><xpath>(/MD_Metadata/identificationInfo/*/citation/CI_Citation/title//*) or (/metadata/simpleDc/title) or (/*/title) or (/*/identificationInfo/*/citation/CI_Citation/title//*) or (/*/ShortName | /*/LongName) or (/*/DataSetId) or (/DIF/Entry_Title) or (/DIF/Data_Set_Citation/Dataset_Title) or (/metadata/idinfo/citation/citeinfo/title) or (/eml/*/title) or (/resource/titles/title) or (/metadata/idinfo/citation/citeinfo/title) or (/metadata/idinfo/citation/citeinfo/title)</xpath></selector><dialect><name>ISO 19115 and ISO 19115-2 / ISO 19139 and ISO 19139-2</name><xpath>boolean(/*[local-name() = 'MI_Metadata' or local-name() = 'MD_Metadata'])</xpath></dialect><dialect><name>ISO 19115-1 / ISO 19115-3</name><xpath>boolean(/*[local-name() = 'MD_Metadata'])</xpath></dialect><dialect><name>Directory Interchange Format</name><xpath>boolean(/*[local-name() = 'dif'])</xpath></dialect><dialect><name>ECHO</name><xpath>boolean(/*[local-name() = 'granule or local-name() = 'granule'])</xpath></dialect><dialect><name>DataCite 3.1</name><xpath>boolean(/*[local-name() = 'resource'])</xpath></dialect><dialect><name>Ecological Metadata Language</name><xpath>boolean(/*[local-name() = 'eml'])</xpath></dialect><dialect><name>Content Standard for Digital Geospatial Metadata</name><xpath>boolean(/*[local-name() = 'metadata[not(mercury)]/idinfo'])</xpath></dialect><dialect><name>Content Standard for Digital Geospatial Metadata (CSDGM) Biological Data Profile</name><xpath>boolean(/*[local-name() = 'mercury/taxoncl'])</xpath></dialect><dialect><name>Mercury Metadata Standard</name><xpath>boolean(/*[local-name() = 'metadata/mercury'])</xpath></dialect><dialect><name>DataONE Dublin Core Extended v1.0</name><xpath>boolean(/*[local-name() = 'metadata/simpleDc'])</xpath></dialect><dialect><name>Dryad Data Package and Data File Modules</name><xpath>boolean(/*[local-name() = 'DryadDataFile or local-name() = 'DryadDataPackage'])</xpath></dialect></check><check><id>ECS_Discovery-Recommended_ResourceVersion_ISO_ISO-1_DIF_ECHO_DCITE_EML_CSDGM_BDP_Mercury_Onedcx_Dryad</id><name>ResourceVersionPresent</name><description>Checks to see if at least one Resource Version concept exists.</description><type>ECS_Discovery-Recommended</type><level>OPTIONAL</level><environment>python</environment><code><![CDATA[
+def call():
+  global output
+  global status
+ 
+  output = "The concept ResourceVersion is present."
+                                        
+  if(ResourceVersion is not None and len(str(ResourceVersion)) > 0):
+    status = "SUCCESS"
+    return True
+    
+  status = "FAILURE"
+  output = "ResourceVersion concept is not present"
+  
+  return False
+      ]]></code><selector><name>ResourceVersion</name><xpath>(/MD_Metadata/identificationInfo/MD_DataIdentification/citation/CI_Citation/edition//*) or (/*/identificationInfo/*/citation/CI_Citation/edition//*) or (/*/VersionId) or (/DIF/Data_Set_Citation/Dataset_Version) or (/DIF/Reference/Edition) or (/resource/version) or (/metadata/idinfo/citeinfo/edition) or (/metadata/idinfo/citeinfo/edition)</xpath></selector><dialect><name>ISO 19115 and ISO 19115-2 / ISO 19139 and ISO 19139-2</name><xpath>boolean(/*[local-name() = 'MI_Metadata' or local-name() = 'MD_Metadata'])</xpath></dialect><dialect><name>ISO 19115-1 / ISO 19115-3</name><xpath>boolean(/*[local-name() = 'MD_Metadata'])</xpath></dialect><dialect><name>Directory Interchange Format</name><xpath>boolean(/*[local-name() = 'dif'])</xpath></dialect><dialect><name>ECHO</name><xpath>boolean(/*[local-name() = 'granule or local-name() = 'granule'])</xpath></dialect><dialect><name>DataCite 3.1</name><xpath>boolean(/*[local-name() = 'resource'])</xpath></dialect><dialect><name>Ecological Metadata Language</name><xpath>boolean(/*[local-name() = 'eml'])</xpath></dialect><dialect><name>Content Standard for Digital Geospatial Metadata</name><xpath>boolean(/*[local-name() = 'metadata[not(mercury)]/idinfo'])</xpath></dialect><dialect><name>Content Standard for Digital Geospatial Metadata (CSDGM) Biological Data Profile</name><xpath>boolean(/*[local-name() = 'mercury/taxoncl'])</xpath></dialect><dialect><name>Mercury Metadata Standard</name><xpath>boolean(/*[local-name() = 'metadata/mercury'])</xpath></dialect><dialect><name>DataONE Dublin Core Extended v1.0</name><xpath>boolean(/*[local-name() = 'metadata/simpleDc'])</xpath></dialect><dialect><name>Dryad Data Package and Data File Modules</name><xpath>boolean(/*[local-name() = 'DryadDataFile or local-name() = 'DryadDataPackage'])</xpath></dialect></check><check><id>ECS_Discovery-Recommended_DistributionContact_ISO_ISO-1_DIF_ECHO_DCITE_EML_CSDGM_BDP_Mercury_Onedcx_Dryad</id><name>DistributionContactPresent</name><description>Checks to see if at least one Distribution Contact concept exists.</description><type>ECS_Discovery-Recommended</type><level>OPTIONAL</level><environment>python</environment><code><![CDATA[
+def call():
+  global output
+  global status
+ 
+  output = "The concept DistributionContact is present."
+                                        
+  if(DistributionContact is not None and len(str(DistributionContact)) > 0):
+    status = "SUCCESS"
+    return True
+    
+  status = "FAILURE"
+  output = "DistributionContact concept is not present"
+  
+  return False
+      ]]></code><selector><name>DistributionContact</name><xpath>(/MD_Metadata/distributionInfo/MD_Distribution/distributor/MD_Distributor/distributorContact/CI_Responsibility) or (/*/distributionInfo/MD_Distribution/distributor/MD_Distributor/distributorContact) or (/*/ArchiveCenter) or (/*/Contacts/Contact[contains(Role,'Data Manager')]) or (/*/Contacts/Contact[contains(Role,'DATA CENTER CONTACT')]) or (/*/Contacts/Contact[contains(Role,'Archive')]) or (/*/Contacts/Contact[contains(Role,'Distributor')]) or (/*/Contacts/Contact[contains(Role,'GHRC USER SERVICES')]) or (/*/Contacts/Contact[contains(Role,'User Services')]) or (/metadata/distinfo/distrib/cntinfo) or (/eml/*/associatedParty/role[RoleType='distributor']) or (/DIF/Data_Center/Personnel/Role) or (/metadata/distinfo/distrib/cntinfo) or (/metadata/mercury/Contact_Person) or (/metadata/distinfo/distrib/cntinfo/cntperp/cntper) or (/metadata/distinfo/distrib/cntinfo)</xpath></selector><dialect><name>ISO 19115 and ISO 19115-2 / ISO 19139 and ISO 19139-2</name><xpath>boolean(/*[local-name() = 'MI_Metadata' or local-name() = 'MD_Metadata'])</xpath></dialect><dialect><name>ISO 19115-1 / ISO 19115-3</name><xpath>boolean(/*[local-name() = 'MD_Metadata'])</xpath></dialect><dialect><name>Directory Interchange Format</name><xpath>boolean(/*[local-name() = 'dif'])</xpath></dialect><dialect><name>ECHO</name><xpath>boolean(/*[local-name() = 'granule or local-name() = 'granule'])</xpath></dialect><dialect><name>DataCite 3.1</name><xpath>boolean(/*[local-name() = 'resource'])</xpath></dialect><dialect><name>Ecological Metadata Language</name><xpath>boolean(/*[local-name() = 'eml'])</xpath></dialect><dialect><name>Content Standard for Digital Geospatial Metadata</name><xpath>boolean(/*[local-name() = 'metadata[not(mercury)]/idinfo'])</xpath></dialect><dialect><name>Content Standard for Digital Geospatial Metadata (CSDGM) Biological Data Profile</name><xpath>boolean(/*[local-name() = 'mercury/taxoncl'])</xpath></dialect><dialect><name>Mercury Metadata Standard</name><xpath>boolean(/*[local-name() = 'metadata/mercury'])</xpath></dialect><dialect><name>DataONE Dublin Core Extended v1.0</name><xpath>boolean(/*[local-name() = 'metadata/simpleDc'])</xpath></dialect><dialect><name>Dryad Data Package and Data File Modules</name><xpath>boolean(/*[local-name() = 'DryadDataFile or local-name() = 'DryadDataPackage'])</xpath></dialect></check><check><id>ECS_Discovery-Recommended_Processor_ISO_ISO-1_DIF_ECHO_DCITE_EML_CSDGM_BDP_Mercury_Onedcx_Dryad</id><name>ProcessorPresent</name><description>Checks to see if at least one Processor concept exists.</description><type>ECS_Discovery-Recommended</type><level>OPTIONAL</level><environment>python</environment><code><![CDATA[
+def call():
+  global output
+  global status
+ 
+  output = "The concept Processor is present."
+                                        
+  if(Processor is not None and len(str(Processor)) > 0):
+    status = "SUCCESS"
+    return True
+    
+  status = "FAILURE"
+  output = "Processor concept is not present"
+  
+  return False
+      ]]></code><selector><name>Processor</name><xpath>(/MD_Metadata/resourceLineage/LI_Lineage/processStep/LI_ProcessStep/processor) or (/*/dataQualityInfo/DQ_DataQuality/lineage/LI_Lineage/processStep/LI_ProcessStep/processor) or (/*/dataQualityInfo/DQ_DataQuality/lineage/LI_Lineage/processStep/LE_ProcessStep/processor) or (/*/ProcessingCenter) or (/metadata/dataqual/lineage/procstep/proccont) or (/metadata/dataqual/lineage/procstep/proccont)</xpath></selector><dialect><name>ISO 19115 and ISO 19115-2 / ISO 19139 and ISO 19139-2</name><xpath>boolean(/*[local-name() = 'MI_Metadata' or local-name() = 'MD_Metadata'])</xpath></dialect><dialect><name>ISO 19115-1 / ISO 19115-3</name><xpath>boolean(/*[local-name() = 'MD_Metadata'])</xpath></dialect><dialect><name>Directory Interchange Format</name><xpath>boolean(/*[local-name() = 'dif'])</xpath></dialect><dialect><name>ECHO</name><xpath>boolean(/*[local-name() = 'granule or local-name() = 'granule'])</xpath></dialect><dialect><name>DataCite 3.1</name><xpath>boolean(/*[local-name() = 'resource'])</xpath></dialect><dialect><name>Ecological Metadata Language</name><xpath>boolean(/*[local-name() = 'eml'])</xpath></dialect><dialect><name>Content Standard for Digital Geospatial Metadata</name><xpath>boolean(/*[local-name() = 'metadata[not(mercury)]/idinfo'])</xpath></dialect><dialect><name>Content Standard for Digital Geospatial Metadata (CSDGM) Biological Data Profile</name><xpath>boolean(/*[local-name() = 'mercury/taxoncl'])</xpath></dialect><dialect><name>Mercury Metadata Standard</name><xpath>boolean(/*[local-name() = 'metadata/mercury'])</xpath></dialect><dialect><name>DataONE Dublin Core Extended v1.0</name><xpath>boolean(/*[local-name() = 'metadata/simpleDc'])</xpath></dialect><dialect><name>Dryad Data Package and Data File Modules</name><xpath>boolean(/*[local-name() = 'DryadDataFile or local-name() = 'DryadDataPackage'])</xpath></dialect></check><check><id>ECS_Discovery-Recommended_MetadataModifiedDate_ISO_ISO-1_DIF_ECHO_DCITE_EML_CSDGM_BDP_Mercury_Onedcx_Dryad</id><name>MetadataModifiedDatePresent</name><description>Checks to see if at least one Metadata Modified Date concept exists.</description><type>ECS_Discovery-Recommended</type><level>OPTIONAL</level><environment>python</environment><code><![CDATA[
+def call():
+  global output
+  global status
+ 
+  output = "The concept MetadataModifiedDate is present."
+                                        
+  if(MetadataModifiedDate is not None and len(str(MetadataModifiedDate)) > 0):
+    status = "SUCCESS"
+    return True
+    
+  status = "FAILURE"
+  output = "MetadataModifiedDate concept is not present"
+  
+  return False
+      ]]></code><selector><name>MetadataModifiedDate</name><xpath>(/MD_Metadata/dateInfo/CI_Date[cit:dateType/CI_DateTypeCode='lastUpdate']/date/DateTime) or (/*/dateStamp/Date) or (/*/dateStamp/DateTime) or (/*/RevisionDate) or (/*/DataGranule/ProductionDateTime) or (/DIF/DIF_Creation_Date) or (/DIF/Last_DIF_Revision_Date) or (/metadata/metainfo/metd) or (/eml/*/maintenance/changeHistory/changeDate) or (/metadata/idinfo/timeperd/timeinfo/rngdates/enddate | /metadata/idinfo/timeperd/timeinfo/rngdates/endtime) or (/metadata/metainfo/metd) or (/metadata/metainfo/metd)</xpath></selector><dialect><name>ISO 19115 and ISO 19115-2 / ISO 19139 and ISO 19139-2</name><xpath>boolean(/*[local-name() = 'MI_Metadata' or local-name() = 'MD_Metadata'])</xpath></dialect><dialect><name>ISO 19115-1 / ISO 19115-3</name><xpath>boolean(/*[local-name() = 'MD_Metadata'])</xpath></dialect><dialect><name>Directory Interchange Format</name><xpath>boolean(/*[local-name() = 'dif'])</xpath></dialect><dialect><name>ECHO</name><xpath>boolean(/*[local-name() = 'granule or local-name() = 'granule'])</xpath></dialect><dialect><name>DataCite 3.1</name><xpath>boolean(/*[local-name() = 'resource'])</xpath></dialect><dialect><name>Ecological Metadata Language</name><xpath>boolean(/*[local-name() = 'eml'])</xpath></dialect><dialect><name>Content Standard for Digital Geospatial Metadata</name><xpath>boolean(/*[local-name() = 'metadata[not(mercury)]/idinfo'])</xpath></dialect><dialect><name>Content Standard for Digital Geospatial Metadata (CSDGM) Biological Data Profile</name><xpath>boolean(/*[local-name() = 'mercury/taxoncl'])</xpath></dialect><dialect><name>Mercury Metadata Standard</name><xpath>boolean(/*[local-name() = 'metadata/mercury'])</xpath></dialect><dialect><name>DataONE Dublin Core Extended v1.0</name><xpath>boolean(/*[local-name() = 'metadata/simpleDc'])</xpath></dialect><dialect><name>Dryad Data Package and Data File Modules</name><xpath>boolean(/*[local-name() = 'DryadDataFile or local-name() = 'DryadDataPackage'])</xpath></dialect></check><check><id>ECS_Discovery-Recommended_VersionDescription_ISO_ISO-1_DIF_ECHO_DCITE_EML_CSDGM_BDP_Mercury_Onedcx_Dryad</id><name>VersionDescriptionPresent</name><description>Checks to see if at least one Version Description concept exists.</description><type>ECS_Discovery-Recommended</type><level>OPTIONAL</level><environment>python</environment><code><![CDATA[
+def call():
+  global output
+  global status
+ 
+  output = "The concept VersionDescription is present."
+                                        
+  if(VersionDescription is not None and len(str(VersionDescription)) > 0):
+    status = "SUCCESS"
+    return True
+    
+  status = "FAILURE"
+  output = "VersionDescription concept is not present"
+  
+  return False
+      ]]></code><selector><name>VersionDescription</name><xpath>(</xpath></selector><dialect><name>ISO 19115 and ISO 19115-2 / ISO 19139 and ISO 19139-2</name><xpath>boolean(/*[local-name() = 'MI_Metadata' or local-name() = 'MD_Metadata'])</xpath></dialect><dialect><name>ISO 19115-1 / ISO 19115-3</name><xpath>boolean(/*[local-name() = 'MD_Metadata'])</xpath></dialect><dialect><name>Directory Interchange Format</name><xpath>boolean(/*[local-name() = 'dif'])</xpath></dialect><dialect><name>ECHO</name><xpath>boolean(/*[local-name() = 'granule or local-name() = 'granule'])</xpath></dialect><dialect><name>DataCite 3.1</name><xpath>boolean(/*[local-name() = 'resource'])</xpath></dialect><dialect><name>Ecological Metadata Language</name><xpath>boolean(/*[local-name() = 'eml'])</xpath></dialect><dialect><name>Content Standard for Digital Geospatial Metadata</name><xpath>boolean(/*[local-name() = 'metadata[not(mercury)]/idinfo'])</xpath></dialect><dialect><name>Content Standard for Digital Geospatial Metadata (CSDGM) Biological Data Profile</name><xpath>boolean(/*[local-name() = 'mercury/taxoncl'])</xpath></dialect><dialect><name>Mercury Metadata Standard</name><xpath>boolean(/*[local-name() = 'metadata/mercury'])</xpath></dialect><dialect><name>DataONE Dublin Core Extended v1.0</name><xpath>boolean(/*[local-name() = 'metadata/simpleDc'])</xpath></dialect><dialect><name>Dryad Data Package and Data File Modules</name><xpath>boolean(/*[local-name() = 'DryadDataFile or local-name() = 'DryadDataPackage'])</xpath></dialect></check><check><id>ECS_Discovery-Recommended_OrganizationName_ISO_ISO-1_DIF_ECHO_DCITE_EML_CSDGM_BDP_Mercury_Onedcx_Dryad</id><name>OrganizationNamePresent</name><description>Checks to see if at least one Organization Name concept exists.</description><type>ECS_Discovery-Recommended</type><level>OPTIONAL</level><environment>python</environment><code><![CDATA[
+def call():
+  global output
+  global status
+ 
+  output = "The concept OrganizationName is present."
+                                        
+  if(OrganizationName is not None and len(str(OrganizationName)) > 0):
+    status = "SUCCESS"
+    return True
+    
+  status = "FAILURE"
+  output = "OrganizationName concept is not present"
+  
+  return False
+      ]]></code><selector><name>OrganizationName</name><xpath>(//CI_Responsibility/party/CI_Organisation/name//*) or (//CI_ResponsibleParty/organisationName//*) or (/*/ArchiveCenter) or (/*/Contacts/Contact/OrganizationName) or (/DIF/Data_Center/Data_Center_Name/Short_Name) or (/DIF/Data_Center/Data_Center_Name/Long_Name) or (/metadata/idinfo/citation/citeinfo/origin) or (/eml/*/*/organizationName) or (/resource/creators/creator/affiliation) or (/metadata/idinfo/citation/citeinfo/origin) or (/metadata/distinfo/distrib/cntinfo/cntperp/cntorg) or (/metadata/idinfo/citation/citeinfo/origin)</xpath></selector><dialect><name>ISO 19115 and ISO 19115-2 / ISO 19139 and ISO 19139-2</name><xpath>boolean(/*[local-name() = 'MI_Metadata' or local-name() = 'MD_Metadata'])</xpath></dialect><dialect><name>ISO 19115-1 / ISO 19115-3</name><xpath>boolean(/*[local-name() = 'MD_Metadata'])</xpath></dialect><dialect><name>Directory Interchange Format</name><xpath>boolean(/*[local-name() = 'dif'])</xpath></dialect><dialect><name>ECHO</name><xpath>boolean(/*[local-name() = 'granule or local-name() = 'granule'])</xpath></dialect><dialect><name>DataCite 3.1</name><xpath>boolean(/*[local-name() = 'resource'])</xpath></dialect><dialect><name>Ecological Metadata Language</name><xpath>boolean(/*[local-name() = 'eml'])</xpath></dialect><dialect><name>Content Standard for Digital Geospatial Metadata</name><xpath>boolean(/*[local-name() = 'metadata[not(mercury)]/idinfo'])</xpath></dialect><dialect><name>Content Standard for Digital Geospatial Metadata (CSDGM) Biological Data Profile</name><xpath>boolean(/*[local-name() = 'mercury/taxoncl'])</xpath></dialect><dialect><name>Mercury Metadata Standard</name><xpath>boolean(/*[local-name() = 'metadata/mercury'])</xpath></dialect><dialect><name>DataONE Dublin Core Extended v1.0</name><xpath>boolean(/*[local-name() = 'metadata/simpleDc'])</xpath></dialect><dialect><name>Dryad Data Package and Data File Modules</name><xpath>boolean(/*[local-name() = 'DryadDataFile or local-name() = 'DryadDataPackage'])</xpath></dialect></check><check><id>ECS_Discovery-Recommended_Email_ISO_ISO-1_DIF_ECHO_DCITE_EML_CSDGM_BDP_Mercury_Onedcx_Dryad</id><name>EmailPresent</name><description>Checks to see if at least one Email concept exists.</description><type>ECS_Discovery-Recommended</type><level>OPTIONAL</level><environment>python</environment><code><![CDATA[
+def call():
+  global output
+  global status
+ 
+  output = "The concept Email is present."
+                                        
+  if(Email is not None and len(str(Email)) > 0):
+    status = "SUCCESS"
+    return True
+    
+  status = "FAILURE"
+  output = "Email concept is not present"
+  
+  return False
+      ]]></code><selector><name>Email</name><xpath>(//CI_Responsibility/party/CI_Organisation/contactInfo/CI_Contact/address/CI_Address/electronicMailAddress//*) or (//CI_Responsibility/party/CI_Individual/contactInfo/CI_Contact/address/CI_Address/electronicMailAddress//*) or (//CI_ResponsibleParty/contactInfo/CI_Contact/address/CI_Address/electronicMailAddress//*) or (/*/Contacts/Contact/OrganizationEmails/Email) or (/DIF/Personnel/Email) or (/metadata/distinfo/distrib/cntinfo/cntemail) or (/metadata/metainfo/metc/cntinfo/cntemail) or (/metadata/mercury/Contact_Person/Email)</xpath></selector><dialect><name>ISO 19115 and ISO 19115-2 / ISO 19139 and ISO 19139-2</name><xpath>boolean(/*[local-name() = 'MI_Metadata' or local-name() = 'MD_Metadata'])</xpath></dialect><dialect><name>ISO 19115-1 / ISO 19115-3</name><xpath>boolean(/*[local-name() = 'MD_Metadata'])</xpath></dialect><dialect><name>Directory Interchange Format</name><xpath>boolean(/*[local-name() = 'dif'])</xpath></dialect><dialect><name>ECHO</name><xpath>boolean(/*[local-name() = 'granule or local-name() = 'granule'])</xpath></dialect><dialect><name>DataCite 3.1</name><xpath>boolean(/*[local-name() = 'resource'])</xpath></dialect><dialect><name>Ecological Metadata Language</name><xpath>boolean(/*[local-name() = 'eml'])</xpath></dialect><dialect><name>Content Standard for Digital Geospatial Metadata</name><xpath>boolean(/*[local-name() = 'metadata[not(mercury)]/idinfo'])</xpath></dialect><dialect><name>Content Standard for Digital Geospatial Metadata (CSDGM) Biological Data Profile</name><xpath>boolean(/*[local-name() = 'mercury/taxoncl'])</xpath></dialect><dialect><name>Mercury Metadata Standard</name><xpath>boolean(/*[local-name() = 'metadata/mercury'])</xpath></dialect><dialect><name>DataONE Dublin Core Extended v1.0</name><xpath>boolean(/*[local-name() = 'metadata/simpleDc'])</xpath></dialect><dialect><name>Dryad Data Package and Data File Modules</name><xpath>boolean(/*[local-name() = 'DryadDataFile or local-name() = 'DryadDataPackage'])</xpath></dialect></check><check><id>ECS_Discovery-Recommended_Role_ISO_ISO-1_DIF_ECHO_DCITE_EML_CSDGM_BDP_Mercury_Onedcx_Dryad</id><name>RolePresent</name><description>Checks to see if at least one Role concept exists.</description><type>ECS_Discovery-Recommended</type><level>OPTIONAL</level><environment>python</environment><code><![CDATA[
+def call():
+  global output
+  global status
+ 
+  output = "The concept Role is present."
+                                        
+  if(Role is not None and len(str(Role)) > 0):
+    status = "SUCCESS"
+    return True
+    
+  status = "FAILURE"
+  output = "Role concept is not present"
+  
+  return False
+      ]]></code><selector><name>Role</name><xpath>(//CI_Responsibility/role/CI_RoleCode) or (//CI_ResponsibleParty/role/CI_RoleCode) or (/*/Contacts/Contact/Role) or (/DIF/Personnel/Role)</xpath></selector><dialect><name>ISO 19115 and ISO 19115-2 / ISO 19139 and ISO 19139-2</name><xpath>boolean(/*[local-name() = 'MI_Metadata' or local-name() = 'MD_Metadata'])</xpath></dialect><dialect><name>ISO 19115-1 / ISO 19115-3</name><xpath>boolean(/*[local-name() = 'MD_Metadata'])</xpath></dialect><dialect><name>Directory Interchange Format</name><xpath>boolean(/*[local-name() = 'dif'])</xpath></dialect><dialect><name>ECHO</name><xpath>boolean(/*[local-name() = 'granule or local-name() = 'granule'])</xpath></dialect><dialect><name>DataCite 3.1</name><xpath>boolean(/*[local-name() = 'resource'])</xpath></dialect><dialect><name>Ecological Metadata Language</name><xpath>boolean(/*[local-name() = 'eml'])</xpath></dialect><dialect><name>Content Standard for Digital Geospatial Metadata</name><xpath>boolean(/*[local-name() = 'metadata[not(mercury)]/idinfo'])</xpath></dialect><dialect><name>Content Standard for Digital Geospatial Metadata (CSDGM) Biological Data Profile</name><xpath>boolean(/*[local-name() = 'mercury/taxoncl'])</xpath></dialect><dialect><name>Mercury Metadata Standard</name><xpath>boolean(/*[local-name() = 'metadata/mercury'])</xpath></dialect><dialect><name>DataONE Dublin Core Extended v1.0</name><xpath>boolean(/*[local-name() = 'metadata/simpleDc'])</xpath></dialect><dialect><name>Dryad Data Package and Data File Modules</name><xpath>boolean(/*[local-name() = 'DryadDataFile or local-name() = 'DryadDataPackage'])</xpath></dialect></check><check><id>ECS_Discovery-Recommended_Phone_ISO_ISO-1_DIF_ECHO_DCITE_EML_CSDGM_BDP_Mercury_Onedcx_Dryad</id><name>PhonePresent</name><description>Checks to see if at least one Phone concept exists.</description><type>ECS_Discovery-Recommended</type><level>OPTIONAL</level><environment>python</environment><code><![CDATA[
+def call():
+  global output
+  global status
+ 
+  output = "The concept Phone is present."
+                                        
+  if(Phone is not None and len(str(Phone)) > 0):
+    status = "SUCCESS"
+    return True
+    
+  status = "FAILURE"
+  output = "Phone concept is not present"
+  
+  return False
+      ]]></code><selector><name>Phone</name><xpath>(//CI_Responsibility/party/CI_Individual/contactInfo/CI_Contact/phone/CI_Telephone[normalize-space\(numberType/CI_TelephoneTypeCode)='voice']) or (//CI_Responsibility/party/CI_Organisation/contactInfo/CI_Contact/phone/CI_Telephone[normalize-space\(numberType/CI_TelephoneTypeCode)='voice']) or (//CI_ResponsibleParty/contactInfo/CI_Contact/phone/CI_Telephone/voice//*) or (/*/Contacts/Contact/OrganizationPhones/Phone[echo:type='voice']/Number) or (/DIF/Personnel/Phone) or (/metadata/distinfo/distrib/cntinfo/cntvoice) or (/metadata/metainfo/metc/cntinfo/cntvoice) or (/metadata/distinfo/distrib/cntinfo/cntvoice) or (/metadata/metainfo/metc/cntinfo/cntvoice) or (/metadata/mercury/Contact_Person/Phone) or (/metadata/distinfo/distrib/cntinfo/cntvoice) or (/metadata/metainfo/metc/cntinfo/cntvoice)</xpath></selector><dialect><name>ISO 19115 and ISO 19115-2 / ISO 19139 and ISO 19139-2</name><xpath>boolean(/*[local-name() = 'MI_Metadata' or local-name() = 'MD_Metadata'])</xpath></dialect><dialect><name>ISO 19115-1 / ISO 19115-3</name><xpath>boolean(/*[local-name() = 'MD_Metadata'])</xpath></dialect><dialect><name>Directory Interchange Format</name><xpath>boolean(/*[local-name() = 'dif'])</xpath></dialect><dialect><name>ECHO</name><xpath>boolean(/*[local-name() = 'granule or local-name() = 'granule'])</xpath></dialect><dialect><name>DataCite 3.1</name><xpath>boolean(/*[local-name() = 'resource'])</xpath></dialect><dialect><name>Ecological Metadata Language</name><xpath>boolean(/*[local-name() = 'eml'])</xpath></dialect><dialect><name>Content Standard for Digital Geospatial Metadata</name><xpath>boolean(/*[local-name() = 'metadata[not(mercury)]/idinfo'])</xpath></dialect><dialect><name>Content Standard for Digital Geospatial Metadata (CSDGM) Biological Data Profile</name><xpath>boolean(/*[local-name() = 'mercury/taxoncl'])</xpath></dialect><dialect><name>Mercury Metadata Standard</name><xpath>boolean(/*[local-name() = 'metadata/mercury'])</xpath></dialect><dialect><name>DataONE Dublin Core Extended v1.0</name><xpath>boolean(/*[local-name() = 'metadata/simpleDc'])</xpath></dialect><dialect><name>Dryad Data Package and Data File Modules</name><xpath>boolean(/*[local-name() = 'DryadDataFile or local-name() = 'DryadDataPackage'])</xpath></dialect></check><check><id>ECS_Discovery-Recommended_PhoneType_ISO_ISO-1_DIF_ECHO_DCITE_EML_CSDGM_BDP_Mercury_Onedcx_Dryad</id><name>PhoneTypePresent</name><description>Checks to see if at least one Phone Type concept exists.</description><type>ECS_Discovery-Recommended</type><level>OPTIONAL</level><environment>python</environment><code><![CDATA[
+def call():
+  global output
+  global status
+ 
+  output = "The concept PhoneType is present."
+                                        
+  if(PhoneType is not None and len(str(PhoneType)) > 0):
+    status = "SUCCESS"
+    return True
+    
+  status = "FAILURE"
+  output = "PhoneType concept is not present"
+  
+  return False
+      ]]></code><selector><name>PhoneType</name><xpath>(</xpath></selector><dialect><name>ISO 19115 and ISO 19115-2 / ISO 19139 and ISO 19139-2</name><xpath>boolean(/*[local-name() = 'MI_Metadata' or local-name() = 'MD_Metadata'])</xpath></dialect><dialect><name>ISO 19115-1 / ISO 19115-3</name><xpath>boolean(/*[local-name() = 'MD_Metadata'])</xpath></dialect><dialect><name>Directory Interchange Format</name><xpath>boolean(/*[local-name() = 'dif'])</xpath></dialect><dialect><name>ECHO</name><xpath>boolean(/*[local-name() = 'granule or local-name() = 'granule'])</xpath></dialect><dialect><name>DataCite 3.1</name><xpath>boolean(/*[local-name() = 'resource'])</xpath></dialect><dialect><name>Ecological Metadata Language</name><xpath>boolean(/*[local-name() = 'eml'])</xpath></dialect><dialect><name>Content Standard for Digital Geospatial Metadata</name><xpath>boolean(/*[local-name() = 'metadata[not(mercury)]/idinfo'])</xpath></dialect><dialect><name>Content Standard for Digital Geospatial Metadata (CSDGM) Biological Data Profile</name><xpath>boolean(/*[local-name() = 'mercury/taxoncl'])</xpath></dialect><dialect><name>Mercury Metadata Standard</name><xpath>boolean(/*[local-name() = 'metadata/mercury'])</xpath></dialect><dialect><name>DataONE Dublin Core Extended v1.0</name><xpath>boolean(/*[local-name() = 'metadata/simpleDc'])</xpath></dialect><dialect><name>Dryad Data Package and Data File Modules</name><xpath>boolean(/*[local-name() = 'DryadDataFile or local-name() = 'DryadDataPackage'])</xpath></dialect></check><check><id>ECS_Discovery-Recommended_ThemeKeyword_ISO_ISO-1_DIF_ECHO_DCITE_EML_CSDGM_BDP_Mercury_Onedcx_Dryad</id><name>ThemeKeywordPresent</name><description>Checks to see if at least one Theme Keyword concept exists.</description><type>ECS_Discovery-Recommended</type><level>OPTIONAL</level><environment>python</environment><code><![CDATA[
+def call():
+  global output
+  global status
+ 
+  output = "The concept ThemeKeyword is present."
+                                        
+  if(ThemeKeyword is not None and len(str(ThemeKeyword)) > 0):
+    status = "SUCCESS"
+    return True
+    
+  status = "FAILURE"
+  output = "ThemeKeyword concept is not present"
+  
+  return False
+      ]]></code><selector><name>ThemeKeyword</name><xpath>(/MD_Metadata/identificationInfo/*/descriptiveKeywords/MD_Keywords[normalize-space\(type/MD_KeywordTypeCode)='theme']/keyword//*) or (/*/identificationInfo/*/descriptiveKeywords/MD_Keywords[contains\(type/MD_KeywordTypeCode,'theme')]/keyword) or (/DIF/Parameters/Category) or (/DIF/Parameters/Topic) or (/DIF/Parameters/Term) or (/DIF/Parameters/Variable_Level_1) or (/DIF/Parameters/Variable_Level_2) or (/DIF/Parameters/Variable_Level_3) or (/DIF/Parameters/Detailed_Variable) or (/metadata/idinfo/keywords/theme/themekey) or (/eml/*/keywordSet/keyword[@keywordType='thematic']) or (/resource/subjects/subject) or (/metadata/idinfo/keywords/theme/themekey) or (/metadata/idinfo/keywords/theme/themekey)</xpath></selector><dialect><name>ISO 19115 and ISO 19115-2 / ISO 19139 and ISO 19139-2</name><xpath>boolean(/*[local-name() = 'MI_Metadata' or local-name() = 'MD_Metadata'])</xpath></dialect><dialect><name>ISO 19115-1 / ISO 19115-3</name><xpath>boolean(/*[local-name() = 'MD_Metadata'])</xpath></dialect><dialect><name>Directory Interchange Format</name><xpath>boolean(/*[local-name() = 'dif'])</xpath></dialect><dialect><name>ECHO</name><xpath>boolean(/*[local-name() = 'granule or local-name() = 'granule'])</xpath></dialect><dialect><name>DataCite 3.1</name><xpath>boolean(/*[local-name() = 'resource'])</xpath></dialect><dialect><name>Ecological Metadata Language</name><xpath>boolean(/*[local-name() = 'eml'])</xpath></dialect><dialect><name>Content Standard for Digital Geospatial Metadata</name><xpath>boolean(/*[local-name() = 'metadata[not(mercury)]/idinfo'])</xpath></dialect><dialect><name>Content Standard for Digital Geospatial Metadata (CSDGM) Biological Data Profile</name><xpath>boolean(/*[local-name() = 'mercury/taxoncl'])</xpath></dialect><dialect><name>Mercury Metadata Standard</name><xpath>boolean(/*[local-name() = 'metadata/mercury'])</xpath></dialect><dialect><name>DataONE Dublin Core Extended v1.0</name><xpath>boolean(/*[local-name() = 'metadata/simpleDc'])</xpath></dialect><dialect><name>Dryad Data Package and Data File Modules</name><xpath>boolean(/*[local-name() = 'DryadDataFile or local-name() = 'DryadDataPackage'])</xpath></dialect></check><check><id>ECS_Discovery-Recommended_PlatformLongName_ISO_ISO-1_DIF_ECHO_DCITE_EML_CSDGM_BDP_Mercury_Onedcx_Dryad</id><name>PlatformLongNamePresent</name><description>Checks to see if at least one Platform Long Name concept exists.</description><type>ECS_Discovery-Recommended</type><level>OPTIONAL</level><environment>python</environment><code><![CDATA[
+def call():
+  global output
+  global status
+ 
+  output = "The concept PlatformLongName is present."
+                                        
+  if(PlatformLongName is not None and len(str(PlatformLongName)) > 0):
+    status = "SUCCESS"
+    return True
+    
+  status = "FAILURE"
+  output = "PlatformLongName concept is not present"
+  
+  return False
+      ]]></code><selector><name>PlatformLongName</name><xpath>(/MD_Metadata/acquisitionInformation/MI_AcquisitionInformation/platform/*/description//*) or (/MI_Metadata/acquisitionInformation/MI_AcquisitionInformation/platform/EOS_Platform/identifier/MD_Identifier/description//*) or (/Collection/Platforms/Platform/LongName) or (/DIF/Source_Name/Long_Name)</xpath></selector><dialect><name>ISO 19115 and ISO 19115-2 / ISO 19139 and ISO 19139-2</name><xpath>boolean(/*[local-name() = 'MI_Metadata' or local-name() = 'MD_Metadata'])</xpath></dialect><dialect><name>ISO 19115-1 / ISO 19115-3</name><xpath>boolean(/*[local-name() = 'MD_Metadata'])</xpath></dialect><dialect><name>Directory Interchange Format</name><xpath>boolean(/*[local-name() = 'dif'])</xpath></dialect><dialect><name>ECHO</name><xpath>boolean(/*[local-name() = 'granule or local-name() = 'granule'])</xpath></dialect><dialect><name>DataCite 3.1</name><xpath>boolean(/*[local-name() = 'resource'])</xpath></dialect><dialect><name>Ecological Metadata Language</name><xpath>boolean(/*[local-name() = 'eml'])</xpath></dialect><dialect><name>Content Standard for Digital Geospatial Metadata</name><xpath>boolean(/*[local-name() = 'metadata[not(mercury)]/idinfo'])</xpath></dialect><dialect><name>Content Standard for Digital Geospatial Metadata (CSDGM) Biological Data Profile</name><xpath>boolean(/*[local-name() = 'mercury/taxoncl'])</xpath></dialect><dialect><name>Mercury Metadata Standard</name><xpath>boolean(/*[local-name() = 'metadata/mercury'])</xpath></dialect><dialect><name>DataONE Dublin Core Extended v1.0</name><xpath>boolean(/*[local-name() = 'metadata/simpleDc'])</xpath></dialect><dialect><name>Dryad Data Package and Data File Modules</name><xpath>boolean(/*[local-name() = 'DryadDataFile or local-name() = 'DryadDataPackage'])</xpath></dialect></check><check><id>ECS_Discovery-Recommended_PlatformShortName_ISO_ISO-1_DIF_ECHO_DCITE_EML_CSDGM_BDP_Mercury_Onedcx_Dryad</id><name>PlatformShortNamePresent</name><description>Checks to see if at least one Platform Short Name concept exists.</description><type>ECS_Discovery-Recommended</type><level>OPTIONAL</level><environment>python</environment><code><![CDATA[
+def call():
+  global output
+  global status
+ 
+  output = "The concept PlatformShortName is present."
+                                        
+  if(PlatformShortName is not None and len(str(PlatformShortName)) > 0):
+    status = "SUCCESS"
+    return True
+    
+  status = "FAILURE"
+  output = "PlatformShortName concept is not present"
+  
+  return False
+      ]]></code><selector><name>PlatformShortName</name><xpath>(/MD_Metadata/acquisitionInformation/MI_AcquisitionInformation/platform/*/identifier/MD_Identifier/code//*) or (//platform/*/identifier/MD_Identifier/code//*) or (/*/Platforms/Platform/ShortName) or (/DIF/Source_Name/Short_Name)</xpath></selector><dialect><name>ISO 19115 and ISO 19115-2 / ISO 19139 and ISO 19139-2</name><xpath>boolean(/*[local-name() = 'MI_Metadata' or local-name() = 'MD_Metadata'])</xpath></dialect><dialect><name>ISO 19115-1 / ISO 19115-3</name><xpath>boolean(/*[local-name() = 'MD_Metadata'])</xpath></dialect><dialect><name>Directory Interchange Format</name><xpath>boolean(/*[local-name() = 'dif'])</xpath></dialect><dialect><name>ECHO</name><xpath>boolean(/*[local-name() = 'granule or local-name() = 'granule'])</xpath></dialect><dialect><name>DataCite 3.1</name><xpath>boolean(/*[local-name() = 'resource'])</xpath></dialect><dialect><name>Ecological Metadata Language</name><xpath>boolean(/*[local-name() = 'eml'])</xpath></dialect><dialect><name>Content Standard for Digital Geospatial Metadata</name><xpath>boolean(/*[local-name() = 'metadata[not(mercury)]/idinfo'])</xpath></dialect><dialect><name>Content Standard for Digital Geospatial Metadata (CSDGM) Biological Data Profile</name><xpath>boolean(/*[local-name() = 'mercury/taxoncl'])</xpath></dialect><dialect><name>Mercury Metadata Standard</name><xpath>boolean(/*[local-name() = 'metadata/mercury'])</xpath></dialect><dialect><name>DataONE Dublin Core Extended v1.0</name><xpath>boolean(/*[local-name() = 'metadata/simpleDc'])</xpath></dialect><dialect><name>Dryad Data Package and Data File Modules</name><xpath>boolean(/*[local-name() = 'DryadDataFile or local-name() = 'DryadDataPackage'])</xpath></dialect></check><check><id>ECS_Discovery-Recommended_PlatformType_ISO_ISO-1_DIF_ECHO_DCITE_EML_CSDGM_BDP_Mercury_Onedcx_Dryad</id><name>PlatformTypePresent</name><description>Checks to see if at least one Platform Type concept exists.</description><type>ECS_Discovery-Recommended</type><level>OPTIONAL</level><environment>python</environment><code><![CDATA[
+def call():
+  global output
+  global status
+ 
+  output = "The concept PlatformType is present."
+                                        
+  if(PlatformType is not None and len(str(PlatformType)) > 0):
+    status = "SUCCESS"
+    return True
+    
+  status = "FAILURE"
+  output = "PlatformType concept is not present"
+  
+  return False
+      ]]></code><selector><name>PlatformType</name><xpath>(/MI_Metadata/acquisitionInformation/MI_AcquisitionInformation/platform/EOS_Platform/description//*) or (/*/Platforms/Platform/Type)</xpath></selector><dialect><name>ISO 19115 and ISO 19115-2 / ISO 19139 and ISO 19139-2</name><xpath>boolean(/*[local-name() = 'MI_Metadata' or local-name() = 'MD_Metadata'])</xpath></dialect><dialect><name>ISO 19115-1 / ISO 19115-3</name><xpath>boolean(/*[local-name() = 'MD_Metadata'])</xpath></dialect><dialect><name>Directory Interchange Format</name><xpath>boolean(/*[local-name() = 'dif'])</xpath></dialect><dialect><name>ECHO</name><xpath>boolean(/*[local-name() = 'granule or local-name() = 'granule'])</xpath></dialect><dialect><name>DataCite 3.1</name><xpath>boolean(/*[local-name() = 'resource'])</xpath></dialect><dialect><name>Ecological Metadata Language</name><xpath>boolean(/*[local-name() = 'eml'])</xpath></dialect><dialect><name>Content Standard for Digital Geospatial Metadata</name><xpath>boolean(/*[local-name() = 'metadata[not(mercury)]/idinfo'])</xpath></dialect><dialect><name>Content Standard for Digital Geospatial Metadata (CSDGM) Biological Data Profile</name><xpath>boolean(/*[local-name() = 'mercury/taxoncl'])</xpath></dialect><dialect><name>Mercury Metadata Standard</name><xpath>boolean(/*[local-name() = 'metadata/mercury'])</xpath></dialect><dialect><name>DataONE Dublin Core Extended v1.0</name><xpath>boolean(/*[local-name() = 'metadata/simpleDc'])</xpath></dialect><dialect><name>Dryad Data Package and Data File Modules</name><xpath>boolean(/*[local-name() = 'DryadDataFile or local-name() = 'DryadDataPackage'])</xpath></dialect></check><check><id>ECS_Discovery-Recommended_InstrumentLongName_ISO_ISO-1_DIF_ECHO_DCITE_EML_CSDGM_BDP_Mercury_Onedcx_Dryad</id><name>InstrumentLongNamePresent</name><description>Checks to see if at least one Instrument Long Name concept exists.</description><type>ECS_Discovery-Recommended</type><level>OPTIONAL</level><environment>python</environment><code><![CDATA[
+def call():
+  global output
+  global status
+ 
+  output = "The concept InstrumentLongName is present."
+                                        
+  if(InstrumentLongName is not None and len(str(InstrumentLongName)) > 0):
+    status = "SUCCESS"
+    return True
+    
+  status = "FAILURE"
+  output = "InstrumentLongName concept is not present"
+  
+  return False
+      ]]></code><selector><name>InstrumentLongName</name><xpath>(/MD_Metadata/acquisitionInformation/MI_AcquisitionInformation/instrument/*/description//*) or (/MI_Metadata/acquisitionInformation/MI_AcquisitionInformation/Instrument/*/description//*) or (/Collection/Platforms/Platform/Instruments/Instrument/LongName) or (/DIF/Source_Name/Long_Name)</xpath></selector><dialect><name>ISO 19115 and ISO 19115-2 / ISO 19139 and ISO 19139-2</name><xpath>boolean(/*[local-name() = 'MI_Metadata' or local-name() = 'MD_Metadata'])</xpath></dialect><dialect><name>ISO 19115-1 / ISO 19115-3</name><xpath>boolean(/*[local-name() = 'MD_Metadata'])</xpath></dialect><dialect><name>Directory Interchange Format</name><xpath>boolean(/*[local-name() = 'dif'])</xpath></dialect><dialect><name>ECHO</name><xpath>boolean(/*[local-name() = 'granule or local-name() = 'granule'])</xpath></dialect><dialect><name>DataCite 3.1</name><xpath>boolean(/*[local-name() = 'resource'])</xpath></dialect><dialect><name>Ecological Metadata Language</name><xpath>boolean(/*[local-name() = 'eml'])</xpath></dialect><dialect><name>Content Standard for Digital Geospatial Metadata</name><xpath>boolean(/*[local-name() = 'metadata[not(mercury)]/idinfo'])</xpath></dialect><dialect><name>Content Standard for Digital Geospatial Metadata (CSDGM) Biological Data Profile</name><xpath>boolean(/*[local-name() = 'mercury/taxoncl'])</xpath></dialect><dialect><name>Mercury Metadata Standard</name><xpath>boolean(/*[local-name() = 'metadata/mercury'])</xpath></dialect><dialect><name>DataONE Dublin Core Extended v1.0</name><xpath>boolean(/*[local-name() = 'metadata/simpleDc'])</xpath></dialect><dialect><name>Dryad Data Package and Data File Modules</name><xpath>boolean(/*[local-name() = 'DryadDataFile or local-name() = 'DryadDataPackage'])</xpath></dialect></check><check><id>ECS_Discovery-Recommended_InstrumentShortName_ISO_ISO-1_DIF_ECHO_DCITE_EML_CSDGM_BDP_Mercury_Onedcx_Dryad</id><name>InstrumentShortNamePresent</name><description>Checks to see if at least one Instrument Short Name concept exists.</description><type>ECS_Discovery-Recommended</type><level>OPTIONAL</level><environment>python</environment><code><![CDATA[
+def call():
+  global output
+  global status
+ 
+  output = "The concept InstrumentShortName is present."
+                                        
+  if(InstrumentShortName is not None and len(str(InstrumentShortName)) > 0):
+    status = "SUCCESS"
+    return True
+    
+  status = "FAILURE"
+  output = "InstrumentShortName concept is not present"
+  
+  return False
+      ]]></code><selector><name>InstrumentShortName</name><xpath>(/MD_Metadata/acquisitionInformation/MI_AcquisitionInformation/instrument/*/identifier/MD_Identifier/code//*) or (//instrument/*/identifier/MD_Identifier/code//*) or (/*/Platforms/Platform/Instruments/Instrument/ShortName) or (/DIF/Sensor_Name/Short_Name)</xpath></selector><dialect><name>ISO 19115 and ISO 19115-2 / ISO 19139 and ISO 19139-2</name><xpath>boolean(/*[local-name() = 'MI_Metadata' or local-name() = 'MD_Metadata'])</xpath></dialect><dialect><name>ISO 19115-1 / ISO 19115-3</name><xpath>boolean(/*[local-name() = 'MD_Metadata'])</xpath></dialect><dialect><name>Directory Interchange Format</name><xpath>boolean(/*[local-name() = 'dif'])</xpath></dialect><dialect><name>ECHO</name><xpath>boolean(/*[local-name() = 'granule or local-name() = 'granule'])</xpath></dialect><dialect><name>DataCite 3.1</name><xpath>boolean(/*[local-name() = 'resource'])</xpath></dialect><dialect><name>Ecological Metadata Language</name><xpath>boolean(/*[local-name() = 'eml'])</xpath></dialect><dialect><name>Content Standard for Digital Geospatial Metadata</name><xpath>boolean(/*[local-name() = 'metadata[not(mercury)]/idinfo'])</xpath></dialect><dialect><name>Content Standard for Digital Geospatial Metadata (CSDGM) Biological Data Profile</name><xpath>boolean(/*[local-name() = 'mercury/taxoncl'])</xpath></dialect><dialect><name>Mercury Metadata Standard</name><xpath>boolean(/*[local-name() = 'metadata/mercury'])</xpath></dialect><dialect><name>DataONE Dublin Core Extended v1.0</name><xpath>boolean(/*[local-name() = 'metadata/simpleDc'])</xpath></dialect><dialect><name>Dryad Data Package and Data File Modules</name><xpath>boolean(/*[local-name() = 'DryadDataFile or local-name() = 'DryadDataPackage'])</xpath></dialect></check><check><id>ECS_Discovery-Recommended_SensorLongName_ISO_ISO-1_DIF_ECHO_DCITE_EML_CSDGM_BDP_Mercury_Onedcx_Dryad</id><name>SensorLongNamePresent</name><description>Checks to see if at least one Sensor Long Name concept exists.</description><type>ECS_Discovery-Recommended</type><level>OPTIONAL</level><environment>python</environment><code><![CDATA[
+def call():
+  global output
+  global status
+ 
+  output = "The concept SensorLongName is present."
+                                        
+  if(SensorLongName is not None and len(str(SensorLongName)) > 0):
+    status = "SUCCESS"
+    return True
+    
+  status = "FAILURE"
+  output = "SensorLongName concept is not present"
+  
+  return False
+      ]]></code><selector><name>SensorLongName</name><xpath>(/Collection/Platforms/Platform/Instruments/Instrument/Sensors/Sensor/LongName) or (/Sensor_Name/Long_Name)</xpath></selector><dialect><name>ISO 19115 and ISO 19115-2 / ISO 19139 and ISO 19139-2</name><xpath>boolean(/*[local-name() = 'MI_Metadata' or local-name() = 'MD_Metadata'])</xpath></dialect><dialect><name>ISO 19115-1 / ISO 19115-3</name><xpath>boolean(/*[local-name() = 'MD_Metadata'])</xpath></dialect><dialect><name>Directory Interchange Format</name><xpath>boolean(/*[local-name() = 'dif'])</xpath></dialect><dialect><name>ECHO</name><xpath>boolean(/*[local-name() = 'granule or local-name() = 'granule'])</xpath></dialect><dialect><name>DataCite 3.1</name><xpath>boolean(/*[local-name() = 'resource'])</xpath></dialect><dialect><name>Ecological Metadata Language</name><xpath>boolean(/*[local-name() = 'eml'])</xpath></dialect><dialect><name>Content Standard for Digital Geospatial Metadata</name><xpath>boolean(/*[local-name() = 'metadata[not(mercury)]/idinfo'])</xpath></dialect><dialect><name>Content Standard for Digital Geospatial Metadata (CSDGM) Biological Data Profile</name><xpath>boolean(/*[local-name() = 'mercury/taxoncl'])</xpath></dialect><dialect><name>Mercury Metadata Standard</name><xpath>boolean(/*[local-name() = 'metadata/mercury'])</xpath></dialect><dialect><name>DataONE Dublin Core Extended v1.0</name><xpath>boolean(/*[local-name() = 'metadata/simpleDc'])</xpath></dialect><dialect><name>Dryad Data Package and Data File Modules</name><xpath>boolean(/*[local-name() = 'DryadDataFile or local-name() = 'DryadDataPackage'])</xpath></dialect></check><check><id>ECS_Discovery-Recommended_SensorShortName_ISO_ISO-1_DIF_ECHO_DCITE_EML_CSDGM_BDP_Mercury_Onedcx_Dryad</id><name>SensorShortNamePresent</name><description>Checks to see if at least one Sensor Short Name concept exists.</description><type>ECS_Discovery-Recommended</type><level>OPTIONAL</level><environment>python</environment><code><![CDATA[
+def call():
+  global output
+  global status
+ 
+  output = "The concept SensorShortName is present."
+                                        
+  if(SensorShortName is not None and len(str(SensorShortName)) > 0):
+    status = "SUCCESS"
+    return True
+    
+  status = "FAILURE"
+  output = "SensorShortName concept is not present"
+  
+  return False
+      ]]></code><selector><name>SensorShortName</name><xpath>(//sensor/EOS_Sensor/identifier/MD_Identifier/code//*) or (/*/Platforms/Platform/Instruments/Instrument/Sensors/Sensor/ShortName) or (/metadata/mercury/Parameter_Description/Sensor)</xpath></selector><dialect><name>ISO 19115 and ISO 19115-2 / ISO 19139 and ISO 19139-2</name><xpath>boolean(/*[local-name() = 'MI_Metadata' or local-name() = 'MD_Metadata'])</xpath></dialect><dialect><name>ISO 19115-1 / ISO 19115-3</name><xpath>boolean(/*[local-name() = 'MD_Metadata'])</xpath></dialect><dialect><name>Directory Interchange Format</name><xpath>boolean(/*[local-name() = 'dif'])</xpath></dialect><dialect><name>ECHO</name><xpath>boolean(/*[local-name() = 'granule or local-name() = 'granule'])</xpath></dialect><dialect><name>DataCite 3.1</name><xpath>boolean(/*[local-name() = 'resource'])</xpath></dialect><dialect><name>Ecological Metadata Language</name><xpath>boolean(/*[local-name() = 'eml'])</xpath></dialect><dialect><name>Content Standard for Digital Geospatial Metadata</name><xpath>boolean(/*[local-name() = 'metadata[not(mercury)]/idinfo'])</xpath></dialect><dialect><name>Content Standard for Digital Geospatial Metadata (CSDGM) Biological Data Profile</name><xpath>boolean(/*[local-name() = 'mercury/taxoncl'])</xpath></dialect><dialect><name>Mercury Metadata Standard</name><xpath>boolean(/*[local-name() = 'metadata/mercury'])</xpath></dialect><dialect><name>DataONE Dublin Core Extended v1.0</name><xpath>boolean(/*[local-name() = 'metadata/simpleDc'])</xpath></dialect><dialect><name>Dryad Data Package and Data File Modules</name><xpath>boolean(/*[local-name() = 'DryadDataFile or local-name() = 'DryadDataPackage'])</xpath></dialect></check><check><id>ECS_Discovery-Recommended_EasternmostLongitude_ISO_ISO-1_DIF_ECHO_DCITE_EML_CSDGM_BDP_Mercury_Onedcx_Dryad</id><name>EasternmostLongitudePresent</name><description>Checks to see if at least one Easternmost Longitude concept exists.</description><type>ECS_Discovery-Recommended</type><level>OPTIONAL</level><environment>python</environment><code><![CDATA[
+def call():
+  global output
+  global status
+ 
+  output = "The concept EasternmostLongitude is present."
+                                        
+  if(EasternmostLongitude is not None and len(str(EasternmostLongitude)) > 0):
+    status = "SUCCESS"
+    return True
+    
+  status = "FAILURE"
+  output = "EasternmostLongitude concept is not present"
+  
+  return False
+      ]]></code><selector><name>EasternmostLongitude</name><xpath>(/MD_Metadata/identificationInfo/*/extent/EX_Extent/geographicElement/EX_GeographicBoundingBox/eastBoundLongitude/Decimal) or (/*/identificationInfo/*/extent/EX_Extent/geographicElement/EX_GeographicBoundingBox/eastBoundLongitude/Decimal) or (/*/Spatial/HorizontalSpatialDomain/Geometry/BoundingRectangle/WestBoundingCoordinate) or (/DIF/Spatial_Coverage/Easternmost_Longitude) or (/metadata/idinfo/spdom/bounding/eastbc) or (/eml/*/coverage/geographicCoverage/boundingCoordinates/eastBoundingCoordinate) or (/metadata/idinfo/spdom/bounding/eastbc) or (/metadata/mercury/Site_Information/Easternmost_Longitude) or (/metadata/mercury/Granule_Details/Granule/Easternmost_Longitude) or (/metadata/idinfo/spdom/bounding/eastbc)</xpath></selector><dialect><name>ISO 19115 and ISO 19115-2 / ISO 19139 and ISO 19139-2</name><xpath>boolean(/*[local-name() = 'MI_Metadata' or local-name() = 'MD_Metadata'])</xpath></dialect><dialect><name>ISO 19115-1 / ISO 19115-3</name><xpath>boolean(/*[local-name() = 'MD_Metadata'])</xpath></dialect><dialect><name>Directory Interchange Format</name><xpath>boolean(/*[local-name() = 'dif'])</xpath></dialect><dialect><name>ECHO</name><xpath>boolean(/*[local-name() = 'granule or local-name() = 'granule'])</xpath></dialect><dialect><name>DataCite 3.1</name><xpath>boolean(/*[local-name() = 'resource'])</xpath></dialect><dialect><name>Ecological Metadata Language</name><xpath>boolean(/*[local-name() = 'eml'])</xpath></dialect><dialect><name>Content Standard for Digital Geospatial Metadata</name><xpath>boolean(/*[local-name() = 'metadata[not(mercury)]/idinfo'])</xpath></dialect><dialect><name>Content Standard for Digital Geospatial Metadata (CSDGM) Biological Data Profile</name><xpath>boolean(/*[local-name() = 'mercury/taxoncl'])</xpath></dialect><dialect><name>Mercury Metadata Standard</name><xpath>boolean(/*[local-name() = 'metadata/mercury'])</xpath></dialect><dialect><name>DataONE Dublin Core Extended v1.0</name><xpath>boolean(/*[local-name() = 'metadata/simpleDc'])</xpath></dialect><dialect><name>Dryad Data Package and Data File Modules</name><xpath>boolean(/*[local-name() = 'DryadDataFile or local-name() = 'DryadDataPackage'])</xpath></dialect></check><check><id>ECS_Discovery-Recommended_NorthernmostLatitude_ISO_ISO-1_DIF_ECHO_DCITE_EML_CSDGM_BDP_Mercury_Onedcx_Dryad</id><name>NorthernmostLatitudePresent</name><description>Checks to see if at least one Northernmost Latitude concept exists.</description><type>ECS_Discovery-Recommended</type><level>OPTIONAL</level><environment>python</environment><code><![CDATA[
+def call():
+  global output
+  global status
+ 
+  output = "The concept NorthernmostLatitude is present."
+                                        
+  if(NorthernmostLatitude is not None and len(str(NorthernmostLatitude)) > 0):
+    status = "SUCCESS"
+    return True
+    
+  status = "FAILURE"
+  output = "NorthernmostLatitude concept is not present"
+  
+  return False
+      ]]></code><selector><name>NorthernmostLatitude</name><xpath>(/MD_Metadata/identificationInfo/*/extent/EX_Extent/geographicElement/EX_GeographicBoundingBox/northBoundLatitude/Decimal) or (/*/identificationInfo/*/extent/EX_Extent/geographicElement/EX_GeographicBoundingBox/northBoundLatitude/Decimal) or (/*/Spatial/HorizontalSpatialDomain/Geometry/BoundingRectangle/NorthBoundingCoordinate) or (/DIF/Spatial_Coverage/Northernmost_Latitude) or (/metadata/idinfo/spdom/bounding/northbc) or (/eml/*/coverage/geographicCoverage/boundingCoordinates/northBoundingCoordinate) or (/metadata/idinfo/spdom/bounding/northbc) or (/metadata/mercury/Site_Information/Northernmost_Latitude) or (/metadata/mercury/Granule_Details/Granule/Northernmost_Latitude) or (/metadata/idinfo/spdom/bounding/northbc)</xpath></selector><dialect><name>ISO 19115 and ISO 19115-2 / ISO 19139 and ISO 19139-2</name><xpath>boolean(/*[local-name() = 'MI_Metadata' or local-name() = 'MD_Metadata'])</xpath></dialect><dialect><name>ISO 19115-1 / ISO 19115-3</name><xpath>boolean(/*[local-name() = 'MD_Metadata'])</xpath></dialect><dialect><name>Directory Interchange Format</name><xpath>boolean(/*[local-name() = 'dif'])</xpath></dialect><dialect><name>ECHO</name><xpath>boolean(/*[local-name() = 'granule or local-name() = 'granule'])</xpath></dialect><dialect><name>DataCite 3.1</name><xpath>boolean(/*[local-name() = 'resource'])</xpath></dialect><dialect><name>Ecological Metadata Language</name><xpath>boolean(/*[local-name() = 'eml'])</xpath></dialect><dialect><name>Content Standard for Digital Geospatial Metadata</name><xpath>boolean(/*[local-name() = 'metadata[not(mercury)]/idinfo'])</xpath></dialect><dialect><name>Content Standard for Digital Geospatial Metadata (CSDGM) Biological Data Profile</name><xpath>boolean(/*[local-name() = 'mercury/taxoncl'])</xpath></dialect><dialect><name>Mercury Metadata Standard</name><xpath>boolean(/*[local-name() = 'metadata/mercury'])</xpath></dialect><dialect><name>DataONE Dublin Core Extended v1.0</name><xpath>boolean(/*[local-name() = 'metadata/simpleDc'])</xpath></dialect><dialect><name>Dryad Data Package and Data File Modules</name><xpath>boolean(/*[local-name() = 'DryadDataFile or local-name() = 'DryadDataPackage'])</xpath></dialect></check><check><id>ECS_Discovery-Recommended_SouthernmostLatitude_ISO_ISO-1_DIF_ECHO_DCITE_EML_CSDGM_BDP_Mercury_Onedcx_Dryad</id><name>SouthernmostLatitudePresent</name><description>Checks to see if at least one Southernmost Latitude concept exists.</description><type>ECS_Discovery-Recommended</type><level>OPTIONAL</level><environment>python</environment><code><![CDATA[
+def call():
+  global output
+  global status
+ 
+  output = "The concept SouthernmostLatitude is present."
+                                        
+  if(SouthernmostLatitude is not None and len(str(SouthernmostLatitude)) > 0):
+    status = "SUCCESS"
+    return True
+    
+  status = "FAILURE"
+  output = "SouthernmostLatitude concept is not present"
+  
+  return False
+      ]]></code><selector><name>SouthernmostLatitude</name><xpath>(/MD_Metadata/identificationInfo/*/extent/EX_Extent/geographicElement/EX_GeographicBoundingBox/southBoundLatitude/Decimal) or (/*/identificationInfo/*/extent/EX_Extent/geographicElement/EX_GeographicBoundingBox/southBoundLatitude/Decimal) or (/*/Spatial/HorizontalSpatialDomain/Geometry/BoundingRectangle/SouthBoundingCoordinate) or (/DIF/Spatial_Coverage/Southernmost_Latitude) or (/metadata/idinfo/spdom/bounding/southbc) or (/eml/*/coverage/geographicCoverage/boundingCoordinates/southBoundingCoordinate) or (/metadata/idinfo/spdom/bounding/southbc) or (/metadata/mercury/Site_Information/Southernmost_Latitude) or (/metadata/mercury/Granule_Details/Granule/Southernmost_Latitude) or (/metadata/idinfo/spdom/bounding/southbc)</xpath></selector><dialect><name>ISO 19115 and ISO 19115-2 / ISO 19139 and ISO 19139-2</name><xpath>boolean(/*[local-name() = 'MI_Metadata' or local-name() = 'MD_Metadata'])</xpath></dialect><dialect><name>ISO 19115-1 / ISO 19115-3</name><xpath>boolean(/*[local-name() = 'MD_Metadata'])</xpath></dialect><dialect><name>Directory Interchange Format</name><xpath>boolean(/*[local-name() = 'dif'])</xpath></dialect><dialect><name>ECHO</name><xpath>boolean(/*[local-name() = 'granule or local-name() = 'granule'])</xpath></dialect><dialect><name>DataCite 3.1</name><xpath>boolean(/*[local-name() = 'resource'])</xpath></dialect><dialect><name>Ecological Metadata Language</name><xpath>boolean(/*[local-name() = 'eml'])</xpath></dialect><dialect><name>Content Standard for Digital Geospatial Metadata</name><xpath>boolean(/*[local-name() = 'metadata[not(mercury)]/idinfo'])</xpath></dialect><dialect><name>Content Standard for Digital Geospatial Metadata (CSDGM) Biological Data Profile</name><xpath>boolean(/*[local-name() = 'mercury/taxoncl'])</xpath></dialect><dialect><name>Mercury Metadata Standard</name><xpath>boolean(/*[local-name() = 'metadata/mercury'])</xpath></dialect><dialect><name>DataONE Dublin Core Extended v1.0</name><xpath>boolean(/*[local-name() = 'metadata/simpleDc'])</xpath></dialect><dialect><name>Dryad Data Package and Data File Modules</name><xpath>boolean(/*[local-name() = 'DryadDataFile or local-name() = 'DryadDataPackage'])</xpath></dialect></check><check><id>ECS_Discovery-Recommended_WesternmostLongitude_ISO_ISO-1_DIF_ECHO_DCITE_EML_CSDGM_BDP_Mercury_Onedcx_Dryad</id><name>WesternmostLongitudePresent</name><description>Checks to see if at least one Westernmost Longitude concept exists.</description><type>ECS_Discovery-Recommended</type><level>OPTIONAL</level><environment>python</environment><code><![CDATA[
+def call():
+  global output
+  global status
+ 
+  output = "The concept WesternmostLongitude is present."
+                                        
+  if(WesternmostLongitude is not None and len(str(WesternmostLongitude)) > 0):
+    status = "SUCCESS"
+    return True
+    
+  status = "FAILURE"
+  output = "WesternmostLongitude concept is not present"
+  
+  return False
+      ]]></code><selector><name>WesternmostLongitude</name><xpath>(/MD_Metadata/identificationInfo/*/extent/EX_Extent/geographicElement/EX_GeographicBoundingBox/westBoundLongitude/Decimal) or (/*/identificationInfo/*/extent/EX_Extent/geographicElement/EX_GeographicBoundingBox/westBoundLongitude/Decimal) or (/*/Spatial/HorizontalSpatialDomain/Geometry/BoundingRectangle/WestBoundingCoordinate) or (/DIF/Spatial_Coverage/Westernmost_Longitude) or (/metadata/idinfo/spdom/bounding/westbc) or (/eml/*/coverage/geographicCoverage/boundingCoordinates/westBoundingCoordinate) or (/metadata/idinfo/spdom/bounding/westbc) or (/metadata/mercury/Site_Information/Westernmost_Longitude) or (/metadata/mercury/Granule_Details/Granule/Westernmost_Longitude) or (/metadata/idinfo/spdom/bounding/westbc)</xpath></selector><dialect><name>ISO 19115 and ISO 19115-2 / ISO 19139 and ISO 19139-2</name><xpath>boolean(/*[local-name() = 'MI_Metadata' or local-name() = 'MD_Metadata'])</xpath></dialect><dialect><name>ISO 19115-1 / ISO 19115-3</name><xpath>boolean(/*[local-name() = 'MD_Metadata'])</xpath></dialect><dialect><name>Directory Interchange Format</name><xpath>boolean(/*[local-name() = 'dif'])</xpath></dialect><dialect><name>ECHO</name><xpath>boolean(/*[local-name() = 'granule or local-name() = 'granule'])</xpath></dialect><dialect><name>DataCite 3.1</name><xpath>boolean(/*[local-name() = 'resource'])</xpath></dialect><dialect><name>Ecological Metadata Language</name><xpath>boolean(/*[local-name() = 'eml'])</xpath></dialect><dialect><name>Content Standard for Digital Geospatial Metadata</name><xpath>boolean(/*[local-name() = 'metadata[not(mercury)]/idinfo'])</xpath></dialect><dialect><name>Content Standard for Digital Geospatial Metadata (CSDGM) Biological Data Profile</name><xpath>boolean(/*[local-name() = 'mercury/taxoncl'])</xpath></dialect><dialect><name>Mercury Metadata Standard</name><xpath>boolean(/*[local-name() = 'metadata/mercury'])</xpath></dialect><dialect><name>DataONE Dublin Core Extended v1.0</name><xpath>boolean(/*[local-name() = 'metadata/simpleDc'])</xpath></dialect><dialect><name>Dryad Data Package and Data File Modules</name><xpath>boolean(/*[local-name() = 'DryadDataFile or local-name() = 'DryadDataPackage'])</xpath></dialect></check><check><id>ECS_Discovery-Recommended_CenterLatitude_ISO_ISO-1_DIF_ECHO_DCITE_EML_CSDGM_BDP_Mercury_Onedcx_Dryad</id><name>CenterLatitudePresent</name><description>Checks to see if at least one Center Latitude concept exists.</description><type>ECS_Discovery-Recommended</type><level>OPTIONAL</level><environment>python</environment><code><![CDATA[
+def call():
+  global output
+  global status
+ 
+  output = "The concept CenterLatitude is present."
+                                        
+  if(CenterLatitude is not None and len(str(CenterLatitude)) > 0):
+    status = "SUCCESS"
+    return True
+    
+  status = "FAILURE"
+  output = "CenterLatitude concept is not present"
+  
+  return False
+      ]]></code><selector><name>CenterLatitude</name><xpath>(</xpath></selector><dialect><name>ISO 19115 and ISO 19115-2 / ISO 19139 and ISO 19139-2</name><xpath>boolean(/*[local-name() = 'MI_Metadata' or local-name() = 'MD_Metadata'])</xpath></dialect><dialect><name>ISO 19115-1 / ISO 19115-3</name><xpath>boolean(/*[local-name() = 'MD_Metadata'])</xpath></dialect><dialect><name>Directory Interchange Format</name><xpath>boolean(/*[local-name() = 'dif'])</xpath></dialect><dialect><name>ECHO</name><xpath>boolean(/*[local-name() = 'granule or local-name() = 'granule'])</xpath></dialect><dialect><name>DataCite 3.1</name><xpath>boolean(/*[local-name() = 'resource'])</xpath></dialect><dialect><name>Ecological Metadata Language</name><xpath>boolean(/*[local-name() = 'eml'])</xpath></dialect><dialect><name>Content Standard for Digital Geospatial Metadata</name><xpath>boolean(/*[local-name() = 'metadata[not(mercury)]/idinfo'])</xpath></dialect><dialect><name>Content Standard for Digital Geospatial Metadata (CSDGM) Biological Data Profile</name><xpath>boolean(/*[local-name() = 'mercury/taxoncl'])</xpath></dialect><dialect><name>Mercury Metadata Standard</name><xpath>boolean(/*[local-name() = 'metadata/mercury'])</xpath></dialect><dialect><name>DataONE Dublin Core Extended v1.0</name><xpath>boolean(/*[local-name() = 'metadata/simpleDc'])</xpath></dialect><dialect><name>Dryad Data Package and Data File Modules</name><xpath>boolean(/*[local-name() = 'DryadDataFile or local-name() = 'DryadDataPackage'])</xpath></dialect></check><check><id>ECS_Discovery-Recommended_CenterLongitude_ISO_ISO-1_DIF_ECHO_DCITE_EML_CSDGM_BDP_Mercury_Onedcx_Dryad</id><name>CenterLongitudePresent</name><description>Checks to see if at least one Center Longitude concept exists.</description><type>ECS_Discovery-Recommended</type><level>OPTIONAL</level><environment>python</environment><code><![CDATA[
+def call():
+  global output
+  global status
+ 
+  output = "The concept CenterLongitude is present."
+                                        
+  if(CenterLongitude is not None and len(str(CenterLongitude)) > 0):
+    status = "SUCCESS"
+    return True
+    
+  status = "FAILURE"
+  output = "CenterLongitude concept is not present"
+  
+  return False
+      ]]></code><selector><name>CenterLongitude</name><xpath>(</xpath></selector><dialect><name>ISO 19115 and ISO 19115-2 / ISO 19139 and ISO 19139-2</name><xpath>boolean(/*[local-name() = 'MI_Metadata' or local-name() = 'MD_Metadata'])</xpath></dialect><dialect><name>ISO 19115-1 / ISO 19115-3</name><xpath>boolean(/*[local-name() = 'MD_Metadata'])</xpath></dialect><dialect><name>Directory Interchange Format</name><xpath>boolean(/*[local-name() = 'dif'])</xpath></dialect><dialect><name>ECHO</name><xpath>boolean(/*[local-name() = 'granule or local-name() = 'granule'])</xpath></dialect><dialect><name>DataCite 3.1</name><xpath>boolean(/*[local-name() = 'resource'])</xpath></dialect><dialect><name>Ecological Metadata Language</name><xpath>boolean(/*[local-name() = 'eml'])</xpath></dialect><dialect><name>Content Standard for Digital Geospatial Metadata</name><xpath>boolean(/*[local-name() = 'metadata[not(mercury)]/idinfo'])</xpath></dialect><dialect><name>Content Standard for Digital Geospatial Metadata (CSDGM) Biological Data Profile</name><xpath>boolean(/*[local-name() = 'mercury/taxoncl'])</xpath></dialect><dialect><name>Mercury Metadata Standard</name><xpath>boolean(/*[local-name() = 'metadata/mercury'])</xpath></dialect><dialect><name>DataONE Dublin Core Extended v1.0</name><xpath>boolean(/*[local-name() = 'metadata/simpleDc'])</xpath></dialect><dialect><name>Dryad Data Package and Data File Modules</name><xpath>boolean(/*[local-name() = 'DryadDataFile or local-name() = 'DryadDataPackage'])</xpath></dialect></check><check><id>ECS_Discovery-Recommended_RadiusUnits_ISO_ISO-1_DIF_ECHO_DCITE_EML_CSDGM_BDP_Mercury_Onedcx_Dryad</id><name>RadiusUnitsPresent</name><description>Checks to see if at least one Radius Units concept exists.</description><type>ECS_Discovery-Recommended</type><level>OPTIONAL</level><environment>python</environment><code><![CDATA[
+def call():
+  global output
+  global status
+ 
+  output = "The concept RadiusUnits is present."
+                                        
+  if(RadiusUnits is not None and len(str(RadiusUnits)) > 0):
+    status = "SUCCESS"
+    return True
+    
+  status = "FAILURE"
+  output = "RadiusUnits concept is not present"
+  
+  return False
+      ]]></code><selector><name>RadiusUnits</name><xpath>(</xpath></selector><dialect><name>ISO 19115 and ISO 19115-2 / ISO 19139 and ISO 19139-2</name><xpath>boolean(/*[local-name() = 'MI_Metadata' or local-name() = 'MD_Metadata'])</xpath></dialect><dialect><name>ISO 19115-1 / ISO 19115-3</name><xpath>boolean(/*[local-name() = 'MD_Metadata'])</xpath></dialect><dialect><name>Directory Interchange Format</name><xpath>boolean(/*[local-name() = 'dif'])</xpath></dialect><dialect><name>ECHO</name><xpath>boolean(/*[local-name() = 'granule or local-name() = 'granule'])</xpath></dialect><dialect><name>DataCite 3.1</name><xpath>boolean(/*[local-name() = 'resource'])</xpath></dialect><dialect><name>Ecological Metadata Language</name><xpath>boolean(/*[local-name() = 'eml'])</xpath></dialect><dialect><name>Content Standard for Digital Geospatial Metadata</name><xpath>boolean(/*[local-name() = 'metadata[not(mercury)]/idinfo'])</xpath></dialect><dialect><name>Content Standard for Digital Geospatial Metadata (CSDGM) Biological Data Profile</name><xpath>boolean(/*[local-name() = 'mercury/taxoncl'])</xpath></dialect><dialect><name>Mercury Metadata Standard</name><xpath>boolean(/*[local-name() = 'metadata/mercury'])</xpath></dialect><dialect><name>DataONE Dublin Core Extended v1.0</name><xpath>boolean(/*[local-name() = 'metadata/simpleDc'])</xpath></dialect><dialect><name>Dryad Data Package and Data File Modules</name><xpath>boolean(/*[local-name() = 'DryadDataFile or local-name() = 'DryadDataPackage'])</xpath></dialect></check><check><id>ECS_Discovery-Recommended_ExclusionGRingFlag_ISO_ISO-1_DIF_ECHO_DCITE_EML_CSDGM_BDP_Mercury_Onedcx_Dryad</id><name>ExclusionGRingFlagPresent</name><description>Checks to see if at least one Exclusion GRing Flag concept exists.</description><type>ECS_Discovery-Recommended</type><level>OPTIONAL</level><environment>python</environment><code><![CDATA[
+def call():
+  global output
+  global status
+ 
+  output = "The concept ExclusionGRingFlag is present."
+                                        
+  if(ExclusionGRingFlag is not None and len(str(ExclusionGRingFlag)) > 0):
+    status = "SUCCESS"
+    return True
+    
+  status = "FAILURE"
+  output = "ExclusionGRingFlag concept is not present"
+  
+  return False
+      ]]></code><selector><name>ExclusionGRingFlag</name><xpath>(</xpath></selector><dialect><name>ISO 19115 and ISO 19115-2 / ISO 19139 and ISO 19139-2</name><xpath>boolean(/*[local-name() = 'MI_Metadata' or local-name() = 'MD_Metadata'])</xpath></dialect><dialect><name>ISO 19115-1 / ISO 19115-3</name><xpath>boolean(/*[local-name() = 'MD_Metadata'])</xpath></dialect><dialect><name>Directory Interchange Format</name><xpath>boolean(/*[local-name() = 'dif'])</xpath></dialect><dialect><name>ECHO</name><xpath>boolean(/*[local-name() = 'granule or local-name() = 'granule'])</xpath></dialect><dialect><name>DataCite 3.1</name><xpath>boolean(/*[local-name() = 'resource'])</xpath></dialect><dialect><name>Ecological Metadata Language</name><xpath>boolean(/*[local-name() = 'eml'])</xpath></dialect><dialect><name>Content Standard for Digital Geospatial Metadata</name><xpath>boolean(/*[local-name() = 'metadata[not(mercury)]/idinfo'])</xpath></dialect><dialect><name>Content Standard for Digital Geospatial Metadata (CSDGM) Biological Data Profile</name><xpath>boolean(/*[local-name() = 'mercury/taxoncl'])</xpath></dialect><dialect><name>Mercury Metadata Standard</name><xpath>boolean(/*[local-name() = 'metadata/mercury'])</xpath></dialect><dialect><name>DataONE Dublin Core Extended v1.0</name><xpath>boolean(/*[local-name() = 'metadata/simpleDc'])</xpath></dialect><dialect><name>Dryad Data Package and Data File Modules</name><xpath>boolean(/*[local-name() = 'DryadDataFile or local-name() = 'DryadDataPackage'])</xpath></dialect></check><check><id>ECS_Discovery-Recommended_GRingPointLatitude_ISO_ISO-1_DIF_ECHO_DCITE_EML_CSDGM_BDP_Mercury_Onedcx_Dryad</id><name>GRingPointLatitudePresent</name><description>Checks to see if at least one GRing Point Latitude concept exists.</description><type>ECS_Discovery-Recommended</type><level>OPTIONAL</level><environment>python</environment><code><![CDATA[
+def call():
+  global output
+  global status
+ 
+  output = "The concept GRingPointLatitude is present."
+                                        
+  if(GRingPointLatitude is not None and len(str(GRingPointLatitude)) > 0):
+    status = "SUCCESS"
+    return True
+    
+  status = "FAILURE"
+  output = "GRingPointLatitude concept is not present"
+  
+  return False
+      ]]></code><selector><name>GRingPointLatitude</name><xpath>(</xpath></selector><dialect><name>ISO 19115 and ISO 19115-2 / ISO 19139 and ISO 19139-2</name><xpath>boolean(/*[local-name() = 'MI_Metadata' or local-name() = 'MD_Metadata'])</xpath></dialect><dialect><name>ISO 19115-1 / ISO 19115-3</name><xpath>boolean(/*[local-name() = 'MD_Metadata'])</xpath></dialect><dialect><name>Directory Interchange Format</name><xpath>boolean(/*[local-name() = 'dif'])</xpath></dialect><dialect><name>ECHO</name><xpath>boolean(/*[local-name() = 'granule or local-name() = 'granule'])</xpath></dialect><dialect><name>DataCite 3.1</name><xpath>boolean(/*[local-name() = 'resource'])</xpath></dialect><dialect><name>Ecological Metadata Language</name><xpath>boolean(/*[local-name() = 'eml'])</xpath></dialect><dialect><name>Content Standard for Digital Geospatial Metadata</name><xpath>boolean(/*[local-name() = 'metadata[not(mercury)]/idinfo'])</xpath></dialect><dialect><name>Content Standard for Digital Geospatial Metadata (CSDGM) Biological Data Profile</name><xpath>boolean(/*[local-name() = 'mercury/taxoncl'])</xpath></dialect><dialect><name>Mercury Metadata Standard</name><xpath>boolean(/*[local-name() = 'metadata/mercury'])</xpath></dialect><dialect><name>DataONE Dublin Core Extended v1.0</name><xpath>boolean(/*[local-name() = 'metadata/simpleDc'])</xpath></dialect><dialect><name>Dryad Data Package and Data File Modules</name><xpath>boolean(/*[local-name() = 'DryadDataFile or local-name() = 'DryadDataPackage'])</xpath></dialect></check><check><id>ECS_Discovery-Recommended_GRingPointLongitude_ISO_ISO-1_DIF_ECHO_DCITE_EML_CSDGM_BDP_Mercury_Onedcx_Dryad</id><name>GRingPointLongitudePresent</name><description>Checks to see if at least one GRing Point Longitude concept exists.</description><type>ECS_Discovery-Recommended</type><level>OPTIONAL</level><environment>python</environment><code><![CDATA[
+def call():
+  global output
+  global status
+ 
+  output = "The concept GRingPointLongitude is present."
+                                        
+  if(GRingPointLongitude is not None and len(str(GRingPointLongitude)) > 0):
+    status = "SUCCESS"
+    return True
+    
+  status = "FAILURE"
+  output = "GRingPointLongitude concept is not present"
+  
+  return False
+      ]]></code><selector><name>GRingPointLongitude</name><xpath>(</xpath></selector><dialect><name>ISO 19115 and ISO 19115-2 / ISO 19139 and ISO 19139-2</name><xpath>boolean(/*[local-name() = 'MI_Metadata' or local-name() = 'MD_Metadata'])</xpath></dialect><dialect><name>ISO 19115-1 / ISO 19115-3</name><xpath>boolean(/*[local-name() = 'MD_Metadata'])</xpath></dialect><dialect><name>Directory Interchange Format</name><xpath>boolean(/*[local-name() = 'dif'])</xpath></dialect><dialect><name>ECHO</name><xpath>boolean(/*[local-name() = 'granule or local-name() = 'granule'])</xpath></dialect><dialect><name>DataCite 3.1</name><xpath>boolean(/*[local-name() = 'resource'])</xpath></dialect><dialect><name>Ecological Metadata Language</name><xpath>boolean(/*[local-name() = 'eml'])</xpath></dialect><dialect><name>Content Standard for Digital Geospatial Metadata</name><xpath>boolean(/*[local-name() = 'metadata[not(mercury)]/idinfo'])</xpath></dialect><dialect><name>Content Standard for Digital Geospatial Metadata (CSDGM) Biological Data Profile</name><xpath>boolean(/*[local-name() = 'mercury/taxoncl'])</xpath></dialect><dialect><name>Mercury Metadata Standard</name><xpath>boolean(/*[local-name() = 'metadata/mercury'])</xpath></dialect><dialect><name>DataONE Dublin Core Extended v1.0</name><xpath>boolean(/*[local-name() = 'metadata/simpleDc'])</xpath></dialect><dialect><name>Dryad Data Package and Data File Modules</name><xpath>boolean(/*[local-name() = 'DryadDataFile or local-name() = 'DryadDataPackage'])</xpath></dialect></check><check><id>ECS_Discovery-Recommended_GRingPointSequenceNumber_ISO_ISO-1_DIF_ECHO_DCITE_EML_CSDGM_BDP_Mercury_Onedcx_Dryad</id><name>GRingPointSequenceNumberPresent</name><description>Checks to see if at least one GRing Point Sequence Number concept exists.</description><type>ECS_Discovery-Recommended</type><level>OPTIONAL</level><environment>python</environment><code><![CDATA[
+def call():
+  global output
+  global status
+ 
+  output = "The concept GRingPointSequenceNumber is present."
+                                        
+  if(GRingPointSequenceNumber is not None and len(str(GRingPointSequenceNumber)) > 0):
+    status = "SUCCESS"
+    return True
+    
+  status = "FAILURE"
+  output = "GRingPointSequenceNumber concept is not present"
+  
+  return False
+      ]]></code><selector><name>GRingPointSequenceNumber</name><xpath>(</xpath></selector><dialect><name>ISO 19115 and ISO 19115-2 / ISO 19139 and ISO 19139-2</name><xpath>boolean(/*[local-name() = 'MI_Metadata' or local-name() = 'MD_Metadata'])</xpath></dialect><dialect><name>ISO 19115-1 / ISO 19115-3</name><xpath>boolean(/*[local-name() = 'MD_Metadata'])</xpath></dialect><dialect><name>Directory Interchange Format</name><xpath>boolean(/*[local-name() = 'dif'])</xpath></dialect><dialect><name>ECHO</name><xpath>boolean(/*[local-name() = 'granule or local-name() = 'granule'])</xpath></dialect><dialect><name>DataCite 3.1</name><xpath>boolean(/*[local-name() = 'resource'])</xpath></dialect><dialect><name>Ecological Metadata Language</name><xpath>boolean(/*[local-name() = 'eml'])</xpath></dialect><dialect><name>Content Standard for Digital Geospatial Metadata</name><xpath>boolean(/*[local-name() = 'metadata[not(mercury)]/idinfo'])</xpath></dialect><dialect><name>Content Standard for Digital Geospatial Metadata (CSDGM) Biological Data Profile</name><xpath>boolean(/*[local-name() = 'mercury/taxoncl'])</xpath></dialect><dialect><name>Mercury Metadata Standard</name><xpath>boolean(/*[local-name() = 'metadata/mercury'])</xpath></dialect><dialect><name>DataONE Dublin Core Extended v1.0</name><xpath>boolean(/*[local-name() = 'metadata/simpleDc'])</xpath></dialect><dialect><name>Dryad Data Package and Data File Modules</name><xpath>boolean(/*[local-name() = 'DryadDataFile or local-name() = 'DryadDataPackage'])</xpath></dialect></check><check><id>ECS_Discovery-Recommended_PointLatitude_ISO_ISO-1_DIF_ECHO_DCITE_EML_CSDGM_BDP_Mercury_Onedcx_Dryad</id><name>PointLatitudePresent</name><description>Checks to see if at least one Point Latitude concept exists.</description><type>ECS_Discovery-Recommended</type><level>OPTIONAL</level><environment>python</environment><code><![CDATA[
+def call():
+  global output
+  global status
+ 
+  output = "The concept PointLatitude is present."
+                                        
+  if(PointLatitude is not None and len(str(PointLatitude)) > 0):
+    status = "SUCCESS"
+    return True
+    
+  status = "FAILURE"
+  output = "PointLatitude concept is not present"
+  
+  return False
+      ]]></code><selector><name>PointLatitude</name><xpath>(</xpath></selector><dialect><name>ISO 19115 and ISO 19115-2 / ISO 19139 and ISO 19139-2</name><xpath>boolean(/*[local-name() = 'MI_Metadata' or local-name() = 'MD_Metadata'])</xpath></dialect><dialect><name>ISO 19115-1 / ISO 19115-3</name><xpath>boolean(/*[local-name() = 'MD_Metadata'])</xpath></dialect><dialect><name>Directory Interchange Format</name><xpath>boolean(/*[local-name() = 'dif'])</xpath></dialect><dialect><name>ECHO</name><xpath>boolean(/*[local-name() = 'granule or local-name() = 'granule'])</xpath></dialect><dialect><name>DataCite 3.1</name><xpath>boolean(/*[local-name() = 'resource'])</xpath></dialect><dialect><name>Ecological Metadata Language</name><xpath>boolean(/*[local-name() = 'eml'])</xpath></dialect><dialect><name>Content Standard for Digital Geospatial Metadata</name><xpath>boolean(/*[local-name() = 'metadata[not(mercury)]/idinfo'])</xpath></dialect><dialect><name>Content Standard for Digital Geospatial Metadata (CSDGM) Biological Data Profile</name><xpath>boolean(/*[local-name() = 'mercury/taxoncl'])</xpath></dialect><dialect><name>Mercury Metadata Standard</name><xpath>boolean(/*[local-name() = 'metadata/mercury'])</xpath></dialect><dialect><name>DataONE Dublin Core Extended v1.0</name><xpath>boolean(/*[local-name() = 'metadata/simpleDc'])</xpath></dialect><dialect><name>Dryad Data Package and Data File Modules</name><xpath>boolean(/*[local-name() = 'DryadDataFile or local-name() = 'DryadDataPackage'])</xpath></dialect></check><check><id>ECS_Discovery-Recommended_PointLongitude_ISO_ISO-1_DIF_ECHO_DCITE_EML_CSDGM_BDP_Mercury_Onedcx_Dryad</id><name>PointLongitudePresent</name><description>Checks to see if at least one Point Longitude concept exists.</description><type>ECS_Discovery-Recommended</type><level>OPTIONAL</level><environment>python</environment><code><![CDATA[
+def call():
+  global output
+  global status
+ 
+  output = "The concept PointLongitude is present."
+                                        
+  if(PointLongitude is not None and len(str(PointLongitude)) > 0):
+    status = "SUCCESS"
+    return True
+    
+  status = "FAILURE"
+  output = "PointLongitude concept is not present"
+  
+  return False
+      ]]></code><selector><name>PointLongitude</name><xpath>(</xpath></selector><dialect><name>ISO 19115 and ISO 19115-2 / ISO 19139 and ISO 19139-2</name><xpath>boolean(/*[local-name() = 'MI_Metadata' or local-name() = 'MD_Metadata'])</xpath></dialect><dialect><name>ISO 19115-1 / ISO 19115-3</name><xpath>boolean(/*[local-name() = 'MD_Metadata'])</xpath></dialect><dialect><name>Directory Interchange Format</name><xpath>boolean(/*[local-name() = 'dif'])</xpath></dialect><dialect><name>ECHO</name><xpath>boolean(/*[local-name() = 'granule or local-name() = 'granule'])</xpath></dialect><dialect><name>DataCite 3.1</name><xpath>boolean(/*[local-name() = 'resource'])</xpath></dialect><dialect><name>Ecological Metadata Language</name><xpath>boolean(/*[local-name() = 'eml'])</xpath></dialect><dialect><name>Content Standard for Digital Geospatial Metadata</name><xpath>boolean(/*[local-name() = 'metadata[not(mercury)]/idinfo'])</xpath></dialect><dialect><name>Content Standard for Digital Geospatial Metadata (CSDGM) Biological Data Profile</name><xpath>boolean(/*[local-name() = 'mercury/taxoncl'])</xpath></dialect><dialect><name>Mercury Metadata Standard</name><xpath>boolean(/*[local-name() = 'metadata/mercury'])</xpath></dialect><dialect><name>DataONE Dublin Core Extended v1.0</name><xpath>boolean(/*[local-name() = 'metadata/simpleDc'])</xpath></dialect><dialect><name>Dryad Data Package and Data File Modules</name><xpath>boolean(/*[local-name() = 'DryadDataFile or local-name() = 'DryadDataPackage'])</xpath></dialect></check><check><id>ECS_Discovery-Recommended_EndsatPresentFlag_ISO_ISO-1_DIF_ECHO_DCITE_EML_CSDGM_BDP_Mercury_Onedcx_Dryad</id><name>EndsatPresentFlagPresent</name><description>Checks to see if at least one Ends at Present Flag concept exists.</description><type>ECS_Discovery-Recommended</type><level>OPTIONAL</level><environment>python</environment><code><![CDATA[
+def call():
+  global output
+  global status
+ 
+  output = "The concept EndsatPresentFlag is present."
+                                        
+  if(EndsatPresentFlag is not None and len(str(EndsatPresentFlag)) > 0):
+    status = "SUCCESS"
+    return True
+    
+  status = "FAILURE"
+  output = "EndsatPresentFlag concept is not present"
+  
+  return False
+      ]]></code><selector><name>EndsatPresentFlag</name><xpath>(</xpath></selector><dialect><name>ISO 19115 and ISO 19115-2 / ISO 19139 and ISO 19139-2</name><xpath>boolean(/*[local-name() = 'MI_Metadata' or local-name() = 'MD_Metadata'])</xpath></dialect><dialect><name>ISO 19115-1 / ISO 19115-3</name><xpath>boolean(/*[local-name() = 'MD_Metadata'])</xpath></dialect><dialect><name>Directory Interchange Format</name><xpath>boolean(/*[local-name() = 'dif'])</xpath></dialect><dialect><name>ECHO</name><xpath>boolean(/*[local-name() = 'granule or local-name() = 'granule'])</xpath></dialect><dialect><name>DataCite 3.1</name><xpath>boolean(/*[local-name() = 'resource'])</xpath></dialect><dialect><name>Ecological Metadata Language</name><xpath>boolean(/*[local-name() = 'eml'])</xpath></dialect><dialect><name>Content Standard for Digital Geospatial Metadata</name><xpath>boolean(/*[local-name() = 'metadata[not(mercury)]/idinfo'])</xpath></dialect><dialect><name>Content Standard for Digital Geospatial Metadata (CSDGM) Biological Data Profile</name><xpath>boolean(/*[local-name() = 'mercury/taxoncl'])</xpath></dialect><dialect><name>Mercury Metadata Standard</name><xpath>boolean(/*[local-name() = 'metadata/mercury'])</xpath></dialect><dialect><name>DataONE Dublin Core Extended v1.0</name><xpath>boolean(/*[local-name() = 'metadata/simpleDc'])</xpath></dialect><dialect><name>Dryad Data Package and Data File Modules</name><xpath>boolean(/*[local-name() = 'DryadDataFile or local-name() = 'DryadDataPackage'])</xpath></dialect></check><check><id>ECS_Discovery-Recommended_DateType_ISO_ISO-1_DIF_ECHO_DCITE_EML_CSDGM_BDP_Mercury_Onedcx_Dryad</id><name>DateTypePresent</name><description>Checks to see if at least one Date Type concept exists.</description><type>ECS_Discovery-Recommended</type><level>OPTIONAL</level><environment>python</environment><code><![CDATA[
+def call():
+  global output
+  global status
+ 
+  output = "The concept DateType is present."
+                                        
+  if(DateType is not None and len(str(DateType)) > 0):
+    status = "SUCCESS"
+    return True
+    
+  status = "FAILURE"
+  output = "DateType concept is not present"
+  
+  return False
+      ]]></code><selector><name>DateType</name><xpath>(</xpath></selector><dialect><name>ISO 19115 and ISO 19115-2 / ISO 19139 and ISO 19139-2</name><xpath>boolean(/*[local-name() = 'MI_Metadata' or local-name() = 'MD_Metadata'])</xpath></dialect><dialect><name>ISO 19115-1 / ISO 19115-3</name><xpath>boolean(/*[local-name() = 'MD_Metadata'])</xpath></dialect><dialect><name>Directory Interchange Format</name><xpath>boolean(/*[local-name() = 'dif'])</xpath></dialect><dialect><name>ECHO</name><xpath>boolean(/*[local-name() = 'granule or local-name() = 'granule'])</xpath></dialect><dialect><name>DataCite 3.1</name><xpath>boolean(/*[local-name() = 'resource'])</xpath></dialect><dialect><name>Ecological Metadata Language</name><xpath>boolean(/*[local-name() = 'eml'])</xpath></dialect><dialect><name>Content Standard for Digital Geospatial Metadata</name><xpath>boolean(/*[local-name() = 'metadata[not(mercury)]/idinfo'])</xpath></dialect><dialect><name>Content Standard for Digital Geospatial Metadata (CSDGM) Biological Data Profile</name><xpath>boolean(/*[local-name() = 'mercury/taxoncl'])</xpath></dialect><dialect><name>Mercury Metadata Standard</name><xpath>boolean(/*[local-name() = 'metadata/mercury'])</xpath></dialect><dialect><name>DataONE Dublin Core Extended v1.0</name><xpath>boolean(/*[local-name() = 'metadata/simpleDc'])</xpath></dialect><dialect><name>Dryad Data Package and Data File Modules</name><xpath>boolean(/*[local-name() = 'DryadDataFile or local-name() = 'DryadDataPackage'])</xpath></dialect></check><check><id>ECS_Discovery-Recommended_PrecisionofSeconds_ISO_ISO-1_DIF_ECHO_DCITE_EML_CSDGM_BDP_Mercury_Onedcx_Dryad</id><name>PrecisionofSecondsPresent</name><description>Checks to see if at least one Precision of Seconds concept exists.</description><type>ECS_Discovery-Recommended</type><level>OPTIONAL</level><environment>python</environment><code><![CDATA[
+def call():
+  global output
+  global status
+ 
+  output = "The concept PrecisionofSeconds is present."
+                                        
+  if(PrecisionofSeconds is not None and len(str(PrecisionofSeconds)) > 0):
+    status = "SUCCESS"
+    return True
+    
+  status = "FAILURE"
+  output = "PrecisionofSeconds concept is not present"
+  
+  return False
+      ]]></code><selector><name>PrecisionofSeconds</name><xpath>(</xpath></selector><dialect><name>ISO 19115 and ISO 19115-2 / ISO 19139 and ISO 19139-2</name><xpath>boolean(/*[local-name() = 'MI_Metadata' or local-name() = 'MD_Metadata'])</xpath></dialect><dialect><name>ISO 19115-1 / ISO 19115-3</name><xpath>boolean(/*[local-name() = 'MD_Metadata'])</xpath></dialect><dialect><name>Directory Interchange Format</name><xpath>boolean(/*[local-name() = 'dif'])</xpath></dialect><dialect><name>ECHO</name><xpath>boolean(/*[local-name() = 'granule or local-name() = 'granule'])</xpath></dialect><dialect><name>DataCite 3.1</name><xpath>boolean(/*[local-name() = 'resource'])</xpath></dialect><dialect><name>Ecological Metadata Language</name><xpath>boolean(/*[local-name() = 'eml'])</xpath></dialect><dialect><name>Content Standard for Digital Geospatial Metadata</name><xpath>boolean(/*[local-name() = 'metadata[not(mercury)]/idinfo'])</xpath></dialect><dialect><name>Content Standard for Digital Geospatial Metadata (CSDGM) Biological Data Profile</name><xpath>boolean(/*[local-name() = 'mercury/taxoncl'])</xpath></dialect><dialect><name>Mercury Metadata Standard</name><xpath>boolean(/*[local-name() = 'metadata/mercury'])</xpath></dialect><dialect><name>DataONE Dublin Core Extended v1.0</name><xpath>boolean(/*[local-name() = 'metadata/simpleDc'])</xpath></dialect><dialect><name>Dryad Data Package and Data File Modules</name><xpath>boolean(/*[local-name() = 'DryadDataFile or local-name() = 'DryadDataPackage'])</xpath></dialect></check><check><id>ECS_Discovery-Recommended_TemporalRangeType_ISO_ISO-1_DIF_ECHO_DCITE_EML_CSDGM_BDP_Mercury_Onedcx_Dryad</id><name>TemporalRangeTypePresent</name><description>Checks to see if at least one Temporal Range Type concept exists.</description><type>ECS_Discovery-Recommended</type><level>OPTIONAL</level><environment>python</environment><code><![CDATA[
+def call():
+  global output
+  global status
+ 
+  output = "The concept TemporalRangeType is present."
+                                        
+  if(TemporalRangeType is not None and len(str(TemporalRangeType)) > 0):
+    status = "SUCCESS"
+    return True
+    
+  status = "FAILURE"
+  output = "TemporalRangeType concept is not present"
+  
+  return False
+      ]]></code><selector><name>TemporalRangeType</name><xpath>(</xpath></selector><dialect><name>ISO 19115 and ISO 19115-2 / ISO 19139 and ISO 19139-2</name><xpath>boolean(/*[local-name() = 'MI_Metadata' or local-name() = 'MD_Metadata'])</xpath></dialect><dialect><name>ISO 19115-1 / ISO 19115-3</name><xpath>boolean(/*[local-name() = 'MD_Metadata'])</xpath></dialect><dialect><name>Directory Interchange Format</name><xpath>boolean(/*[local-name() = 'dif'])</xpath></dialect><dialect><name>ECHO</name><xpath>boolean(/*[local-name() = 'granule or local-name() = 'granule'])</xpath></dialect><dialect><name>DataCite 3.1</name><xpath>boolean(/*[local-name() = 'resource'])</xpath></dialect><dialect><name>Ecological Metadata Language</name><xpath>boolean(/*[local-name() = 'eml'])</xpath></dialect><dialect><name>Content Standard for Digital Geospatial Metadata</name><xpath>boolean(/*[local-name() = 'metadata[not(mercury)]/idinfo'])</xpath></dialect><dialect><name>Content Standard for Digital Geospatial Metadata (CSDGM) Biological Data Profile</name><xpath>boolean(/*[local-name() = 'mercury/taxoncl'])</xpath></dialect><dialect><name>Mercury Metadata Standard</name><xpath>boolean(/*[local-name() = 'metadata/mercury'])</xpath></dialect><dialect><name>DataONE Dublin Core Extended v1.0</name><xpath>boolean(/*[local-name() = 'metadata/simpleDc'])</xpath></dialect><dialect><name>Dryad Data Package and Data File Modules</name><xpath>boolean(/*[local-name() = 'DryadDataFile or local-name() = 'DryadDataPackage'])</xpath></dialect></check><check><id>ECS_Discovery-Recommended_TimeType_ISO_ISO-1_DIF_ECHO_DCITE_EML_CSDGM_BDP_Mercury_Onedcx_Dryad</id><name>TimeTypePresent</name><description>Checks to see if at least one Time Type concept exists.</description><type>ECS_Discovery-Recommended</type><level>OPTIONAL</level><environment>python</environment><code><![CDATA[
+def call():
+  global output
+  global status
+ 
+  output = "The concept TimeType is present."
+                                        
+  if(TimeType is not None and len(str(TimeType)) > 0):
+    status = "SUCCESS"
+    return True
+    
+  status = "FAILURE"
+  output = "TimeType concept is not present"
+  
+  return False
+      ]]></code><selector><name>TimeType</name><xpath>(</xpath></selector><dialect><name>ISO 19115 and ISO 19115-2 / ISO 19139 and ISO 19139-2</name><xpath>boolean(/*[local-name() = 'MI_Metadata' or local-name() = 'MD_Metadata'])</xpath></dialect><dialect><name>ISO 19115-1 / ISO 19115-3</name><xpath>boolean(/*[local-name() = 'MD_Metadata'])</xpath></dialect><dialect><name>Directory Interchange Format</name><xpath>boolean(/*[local-name() = 'dif'])</xpath></dialect><dialect><name>ECHO</name><xpath>boolean(/*[local-name() = 'granule or local-name() = 'granule'])</xpath></dialect><dialect><name>DataCite 3.1</name><xpath>boolean(/*[local-name() = 'resource'])</xpath></dialect><dialect><name>Ecological Metadata Language</name><xpath>boolean(/*[local-name() = 'eml'])</xpath></dialect><dialect><name>Content Standard for Digital Geospatial Metadata</name><xpath>boolean(/*[local-name() = 'metadata[not(mercury)]/idinfo'])</xpath></dialect><dialect><name>Content Standard for Digital Geospatial Metadata (CSDGM) Biological Data Profile</name><xpath>boolean(/*[local-name() = 'mercury/taxoncl'])</xpath></dialect><dialect><name>Mercury Metadata Standard</name><xpath>boolean(/*[local-name() = 'metadata/mercury'])</xpath></dialect><dialect><name>DataONE Dublin Core Extended v1.0</name><xpath>boolean(/*[local-name() = 'metadata/simpleDc'])</xpath></dialect><dialect><name>Dryad Data Package and Data File Modules</name><xpath>boolean(/*[local-name() = 'DryadDataFile or local-name() = 'DryadDataPackage'])</xpath></dialect></check></mdq:suite>
