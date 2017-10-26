@@ -19,7 +19,7 @@ library(httr)
 #'
 #' @examples
 get <- function(url) {
-    temp_dir = Sys.getenv("MDQE_CACHE_DIR", "~/tmp")
+    temp_dir = Sys.getenv("MDQE_CACHE_DIR", tempdir())
     if (temp_dir == "") stop("MDQE_CACHE_DIR was not set.")
     if (!file.exists(temp_dir))
       stop(paste0("MDQE_CACHE_DIR was set to a path that does not exist: ",
