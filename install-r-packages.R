@@ -2,14 +2,9 @@
 
 # The packages we're going to install
 packages_cran <- c("jsonlite",
-                   "dplyr",
-                   "ggplot2",
-                   "svglite",
                    "digest",
                    "RCurl",
-                   "httr",
-                   "readxl",
-                   "data.table")
+                   "httr")
 
 packages_github <- list("metadig" = "NCEAS/metadig-r")
 
