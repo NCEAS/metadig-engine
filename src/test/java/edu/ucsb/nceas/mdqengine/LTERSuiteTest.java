@@ -16,6 +16,7 @@ import org.dataone.configuration.Settings;
 import org.dataone.service.types.v2.SystemMetadata;
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import edu.ucsb.nceas.mdqengine.model.Check;
@@ -50,7 +51,7 @@ public class LTERSuiteTest{
 	}
 	
 	@Test
-	//@Ignore("ignoring LTERSuiteTest")
+	@Ignore("ignoring LTERSuiteTest")
 	public void runMDQEtestsForId() {
 		MDQEngine mdqe = new MDQEngine();
 		Run run = null;
