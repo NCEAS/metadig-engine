@@ -4,23 +4,32 @@ import com.rabbitmq.client.*;
 
 import java.io.*;
 import java.io.IOException;
+import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeoutException;
+import java.util.UUID;
+import java.io.InputStream;
+
 import org.apache.commons.configuration2.Configuration;
 import org.apache.commons.configuration2.builder.fluent.Configurations;
 import org.apache.commons.configuration2.ex.ConfigurationException;
+import org.apache.log4j.Logger;
 
-import edu.ucsb.nceas.mdqengine.MDQEngine;
-import edu.ucsb.nceas.mdqengine.MDQStore;
 import edu.ucsb.nceas.mdqengine.model.Result;
 import edu.ucsb.nceas.mdqengine.model.Run;
 import edu.ucsb.nceas.mdqengine.model.Suite;
 import edu.ucsb.nceas.mdqengine.store.InMemoryStore;
 import edu.ucsb.nceas.mdqengine.serialize.XmlMarshaller;
-import org.dataone.service.types.v2.SystemMetadata;
 
+import org.apache.commons.codec.digest.DigestUtils;
+import org.dataone.client.auth.AuthTokenSession;
+import org.dataone.client.v2.itk.D1Client;
+import org.dataone.client.v2.MNode;
+import org.dataone.service.exceptions.*;
+import org.dataone.service.types.v1.*;
+import org.dataone.service.types.v2.SystemMetadata;
 
 /**
  * The Worker class contains methods that create quality reports for metadata documents
@@ -40,6 +49,10 @@ public class Worker {
     private static Channel generateReportChannel;
     private static Connection reportCreatedConnection;
     private static Channel reportCreatedChannel;
+
+    private static Logger logger = Logger.getLogger(Worker.class);
+    private static String RabbitMQhost = null;
+    private static String authToken = null;
 
     public static void main(String[] argv) throws Exception {
 
@@ -150,7 +163,7 @@ public class Worker {
 
         // Queue to send generated reports back to controller
         factory = new ConnectionFactory();
-        factory.setHost("localhost");
+        factory.setHost(RabbitMQhost);
         reportCreatedConnection = factory.newConnection();
         reportCreatedChannel = reportCreatedConnection.createChannel();
         reportCreatedChannel.queueDeclare(REPORT_CREATED_QUEUE_NAME, false, false, false, null);
