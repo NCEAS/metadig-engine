@@ -1,0 +1,41 @@
+  @startuml images/mqe-run_check-sequence.png
+  skinparam {
+        sequenceTitleFontColor black
+                sequenceTitleFontSize 16
+                sequenceTitleFontStyle normal
+                sequenceTitleFontName Lucida Bright
+        }
+        title: Run a Quality Check for a Data Package (run_check)
+
+        "Remote Client" -> "DataONE Quality Service": MN.QualityService(checkId, pid)
+        activate "Remote Client"
+        note right: pid specified a package id
+        activate "DataONE Quality Service"
+        "DataONE Quality Service" -> MNodeService : runQC(checkId, pid)
+        activate "MNodeService"
+        MNodeService -> QCController : runCheck(checkId, metadata, datasetList)
+        activate QCController
+        QCController -> QCMetadataManager : getCheckMetadata(checkId, dialect)
+        activate QCMetadataManager
+        QCMetadataManager --> QCController : checkMetadata
+        deactivate QCMetadataManager
+        loop [ datasetsToCheck > 0]
+          QCController -> QCDispatcher : dispatchCheck(checkId, dialect, metadata, dataset)
+          activate QCDispatcher
+          QCDispatcher -> checkImpl : runCheckImpl(metadata, dataset)
+          activate checkImpl
+          checkImpl --> QCDispatcher : checkResults
+          deactivate checkImpl
+          QCDispatcher --> QCController : checkResults
+          deactivate QCDispatcher 
+          QCController -> QCResultsManager : storeResults(checkId, pid, dialect)
+        end
+        QCController --> MNodeService : checkReport
+        deactivate QCController
+        MNodeService --> "DataONE Quality Service" : checkReport
+        deactivate "MNodeService"
+        "DataONE Quality Service" --> "Remote Client" : serviceResponse
+        deactivate "DataONE Quality Service"
+        deactivate "Remote Client"
+
+  @enduml
