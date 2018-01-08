@@ -12,6 +12,17 @@ import org.dataone.exceptions.MarshallingException;
 import org.dataone.service.types.v2.SystemMetadata;
 import org.dataone.service.util.TypeMarshaller;
 import org.joda.time.DateTime;
+
+/**
+ * The Controller class accepts requests for generating quality documents for
+ * for metadata documents. As the report generation process can take a significant
+ * amount of time, the controller delegates report generation to worker processes
+ * via a RabbitMQ queue that the worker processes read from.
+ * @author      Peter Slaughter
+ *
+ * @version     %I%, %G%
+ * @since       1.0
+ */
 public class Controller {
 
     private final static String GENERATE_REPORT_QUEUE_NAME = "generateReport";
@@ -63,6 +74,18 @@ public class Controller {
         }
     }
 
+    /**
+     *
+     * @param memberNode the member node service URL to send the quality report to.
+     * @param metadataPid the identifier of the metadata document.
+     * @param metadata the metadata XML document.
+     * @param qualitySuiteId the unique identifier of the metadig-engine quality suite, i.e. 'arctic.data.center.suite.1'
+     * @param localFilePath the local directory path on the member node where data files can be located (not implemented yet)
+     * @param requestDateTime the date and time of the initial report generation request
+     * @param systemMetadata the DataONE system metadata for the metadata document.
+     * @return
+     * @throws java.io.IOException
+     */
     public String processRequest( String memberNode,
                                   String metadataPid,
                                   InputStream metadata,
@@ -107,6 +130,11 @@ public class Controller {
         return("sucess");
     }
 
+    /**
+     *
+     * @throws IOException
+     * @throws TimeoutException
+     */
     public void setupQueues () throws IOException, TimeoutException {
         ConnectionFactory factory = new ConnectionFactory();
         factory.setHost("localhost");
@@ -119,6 +147,10 @@ public class Controller {
         reportCreatedConnection = factory.newConnection();
         reportCreatedChannel = reportCreatedConnection.createChannel();
         reportCreatedChannel.queueDeclare(REPORT_CREATED_QUEUE_NAME, false, false, false, null);
+
+        /* This method overrides the RabbitMQ library and implements a callback that is invoked whenever an entry is added
+         * to 'reportCreatedChannel'.
+         */
         final Consumer consumer = new DefaultConsumer(reportCreatedChannel) {
             @Override
             public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties, byte[] body) throws IOException {
@@ -142,11 +174,21 @@ public class Controller {
         reportCreatedChannel.basicConsume(REPORT_CREATED_QUEUE_NAME, false, consumer);
     }
 
+    /**
+     *
+     * @param message
+     * @throws IOException
+     */
     public void writeGenerateQueue (byte[] message) throws IOException {
 
         generateReportChannel.basicPublish("", GENERATE_REPORT_QUEUE_NAME, MessageProperties.PERSISTENT_TEXT_PLAIN, message);
     }
 
+    /**
+     *
+     * @throws IOException
+     * @throws TimeoutException
+     */
     public void shutdown() throws IOException, TimeoutException {
         generateReportChannel.close();
         generateReportConnection.close();

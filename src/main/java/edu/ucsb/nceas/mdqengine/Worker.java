@@ -22,6 +22,15 @@ import edu.ucsb.nceas.mdqengine.serialize.XmlMarshaller;
 import org.dataone.service.types.v2.SystemMetadata;
 
 
+/**
+ * The Worker class contains methods that create quality reports for metadata documents
+ * and uploads these reports to DataONE member nodes for cataloging and indexing.
+ * A worker reads from a RabbitMQ queue that a controller process writes to.
+ *
+ * @author      Peter Slaughter
+ * @version     %I%, %G%
+ * @since       1.0
+ */
 public class Worker {
 
     private final static String GENERATE_REPORT_QUEUE_NAME = "generateReport";
@@ -96,6 +105,11 @@ public class Worker {
         generateReportChannel.basicConsume(GENERATE_REPORT_QUEUE_NAME, false, consumer);
     }
 
+     * Declare and connect to the queues that are being maintained by the Controller.
+     *
+     * @throws IOException
+     * @throws TimeoutException
+     */
     public void setupQueues () throws IOException, TimeoutException {
         ConnectionFactory factory = new ConnectionFactory();
         factory.setHost("localhost");
@@ -116,6 +130,16 @@ public class Worker {
         reportCreatedChannel.queueDeclare(REPORT_CREATED_QUEUE_NAME, false, false, false, null);
     }
 
+    /**
+     * The processReport method runs the requested metadig-engine quality suite for the provided
+     * metadata document. This method appends the generated quality report to the RabbitMQ
+     * queue entry.
+     *
+     * @param message the RabbitMQ queue entry that contains the metadata document to score.
+     * @return
+     * @throws InterruptedException
+     * @throws Exception
+     */
     public String processReport(QueueEntry message) throws InterruptedException, Exception {
 
         String suiteId = message.getQualitySuiteId();
