@@ -165,6 +165,91 @@ public class Worker {
         return(runXML);
     }
 
+    /**
+     * Submit (upload) the newly generated quality report to the source member node of the metadata document that
+     * the report was generated for.
+     *
+     * @param message the RabbitMQ message containing the metadata document and generated quality report.
+     * @return pid the
+     */
+    public String submitReport(QueueEntry message) {
+
+        Integer rptLength = 0;
+        String qualityXML = null;
+        InputStream qualityReport;
+        String memberNodeServiceUrl = null;
+
+        try {
+            qualityXML = message.getRunXML();
+            qualityReport = new ByteArrayInputStream(qualityXML.getBytes("UTF-8"));
+            rptLength = qualityXML.getBytes("UTF-8").length;
+        } catch (UnsupportedEncodingException ex) {
+            logger.error("Unable to read quality report for metadata pid: " + message.getMetadataPid());
+            logger.error(ex);
+            return null;
+        }
+
+        /* Read the sysmeta for the metadata pid and use appropriate values from it for the
+           quality report sysmeta.
+         */
+        SystemMetadata sysmeta = message.getSystemMetadata();
+
+        Identifier newId = new Identifier();
+        UUID uuid = UUID.randomUUID();
+        newId.setValue("urn:uuid" + uuid.toString());
+
+        SystemMetadata sm = new SystemMetadata();
+        sm.setIdentifier(newId);
+        ObjectFormatIdentifier fmtid = new ObjectFormatIdentifier();
+        fmtid.setValue("https://nceas.ucsb.edu/mdqe/v1");
+        sm.setFormatId(fmtid);
+
+        sm.setSize(BigInteger.valueOf(rptLength));
+        Checksum cs = new Checksum();
+        cs.setAlgorithm("SHA-1");
+        cs.setValue(DigestUtils.shaHex(qualityXML));
+        sm.setChecksum(cs);
+
+        sm.setRightsHolder(sysmeta.getRightsHolder());
+        sm.setSubmitter(sysmeta.getRightsHolder());
+        sm.setAccessPolicy(sysmeta.getAccessPolicy());
+
+        /* The auth token is read from the config file. */
+        Session session = new AuthTokenSession(authToken);
+        System.out.println(" Created session for subject: " + session.getSubject());
+
+        memberNodeServiceUrl = message.getMemberNode();
+
+        /* Upload the quality report to the source member node */
+        MNode mn = null;
+        try {
+            mn = D1Client.getMN(memberNodeServiceUrl);
+        } catch (ServiceFailure ex) {
+            ex.printStackTrace();
+            System.out.println("Error connecting to DataONE client at URL: " + memberNodeServiceUrl);
+        }
+
+        System.out.println(" Uploading quality report with pid: " + newId.getValue() + ", rightsHolder: " + sm.getRightsHolder().getValue());
+
+        Identifier returnPid = null;
+        try {
+            returnPid = mn.create(session, newId, qualityReport, sm);
+        } catch (InvalidRequest | NotAuthorized | InvalidToken | InvalidSystemMetadata | UnsupportedType | IdentifierNotUnique | InsufficientResources
+                | NotImplemented | ServiceFailure ex) {
+            logger.error(ex);
+            System.out.println("Error uploading object with PID: " + returnPid.getValue());
+        }
+
+        System.out.println("Uploaded pid " + returnPid.getValue() + " to member node " + mn.getNodeId().getValue());
+
+        return (returnPid.getValue());
+    }
+
+    /**
+     *
+     * @param message
+     * @throws IOException
+     */
     public void writeReportCreatedQueue (byte[] message) throws IOException {
         reportCreatedChannel.basicPublish("", REPORT_CREATED_QUEUE_NAME, MessageProperties.PERSISTENT_TEXT_PLAIN, message);
     }
