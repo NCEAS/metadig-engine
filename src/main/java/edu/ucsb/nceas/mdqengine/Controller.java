@@ -5,7 +5,9 @@ import com.rabbitmq.client.*;
 import java.io.*;
 import java.util.concurrent.TimeoutException;
 
-import org.apache.commons.compress.utils.IOUtils;
+import org.apache.commons.configuration2.Configuration;
+import org.apache.commons.configuration2.builder.fluent.Configurations;
+import org.apache.commons.configuration2.ex.ConfigurationException;
 import org.dataone.exceptions.MarshallingException;
 import org.dataone.service.types.v2.SystemMetadata;
 import org.dataone.service.util.TypeMarshaller;
@@ -20,7 +22,20 @@ public class Controller {
     private static com.rabbitmq.client.Connection reportCreatedConnection;
     private static com.rabbitmq.client.Channel reportCreatedChannel;
 
+    private static String RabbitMQhost = null;
+
     public static void main(String[] argv) throws Exception {
+
+        Configurations configs = new Configurations();
+        Configuration config = null;
+        try {
+            config = configs.properties(new File("./config/metadig.properties"));
+            // access configuration properties
+        } catch (ConfigurationException cex) {
+            // Something went wrong
+        }
+
+        RabbitMQhost = config.getString("RabbitMQ.host");
 
         DateTime requestDateTime = new DateTime();
         FileInputStream metadata = new FileInputStream("/Users/slaughter/Projects/Metadig/test/knb.1101.1.xml");

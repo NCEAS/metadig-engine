@@ -8,6 +8,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeoutException;
+import org.apache.commons.configuration2.Configuration;
+import org.apache.commons.configuration2.builder.fluent.Configurations;
+import org.apache.commons.configuration2.ex.ConfigurationException;
 
 import edu.ucsb.nceas.mdqengine.MDQEngine;
 import edu.ucsb.nceas.mdqengine.MDQStore;
@@ -34,6 +37,21 @@ public class Worker {
         Worker wkr = new Worker();
         wkr.setupQueues();
 
+        Configurations configs = new Configurations();
+        Configuration config = null;
+        try {
+            config = configs.properties(new File("./config/metadig.properties"));
+            // access configuration properties
+        } catch (ConfigurationException cex) {
+            // Something went wrong
+        }
+
+        /* The host on which the Controller process is running. The RabbitMQ queue can be on
+         * any host, but for simplicity it is on the same host that the Controller is running on.
+         */
+        RabbitMQhost = config.getString("RabbitMQ.host");
+        /* The authentication token that will allow a worker to upload the quality report to the member node. */
+        authToken = config.getString("dataone.authToken");
         final Consumer consumer = new DefaultConsumer(generateReportChannel) {
             @Override
             public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties, byte[] body) throws IOException {
