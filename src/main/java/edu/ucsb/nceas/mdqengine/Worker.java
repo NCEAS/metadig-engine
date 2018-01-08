@@ -61,6 +61,11 @@ public class Worker {
         RabbitMQhost = config.getString("RabbitMQ.host");
         /* The authentication token that will allow a worker to upload the quality report to the member node. */
         authToken = config.getString("dataone.authToken");
+
+        /* This method is overridden from the RabbitMQ library and serves as the callback that is invoked whenenver
+         * an entry added to the 'generatedReportChannel' and this particular instance of the Worker is selected for
+         * delivery of the queue message.
+         */
         final Consumer consumer = new DefaultConsumer(generateReportChannel) {
             @Override
             public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties, byte[] body) throws IOException {
@@ -83,7 +88,20 @@ public class Worker {
                 try {
                     runXML = wkr.processReport(qEntry);
                     qEntry.setRunXML(runXML);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                } catch (java.lang.Exception e) {
+                    e.printStackTrace();
+                } finally {
+                    System.out.println(" [x] Done");
+                    //generateReportChannel.basicAck(envelope.getDeliveryTag(), false);
+                }
 
+                /* Once the quality report has been created, it can be submitted to the member node to be
+                   uploaded and indexed.
+                */
+                try {
+                    wkr.submitReport(qEntry);
                     ByteArrayOutputStream bos = new ByteArrayOutputStream();
                     ObjectOutput out = new ObjectOutputStream(bos);
                     out.writeObject(qEntry);
@@ -91,28 +109,36 @@ public class Worker {
 
                     wkr.writeReportCreatedQueue(message);
                     System.out.println(" [x] Sent completed report for pid: '" + qEntry.getMetadataPid() + "'");
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                } catch (java.lang.Exception e) {
-                    e.printStackTrace();
+                } catch (Exception e) {
+
                 } finally {
                     System.out.println(" [x] Done");
+                    /* Inform the controller that the report has been created and uploaded. */
+                    /* TODO: include a status value and description so that when a response is sent for
+                       a failed report creation, the controller can take the appropriate action.
+                     */
                     generateReportChannel.basicAck(envelope.getDeliveryTag(), false);
                 }
+
             }
         };
 
         generateReportChannel.basicConsume(GENERATE_REPORT_QUEUE_NAME, false, consumer);
     }
 
+    /**
      * Declare and connect to the queues that are being maintained by the Controller.
      *
      * @throws IOException
      * @throws TimeoutException
      */
     public void setupQueues () throws IOException, TimeoutException {
+
+        /* Connect to the RabbitMQ queue containing entries for which quality reports
+           need to be created.
+         */
         ConnectionFactory factory = new ConnectionFactory();
-        factory.setHost("localhost");
+        factory.setHost(RabbitMQhost);
         generateReportConnection = factory.newConnection();
         generateReportChannel = generateReportConnection.createChannel();
 
