@@ -1,0 +1,25 @@
+@startuml queue-event-trigger_sequence.png
+    skinparam {
+        sequenceTitleFontColor black
+        sequenceTitleFontSize 16
+        sequenceTitleFontStyle normal
+        sequenceTitleFontName Lucida Bright
+    }
+    title: MetaDIG Engine: 'pending' Queue
+    activate "DataONE_Client"
+    "DataONE_Client" -> Metacat : MN.create(metadata, sysmeta)
+    deactivate "DataONE_Client"
+    activate Metacat
+    Metacat -> Metacat : MDQClient.submit(sysmeta)
+    Metacat -> "MetaDIG API" : https://quality..../suite/{id}/run
+    deactivate Metacat
+    activate "MetaDIG API"
+    "MetaDIG API" -> "MetaDIG webapp" : SuiteResource.run(metadata, sysmeta, suiteId)
+    deactivate "MetaDIG API"
+    activate "MetaDIG webapp"
+    "MetaDIG webapp" -> Controller : processRun(metadata, sysmeta, suiteId)
+    deactivate "MetaDIG webapp"
+    activate Controller
+    Controller ->> "pending:Java Queue" : QueueEntry
+    deactivate Controller
+@enduml  

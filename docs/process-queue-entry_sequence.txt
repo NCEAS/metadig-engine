@@ -1,0 +1,32 @@
+@startuml process-queue-entry_sequence.png
+    skinparam {
+        sequenceTitleFontColor black
+        sequenceTitleFontSize 16
+        sequenceTitleFontStyle normal
+        sequenceTitleFontName Lucida Bright
+    }
+    title: MetaDIG Engine: Processing a Request
+    activate "pending:Java Queue"
+    "pending:Java Queue" -> Controller: QueueEntry
+    deactivate "pending:Java Queue"
+    activate Controller
+    Controller -> Controller: scheduleEntry()
+    Controller ->> "inprocess:RabbitMQ Queue": QueueEntry
+    deactivate Controller
+    activate "inprocess:RabbitMQ Queue"
+    "inprocess:RabbitMQ Queue" -> Worker: processReport()
+    deactivate "inprocess:RabbitMQ Queue"
+    Worker -> Metacat: MN.create()
+    Metacat -> Worker: status
+    alt success case
+        Worker -> "inprocess:RabbitMQ Queue": acknowledgement
+        Worker ->> "completed:RabbitMQ Queue": QueueEntry
+        "completed:RabbitMQ Queue" -> Controller: handleCompleted(success)
+        Controller ->> "completed:RabbitMQ Queue" : acknowledgement
+    else failure
+        Worker -> "inprocess:RabbitMQ Queue": acknowledgement
+        Worker ->> "completed:RabbitMQ Queue": QueueEntry
+        "completed:RabbitMQ Queue" -> Controller: handleCompleted(failure)
+        Controller ->> "completed:RabbitMQ Queue" : acknowledgement
+    end
+@enduml
