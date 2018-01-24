@@ -70,7 +70,7 @@ metadata quality reports for holdings in DataONE Member Nodes.
 
 The following diagram shows the various components of the MetaDIG engine:
 
-![MetaDIG Engine Components](https://github.com/NCEAS/metadig-engine/blob/master/docs/imags/metadig-engine_components.png "MetaDIG Engine Components")
+![MetaDIG Engine Components](https://github.com/NCEAS/metadig-engine/blob/master/docs/images/metadig-engine_components.png "MetaDIG Engine Components")
 
 ## The following diagrams show message passing between the MetaDIG components:
 
