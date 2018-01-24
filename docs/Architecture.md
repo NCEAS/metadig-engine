@@ -74,13 +74,13 @@ The following diagram shows the various components of the MetaDIG engine:
 
 ## The following diagrams show message passing between the MetaDIG components:
 
-* This sequence diagram showing how a job is poped off of the pending queue by a worker, added to the inprocess queue, processed by the worker, results saved to a Tier 3 node, and then the controller is told the job is complete.
+* This sequence diagram showing how a job is popped off of the pending queue by a worker, added to the inprocess queue, processed by the worker, results saved to a Tier 3 node, and then the controller is told the job is complete.
 
-https://github.com/NCEAS/metadig-engine/blob/master/docs/images/process-queue-entry_sequence.png
+![Worker Process](https://github.com/NCEAS/metadig-engine/blob/master/docs/images/process-queue-entry_sequence.png "Worker Process")
 
 * This sequence diagram shows how a trigger event on a MN or CN results in a job being added to the pending queue.
 
-https://github.com/NCEAS/metadig-engine/blob/master/docs/images/queue-event-trigger_sequence.png
+![Queue Event Sequence](https://github.com/NCEAS/metadig-engine/blob/master/docs/images/queue-event-trigger_sequence.png "Queue Event Sequence")
 
 ## Metadata Quality Display Mockups
 * The following display shows metadata quality summarized for all of DataONE:
