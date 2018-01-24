@@ -1,4 +1,4 @@
-@startuml process-queue-entry_sequence.png
+@startuml images/process-queue-entry_sequence.png
     skinparam {
         sequenceTitleFontColor black
         sequenceTitleFontSize 16

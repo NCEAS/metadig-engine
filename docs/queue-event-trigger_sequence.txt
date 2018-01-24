@@ -1,4 +1,4 @@
-@startuml queue-event-trigger_sequence.png
+@startuml images/queue-event-trigger_sequence.png
     skinparam {
         sequenceTitleFontColor black
         sequenceTitleFontSize 16
