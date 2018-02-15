@@ -1,8 +1,8 @@
-# mdqengine
+# metadig-engine
 The Java project for MetaDig
 
-[![Build Status](https://travis-ci.org/NCEAS/mdqengine.svg?branch=master)](https://travis-ci.org/NCEAS/mdqengine)
-[![BuildStatus](https://circleci.com/gh/NCEAS/mdqengine.png?circle-token=FIXME)](https://circleci.com/gh/NCEAS/mdqengine)
+[![Build Status](https://travis-ci.org/NCEAS/metadig-engine.svg?branch=master)](https://travis-ci.org/NCEAS/metadig-engine)
+[![BuildStatus](https://circleci.com/gh/NCEAS/metadig-engine.png?circle-token=FIXME)](https://circleci.com/gh/NCEAS/metadig-engine)
 
 The MDQ Engine is a flexible engine to managing and executing metadata quality checks on a wide variety of metadata documents.
 Quality Checks are organized into Suites that can be stored and managed by the engine before ultimately being run against input metadata documents.
@@ -71,7 +71,7 @@ Once you are satisfied with your check code, you can run a suite (one or more ch
 
 ## Using the library elsewhere
 
-There are two options for utilizing MDQ features in other projects. The mdqengine artifcat can be included in other Maven projects like any other dependency and all public classes and methods will be readily available to that project.
+There are two options for utilizing MDQ features in other projects. The metadig-engine artifcat can be included in other Maven projects like any other dependency and all public classes and methods will be readily available to that project.
 
 For Metacat, we have used a looser coupling in that there is no build dependency. Metacat can be configured to interact with the MDQ webapp through the defined REST API that it exposes. So, for example, any time a new metadata document is added to Metacat, we submit the document to the MDQ via the REST API and then save the returned results as another object in that Metacat repository. See the mdq-webapp project for details on the MDQ REST API.
 
