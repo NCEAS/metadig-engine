@@ -190,11 +190,27 @@ public class Controller {
      * @throws TimeoutException
      */
     public void shutdown() throws IOException, TimeoutException {
-        generateReportChannel.close();
-        generateReportConnection.close();
+        inProcessReportChannel.close();
+        inProcessReportConnection.close();
 
-        reportCreatedChannel.close();
-        reportCreatedConnection.close();
+        completedChannel.close();
+        completedConnection.close();
+    }
+
+    /**
+     * Read a file from a Java resources folder.
+     * @param fileName the relative path of the file to read.
+     * @return THe resources file.
+     */
+    private File getResource(String fileName) {
+
+        StringBuilder result = new StringBuilder("");
+
+        //Get file from resources folder
+        ClassLoader classLoader = getClass().getClassLoader();
+        File file = new File(classLoader.getResource(fileName).getFile());
+
+        return file;
     }
 }
 
