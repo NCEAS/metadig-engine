@@ -42,13 +42,13 @@ import org.dataone.service.types.v2.SystemMetadata;
  */
 public class Worker {
 
-    private final static String GENERATE_REPORT_QUEUE_NAME = "generateReport";
-    private final static String REPORT_CREATED_QUEUE_NAME = "reportCreated";
+    private final static String InProcess_QUEUE_NAME = "InProcess";
+    private final static String Completed_QUEUE_NAME = "Completed";
 
-    private static Connection generateReportConnection;
-    private static Channel generateReportChannel;
-    private static Connection reportCreatedConnection;
-    private static Channel reportCreatedChannel;
+    private static Connection inProcessReportConnection;
+    private static Channel inProcessReportChannel;
+    private static Connection completedConnection;
+    private static Channel completedChannel;
 
     private static Logger logger = Logger.getLogger(Worker.class);
     private static String RabbitMQhost = null;
@@ -76,10 +76,10 @@ public class Worker {
         authToken = config.getString("dataone.authToken");
 
         /* This method is overridden from the RabbitMQ library and serves as the callback that is invoked whenenver
-         * an entry added to the 'generatedReportChannel' and this particular instance of the Worker is selected for
+         * an entry added to the 'inProcessReportChannel' and this particular instance of the Worker is selected for
          * delivery of the queue message.
          */
-        final Consumer consumer = new DefaultConsumer(generateReportChannel) {
+        final Consumer consumer = new DefaultConsumer(inProcessReportChannel) {
             @Override
             public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties, byte[] body) throws IOException {
 
@@ -107,20 +107,21 @@ public class Worker {
                     e.printStackTrace();
                 } finally {
                     System.out.println(" [x] Done");
-                    //generateReportChannel.basicAck(envelope.getDeliveryTag(), false);
+                    //inProcessReportChannel.basicAck(envelope.getDeliveryTag(), false);
                 }
 
                 /* Once the quality report has been created, it can be submitted to the member node to be
                    uploaded and indexed.
                 */
                 try {
-                    wkr.submitReport(qEntry);
+                    /* wkr.submitReport(qEntry); */
+
                     ByteArrayOutputStream bos = new ByteArrayOutputStream();
                     ObjectOutput out = new ObjectOutputStream(bos);
                     out.writeObject(qEntry);
                     message = bos.toByteArray();
 
-                    wkr.writeReportCreatedQueue(message);
+                    wkr.writeCompletedQueue(message);
                     System.out.println(" [x] Sent completed report for pid: '" + qEntry.getMetadataPid() + "'");
                 } catch (Exception e) {
 
@@ -130,13 +131,13 @@ public class Worker {
                     /* TODO: include a status value and description so that when a response is sent for
                        a failed report creation, the controller can take the appropriate action.
                      */
-                    generateReportChannel.basicAck(envelope.getDeliveryTag(), false);
+                    inProcessReportChannel.basicAck(envelope.getDeliveryTag(), false);
                 }
 
             }
         };
 
-        generateReportChannel.basicConsume(GENERATE_REPORT_QUEUE_NAME, false, consumer);
+        inProcessReportChannel.basicConsume(InProcess_QUEUE_NAME, false, consumer);
     }
 
     /**
@@ -152,30 +153,33 @@ public class Worker {
          */
         ConnectionFactory factory = new ConnectionFactory();
         factory.setHost(RabbitMQhost);
-        generateReportConnection = factory.newConnection();
-        generateReportChannel = generateReportConnection.createChannel();
+        inProcessReportConnection = factory.newConnection();
+        inProcessReportChannel = inProcessReportConnection.createChannel();
 
-        generateReportChannel.queueDeclare(GENERATE_REPORT_QUEUE_NAME, false, false, false, null);
+        inProcessReportChannel.queueDeclare(InProcess_QUEUE_NAME, false, false, false, null);
         System.out.println(" [*] Waiting for messages. To exit press CTRL+C");
 
         // Only send one request to each worker at a time.
-        generateReportChannel.basicQos(1);
+        inProcessReportChannel.basicQos(1);
 
         // Queue to send generated reports back to controller
         factory = new ConnectionFactory();
         factory.setHost(RabbitMQhost);
-        reportCreatedConnection = factory.newConnection();
-        reportCreatedChannel = reportCreatedConnection.createChannel();
-        reportCreatedChannel.queueDeclare(REPORT_CREATED_QUEUE_NAME, false, false, false, null);
+        completedConnection = factory.newConnection();
+        completedChannel = completedConnection.createChannel();
+        completedChannel.queueDeclare(Completed_QUEUE_NAME, false, false, false, null);
     }
 
     /**
+     * Create a quality report for a single metadata document.
+     * <p>
      * The processReport method runs the requested metadig-engine quality suite for the provided
      * metadata document. This method appends the generated quality report to the RabbitMQ
      * queue entry.
+     * </p>
      *
      * @param message the RabbitMQ queue entry that contains the metadata document to score.
-     * @return
+     * @return The quality report as a string.
      * @throws InterruptedException
      * @throws Exception
      */
@@ -205,11 +209,14 @@ public class Worker {
     }
 
     /**
-     * Submit (upload) the newly generated quality report to the source member node of the metadata document that
-     * the report was generated for.
+     * Submit (upload) the newly generated quality report to a member node
+     * <p>>
+     * The quality report is submitted to the authoritative member node of the source
+     * metadata document, if the member node name/location was provided.
+     * </p>
      *
-     * @param message the RabbitMQ message containing the metadata document and generated quality report.
-     * @return pid the
+     * @param The QueuEntry containing the metadata document and generated quality report.
+     * @return The identifier of the uploaded qualtiy report, as a String.
      */
     public String submitReport(QueueEntry message) {
 
@@ -289,8 +296,8 @@ public class Worker {
      * @param message
      * @throws IOException
      */
-    public void writeReportCreatedQueue (byte[] message) throws IOException {
-        reportCreatedChannel.basicPublish("", REPORT_CREATED_QUEUE_NAME, MessageProperties.PERSISTENT_TEXT_PLAIN, message);
+    public void writeCompletedQueue (byte[] message) throws IOException {
+        completedChannel.basicPublish("", Completed_QUEUE_NAME, MessageProperties.PERSISTENT_TEXT_PLAIN, message);
     }
 }
 
