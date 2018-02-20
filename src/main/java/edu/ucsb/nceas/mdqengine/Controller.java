@@ -34,6 +34,7 @@ public class Controller {
     private static com.rabbitmq.client.Channel reportCreatedChannel;
 
     private static String RabbitMQhost = null;
+    private static Controller instance;
 
     public static void main(String[] argv) throws Exception {
 
@@ -49,10 +50,12 @@ public class Controller {
         RabbitMQhost = config.getString("RabbitMQ.host");
 
         DateTime requestDateTime = new DateTime();
-        FileInputStream metadata = new FileInputStream("/Users/slaughter/Projects/Metadig/test/knb.1101.1.xml");
 
+        // TODO: move this test into the JUnit tests
+        Controller metadigCtrl = Controller.getInstance();
+
+        FileInputStream metadata = new FileInputStream("/Users/slaughter/Projects/Metadig/test/knb.1101.1.xml");
         FileInputStream sysmeta = new FileInputStream( "/Users/slaughter/Projects/Metadig/test/sysmeta.xml");
-        Controller metadigCtrl = new Controller();
 
         metadigCtrl.start();
         metadigCtrl.processRequest("urn:node:mnTestKNB", "1234",
@@ -65,6 +68,31 @@ public class Controller {
         // Check if all queues have been purged, then shutdown
         // metadigCtrl.shutdown();
     }
+
+    private Controller(){}
+
+    /**
+     * Implement a Singleton pattern using "double checked locking" pattern.
+     * @return a singleton instance of the Controller class.
+     */
+    public static Controller getInstance(){
+        if(instance == null){
+            synchronized (Controller.class) {
+                if(instance == null){
+                    instance = new Controller();
+                }
+            }
+        }
+        return instance;
+    }
+
+    /**
+     * Initialize the quality engine.
+     * <p>
+     * Prepare the quality engine for use by initializing the RabbitMQ queues and performing
+     * and other startup tasks.
+     * </p>
+     */
 
     public void start () {
         try {
