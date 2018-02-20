@@ -4,7 +4,6 @@ import com.rabbitmq.client.*;
 
 import java.io.*;
 import java.util.concurrent.TimeoutException;
-
 import org.apache.commons.configuration2.Configuration;
 import org.apache.commons.configuration2.builder.fluent.Configurations;
 import org.apache.commons.configuration2.ex.ConfigurationException;
@@ -12,26 +11,28 @@ import org.dataone.exceptions.MarshallingException;
 import org.dataone.service.types.v2.SystemMetadata;
 import org.dataone.service.util.TypeMarshaller;
 import org.joda.time.DateTime;
+import java.io.File;
+import java.io.IOException;
 
 /**
- * The Controller class accepts requests for generating quality documents for
- * for metadata documents. As the report generation process can take a significant
+ * The Controller class accepts requests for generating quality documents from
+ * metadata documents. As the report generation process can take a significant
  * amount of time, the controller delegates report generation to worker processes
  * via a RabbitMQ queue that the worker processes read from.
- * @author      Peter Slaughter
  *
+ * @author      Peter Slaughter
  * @version     %I%, %G%
  * @since       1.0
  */
 public class Controller {
 
-    private final static String GENERATE_REPORT_QUEUE_NAME = "generateReport";
-    private final static String REPORT_CREATED_QUEUE_NAME = "reportCreated";
+    private final static String InProcess_QUEUE_NAME = "InProcess";
+    private final static String Completed_QUEUE_NAME = "Completed";
 
-    private static com.rabbitmq.client.Connection generateReportConnection;
-    private static com.rabbitmq.client.Channel generateReportChannel;
-    private static com.rabbitmq.client.Connection reportCreatedConnection;
-    private static com.rabbitmq.client.Channel reportCreatedChannel;
+    private static com.rabbitmq.client.Connection inProcessReportConnection;
+    private static com.rabbitmq.client.Channel inProcessReportChannel;
+    private static com.rabbitmq.client.Connection completedConnection;
+    private static com.rabbitmq.client.Channel completedChannel;
 
     private static String RabbitMQhost = null;
     private static Controller instance;
@@ -59,10 +60,10 @@ public class Controller {
 
         metadigCtrl.start();
         metadigCtrl.processRequest("urn:node:mnTestKNB", "1234",
-                metadata, "arctic.data.center.suite.1", "/tmp", requestDateTime, sysmeta);
+                metadata, "metadig-test.suite.1", "/tmp", requestDateTime, sysmeta);
 
         //metadigCtrl.processRequest("urn:node:mnTestKNB", "4567",
-        //        metadata, "arctic.data.center.suite.1", "/tmp", requestDateTime, sysmeta);
+        //        metadata, "metadig-test.suite.1", "/tmp", requestDateTime, sysmeta);
 
 
         // Check if all queues have been purged, then shutdown
@@ -103,6 +104,12 @@ public class Controller {
     }
 
     /**
+     * Forward a request to the "InProcess" queue.
+     * <p>
+     * A request to create a quality report is serialized and placed on the RabbitMQ "InProcess"
+     * queue. This queue is read by worker processes that call the quality engine core to generate
+     * the report.
+     * </p>
      *
      * @param memberNode the member node service URL to send the quality report to.
      * @param metadataPid the identifier of the metadata document.
@@ -114,7 +121,7 @@ public class Controller {
      * @return
      * @throws java.io.IOException
      */
-    public String processRequest( String memberNode,
+    public void processRequest( String memberNode,
                                   String metadataPid,
                                   InputStream metadata,
                                   String qualitySuiteId,
@@ -151,35 +158,34 @@ public class Controller {
         out.writeObject(qEntry);
         message = bos.toByteArray();
 
-        this.writeGenerateQueue(message);
+        this.writeInProcessQueue(message);
         System.out.println(" [x] Sent report request for pid: '" + qEntry.getMetadataPid() + "'");
         //metadigController.shutdown();
 
-        return("sucess");
     }
 
     /**
-     *
+     * Intialize the RabbitMQ queues.
      * @throws IOException
      * @throws TimeoutException
      */
     public void setupQueues () throws IOException, TimeoutException {
         ConnectionFactory factory = new ConnectionFactory();
         factory.setHost("localhost");
-        generateReportConnection = factory.newConnection();
-        generateReportChannel = generateReportConnection.createChannel();
-        generateReportChannel.queueDeclare(GENERATE_REPORT_QUEUE_NAME, false, false, false, null);
+        inProcessReportConnection = factory.newConnection();
+        inProcessReportChannel = inProcessReportConnection.createChannel();
+        inProcessReportChannel.queueDeclare(InProcess_QUEUE_NAME, false, false, false, null);
 
         factory = new ConnectionFactory();
         factory.setHost("localhost");
-        reportCreatedConnection = factory.newConnection();
-        reportCreatedChannel = reportCreatedConnection.createChannel();
-        reportCreatedChannel.queueDeclare(REPORT_CREATED_QUEUE_NAME, false, false, false, null);
+        completedConnection = factory.newConnection();
+        completedChannel = completedConnection.createChannel();
+        completedChannel.queueDeclare(Completed_QUEUE_NAME, false, false, false, null);
 
         /* This method overrides the RabbitMQ library and implements a callback that is invoked whenever an entry is added
-         * to 'reportCreatedChannel'.
+         * to 'completedChannel'.
          */
-        final Consumer consumer = new DefaultConsumer(reportCreatedChannel) {
+        final Consumer consumer = new DefaultConsumer(completedChannel) {
             @Override
             public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties, byte[] body) throws IOException {
 
@@ -191,7 +197,7 @@ public class Controller {
                 } catch (java.lang.ClassNotFoundException e) {
                     System.out.println("Class 'QueueEntry' not found");
                 } finally {
-                    reportCreatedChannel.basicAck(envelope.getDeliveryTag(), false);
+                    completedChannel.basicAck(envelope.getDeliveryTag(), false);
                 }
 
                 System.out.println(" [x] Controller received completed report for pid: '" + qEntry.getMetadataPid() + "'");
@@ -199,17 +205,17 @@ public class Controller {
             }
         };
 
-        reportCreatedChannel.basicConsume(REPORT_CREATED_QUEUE_NAME, false, consumer);
+        completedChannel.basicConsume(Completed_QUEUE_NAME, false, consumer);
     }
 
     /**
-     *
+     * Write an entry to the "InProcess" queue.
      * @param message
      * @throws IOException
      */
-    public void writeGenerateQueue (byte[] message) throws IOException {
+    public void writeInProcessQueue (byte[] message) throws IOException {
 
-        generateReportChannel.basicPublish("", GENERATE_REPORT_QUEUE_NAME, MessageProperties.PERSISTENT_TEXT_PLAIN, message);
+        inProcessReportChannel.basicPublish("", InProcess_QUEUE_NAME, MessageProperties.PERSISTENT_TEXT_PLAIN, message);
     }
 
     /**
