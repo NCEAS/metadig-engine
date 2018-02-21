@@ -51,16 +51,22 @@ public class Controller {
         }
 
         RabbitMQhost = config.getString("RabbitMQ.host");
+        if(RabbitMQhost == null) RabbitMQhost = "localhost:5673";
 
         DateTime requestDateTime = new DateTime();
-
-        // TODO: move this test into the JUnit tests
         Controller metadigCtrl = Controller.getInstance();
 
-        FileInputStream metadata = new FileInputStream("/Users/slaughter/Projects/Metadig/test/knb.1101.1.xml");
-        FileInputStream sysmeta = new FileInputStream( "/Users/slaughter/Projects/Metadig/test/sysmeta.xml");
+        // TODO: move this test to the JUnit tests
+        InputStream metadata = metadigCtrl.getFile("data/knb.1101.1.xml");
+        InputStream sysmeta = metadigCtrl.getFile("data/sysmeta.xml");
 
         metadigCtrl.start();
+        if(metadigCtrl.getIsStarted()) {
+            log.info("The controller has been started");
+        } else {
+            log.info("The controller has not been started");
+        }
+
         metadigCtrl.processRequest("urn:node:mnTestKNB", "1234",
                 metadata, "metadig-test.suite.1", "/tmp", requestDateTime, sysmeta);
 
@@ -231,22 +237,62 @@ public class Controller {
 
         completedChannel.close();
         completedConnection.close();
+    /**
+     * Run a simple test of the report generation facility.
+     * @return a boolean set to true if the engine has been started.
+     */
+    public boolean test() {
+        DateTime requestDateTime = new DateTime();
+
+        Controller metadigCtrl = Controller.getInstance();
+
+        //FileInputStream metadata = new FileInputStream("/Users/slaughter/Projects/Metadig/test/knb.1101.1.xml");
+        //FileInputStream sysmeta = new FileInputStream( "/Users/slaughter/Projects/Metadig/test/sysmeta.xml");
+
+        InputStream metadata = metadigCtrl.getFile("data/knb.1101.1.xml");
+        InputStream sysmeta = metadigCtrl.getFile("data/sysmeta.xml");
+
+        if(!metadigCtrl.getIsStarted()) {
+            metadigCtrl.start();
+        }
+
+        try {
+            metadigCtrl.processRequest("urn:node:mnTestKNB", "1234",
+                    metadata, "metadig-test.suite.1", "/tmp", requestDateTime, sysmeta);
+        } catch (IOException ioe) {
+            ioe.printStackTrace();
+            return false;
+        }
+
+        return true;
     }
 
     /**
      * Read a file from a Java resources folder.
      * @param fileName the relative path of the file to read.
-     * @return THe resources file.
+     * @return THe resources file as a stream.
      */
-    private File getResource(String fileName) {
+    private InputStream getFile(String fileName) {
 
         StringBuilder result = new StringBuilder("");
 
         //Get file from resources folder
         ClassLoader classLoader = getClass().getClassLoader();
         File file = new File(classLoader.getResource(fileName).getFile());
+        log.info(file.getAbsolutePath());
 
-        return file;
+        InputStream is = classLoader.getResourceAsStream(fileName);
+
+        return is;
+    }
+
+
+    /**
+     * Check if the quality engine has been initialized.
+     * @return a boolean set to true if the engine has been started.
+     */
+    public boolean getIsStarted() {
+        return isStarted;
     }
 }
 
