@@ -1,9 +1,6 @@
 package edu.ucsb.nceas.mdqengine;
 
 import com.rabbitmq.client.*;
-
-import java.io.*;
-import java.util.concurrent.TimeoutException;
 import org.apache.commons.configuration2.Configuration;
 import org.apache.commons.configuration2.builder.fluent.Configurations;
 import org.apache.commons.configuration2.ex.ConfigurationException;
@@ -11,8 +8,11 @@ import org.dataone.exceptions.MarshallingException;
 import org.dataone.service.types.v2.SystemMetadata;
 import org.dataone.service.util.TypeMarshaller;
 import org.joda.time.DateTime;
-import java.io.File;
-import java.io.IOException;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
+import java.io.*;
+import java.util.concurrent.TimeoutException;
 
 /**
  * The Controller class accepts requests for generating quality documents from
@@ -29,8 +29,8 @@ public class Controller {
     private final static String InProcess_QUEUE_NAME = "InProcess";
     private final static String Completed_QUEUE_NAME = "Completed";
 
-    private static com.rabbitmq.client.Connection inProcessReportConnection;
-    private static com.rabbitmq.client.Channel inProcessReportChannel;
+    private static com.rabbitmq.client.Connection inProcessConnection;
+    private static com.rabbitmq.client.Channel inProcessChannel;
     private static com.rabbitmq.client.Connection completedConnection;
     private static com.rabbitmq.client.Channel completedChannel;
 
@@ -43,6 +43,7 @@ public class Controller {
 
         Configurations configs = new Configurations();
         Configuration config = null;
+        // TODO: read config info from a system-wide installed location or from environment variable.
         try {
             config = configs.properties(new File("./config/metadig.properties"));
             // access configuration properties
@@ -180,9 +181,9 @@ public class Controller {
     public void setupQueues () throws IOException, TimeoutException {
         ConnectionFactory factory = new ConnectionFactory();
         factory.setHost("localhost");
-        inProcessReportConnection = factory.newConnection();
-        inProcessReportChannel = inProcessReportConnection.createChannel();
-        inProcessReportChannel.queueDeclare(InProcess_QUEUE_NAME, false, false, false, null);
+        inProcessConnection = factory.newConnection();
+        inProcessChannel = inProcessConnection.createChannel();
+        inProcessChannel.queueDeclare(InProcess_QUEUE_NAME, false, false, false, null);
 
         factory = new ConnectionFactory();
         factory.setHost("localhost");
@@ -223,7 +224,7 @@ public class Controller {
      */
     public void writeInProcessQueue (byte[] message) throws IOException {
 
-        inProcessReportChannel.basicPublish("", InProcess_QUEUE_NAME, MessageProperties.PERSISTENT_TEXT_PLAIN, message);
+        inProcessChannel.basicPublish("", InProcess_QUEUE_NAME, MessageProperties.PERSISTENT_TEXT_PLAIN, message);
     }
 
     /**
@@ -232,11 +233,15 @@ public class Controller {
      * @throws TimeoutException
      */
     public void shutdown() throws IOException, TimeoutException {
-        inProcessReportChannel.close();
-        inProcessReportConnection.close();
+        inProcessChannel.close();
+        inProcessConnection.close();
 
         completedChannel.close();
         completedConnection.close();
+        isStarted = false;
+    }
+
+
     /**
      * Run a simple test of the report generation facility.
      * @return a boolean set to true if the engine has been started.

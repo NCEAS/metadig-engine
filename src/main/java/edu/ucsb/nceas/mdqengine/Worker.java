@@ -1,35 +1,34 @@
 package edu.ucsb.nceas.mdqengine;
 
 import com.rabbitmq.client.*;
+import edu.ucsb.nceas.mdqengine.model.Result;
+import edu.ucsb.nceas.mdqengine.model.Run;
+import edu.ucsb.nceas.mdqengine.model.Suite;
+import edu.ucsb.nceas.mdqengine.serialize.XmlMarshaller;
+import edu.ucsb.nceas.mdqengine.store.InMemoryStore;
+import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.commons.configuration2.Configuration;
+import org.apache.commons.configuration2.builder.fluent.Configurations;
+import org.apache.commons.configuration2.ex.ConfigurationException;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.dataone.client.auth.AuthTokenSession;
+import org.dataone.client.v2.MNode;
+import org.dataone.client.v2.itk.D1Client;
+import org.dataone.service.exceptions.*;
+import org.dataone.service.types.v1.Checksum;
+import org.dataone.service.types.v1.Identifier;
+import org.dataone.service.types.v1.ObjectFormatIdentifier;
+import org.dataone.service.types.v1.Session;
+import org.dataone.service.types.v2.SystemMetadata;
 
 import java.io.*;
-import java.io.IOException;
 import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeoutException;
 import java.util.UUID;
-import java.io.InputStream;
-
-import org.apache.commons.configuration2.Configuration;
-import org.apache.commons.configuration2.builder.fluent.Configurations;
-import org.apache.commons.configuration2.ex.ConfigurationException;
-import org.apache.log4j.Logger;
-
-import edu.ucsb.nceas.mdqengine.model.Result;
-import edu.ucsb.nceas.mdqengine.model.Run;
-import edu.ucsb.nceas.mdqengine.model.Suite;
-import edu.ucsb.nceas.mdqengine.store.InMemoryStore;
-import edu.ucsb.nceas.mdqengine.serialize.XmlMarshaller;
-
-import org.apache.commons.codec.digest.DigestUtils;
-import org.dataone.client.auth.AuthTokenSession;
-import org.dataone.client.v2.itk.D1Client;
-import org.dataone.client.v2.MNode;
-import org.dataone.service.exceptions.*;
-import org.dataone.service.types.v1.*;
-import org.dataone.service.types.v2.SystemMetadata;
+import java.util.concurrent.TimeoutException;
 
 /**
  * The Worker class contains methods that create quality reports for metadata documents
@@ -45,14 +44,15 @@ public class Worker {
     private final static String InProcess_QUEUE_NAME = "InProcess";
     private final static String Completed_QUEUE_NAME = "Completed";
 
-    private static Connection inProcessReportConnection;
-    private static Channel inProcessReportChannel;
+    private static Connection inProcessConnection;
+    private static Channel inProcessChannel;
     private static Connection completedConnection;
     private static Channel completedChannel;
 
     public static Log log = LogFactory.getLog(Worker.class);
     private static String RabbitMQhost = null;
     private static String authToken = null;
+
 
     public static void main(String[] argv) throws Exception {
 
@@ -76,10 +76,10 @@ public class Worker {
         authToken = config.getString("dataone.authToken");
 
         /* This method is overridden from the RabbitMQ library and serves as the callback that is invoked whenenver
-         * an entry added to the 'inProcessReportChannel' and this particular instance of the Worker is selected for
+         * an entry added to the 'inProcessChannel' and this particular instance of the Worker is selected for
          * delivery of the queue message.
          */
-        final Consumer consumer = new DefaultConsumer(inProcessReportChannel) {
+        final Consumer consumer = new DefaultConsumer(inProcessChannel) {
             @Override
             public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties, byte[] body) throws IOException {
 
@@ -106,8 +106,7 @@ public class Worker {
                 } catch (java.lang.Exception e) {
                     e.printStackTrace();
                 } finally {
-                    System.out.println(" [x] Done");
-                    //inProcessReportChannel.basicAck(envelope.getDeliveryTag(), false);
+                    //inProcessChannel.basicAck(envelope.getDeliveryTag(), false);
                 }
 
                 /* Once the quality report has been created, it can be submitted to the member node to be
@@ -151,14 +150,14 @@ public class Worker {
          */
         ConnectionFactory factory = new ConnectionFactory();
         factory.setHost(RabbitMQhost);
-        inProcessReportConnection = factory.newConnection();
-        inProcessReportChannel = inProcessReportConnection.createChannel();
+        inProcessConnection = factory.newConnection();
+        inProcessChannel = inProcessConnection.createChannel();
 
-        inProcessReportChannel.queueDeclare(InProcess_QUEUE_NAME, false, false, false, null);
-        System.out.println(" [*] Waiting for messages. To exit press CTRL+C");
+        inProcessChannel.queueDeclare(InProcess_QUEUE_NAME, false, false, false, null);
+        log.info(" [*] Waiting for messages. To exit press CTRL+C");
 
         // Only send one request to each worker at a time.
-        inProcessReportChannel.basicQos(1);
+        inProcessChannel.basicQos(1);
 
         // Queue to send generated reports back to controller
         factory = new ConnectionFactory();
@@ -213,7 +212,7 @@ public class Worker {
      * metadata document, if the member node name/location was provided.
      * </p>
      *
-     * @param The QueuEntry containing the metadata document and generated quality report.
+     * @param message containing the metadata document and generated quality report.
      * @return The identifier of the uploaded qualtiy report, as a String.
      */
     public String submitReport(QueueEntry message) {
