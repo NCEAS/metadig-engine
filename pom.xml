@@ -3,8 +3,8 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<groupId>edu.ucsb.nceas</groupId>
-	<artifactId>mdqengine</artifactId>
-	<version>1.1.2-SNAPSHOT</version>
+	<artifactId>metadig-engine</artifactId>
+	<version>1.1.3-SNAPSHOT</version>
 	<packaging>jar</packaging>
 
 	<name>mdqengine</name>
@@ -37,12 +37,6 @@
 			<groupId>org.python</groupId>
 			<artifactId>jython-standalone</artifactId>
 			<version>${jython.version}</version>
-		</dependency>
-		<!-- http://mvnrepository.com/artifact/log4j/log4j -->
-		<dependency>
-		    <groupId>log4j</groupId>
-		    <artifactId>log4j</artifactId>
-		    <version>1.2.17</version>
 		</dependency>
 		<!-- https://mvnrepository.com/artifact/junit/junit -->
 		<dependency>
@@ -115,6 +109,13 @@
 			<artifactId>amqp-client</artifactId>
 			<version>4.3.0</version>
 		</dependency>
+		<!-- https://mvnrepository.com/artifact/joda-time/joda-time -->
+		<dependency>
+			<groupId>joda-time</groupId>
+			<artifactId>joda-time</artifactId>
+			<version>2.9.9</version>
+		</dependency>
+
 	</dependencies>
 	<repositories>
 		<repository>
