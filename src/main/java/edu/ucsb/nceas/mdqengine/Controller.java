@@ -36,6 +36,8 @@ public class Controller {
 
     private static String RabbitMQhost = null;
     private static Controller instance;
+    private boolean isStarted = false;
+    public static Log log = LogFactory.getLog(Controller.class);
 
     public static void main(String[] argv) throws Exception {
 
@@ -159,7 +161,7 @@ public class Controller {
         message = bos.toByteArray();
 
         this.writeInProcessQueue(message);
-        System.out.println(" [x] Sent report request for pid: '" + qEntry.getMetadataPid() + "'");
+        log.info(" [x] Sent report request for pid: '" + qEntry.getMetadataPid() + "'");
         //metadigController.shutdown();
 
     }
@@ -195,13 +197,13 @@ public class Controller {
                 try {
                     qEntry = (QueueEntry) in.readObject();
                 } catch (java.lang.ClassNotFoundException e) {
-                    System.out.println("Class 'QueueEntry' not found");
+                    log.info("Class 'QueueEntry' not found");
                 } finally {
                     completedChannel.basicAck(envelope.getDeliveryTag(), false);
                 }
 
-                System.out.println(" [x] Controller received completed report for pid: '" + qEntry.getMetadataPid() + "'");
-                //System.out.println(qEntry.getRunXML());
+                log.info(" [x] Controller received completed report for pid: '" + qEntry.getMetadataPid() + "'");
+                //log.info(qEntry.getRunXML());
             }
         };
 

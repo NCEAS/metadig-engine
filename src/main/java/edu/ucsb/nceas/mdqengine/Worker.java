@@ -50,7 +50,7 @@ public class Worker {
     private static Connection completedConnection;
     private static Channel completedChannel;
 
-    private static Logger logger = Logger.getLogger(Worker.class);
+    public static Log log = LogFactory.getLog(Worker.class);
     private static String RabbitMQhost = null;
     private static String authToken = null;
 
@@ -90,14 +90,14 @@ public class Worker {
                 try {
                     qEntry = (QueueEntry) in.readObject();
                 } catch (java.lang.ClassNotFoundException e) {
-                    System.out.println("Class 'QueueEntry' not found");
+                    log.info("Class 'QueueEntry' not found");
                 }
 
                 //String message = new String(body, "UTF-8");
                 Worker wkr = new Worker();
                 String runXML = null;
 
-                //System.out.println(" [x] Received '" + message + "'");
+                //log.info(" [x] Received '" + message + "'");
                 try {
                     runXML = wkr.processReport(qEntry);
                     qEntry.setRunXML(runXML);
@@ -115,29 +115,27 @@ public class Worker {
                 */
                 try {
                     /* wkr.submitReport(qEntry); */
-
                     ByteArrayOutputStream bos = new ByteArrayOutputStream();
                     ObjectOutput out = new ObjectOutputStream(bos);
                     out.writeObject(qEntry);
                     message = bos.toByteArray();
 
                     wkr.writeCompletedQueue(message);
-                    System.out.println(" [x] Sent completed report for pid: '" + qEntry.getMetadataPid() + "'");
+                    log.info(" [x] Sent completed report for pid: '" + qEntry.getMetadataPid() + "'");
                 } catch (Exception e) {
 
                 } finally {
-                    System.out.println(" [x] Done");
+                    log.info(" [x] Done");
                     /* Inform the controller that the report has been created and uploaded. */
                     /* TODO: include a status value and description so that when a response is sent for
-                       a failed report creation, the controller can take the appropriate action.
+                     * a failed report creation, the controller can take the appropriate action.
                      */
-                    inProcessReportChannel.basicAck(envelope.getDeliveryTag(), false);
+                    inProcessChannel.basicAck(envelope.getDeliveryTag(), false);
                 }
-
             }
         };
 
-        inProcessReportChannel.basicConsume(InProcess_QUEUE_NAME, false, consumer);
+        inProcessChannel.basicConsume(InProcess_QUEUE_NAME, false, consumer);
     }
 
     /**
@@ -186,7 +184,7 @@ public class Worker {
     public String processReport(QueueEntry message) throws InterruptedException, Exception {
 
         String suiteId = message.getQualitySuiteId();
-        System.out.println(" [x] Running suite '" + message.getQualitySuiteId() + "'" + " for metadata pid " + message.getMetadataPid());
+        log.info(" [x] Running suite '" + message.getQualitySuiteId() + "'" + " for metadata pid " + message.getMetadataPid());
 
         String metadataDoc = message.getMetadataDoc();
         InputStream input = new ByteArrayInputStream(metadataDoc.getBytes("UTF-8"));
@@ -230,8 +228,8 @@ public class Worker {
             qualityReport = new ByteArrayInputStream(qualityXML.getBytes("UTF-8"));
             rptLength = qualityXML.getBytes("UTF-8").length;
         } catch (UnsupportedEncodingException ex) {
-            logger.error("Unable to read quality report for metadata pid: " + message.getMetadataPid());
-            logger.error(ex);
+            log.error("Unable to read quality report for metadata pid: " + message.getMetadataPid());
+            log.error(ex);
             return null;
         }
 
@@ -262,7 +260,7 @@ public class Worker {
 
         /* The auth token is read from the config file. */
         Session session = new AuthTokenSession(authToken);
-        System.out.println(" Created session for subject: " + session.getSubject());
+        log.info(" Created session for subject: " + session.getSubject());
 
         memberNodeServiceUrl = message.getMemberNode();
 
@@ -272,21 +270,21 @@ public class Worker {
             mn = D1Client.getMN(memberNodeServiceUrl);
         } catch (ServiceFailure ex) {
             ex.printStackTrace();
-            System.out.println("Error connecting to DataONE client at URL: " + memberNodeServiceUrl);
+            log.error("Error connecting to DataONE client at URL: " + memberNodeServiceUrl);
         }
 
-        System.out.println(" Uploading quality report with pid: " + newId.getValue() + ", rightsHolder: " + sm.getRightsHolder().getValue());
+        log.info(" Uploading quality report with pid: " + newId.getValue() + ", rightsHolder: " + sm.getRightsHolder().getValue());
 
         Identifier returnPid = null;
         try {
             returnPid = mn.create(session, newId, qualityReport, sm);
         } catch (InvalidRequest | NotAuthorized | InvalidToken | InvalidSystemMetadata | UnsupportedType | IdentifierNotUnique | InsufficientResources
                 | NotImplemented | ServiceFailure ex) {
-            logger.error(ex);
-            System.out.println("Error uploading object with PID: " + returnPid.getValue());
+            log.error(ex);
+            log.error("Error uploading object with PID: " + returnPid.getValue());
         }
 
-        System.out.println("Uploaded pid " + returnPid.getValue() + " to member node " + mn.getNodeId().getValue());
+        log.info("Uploaded pid " + returnPid.getValue() + " to member node " + mn.getNodeId().getValue());
 
         return (returnPid.getValue());
     }
