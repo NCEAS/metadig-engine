@@ -79,6 +79,7 @@ public class Controller {
         // metadigCtrl.shutdown();
     }
 
+
     private Controller(){}
 
     /**
@@ -105,10 +106,15 @@ public class Controller {
      */
 
     public void start () {
+        /* Don't try to re-initialize the queues if they are already started */
+        if(isStarted) return;
+
         try {
             this.setupQueues();
+            this.isStarted = true;
         } catch (java.io.IOException | java.util.concurrent.TimeoutException e) {
             e.printStackTrace();
+            this.isStarted = false;
         }
     }
 
