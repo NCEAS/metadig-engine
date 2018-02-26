@@ -1,6 +1,6 @@
 FROM ubuntu:latest
 
-MAINTAINER slaughter@nceas.ucsb.edu
+MAINTAINER yourname@example.com
 
 RUN apt-get update && apt-get install -y --no-install-recommends apache2 libapache2-mod-jk
 
