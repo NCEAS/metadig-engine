@@ -71,25 +71,23 @@ public class Controller {
         metadigCtrl.processRequest("urn:node:mnTestKNB", "1234",
                 metadata, "metadig-test.suite.1", "/tmp", requestDateTime, sysmeta);
 
-        //metadigCtrl.processRequest("urn:node:mnTestKNB", "4567",
-        //        metadata, "metadig-test.suite.1", "/tmp", requestDateTime, sysmeta);
-
-
         // Check if all queues have been purged, then shutdown
         // metadigCtrl.shutdown();
     }
 
 
-    private Controller(){}
+    private Controller() {
+    }
 
     /**
      * Implement a Singleton pattern using "double checked locking" pattern.
+     *
      * @return a singleton instance of the Controller class.
      */
-    public static Controller getInstance(){
-        if(instance == null){
+    public static Controller getInstance() {
+        if (instance == null) {
             synchronized (Controller.class) {
-                if(instance == null){
+                if (instance == null) {
                     instance = new Controller();
                 }
             }
