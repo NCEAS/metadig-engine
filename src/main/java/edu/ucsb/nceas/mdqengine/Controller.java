@@ -62,7 +62,7 @@ public class Controller {
         InputStream sysmeta = metadigCtrl.getFile("data/sysmeta.xml");
 
         metadigCtrl.start();
-        if(metadigCtrl.getIsStarted()) {
+        if (metadigCtrl.getIsStarted()) {
             log.info("The controller has been started");
         } else {
             log.info("The controller has not been started");
@@ -103,11 +103,12 @@ public class Controller {
      * </p>
      */
 
-    public void start () {
+    public void start() {
         /* Don't try to re-initialize the queues if they are already started */
-        if(isStarted) return;
+        if (isStarted) return;
 
         try {
+            this.readConfig();
             this.setupQueues();
             this.isStarted = true;
         } catch (java.io.IOException | java.util.concurrent.TimeoutException e) {
