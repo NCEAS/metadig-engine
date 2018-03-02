@@ -1,6 +1,6 @@
 FROM ubuntu:latest
 
-MAINTAINER yourname@example.com
+MAINTAINER slaughter@nceas.ucsb.edu
 
 RUN apt-get update && apt-get install -y --no-install-recommends apache2 libapache2-mod-jk
 
@@ -17,3 +17,4 @@ VOLUME ["/var/log/apache2"]
 EXPOSE 80 443
 
 CMD ["apachectl", "-k", "start", "-DFOREGROUND"]
+

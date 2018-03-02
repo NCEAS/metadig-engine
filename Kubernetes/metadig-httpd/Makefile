@@ -1,6 +1,6 @@
 all: build
 
 build:
-	docker build -t metadig-httpd .
-	docker tag metadig-httpd $(DOCKER_REPO)metadig-httpd:dev
-	docker push $(DOCKER_REPO)metadig-httpd:dev
+	docker build -t $(DOCKER_REPO)metadig-httpd:$(DOCKER_TAG) .
+	docker push $(DOCKER_HUB)$(DOCKER_REPO)metadig-httpd:$(DOCKER_TAG)
+
