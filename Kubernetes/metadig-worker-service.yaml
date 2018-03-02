@@ -1,18 +1,8 @@
-apiVersion: v1
 kind: Service
+apiVersion: v1
 metadata:
   name: metadig-worker
-  labels:
-    app: metadig-worker
-    tier: backend 
 spec:
-  type: ClusterIP
-  #type: NodePort
-  # if your cluster supports it, uncomment the following to automatically create
-  # an external load-balanced IP for the frontend service.
-  # type: LoadBalancer
-  ports:
-  - port: 80
   selector:
     app: metadig-worker
     tier: backend

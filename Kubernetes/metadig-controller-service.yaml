@@ -2,16 +2,22 @@ apiVersion: v1
 kind: Service
 metadata:
   name: metadig-controller
-  labels:
-    app: metadig-controller
-    tier: frontend
 spec:
   type: NodePort 
-  # if your cluster supports it, uncomment the following to automatically create
-  # an external load-balanced IP for the frontend service.
-  # type: LoadBalancer
-  ports:
-  - port: 80
   selector:
     app: metadig-controller
     tier: frontend
+  ports:
+  - name: metadig-httpd
+    port: 80
+    protocol: TCP
+    targetPort: metadig-httpd
+  - name: rabbitmq
+    port: 5672
+    protocol: TCP
+    targetPort: rabbitmq
+  - name: rabbitmqadmin
+    port: 15672
+    protocol: TCP
+    targetPort: rabbitmqadmin
+

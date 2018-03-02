@@ -2,9 +2,6 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: metadig-controller
-  labels:
-    app: metadig
-    tier: frontend
 spec:
   selector:
     matchLabels:
@@ -21,35 +18,27 @@ spec:
       - name: rabbitmq
         image: rabbitmq:3.7.3
         ports:
-        - containerPort: 5672
+        - name: rabbitmq 
+          containerPort: 5672
+        - name: rabbitmqadmin
+          containerPort: 15672
       - name: metadig-tomcat
         image: docker.io/sbpcs59/metadig-tomcat:dev
         ports:
-        - containerPort: 8009
+        - name: metadig-tomcat
+          containerPort: 8009
+        imagePullPolicy: Always
       - name: metadig-httpd
         image: docker.io/sbpcs59/metadig-httpd:dev
-        volumeMounts:
-        - mountPath: /var/log/apache2
-          name: metadig-controller-claim0
-        #resources:
-        #  requests:
-        #    cpu: 100m
-        #    memory: 100Mi
-        env:
-        - name: GET_HOSTS_FROM
-          #value: dns
-          # Using `GET_HOSTS_FROM=dns` requires your cluster to
-          # provide a dns service. As of Kubernetes 1.3, DNS is a built-in
-          # service launched automatically. However, if the cluster you are using
-          # does not have a built-in DNS service, you can instead
-          # access an environment variable to find the master
-          # service's host. To do so, comment out the 'value: dns' line above, and
-          # uncomment the line below:
-          value: env
+        #volumeMounts:
+        #- mountPath: /var/log/apache2
+        #  name: metadig-controller-claim0
         ports:
-        - containerPort: 80
+        - name: metadig-httpd
+          containerPort: 80
+        imagePullPolicy: Always
       restartPolicy: Always
-      volumes:
-      - name: metadig-controller-claim0
-        persistentVolumeClaim:
-          claimName: metadig-controller-claim0
+      #volumes:
+      #- name: metadig-controller-claim0
+      #  persistentVolumeClaim:
+      #    claimName: metadig-controller-claim0
