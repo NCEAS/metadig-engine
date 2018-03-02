@@ -9,7 +9,6 @@ import edu.ucsb.nceas.mdqengine.store.InMemoryStore;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.configuration2.Configuration;
 import org.apache.commons.configuration2.builder.fluent.Configurations;
-import org.apache.commons.configuration2.ex.ConfigurationException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.dataone.client.auth.AuthTokenSession;
@@ -50,30 +49,18 @@ public class Worker {
     private static Channel completedChannel;
 
     public static Log log = LogFactory.getLog(Worker.class);
-    private static String RabbitMQhost = null;
+    private static String RabbitMQhost = "localhost";
+    private static Integer RabbitMQport = 5672;
+    private static String RabbitMQpassword = "guest";
+    private static String RabbitMQusername = "guest";
     private static String authToken = null;
 
 
     public static void main(String[] argv) throws Exception {
 
         Worker wkr = new Worker();
+        wkr.readConfig();
         wkr.setupQueues();
-
-        Configurations configs = new Configurations();
-        Configuration config = null;
-        try {
-            config = configs.properties(new File("./config/metadig.properties"));
-            // access configuration properties
-        } catch (ConfigurationException cex) {
-            // Something went wrong
-        }
-
-        /* The host on which the Controller process is running. The RabbitMQ queue can be on
-         * any host, but for simplicity it is on the same host that the Controller is running on.
-         */
-        RabbitMQhost = config.getString("RabbitMQ.host");
-        /* The authentication token that will allow a worker to upload the quality report to the member node. */
-        authToken = config.getString("dataone.authToken");
 
         /* This method is overridden from the RabbitMQ library and serves as the callback that is invoked whenenver
          * an entry added to the 'inProcessChannel' and this particular instance of the Worker is selected for
@@ -150,9 +137,14 @@ public class Worker {
          */
         ConnectionFactory factory = new ConnectionFactory();
         factory.setHost(RabbitMQhost);
+        factory.setPort(RabbitMQport);
+        factory.setPassword(RabbitMQpassword);
+        factory.setUsername(RabbitMQusername);
+        log.info("Set RabbitMQ host to: " + RabbitMQhost);
+        log.info("Set RabbitMQ port to: " + RabbitMQport);
+
         inProcessConnection = factory.newConnection();
         inProcessChannel = inProcessConnection.createChannel();
-
         inProcessChannel.queueDeclare(InProcess_QUEUE_NAME, false, false, false, null);
         log.info(" [*] Waiting for messages. To exit press CTRL+C");
 
@@ -295,6 +287,46 @@ public class Worker {
      */
     public void writeCompletedQueue (byte[] message) throws IOException {
         completedChannel.basicPublish("", Completed_QUEUE_NAME, MessageProperties.PERSISTENT_TEXT_PLAIN, message);
+    }
+
+    /**
+     * Read a file from a Java resources folder.
+     *
+     * @param fileName the relative path of the file to read.
+     * @return THe resources file as a stream.
+     */
+    private InputStream getResourceFile(String fileName) {
+
+        StringBuilder result = new StringBuilder("");
+
+        //Get file from resources folder
+        ClassLoader classLoader = getClass().getClassLoader();
+        File file = new File(classLoader.getResource(fileName).getFile());
+        log.info(file.getAbsolutePath());
+
+        InputStream is = classLoader.getResourceAsStream(fileName);
+
+        return is;
+    }
+
+    /**
+     * Read a configuration file for parameter values.
+     */
+    private void readConfig() {
+
+        Configurations configs = new Configurations();
+        Configuration config = null;
+        //try {
+        //    config = configs.properties(new File("./config/metadig.properties"));
+            //RabbitMQhost = config.getString("RabbitMQ.host", RabbitMQhost);
+            //RabbitMQport = config.getInteger("RabbitMQ.port", RabbitMQport);
+        RabbitMQhost = "metadig-controller.default.svc.cluster.local";
+        RabbitMQport = 5672;
+        RabbitMQpassword = "guest";
+        RabbitMQusername = "guest";
+        //} catch (ConfigurationException cex) {
+         //   log.error("Unable to read configuration, using default values.");
+       // }
     }
 }
 

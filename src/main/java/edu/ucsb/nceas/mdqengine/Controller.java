@@ -3,13 +3,12 @@ package edu.ucsb.nceas.mdqengine;
 import com.rabbitmq.client.*;
 import org.apache.commons.configuration2.Configuration;
 import org.apache.commons.configuration2.builder.fluent.Configurations;
-import org.apache.commons.configuration2.ex.ConfigurationException;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.dataone.exceptions.MarshallingException;
 import org.dataone.service.types.v2.SystemMetadata;
 import org.dataone.service.util.TypeMarshaller;
 import org.joda.time.DateTime;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 import java.io.*;
 import java.util.concurrent.TimeoutException;
@@ -34,32 +33,24 @@ public class Controller {
     private static com.rabbitmq.client.Connection completedConnection;
     private static com.rabbitmq.client.Channel completedChannel;
 
-    private static String RabbitMQhost = null;
+    // Default values for the RabbitMQ message broker server. The value of 'localhost' is valid for
+    // a RabbitMQ server running on a 'bare metal' server, inside a VM, or within a Kubernetes
+    // where metadig-controller and the RabbitMQ server are running in containers that belong
+    // to the same Pod. These defaults will be used if the properties file cannot be read.
+    private static String RabbitMQhost = "localhost";
+    private static Integer RabbitMQport = 5672;
     private static Controller instance;
     private boolean isStarted = false;
     public static Log log = LogFactory.getLog(Controller.class);
 
     public static void main(String[] argv) throws Exception {
 
-        Configurations configs = new Configurations();
-        Configuration config = null;
-        // TODO: read config info from a system-wide installed location or from environment variable.
-        try {
-            config = configs.properties(new File("./config/metadig.properties"));
-            // access configuration properties
-        } catch (ConfigurationException cex) {
-            // Something went wrong
-        }
-
-        RabbitMQhost = config.getString("RabbitMQ.host");
-        if(RabbitMQhost == null) RabbitMQhost = "localhost:5673";
-
         DateTime requestDateTime = new DateTime();
         Controller metadigCtrl = Controller.getInstance();
 
         // TODO: move this test to the JUnit tests
-        InputStream metadata = metadigCtrl.getFile("data/knb.1101.1.xml");
-        InputStream sysmeta = metadigCtrl.getFile("data/sysmeta.xml");
+        InputStream metadata = metadigCtrl.getResourceFile("data/knb.1101.1.xml");
+        InputStream sysmeta = metadigCtrl.getResourceFile("data/sysmeta.xml");
 
         metadigCtrl.start();
         if (metadigCtrl.getIsStarted()) {
@@ -125,23 +116,23 @@ public class Controller {
      * the report.
      * </p>
      *
-     * @param memberNode the member node service URL to send the quality report to.
-     * @param metadataPid the identifier of the metadata document.
-     * @param metadata the metadata XML document.
-     * @param qualitySuiteId the unique identifier of the metadig-engine quality suite, i.e. 'arctic.data.center.suite.1'
-     * @param localFilePath the local directory path on the member node where data files can be located (not implemented yet)
+     * @param memberNode      the member node service URL to send the quality report to.
+     * @param metadataPid     the identifier of the metadata document.
+     * @param metadata        the metadata XML document.
+     * @param qualitySuiteId  the unique identifier of the metadig-engine quality suite, i.e. 'arctic.data.center.suite.1'
+     * @param localFilePath   the local directory path on the member node where data files can be located (not implemented yet)
      * @param requestDateTime the date and time of the initial report generation request
-     * @param systemMetadata the DataONE system metadata for the metadata document.
+     * @param systemMetadata  the DataONE system metadata for the metadata document.
      * @return
      * @throws java.io.IOException
      */
-    public void processRequest( String memberNode,
-                                  String metadataPid,
-                                  InputStream metadata,
-                                  String qualitySuiteId,
-                                  String localFilePath,
-                                  DateTime requestDateTime,
-                                  InputStream systemMetadata) throws java.io.IOException {
+    public void processRequest(String memberNode,
+                               String metadataPid,
+                               InputStream metadata,
+                               String qualitySuiteId,
+                               String localFilePath,
+                               DateTime requestDateTime,
+                               InputStream systemMetadata) throws java.io.IOException {
 
         QueueEntry qEntry = null;
         SystemMetadata sysmeta = null;
@@ -152,7 +143,7 @@ public class Controller {
         BufferedInputStream bis = new BufferedInputStream(metadata);
         ByteArrayOutputStream buf = new ByteArrayOutputStream();
         int result = bis.read();
-        while(result != -1) {
+        while (result != -1) {
             buf.write((byte) result);
             result = bis.read();
         }
@@ -180,18 +171,21 @@ public class Controller {
 
     /**
      * Intialize the RabbitMQ queues.
+     *
      * @throws IOException
      * @throws TimeoutException
      */
-    public void setupQueues () throws IOException, TimeoutException {
+    public void setupQueues() throws IOException, TimeoutException {
         ConnectionFactory factory = new ConnectionFactory();
-        factory.setHost("localhost");
+        factory.setHost(RabbitMQhost);
+        factory.setPort(RabbitMQport);
+        log.info("Set RabbitMQ host to: " + RabbitMQhost);
+        log.info("Set RabbitMQ port to: " + RabbitMQport);
+
         inProcessConnection = factory.newConnection();
         inProcessChannel = inProcessConnection.createChannel();
         inProcessChannel.queueDeclare(InProcess_QUEUE_NAME, false, false, false, null);
 
-        factory = new ConnectionFactory();
-        factory.setHost("localhost");
         completedConnection = factory.newConnection();
         completedChannel = completedConnection.createChannel();
         completedChannel.queueDeclare(Completed_QUEUE_NAME, false, false, false, null);
@@ -224,16 +218,16 @@ public class Controller {
 
     /**
      * Write an entry to the "InProcess" queue.
+     *
      * @param message
      * @throws IOException
      */
-    public void writeInProcessQueue (byte[] message) throws IOException {
+    public void writeInProcessQueue(byte[] message) throws IOException {
 
         inProcessChannel.basicPublish("", InProcess_QUEUE_NAME, MessageProperties.PERSISTENT_TEXT_PLAIN, message);
     }
 
     /**
-     *
      * @throws IOException
      * @throws TimeoutException
      */
@@ -249,6 +243,7 @@ public class Controller {
 
     /**
      * Run a simple test of the report generation facility.
+     *
      * @return a boolean set to true if the engine has been started.
      */
     public boolean test() {
@@ -259,10 +254,10 @@ public class Controller {
         //FileInputStream metadata = new FileInputStream("/Users/slaughter/Projects/Metadig/test/knb.1101.1.xml");
         //FileInputStream sysmeta = new FileInputStream( "/Users/slaughter/Projects/Metadig/test/sysmeta.xml");
 
-        InputStream metadata = metadigCtrl.getFile("data/knb.1101.1.xml");
-        InputStream sysmeta = metadigCtrl.getFile("data/sysmeta.xml");
+        InputStream metadata = metadigCtrl.getResourceFile("data/knb.1101.1.xml");
+        InputStream sysmeta = metadigCtrl.getResourceFile("data/sysmeta.xml");
 
-        if(!metadigCtrl.getIsStarted()) {
+        if (!metadigCtrl.getIsStarted()) {
             metadigCtrl.start();
         }
 
@@ -279,17 +274,18 @@ public class Controller {
 
     /**
      * Read a file from a Java resources folder.
+     *
      * @param fileName the relative path of the file to read.
      * @return THe resources file as a stream.
      */
-    private InputStream getFile(String fileName) {
+    private InputStream getResourceFile(String fileName) {
 
         StringBuilder result = new StringBuilder("");
 
         //Get file from resources folder
         ClassLoader classLoader = getClass().getClassLoader();
         File file = new File(classLoader.getResource(fileName).getFile());
-        log.info(file.getAbsolutePath());
+        log.info(file.getName());
 
         InputStream is = classLoader.getResourceAsStream(fileName);
 
@@ -299,10 +295,35 @@ public class Controller {
 
     /**
      * Check if the quality engine has been initialized.
+     *
      * @return a boolean set to true if the engine has been started.
      */
     public boolean getIsStarted() {
         return isStarted;
+    }
+
+    /**
+     * Read a configuration file for parameter values.
+     */
+    private void readConfig() {
+
+        Configurations configs = new Configurations();
+        Configuration config = null;
+        //try {
+            //Get file from resources folder
+            //File configFile = new File(classLoader.getResource("/configuration/metadig.properties").getFile());
+            //InputStream props = this.getResourceFile("configuration/metadig.properties");
+            //config = configs.properties(props);
+            //RabbitMQhost = config.getString("RabbitMQ.host", RabbitMQhost);
+            //RabbitMQport = config.getInteger("RabbitMQ.port", RabbitMQport);
+            RabbitMQhost = "localhost";
+            RabbitMQport = 5672;
+
+            log.info("From properties resource - RabbitMQhost: " + RabbitMQhost);
+            log.info("From properties resource - RabbitMQport: " + RabbitMQport);
+        //} catch (URISyntaxException | ConfigurationException cex) {
+        //    log.error("Unable to read configuration, using default values.");
+        //}
     }
 }
 
