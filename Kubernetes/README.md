@@ -106,7 +106,25 @@ rabbitmq     1     0  0 20:34 ?        00:00:00 /bin/sh /usr/lib/rabbitmq/bin/ra
 To view logs for a particular pod:
 
 ```/bin/bash
-kubectl logs metadig-worker-57cd9f9f4-h9cwd
+$ kubectl logs metadig-worker-57cd9f9f4-h9cwd
 ```
 
+## Scale number of workers
+
+The `metadig-worker` pod is in a separate k8s deployment so that it can be scaled independently from `metadig-controller`. To scale the number of pods up so that more report generation containers can be running simultaneously, use the command:
+
+```/bin/bash
+kubectl scale --replicas=3 deployment/metadig-worker
+```
+
+To view the results:
+
+```/bin/bash
+$ kubectl get pods
+NAME                                  READY     STATUS             RESTARTS   AGE       IP           NODE
+metadig-controller-7b9b5c788d-hjnx5   3/3       Running            0          1d        172.17.0.4   minikube
+metadig-worker-86679b74bc-52l5z       1/1       Running            0          1d        172.17.0.5   minikube
+metadig-worker-86679b74bc-gsp9v       1/1       Running            0          1d        172.17.0.7   minikube
+metadig-worker-86679b74bc-kq47c       1/1       Running            0          1d        172.17.0.6   minikube
+```
 
