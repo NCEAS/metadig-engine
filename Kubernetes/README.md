@@ -45,7 +45,7 @@ $ kubectl apply -f metadig-worker-service.yaml
 ```
 
 
-## Connect to the MetaDIG Engine via a browser
+## Check status of the cluster
 First check that all the `metadig` services have started:
 
 ```/bin/bash
@@ -56,7 +56,7 @@ metadig-controller   NodePort    10.99.100.113    <none>        80:31761/TCP   2
 metadig-worker       ClusterIP   10.110.110.143   <none>        80/TCP         1h        app=metadig-worker,tier=backend
 ```
 
-Ensure that 'metadig-controller' and `metadig-worker` appear.
+Ensure that `metadig-controlle` and `metadig-worker` appear.
 
 Now check that all necessary pods are deployed:
 
@@ -68,6 +68,20 @@ metadig-worker-57cd9f9f4-h9cwd        1/1       Running         0         53m   
 ```
 
 Both `metadig-controller*` and `metadig-worker*` pods should have a status of `Running`.
+
+## Connect to the metadig-controller service via a browser
+The `minikube` facility can proxy a connection to the `metadig-controller` service. To obtain the external url for the connection:
+
+```/bin/bash
+$ minikube service metadig-controller --url
+http://192.168.99.103:30364
+http://192.168.99.103:30625
+http://192.168.99.103:32363
+```
+
+The `metadig-controller` service contains a pod composed of `metadig-httpd`, `metadig-tomcat` and `rabbitmq` (type `kubectl describe pod metadig-controller` for details). 
+
+The first of these urls is for the connection to `metadig-httpd`. Enter this url in a browser to connect to the metadig-engine web application.
 
 ## Debugging the Cluster Configuration
 
@@ -88,4 +102,11 @@ UID        PID  PPID  C STIME TTY          TIME CMD
 rabbitmq     1     0  0 20:34 ?        00:00:00 /bin/sh /usr/lib/rabbitmq/bin/rabbitmq-server
 ...
 ```
+
+To view logs for a particular pod:
+
+```/bin/bash
+kubectl logs metadig-worker-57cd9f9f4-h9cwd
+```
+
 
