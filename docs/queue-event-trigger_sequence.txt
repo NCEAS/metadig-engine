@@ -5,12 +5,12 @@
         sequenceTitleFontStyle normal
         sequenceTitleFontName Lucida Bright
     }
-    title: MetaDIG Engine: 'pending' Queue
+    title: MetaDIG Engine: 'InProcess' Queue
     activate "DataONE_Client"
     "DataONE_Client" -> Metacat : MN.create(metadata, sysmeta)
     deactivate "DataONE_Client"
     activate Metacat
-    Metacat -> Metacat : MDQClient.submit(sysmeta)
+    Metacat -> Metacat : MDQClient.requestReport(sysmeta)
     Metacat -> "MetaDIG API" : https://quality..../suite/{id}/run
     deactivate Metacat
     activate "MetaDIG API"
@@ -20,6 +20,6 @@
     "MetaDIG webapp" -> Controller : processRun(metadata, sysmeta, suiteId)
     deactivate "MetaDIG webapp"
     activate Controller
-    Controller ->> "pending:Java Queue" : QueueEntry
+    Controller ->> "InProcess:RabbitMQ Queue" : QueueEntry
     deactivate Controller
 @enduml  
