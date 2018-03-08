@@ -17,7 +17,7 @@ metadig app
     - metadig-worker deployment
         - metadig-worker container
 
-## Start a Local Cluster 
+## Start a Local Cluster
 
 ```/bin/bash
 minikube start
@@ -79,7 +79,7 @@ http://192.168.99.103:30625
 http://192.168.99.103:32363
 ```
 
-The `metadig-controller` service contains a pod composed of `metadig-httpd`, `metadig-tomcat` and `rabbitmq` (type `kubectl describe pod metadig-controller` for details). 
+The `metadig-controller` service contains a pod composed of `metadig-httpd`, `metadig-tomcat` and `rabbitmq` (type `kubectl describe pod metadig-controller` for details).
 
 The first of these urls is for the connection to `metadig-httpd`. Enter this url in a browser to connect to the metadig-engine web application.
 
@@ -128,3 +128,159 @@ metadig-worker-86679b74bc-gsp9v       1/1       Running            0          1d
 metadig-worker-86679b74bc-kq47c       1/1       Running            0          1d        172.17.0.6   minikube
 ```
 
+
+# Alternate approach to set up a kubernetes cluster with `kubeadm`
+
+kubeadm is a utility for bootstrapping a fully configured k8s cluster.
+Installation instructions:  https://kubernetes.io/docs/setup/independent/install-kubeadm/
+
+## Prereqs: docker
+
+From the docs:
+
+    On each of your machines, install Docker. Version v1.12 is recommended,
+    but v1.11, v1.13 and 17.03 are known to work as well. Versions 17.06+
+    might work, but have not yet been tested and verified by the
+    Kubernetes node team.
+
+We've got `docker 17.12`, so hopefully it will work.
+
+## Prereqs: firewall
+
+```
+for port in `echo "6443 2379 2380 10250 10251 10252 10255"`
+do
+        echo $port
+        #ufw route allow from 128.111.54.64/26
+done
+```
+
+## First install kubeadm and other tools
+
+As root:
+
+```
+apt-get update && apt-get install -y apt-transport-https
+curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add -
+cat <<EOF >/etc/apt/sources.list.d/kubernetes.list
+deb http://apt.kubernetes.io/ kubernetes-xenial main
+EOF
+apt-get update
+apt-get install -y kubelet kubeadm kubectl
+```
+
+- be sure the machine is not using swap, as k8s isn't happy with that.
+- See: https://serverfault.com/questions/881517/why-disable-swap-on-kubernetes
+
+```
+swapoff -a
+sudo sed -i '/ swap / s/^\(.*\)$/#\1/g' /etc/fstab
+```
+
+## Then configure the cluster
+
+As a regular user:
+
+```
+$ sudo kubeadm init --pod-network-cidr=192.168.0.0/16
+[init] Using Kubernetes version: v1.9.3
+[init] Using Authorization modes: [Node RBAC]
+[preflight] Running pre-flight checks.
+	[WARNING SystemVerification]: docker version is greater than the most recently validated version. Docker version: 17.12.1-ce. Max validated version: 17.03
+	[WARNING FileExisting-crictl]: crictl not found in system path
+[preflight] Starting the kubelet service
+[certificates] Generated ca certificate and key.
+[certificates] Generated apiserver certificate and key.
+[certificates] apiserver serving cert is signed for DNS names [docker-ucsb-1 kubernetes kubernetes.default kubernetes.default.svc kubernetes.default.svc.cluster.local] and IPs [10.96.0.1 128.111.54.69]
+[certificates] Generated apiserver-kubelet-client certificate and key.
+[certificates] Generated sa key and public key.
+[certificates] Generated front-proxy-ca certificate and key.
+[certificates] Generated front-proxy-client certificate and key.
+[certificates] Valid certificates and keys now exist in "/etc/kubernetes/pki"
+[kubeconfig] Wrote KubeConfig file to disk: "admin.conf"
+[kubeconfig] Wrote KubeConfig file to disk: "kubelet.conf"
+[kubeconfig] Wrote KubeConfig file to disk: "controller-manager.conf"
+[kubeconfig] Wrote KubeConfig file to disk: "scheduler.conf"
+[controlplane] Wrote Static Pod manifest for component kube-apiserver to "/etc/kubernetes/manifests/kube-apiserver.yaml"
+[controlplane] Wrote Static Pod manifest for component kube-controller-manager to "/etc/kubernetes/manifests/kube-controller-manager.yaml"
+[controlplane] Wrote Static Pod manifest for component kube-scheduler to "/etc/kubernetes/manifests/kube-scheduler.yaml"
+[etcd] Wrote Static Pod manifest for a local etcd instance to "/etc/kubernetes/manifests/etcd.yaml"
+[init] Waiting for the kubelet to boot up the control plane as Static Pods from directory "/etc/kubernetes/manifests".
+[init] This might take a minute or longer if the control plane images have to be pulled.
+[apiclient] All control plane components are healthy after 29.003756 seconds
+[uploadconfig] Storing the configuration used in ConfigMap "kubeadm-config" in the "kube-system" Namespace
+[markmaster] Will mark node docker-ucsb-1 as master by adding a label and a taint
+[markmaster] Master docker-ucsb-1 tainted and labelled with key/value: node-role.kubernetes.io/master=""
+[bootstraptoken] Using token: dd97a9.2868c79262f0905a
+[bootstraptoken] Configured RBAC rules to allow Node Bootstrap tokens to post CSRs in order for nodes to get long term certificate credentials
+[bootstraptoken] Configured RBAC rules to allow the csrapprover controller automatically approve CSRs from a Node Bootstrap Token
+[bootstraptoken] Configured RBAC rules to allow certificate rotation for all node client certificates in the cluster
+[bootstraptoken] Creating the "cluster-info" ConfigMap in the "kube-public" namespace
+[addons] Applied essential addon: kube-dns
+[addons] Applied essential addon: kube-proxy
+
+Your Kubernetes master has initialized successfully!
+
+To start using your cluster, you need to run the following as a regular user:
+
+  mkdir -p $HOME/.kube
+  sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+  sudo chown $(id -u):$(id -g) $HOME/.kube/config
+
+You should now deploy a pod network to the cluster.
+Run "kubectl apply -f [podnetwork].yaml" with one of the options listed at:
+  https://kubernetes.io/docs/concepts/cluster-administration/addons/
+
+You can now join any number of machines by running the following on each node
+as root:
+
+  kubeadm join --token <token> 128.111.54.69:6443 --discovery-token-ca-cert-hash sha256:<hash>
+```
+
+- now do what it says above and set up the non-root user environments
+
+## Next, choose and install a POD Network
+
+The install instructions are incredibly vague about which network to choose.
+This blog was illuminating:  https://chrislovecnm.com/kubernetes/cni/choosing-a-cni-provider/
+He has a nice summary table at the bottom.  But he also says, unless you need
+CNI, just use `kubenet`.   The [networking guide](https://kubernetes.io/docs/concepts/cluster-administration/network-plugins/) for k8s
+has other good info.
+
+After reading through it, I went with Calico, which provided a nice set of
+bootstrap instructions: https://docs.projectcalico.org/v3.0/getting-started/kubernetes/
+
+```
+$ kubectl apply -f \
+https://docs.projectcalico.org/v3.0/getting-started/kubernetes/installation/hosted/kubeadm/1.7/calico.yaml
+configmap "calico-config" created
+daemonset "calico-etcd" created
+service "calico-etcd" created
+daemonset "calico-node" created
+deployment "calico-kube-controllers" created
+clusterrolebinding "calico-cni-plugin" created
+clusterrole "calico-cni-plugin" created
+serviceaccount "calico-cni-plugin" created
+clusterrolebinding "calico-kube-controllers" created
+clusterrole "calico-kube-controllers" created
+serviceaccount "calico-kube-controllers" created
+```
+
+## Remove the restrictions (taints) on master so we can run pods here on a single node
+
+```
+kubectl taint nodes --all node-role.kubernetes.io/master-
+```
+
+## Apparently, we now have a working cluster with one node!
+
+```
+$ kubectl get nodes -o wide
+NAME            STATUS    ROLES     AGE       VERSION   EXTERNAL-IP   OS-IMAGE             KERNEL-VERSION      CONTAINER-RUNTIME
+docker-ucsb-1   Ready     master    6m        v1.9.3    <none>        Ubuntu 16.04.4 LTS   4.4.0-116-generic   docker://17.12.1-ce
+```
+
+## Adding additional nodes
+
+Use the command in the instructions above with its embedded token and has to
+add other nodes to the cluster.
