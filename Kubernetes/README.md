@@ -1,6 +1,6 @@
 # Create a Local Kubernetes Cluster to Run MetaDIG Engine
 
-The MetaDIG Quality Engine can be run inside a local Kubernetes cluster using the `minikube` facility. Running the Quality Engine in this manner can be useful for development and debugging as a local cluster can be easily started and accessed.
+The MetaDIG Quality Engine can be run inside a local Kubernetes (k8s) cluster using the `minikube` facility. Running the Quality Engine in this manner can be useful for development and debugging as a local cluster can be easily started and accessed, but is not intended as a production deployment of k8s, due to limitations such as only supporting one k8s node.
 
 Instructions for installing `minikube` are [here](https://kubernetes.io/docs/tasks/tools/install-minikube)
 
@@ -143,7 +143,21 @@ From the docs:
     might work, but have not yet been tested and verified by the
     Kubernetes node team.
 
-We've got `docker 17.12`, so hopefully it will work.
+Docker version 17.03-ce was installed with these commands:
+
+```sudo apt-get update
+sudo apt-get install -y \
+    apt-transport-https \
+    ca-certificates \
+    curl \
+    software-properties-common
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+sudo add-apt-repository \
+   "deb https://download.docker.com/linux/$(. /etc/os-release; echo "$ID") \
+   $(lsb_release -cs) \
+   stable"
+sudo apt-get update && sudo apt-get install -y docker-ce=$(apt-cache madison docker-ce | grep 17.03 | head -1 | awk '{print $3}')
+```
 
 ## Prereqs: firewall
 
@@ -177,12 +191,24 @@ swapoff -a
 sudo sed -i '/ swap / s/^\(.*\)$/#\1/g' /etc/fstab
 ```
 
+Check that `kubelet` is running, ensuring that the status is `active`:
+```
+slaughter@docker-ucsb-1:~$ systemctl status kubelet
+● kubelet.service - kubelet: The Kubernetes Node Agent
+   Loaded: loaded (/lib/systemd/system/kubelet.service; enabled; vendor preset: enabled)
+  Drop-In: /etc/systemd/system/kubelet.service.d
+           └─10-kubeadm.conf
+   Active: active (running) since Mon 2018-03-12 18:29:52 PDT; 17h ago
+   ...
+```
+If it is not running, read the log in order to determine the cause and potentially restart or reinstall it.
+
 ## Then configure the cluster
 
 As a regular user:
 
 ```
-$ sudo kubeadm init --pod-network-cidr=192.168.0.0/16
+$ kubeadm init --pod-network-cidr=192.168.0.0/16
 [init] Using Kubernetes version: v1.9.3
 [init] Using Authorization modes: [Node RBAC]
 [preflight] Running pre-flight checks.
@@ -266,6 +292,18 @@ clusterrole "calico-kube-controllers" created
 serviceaccount "calico-kube-controllers" created
 ```
 
+## Install monitoring software
+
+The following commands install `grafana` monitoring software with `heapster` 
+and `influxdb`:
+
+```
+$ git clone https://github.com/kubernetes/heapster.git
+$ cd heapster
+$ kubectl create -f deploy/kube-config/influxdb/
+$ kubectl create -f deploy/kube-config/rbac/heapster-rbac.yaml
+```
+
 ## Remove the restrictions (taints) on master so we can run pods here on a single node
 
 ```
@@ -282,5 +320,25 @@ docker-ucsb-1   Ready     master    6m        v1.9.3    <none>        Ubuntu 16.
 
 ## Adding additional nodes
 
-Use the command in the instructions above with its embedded token and has to
-add other nodes to the cluster.
+After installing docker, kubeadm, kubectl, kubelet on a worker node, i.e. `docker-ucsb-2.test.dataone.org` use the command in the instructions above with its embedded token and has to add other nodes to the cluster:
+
+```
+$ kubeadm join --token <token> 128.111.54.69:6443 --discovery-token-ca-cert-hash sha256:<hash>
+sha256:b3944dd0f303e43bba579810381cd553a6e2b6448b94802c3ead3029080c9fd4
+[preflight] Running pre-flight checks.
+    [WARNING FileExisting-crictl]: crictl not found in system path
+[preflight] Starting the kubelet service
+[discovery] Trying to connect to API Server "128.111.54.69:6443"
+[discovery] Created cluster-info discovery client, requesting info from "https://128.111.54.69:6443"
+[discovery] Requesting info from "https://128.111.54.69:6443" again to validate TLS against the pinned public key
+[discovery] Cluster info signature and contents are valid and TLS certificate validates against pinned roots, will use API Server "128.111.54.69:6443"
+[discovery] Successfully established connection with API Server "128.111.54.69:6443"
+
+This node has joined the cluster:
+* Certificate signing request was sent to master and a response
+  was received.
+* The Kubelet was informed of the new secure connection details.
+
+Run 'kubectl get nodes' on the master to see this node join the cluster.
+
+```
