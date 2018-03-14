@@ -238,7 +238,7 @@
 		<key>NSPaperSize</key>
 		<array>
 			<string>size</string>
-			<string>{611.99998474121094, 792}</string>
+			<string>{612.00002670288086, 792}</string>
 		</array>
 		<key>NSPrintReverseOrientation</key>
 		<array>
@@ -1154,7 +1154,7 @@ entry w/status}</string>
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{775.42354780464188, 1093.7721508953805}, {54, 54}}</string>
+					<string>{{775.42354780463791, 1093.7721508066497}, {54, 54}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>FitText</key>
@@ -1215,7 +1215,7 @@ cmds}</string>
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{432.84922507162145, 1072.1640256548935}, {65, 54}}</string>
+					<string>{{432.8492250716215, 1072.1640256548962}, {65, 54}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>FitText</key>
@@ -1276,7 +1276,7 @@ suite}</string>
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{1066.6104510786022, 1094.53623753222}, {88, 54}}</string>
+					<string>{{1066.610451077855, 1094.5362372037202}, {88, 54}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>FitText</key>
@@ -1396,7 +1396,7 @@ info}</string>
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{958.47867676122928, 455.51874585086045}, {117, 24}}</string>
+					<string>{{958.4786775085737, 455.51874644893428}, {117, 24}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>FitText</key>
@@ -1469,8 +1469,8 @@ info}</string>
 					<integer>24</integer>
 					<key>Points</key>
 					<array>
-						<string>{846.90143723508015, 541.70758833393904}</string>
-						<string>{1131.5830354166601, 421.78447964228559}</string>
+						<string>{846.90143777148137, 541.70758833550769}</string>
+						<string>{1131.5830363266641, 421.78448062755871}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -1512,8 +1512,8 @@ info}</string>
 					<integer>25</integer>
 					<key>Points</key>
 					<array>
-						<string>{1043.9211116299964, 1121.1987359307175}</string>
-						<string>{1198.9165559128155, 1121.9831373223574}</string>
+						<string>{1043.9211116300021, 1121.1987357529365}</string>
+						<string>{1198.9165559128326, 1121.9831367942941}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -1726,7 +1726,7 @@ processReport(queueEntry)}</string>
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{470.50937043530735, 658.41151985951717}, {94, 25}}</string>
+					<string>{{470.50937043530735, 658.41151985951967}, {94, 25}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>FitText</key>
@@ -1785,7 +1785,7 @@ processReport(queueEntry)}</string>
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{602.4874969217999, 717.84516577847057}, {104, 25}}</string>
+					<string>{{602.48749692660238, 717.84516577707916}, {104, 25}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>FitText</key>
@@ -2020,8 +2020,8 @@ processReport(queueEntry)}</string>
 					<integer>35</integer>
 					<key>Points</key>
 					<array>
-						<string>{511.53143982625164, 1098.8634152750512}</string>
-						<string>{418.32323416364903, 1099.4701283627091}</string>
+						<string>{511.53143982625164, 1098.8634152750531}</string>
+						<string>{418.32323416364909, 1099.4701283627128}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -2194,7 +2194,7 @@ processReport(queueEntry)}</string>
 \f0\b\fs30 \cf0 Quality Solr Server\
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\qc\partightenfactor0
 
-\b0\fs24 \cf0 Determines how each check should be run and executes it}</string>
+\b0\fs24 \cf0 Contains all info from quality report and the pid of the scored metadata document}</string>
 					</dict>
 				</dict>
 				<dict>
@@ -2209,8 +2209,8 @@ processReport(queueEntry)}</string>
 					<integer>40</integer>
 					<key>Points</key>
 					<array>
-						<string>{714.35157852625241, 1120.7567506250723}</string>
-						<string>{886.58937540528905, 1120.7868681374994}</string>
+						<string>{714.35157852625241, 1120.7567505600937}</string>
+						<string>{886.58937540528916, 1120.7868680260701}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -2407,8 +2407,8 @@ processReport(queueEntry)}</string>
 					<integer>45</integer>
 					<key>Points</key>
 					<array>
-						<string>{654.27412749432665, 670.91145493284739}</string>
-						<string>{407.9582548037356, 670.91157186698797}</string>
+						<string>{654.27412749432665, 670.9114549328483}</string>
+						<string>{407.9582548037356, 670.91157186699172}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -2628,8 +2628,8 @@ processReport(queueEntry)}</string>
 					<integer>51</integer>
 					<key>Points</key>
 					<array>
-						<string>{596.07378724889099, 774.5980019310183}</string>
-						<string>{688.98147820609665, 704.21334654338818}</string>
+						<string>{596.07378724889827, 774.59800193103638}</string>
+						<string>{688.98147821076839, 704.21334654340876}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -2661,7 +2661,7 @@ processReport(queueEntry)}</string>
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{271.03454144915764, 238.77410412669659}, {137, 24}}</string>
+					<string>{{271.03454144915617, 238.77410412669653}, {137, 24}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>FitText</key>
@@ -2735,7 +2735,7 @@ processReport(queueEntry)}</string>
 					<key>Points</key>
 					<array>
 						<string>{337.55005469563366, 324.97672247143976}</string>
-						<string>{336.95195222487536, 201.45343963041114}</string>
+						<string>{336.95195222487285, 201.45343963041114}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -2797,7 +2797,7 @@ processReport(queueEntry)}</string>
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{821.22095218909624, 457.84357588817846}, {111, 24}}</string>
+					<string>{{821.22095015863442, 457.84358139851525}, {111, 24}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>FitText</key>
@@ -2870,8 +2870,8 @@ processReport(queueEntry)}</string>
 					<integer>56</integer>
 					<key>Points</key>
 					<array>
-						<string>{812.71618477889012, 541.53693953646325}</string>
-						<string>{922.12633021408124, 424.8414724845511}</string>
+						<string>{812.71618557514421, 541.53693954252367}</string>
+						<string>{922.12633488580184, 424.84147250166075}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -3048,7 +3048,7 @@ processReport(queueEntry)}</string>
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{573.61305269938657, 1154.155914103475}, {56, 24}}</string>
+					<string>{{573.61446275334288, 1154.1559121784298}, {56, 24}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>FitText</key>
@@ -3119,8 +3119,8 @@ processReport(queueEntry)}</string>
 					<integer>61</integer>
 					<key>Points</key>
 					<array>
-						<string>{601.62593990933567, 1191.8335053571002}</string>
-						<string>{601.60407965727768, 1148.2772492501838}</string>
+						<string>{601.62666964169455, 1191.8335053506271}</string>
+						<string>{601.60596340370057, 1148.2772492418987}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -3189,8 +3189,8 @@ processReport(queueEntry)}</string>
 					<integer>63</integer>
 					<key>Points</key>
 					<array>
-						<string>{751.1049366306695, 637.47205778330363}</string>
-						<string>{777.01357407349576, 589.77752350337005}</string>
+						<string>{751.10499984054695, 637.47205813270648}</string>
+						<string>{777.01372726263332, 589.77752467685173}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -3388,7 +3388,7 @@ manages queues}</string>
 \f0\b\fs30 \cf0 Report Worker\
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\qc\partightenfactor0
 
-\b0\fs24 \cf0 Determines how each check should be run and executes it}</string>
+\b0\fs24 \cf0 Coordinates creation and storage of quality report}</string>
 					</dict>
 				</dict>
 				<dict>
@@ -3875,8 +3875,8 @@ Node}</string>
 					<integer>9</integer>
 					<key>Points</key>
 					<array>
-						<string>{320.95329133228455, 262.34818507838105}</string>
-						<string>{399.27203484395523, 178.1518148336886}</string>
+						<string>{320.95329131889969, 262.34818507833188}</string>
+						<string>{399.27203480797067, 178.15181483355639}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -3920,8 +3920,8 @@ Node}</string>
 					<integer>10</integer>
 					<key>Points</key>
 					<array>
-						<string>{455.08402244350822, 402.53764030921013}</string>
-						<string>{507.10702132561022, 362.02150902782893}</string>
+						<string>{455.08402244521494, 402.53764030922076}</string>
+						<string>{507.10702133021397, 362.0215090278428}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -3992,8 +3992,8 @@ Node}</string>
 					<integer>12</integer>
 					<key>Points</key>
 					<array>
-						<string>{761.34610214329484, 762.07011939997597}</string>
-						<string>{652.95095467256829, 715.58010468988152}</string>
+						<string>{761.34610214320082, 762.07011942461315}</string>
+						<string>{652.95095465117788, 715.58010476665265}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -4082,8 +4082,8 @@ Node}</string>
 					<integer>14</integer>
 					<key>Points</key>
 					<array>
-						<string>{761.34599697400188, 582.86432793980384}</string>
-						<string>{652.95094389723727, 629.3543504505335}</string>
+						<string>{761.34599697390775, 582.86432791516643}</string>
+						<string>{652.95094387584641, 629.35435037376169}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -4250,8 +4250,8 @@ Node}</string>
 					<integer>18</integer>
 					<key>Points</key>
 					<array>
-						<string>{392.79394072825215, 402.54131113330328}</string>
-						<string>{339.75428214457565, 362.01783955253342}</string>
+						<string>{392.79394072875994, 402.54131113330016}</string>
+						<string>{339.75428214594581, 362.01783955252944}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -4295,8 +4295,8 @@ Node}</string>
 					<integer>19</integer>
 					<key>Points</key>
 					<array>
-						<string>{422.72583917095102, 941.071434953422}</string>
-						<string>{423.09100260314102, 866.5714138359773}</string>
+						<string>{422.72583850088012, 941.07143495335401}</string>
+						<string>{423.0909998717994, 866.57141383594831}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -4475,8 +4475,8 @@ Node}</string>
 					<integer>23</integer>
 					<key>Points</key>
 					<array>
-						<string>{260.16313614265971, 262.23384268115421}</string>
-						<string>{235.9623563306252, 178.2661649686045}</string>
+						<string>{260.16313613832176, 262.23384268116536}</string>
+						<string>{235.96235631899947, 178.26616496863426}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -5779,8 +5779,8 @@ REST Service}</string>
 					<integer>13</integer>
 					<key>Points</key>
 					<array>
-						<string>{297.13666213264423, 519.05865568507159}</string>
-						<string>{206.60598021463227, 535.92822431827278}</string>
+						<string>{297.13666189383673, 519.05815694965293}</string>
+						<string>{206.60597954919831, 535.92748142926212}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -5824,8 +5824,8 @@ REST Service}</string>
 					<integer>14</integer>
 					<key>Points</key>
 					<array>
-						<string>{297.13569492758643, 452.23220447177789}</string>
-						<string>{206.60694822505837, 436.37988589877364}</string>
+						<string>{297.13569515335058, 452.23170568069258}</string>
+						<string>{206.60694885420583, 436.37914292690886}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -6431,7 +6431,7 @@ REST Service}</string>
 		<key>CurrentSheet</key>
 		<integer>0</integer>
 		<key>Frame</key>
-		<string>{{0, 0}, {1440, 877}}</string>
+		<string>{{162, 184}, {1440, 877}}</string>
 		<key>ShowInfo</key>
 		<true/>
 		<key>Sidebar</key>
@@ -6441,12 +6441,12 @@ REST Service}</string>
 		<key>Sidebar_Tab</key>
 		<integer>0</integer>
 		<key>VisibleRegion</key>
-		<string>{{-48.476218233803358, -92.867629067776619}, {1511.4754098360654, 1257.3770491803277}}</string>
+		<string>{{7.1394630553581422, 779.62105013067242}, {668.1159420289855, 555.79710144927537}}</string>
 		<key>ZoomValues</key>
 		<array>
 			<array>
 				<string>Canvas 1</string>
-				<real>0.60999999999999999</real>
+				<real>1.3800000000000001</real>
 				<real>0.0</real>
 			</array>
 			<array>
