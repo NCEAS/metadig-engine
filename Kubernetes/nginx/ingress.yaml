@@ -1,0 +1,15 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: test
+  annotations:
+    ingress.kubernetes.io/rewrite-target: /
+spec:
+  rules:
+  - host: docker-ucsb-1.test.dataone.org
+    http:
+      paths:
+      - path: /test
+        backend:
+          serviceName: http-svc
+          servicePort: 80
