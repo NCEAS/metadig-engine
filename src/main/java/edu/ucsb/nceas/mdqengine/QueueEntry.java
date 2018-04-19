@@ -1,8 +1,9 @@
 package edu.ucsb.nceas.mdqengine;
 
-import java.io.Serializable;
-import org.joda.time.DateTime;
 import org.dataone.service.types.v2.SystemMetadata;
+import org.joda.time.DateTime;
+
+import java.io.Serializable;
 
 public class QueueEntry implements Serializable {
 
@@ -23,6 +24,8 @@ public class QueueEntry implements Serializable {
     private SystemMetadata systemMetadata;
 
     private String runXML;
+
+    private long elapsedTimeSeconds;
 
     public String getMemberNode() {
         return memberNode;
@@ -86,6 +89,14 @@ public class QueueEntry implements Serializable {
 
     public void setRunXML(String runXML) {
         this.runXML = runXML;
+    }
+
+    public void setElapsedTimeSeconds (long seconds) {
+        this.elapsedTimeSeconds = seconds;
+    };
+
+    public long getElapsedTimeSeconds() {
+        return elapsedTimeSeconds;
     }
 
     public QueueEntry (String memberNode, String metadataPid, String metadataDoc, String qualitySuiteId, String localFilePath,
