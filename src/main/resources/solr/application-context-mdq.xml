@@ -1,0 +1,172 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+	   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	   xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+	<bean id="mdqSubprocessor" class="org.dataone.cn.indexer.parser.ScienceMetadataDocumentSubprocessor">
+
+		<!-- match MDQ documents -->
+		<property name="matchDocuments">
+			<list>
+				<value>https://nceas.ucsb.edu/mdqe/v1</value>
+			</list>
+		</property>
+		<property name="fieldList">
+			<list>
+				<ref bean="mdq.runId"/>
+				<ref bean="mdq.suiteId"/>
+				<ref bean="mdq.timestamp"/>
+				<ref bean="mdq.metadata.formatId"/>
+				<ref bean="mdq.metadata.datasource"/>
+				<ref bean="mdq.metadata.funder"/>
+				<ref bean="mdq.metadata.funder.lookup"/>
+				<ref bean="mdq.metadata.rightsHolder"/>
+				<ref bean="mdq.metadata.group"/>
+				<ref bean="mdq.score.green"/>
+				<ref bean="mdq.score.orange"/>
+				<ref bean="mdq.score.red"/>
+				<ref bean="mdq.score.blue"/>
+				<ref bean="mdq.score.total"/>
+				<ref bean="mdq.score.identification"/>
+				<ref bean="mdq.score.interpretation"/>
+				<ref bean="mdq.score.discovery"/>
+				<ref bean="mdq.score.other"/>
+				<ref bean="mdq.score.composite"/>
+			</list>
+		</property>
+	</bean>
+
+	<bean id="mdq.runId" class="org.dataone.cn.indexer.parser.SolrField">
+		<constructor-arg name="name" value="runId"/>
+		<constructor-arg name="xpath"
+						 value="/*[local-name() = 'run']/id"/>
+		<property name="multivalue" value="false"/>
+	</bean>
+
+	<bean id="mdq.suiteId" class="org.dataone.cn.indexer.parser.SolrField">
+		<constructor-arg name="name" value="suiteId"/>
+		<constructor-arg name="xpath"
+						 value="//suiteId"/>
+		<property name="multivalue" value="false"/>
+	</bean>
+
+	<bean id="mdq.timestamp" class="org.dataone.cn.indexer.parser.SolrField">
+		<constructor-arg name="name" value="timestamp"/>
+		<constructor-arg name="xpath"
+						 value="//timestamp"/>
+		<property name="multivalue" value="false"/>
+		<property name="converter" ref="dateConverter"/>
+	</bean>
+
+	<bean id="mdq.metadata.formatId" class="org.dataone.cn.indexer.parser.SolrField">
+		<constructor-arg name="name" value="metadata_formatId"/>
+		<constructor-arg name="xpath"
+						 value="//result[check/id[text() = 'check.echo.formatId.1']]/output/text()"/>
+		<property name="multivalue" value="false"/>
+	</bean>
+
+	<bean id="mdq.metadata.datasource" class="org.dataone.cn.indexer.parser.SolrField">
+		<constructor-arg name="name" value="metadata_datasource"/>
+		<constructor-arg name="xpath"
+						 value="//result[check/id[text() = 'check.echo.datasource.1']]/output/text()"/>
+		<property name="multivalue" value="false"/>
+	</bean>
+
+	<bean id="mdq.metadata.funder" class="org.dataone.cn.indexer.parser.SolrField">
+		<constructor-arg name="name" value="metadata_funder"/>
+		<constructor-arg name="xpath"
+						 value="//result[check/id[text() = 'check.echo.funder.1']]/output/text()"/>
+		<property name="multivalue" value="true"/>
+		<property name="dedupe" value="true"/>
+	</bean>
+
+	<bean id="mdq.metadata.funder.lookup" class="org.dataone.cn.indexer.parser.SolrField">
+		<constructor-arg name="name" value="metadata_funder_lookup"/>
+		<constructor-arg name="xpath"
+						 value="//result[check/id[text() = 'check.lookup.funder.1']]/output/text()"/>
+		<property name="multivalue" value="true"/>
+		<property name="dedupe" value="true"/>
+	</bean>
+
+	<bean id="mdq.metadata.rightsHolder" class="org.dataone.cn.indexer.parser.SolrField">
+		<constructor-arg name="name" value="metadata_rightsHolder"/>
+		<constructor-arg name="xpath"
+						 value="//result[check/id[text() = 'check.echo.rightsHolder.1']]/output/text()"/>
+		<property name="multivalue" value="false"/>
+	</bean>
+
+	<bean id="mdq.metadata.group" class="org.dataone.cn.indexer.parser.SolrField">
+		<constructor-arg name="name" value="metadata_group"/>
+		<constructor-arg name="xpath"
+						 value="//result[check/id[text() = 'check.lookup.group.1']]/output/text()"/>
+		<property name="multivalue" value="true"/>
+		<property name="dedupe" value="true"/>
+	</bean>
+
+	<!-- scoring by result status -->
+	<bean id="mdq.score.green" class="org.dataone.cn.indexer.parser.SolrField">
+		<constructor-arg name="name" value="score_green"/>
+		<constructor-arg name="xpath"
+						 value="count(//result[check/level[text() != 'INFO']]/status[text() = 'SUCCESS'])"/>
+		<property name="multivalue" value="false"/>
+	</bean>
+	<bean id="mdq.score.orange" class="org.dataone.cn.indexer.parser.SolrField">
+		<constructor-arg name="name" value="score_orange"/>
+		<constructor-arg name="xpath"
+						 value="count( //result[check/level[text() != 'INFO']]/status[text() = 'ERROR'] | //result[check/level[text() = 'OPTIONAL']]/status[text() = 'FAILURE'])"/>
+		<property name="multivalue" value="false"/>
+	</bean>
+	<bean id="mdq.score.red" class="org.dataone.cn.indexer.parser.SolrField">
+		<constructor-arg name="name" value="score_red"/>
+		<constructor-arg name="xpath"
+						 value="count(//result[check/level[text() = 'REQUIRED']]/status[text() = 'FAILURE'])"/>
+		<property name="multivalue" value="false"/>
+	</bean>
+
+	<bean id="mdq.score.blue" class="org.dataone.cn.indexer.parser.SolrField">
+		<constructor-arg name="name" value="score_blue"/>
+		<constructor-arg name="xpath"
+						 value="count(//result/status[text() = 'SKIP'] | //result[check/level[text() = 'INFO']])"/>
+		<property name="multivalue" value="false"/>
+    </bean>
+
+	<!-- the composite score -->
+	<bean id="mdq.score.composite" class="org.dataone.cn.indexer.parser.SolrField">
+		<constructor-arg name="name" value="score_composite"/>
+		<constructor-arg name="xpath"
+						 value="count(//result[check/level[text() != 'INFO']]/status[text() = 'SUCCESS']) div (count(//result) - count(//result/status[text() = 'SKIP'] | //result[check/level[text() = 'INFO']]))"/>
+		<property name="multivalue" value="false"/>
+	</bean>
+
+	<!-- scoring by check.type -->
+	<bean id="mdq.score.identification" class="org.dataone.cn.indexer.parser.SolrField">
+		<constructor-arg name="name" value="score_identification"/>
+		<constructor-arg name="xpath"
+						 value="count(//result[check/type[text() = 'identification']]/status[text() = 'SUCCESS']) div count(//result[check/type[text() = 'identification']])"/>
+		<property name="multivalue" value="false"/>
+	</bean>
+	<bean id="mdq.score.interpretation" class="org.dataone.cn.indexer.parser.SolrField">
+		<constructor-arg name="name" value="score_interpretation"/>
+		<constructor-arg name="xpath"
+						 value="count(//result[check/type[text() = 'interpretation']]/status[text() = 'SUCCESS']) div count(//result[check/type[text() = 'interpretation']])"/>
+		<property name="multivalue" value="false"/>
+	</bean>
+	<bean id="mdq.score.discovery" class="org.dataone.cn.indexer.parser.SolrField">
+		<constructor-arg name="name" value="score_discovery"/>
+		<constructor-arg name="xpath"
+						 value="count(//result[check/type[text() = 'discovery']]/status[text() = 'SUCCESS']) div count(//result[check/type[text() = 'discovery']])"/>
+		<property name="multivalue" value="false"/>
+	</bean>
+	<bean id="mdq.score.other" class="org.dataone.cn.indexer.parser.SolrField">
+		<constructor-arg name="name" value="score_other"/>
+		<constructor-arg name="xpath"
+						 value="count(//result[check/type[text() != 'identification' and text() != 'interpretation' and text() != 'discovery']]/status[text() = 'SUCCESS']) div count(//result[check/type[text() != 'identification' and text() != 'interpretation' and text() != 'discovery']])"/>
+		<property name="multivalue" value="false"/>
+	</bean>
+
+	<bean id="mdq.score.total" class="org.dataone.cn.indexer.parser.SolrField">
+		<constructor-arg name="name" value="score_total"/>
+		<constructor-arg name="xpath"
+						 value="count(//result)"/>
+		<property name="multivalue" value="false"/>
+	</bean>
+</beans>
