@@ -11,6 +11,9 @@ import org.dataone.service.util.TypeMarshaller;
 import org.joda.time.DateTime;
 
 import java.io.*;
+import java.net.ServerSocket;
+import java.net.Socket;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 /**
@@ -37,20 +40,34 @@ public class Controller {
     // a RabbitMQ server running on a 'bare metal' server, inside a VM, or within a Kubernetes
     // where metadig-controller and the RabbitMQ server are running in containers that belong
     // to the same Pod. These defaults will be used if the properties file cannot be read.
+    //private static String RabbitMQhost = "rabbitmq.metadig.svc.cluster.local";
     private static String RabbitMQhost = "localhost";
     private static Integer RabbitMQport = 5672;
+    private static String RabbitMQpassword = "guest";
+    private static String RabbitMQusername = "guest";
     private static Controller instance;
     private boolean isStarted = false;
+    private int testCount = 0;
+    private int runCount = 0;
+    private long totalElapsedSeconds = 0;
+    private long startTime = 0;
+    private boolean testMode = false;
     public static Log log = LogFactory.getLog(Controller.class);
 
     public static void main(String[] argv) throws Exception {
 
-        DateTime requestDateTime = new DateTime();
-        Controller metadigCtrl = Controller.getInstance();
+        /* Get command line arguments. Currently the only argument supported is
+        to turn on test mode, where the Controller will read from a port. The information
+        read from the port contains report generation requests, which each record
+        containing these fields:
 
-        // TODO: move this test to the JUnit tests
-        InputStream metadata = metadigCtrl.getResourceFile("data/knb.1101.1.xml");
-        InputStream sysmeta = metadigCtrl.getResourceFile("data/sysmeta.xml");
+            identifier
+            metadata document filename
+            suite id to run
+            systemmetadata document filename
+
+         */
+        Controller metadigCtrl = Controller.getInstance();
 
         metadigCtrl.start();
         if (metadigCtrl.getIsStarted()) {
@@ -59,13 +76,90 @@ public class Controller {
             log.info("The controller has not been started");
         }
 
-        metadigCtrl.processRequest("urn:node:mnTestKNB", "1234",
-                metadata, "metadig-test.suite.1", "/tmp", requestDateTime, sysmeta);
+        log.info("# of arguments: " + argv.length);
+        /* When in "test" mode (i.e. if cmd args are passed in), records will be
+         read from the port number (argv[0]) which will are the metadata and
+         sysmeta filenames to submit to the report generation queue. Records will
+         be read in until a line with 'Done' is encountered. The outer loop here
+         is so that mulitple 'test' sessions can occur, i.e. controller will wait
+         again for a new client to connect to the port, and then begin again reading
+         filesnames to run.
+        */
+
+        Boolean stop = false;
+        if (argv.length > 0) {
+            // Continue to listen on specified port for client 'test' requests
+            while(true) {
+                int portNumber = Integer.parseInt(argv[0]);
+                log.info("Controller test mode is enabled.");
+                log.info("Controller listening on port " + portNumber + "for filenames to submit");
+                DateTime requestDateTime = new DateTime();
+                ServerSocket serverSocket = new ServerSocket(portNumber);
+                log.info("Waiting to establish connection to test client:");
+                Socket clientSocket = serverSocket.accept();
+                BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+                String request;
+
+                String info = in.readLine();
+
+                // Client has indicated a stop for all tests, as the first line sent to a new connection.
+                if ("Stop".equals(info)) {
+                    clientSocket.close();
+                    serverSocket.close();
+                    break;
+                }
+
+                // First line contains the number of tests that will be run
+                int cnt = Integer.parseInt(info);
+                log.info(cnt + " tests will be run.");
+                metadigCtrl.initTests(cnt);
+
+                while ((request = in.readLine()) != null) {
+                    // Stop reading all requests
+                    if ("Stop".equals(request)) {
+                        stop = true;
+                        break;
+                    }
+                    // Stop reading from the current port connection
+                    if ("Done".equals(request)) {
+                        log.info("Controller test mode complete.");
+                        break;
+                    }
+                    String delims = "[,]";
+                    String[] tokens = request.split(delims);
+
+
+                    String metadataPid = tokens[0];
+
+                    File metadataFile = new File(tokens[1]);
+                    InputStream metadata = new FileInputStream(metadataFile);
+
+                    String suiteId = tokens[2];
+
+                    File sysmetaFile = new File(tokens[3]);
+                    InputStream sysmeta = new FileInputStream(sysmetaFile);
+
+                    requestDateTime = new DateTime();
+                    log.info("Request queuing of: " + tokens[0] + ", " + tokens[1] + ", " + tokens[2] + ", " + tokens[3]);
+                    metadigCtrl.processRequest("urn:node:mnTestKNB", metadataPid,
+                            metadata, suiteId, "/tmp", requestDateTime, sysmeta);
+                }
+                // Close current connection, then start again with new connection
+                clientSocket.close();
+                serverSocket.close();
+                if(stop) break;
+            }
+        }
+
+        //InputStream metadata = metadigCtrl.getResourceFile("data/knb.1101.1.xml");
+        //InputStream sysmeta = metadigCtrl.getResourceFile("data/sysmeta.xml");
+
+        //metadigCtrl.processRequest("urn:node:mnTestKNB", "1234",
+        //        metadata, "metadig-test.suite.1", "/tmp", requestDateTime, sysmeta);
 
         // Check if all queues have been purged, then shutdown
         // metadigCtrl.shutdown();
     }
-
 
     private Controller() {
     }
@@ -104,8 +198,38 @@ public class Controller {
             this.isStarted = true;
         } catch (java.io.IOException | java.util.concurrent.TimeoutException e) {
             e.printStackTrace();
+            log.error("Error starting queue:");
+            log.error(e.getMessage());
             this.isStarted = false;
         }
+    }
+
+    /**
+     * Initialize the test statistics
+     * <p>
+     * Initialize state variables for test statistics.
+     * </p>
+     */
+    public void initTests(int cnt) {
+        //this.startTime = System.nanoTime();
+        this.startTime = System.currentTimeMillis();
+        this.testMode = true;
+        this.testCount = cnt;
+        this.runCount = 0;
+        this.totalElapsedSeconds = 0;
+    }
+
+    /**
+     * Disable test mode
+     * <p>
+     * Disable test mode so that the controller resumes normal operation.
+     * </p>
+     */
+    public void disableTestMode() {
+        this.testMode = false;
+        this.testCount = 0;
+        this.runCount = 0;
+        this.totalElapsedSeconds = 0;
     }
 
     /**
@@ -225,7 +349,33 @@ public class Controller {
                 }
 
                 log.info(" [x] Controller received completed report for pid: '" + qEntry.getMetadataPid() + "'");
+                log.info("Elapsed time: " + qEntry.getElapsedTimeSeconds());
                 //log.info(qEntry.getRunXML());
+                if(testMode) {
+                    long elapsedSeconds = qEntry.getElapsedTimeSeconds();
+                    totalElapsedSeconds += elapsedSeconds;
+                    runCount += 1;
+                    if(runCount == testCount) {
+                        log.info("Tests for this run are complete.");
+                        log.info("Number of tests run: " + runCount);
+                        log.info("Cummulative elapsed time for all workers: " + TimeUnit.SECONDS.toMinutes(totalElapsedSeconds) + " seconds");
+                        log.info("Average worker elapsed time: " + totalElapsedSeconds/runCount + " seconds");
+                        //long difference = System.nanoTime() - startTime;
+                        long endTime = System.currentTimeMillis();
+                        long difference = endTime - startTime;
+                        log.info("Controller start time in milliseconds: "
+                                + String.format("%d", startTime));
+                        log.info("Controller end time in milliseconds: "
+                                + String.format("%d", endTime));
+                        log.info("Total elapsed controller elapsed time: "
+                                + String.format("%d", TimeUnit.MILLISECONDS.toSeconds(difference))
+                                + " seconds\n");
+                        log.info("Total elapsed controller elapsed time: "
+                                + String.format("%d", TimeUnit.MILLISECONDS.toMinutes(difference))
+                                + " minutes\n");
+                        disableTestMode();
+                    }
+                }
             }
         };
 
