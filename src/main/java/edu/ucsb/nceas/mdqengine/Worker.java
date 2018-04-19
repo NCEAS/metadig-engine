@@ -5,12 +5,15 @@ import edu.ucsb.nceas.mdqengine.model.Result;
 import edu.ucsb.nceas.mdqengine.model.Run;
 import edu.ucsb.nceas.mdqengine.model.Suite;
 import edu.ucsb.nceas.mdqengine.serialize.XmlMarshaller;
+import edu.ucsb.nceas.mdqengine.solr.IndexApplicationController;
 import edu.ucsb.nceas.mdqengine.store.InMemoryStore;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.configuration2.Configuration;
 import org.apache.commons.configuration2.builder.fluent.Configurations;
+import org.apache.commons.configuration2.ex.ConfigurationException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.solr.client.solrj.SolrClient;
 import org.dataone.client.auth.AuthTokenSession;
 import org.dataone.client.v2.MNode;
 import org.dataone.client.v2.itk.D1Client;
@@ -27,6 +30,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 /**
@@ -42,6 +46,7 @@ public class Worker {
 
     private final static String InProcess_QUEUE_NAME = "InProcess";
     private final static String Completed_QUEUE_NAME = "Completed";
+    private final static String springConfigFileURL = "/metadig-index-processor-context.xml";
 
     private static Connection inProcessConnection;
     private static Channel inProcessChannel;
@@ -49,17 +54,19 @@ public class Worker {
     private static Channel completedChannel;
 
     public static Log log = LogFactory.getLog(Worker.class);
+    //private static String RabbitMQhost = "rabbitmq.metadig.svc.cluster.local";
     private static String RabbitMQhost = "localhost";
     private static Integer RabbitMQport = 5672;
     private static String RabbitMQpassword = "guest";
     private static String RabbitMQusername = "guest";
     private static String authToken = null;
+    private static SolrClient client = null;
 
 
     public static void main(String[] argv) throws Exception {
 
         Worker wkr = new Worker();
-        wkr.readConfig();
+        //wkr.readConfig();
         wkr.setupQueues();
 
         /* This method is overridden from the RabbitMQ library and serves as the callback that is invoked whenenver
@@ -70,10 +77,14 @@ public class Worker {
             @Override
             public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties, byte[] body) throws IOException {
 
-                byte[] message;
+                byte[] message = null;
+                Run run = null;
                 ByteArrayInputStream bis = new ByteArrayInputStream(body);
                 ObjectInput in = new ObjectInputStream(bis);
                 QueueEntry qEntry = null;
+                //long startTime = System.nanoTime();
+                long startTime = System.currentTimeMillis();
+
                 try {
                     qEntry = (QueueEntry) in.readObject();
                 } catch (java.lang.ClassNotFoundException e) {
@@ -83,10 +94,14 @@ public class Worker {
                 //String message = new String(body, "UTF-8");
                 Worker wkr = new Worker();
                 String runXML = null;
+                String metadataPid = qEntry.getMetadataPid();
+                String suiteId = qEntry.getQualitySuiteId();
+                SystemMetadata sysmeta = qEntry.getSystemMetadata();
 
                 //log.info(" [x] Received '" + message + "'");
                 try {
-                    runXML = wkr.processReport(qEntry);
+                    run = wkr.processReport(qEntry);
+                    runXML = XmlMarshaller.toXml(run);
                     qEntry.setRunXML(runXML);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
@@ -96,22 +111,44 @@ public class Worker {
                     //inProcessChannel.basicAck(envelope.getDeliveryTag(), false);
                 }
 
+
                 /* Once the quality report has been created, it can be submitted to the member node to be
+                 * uploaded and indexed.
+                */
+                try {
+                    // convert String into InputStream
+                    wkr.indexReport(metadataPid, runXML, suiteId, sysmeta);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+
+                /* Put the quality report in a queue message and return in to the controller
                    uploaded and indexed.
                 */
                 try {
+                    //long difference = System.nanoTime() - startTime;
+                    long difference = System.currentTimeMillis() - startTime;
+                    long elapsedSeconds = TimeUnit.MILLISECONDS.toSeconds(difference);
+
+                    log.info("Elapsed time (seconds): "
+                            + String.format("%d", elapsedSeconds)
+                            + " for metadataPid: " + metadataPid
+                            + ", suiteId: " + suiteId
+                            + "\n");
+                    qEntry.setElapsedTimeSeconds(elapsedSeconds);
                     /* wkr.submitReport(qEntry); */
                     ByteArrayOutputStream bos = new ByteArrayOutputStream();
                     ObjectOutput out = new ObjectOutputStream(bos);
                     out.writeObject(qEntry);
                     message = bos.toByteArray();
 
-                    wkr.writeCompletedQueue(message);
-                    log.info(" [x] Sent completed report for pid: '" + qEntry.getMetadataPid() + "'");
+                    //log.info(" Quality report sent to Solr");
                 } catch (Exception e) {
 
                 } finally {
                     log.info(" [x] Done");
+                    wkr.writeCompletedQueue(message);
+                    log.info(" [x] Sent completed report for pid: '" + qEntry.getMetadataPid() + "'");
                     /* Inform the controller that the report has been created and uploaded. */
                     /* TODO: include a status value and description so that when a response is sent for
                      * a failed report creation, the controller can take the appropriate action.
@@ -181,7 +218,7 @@ public class Worker {
      * @throws InterruptedException
      * @throws Exception
      */
-    public String processReport(QueueEntry message) throws InterruptedException, Exception {
+    public Run processReport(QueueEntry message) throws InterruptedException, Exception {
 
         String suiteId = message.getQualitySuiteId();
         log.info(" [x] Running suite '" + message.getQualitySuiteId() + "'" + " for metadata pid " + message.getMetadataPid());
@@ -201,9 +238,39 @@ public class Worker {
         Run run = engine.runSuite(suite, input, params, sysmeta);
         List<Result> results = run.getResult();
 
-        String runXML = XmlMarshaller.toXml(run);
+        //String runXML = XmlMarshaller.toXml(run);
 
-        return(runXML);
+        return(run);
+    }
+
+    /**
+     * Send a quality report to the Solr server to be added to the index.
+     * <p>
+     * The quality report is added to the Solr index using the DataONE index processing
+     * component, which has been modified for use with metadig_engine.
+     * </p>
+     *
+     * @param metadataId
+     * @param runXML
+     * @param suiteId
+     * @param sysmeta
+     * @throws Exception
+     */
+    public void indexReport(String metadataId, String runXML, String suiteId, SystemMetadata sysmeta) throws Exception {
+
+        log.info(" [x] Indexing metadata PID: " + metadataId + ", suite id: " + suiteId);
+
+        IndexApplicationController iac = new IndexApplicationController();
+        iac.initialize(this.springConfigFileURL);
+        InputStream runIS = new ByteArrayInputStream(runXML.getBytes());
+        Identifier pid = new Identifier();
+        pid.setValue(metadataId);
+        ObjectFormatIdentifier objFormatId =  new ObjectFormatIdentifier();
+        // Update the sysmeta, setting the cprrect type to a metadig quality report
+        objFormatId.setValue("https://nceas.ucsb.edu/mdqe/v1");
+        sysmeta.setFormatId(objFormatId);
+        iac.insertSolrDoc(pid, sysmeta, runIS);
+        log.info(" [x] Done indexing metadata PID: " + metadataId + ", suite id: " + suiteId);
     }
 
     /**
