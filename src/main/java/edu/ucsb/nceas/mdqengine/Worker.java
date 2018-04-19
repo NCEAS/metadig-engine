@@ -143,20 +143,29 @@ public class Worker {
         log.info("Set RabbitMQ host to: " + RabbitMQhost);
         log.info("Set RabbitMQ port to: " + RabbitMQport);
 
-        inProcessConnection = factory.newConnection();
-        inProcessChannel = inProcessConnection.createChannel();
-        inProcessChannel.queueDeclare(InProcess_QUEUE_NAME, false, false, false, null);
-        log.info(" [*] Waiting for messages. To exit press CTRL+C");
+        try {
+            inProcessConnection = factory.newConnection();
+            inProcessChannel = inProcessConnection.createChannel();
+            inProcessChannel.queueDeclare(InProcess_QUEUE_NAME, false, false, false, null);
+            // Channel will only send one request for each worker at a time.
+            inProcessChannel.basicQos(1);
+            log.info("Connected to RabbitMQ queue " + InProcess_QUEUE_NAME);
+            log.info(" [*] Waiting for messages. To exit press CTRL+C");
+        } catch (Exception e) {
+            log.error("Error connecting to RabbitMQ queue " + InProcess_QUEUE_NAME);
+            log.error(e.getMessage());
 
-        // Only send one request to each worker at a time.
-        inProcessChannel.basicQos(1);
+        }
 
-        // Queue to send generated reports back to controller
-        factory = new ConnectionFactory();
-        factory.setHost(RabbitMQhost);
-        completedConnection = factory.newConnection();
-        completedChannel = completedConnection.createChannel();
-        completedChannel.queueDeclare(Completed_QUEUE_NAME, false, false, false, null);
+        try {
+            completedConnection = factory.newConnection();
+            completedChannel = completedConnection.createChannel();
+            completedChannel.queueDeclare(Completed_QUEUE_NAME, false, false, false, null);
+            log.info("Connected to RabbitMQ queue " + Completed_QUEUE_NAME);
+        } catch (Exception e) {
+            log.error("Error connecting to RabbitMQ queue " + Completed_QUEUE_NAME);
+            log.error(e.getMessage());
+        }
     }
 
     /**
