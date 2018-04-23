@@ -166,10 +166,11 @@ public class RDispatcherTest {
 		names.put("expected", 100);
 		
 		// R code to check congruence between loaded data and the metadata
-		String code =
-				"library(RCurl); \n"
-				+ "myCsv <- getURL(dataUrl); \n"
-				+ "df <- read.csv(textConnection(myCsv), header=header, sep=sep); "
+		String code = 	"library(httr); \n"
+				+ "tf <- tempfile(fileext='.csv') \n"
+				+ "dataUrl <- 'https://knb.ecoinformatics.org/knb/d1/mn/v2/object/doi:10.5063/AA/tao.2.1' \n"
+				+ "GET(dataUrl, write_disk(tf, overwrite=TRUE)) \n"
+				+ "df <- read.csv(tf, header=header, sep=sep) \n"
 				+ "mdq_result = list(output=list(list(value = (nrow(df) == expected) )))";
 		Result result = null;
 		try {

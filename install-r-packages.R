@@ -3,7 +3,6 @@
 # The packages we're going to install
 packages_cran <- c("jsonlite",
                    "digest",
-                   "RCurl",
                    "httr")
 
 packages_github <- list("metadig" = "NCEAS/metadig-r")
