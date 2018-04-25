@@ -3,7 +3,7 @@
 	xsi:schemaLocation="http://www.springframework.org/schema/beans
 						http://www.springframework.org/schema/beans/spring-beans.xsd">
 
-	<bean id="xpath_system_metadata_300" class="java.util.ArrayList">
+	<bean id="xpath_system_metadata_200" class="java.util.ArrayList">
 		<constructor-arg>
 			<list>
 				<bean class="org.dataone.cn.indexer.parser.SolrField">
