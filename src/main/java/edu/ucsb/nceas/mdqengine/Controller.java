@@ -1,6 +1,7 @@
 package edu.ucsb.nceas.mdqengine;
 
 import com.rabbitmq.client.*;
+import edu.ucsb.nceas.mdqengine.exception.MetadigException;
 import org.apache.commons.configuration2.Configuration;
 import org.apache.commons.configuration2.builder.fluent.Configurations;
 import org.apache.commons.logging.Log;
@@ -280,7 +281,8 @@ public class Controller {
             fis.printStackTrace();
         }
 
-        qEntry = new QueueEntry(memberNode, metadataPid, metadataDoc, qualitySuiteId, localFilePath, requestDateTime, sysmeta, runXML);
+        qEntry = new QueueEntry(memberNode, metadataPid, metadataDoc, qualitySuiteId, localFilePath, requestDateTime, sysmeta,
+                runXML, null);
 
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         ObjectOutput out = new ObjectOutputStream(bos);
@@ -318,6 +320,7 @@ public class Controller {
         } catch (Exception e) {
             log.error("Error connecting to RabbitMQ queue " + InProcess_QUEUE_NAME);
             log.error(e.getMessage());
+            throw e;
         }
 
         try {
@@ -328,6 +331,7 @@ public class Controller {
         } catch (Exception e) {
             log.error("Error connecting to RabbitMQ queue " + Completed_QUEUE_NAME);
             log.error(e.getMessage());
+            throw e;
         }
 
         /* This method overrides the RabbitMQ library and implements a callback that is invoked whenever an entry is added
@@ -348,9 +352,24 @@ public class Controller {
                     completedChannel.basicAck(envelope.getDeliveryTag(), false);
                 }
 
-                log.info(" [x] Controller received completed report for pid: '" + qEntry.getMetadataPid() + "'");
+                log.info(" [x] Controller received completed report for pid: '" + qEntry.getMetadataPid() + "'" + ", " +
+                        "hostsname: " + qEntry.getHostname());
                 log.info("Elapsed time: " + qEntry.getElapsedTimeSeconds());
-                //log.info(qEntry.getRunXML());
+
+                /* An exception caught by the worker will be passed back to the controller via the queue entry
+                 * 'exception' field. Check this now and take the appropriate action.
+                 */
+                Exception me = qEntry.getException();
+                // TODO: decide if/when an entry should be requeued
+                if (me instanceof MetadigException) {
+                    log.error("Error running suite: " + qEntry.getQualitySuiteId()+ ", " + qEntry.getMetadataPid() + ": ");
+                    log.error("\t" + me.getMessage());
+                    Throwable thisCause = me.getCause();
+                    if(thisCause != null) {
+                        log.error("\tcause: " + thisCause.getMessage());
+                    }
+                    return;
+                }
                 if(testMode) {
                     long elapsedSeconds = qEntry.getElapsedTimeSeconds();
                     totalElapsedSeconds += elapsedSeconds;

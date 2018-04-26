@@ -1,6 +1,9 @@
 package edu.ucsb.nceas.mdqengine;
 
 import com.rabbitmq.client.*;
+import edu.ucsb.nceas.mdqengine.exception.MetadigException;
+import edu.ucsb.nceas.mdqengine.exception.MetadigIndexException;
+import edu.ucsb.nceas.mdqengine.exception.MetadigProcessException;
 import edu.ucsb.nceas.mdqengine.model.Result;
 import edu.ucsb.nceas.mdqengine.model.Run;
 import edu.ucsb.nceas.mdqengine.model.Suite;
@@ -26,6 +29,7 @@ import org.dataone.service.types.v2.SystemMetadata;
 
 import java.io.*;
 import java.math.BigInteger;
+import java.net.InetAddress;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -54,8 +58,9 @@ public class Worker {
     private static Channel completedChannel;
 
     public static Log log = LogFactory.getLog(Worker.class);
-    //private static String RabbitMQhost = "rabbitmq.metadig.svc.cluster.local";
-    private static String RabbitMQhost = "localhost";
+    // TODO: move rabbitmq config to parameter file
+    private static String RabbitMQhost = "rabbitmq.metadig.svc.cluster.local";
+    //private static String RabbitMQhost = "localhost";
     private static Integer RabbitMQport = 5672;
     private static String RabbitMQpassword = "guest";
     private static String RabbitMQusername = "guest";
@@ -77,7 +82,6 @@ public class Worker {
             @Override
             public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties, byte[] body) throws IOException {
 
-                byte[] message = null;
                 Run run = null;
                 ByteArrayInputStream bis = new ByteArrayInputStream(body);
                 ObjectInput in = new ObjectInputStream(bis);
@@ -88,29 +92,45 @@ public class Worker {
                 try {
                     qEntry = (QueueEntry) in.readObject();
                 } catch (java.lang.ClassNotFoundException e) {
-                    log.info("Class 'QueueEntry' not found");
+                    log.info("Unable to process quality report");
+                    e.printStackTrace();
+                    return;
                 }
 
-                //String message = new String(body, "UTF-8");
                 Worker wkr = new Worker();
                 String runXML = null;
                 String metadataPid = qEntry.getMetadataPid();
                 String suiteId = qEntry.getQualitySuiteId();
                 SystemMetadata sysmeta = qEntry.getSystemMetadata();
 
-                //log.info(" [x] Received '" + message + "'");
+                // Create the quality report
                 try {
+                    qEntry.setHostname(InetAddress.getLocalHost().getHostName());
                     run = wkr.processReport(qEntry);
                     runXML = XmlMarshaller.toXml(run);
                     qEntry.setRunXML(runXML);
                 } catch (InterruptedException e) {
+                    log.info("Unable to run quality suite.");
                     e.printStackTrace();
+                    MetadigException me = new MetadigProcessException("Unable to run quality suite.");
+                    me.initCause(e);
+                    // Store an exception in the queue entry. This will be returned to the Controller so
+                    // so that it can take the appropriate action, for example, to resubmit the entry
+                    // or to log the error in an easily assessible location, or to notify a user.
+                    qEntry.setException(e);
+                    // return now, as indexing can't be done if there was a problem creating the report.
+                    // Note that the wkr.returnReport will be executed before the return.
+                    return;
                 } catch (java.lang.Exception e) {
+                    log.info("Unable to run quality suite.");
                     e.printStackTrace();
+                    MetadigException me = new MetadigProcessException("Unable to run quality suite.");
+                    me.initCause(e);
+                    qEntry.setException(me);
+                    return;
                 } finally {
-                    //inProcessChannel.basicAck(envelope.getDeliveryTag(), false);
+                    wkr.returnReport(metadataPid, suiteId, qEntry, startTime);
                 }
-
 
                 /* Once the quality report has been created, it can be submitted to the member node to be
                  * uploaded and indexed.
@@ -119,46 +139,60 @@ public class Worker {
                     // convert String into InputStream
                     wkr.indexReport(metadataPid, runXML, suiteId, sysmeta);
                 } catch (Exception e) {
+                    log.info("Unable to index quality suite.");
                     e.printStackTrace();
-                }
-
-                /* Put the quality report in a queue message and return in to the controller
-                   uploaded and indexed.
-                */
-                try {
-                    //long difference = System.nanoTime() - startTime;
-                    long difference = System.currentTimeMillis() - startTime;
-                    long elapsedSeconds = TimeUnit.MILLISECONDS.toSeconds(difference);
-
-                    log.info("Elapsed time (seconds): "
-                            + String.format("%d", elapsedSeconds)
-                            + " for metadataPid: " + metadataPid
-                            + ", suiteId: " + suiteId
-                            + "\n");
-                    qEntry.setElapsedTimeSeconds(elapsedSeconds);
-                    /* wkr.submitReport(qEntry); */
-                    ByteArrayOutputStream bos = new ByteArrayOutputStream();
-                    ObjectOutput out = new ObjectOutputStream(bos);
-                    out.writeObject(qEntry);
-                    message = bos.toByteArray();
-
-                    //log.info(" Quality report sent to Solr");
-                } catch (Exception e) {
-
+                    MetadigException me = new MetadigIndexException("Unable to run quality suite.");
+                    me.initCause(e);
+                    qEntry.setException(me);
                 } finally {
-                    log.info(" [x] Done");
-                    wkr.writeCompletedQueue(message);
-                    log.info(" [x] Sent completed report for pid: '" + qEntry.getMetadataPid() + "'");
-                    /* Inform the controller that the report has been created and uploaded. */
-                    /* TODO: include a status value and description so that when a response is sent for
-                     * a failed report creation, the controller can take the appropriate action.
-                     */
-                    inProcessChannel.basicAck(envelope.getDeliveryTag(), false);
+                    // Try to return status, even if an error occurred
+                    try {
+                        wkr.returnReport(metadataPid, suiteId, qEntry, startTime);
+                        inProcessChannel.basicAck(envelope.getDeliveryTag(), false);
+                    } catch (IOException e) {
+                        log.error("Unable to return status or ack to controller.");
+                        e.printStackTrace();
+                    }
                 }
+                log.info("Worker completed task");
             }
         };
 
+        log.info("Calling basicConsume");
         inProcessChannel.basicConsume(InProcess_QUEUE_NAME, false, consumer);
+    }
+
+    private void returnReport(String metadataPid, String suiteId, QueueEntry qEntry, long startTime) throws IOException {
+        /* Put the quality report in a queue message and return in to the controller
+           uploaded and indexed.
+        */
+        byte[] message = null;
+        try {
+            //long difference = System.nanoTime() - startTime;
+            long difference = System.currentTimeMillis() - startTime;
+            long elapsedSeconds = TimeUnit.MILLISECONDS.toSeconds(difference);
+
+            log.info("Elapsed time (seconds): "
+                    + String.format("%d", elapsedSeconds)
+                    + " for metadataPid: " + metadataPid
+                    + ", suiteId: " + suiteId
+                    + "\n");
+            qEntry.setElapsedTimeSeconds(elapsedSeconds);
+            /* wkr.submitReport(qEntry); */
+            ByteArrayOutputStream bos = new ByteArrayOutputStream();
+            ObjectOutput out = new ObjectOutputStream(bos);
+            out.writeObject(qEntry);
+            message = bos.toByteArray();
+
+            log.info(" [x] Done");
+            this.writeCompletedQueue(message);
+            log.info(" [x] Sent completed report for pid: '" + qEntry.getMetadataPid() + "'");
+        } catch (Exception e) {
+            // If we couldn't prepare the message, then there is nothing left to do
+            log.error(" Unable to return report to controller");
+            e.printStackTrace();
+            throw e;
+        }
     }
 
     /**
@@ -191,7 +225,6 @@ public class Worker {
         } catch (Exception e) {
             log.error("Error connecting to RabbitMQ queue " + InProcess_QUEUE_NAME);
             log.error(e.getMessage());
-
         }
 
         try {
@@ -233,10 +266,15 @@ public class Worker {
         Map<String, Object> params = new HashMap<String, Object>();
         MDQStore store = new InMemoryStore();
 
-        MDQEngine engine = new MDQEngine();
-        Suite suite = store.getSuite(suiteId);
-        Run run = engine.runSuite(suite, input, params, sysmeta);
-        List<Result> results = run.getResult();
+        Run run = null;
+        try {
+            MDQEngine engine = new MDQEngine();
+            Suite suite = store.getSuite(suiteId);
+            run = engine.runSuite(suite, input, params, sysmeta);
+            List<Result> results = run.getResult();
+        } catch (Exception e) {
+            throw new MetadigException("Unable to run quality suite for pid " + message.getMetadataPid() + ", suite: " + suiteId, e);
+        }
 
         //String runXML = XmlMarshaller.toXml(run);
 
