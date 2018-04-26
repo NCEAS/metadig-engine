@@ -7,7 +7,7 @@ import java.io.Serializable;
 
 public class QueueEntry implements Serializable {
 
-    private static final long serialVersionUID = 2232569248669396125L;
+    private static final long serialVersionUID = 6229001259619429676L;
 
     private String memberNode;
 
@@ -26,6 +26,11 @@ public class QueueEntry implements Serializable {
     private String runXML;
 
     private long elapsedTimeSeconds;
+
+    private Exception exception;
+
+    // Hostsname of the machine that is running metadig engine
+    private String hostname;
 
     public String getMemberNode() {
         return memberNode;
@@ -99,8 +104,16 @@ public class QueueEntry implements Serializable {
         return elapsedTimeSeconds;
     }
 
+    public void setException(Exception exception) { this.exception = exception; };
+
+    public Exception getException() { return exception; }
+
+    public void setHostname(String hostname) { this.hostname = hostname; };
+
+    public String getHostname() { return hostname; }
+
     public QueueEntry (String memberNode, String metadataPid, String metadataDoc, String qualitySuiteId, String localFilePath,
-                       DateTime requestDataTime, SystemMetadata systemMetadata, String runXML) {
+                       DateTime requestDataTime, SystemMetadata systemMetadata, String runXML, String hostname) {
         this.memberNode = memberNode;
         this.metadataPid = metadataPid;
         this.metadataDoc = metadataDoc;
@@ -109,7 +122,7 @@ public class QueueEntry implements Serializable {
         this.localFilePath = localFilePath;
         this.requestDataTime = requestDataTime;
         this.runXML = runXML;
+        this.hostname = hostname;
     }
-
 }
 
