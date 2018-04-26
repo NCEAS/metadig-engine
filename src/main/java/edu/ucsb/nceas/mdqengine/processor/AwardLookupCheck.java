@@ -1,21 +1,19 @@
 package edu.ucsb.nceas.mdqengine.processor;
 
+import edu.ucsb.nceas.mdqengine.model.Output;
+import edu.ucsb.nceas.mdqengine.model.Result;
+import edu.ucsb.nceas.mdqengine.model.Status;
+import net.minidev.json.JSONArray;
+import net.minidev.json.JSONObject;
+import net.minidev.json.parser.JSONParser;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
-
-import net.minidev.json.JSONArray;
-import net.minidev.json.JSONObject;
-import net.minidev.json.parser.JSONParser;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
-import edu.ucsb.nceas.mdqengine.model.Output;
-import edu.ucsb.nceas.mdqengine.model.Result;
-import edu.ucsb.nceas.mdqengine.model.Status;
 
 /**
  * Looks up award information for given award number
@@ -24,7 +22,7 @@ import edu.ucsb.nceas.mdqengine.model.Status;
  */
 public class AwardLookupCheck implements Callable<Result> {
 	
-	private static String apiUrl = "http://api.nsf.gov/services/v1/awards.json"
+	private static String apiUrl = "https://api.nsf.gov/services/v1/awards.json"
 			+ "?printFields="
 			+ "id,"
 			+ "title,"
@@ -42,6 +40,7 @@ public class AwardLookupCheck implements Callable<Result> {
 	public Result call() {
 		Result result = new Result();
 		List<Output> outputs = new ArrayList<Output>();
+		URL url = null;
 		
 		if (this.awards != null) {
 			result.setStatus(Status.SUCCESS);
@@ -62,15 +61,17 @@ public class AwardLookupCheck implements Callable<Result> {
 					if (awardId instanceof Number) {
 						idString = String.format("%07d", awardId);
 					}
-					URL url = new URL(apiUrl + idString);
+					url = new URL(apiUrl + idString);
 					log.debug("URL=" + url.toString());
 
 					InputStream jsonStream = url.openStream();
 					
 					// parse
 					JSONParser parser = new JSONParser(JSONParser.DEFAULT_PERMISSIVE_MODE);
-					JSONObject json = (JSONObject) parser.parse(jsonStream);
-					
+					String apiRetStr= parser.parse(jsonStream).toString();
+					log.debug("String returned from Award API: " + apiRetStr);
+					JSONObject json = (JSONObject) parser.parse(apiRetStr);
+
 					if (json == null) {
 						log.warn("No award information found for " + idString);
 						continue;
@@ -105,7 +106,7 @@ public class AwardLookupCheck implements Callable<Result> {
 					outputs.addAll(this.lookupCrossRef(id));
 
 				} catch (Exception e) {
-					log.error("Could not look up award " + awardId, e);
+					log.error("Could not look up award " + awardId + " at URL " + url.toString() + ": ", e);
 					continue;
 				}
 			}
