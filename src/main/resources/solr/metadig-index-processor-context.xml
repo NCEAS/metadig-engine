@@ -4,7 +4,7 @@
        xsi:schemaLocation="http://www.springframework.org/schema/beans
  http://www.springframework.org/schema/beans/spring-beans.xsd">
 
- <import resource="application-context-systemmeta300.xml" />
+ <import resource="application-context-systemmeta-200.xml" />
  <import resource="application-context-mdq.xml" />
 
  <bean id="serviceTypesConverter" class="org.dataone.cn.indexer.convert.MemberNodeServiceRegistrationTypeConverter" />
@@ -22,7 +22,7 @@
    <list>
     <bean class="edu.ucsb.nceas.mdqengine.solr.SolrIndex">
      <constructor-arg name="xmlNamespaceConfig" ref="xmlNamespaceConfig" />
-     <constructor-arg name="sysmetaSolrFields" ref="xpath_system_metadata_300"/>
+     <constructor-arg name="sysmetaSolrFields" ref="xpath_system_metadata_200"/>
      <!--<property name="solrBaseUri" value="${solr.base.uri}" />
      <property name="httpService" ref="httpService" /> -->
      <property name="subprocessors">

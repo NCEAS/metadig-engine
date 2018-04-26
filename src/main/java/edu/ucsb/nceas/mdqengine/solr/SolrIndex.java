@@ -354,6 +354,7 @@ public class SolrIndex {
             }
             if(!solrDoc.isEmpty()) {
                 try {
+                    //UpdateResponse response = solrClient.add("quality", solrDoc);
                     UpdateResponse response = solrClient.add(solrDoc);
                     solrClient.commit();
                 } catch (SolrServerException e) {

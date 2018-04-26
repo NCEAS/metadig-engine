@@ -2,15 +2,17 @@ package edu.ucsb.nceas.mdqengine.solr;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.solr.client.solrj.SolrClient;
+import org.apache.solr.client.solrj.impl.HttpSolrClient;
 import org.dataone.service.types.v1.Identifier;
 import org.dataone.service.types.v2.SystemMetadata;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 import java.io.*;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
-import static org.apache.solr.client.solrj.impl.HttpSolrClient.Builder;
+//import org.apache.solr.client.solrj.impl.HttpSolrClient;
 
 //import org.springframework.context.ApplicationContext;
 
@@ -18,12 +20,14 @@ public class IndexApplicationController {
 
     private static String SOLRINDEXES = "solrIndexes";
     private static String solrLocation = "http://localhost:8983/solr/quality";
-    //private final static String defaultSpringConfigFileURL = "/index-processor-context.xml";
-
+    // TODO: configure Solr server (location, cloud vs standalone) via config parameters
+    private static ArrayList<String> solrLocations = new ArrayList<String>(
+            Arrays.asList("http://localhost:8983/solr", "http://localhost:7574/solr"));
     private List<SolrIndex> solrIndexes = null;
     private ClassPathXmlApplicationContext context = null;
     private String springConfigFileURL = null;
-    private SolrClient solrClient = null;
+    private HttpSolrClient solrClient = null;
+    //private CloudSolrClient solrClient = null;
     private SolrIndex solrIndex = null;
     Log log = LogFactory.getLog(IndexApplicationController.class);
 
@@ -35,16 +39,19 @@ public class IndexApplicationController {
 
     /**
      * Initialize the list of the SolrIndex objects from the configuration file.
-     * Set the SolrServer implementation using the factory.
+     * Create a Solr client that will be used for indexing.
      * @param configFile the path of the Spring configuration file
      */
     public void initialize(String configFile) throws Exception {
         try {
-            solrClient = new Builder(solrLocation).build();
+            solrClient = new HttpSolrClient.Builder(solrLocation).build();
+            //solrClient = new CloudSolrClient.Builder().withSolrUrl(solrLocations).build();
+            //solrClient = new CloudSolrClient.Builder().withZkHost(solrLocation).build();
+            //solrClient.setDefaultCollection("quality");
             log.info("Created Solr client");
         } catch (Exception e) {
             log.error("Could not create Solr client", e);
-            e.printStackTrace();
+            throw e;
         }
 
         springConfigFileURL = configFile;
@@ -92,7 +99,7 @@ public class IndexApplicationController {
      *
      */
 
-    public void insertSolrDoc(Identifier pid, SystemMetadata sysmeta, InputStream is) {
+    public void insertSolrDoc(Identifier pid, SystemMetadata sysmeta, InputStream is) throws IOException, Exception {
 
         /* The DataONE indexer reads the input doc as a disk file, so write out the
            data file contents to disk.
@@ -106,19 +113,19 @@ public class IndexApplicationController {
             OutputStream outStream = new FileOutputStream(tFile);
             outStream.write(buffer);
         } catch(IOException e){
-            e.printStackTrace();
+            log.error("Unable to create output stream from metadata document.");
+            throw e;
         }
 
         if (sysmeta != null) {
-            log.info("'solrIndexes' size: " + solrIndexes.size());
             try {
                 for (SolrIndex solrIndex: solrIndexes) {
-                    log.info("calling solrIndex.insert()...");
+                    log.debug("calling solrIndex.insert()...");
                     solrIndex.insert(pid, sysmeta, tFile.getAbsolutePath());
                 }
             } catch (Exception e) {
                 log.error("Unable to insert Solr document for PID: " + pid.getValue());
-                e.printStackTrace();
+                throw e;
             }
         }
     }
