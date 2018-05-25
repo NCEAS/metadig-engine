@@ -1,8 +1,0 @@
-kind: Service
-apiVersion: v1
-metadata:
-  name: metadig-worker
-spec:
-  selector:
-    app: metadig-worker
-    tier: backend
