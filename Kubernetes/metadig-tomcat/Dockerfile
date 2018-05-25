@@ -1,4 +1,5 @@
-FROM tomcat:8
+FROM tomcat:8.5
+#FROM tomcat:8.5-alpine
 
 MAINTAINER slaughter@nceas.ucsb.edu
 
