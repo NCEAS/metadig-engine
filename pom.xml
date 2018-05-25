@@ -185,6 +185,7 @@
 					<target>1.8</target>
 				</configuration>
 			</plugin>
+            <!--
 			<plugin>
 			    <groupId>org.codehaus.mojo</groupId>
 			    <artifactId>jaxb2-maven-plugin</artifactId>
@@ -201,11 +202,11 @@
 			                    <source>src/main/java/edu/ucsb/nceas/mdqengine/model</source>
 			                </sources>
 			                <outputDirectory>${basedir}/src/main/resources/schemas</outputDirectory>
-			                <!-- <outputDirectory>${project.build.directory}/schemas</outputDirectory> -->
 			            </configuration>
 			        </execution>
 			    </executions>
 			</plugin>
+        -->
 			<!--
 			The following plugin builds a JAR file with dependencies that automatically runs the main() method of the
 			MDQEngine. This allows me to run a Suite against a document like:
@@ -214,7 +215,7 @@
 
 			Taken pretty much verbatim from http://maven.apache.org/plugins/maven-assembly-plugin/usage.html.
 			-->
-
+            <!--
 			<plugin>
 				<artifactId>maven-assembly-plugin</artifactId>
 				<version>2.6</version>
@@ -238,6 +239,7 @@
 					</execution>
 				</executions>
 			</plugin>
+            -->
 			<!-- Include all dependencies using a 'shade' jar so that the
 				 MetaDIG Controller and Worker can be run directly from this
 				 jar file. This allows deployment either in the MetaDIG web
@@ -261,9 +263,15 @@
 										<exclude>META-INF/*.SF</exclude>
 										<exclude>META-INF/*.DSA</exclude>
 										<exclude>META-INF/*.RSA</exclude>
+										<exclude>META-INF/</exclude>
 									</excludes>
 								</filter>
 							</filters>
+                            <artifactSet>
+                                <excludes>
+                                    <exclude>javax.servlet:*</exclude>
+                                </excludes>
+                            </artifactSet>
 							<transformers>
 								<transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
 									<manifestEntries>
