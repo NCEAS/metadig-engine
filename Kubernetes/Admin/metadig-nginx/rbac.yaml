@@ -1,15 +1,15 @@
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: nginx-ingress-serviceaccount
-  namespace: ingress-nginx
-
+  name: metadig-ingress-serviceaccount
+  namespace: metadig
+  
 ---
 
 apiVersion: rbac.authorization.k8s.io/v1beta1
 kind: ClusterRole
 metadata:
-  name: nginx-ingress-clusterrole
+  name: metadig-ingress-clusterrole
 rules:
   - apiGroups:
       - ""
@@ -63,8 +63,8 @@ rules:
 apiVersion: rbac.authorization.k8s.io/v1beta1
 kind: Role
 metadata:
-  name: nginx-ingress-role
-  namespace: ingress-nginx
+  name: metadig-ingress-role
+  namespace: metadig
 rules:
   - apiGroups:
       - ""
@@ -106,28 +106,28 @@ rules:
 apiVersion: rbac.authorization.k8s.io/v1beta1
 kind: RoleBinding
 metadata:
-  name: nginx-ingress-role-nisa-binding
-  namespace: ingress-nginx
+  name: metadig-ingress-role-nisa-binding
+  namespace: metadig
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: Role
-  name: nginx-ingress-role
+  name: metadig-ingress-role
 subjects:
   - kind: ServiceAccount
-    name: nginx-ingress-serviceaccount
-    namespace: ingress-nginx
+    name: metadig-ingress-serviceaccount
+    namespace: metadig
 
 ---
 
 apiVersion: rbac.authorization.k8s.io/v1beta1
 kind: ClusterRoleBinding
 metadata:
-  name: nginx-ingress-clusterrole-nisa-binding
+  name: metadig-ingress-clusterrole-nisa-binding
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
-  name: nginx-ingress-clusterrole
+  name: metadig-ingress-clusterrole
 subjects:
   - kind: ServiceAccount
-    name: nginx-ingress-serviceaccount
-    namespace: ingress-nginx
+    name: metadig-ingress-serviceaccount
+    namespace: metadig

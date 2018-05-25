@@ -1,23 +1,24 @@
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
-  name: default-http-backend
+  name: metadig-http-backend
   labels:
-    app: default-http-backend
-  namespace: ingress-nginx
+    app: metadig-http-backend
+  namespace: metadig
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: default-http-backend
+      app: metadig-http-backend
   template:
     metadata:
       labels:
-        app: default-http-backend
+        app: metadig-http-backend
     spec:
+      serviceAccountName: metadig-ingress-serviceaccount
       terminationGracePeriodSeconds: 60
       containers:
-      - name: default-http-backend
+      - name: metadig-http-backend
         # Any image is permissible as long as:
         # 1. It serves a 404 page at /
         # 2. It serves 200 on a /healthz endpoint
@@ -43,13 +44,13 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: default-http-backend
-  namespace: ingress-nginx
+  name: metadig-http-backend
+  namespace: metadig
   labels:
-    app: default-http-backend
+    app: metadig-http-backend
 spec:
   ports:
   - port: 80
     targetPort: 8080
   selector:
-    app: default-http-backend
+    app: metadig-http-backend

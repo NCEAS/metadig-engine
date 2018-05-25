@@ -1,15 +1,15 @@
+---
 apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
-  name: test
-  annotations:
-    ingress.kubernetes.io/rewrite-target: /
+  name: metadig-webapp
+  namespace: metadig
 spec:
   rules:
   - host: docker-ucsb-1.test.dataone.org
     http:
       paths:
-      - path: /test
+      - path: /
         backend:
-          serviceName: http-svc
+          serviceName: metadig-webapp
           servicePort: 80
