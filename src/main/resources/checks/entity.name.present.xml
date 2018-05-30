@@ -72,7 +72,8 @@ check <- function() {
     if(skip) status <- "SKIP" else status <- "FAILURE"
     return(list(status=status, values=outputList))
   } else {
-    return(list(status="SUCCESS", values=list(value=sprintf("All data description sections have a name, description, format, size and checksum"))))
+    outputList[[length(outputList)+1]] <- list(value=sprintf("All data description sections have a name, description, format, size and checksum"))
+    return(list(status="SUCCESS", values=outputList))
   }
 }
 
