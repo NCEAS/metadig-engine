@@ -9,6 +9,11 @@
   <code><![CDATA[
 library(stringr)
 
+# If the system metadata was provided to the quality engine, then use the metadata pid there.
+if (!is.null(systemMetadataPid)) {
+  identifier <- systemMetadataPid
+}
+
 if (length(identifier) == 0) {
   mdq_result <- list(status = "FAILURE",
                      output = list(list(value = "No identifier was found.")))
