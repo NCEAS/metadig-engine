@@ -31,6 +31,7 @@
 				<ref bean="mdq.score.discovery"/>
 				<ref bean="mdq.score.other"/>
 				<ref bean="mdq.score.composite"/>
+				<ref bean="mdq.fullReport"/>
 			</list>
 		</property>
 	</bean>
@@ -168,5 +169,9 @@
 		<constructor-arg name="xpath"
 						 value="count(//result)"/>
 		<property name="multivalue" value="false"/>
+	</bean>
+	<bean id="mdq.fullReport" class="edu.ucsb.nceas.mdqengine.solr.XMLtoJSON">
+        <!-- Spring isn't happy with this constructor, so set it in the class -->
+		<!-- <constructor-arg name="name" value="full_report"/> -->
 	</bean>
 </beans>
