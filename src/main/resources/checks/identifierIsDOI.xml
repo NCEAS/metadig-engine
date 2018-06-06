@@ -9,6 +9,18 @@
   <code><![CDATA[
 library(stringr)
 
+# Alter the FAILURE message if the source member node is ADC. 
+
+if (is.null(authoritativeMemberNode)) {
+  warningMsg <- "The identifier '%s' does not look like a DOI.."
+} else {
+  if (authoritativeMemberNode == "urn:node:ARCTIC" || authoritativeMemberNode == "urn:node:mnTestARCTIC") {
+    warningMsg <- "The identifier '%s' does not look like a DOI. Note that a DOI will be assigned to this dataset when it has been reviewed and approved."
+  } else {
+    warningMsg <- "The identifier '%s' does not look like a DOI."
+  }
+}
+
 # If the system metadata was provided to the quality engine, then use the metadata pid there.
 if (!is.null(systemMetadataPid)) {
   identifier <- systemMetadataPid
@@ -31,7 +43,7 @@ if (length(identifier) == 0) {
                        output = list(list(value = "The identifier looks like a DOI.")))
   } else {
     mdq_result <- list(status = "FAILURE",
-                       output = list(list(value = paste0("The identifier '", identifier, "' does not look like a DOI. Note that a DOI will be assigned to this dataset when it has been reviewed and approved."))))
+                       output = list(list(value = sprintf(warningMsg, identifier))))
   }
 }
   ]]></code>
