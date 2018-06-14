@@ -138,29 +138,35 @@
 			<version>${spring.version}</version>
 		</dependency>
 		<dependency>
-		<groupId>org.dataone</groupId>
-		<artifactId>d1_cn_index_processor</artifactId>
-		<version>${d1_cn_index_processor_version}</version>
-		<type>jar</type>
-		<exclusions>
-			<exclusion>
-				<groupId>org.slf4j</groupId>
-				<artifactId>slf4j-log4j12</artifactId>
-			</exclusion>
-			<exclusion>
-				<groupId>com.hp.hpl.jena</groupId>
-				<artifactId>jena</artifactId>
-			</exclusion>
-			<exclusion>
-				<groupId>xml-apis</groupId>
-				<artifactId>xml-apis</artifactId>
-			</exclusion>
-			<exclusion>
-				<groupId>org.apache.solr</groupId>
-				<artifactId>solr-solrj</artifactId>
-			</exclusion>
-		</exclusions>
-	</dependency>
+			<groupId>org.dataone</groupId>
+			<artifactId>d1_cn_index_processor</artifactId>
+			<version>${d1_cn_index_processor_version}</version>
+			<type>jar</type>
+			<exclusions>
+				<exclusion>
+					<groupId>org.slf4j</groupId>
+					<artifactId>slf4j-log4j12</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>com.hp.hpl.jena</groupId>
+					<artifactId>jena</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>xml-apis</groupId>
+					<artifactId>xml-apis</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.apache.solr</groupId>
+					<artifactId>solr-solrj</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/org.json/json -->
+		<dependency>
+			<groupId>org.json</groupId>
+			<artifactId>json</artifactId>
+			<version>20180130</version>
+		</dependency>
 	</dependencies>
 	<repositories>
 		<repository>
@@ -215,7 +221,6 @@
 
 			Taken pretty much verbatim from http://maven.apache.org/plugins/maven-assembly-plugin/usage.html.
 			-->
-            <!--
 			<plugin>
 				<artifactId>maven-assembly-plugin</artifactId>
 				<version>2.6</version>
@@ -239,7 +244,6 @@
 					</execution>
 				</executions>
 			</plugin>
-            -->
 			<!-- Include all dependencies using a 'shade' jar so that the
 				 MetaDIG Controller and Worker can be run directly from this
 				 jar file. This allows deployment either in the MetaDIG web
