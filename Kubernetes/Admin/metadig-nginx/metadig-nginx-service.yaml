@@ -10,7 +10,7 @@ spec:
   - name: http
     port: 80
     targetPort: 80
-    nodePort: 30000
+    nodePort: 30080
     protocol: TCP
   selector:
     app: metadig-nginx
