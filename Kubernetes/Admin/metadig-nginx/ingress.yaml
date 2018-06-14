@@ -2,7 +2,7 @@
 apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
-  name: metadig-webapp
+  name: metadig-controller
   namespace: metadig
 spec:
   rules:
@@ -11,5 +11,6 @@ spec:
       paths:
       - path: /
         backend:
-          serviceName: metadig-webapp
-          servicePort: 80
+          serviceName: metadig-controller
+          servicePort: 8080
+
