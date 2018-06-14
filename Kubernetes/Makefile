@@ -3,20 +3,22 @@
 
 SUBDIRS := metadig-tomcat metadig-worker metadig-httpd
 
-#METADIG_ENGINE_REPO=$(HOME)/.m2/repository/edu/ucsb/nceas/metadig-engine/$(METADIG_ENGINE_VERSION)/
-METADIG_ENGINE_REPO=/home/slaughter/stage
+METADIG_ENGINE_REPO=$(HOME)/.m2/repository/edu/ucsb/nceas/metadig-engine/$(METADIG_ENGINE_VERSION)/
+#METADIG_ENGINE_REPO=/home/slaughter/stage
 export METADIG_ENGINE_REPO
 
-#METADIG_WEBAPP_REPO=$(HOME)/.m2/repository/edu/ucsb/nceas/metadig-webapp/$(METADIG_WEBAPP_VERSION)/
-METADIG_WEBAPP_REPO=/home/slaughter/stage
+METADIG_WEBAPP_REPO=$(HOME)/.m2/repository/edu/ucsb/nceas/metadig-webapp/$(METADIG_WEBAPP_VERSION)/
+#METADIG_WEBAPP_REPO=/home/slaughter/stage
 export METADIG_WEBAPP_REPO
 
-#DOCKER_HUB := docker.io/
-DOCKER_REGISTRY := localhost:5000
+#DOCKER_REGISTRY := 
+DOCKER_REGISTRY := docker.io/
+#DOCKER_REGISTRY := localhost:5000/
+#DOCKER_REGISTRY := docker-ucsb-1.test.dataone.org:5000/
 export DOCKER_REGISTRY
 
-DOCKER_REPO := metadig/
-#DOCKER_REPO := sbpcs59/
+#DOCKER_REPO := metadig/
+DOCKER_REPO := sbpcs59/
 export DOCKER_REPO
 
 DOCKER_TAG := dev

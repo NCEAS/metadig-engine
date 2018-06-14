@@ -8,8 +8,7 @@ build:
 	cp $(METADIG_ENGINE_REPO)/metadig-engine-$(METADIG_ENGINE_VERSION).jar metadig-engine.jar
 	# D1 indexing can't find these files in the .jar, have to pull them out and add dir to classpath
 	jar xvf metadig-engine.jar solr
-	#docker build --build-arg JAVA_OPTIONS='$(JAVA_OPTIONS)' -t $(DOCKER_REPO)metadig-worker:$(DOCKER_TAG) .
-	docker build -t $(DOCKER_REGISTRY)/$(DOCKER_REPO)metadig-worker:$(DOCKER_TAG) .
-	docker push $(DOCKER_REGISTRY)/$(DOCKER_REPO)metadig-worker:$(DOCKER_TAG)
+	docker build -t $(DOCKER_REGISTRY)$(DOCKER_REPO)metadig-worker:$(DOCKER_TAG) .
+	docker push $(DOCKER_REGISTRY)$(DOCKER_REPO)metadig-worker:$(DOCKER_TAG)
 
 
