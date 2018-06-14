@@ -1,0 +1,3 @@
+install.packages(c("jsonlite","stringr","httr","digest","xml2"), repos="https://cran.cnr.berkeley.edu/")
+install.packages("metadig.tar.gz", repos=NULL)
+
