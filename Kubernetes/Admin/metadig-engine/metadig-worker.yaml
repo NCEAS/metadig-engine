@@ -18,7 +18,7 @@ spec:
       serviceAccountName: metadig-serviceaccount
       containers:
         - name: metadig-worker
-          image: docker.io/sbpcs59/metadig-worker:dev
+          image: docker.io/metadig/metadig-worker:dev
           #image: localhost:5000/metadig/metadig-worker:dev
           imagePullPolicy: Always
 
