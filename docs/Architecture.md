@@ -82,6 +82,12 @@ The following diagram shows the various components of the MetaDIG engine:
 
 ![Queue Event Sequence](https://github.com/NCEAS/metadig-engine/blob/master/docs/images/queue-event-trigger_sequence.png "Queue Event Sequence")
 
+## The metadig-engine index-monitor 
+
+* This sequence diagram shows how the index-monitor determines which DataONE metadata documents to create quality reports for, then submits requests to metadig-engine to create the reports.
+
+![Index Monitor Sequence](https://github.com/NCEAS/metadig-engine/blob/master/docs/images/index-monitor_sequence.png "Index Monitor Sequence")
+
 ## Metadata Quality Display Mockups
 * The following display shows metadata quality summarized for all of DataONE:
 
