@@ -10,9 +10,9 @@
     activate "Quality Index"
     "Quality Index" -> "Index Monitor" : pid status
     alt exists 
-        "Index Monitor" -> "Quality Engine" : /suite/id/run 
-        "Quality Engine" -> "Quality Index" : add()
     else does not exist
+    "Index Monitor" -> "Quality Engine" : /suite/id/run 
+    "Quality Engine" -> "Quality Index" : add()
     end 
     deactivate "Quality Index"
     deactivate "Index Monitor"
