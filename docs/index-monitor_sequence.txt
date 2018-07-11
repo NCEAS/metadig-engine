@@ -1,0 +1,20 @@
+@startuml images/index-monitor_sequence.png
+    !include plantuml-styles.txt
+    title: MetaDIG Engine: Index Monitor
+    activate "Index Monitor"
+    "Index Monitor" -> "MN Index": query(pid="*", updateId)
+    activate "MN Index"
+    "MN Index" -> "Index Monitor" : pid list
+    deactivate "MN Index"
+    "Index Monitor" -> "Quality Index" : query(pid, suiteId)
+    activate "Quality Index"
+    "Quality Index" -> "Index Monitor" : pid status
+    alt exists 
+        "Index Monitor" -> "Quality Engine" : /suite/id/run 
+        "Quality Engine" -> "Quality Index" : add()
+    else does not exist
+    end 
+    deactivate "Quality Index"
+    deactivate "Index Monitor"
+   
+@enduml  
