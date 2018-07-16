@@ -1,0 +1,146 @@
+
+package edu.ucsb.nceas.mdqengine.solr;
+
+import org.apache.commons.codec.EncoderException;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.dataone.cn.indexer.XmlDocumentUtility;
+import org.dataone.cn.indexer.parser.IDocumentSubprocessor;
+import org.dataone.cn.indexer.parser.SubprocessorUtility;
+import org.dataone.cn.indexer.solrhttp.SolrDoc;
+import org.dataone.cn.indexer.solrhttp.SolrElementField;
+import org.w3c.dom.Document;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
+
+import javax.xml.xpath.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.text.DecimalFormat;
+import java.util.*;
+
+
+/**
+ * Quality Report Document processor.  Operates on one quality report for
+ * a unique metadata id, suite id key, extracting values from the document and
+ * calculating scores for the overall report and for each check type.
+ *
+ */
+public class QualityReportSubprocessor implements IDocumentSubprocessor {
+
+    private static Log log = LogFactory.getLog(QualityReportSubprocessor.class);
+    private SubprocessorUtility processorUtility;
+    private List<String> matchDocuments = null;
+    private List<String> fieldsToMerge = new ArrayList<String>();
+
+    /**
+     * Implements IDocumentSubprocessor.processDocument method.
+     * Given the existing Solr document for this quality report, add any dynamic Solr fields that
+     * are required. Currently the quality check 'type' fields can have any name the check writer
+     * desires, so we have to extract these field names and add a dynamic field for each name. In
+     * addition, we have to score each unique check type (multiple checks can have the same type)
+     * and determine the 'composite score' for all checks.
+     */
+    @Override
+    public Map<String, SolrDoc> processDocument(String identifier, Map<String, SolrDoc> docs,
+                                                InputStream is) throws XPathExpressionException, IOException, EncoderException {
+
+        ArrayList<String> checkTypes = new ArrayList<String>();
+        // There should only be one quality document
+        SolrDoc qualityReportSolrDoc = docs.get(identifier);
+       // The Solr doc that contains MetaDIG quality check type fields that will be dynamically added to this temp SolrDoc,
+        // to be merged with the existing SolrDoc that was created with the statically defined Solr fields.
+        XPathFactory xPathfactory = XPathFactory.newInstance();
+        XPath xpath = xPathfactory.newXPath();
+        XPathExpression checkTypeXpath = null;
+        XPathExpression checkTypeScoreXpath = null;
+        Document xmldoc = null;
+        DecimalFormat df2 = new DecimalFormat(".##");
+        log.info("Processing document for " + qualityReportSolrDoc.getFirstFieldValue("metadataId"));
+        log.info("Number of fields in document: " + qualityReportSolrDoc.getFieldList().size());
+        log.info("Processing document for id: " + identifier);
+        log.info("Do docs passed to subprocessor contain id " + identifier + "? - " + docs.containsKey(identifier));
+
+        // Parse the quality report
+        try {
+            xmldoc = XmlDocumentUtility.generateXmlDocument(is);
+        } catch (SAXException e) {
+            e.printStackTrace();
+        }
+
+        // Get the set of unique check type names
+        checkTypeXpath = xpath.compile("//result/check/type");
+        NodeList result = (NodeList) checkTypeXpath.evaluate(xmldoc, XPathConstants.NODESET);
+        for(int index = 0; index < result.getLength(); index ++) {
+            Node node = result.item(index);
+            checkTypes.add(node.getTextContent());
+            log.info("found check type: " + node.getTextContent());
+        }
+
+        //log.info("check types returned from xpath expr: " + cts);
+        //checkTypes = new ArrayList<String>(Arrays.asList(cts.split(" ")));
+
+        // Get deduped list of check types
+        HashSet<String> set = new HashSet<>(checkTypes);
+        ArrayList<String> uniqueTypes = new ArrayList<>(set);
+        log.info("Unique check type name cound: " + uniqueTypes.size());
+
+        String xpathExStr = null;
+        SolrElementField sField = null;
+        Double checkValue;
+        String fieldName = null;
+        // Calculate the score for each check type. Note that the scores for "passed", "warned", etc are also calculated from the indexer, but those calculations
+        // are defined in the MetaDIG application context file "application-context-mdq.xml".
+        for (String typeName: uniqueTypes) {
+            xpathExStr = String.format("count(//result[check/type[text() = '%s']]/status[text() = 'SUCCESS']) div count(//result[check/type[text() = '%s']])", typeName, typeName);
+            checkTypeScoreXpath = xpath.compile(xpathExStr);
+            checkValue = (Double) checkTypeScoreXpath.evaluate(xmldoc, XPathConstants.NUMBER);
+            sField = new SolrElementField();
+            // Set the dynamic field type to be Float, i.e. append "_f" to the name
+            fieldName = "scoreByType_" + typeName + "_f";
+            sField.setName(fieldName);
+            sField.setValue(df2.format(checkValue));
+            //sField.setValue(String.valueOf(checkValue));
+            qualityReportSolrDoc.addField(sField);
+            log.info("Added field " + sField.getName() + ", value: " + sField.getValue());
+            log.info("Number of fields in document: " + qualityReportSolrDoc.getFieldList().size());
+        }
+
+        log.info("Field value for metadataId: " + qualityReportSolrDoc.getFirstFieldValue("metadataId"));
+        log.info("Number of fields in document: " + qualityReportSolrDoc.getFieldList().size());
+        // Only one Solr document will be updated
+        Map<String, SolrDoc> mergedDocs = new HashMap<String, SolrDoc>();
+        log.info("Processed merged document (before put) for " + qualityReportSolrDoc.getFirstFieldValue("metadataId"));
+        mergedDocs.put(qualityReportSolrDoc.getFirstFieldValue("metadataId"), qualityReportSolrDoc);
+        log.info("Processed merged document (after put) for " + qualityReportSolrDoc.getFirstFieldValue("metadataId"));
+
+        return mergedDocs;
+    }
+
+    @Override
+    public SolrDoc mergeWithIndexedDocument(SolrDoc indexDocument) throws IOException,
+            EncoderException, XPathExpressionException {
+        return processorUtility.mergeWithIndexedDocument(indexDocument, fieldsToMerge);
+    }
+
+    public List<String> getMatchDocuments() {
+        return matchDocuments;
+    }
+
+    public void setMatchDocuments(List<String> matchDocuments) {
+        this.matchDocuments = matchDocuments;
+    }
+
+    public boolean canProcess(String formatId) {
+        return matchDocuments.contains(formatId);
+    }
+
+    public List<String> getFieldsToMerge() {
+        return fieldsToMerge;
+    }
+
+    public void setFieldsToMerge(List<String> fieldsToMerge) {
+        this.fieldsToMerge = fieldsToMerge;
+    }
+}
