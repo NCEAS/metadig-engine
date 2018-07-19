@@ -170,6 +170,7 @@ public class XMLDialect {
 					ByteArrayOutputStream baos = new ByteArrayOutputStream();
 					TypeMarshaller.marshalTypeToOutputStream(systemMetadata, baos);
 					variables.put("systemMetadata", baos.toString("UTF-8"));
+					variables.put("datasource", systemMetadata.getAuthoritativeMemberNode());
 				} catch (Exception e) {
 					log.error("Could not serialize SystemMetadata for check", e);
 				}
