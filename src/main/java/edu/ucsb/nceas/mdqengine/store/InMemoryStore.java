@@ -67,11 +67,11 @@ public class InMemoryStore implements MDQStore{
 				Suite suite = null;
 				try {
 					URL url = resource.getURL();
-					log.debug("Loading suite found at: " + url.toString());
+					//log.debug("Loading suite found at: " + url.toString());
 					String xml = IOUtils.toString(url.openStream(), "UTF-8");
 					suite = (Suite) XmlMarshaller.fromXml(xml, Suite.class);
 				} catch (JAXBException | IOException | SAXException e) {
-					log.warn("Could not load suite '" + resource.getFilename() + "' due to an error: " + e.getMessage() + ".");
+					//log.warn("Could not load suite '" + resource.getFilename() + "' due to an error: " + e.getMessage() + ".");
 					continue;
 				}
 				this.createSuite(suite);
@@ -98,11 +98,11 @@ public class InMemoryStore implements MDQStore{
 				Check check = null;
 				try {
 					URL url = resource.getURL();
-					log.debug("Loading check found at: " + url.toString());
+					//log.debug("Loading check found at: " + url.toString());
 					String xml = IOUtils.toString(url.openStream(), "UTF-8");
 					check = (Check) XmlMarshaller.fromXml(xml, Check.class);
 				} catch (JAXBException | IOException | SAXException e) {
-					log.warn("Could not load check '" + resource.getFilename() + "' due to an error: " + e.getMessage() + ".");
+					//log.warn("Could not load check '" + resource.getFilename() + "' due to an error: " + e.getMessage() + ".");
 					continue;
 				}
 				this.createCheck(check);

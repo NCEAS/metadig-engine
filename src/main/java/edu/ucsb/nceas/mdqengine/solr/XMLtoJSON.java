@@ -27,8 +27,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.dataone.cn.indexer.parser.ISolrField;
 import org.dataone.cn.indexer.solrhttp.SolrElementField;
-import org.json.JSONObject;
 import org.json.XML;
+import org.json.JSONObject;
 import org.json.JSONException;
 import org.w3c.dom.Document;
 
@@ -43,15 +43,19 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * ISolrField implementation that stores the entire input XML document as a JSON string value.
+ * ISolrField implementation that converts the input XML document to a JSON string value.
  *
  * @author slaughter
  *
  */
 public class XMLtoJSON implements ISolrField {
 
-    private String name = "full_report";
+    private String name = null;
     private List<ISolrField> fieldList = new ArrayList<ISolrField>();
+
+    public XMLtoJSON(String name) {
+        this.name = name;
+    }
 
     @Override
     public void initExpression(XPath xpathObject) {
@@ -61,7 +65,6 @@ public class XMLtoJSON implements ISolrField {
     public List<SolrElementField> getFields(Document doc, String identifier) throws Exception {
         List<SolrElementField> fields = new ArrayList<SolrElementField>();
         String xmlString = null;
-        int PRETTY_PRINT_INDENT_FACTOR = 4;
         String jsonString = null;
         Log log = LogFactory.getLog(XMLtoJSON.class);
 
@@ -77,7 +80,7 @@ public class XMLtoJSON implements ISolrField {
             xmlString = writer.toString();
 
             JSONObject xmlJSONObj = XML.toJSONObject(xmlString);
-            jsonString = xmlJSONObj.toString(PRETTY_PRINT_INDENT_FACTOR);
+            jsonString = xmlJSONObj.toString();
         } catch(TransformerException ex) {
             ex.printStackTrace();
             log.error("Error processing field " + this.name + ": " + ex.getMessage());

@@ -23,8 +23,8 @@ import java.util.*;
 
 /**
  * Quality Report Document processor.  Operates on one quality report for
- * a unique metadata id, suite id key, extracting values from the document and
- * calculating scores for the overall report and for each check type.
+ * a unique metadata id, suite id key combination, extracting values from the document and
+ * calculating scores for each check type.
  *
  */
 public class QualityReportSubprocessor implements IDocumentSubprocessor {
@@ -39,8 +39,7 @@ public class QualityReportSubprocessor implements IDocumentSubprocessor {
      * Given the existing Solr document for this quality report, add any dynamic Solr fields that
      * are required. Currently the quality check 'type' fields can have any name the check writer
      * desires, so we have to extract these field names and add a dynamic field for each name. In
-     * addition, we have to score each unique check type (multiple checks can have the same type)
-     * and determine the 'composite score' for all checks.
+     * addition, we have to score each unique check type (multiple checks can have the same type).
      */
     @Override
     public Map<String, SolrDoc> processDocument(String identifier, Map<String, SolrDoc> docs,
@@ -49,18 +48,14 @@ public class QualityReportSubprocessor implements IDocumentSubprocessor {
         ArrayList<String> checkTypes = new ArrayList<String>();
         // There should only be one quality document
         SolrDoc qualityReportSolrDoc = docs.get(identifier);
-       // The Solr doc that contains MetaDIG quality check type fields that will be dynamically added to this temp SolrDoc,
-        // to be merged with the existing SolrDoc that was created with the statically defined Solr fields.
+        // The Solr doc that contains MetaDIG quality check type fields that will be dynamically added to the SolrDoc.
         XPathFactory xPathfactory = XPathFactory.newInstance();
         XPath xpath = xPathfactory.newXPath();
         XPathExpression checkTypeXpath = null;
         XPathExpression checkTypeScoreXpath = null;
         Document xmldoc = null;
         DecimalFormat df2 = new DecimalFormat(".##");
-        log.info("Processing document for " + qualityReportSolrDoc.getFirstFieldValue("metadataId"));
-        log.info("Number of fields in document: " + qualityReportSolrDoc.getFieldList().size());
-        log.info("Processing document for id: " + identifier);
-        log.info("Do docs passed to subprocessor contain id " + identifier + "? - " + docs.containsKey(identifier));
+        log.debug("Processing document for id: " + identifier);
 
         // Parse the quality report
         try {
@@ -69,22 +64,21 @@ public class QualityReportSubprocessor implements IDocumentSubprocessor {
             e.printStackTrace();
         }
 
-        // Get the set of unique check type names
+        // Get the set of unique check type names. The count and status (SUCCESS, FAILURE) of these
+        // check types will be used to calculate the metadata quality score for each check type, e.g.
+        // the number of 'passed' checks for a type over the total number of checks for that type.
         checkTypeXpath = xpath.compile("//result/check/type");
         NodeList result = (NodeList) checkTypeXpath.evaluate(xmldoc, XPathConstants.NODESET);
         for(int index = 0; index < result.getLength(); index ++) {
             Node node = result.item(index);
             checkTypes.add(node.getTextContent());
-            log.info("found check type: " + node.getTextContent());
+            log.debug("found check type: " + node.getTextContent());
         }
-
-        //log.info("check types returned from xpath expr: " + cts);
-        //checkTypes = new ArrayList<String>(Arrays.asList(cts.split(" ")));
 
         // Get deduped list of check types
         HashSet<String> set = new HashSet<>(checkTypes);
         ArrayList<String> uniqueTypes = new ArrayList<>(set);
-        log.info("Unique check type name cound: " + uniqueTypes.size());
+        log.debug("Unique check type name cound: " + uniqueTypes.size());
 
         String xpathExStr = null;
         SolrElementField sField = null;
@@ -103,17 +97,14 @@ public class QualityReportSubprocessor implements IDocumentSubprocessor {
             sField.setValue(df2.format(checkValue));
             //sField.setValue(String.valueOf(checkValue));
             qualityReportSolrDoc.addField(sField);
-            log.info("Added field " + sField.getName() + ", value: " + sField.getValue());
-            log.info("Number of fields in document: " + qualityReportSolrDoc.getFieldList().size());
+            log.debug("Added check type field " + sField.getName() + ", value: " + sField.getValue());
+            log.debug("Number of fields in document: " + qualityReportSolrDoc.getFieldList().size());
         }
 
-        log.info("Field value for metadataId: " + qualityReportSolrDoc.getFirstFieldValue("metadataId"));
-        log.info("Number of fields in document: " + qualityReportSolrDoc.getFieldList().size());
         // Only one Solr document will be updated
         Map<String, SolrDoc> mergedDocs = new HashMap<String, SolrDoc>();
-        log.info("Processed merged document (before put) for " + qualityReportSolrDoc.getFirstFieldValue("metadataId"));
         mergedDocs.put(qualityReportSolrDoc.getFirstFieldValue("metadataId"), qualityReportSolrDoc);
-        log.info("Processed merged document (after put) for " + qualityReportSolrDoc.getFirstFieldValue("metadataId"));
+        log.debug("Completed subprocessor processing for metadata id: " + qualityReportSolrDoc.getFirstFieldValue("metadataId"));
 
         return mergedDocs;
     }

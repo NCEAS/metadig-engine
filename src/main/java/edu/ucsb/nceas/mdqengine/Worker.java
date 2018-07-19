@@ -51,6 +51,7 @@ public class Worker {
     private final static String InProcess_QUEUE_NAME = "InProcess";
     private final static String Completed_QUEUE_NAME = "Completed";
     private final static String springConfigFileURL = "/metadig-index-processor-context.xml";
+    private final static String qualityReportObjectType = "https://nceas.ucsb.edu/mdqe/v1";
 
     private static Connection inProcessConnection;
     private static Channel inProcessChannel;
@@ -72,6 +73,7 @@ public class Worker {
     private static long elapsedTimeSecondsIndexing;
     private static long elapsedTimeSecondsProcessing;
     private static long totalElapsedTimeSeconds;
+
 
     public static void main(String[] argv) throws Exception {
 
@@ -274,13 +276,11 @@ public class Worker {
     public Run processReport(QueueEntry message) throws InterruptedException, Exception {
 
         String suiteId = message.getQualitySuiteId();
-        log.info(" [x] Running suite '" + message.getQualitySuiteId() + "'" + " for metadata pid " + message.getMetadataPid());
-
         String metadataDoc = message.getMetadataDoc();
         InputStream input = new ByteArrayInputStream(metadataDoc.getBytes("UTF-8"));
-
         SystemMetadata sysmeta = message.getSystemMetadata();
 
+        log.info(" [x] Running suite '" + message.getQualitySuiteId() + "'" + " for metadata pid " + message.getMetadataPid());
         // Run the Metadata Quality Engine for the specified metadata object.
         // TODO: set suite params correctly
         Map<String, Object> params = new HashMap<String, Object>();
@@ -325,7 +325,7 @@ public class Worker {
         pid.setValue(metadataId);
         ObjectFormatIdentifier objFormatId =  new ObjectFormatIdentifier();
         // Update the sysmeta, setting the cprrect type to a metadig quality report
-        objFormatId.setValue("https://nceas.ucsb.edu/mdqe/v1");
+        objFormatId.setValue(qualityReportObjectType);
         sysmeta.setFormatId(objFormatId);
         iac.insertSolrDoc(pid, sysmeta, runIS);
         log.info(" [x] Done indexing metadata PID: " + metadataId + ", suite id: " + suiteId);
@@ -450,17 +450,13 @@ public class Worker {
 
         Configurations configs = new Configurations();
         Configuration config = null;
-        //try {
-        //    config = configs.properties(new File("./config/metadig.properties"));
-            //RabbitMQhost = config.getString("RabbitMQ.host", RabbitMQhost);
-            //RabbitMQport = config.getInteger("RabbitMQ.port", RabbitMQport);
-        RabbitMQhost = "metadig-controller.default.svc.cluster.local";
-        RabbitMQport = 5672;
-        RabbitMQpassword = "guest";
-        RabbitMQusername = "guest";
-        //} catch (ConfigurationException cex) {
-         //   log.error("Unable to read configuration, using default values.");
-       // }
+        try {
+            config = configs.properties(new File("./config/metadig.properties"));
+            RabbitMQhost = config.getString("RabbitMQ.host", RabbitMQhost);
+            RabbitMQport = config.getInteger("RabbitMQ.port", RabbitMQport);
+        } catch (ConfigurationException cex) {
+           log.error("Unable to read configuration, using default values.");
+        }
     }
 }
 

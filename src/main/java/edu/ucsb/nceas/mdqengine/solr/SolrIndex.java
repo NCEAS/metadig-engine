@@ -54,8 +54,9 @@ import java.io.*;
 import java.util.*;
 
 /**
- * A class does insert, update and remove indexes to a SOLR server
+ * A class that performs inserts to a SOLR server
  * @author tao
+ * @author slaughter
  *
  */
 public class SolrIndex {
@@ -63,7 +64,6 @@ public class SolrIndex {
     public static final String ID = "id";
     private static final String IDQUERY = ID+":*";
     private List<IDocumentSubprocessor> subprocessors = null;
-    //private List<IDocumentDeleteSubprocessor> deleteSubprocessors = null;
 
     private SolrClient solrClient = null;
     private XMLNamespaceConfig xmlNamespaceConfig = null;
@@ -132,15 +132,6 @@ public class SolrIndex {
         this.subprocessors = subprocessorList;
     }
 
-    //public List<IDocumentDeleteSubprocessor> getDeleteSubprocessors() {
-    //    return deleteSubprocessors;
-    //}
-
-    //public void setDeleteSubprocessors(
-    //        List<IDocumentDeleteSubprocessor> deleteSubprocessors) {
-    //    this.deleteSubprocessors = deleteSubprocessors;
-    //}
-
     /**
      * Generate the index for the given information
      * @param id
@@ -160,7 +151,7 @@ public class SolrIndex {
      */
     private Map<String, SolrDoc> process(String id, SystemMetadata systemMetadata, String objectPath)
             throws IOException, SAXException, MarshallingException, SolrServerException {
-        log.info("SolrIndex.process - trying to generate the solr doc object for the pid "+id);
+        log.debug("SolrIndex.process - trying to generate the solr doc object for the pid "+id);
         // Load the System Metadata document
         ByteArrayOutputStream systemMetadataOutputStream = new ByteArrayOutputStream();
         TypeMarshaller.marshalTypeToOutputStream(systemMetadata, systemMetadataOutputStream);
@@ -179,17 +170,15 @@ public class SolrIndex {
 
         // get the format id for this object
         String formatId = indexDocument.getFirstFieldValue(SolrElementField.FIELD_OBJECTFORMAT);
-        log.info("SolrIndex.process - the object format id for the pid "+id+" is "+formatId);
+        log.debug("SolrIndex.process - the object format id for the pid "+id+" is "+formatId);
         // Determine if subprocessors are available for this ID
         if (subprocessors != null) {
             // for each subprocessor loaded from the spring config
             for (IDocumentSubprocessor subprocessor : subprocessors) {
                 // Does this subprocessor apply?
-                log.info("SolrIndex.process - trying subprocessor "+ subprocessor.getClass().getName());
-                //List<String> slist = subprocessor.getMatchDocuments();
-                //log.info(Arrays.toString(slist.toArray()));
+                log.debug("SolrIndex.process - trying subprocessor "+ subprocessor.getClass().getName());
                 if (subprocessor.canProcess(formatId)) {
-                    log.info("SolrIndex.process - using subprocessor "+ subprocessor.getClass().getName());
+                    log.debug("SolrIndex.process - using subprocessor "+ subprocessor.getClass().getName());
                     // if so, then extract the additional information from the
                     // document.
                     try {
@@ -203,9 +192,9 @@ public class SolrIndex {
                                     + objectPath);
                             //throw new Exception("Could not load OBJECT for ID " + id );
                         } else {
-                            log.info("SolrIndex.process - subprocessor "+ subprocessor.getClass().getName() +" generating solr doc for id "+id);
+                            log.debug("SolrIndex.process - subprocessor "+ subprocessor.getClass().getName() +" generating solr doc for id "+id);
                             docs = subprocessor.processDocument(id, docs, dataStream);
-                            log.info("SolrIndex.process - subprocessor "+ subprocessor.getClass().getName() +" generated solr doc for id "+id);
+                            log.debug("SolrIndex.process - subprocessor "+ subprocessor.getClass().getName() +" generated solr doc for id "+id);
                         }
                     } catch (Exception e) {
                         e.printStackTrace();
@@ -215,28 +204,12 @@ public class SolrIndex {
                 }
             }
         } else {
-            log.info("Subproccor list is null");
+            log.debug("Subproccor list is null");
         }
 
         return docs;
     }
 
-//    /*
-//     * If the given field name is a system metadata field.
-//     */
-//    private boolean isSystemMetadataField(String fieldName) {
-//        boolean is = false;
-//        if (fieldName != null && !fieldName.trim().equals("") && sysmetaSolrFields != null) {
-//            for(SolrField field : sysmetaSolrFields) {
-//                if(field !=  null && field.getName() != null && field.getName().equals(fieldName)) {
-//                    log.debug("SolrIndex.isSystemMetadataField - the field name "+fieldName+" matches one record of system metadata field list. It is a system metadata field.");
-//                    is = true;
-//                    break;
-//                }
-//            }
-//        }
-//        return is;
-//    }
     /*
      * Generate a Document from the InputStream
      */
@@ -307,10 +280,9 @@ public class SolrIndex {
     public synchronized void insert(Identifier pid, SystemMetadata systemMetadata, String objectPath)
             throws IOException, SAXException, ParserConfigurationException,
             XPathExpressionException, SolrServerException, MarshallingException, EncoderException, NotImplemented, NotFound, UnsupportedType {
-        log.info("Insert: checking params");
-        log.info("Identifier: " + pid.getValue());
-        log.info("sysmeta pid" + systemMetadata.getIdentifier().getValue());
-        log.info("objectPath: " + objectPath);
+        log.debug("Identifier: " + pid.getValue());
+        log.debug("sysmeta pid" + systemMetadata.getIdentifier().getValue());
+        log.debug("objectPath: " + objectPath);
 
         checkParams(pid, systemMetadata, objectPath);
         log.info("SolrIndex.insert - trying to insert the solrDoc for object "+pid.getValue());
@@ -323,12 +295,12 @@ public class SolrIndex {
                 if(id != null) {
                     SolrDoc doc = docs.get(id);
                     insertToIndex(doc);
-                    log.debug("SolrIndex.insert - inserted the solr-doc object of pid "+id+", which relates to object "+pid.getValue()+", into the solr server.");
+                    log.debug("SolrIndex.insert - inserted the solr document object for pid "+id+", which relates to object "+pid.getValue()+", into the solr server.");
                 }
             }
             log.debug("SolrIndex.insert - finished to insert the solrDoc for object "+pid.getValue());
         } else {
-            log.debug("SolrIndex.insert - the genered solrDoc is null. So we will not index the object "+pid.getValue());
+            log.debug("SolrIndex.insert - the generated solrDoc is null. So we will not index the object "+pid.getValue());
         }
     }
 
@@ -340,21 +312,18 @@ public class SolrIndex {
             SolrInputDocument solrDoc = new SolrInputDocument();
             List<SolrElementField> list = doc.getFieldList();
             if(list != null) {
-                //solrDoc.addField(METACATPIDFIELD, pid);
                 Iterator<SolrElementField> iterator = list.iterator();
                 while (iterator.hasNext()) {
                     SolrElementField field = iterator.next();
                     if(field != null) {
                         String value = field.getValue();
                         String name = field.getName();
-                        log.info("SolrIndex.insertToIndex - add name/value pair - "+name+"/"+value);
                         solrDoc.addField(name, value);
                     }
                 }
             }
             if(!solrDoc.isEmpty()) {
                 try {
-                    //UpdateResponse response = solrClient.add("quality", solrDoc);
                     UpdateResponse response = solrClient.add(solrDoc);
                     solrClient.commit();
                 } catch (SolrServerException e) {
@@ -363,7 +332,6 @@ public class SolrIndex {
                     throw e;
 
                 }
-                //System.out.println("=================the response is:\n"+response.toString());
             }
         }
     }
@@ -399,7 +367,6 @@ public class SolrIndex {
         if(docs != null) {
             for(SolrDocument doc :docs) {
                 String identifier = (String)doc.getFieldValue(ID);
-                //System.out.println("======================== "+identifier);
                 list.add(identifier);
             }
         }

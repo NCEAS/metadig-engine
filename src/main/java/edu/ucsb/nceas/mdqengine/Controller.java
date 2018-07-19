@@ -151,15 +151,6 @@ public class Controller {
                 if(stop) break;
             }
         }
-
-        //InputStream metadata = metadigCtrl.getResourceFile("data/knb.1101.1.xml");
-        //InputStream sysmeta = metadigCtrl.getResourceFile("data/sysmeta.xml");
-
-        //metadigCtrl.processRequest("urn:node:mnTestKNB", "1234",
-        //        metadata, "metadig-test.suite.1", "/tmp", requestDateTime, sysmeta);
-
-        // Check if all queues have been purged, then shutdown
-        // metadigCtrl.shutdown();
     }
 
     private Controller() {
@@ -194,7 +185,7 @@ public class Controller {
         if (isStarted) return;
 
         try {
-            this.readConfig();
+            //this.readConfig();
             this.setupQueues();
             this.isStarted = true;
         } catch (java.io.IOException | java.util.concurrent.TimeoutException e) {
@@ -290,9 +281,7 @@ public class Controller {
         message = bos.toByteArray();
 
         this.writeInProcessQueue(message);
-        log.info(" [x] Sent report request for pid: '" + qEntry.getMetadataPid() + "'");
-        //metadigController.shutdown();
-
+        log.info(" [x] Queued report request for pid: '" + qEntry.getMetadataPid() + "'" + " metadata pid: " + sysmeta.getIdentifier().getValue());
     }
 
     /**
@@ -426,9 +415,6 @@ public class Controller {
         DateTime requestDateTime = new DateTime();
 
         Controller metadigCtrl = Controller.getInstance();
-
-        //FileInputStream metadata = new FileInputStream("/Users/slaughter/Projects/Metadig/test/knb.1101.1.xml");
-        //FileInputStream sysmeta = new FileInputStream( "/Users/slaughter/Projects/Metadig/test/sysmeta.xml");
 
         InputStream metadata = metadigCtrl.getResourceFile("data/knb.1101.1.xml");
         InputStream sysmeta = metadigCtrl.getResourceFile("data/sysmeta.xml");
