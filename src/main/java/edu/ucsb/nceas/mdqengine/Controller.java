@@ -354,7 +354,9 @@ public class Controller {
 
                 log.info(" [x] Controller received completed report for pid: '" + qEntry.getMetadataPid() + "'" + ", " +
                         "hostsname: " + qEntry.getHostname());
-                log.info("Elapsed time: " + qEntry.getElapsedTimeSeconds());
+                log.info("Total processing time for worker " + qEntry.getHostname() + " for PID " + qEntry.getMetadataPid() + ": " + qEntry.getProcessingElapsedTimeSeconds());
+                log.info("Total indexing time for worker " + qEntry.getHostname() + " for PID " + qEntry.getMetadataPid() + ": " + qEntry.getIndexingElapsedTimeSeconds());
+                log.info("Total elapsed time for worker " + qEntry.getHostname() + " for PID " + qEntry.getMetadataPid() + ": " + qEntry.getTotalElapsedTimeSeconds());
 
                 /* An exception caught by the worker will be passed back to the controller via the queue entry
                  * 'exception' field. Check this now and take the appropriate action.
@@ -371,27 +373,16 @@ public class Controller {
                     return;
                 }
                 if(testMode) {
-                    long elapsedSeconds = qEntry.getElapsedTimeSeconds();
+                    long elapsedSeconds = qEntry.getTotalElapsedTimeSeconds();
                     totalElapsedSeconds += elapsedSeconds;
                     runCount += 1;
                     if(runCount == testCount) {
                         log.info("Tests for this run are complete.");
                         log.info("Number of tests run: " + runCount);
-                        log.info("Cummulative elapsed time for all workers: " + TimeUnit.SECONDS.toMinutes(totalElapsedSeconds) + " seconds");
+                        log.info("Cummulative elapsed time for all workers: " + TimeUnit.SECONDS.toMinutes(totalElapsedSeconds) + " minutes");
                         log.info("Average worker elapsed time: " + totalElapsedSeconds/runCount + " seconds");
-                        //long difference = System.nanoTime() - startTime;
-                        long endTime = System.currentTimeMillis();
-                        long difference = endTime - startTime;
-                        log.info("Controller start time in milliseconds: "
-                                + String.format("%d", startTime));
-                        log.info("Controller end time in milliseconds: "
-                                + String.format("%d", endTime));
-                        log.info("Total elapsed controller elapsed time: "
-                                + String.format("%d", TimeUnit.MILLISECONDS.toSeconds(difference))
-                                + " seconds\n");
-                        log.info("Total elapsed controller elapsed time: "
-                                + String.format("%d", TimeUnit.MILLISECONDS.toMinutes(difference))
-                                + " minutes\n");
+                        log.info("Total elapsed time for controller: "
+                                + String.format("%d", totalElapsedSeconds) + " seconds");
                         disableTestMode();
                     }
                 }

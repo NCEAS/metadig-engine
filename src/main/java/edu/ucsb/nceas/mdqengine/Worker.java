@@ -67,6 +67,11 @@ public class Worker {
     private static String authToken = null;
     private static SolrClient client = null;
 
+    private static long startTimeIndexing;
+    private static long startTimeProcessing;
+    private static long elapsedTimeSecondsIndexing;
+    private static long elapsedTimeSecondsProcessing;
+    private static long totalElapsedTimeSeconds;
 
     public static void main(String[] argv) throws Exception {
 
@@ -87,7 +92,7 @@ public class Worker {
                 ObjectInput in = new ObjectInputStream(bis);
                 QueueEntry qEntry = null;
                 //long startTime = System.nanoTime();
-                long startTime = System.currentTimeMillis();
+                startTimeProcessing = System.currentTimeMillis();
 
                 try {
                     qEntry = (QueueEntry) in.readObject();
@@ -102,6 +107,7 @@ public class Worker {
                 String metadataPid = qEntry.getMetadataPid();
                 String suiteId = qEntry.getQualitySuiteId();
                 SystemMetadata sysmeta = qEntry.getSystemMetadata();
+                long difference;
 
                 // Create the quality report
                 try {
@@ -109,6 +115,9 @@ public class Worker {
                     run = wkr.processReport(qEntry);
                     runXML = XmlMarshaller.toXml(run);
                     qEntry.setRunXML(runXML);
+                    difference = System.currentTimeMillis() - startTimeProcessing;
+                    elapsedTimeSecondsProcessing = TimeUnit.MILLISECONDS.toSeconds(difference);
+                    qEntry.setProcessingElapsedTimeSeconds(elapsedTimeSecondsProcessing);
                 } catch (InterruptedException e) {
                     log.info("Unable to run quality suite.");
                     e.printStackTrace();
@@ -128,30 +137,35 @@ public class Worker {
                     me.initCause(e);
                     qEntry.setException(me);
                     return;
-                } finally {
-                    wkr.returnReport(metadataPid, suiteId, qEntry, startTime);
                 }
 
-                /* Once the quality report has been created, it can be submitted to the member node to be
-                 * uploaded and indexed.
-                */
+                /* Once the quality report has been created, it can be added to the Solr index */
                 try {
                     // convert String into InputStream
+                    startTimeIndexing = System.currentTimeMillis();
                     wkr.indexReport(metadataPid, runXML, suiteId, sysmeta);
+                    difference = System.currentTimeMillis() - startTimeIndexing;
+                    elapsedTimeSecondsIndexing = TimeUnit.MILLISECONDS.toSeconds(difference);
+                    qEntry.setIndexingElapsedTimeSeconds(elapsedTimeSecondsIndexing);
                 } catch (Exception e) {
                     log.info("Unable to index quality suite.");
                     e.printStackTrace();
-                    MetadigException me = new MetadigIndexException("Unable to run quality suite.");
+                    MetadigException me = new MetadigIndexException("Unable index the generated quality report.");
                     me.initCause(e);
                     qEntry.setException(me);
                 } finally {
                     // Try to return status, even if an error occurred
                     try {
-                        wkr.returnReport(metadataPid, suiteId, qEntry, startTime);
+                        totalElapsedTimeSeconds = elapsedTimeSecondsProcessing + elapsedTimeSecondsIndexing;
+                        qEntry.setTotalElapsedTimeSeconds(totalElapsedTimeSeconds);
+                        wkr.returnReport(metadataPid, suiteId, qEntry, startTimeProcessing);
                         inProcessChannel.basicAck(envelope.getDeliveryTag(), false);
                     } catch (IOException e) {
                         log.error("Unable to return status or ack to controller.");
                         e.printStackTrace();
+                        MetadigException me = new MetadigProcessException("Unable to run quality suite.");
+                        me.initCause(e);
+                        qEntry.setException(me);
                     }
                 }
                 log.info("Worker completed task");
@@ -168,17 +182,23 @@ public class Worker {
         */
         byte[] message = null;
         try {
-            //long difference = System.nanoTime() - startTime;
-            long difference = System.currentTimeMillis() - startTime;
-            long elapsedSeconds = TimeUnit.MILLISECONDS.toSeconds(difference);
-
-            log.info("Elapsed time (seconds): "
-                    + String.format("%d", elapsedSeconds)
+            log.info("Elapsed time processing (seconds): "
+                    + String.format("%d", elapsedTimeSecondsProcessing)
                     + " for metadataPid: " + metadataPid
                     + ", suiteId: " + suiteId
                     + "\n");
-            qEntry.setElapsedTimeSeconds(elapsedSeconds);
-            /* wkr.submitReport(qEntry); */
+
+            log.info("Elapsed time indexing (seconds): "
+                    + String.format("%d", elapsedTimeSecondsIndexing)
+                    + " for metadataPid: " + metadataPid
+                    + ", suiteId: " + suiteId
+                    + "\n");
+
+            log.info("Total elapsed time (seconds): "
+                    + String.format("%d", totalElapsedTimeSeconds)
+                    + " for metadataPid: " + metadataPid
+                    + ", suiteId: " + suiteId
+                    + "\n");
             ByteArrayOutputStream bos = new ByteArrayOutputStream();
             ObjectOutput out = new ObjectOutputStream(bos);
             out.writeObject(qEntry);

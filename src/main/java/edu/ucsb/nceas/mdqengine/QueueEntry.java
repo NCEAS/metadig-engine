@@ -25,7 +25,11 @@ public class QueueEntry implements Serializable {
 
     private String runXML;
 
-    private long elapsedTimeSeconds;
+    private long processingElapsedTimeSeconds;
+
+    private long indexingElapsedTimeSeconds;
+
+    private long totalElapsedTimeSeconds;
 
     private Exception exception;
 
@@ -96,12 +100,28 @@ public class QueueEntry implements Serializable {
         this.runXML = runXML;
     }
 
-    public void setElapsedTimeSeconds (long seconds) {
-        this.elapsedTimeSeconds = seconds;
+    public void setProcessingElapsedTimeSeconds (long seconds) {
+        this.processingElapsedTimeSeconds = seconds;
     };
 
-    public long getElapsedTimeSeconds() {
-        return elapsedTimeSeconds;
+    public void setIndexingElapsedTimeSeconds (long seconds) {
+        this.indexingElapsedTimeSeconds = seconds;
+    };
+
+    public void setTotalElapsedTimeSeconds (long seconds) {
+        this.totalElapsedTimeSeconds = seconds;
+    };
+
+    public long getProcessingElapsedTimeSeconds() {
+        return processingElapsedTimeSeconds;
+    }
+
+    public long getIndexingElapsedTimeSeconds() {
+        return indexingElapsedTimeSeconds;
+    }
+
+    public long getTotalElapsedTimeSeconds() {
+        return totalElapsedTimeSeconds;
     }
 
     public void setException(Exception exception) { this.exception = exception; };
