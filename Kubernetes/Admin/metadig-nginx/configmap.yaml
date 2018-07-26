@@ -5,3 +5,5 @@ metadata:
   namespace: metadig
   labels:
     app: metadig-nginx
+data:
+  proxy-body-size: "5m"
