@@ -167,7 +167,7 @@ public class InMemoryStore implements MDQStore{
 	}
 
 	@Override
-	public Run getRun(String id) {
+	public Run getRun(String suite, String id) {
 		return runs.get(id);
 	}
 

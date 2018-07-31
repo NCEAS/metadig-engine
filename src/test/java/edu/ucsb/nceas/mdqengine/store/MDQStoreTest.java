@@ -98,7 +98,7 @@ public class MDQStoreTest {
 			Run run = mdqe.runSuite(suite, input, null, sysMeta);
 			store.createRun(run);
 			
-			Run r = store.getRun(run.getId());
+			Run r = store.getRun(suite.getId(), run.getId());
 			assertEquals(run.getObjectIdentifier(), r.getObjectIdentifier());
 			
 			store.deleteRun(run);

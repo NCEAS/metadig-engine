@@ -9,6 +9,7 @@ import edu.ucsb.nceas.mdqengine.model.Run;
 import edu.ucsb.nceas.mdqengine.model.Suite;
 import edu.ucsb.nceas.mdqengine.serialize.XmlMarshaller;
 import edu.ucsb.nceas.mdqengine.solr.IndexApplicationController;
+import edu.ucsb.nceas.mdqengine.store.DatabaseStore;
 import edu.ucsb.nceas.mdqengine.store.InMemoryStore;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.configuration2.Configuration;
@@ -142,6 +143,32 @@ public class Worker {
                 }
 
                 /* Once the quality report has been created, it can be added to the Solr index */
+                try {
+                    // convert String into InputStream
+                    wkr.saveRun(run, sysmeta);
+                } catch (Exception e) {
+                    log.info("Unable to save quality suite to database.");
+                    e.printStackTrace();
+                    MetadigException me = new MetadigIndexException("Unable to save the generated quality report.");
+                    me.initCause(e);
+                    qEntry.setException(me);
+                } finally {
+                    // Try to return status, even if an error occurred
+                    try {
+                        totalElapsedTimeSeconds = elapsedTimeSecondsProcessing + elapsedTimeSecondsIndexing;
+                        qEntry.setTotalElapsedTimeSeconds(totalElapsedTimeSeconds);
+                        wkr.returnReport(metadataPid, suiteId, qEntry, startTimeProcessing);
+                        inProcessChannel.basicAck(envelope.getDeliveryTag(), false);
+                    } catch (IOException e) {
+                        log.error("Unable to return status or ack to controller.");
+                        e.printStackTrace();
+                        MetadigException me = new MetadigProcessException("Unable to run quality suite.");
+                        me.initCause(e);
+                        qEntry.setException(me);
+                    }
+                }
+
+                /* Once the quality report has been created and saved, it can be added to the Solr index */
                 try {
                     // convert String into InputStream
                     startTimeIndexing = System.currentTimeMillis();
@@ -329,6 +356,25 @@ public class Worker {
         sysmeta.setFormatId(objFormatId);
         iac.insertSolrDoc(pid, sysmeta, runIS);
         log.info(" [x] Done indexing metadata PID: " + metadataId + ", suite id: " + suiteId);
+    }
+
+    /**
+     * Send a quality report to the Solr server to be added to the index.
+     * <p>
+     * The quality report is added to the Solr index using the DataONE index processing
+     * component, which has been modified for use with metadig_engine.
+     * </p>
+     *
+     * @param run The quality run info to save.
+     * @throws Exception
+     */
+    public void saveRun(Run run, SystemMetadata sysmeta) throws Exception {
+
+        log.info("Saving metadata PID: " + run.getId()  + ", suite id: " + run.getSuiteId());
+        DatabaseStore dbStore = new DatabaseStore();
+        dbStore.saveRun(run, sysmeta);
+        dbStore.shutdown();
+        log.info("Done saving metadata PID: " + run.getId() + ", suite id: " + run.getSuiteId());
     }
 
     /**
