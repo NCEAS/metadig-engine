@@ -132,6 +132,8 @@ public class Worker {
                     qEntry.setException(e);
                     // return now, as indexing can't be done if there was a problem creating the report.
                     // Note that the wkr.returnReport will be executed before the return.
+                    // TODO: inform the controller that a problem occurred.
+                    inProcessChannel.basicAck(envelope.getDeliveryTag(), false);
                     return;
                 } catch (java.lang.Exception e) {
                     log.info("Unable to run quality suite.");
@@ -139,6 +141,8 @@ public class Worker {
                     MetadigException me = new MetadigProcessException("Unable to run quality suite.");
                     me.initCause(e);
                     qEntry.setException(me);
+                    // TODO: inform the controller that a problem occurred.
+                    inProcessChannel.basicAck(envelope.getDeliveryTag(), false);
                     return;
                 }
 
@@ -158,7 +162,6 @@ public class Worker {
                         totalElapsedTimeSeconds = elapsedTimeSecondsProcessing + elapsedTimeSecondsIndexing;
                         qEntry.setTotalElapsedTimeSeconds(totalElapsedTimeSeconds);
                         wkr.returnReport(metadataPid, suiteId, qEntry, startTimeProcessing);
-                        inProcessChannel.basicAck(envelope.getDeliveryTag(), false);
                     } catch (IOException e) {
                         log.error("Unable to return status or ack to controller.");
                         e.printStackTrace();
@@ -188,7 +191,6 @@ public class Worker {
                         totalElapsedTimeSeconds = elapsedTimeSecondsProcessing + elapsedTimeSecondsIndexing;
                         qEntry.setTotalElapsedTimeSeconds(totalElapsedTimeSeconds);
                         wkr.returnReport(metadataPid, suiteId, qEntry, startTimeProcessing);
-                        inProcessChannel.basicAck(envelope.getDeliveryTag(), false);
                     } catch (IOException e) {
                         log.error("Unable to return status or ack to controller.");
                         e.printStackTrace();
@@ -197,6 +199,7 @@ public class Worker {
                         qEntry.setException(me);
                     }
                 }
+                inProcessChannel.basicAck(envelope.getDeliveryTag(), false);
                 log.info("Worker completed task");
             }
         };
