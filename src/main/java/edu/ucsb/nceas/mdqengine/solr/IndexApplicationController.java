@@ -19,7 +19,8 @@ import java.util.List;
 public class IndexApplicationController {
 
     private static String SOLRINDEXES = "solrIndexes";
-    private static String solrLocation = "http://localhost:8983/solr/quality";
+    //private static String solrLocation = "http://localhost:8983/solr/quality";
+    private static String solrLocation = "http://docker-ucsb-1.test.dataone.org:8983/solr/quality";
     // TODO: configure Solr server (location, cloud vs standalone) via config parameters
     private static ArrayList<String> solrLocations = new ArrayList<String>(
             Arrays.asList("http://localhost:8983/solr", "http://localhost:7574/solr"));

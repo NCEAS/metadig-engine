@@ -41,8 +41,8 @@ public class Controller {
     // a RabbitMQ server running on a 'bare metal' server, inside a VM, or within a Kubernetes
     // where metadig-controller and the RabbitMQ server are running in containers that belong
     // to the same Pod. These defaults will be used if the properties file cannot be read.
-    //private static String RabbitMQhost = "rabbitmq.metadig.svc.cluster.local";
-    private static String RabbitMQhost = "localhost";
+    private static String RabbitMQhost = "rabbitmq.metadig.svc.cluster.local";
+    //private static String RabbitMQhost = "localhost";
     private static Integer RabbitMQport = 5672;
     private static String RabbitMQpassword = "guest";
     private static String RabbitMQusername = "guest";
