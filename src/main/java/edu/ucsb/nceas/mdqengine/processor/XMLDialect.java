@@ -325,7 +325,7 @@ public class XMLDialect {
 	public boolean isCheckValid(Check check) throws XPathExpressionException {
 
 		if (check.getDialect() == null) {
-			log.info("No dialects have been specified for check, assuming it is valid for this document");
+			log.debug("No dialects have been specified for check, assuming it is valid for this document");
 			return true;
 		}
 		
@@ -425,7 +425,7 @@ public class XMLDialect {
 				value = values;
 			}  
 		} catch (XPathExpressionException xpee) {
-			log.warn("Defaulting to single value selection: " + xpee.getCause().getMessage());
+			log.debug("Defaulting to single value selection: " + xpee.getCause().getMessage());
 			
 			// try just a single value
 			try {

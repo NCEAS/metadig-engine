@@ -373,11 +373,11 @@ public class Worker {
      */
     public void saveRun(Run run, SystemMetadata sysmeta) throws Exception {
 
-        log.info("Saving metadata PID: " + run.getId()  + ", suite id: " + run.getSuiteId());
+        log.info("Saving to persistent storage: metadata PID: " + run.getId()  + ", suite id: " + run.getSuiteId());
         DatabaseStore dbStore = new DatabaseStore();
         dbStore.saveRun(run, sysmeta);
         dbStore.shutdown();
-        log.info("Done saving metadata PID: " + run.getId() + ", suite id: " + run.getSuiteId());
+        log.info("Done saving to persistent storage: metadata PID: " + run.getId() + ", suite id: " + run.getSuiteId());
     }
 
     /**
