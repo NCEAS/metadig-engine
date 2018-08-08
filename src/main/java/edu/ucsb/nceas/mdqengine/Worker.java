@@ -76,7 +76,6 @@ public class Worker {
     private static long elapsedTimeSecondsProcessing;
     private static long totalElapsedTimeSeconds;
 
-
     public static void main(String[] argv) throws Exception {
 
         Worker wkr = new Worker();
@@ -97,6 +96,9 @@ public class Worker {
                 QueueEntry qEntry = null;
                 //long startTime = System.nanoTime();
                 startTimeProcessing = System.currentTimeMillis();
+                elapsedTimeSecondsIndexing = 0L;
+                elapsedTimeSecondsProcessing = 0L;
+                totalElapsedTimeSeconds = 0L;
 
                 try {
                     qEntry = (QueueEntry) in.readObject();
@@ -113,8 +115,15 @@ public class Worker {
                 SystemMetadata sysmeta = qEntry.getSystemMetadata();
                 long difference;
 
+                // Fail fast for each of these tasks: create run, save run, index run
+                // If any one of these fails, send an 'ack' back to the controller, try to
+                // return a report query entry (that also contains the exception) and return
+                boolean failFast = false;
+
                 // Create the quality report
                 try {
+                    // Set host name so controller can print stats info, referring to this
+                    // worker.
                     qEntry.setHostname(InetAddress.getLocalHost().getHostName());
                     run = wkr.processReport(qEntry);
                     runXML = XmlMarshaller.toXml(run);
@@ -122,69 +131,60 @@ public class Worker {
                     difference = System.currentTimeMillis() - startTimeProcessing;
                     elapsedTimeSecondsProcessing = TimeUnit.MILLISECONDS.toSeconds(difference);
                     qEntry.setProcessingElapsedTimeSeconds(elapsedTimeSecondsProcessing);
-                } catch (InterruptedException e) {
+                } catch (java.lang.Exception e) {
+                    failFast = true;
                     log.info("Unable to run quality suite.");
                     e.printStackTrace();
-                    MetadigException me = new MetadigProcessException("Unable to run quality suite.");
-                    me.initCause(e);
                     // Store an exception in the queue entry. This will be returned to the Controller so
                     // so that it can take the appropriate action, for example, to resubmit the entry
                     // or to log the error in an easily assessible location, or to notify a user.
-                    qEntry.setException(e);
-                    // return now, as indexing can't be done if there was a problem creating the report.
-                    // Note that the wkr.returnReport will be executed before the return.
-                    // TODO: inform the controller that a problem occurred.
-                    inProcessChannel.basicAck(envelope.getDeliveryTag(), false);
-                    return;
-                } catch (java.lang.Exception e) {
-                    log.info("Unable to run quality suite.");
-                    e.printStackTrace();
                     MetadigException me = new MetadigProcessException("Unable to run quality suite.");
                     me.initCause(e);
                     qEntry.setException(me);
-                    // TODO: inform the controller that a problem occurred.
-                    inProcessChannel.basicAck(envelope.getDeliveryTag(), false);
-                    return;
+                    // Note: Don't explicitly call 'return' from this routine causes the worker to silently loose connection
+                    // to rabbitmq, i.e. the message to the completed queue doesn't appear to be queued
                 }
 
-                /* Once the quality report has been created, it can be added to the Solr index */
-                try {
-                    // convert String into InputStream
-                    wkr.saveRun(run, sysmeta);
-                } catch (Exception e) {
-                    log.info("Unable to save quality suite to database.");
-                    e.printStackTrace();
-                    qEntry.setException(e);
-                }
-
-                /* Once the quality report has been created and saved, it can be added to the Solr index */
-                try {
-                    // convert String into InputStream
-                    startTimeIndexing = System.currentTimeMillis();
-                    wkr.indexReport(metadataPid, runXML, suiteId, sysmeta);
-                    difference = System.currentTimeMillis() - startTimeIndexing;
-                    elapsedTimeSecondsIndexing = TimeUnit.MILLISECONDS.toSeconds(difference);
-                    qEntry.setIndexingElapsedTimeSeconds(elapsedTimeSecondsIndexing);
-                } catch (Exception e) {
-                    log.info("Unable to index quality suite.");
-                    e.printStackTrace();
-                    MetadigException me = new MetadigIndexException("Unable index the generated quality report.");
-                    me.initCause(e);
-                    qEntry.setException(me);
-                } finally {
-                    // Try to return status, even if an error occurred
+                if(!failFast) {
+                    /* Once the quality report has been created, it can be added to the Solr index */
                     try {
-                        totalElapsedTimeSeconds = elapsedTimeSecondsProcessing + elapsedTimeSecondsIndexing;
-                        qEntry.setTotalElapsedTimeSeconds(totalElapsedTimeSeconds);
-                        wkr.returnReport(metadataPid, suiteId, qEntry, startTimeProcessing);
-                    } catch (IOException e) {
-                        log.error("Unable to return status or ack to controller.");
+                        // convert String into InputStream
+                        wkr.saveRun(run, sysmeta);
+                    } catch (MetadigStoreException me) {
+                        failFast = true;
+                        log.info("Unable to save (then index) quality report to database.");
+                        qEntry.setException(me);
+                    }
+                }
+
+                if(!failFast) {
+                    /* Once the quality report has been created and saved, it can be added to the Solr index */
+                    try {
+                        // convert String into InputStream
+                        startTimeIndexing = System.currentTimeMillis();
+                        wkr.indexReport(metadataPid, runXML, suiteId, sysmeta);
+                        difference = System.currentTimeMillis() - startTimeIndexing;
+                        elapsedTimeSecondsIndexing = TimeUnit.MILLISECONDS.toSeconds(difference);
+                        qEntry.setIndexingElapsedTimeSeconds(elapsedTimeSecondsIndexing);
+                    } catch (Exception e) {
+                        log.info("Unable to index quality report.");
                         e.printStackTrace();
-                        MetadigException me = new MetadigProcessException("Unable to run quality suite.");
+                        MetadigException me = new MetadigIndexException("Unable index the generated quality report.");
                         me.initCause(e);
                         qEntry.setException(me);
                     }
                 }
+
+                // Send the report (completed or not) to the controller, with errors that were encountered.
+                try {
+                    totalElapsedTimeSeconds = elapsedTimeSecondsProcessing + elapsedTimeSecondsIndexing;
+                    qEntry.setTotalElapsedTimeSeconds(totalElapsedTimeSeconds);
+                    wkr.returnReport(metadataPid, suiteId, qEntry, startTimeProcessing);
+                } catch (IOException ioe) {
+                    log.error("Unable to return quality report to controller.");
+                    ioe.printStackTrace();
+                }
+
                 inProcessChannel.basicAck(envelope.getDeliveryTag(), false);
                 log.info("Worker completed task");
             }

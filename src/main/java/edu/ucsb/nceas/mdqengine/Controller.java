@@ -351,9 +351,8 @@ public class Controller {
                  * 'exception' field. Check this now and take the appropriate action.
                  */
                 Exception me = qEntry.getException();
-                // TODO: decide if/when an entry should be requeued
                 if (me instanceof MetadigException) {
-                    log.error("Error running suite: " + qEntry.getQualitySuiteId()+ ", " + qEntry.getMetadataPid() + ": ");
+                    log.error("Error running suite: " + qEntry.getQualitySuiteId()+ ", pid: " + qEntry.getMetadataPid() + ", error msg: ");
                     log.error("\t" + me.getMessage());
                     Throwable thisCause = me.getCause();
                     if(thisCause != null) {
