@@ -4,6 +4,7 @@ import com.rabbitmq.client.*;
 import edu.ucsb.nceas.mdqengine.exception.MetadigException;
 import edu.ucsb.nceas.mdqengine.exception.MetadigIndexException;
 import edu.ucsb.nceas.mdqengine.exception.MetadigProcessException;
+import edu.ucsb.nceas.mdqengine.exception.MetadigStoreException;
 import edu.ucsb.nceas.mdqengine.model.Result;
 import edu.ucsb.nceas.mdqengine.model.Run;
 import edu.ucsb.nceas.mdqengine.model.Suite;
@@ -153,22 +154,7 @@ public class Worker {
                 } catch (Exception e) {
                     log.info("Unable to save quality suite to database.");
                     e.printStackTrace();
-                    MetadigException me = new MetadigIndexException("Unable to save the generated quality report.");
-                    me.initCause(e);
-                    qEntry.setException(me);
-                } finally {
-                    // Try to return status, even if an error occurred
-                    try {
-                        totalElapsedTimeSeconds = elapsedTimeSecondsProcessing + elapsedTimeSecondsIndexing;
-                        qEntry.setTotalElapsedTimeSeconds(totalElapsedTimeSeconds);
-                        wkr.returnReport(metadataPid, suiteId, qEntry, startTimeProcessing);
-                    } catch (IOException e) {
-                        log.error("Unable to return status or ack to controller.");
-                        e.printStackTrace();
-                        MetadigException me = new MetadigProcessException("Unable to run quality suite.");
-                        me.initCause(e);
-                        qEntry.setException(me);
-                    }
+                    qEntry.setException(e);
                 }
 
                 /* Once the quality report has been created and saved, it can be added to the Solr index */
@@ -371,7 +357,7 @@ public class Worker {
      * @param run The quality run info to save.
      * @throws Exception
      */
-    public void saveRun(Run run, SystemMetadata sysmeta) throws Exception {
+    public void saveRun(Run run, SystemMetadata sysmeta) throws MetadigStoreException {
 
         log.info("Saving to persistent storage: metadata PID: " + run.getId()  + ", suite id: " + run.getSuiteId());
         DatabaseStore dbStore = new DatabaseStore();
