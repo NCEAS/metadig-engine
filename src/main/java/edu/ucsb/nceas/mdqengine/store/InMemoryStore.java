@@ -181,4 +181,11 @@ public class InMemoryStore implements MDQStore{
 		runs.remove(run.getId());
 	}
 
+	@Override
+	public boolean isAvailable() { return true; }
+
+	@Override
+	public void renew() {};
+
+
 }

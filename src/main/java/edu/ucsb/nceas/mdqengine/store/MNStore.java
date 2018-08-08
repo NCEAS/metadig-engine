@@ -323,4 +323,10 @@ public class MNStore implements MDQStore {
 		delete(run.getId());
 	}
 
+	@Override
+	public boolean isAvailable() { return true; }
+
+	@Override
+	public void renew() {}
+
 }

@@ -25,4 +25,7 @@ public interface MDQStore {
 	public void createRun(Run run);
 	public void deleteRun(Run run);
 
+	public boolean isAvailable();
+	public void renew() throws MetadigStoreException;
+
 }
