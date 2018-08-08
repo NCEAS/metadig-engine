@@ -1,0 +1,48 @@
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  name: postgres
+  namespace: metadig
+spec:
+  selector:
+    matchLabels:
+      app: postgres
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: postgres
+    spec:
+      serviceAccountName: metadig-serviceaccount
+      containers:
+      - name: postgres
+        image: docker.io/postgres:10.4-alpine
+        ports:
+        - name: postgres
+          containerPort: 5432
+        imagePullPolicy: IfNotPresent
+        volumeMounts:
+        - name: gluster-gvol0
+          mountPath: /var/lib
+          readOnly: false
+      restartPolicy: Always
+      volumes:
+      - name: gluster-gvol0
+        persistentVolumeClaim:
+          claimName: gluster-claim
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres
+  namespace: metadig
+spec:
+  selector:
+    app: postgres
+  ports:
+  - name: postgres
+    port: 5432
+    protocol: TCP
+    targetPort: postgres
