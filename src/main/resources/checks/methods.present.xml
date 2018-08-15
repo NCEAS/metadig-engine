@@ -59,7 +59,7 @@ mdq_result <- list(status=result$status, output=list(list(value=result$output)))
 		<xpath>/eml/dataset/methods/methodStep</xpath>
 		<subSelector>
 			<name>msd</name>
-			<xpath>./description//para/text()</xpath>
+			<xpath>./description/para/text() | ./description/text()</xpath>
 		</subSelector>
 	</selector>
 	<dialect>
