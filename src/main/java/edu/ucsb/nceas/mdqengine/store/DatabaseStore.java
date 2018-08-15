@@ -127,13 +127,13 @@ public class DatabaseStore implements MDQStore {
 
         // Select records from the 'runs' table
         try {
-            log.info("preparing statement for query");
+            log.debug("preparing statement for query");
             String sql = "select * from runs where metadata_id = ? and suite_id = ?";
             stmt = conn.prepareStatement(sql);
             stmt.setString(1, metadataId);
             stmt.setString(2, suiteId);
 
-            log.info("issuing query: " + sql);
+            log.debug("issuing query: " + sql);
             ResultSet rs = stmt.executeQuery();
             if(rs.next()) {
                 mId = rs.getString("metadata_id");
@@ -158,7 +158,7 @@ public class DatabaseStore implements MDQStore {
     /*
      * Save a single run, first populating the 'pids' table, then the 'runs' table.
      */
-    public void saveRun(Run run, SystemMetadata sysmeta) {
+    public void saveRun(Run run, SystemMetadata sysmeta) throws MetadigStoreException {
         //runs.put(run.getId(), run);
 
         PreparedStatement stmt = null;
@@ -172,12 +172,17 @@ public class DatabaseStore implements MDQStore {
 
         String runStr = null;
 
+        MetadigStoreException me = new MetadigStoreException("Unable save quality report to the datdabase.");
         try {
             runStr = XmlMarshaller.toXml(run);
         } catch (JAXBException e) {
             e.printStackTrace();
+            me.initCause(e);
+            throw(me);
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
+            me.initCause(e);
+            throw(me);
         }
 
         // First, insert a record into the main table ('pids')
@@ -195,8 +200,10 @@ public class DatabaseStore implements MDQStore {
             stmt.close();
             conn.commit();
             //conn.close();
-        } catch (Exception e) {
+        } catch (SQLException e) {
             log.error( e.getClass().getName()+": "+ e.getMessage());
+            me.initCause(e);
+            throw(me);
         }
 
         // Perform an 'upsert' on the 'runs' table - if a record exists for the 'metadata_id, suite_id' already,
@@ -218,8 +225,10 @@ public class DatabaseStore implements MDQStore {
             stmt.close();
             conn.commit();
             //conn.close();
-        } catch (Exception e) {
+        } catch (SQLException e) {
             log.error( e.getClass().getName()+": "+ e.getMessage());
+            me.initCause(e);
+            throw(me);
         }
 
         // Next, insert a record into the child table ('runs')
@@ -244,7 +253,7 @@ public class DatabaseStore implements MDQStore {
      */
     public void renew() throws MetadigStoreException {
         if(!this.isAvailable()) {
-            log.info("Renewing connection to database");
+            log.debug("Renewing connection to database");
             this.init();
         }
     }
@@ -318,6 +327,4 @@ public class DatabaseStore implements MDQStore {
     public void deleteCheck(Check check) {
         checks.remove(check.getId());
     }
-
-
 }
