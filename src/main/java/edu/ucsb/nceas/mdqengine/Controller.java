@@ -281,7 +281,7 @@ public class Controller {
         message = bos.toByteArray();
 
         this.writeInProcessQueue(message);
-        log.info(" [x] Queued report request for pid: '" + qEntry.getMetadataPid() + "'" + " metadata pid: " + sysmeta.getIdentifier().getValue());
+        log.info(" [x] Queued report request for pid: '" + qEntry.getMetadataPid() + "'" + " quality suite " + qualitySuiteId);
     }
 
     /**
