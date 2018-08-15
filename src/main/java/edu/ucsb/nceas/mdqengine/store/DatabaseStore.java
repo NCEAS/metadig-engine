@@ -1,5 +1,6 @@
 package edu.ucsb.nceas.mdqengine.store;
 
+import org.apache.commons.lang3.ArrayUtils;
 import edu.ucsb.nceas.mdqengine.MDQStore;
 import edu.ucsb.nceas.mdqengine.exception.MetadigStoreException;
 import edu.ucsb.nceas.mdqengine.model.Check;
@@ -7,15 +8,22 @@ import edu.ucsb.nceas.mdqengine.model.Result;
 import edu.ucsb.nceas.mdqengine.model.Run;
 import edu.ucsb.nceas.mdqengine.model.Suite;
 import edu.ucsb.nceas.mdqengine.serialize.XmlMarshaller;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.dataone.configuration.Settings;
 import org.dataone.service.types.v2.SystemMetadata;
 import org.dataone.service.util.TypeMarshaller;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
+import org.xml.sax.SAXException;
 
 import javax.xml.bind.JAXBException;
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
+import java.net.URL;
 import java.sql.*;
 import java.time.Instant;
 import java.util.Collection;
@@ -61,6 +69,40 @@ public class DatabaseStore implements MDQStore {
             MetadigStoreException mse = new MetadigStoreException("Unable to create the database store.");
             mse.initCause(e);
             throw(mse);
+        }
+
+        // For now, load checks into memory from the distribution jar file
+        String additionalDir = Settings.getConfiguration().getString("mdq.store.directory", null);
+
+        PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
+
+        Resource[] suiteResources = null;
+        // load all the resources from local files
+        try {
+            suiteResources  = resolver.getResources("classpath*:/suites/*.xml");
+            // do we have an additional location for these?
+            if (additionalDir != null) {
+                Resource[] additionalSuiteResources = resolver.getResources("file://" + additionalDir + "/suites/*.xml");
+                suiteResources = (Resource[]) ArrayUtils.addAll(suiteResources, additionalSuiteResources);
+            }
+        } catch (IOException e) {
+            log.error("Could not read local suite resources: " + e.getMessage(), e);
+        }
+        if (suiteResources != null) {
+            for (Resource resource: suiteResources) {
+                Suite suite = null;
+                try {
+                    URL url = resource.getURL();
+                    //log.debug("Loading suite found at: " + url.toString());
+                    String xml = IOUtils.toString(url.openStream(), "UTF-8");
+                    suite = (Suite) XmlMarshaller.fromXml(xml, Suite.class);
+                } catch (JAXBException | IOException | SAXException e) {
+                    //log.warn("Could not load suite '" + resource.getFilename() + "' due to an error: " + e.getMessage() + ".");
+                    continue;
+                }
+                this.createSuite(suite);
+
+            }
         }
         log.debug("Initialized databasestore: opened database successfully");
     }
