@@ -20,6 +20,7 @@ COPY metadig-engine.jar metadig-engine.jar
 # but maybe further action needs to be taken for java/dataone to be able to find them without having to
 # do this extra step.
 COPY solr solr
+COPY metadig.properties /etc/metadig/metadig.propeties
 
 # DataONE indexer prints copious error msgs if these files don't exist
 RUN mkdir -p /etc/dataone/index && touch /etc/dataone/index/d1client.properties && touch /etc/dataone/node.properties && touch /etc/dataone/index/cn-index-processor.properties

@@ -13,8 +13,6 @@ import edu.ucsb.nceas.mdqengine.solr.IndexApplicationController;
 import edu.ucsb.nceas.mdqengine.store.DatabaseStore;
 import edu.ucsb.nceas.mdqengine.store.InMemoryStore;
 import org.apache.commons.codec.digest.DigestUtils;
-import org.apache.commons.configuration2.Configuration;
-import org.apache.commons.configuration2.builder.fluent.Configurations;
 import org.apache.commons.configuration2.ex.ConfigurationException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -32,6 +30,7 @@ import org.dataone.service.types.v2.SystemMetadata;
 import java.io.*;
 import java.math.BigInteger;
 import java.net.InetAddress;
+import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -61,12 +60,11 @@ public class Worker {
     private static Channel completedChannel;
 
     public static Log log = LogFactory.getLog(Worker.class);
-    // TODO: move rabbitmq config to parameter file
-    private static String RabbitMQhost = "rabbitmq.metadig.svc.cluster.local";
-    //private static String RabbitMQhost = "localhost";
-    private static Integer RabbitMQport = 5672;
-    private static String RabbitMQpassword = "guest";
-    private static String RabbitMQusername = "guest";
+    // These values are read from a config file, see class 'MDQconfig'.
+    private static String RabbitMQhost = null;
+    private static Integer RabbitMQport = null;
+    private static String RabbitMQpassword = null;
+    private static String RabbitMQusername = null;
     private static String authToken = null;
     private static SolrClient client = null;
 
@@ -75,11 +73,26 @@ public class Worker {
     private static long elapsedTimeSecondsIndexing;
     private static long elapsedTimeSecondsProcessing;
     private static long totalElapsedTimeSeconds;
+    private static DatabaseStore dbStore = null;
 
     public static void main(String[] argv) throws Exception {
 
         Worker wkr = new Worker();
-        //wkr.readConfig();
+
+        MDQconfig cfg = new MDQconfig ();
+
+        try {
+            RabbitMQpassword = cfg.getString("RabbitMQ.password");
+            RabbitMQusername = cfg.getString("RabbitMQ.username");
+            RabbitMQhost = cfg.getString("RabbitMQ.host");
+            RabbitMQport = cfg.getInt("RabbitMQ.port");
+        } catch (ConfigurationException cex) {
+            log.error("Unable to read configuration");
+            MetadigException me = new MetadigException("Unable to read config properties");
+            me.initCause(cex.getCause());
+            throw me;
+        }
+
         wkr.setupQueues();
 
         /* This method is overridden from the RabbitMQ library and serves as the callback that is invoked whenenver
@@ -359,10 +372,30 @@ public class Worker {
      */
     public void saveRun(Run run, SystemMetadata sysmeta) throws MetadigStoreException {
 
+        if(dbStore == null) {
+            log.debug("Creating new connection to database");
+            dbStore = new DatabaseStore();
+        } else if (!dbStore.isAvailable()) {
+            log.debug("Renewing connection to database");
+            dbStore.renew();
+        }
+
         log.info("Saving to persistent storage: metadata PID: " + run.getId()  + ", suite id: " + run.getSuiteId());
-        DatabaseStore dbStore = new DatabaseStore();
-        dbStore.saveRun(run, sysmeta);
-        dbStore.shutdown();
+        try {
+            dbStore.saveRun(run, sysmeta);
+        } catch (MetadigException me) {
+            log.debug("Error saving run: " + me.getCause());
+            if(me.getCause() instanceof SQLException) {
+                log.debug("Retrying saveRun() due to error");
+                dbStore.saveRun(run, sysmeta);
+           } else {
+                throw(me);
+           }
+        }
+
+        // TODO: shutdown connection when a Worker process/container ends. This may involve catching a SIGTERM
+        // sent to the processing running the worker.
+        //dbStore.shutdown();
         log.info("Done saving to persistent storage: metadata PID: " + run.getId() + ", suite id: " + run.getSuiteId());
     }
 
@@ -476,22 +509,6 @@ public class Worker {
         InputStream is = classLoader.getResourceAsStream(fileName);
 
         return is;
-    }
-
-    /**
-     * Read a configuration file for parameter values.
-     */
-    private void readConfig() {
-
-        Configurations configs = new Configurations();
-        Configuration config = null;
-        try {
-            config = configs.properties(new File("./config/metadig.properties"));
-            RabbitMQhost = config.getString("RabbitMQ.host", RabbitMQhost);
-            RabbitMQport = config.getInteger("RabbitMQ.port", RabbitMQport);
-        } catch (ConfigurationException cex) {
-           log.error("Unable to read configuration, using default values.");
-        }
     }
 }
 

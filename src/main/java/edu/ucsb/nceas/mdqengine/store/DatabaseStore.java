@@ -1,14 +1,16 @@
 package edu.ucsb.nceas.mdqengine.store;
 
-import org.apache.commons.lang3.ArrayUtils;
 import edu.ucsb.nceas.mdqengine.MDQStore;
+import edu.ucsb.nceas.mdqengine.MDQconfig;
 import edu.ucsb.nceas.mdqengine.exception.MetadigStoreException;
 import edu.ucsb.nceas.mdqengine.model.Check;
 import edu.ucsb.nceas.mdqengine.model.Result;
 import edu.ucsb.nceas.mdqengine.model.Run;
 import edu.ucsb.nceas.mdqengine.model.Suite;
 import edu.ucsb.nceas.mdqengine.serialize.XmlMarshaller;
+import org.apache.commons.configuration2.ex.ConfigurationException;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.dataone.configuration.Settings;
@@ -18,6 +20,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.xml.sax.SAXException;
 
+import javax.sql.DataSource;
 import javax.xml.bind.JAXBException;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -39,8 +42,8 @@ public class DatabaseStore implements MDQStore {
 
     protected Log log = LogFactory.getLog(this.getClass());
 
-    String dbUrl = "jdbc:postgresql://localhost:5432/metadig";
-    //String dbUrl = "jdbc:postgresql://postgres.metadig.svc.cluster.local:5432/metadig";
+    //String dbUrl = "jdbc:postgresql://localhost:5432/metadig";
+    private static String dbUrl = null;
 
     Map<String, Suite> suites = new HashMap<String, Suite>();
 
@@ -49,6 +52,8 @@ public class DatabaseStore implements MDQStore {
     Map<String, Run> runs = new HashMap<String, Run>();
 
     Connection conn = null;
+
+    DataSource dataSource = null;
 
     public DatabaseStore () throws MetadigStoreException {
         log.debug("Initializing a new DatabaseStore to " + dbUrl + ".");
@@ -59,6 +64,17 @@ public class DatabaseStore implements MDQStore {
      * Get a connection to the database that contains the quality reports.
      */
     private void init() throws MetadigStoreException {
+
+        MDQconfig cfg = new MDQconfig();
+        try {
+            dbUrl = cfg.getString("jdbc.url");
+        } catch (ConfigurationException ce) {
+            log.error(ce.getMessage());
+            MetadigStoreException mse = new MetadigStoreException("Unable to create new Store");
+            mse.initCause(ce.getCause());
+            throw mse;
+        }
+
         try {
             Class.forName("org.postgresql.Driver");
             conn = DriverManager.getConnection(dbUrl,"metadig", "metadig");

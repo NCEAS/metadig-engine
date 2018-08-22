@@ -1,5 +1,6 @@
 package edu.ucsb.nceas.mdqengine.solr;
 
+import edu.ucsb.nceas.mdqengine.MDQconfig;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.solr.client.solrj.impl.HttpSolrClient;
@@ -19,8 +20,7 @@ import java.util.List;
 public class IndexApplicationController {
 
     private static String SOLRINDEXES = "solrIndexes";
-    //private static String solrLocation = "http://localhost:8983/solr/quality";
-    private static String solrLocation = "http://docker-ucsb-1.test.dataone.org:8983/solr/quality";
+    private static String solrLocation = null;
     // TODO: configure Solr server (location, cloud vs standalone) via config parameters
     private static ArrayList<String> solrLocations = new ArrayList<String>(
             Arrays.asList("http://localhost:8983/solr", "http://localhost:7574/solr"));
@@ -45,6 +45,8 @@ public class IndexApplicationController {
      */
     public void initialize(String configFile) throws Exception {
         try {
+            MDQconfig cfg = new MDQconfig();
+            solrLocation = cfg.getString("solr.location");
             solrClient = new HttpSolrClient.Builder(solrLocation).build();
             //solrClient = new CloudSolrClient.Builder().withSolrUrl(solrLocations).build();
             //solrClient = new CloudSolrClient.Builder().withZkHost(solrLocation).build();

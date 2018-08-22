@@ -2,8 +2,6 @@ package edu.ucsb.nceas.mdqengine;
 
 import com.rabbitmq.client.*;
 import edu.ucsb.nceas.mdqengine.exception.MetadigException;
-import org.apache.commons.configuration2.Configuration;
-import org.apache.commons.configuration2.builder.fluent.Configurations;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.dataone.exceptions.MarshallingException;
@@ -41,11 +39,11 @@ public class Controller {
     // a RabbitMQ server running on a 'bare metal' server, inside a VM, or within a Kubernetes
     // where metadig-controller and the RabbitMQ server are running in containers that belong
     // to the same Pod. These defaults will be used if the properties file cannot be read.
-    private static String RabbitMQhost = "rabbitmq.metadig.svc.cluster.local";
-    //private static String RabbitMQhost = "localhost";
-    private static Integer RabbitMQport = 5672;
-    private static String RabbitMQpassword = "guest";
-    private static String RabbitMQusername = "guest";
+    // These values are read from a config file, see class 'MDQconfig'
+    private static String RabbitMQhost = null;
+    private static Integer RabbitMQport = null;
+    private static String RabbitMQpassword = null;
+    private static String RabbitMQusername = null;
     private static Controller instance;
     private boolean isStarted = false;
     private int testCount = 0;
@@ -57,18 +55,13 @@ public class Controller {
 
     public static void main(String[] argv) throws Exception {
 
-        /* Get command line arguments. Currently the only argument supported is
-        to turn on test mode, where the Controller will read from a port. The information
-        read from the port contains report generation requests, which each record
-        containing these fields:
-
-            identifier
-            metadata document filename
-            suite id to run
-            systemmetadata document filename
-
-         */
         Controller metadigCtrl = Controller.getInstance();
+
+        MDQconfig cfg = new MDQconfig();
+        RabbitMQpassword = cfg.getString("RabbitMQ.password");
+        RabbitMQusername = cfg.getString("RabbitMQ.username");
+        RabbitMQhost = cfg.getString("RabbitMQ.host");
+        RabbitMQport = cfg.getInt("RabbitMQ.port");
 
         metadigCtrl.start();
         if (metadigCtrl.getIsStarted()) {
@@ -185,7 +178,8 @@ public class Controller {
         if (isStarted) return;
 
         try {
-            //this.readConfig();
+
+
             this.setupQueues();
             this.isStarted = true;
         } catch (java.io.IOException | java.util.concurrent.TimeoutException e) {
@@ -461,30 +455,6 @@ public class Controller {
      */
     public boolean getIsStarted() {
         return isStarted;
-    }
-
-    /**
-     * Read a configuration file for parameter values.
-     */
-    private void readConfig() {
-
-        Configurations configs = new Configurations();
-        Configuration config = null;
-        //try {
-            //Get file from resources folder
-            //File configFile = new File(classLoader.getResource("/configuration/metadig.properties").getFile());
-            //InputStream props = this.getResourceFile("configuration/metadig.properties");
-            //config = configs.properties(props);
-            //RabbitMQhost = config.getString("RabbitMQ.host", RabbitMQhost);
-            //RabbitMQport = config.getInteger("RabbitMQ.port", RabbitMQport);
-            RabbitMQhost = "localhost";
-            RabbitMQport = 5672;
-
-            log.info("From properties resource - RabbitMQhost: " + RabbitMQhost);
-            log.info("From properties resource - RabbitMQport: " + RabbitMQport);
-        //} catch (URISyntaxException | ConfigurationException cex) {
-        //    log.error("Unable to read configuration, using default values.");
-        //}
     }
 }
 

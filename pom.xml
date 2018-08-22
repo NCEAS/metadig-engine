@@ -78,7 +78,13 @@
 		<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-configuration2</artifactId>
-			<version>2.2</version>
+			<version>2.3</version>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/commons-beanutils/commons-beanutils -->
+		<dependency>
+			<groupId>commons-beanutils</groupId>
+			<artifactId>commons-beanutils</artifactId>
+			<version>1.9.3</version>
 		</dependency>
 		<!-- http://mvnrepository.com/artifact/org.eclipse.persistence/org.eclipse.persistence.moxy -->
 		<dependency>
@@ -161,6 +167,18 @@
 				<exclusion>
 					<groupId>org.apache.solr</groupId>
 					<artifactId>solr-solrj</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>postgresql</groupId>
+					<artifactId>postgresql</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>commons-beanutils</groupId>
+					<artifactId>commons-beanutils</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>com.rabbitmq</groupId>
+					<artifactId>amqp-client</artifactId>
 				</exclusion>
 			</exclusions>
 		</dependency>
