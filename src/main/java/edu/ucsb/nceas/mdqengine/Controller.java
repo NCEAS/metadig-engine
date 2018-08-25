@@ -2,6 +2,7 @@ package edu.ucsb.nceas.mdqengine;
 
 import com.rabbitmq.client.*;
 import edu.ucsb.nceas.mdqengine.exception.MetadigException;
+import org.apache.commons.configuration2.ex.ConfigurationException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.dataone.exceptions.MarshallingException;
@@ -41,7 +42,7 @@ public class Controller {
     // to the same Pod. These defaults will be used if the properties file cannot be read.
     // These values are read from a config file, see class 'MDQconfig'
     private static String RabbitMQhost = null;
-    private static Integer RabbitMQport = null;
+    private static int RabbitMQport = 0;
     private static String RabbitMQpassword = null;
     private static String RabbitMQusername = null;
     private static Controller instance;
@@ -57,11 +58,6 @@ public class Controller {
 
         Controller metadigCtrl = Controller.getInstance();
 
-        MDQconfig cfg = new MDQconfig();
-        RabbitMQpassword = cfg.getString("RabbitMQ.password");
-        RabbitMQusername = cfg.getString("RabbitMQ.username");
-        RabbitMQhost = cfg.getString("RabbitMQ.host");
-        RabbitMQport = cfg.getInt("RabbitMQ.port");
 
         metadigCtrl.start();
         if (metadigCtrl.getIsStarted()) {
@@ -178,11 +174,10 @@ public class Controller {
         if (isStarted) return;
 
         try {
-
-
+            this.readConfig();
             this.setupQueues();
             this.isStarted = true;
-        } catch (java.io.IOException | java.util.concurrent.TimeoutException e) {
+        } catch (java.io.IOException | java.util.concurrent.TimeoutException | ConfigurationException e) {
             e.printStackTrace();
             log.error("Error starting queue:");
             log.error(e.getMessage());
@@ -203,6 +198,20 @@ public class Controller {
         this.testCount = cnt;
         this.runCount = 0;
         this.totalElapsedSeconds = 0;
+    }
+
+    public void readConfig () throws ConfigurationException, IOException {
+        MDQconfig cfg = new MDQconfig();
+
+        RabbitMQpassword = cfg.getString("RabbitMQ.password");
+        RabbitMQusername = cfg.getString("RabbitMQ.username");
+        RabbitMQhost = cfg.getString("RabbitMQ.host");
+        RabbitMQport = cfg.getInt("RabbitMQ.port");
+        log.debug("Read config:");
+        log.debug("RabbitMQpassword: " + RabbitMQpassword);
+        log.debug("RabbitMQusername: " + RabbitMQusername);
+        log.debug("RabbitMQhost: " + RabbitMQhost);
+        log.debug("RabbitMQport: " + RabbitMQport);
     }
 
     /**

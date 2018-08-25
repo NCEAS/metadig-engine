@@ -32,6 +32,7 @@ import java.time.Instant;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Properties;
 
 /**
  * Persistent storage for quality runs.
@@ -44,15 +45,13 @@ public class DatabaseStore implements MDQStore {
 
     //String dbUrl = "jdbc:postgresql://localhost:5432/metadig";
     private static String dbUrl = null;
+    private static String dbUser = null;
+    private static String dbPasswd = null;
 
     Map<String, Suite> suites = new HashMap<String, Suite>();
-
     Map<String, Check> checks = new HashMap<String, Check>();
-
     Map<String, Run> runs = new HashMap<String, Run>();
-
     Connection conn = null;
-
     DataSource dataSource = null;
 
     public DatabaseStore () throws MetadigStoreException {
@@ -65,19 +64,26 @@ public class DatabaseStore implements MDQStore {
      */
     private void init() throws MetadigStoreException {
 
-        MDQconfig cfg = new MDQconfig();
         try {
+            MDQconfig cfg = new MDQconfig();
             dbUrl = cfg.getString("jdbc.url");
-        } catch (ConfigurationException ce) {
-            log.error(ce.getMessage());
+            dbUser = cfg.getString("postgres.user");
+            dbPasswd = cfg.getString("postgres.passwd");
+        } catch (ConfigurationException | IOException ex ) {
+            log.error(ex.getMessage());
             MetadigStoreException mse = new MetadigStoreException("Unable to create new Store");
-            mse.initCause(ce.getCause());
+            mse.initCause(ex.getCause());
             throw mse;
         }
 
         try {
+            Properties props = new Properties();
+            props.setProperty("user",dbUser);
+            props.setProperty("password",dbPasswd);
+            props.setProperty("prepareThreshold", "0");
+            //props.setProperty("extra_float_digits", "2");
             Class.forName("org.postgresql.Driver");
-            conn = DriverManager.getConnection(dbUrl,"metadig", "metadig");
+            conn = DriverManager.getConnection(dbUrl, props);
             conn.setAutoCommit(false);
         } catch (Exception e) {
             e.printStackTrace();

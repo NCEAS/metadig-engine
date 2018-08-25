@@ -62,7 +62,7 @@ public class Worker {
     public static Log log = LogFactory.getLog(Worker.class);
     // These values are read from a config file, see class 'MDQconfig'.
     private static String RabbitMQhost = null;
-    private static Integer RabbitMQport = null;
+    private static int RabbitMQport = 0;
     private static String RabbitMQpassword = null;
     private static String RabbitMQusername = null;
     private static String authToken = null;
@@ -78,7 +78,6 @@ public class Worker {
     public static void main(String[] argv) throws Exception {
 
         Worker wkr = new Worker();
-
         MDQconfig cfg = new MDQconfig ();
 
         try {
@@ -395,7 +394,9 @@ public class Worker {
 
         // TODO: shutdown connection when a Worker process/container ends. This may involve catching a SIGTERM
         // sent to the processing running the worker.
-        //dbStore.shutdown();
+        // Note that when the connection pooler 'pgbouncer' is used, closing the connection actually just returns
+        // the connection to the pool that pgbouncer maintains.
+        dbStore.shutdown();
         log.info("Done saving to persistent storage: metadata PID: " + run.getId() + ", suite id: " + run.getSuiteId());
     }
 
