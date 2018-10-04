@@ -3,17 +3,17 @@
   <id>ACDD_Discovery_ACDD_ISO</id>
   <name>ACDD_Discovery_ACDD_ISO</name>
   <namespaces>
-	<namespace prefix="eml">eml://ecoinformatics.org/eml-2.1.1</namespace>
-	<namespace prefix="gco">http://www.isotc211.org/2005/gco</namespace>
-	<namespace prefix="gmd">http://www.isotc211.org/2005/gmd</namespace>
-	<namespace prefix="gml">http://www.opengis.net/gml/3.2</namespace>
-	<namespace prefix="gmx">http://www.isotc211.org/2005/gmx</namespace>
-	<namespace prefix="xlink">http://www.w3.org/1999/xlink</namespace>
-	<namespace prefix="gss">http://www.isotc211.org/2005/gss</namespace>
-	<namespace prefix="gts">http://www.isotc211.org/2005/gts</namespace>
-	<namespace prefix="gsr">http://www.isotc211.org/2005/gsr</namespace>
-	<namespace prefix="gmi">http://www.isotc211.org/2005/gmi</namespace>
-	<namespace prefix="srv">http://www.isotc211.org/2005/srv</namespace> 
+    <namespace prefix="eml">eml://ecoinformatics.org/eml-2.1.1</namespace>
+    <namespace prefix="gco">http://www.isotc211.org/2005/gco</namespace>
+    <namespace prefix="gmd">http://www.isotc211.org/2005/gmd</namespace>
+    <namespace prefix="gml">http://www.opengis.net/gml/3.2</namespace>
+    <namespace prefix="gmx">http://www.isotc211.org/2005/gmx</namespace>
+    <namespace prefix="xlink">http://www.w3.org/1999/xlink</namespace>
+    <namespace prefix="gss">http://www.isotc211.org/2005/gss</namespace>
+    <namespace prefix="gts">http://www.isotc211.org/2005/gts</namespace>
+    <namespace prefix="gsr">http://www.isotc211.org/2005/gsr</namespace>
+    <namespace prefix="gmi">http://www.isotc211.org/2005/gmi</namespace>
+    <namespace prefix="srv">http://www.isotc211.org/2005/srv</namespace>
   </namespaces>
   <check>
     <id>ACDD_highlyRecommended_ResourceTitle_ACDD_ISO_EML</id>
@@ -130,7 +130,7 @@ def call():
       <xpath>boolean(/*[local-name() = 'eml'])</xpath>
     </dialect>
   </check>
-<check>
+  <check>
     <id>ACDD_recommended_ResourceIdentifier_ACDD_ISO_EML</id>
     <name>ResourceIdentifierPresent</name>
     <description>Checks to see if at least one Resource Identifier concept exists.</description>
