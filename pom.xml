@@ -114,7 +114,7 @@
 		<dependency>
 			<groupId>com.rabbitmq</groupId>
 			<artifactId>amqp-client</artifactId>
-			<version>4.3.0</version>
+			<version>5.3.0</version>
 		</dependency>
 		<!-- https://mvnrepository.com/artifact/joda-time/joda-time -->
 		<dependency>
@@ -192,15 +192,16 @@
 		<dependency>
 			<groupId>org.postgresql</groupId>
 			<artifactId>postgresql</artifactId>
-			<version>42.2.2</version>
+			<version>42.2.4</version>
 		</dependency>
 	</dependencies>
 	<repositories>
-        <repository>
+        <!-- <repository>
             <id>docker.io</id>
             <name>docker hub</name>
             <url>https://hub.docker.com</url>
         </repository>
+	-->
 		<repository>
 			<id>bedatadriven</id>
 			<name>bedatadriven public repo</name>
@@ -336,11 +337,12 @@
 							<goal>run</goal>
 						</goals>
 						<configuration>
-							<target name="copy jar file for Docker image build">
+							<target name="copy files">
                                 <copy file="${project.build.directory}/metadig-engine-${project.version}.jar" tofile="${project.basedir}/Kubernetes/metadig-worker/metadig-engine.jar" />
                                 <copy file="${project.build.directory}/classes/solr/application-context-mdq.xml" tofile="${project.basedir}/Kubernetes/metadig-worker/solr/application-context-mdq.xml" />
                                 <copy file="${project.build.directory}/classes/solr/application-context-systemmeta-200.xml" tofile="${project.basedir}/Kubernetes/metadig-worker/solr/application-context-systemmeta-200.xml" />
 								<copy file="${project.build.directory}/classes/solr/metadig-index-processor-context.xml" tofile="${project.basedir}/Kubernetes/metadig-worker/solr/metadig-index-processor-context.xml" />
+								<copy file="${project.build.directory}/classes/configuration/metadig.properties" tofile="${project.basedir}/Kubernetes/metadig-worker/metadig.properties" />
 							</target>
 						</configuration>
 					</execution>
