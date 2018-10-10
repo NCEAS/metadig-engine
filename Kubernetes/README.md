@@ -320,7 +320,14 @@ docker-ucsb-1   Ready     master    6m        v1.9.3    <none>        Ubuntu 16.
 
 ## Adding additional nodes
 
-After installing docker, kubeadm, kubectl, kubelet on a worker node, i.e. `docker-ucsb-2.test.dataone.org` use the command in the instructions above with its embedded token and has to add other nodes to the cluster:
+After installing docker, kubeadm, kubectl, kubelet on a worker node, i.e. `docker-ucsb-2.test.dataone.org` use the command in the instructions above with its embedded token and has to add other nodes to the cluster. 
+
+Note that after the join token expires, a new token, along with the complete join command (to be entered at a new node) can be obtained with the command:
+```
+sudo kubeadm token create --print-join-command
+```
+
+Here is the join command that was printed from `kubeadm init`:
 
 ```
 $ kubeadm join --token <token> 128.111.54.69:6443 --discovery-token-ca-cert-hash sha256:<hash>
