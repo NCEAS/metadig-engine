@@ -30,7 +30,6 @@ import org.dataone.service.types.v2.SystemMetadata;
 import java.io.*;
 import java.math.BigInteger;
 import java.net.InetAddress;
-import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -384,20 +383,22 @@ public class Worker {
             dbStore.saveRun(run, sysmeta);
         } catch (MetadigException me) {
             log.debug("Error saving run: " + me.getCause());
-            if(me.getCause() instanceof SQLException) {
-                log.debug("Retrying saveRun() due to error");
-                dbStore.saveRun(run, sysmeta);
-           } else {
-                throw(me);
-           }
-        }
+            //if(me.getCause() instanceof SQLException) {
+            //    log.debug("Retrying saveRun() due to error");
+            //    dbStore.saveRun(run, sysmeta);
+            //} else {
+            //     throw(me);
+            // }
+            throw(me);
+        } finally {
+            // TODO: shutdown connection when a Worker process/container ends. This may involve catching a SIGTERM
+            // sent to the processing running the worker.
+            // Note that when the connection pooler 'pgbouncer' is used, closing the connection actually just returns
+            // the connection to the pool that pgbouncer maintains.
+            dbStore.shutdown();
+            log.info("Done saving to persistent storage: metadata PID: " + run.getId() + ", suite id: " + run.getSuiteId());
 
-        // TODO: shutdown connection when a Worker process/container ends. This may involve catching a SIGTERM
-        // sent to the processing running the worker.
-        // Note that when the connection pooler 'pgbouncer' is used, closing the connection actually just returns
-        // the connection to the pool that pgbouncer maintains.
-        dbStore.shutdown();
-        log.info("Done saving to persistent storage: metadata PID: " + run.getId() + ", suite id: " + run.getSuiteId());
+        }
     }
 
     /**

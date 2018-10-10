@@ -19,7 +19,6 @@ public class MDQconfig {
 
     public static Configuration config;
 
-
     public MDQconfig () throws ConfigurationException, IOException {
         // Check if we are running in a servlet
         boolean inServlet = false;
@@ -37,14 +36,11 @@ public class MDQconfig {
             InputStream inputStream = this.getClass().getClassLoader().getResourceAsStream("/metadig.properties");
             String TMP_DIR = System.getProperty("java.io.tmpdir");
             File tempFile = new File(TMP_DIR + "/metadig.properties");
-            log.debug("Reading config properties from: " + tempFile);
-            //File tempFile = File.createTempFile("metadig", ".properties");
+            log.debug("Reading config properties in servlet from: " + tempFile);
             FileOutputStream out = new FileOutputStream(tempFile);
             IOUtils.copy(inputStream, out);
             config = configs.properties(tempFile);
             log.debug("Successfully read properties from: " + tempFile);
-            log.debug("RabbitMQ.host: " + config.getString("RabbitMQ.host"));
-            log.debug("RabbitMQ.port: " + config.getString("RabbitMQ.port"));
         } else {
             log.debug("Reading config properties from: " + configFilePath);
             config = configs.properties(new File(configFilePath));
