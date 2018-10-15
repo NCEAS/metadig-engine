@@ -20,7 +20,9 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.dataone.configuration.Settings;
+import org.dataone.exceptions.MarshallingException;
 import org.dataone.service.types.v2.SystemMetadata;
+import org.dataone.service.util.TypeMarshaller;
 import org.xml.sax.SAXException;
 
 import edu.ucsb.nceas.mdqengine.dispatch.MDQCache;
@@ -193,14 +195,24 @@ public class MDQEngine {
 			String xml = IOUtils.toString(new FileInputStream(args[0]), "UTF-8");
 			Suite suite = (Suite) XmlMarshaller.fromXml(xml , Suite.class);
 			InputStream input = new FileInputStream(args[1]);
-			Run run = engine.runSuite(suite, input, null, null);
+			InputStream sysmetaInputStream = null;
+			SystemMetadata sysmeta = null;
+
+			// Read in the system metadata XML file if it is provided. Suites can be run without it.
+			if(args.length >= 3) {
+				sysmetaInputStream = new FileInputStream(args[2]);
+				try {
+					sysmeta = TypeMarshaller.unmarshalTypeFromStream(SystemMetadata.class, sysmetaInputStream);
+				} catch (InstantiationException | IllegalAccessException | IOException | MarshallingException fis) {
+					fis.printStackTrace();
+				}
+			}
+			Run run = engine.runSuite(suite, input, null, sysmeta);
 			System.out.println(XmlMarshaller.toXml(run));
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
-		
 	}
 
 }

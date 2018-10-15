@@ -1,0 +1,16 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: metadig-nginx
+  namespace: metadig
+spec:
+  type: NodePort
+  ports:
+  - name: https
+    port: 443
+    targetPort: 443
+    nodePort: 30443
+    protocol: TCP
+  selector:
+    app: metadig-nginx

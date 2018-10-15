@@ -2,7 +2,8 @@ version: 2
 general:
   branches:
     only:
-      - HDFsuites # list of branches to build
+      - master # list of branches to build
+      # - /feature-.*/ # or regexes
 jobs:
   build:
     working_directory: ~/NCEAS/metadig-engine
@@ -37,7 +38,7 @@ jobs:
         - v1-dep-master-
         # Any branch if there are none on the default branch - this should be unnecessary if you have your default branch configured correctly
         - v1-dep-
-    - run: sudo sh -c 'echo "deb http://cran.rstudio.com/bin/linux/ubuntu trusty/" >> /etc/apt/sources.list'
+    - run: sudo sh -c 'echo "deb http://cran.rstudio.com/bin/linux/debian stretch-cran34/" >> /etc/apt/sources.list'
     - run: gpg --keyserver keyserver.ubuntu.com --recv-key E084DAB9
     - run: gpg -a --export E084DAB9 | sudo apt-key add -
     - run: sudo apt-get update

@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<d1_v2.0:systemMetadata xmlns:d1_v2.0="http://ns.dataone.org/service/types/v2.0" xmlns:d1="http://ns.dataone.org/service/types/v1">
+ <serialVersion>1</serialVersion>
+ <identifier>9CD87ED9-A531-419B-B24E-30CAE834EF72</identifier>
+ <formatId>eml://ecoinformatics.org/eml-2.1.1</formatId>
+ <size>18068</size>
+ <checksum algorithm="SHA1">58990f6ab7069a04156e70b161bda08cbb48f77c</checksum>
+ <submitter>http://orcid.org/0000-0002-2192-403X</submitter>
+ <rightsHolder>http://orcid.org/0000-0002-2192-403X</rightsHolder>
+ <accessPolicy>
+  <allow>
+   <subject>public</subject>
+   <permission>read</permission>
+  </allow>
+ </accessPolicy>
+ <replicationPolicy replicationAllowed="false" numberReplicas="0">
+  <blockedMemberNode>urn:node:mnUCSB1</blockedMemberNode>
+ </replicationPolicy>
+ <archived>false</archived>
+ <dateUploaded>2017-12-06T17:36:46.920+00:00</dateUploaded>
+ <dateSysMetadataModified>2017-12-06T17:36:48.514+00:00</dateSysMetadataModified>
+ <originMemberNode>urn:node:mnTestKNB</originMemberNode>
+ <authoritativeMemberNode>urn:node:mnTestKNB</authoritativeMemberNode>
+ <fileName>science_metadata.xml</fileName>
+</d1_v2.0:systemMetadata>

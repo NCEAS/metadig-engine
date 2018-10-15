@@ -1,24 +1,13 @@
 package edu.ucsb.nceas.mdqengine.store;
 
-import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
-import java.lang.reflect.InvocationTargetException;
-import java.math.BigInteger;
-import java.net.URLEncoder;
-import java.security.NoSuchAlgorithmException;
-import java.security.PrivateKey;
-import java.security.cert.X509Certificate;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Collection;
-import java.util.Date;
-
-import javax.xml.bind.JAXBException;
-
+import edu.ucsb.nceas.mdqengine.MDQStore;
+import edu.ucsb.nceas.mdqengine.model.Check;
+import edu.ucsb.nceas.mdqengine.model.Run;
+import edu.ucsb.nceas.mdqengine.model.Suite;
+import edu.ucsb.nceas.mdqengine.serialize.XmlMarshaller;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import net.minidev.json.JSONValue;
-
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -35,11 +24,19 @@ import org.dataone.service.types.v1.Subject;
 import org.dataone.service.types.v1.util.ChecksumUtil;
 import org.dataone.service.types.v2.SystemMetadata;
 
-import edu.ucsb.nceas.mdqengine.MDQStore;
-import edu.ucsb.nceas.mdqengine.model.Check;
-import edu.ucsb.nceas.mdqengine.model.Suite;
-import edu.ucsb.nceas.mdqengine.model.Run;
-import edu.ucsb.nceas.mdqengine.serialize.XmlMarshaller;
+import javax.xml.bind.JAXBException;
+import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
+import java.lang.reflect.InvocationTargetException;
+import java.math.BigInteger;
+import java.net.URLEncoder;
+import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
+import java.security.cert.X509Certificate;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Collection;
+import java.util.Date;
 
 public class MNStore implements MDQStore {
 
@@ -312,7 +309,7 @@ public class MNStore implements MDQStore {
 	}
 
 	@Override
-	public Run getRun(String id) {
+	public Run getRun(String suite, String id) {
 		return (Run) get(id, Run.class);
 	}
 
@@ -325,5 +322,11 @@ public class MNStore implements MDQStore {
 	public void deleteRun(Run run) {
 		delete(run.getId());
 	}
+
+	@Override
+	public boolean isAvailable() { return true; }
+
+	@Override
+	public void renew() {}
 
 }

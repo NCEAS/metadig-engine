@@ -1,10 +1,11 @@
 package edu.ucsb.nceas.mdqengine;
 
-import java.util.Collection;
-
+import edu.ucsb.nceas.mdqengine.exception.MetadigStoreException;
 import edu.ucsb.nceas.mdqengine.model.Check;
-import edu.ucsb.nceas.mdqengine.model.Suite;
 import edu.ucsb.nceas.mdqengine.model.Run;
+import edu.ucsb.nceas.mdqengine.model.Suite;
+
+import java.util.Collection;
 
 public interface MDQStore {
 	
@@ -21,8 +22,11 @@ public interface MDQStore {
 	public void deleteCheck(Check check);
 	
 	public Collection<String> listRuns();
-	public Run getRun(String id);
+	public Run getRun(String suite, String id );
 	public void createRun(Run run);
 	public void deleteRun(Run run);
+
+	public boolean isAvailable();
+	public void renew() throws MetadigStoreException;
 
 }

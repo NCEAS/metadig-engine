@@ -23,13 +23,17 @@ check <- function() {
     if(!methodsPresent) {
         return(list(status = "FAILURE", output = sprintf("A methods section is not present, so unable to check method step descriptions word count.")))
     }
-    
+
     if (methodStepCount > 0) {
         for(iDescr in 1:length(methodStepDescription)) {
             thisDescr <- methodStepDescription[[iDescr]]
-            wordCount <- length(unlist(strsplit(thisDescr, "\\s+", perl=T)))
-            if (wordCount < minWordCount) {
-                badStepCount <- badStepCount + 1
+            if(is.null(thisDescr) || class(thisDescr) != "character") {
+              badStepCount <- badStepCount + 1
+            } else {
+                wordCount <- length(unlist(strsplit(thisDescr, "\\s+", perl=T)))
+                if (wordCount < minWordCount) {
+                    badStepCount <- badStepCount + 1
+                }
             }
         }
     } else {
@@ -59,7 +63,7 @@ mdq_result <- list(status=result$status, output=list(list(value=result$output)))
 		<xpath>/eml/dataset/methods/methodStep</xpath>
 		<subSelector>
 			<name>msd</name>
-			<xpath>./description//para/text()</xpath>
+			<xpath>./description/para/text() | ./description/text() | ./description/section/para/text()</xpath>
 		</subSelector>
 	</selector>
 	<dialect>

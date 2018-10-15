@@ -170,8 +170,7 @@ public class XMLDialect {
 					ByteArrayOutputStream baos = new ByteArrayOutputStream();
 					TypeMarshaller.marshalTypeToOutputStream(systemMetadata, baos);
 					variables.put("systemMetadata", baos.toString("UTF-8"));
-					variables.put("systemMetadataPid", systemMetadata.getIdentifier().getValue());
-                    variables.put("authoritativeMemberNode", systemMetadata.getAuthoritativeMemberNode());
+					variables.put("datasource", systemMetadata.getAuthoritativeMemberNode());
 				} catch (Exception e) {
 					log.error("Could not serialize SystemMetadata for check", e);
 				}
@@ -326,7 +325,7 @@ public class XMLDialect {
 	public boolean isCheckValid(Check check) throws XPathExpressionException {
 
 		if (check.getDialect() == null) {
-			log.info("No dialects have been specified for check, assuming it is valid for this document");
+			log.debug("No dialects have been specified for check, assuming it is valid for this document");
 			return true;
 		}
 		
@@ -426,7 +425,7 @@ public class XMLDialect {
 				value = values;
 			}  
 		} catch (XPathExpressionException xpee) {
-			log.warn("Defaulting to single value selection: " + xpee.getCause().getMessage());
+			log.debug("Defaulting to single value selection: " + xpee.getCause().getMessage());
 			
 			// try just a single value
 			try {
