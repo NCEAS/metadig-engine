@@ -1,28 +1,22 @@
 package edu.ucsb.nceas.mdqengine;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
-
-import java.io.InputStream;
-import java.net.URL;
-
+import edu.ucsb.nceas.mdqengine.model.*;
+import edu.ucsb.nceas.mdqengine.processor.XMLDialect;
+import edu.ucsb.nceas.mdqengine.serialize.JsonMarshaller;
+import edu.ucsb.nceas.mdqengine.serialize.XmlMarshaller;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.dataone.configuration.Settings;
 import org.dataone.service.types.v2.SystemMetadata;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import edu.ucsb.nceas.mdqengine.model.Check;
-import edu.ucsb.nceas.mdqengine.model.Result;
-import edu.ucsb.nceas.mdqengine.model.Run;
-import edu.ucsb.nceas.mdqengine.model.Status;
-import edu.ucsb.nceas.mdqengine.model.Suite;
-import edu.ucsb.nceas.mdqengine.model.SuiteFactory;
-import edu.ucsb.nceas.mdqengine.processor.XMLDialect;
-import edu.ucsb.nceas.mdqengine.serialize.JsonMarshaller;
-import edu.ucsb.nceas.mdqengine.serialize.XmlMarshaller;
+import java.io.InputStream;
+import java.net.URL;
+
+import static org.dataone.configuration.Settings.getConfiguration;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 public class MDQEngineTest {
 	
@@ -66,7 +60,7 @@ public class MDQEngineTest {
 		Run run = null;
 		try {
 			// retrieve the metadata content
-			String cnURL = Settings.getConfiguration().getString("D1Client.CN_URL");
+			String cnURL = getConfiguration().getString("D1Client.CN_URL");
 			log.error("CN URL: " + cnURL);
 			String metadataURL = "https://cn.dataone.org/cn/v2/object/" + id;
 			InputStream input = new URL(metadataURL).openStream();

@@ -1,7 +1,8 @@
 package edu.ucsb.nceas.mdqengine.store;
 
-import edu.ucsb.nceas.mdqengine.MDQStore;
+import edu.ucsb.nceas.mdqengine.exception.MetadigStoreException;
 import edu.ucsb.nceas.mdqengine.model.Check;
+import edu.ucsb.nceas.mdqengine.model.Node;
 import edu.ucsb.nceas.mdqengine.model.Run;
 import edu.ucsb.nceas.mdqengine.model.Suite;
 import edu.ucsb.nceas.mdqengine.serialize.XmlMarshaller;
@@ -328,5 +329,11 @@ public class MNStore implements MDQStore {
 
 	@Override
 	public void renew() {}
+
+	@Override
+	public Node getNode(String nodeId) { return new Node(); }
+
+	@Override
+	public void saveNode(Node node) throws MetadigStoreException { }
 
 }

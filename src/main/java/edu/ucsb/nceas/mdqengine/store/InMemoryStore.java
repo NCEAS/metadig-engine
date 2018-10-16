@@ -1,27 +1,27 @@
 package edu.ucsb.nceas.mdqengine.store;
 
+import edu.ucsb.nceas.mdqengine.exception.MetadigStoreException;
+import edu.ucsb.nceas.mdqengine.model.Check;
+import edu.ucsb.nceas.mdqengine.model.Node;
+import edu.ucsb.nceas.mdqengine.model.Run;
+import edu.ucsb.nceas.mdqengine.model.Suite;
+import edu.ucsb.nceas.mdqengine.serialize.XmlMarshaller;
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.ArrayUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
+import org.xml.sax.SAXException;
+
+import javax.xml.bind.JAXBException;
 import java.io.IOException;
 import java.net.URL;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.xml.bind.JAXBException;
-
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.ArrayUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.dataone.configuration.Settings;
-import org.springframework.core.io.Resource;
-import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
-import org.xml.sax.SAXException;
-
-import edu.ucsb.nceas.mdqengine.MDQStore;
-import edu.ucsb.nceas.mdqengine.model.Check;
-import edu.ucsb.nceas.mdqengine.model.Suite;
-import edu.ucsb.nceas.mdqengine.model.Run;
-import edu.ucsb.nceas.mdqengine.serialize.XmlMarshaller;
+import static org.dataone.configuration.Settings.getConfiguration;
 
 /**
  * Place-holder storage implementation for 
@@ -46,7 +46,7 @@ public class InMemoryStore implements MDQStore{
 	
 	private void init() {
 		
-		String additionalDir = Settings.getConfiguration().getString("mdq.store.directory", null);
+		String additionalDir = getConfiguration().getString("mdq.store.directory", null);
 		
 		PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
 		
