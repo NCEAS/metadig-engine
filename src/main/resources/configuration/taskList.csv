@@ -1,0 +1,5 @@
+query,task-type,job-name,job-group,cron-schedule,params
+# Query string, tassk type, job name, job group, cron schedule, "suite id; node id; D1 node bases url; harvest begin date; harvest increment;1"
+?q=formatId:eml*, quality, quality-mnTestKNB, metadig, 0 0/5 * * * ?, "knb.suite.1;urn:node:mnTestKNB;https://dev.nceas.ucsb.edu/knb/d1/mn;2018-10-10T00:00:00.00Z;1"
+#?q=formatId:eml*, quality, quality-knb, metadig, 0 0/5 * * * ?, "knb.suite.1;urn:node:KNB;https://knb.ecoinformatics.org/knb/d1/mn;2018-09-01T00:00:00.00Z;1"
+#?q=formatId:eml*, quality, quality-arctic, metadig, 0 0/5 * * * ?, "arctic.data.center.suite.1;urn:node:ARCTIC;https://arcticdata.io/metacat/d1/mn;1"

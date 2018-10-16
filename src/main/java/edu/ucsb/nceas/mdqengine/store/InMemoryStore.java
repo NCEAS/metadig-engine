@@ -187,5 +187,11 @@ public class InMemoryStore implements MDQStore{
 	@Override
 	public void renew() {};
 
+	@Override
+	public Node getNode(String nodeId) { return new Node(); }
+
+	@Override
+	public void saveNode(Node node) throws MetadigStoreException { }
+
 
 }

@@ -1,19 +1,14 @@
 package edu.ucsb.nceas.mdqengine.store;
 
-import edu.ucsb.nceas.mdqengine.MDQStore;
 import edu.ucsb.nceas.mdqengine.MDQconfig;
 import edu.ucsb.nceas.mdqengine.exception.MetadigStoreException;
-import edu.ucsb.nceas.mdqengine.model.Check;
-import edu.ucsb.nceas.mdqengine.model.Result;
-import edu.ucsb.nceas.mdqengine.model.Run;
-import edu.ucsb.nceas.mdqengine.model.Suite;
+import edu.ucsb.nceas.mdqengine.model.*;
 import edu.ucsb.nceas.mdqengine.serialize.XmlMarshaller;
 import org.apache.commons.configuration2.ex.ConfigurationException;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.dataone.configuration.Settings;
 import org.dataone.service.types.v2.SystemMetadata;
 import org.dataone.service.util.TypeMarshaller;
 import org.springframework.core.io.Resource;
@@ -33,6 +28,8 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
+
+import static org.dataone.configuration.Settings.getConfiguration;
 
 /**
  * Persistent storage for quality runs.
@@ -94,7 +91,7 @@ public class DatabaseStore implements MDQStore {
         }
 
         // For now, load checks into memory from the distribution jar file
-        String additionalDir = Settings.getConfiguration().getString("mdq.store.directory", null);
+        String additionalDir = getConfiguration().getString("mdq.store.directory", null);
 
         PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
 
@@ -288,6 +285,70 @@ public class DatabaseStore implements MDQStore {
         } catch ( java.sql.SQLException e) {
             log.error("Error closing database: " + e.getMessage());
         }
+    }
+
+    public Node getNode(String nodeId) {
+
+        //return runs.get(id);
+        Result result = new Result();
+        PreparedStatement stmt = null;
+        String lastDT = null;
+        Node node = new Node();
+
+        // Select records from the 'nodes' table
+        try {
+            log.debug("preparing statement for query");
+            String sql = "select * from nodes where node_id = ?";
+            stmt = conn.prepareStatement(sql);
+            stmt.setString(1, nodeId);
+
+            log.debug("issuing query: " + sql);
+            ResultSet rs = stmt.executeQuery();
+            if(rs.next()) {
+                node.setNodeId(rs.getString("node_id"));
+                node.setLastHarvestDatetime(rs.getString("last_harvest_datetime"));
+                rs.close();
+                stmt.close();
+                log.debug("Retrieved lastHarvestDatetime," + lastDT);
+            } else {
+                log.debug("No results returned from query");
+            }
+        } catch ( Exception e ) {
+            log.error( e.getClass().getName()+": "+ e.getMessage());
+        }
+
+        return(node);
+    }
+
+    public void saveNode(Node node) throws MetadigStoreException {
+
+        PreparedStatement stmt = null;
+
+        // Perform an 'upsert' on the 'nodes' table - if a record exists for the 'metadata_id, suite_id' already,
+        // then update the record with the incoming data.
+        try {
+            String sql = "INSERT INTO nodes (node_id, last_harvest_datetime) VALUES (?, ?)"
+                    + " ON CONFLICT ON CONSTRAINT node_id_pk "
+                    + " DO UPDATE SET (node_id, last_harvest_datetime) = (?, ?);";
+
+            stmt = conn.prepareStatement(sql);
+            stmt.setString(1, node.getNodeId());
+            stmt.setString(2, node.getLastHarvestDatetime());
+            stmt.setString(3, node.getNodeId());
+            stmt.setString(4, node.getLastHarvestDatetime());
+            stmt.executeUpdate();
+            stmt.close();
+            conn.commit();
+            //conn.close();
+        } catch (SQLException e) {
+            log.error( e.getClass().getName()+": "+ e.getMessage());
+            MetadigStoreException me = new MetadigStoreException("Unable save last harvest date to the datdabase.");
+            me.initCause(e);
+            throw(me);
+        }
+
+        // Next, insert a record into the child table ('runs')
+        log.debug("Records created successfully");
     }
 
     @Override
