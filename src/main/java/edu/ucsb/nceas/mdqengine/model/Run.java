@@ -1,19 +1,19 @@
 package edu.ucsb.nceas.mdqengine.model;
 
+import javax.xml.bind.annotation.*;
 import java.util.Date;
 import java.util.List;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlType;
-
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(propOrder = {"id", "timestamp", "objectIdentifier", "suiteId", "result"})
+@XmlType(propOrder = {"id", "timestamp", "objectIdentifier", "suiteId", "status", "errorDescription", "result"})
 public class Run {
-	
+
+	public static final String SUCCESS = "success";
+	public static final String FAILURE = "failure";
+	public static final String QUEUED = "queued";
+	public static final String PROCESSING = "processing";
+
 	/**
 	 * The unique identifier for the QC run. This will likely be long and opaque
 	 * (like a UUID) considering the quantity of runs that will likely be performed 
@@ -49,7 +49,19 @@ public class Run {
 	 */
 	@XmlElement(required = false)
 	private String suiteId;
-	
+
+	/**
+	 * The processing status of the run, i.e. was an error encountered generating the run
+	 */
+	@XmlElement(required = true)
+	private String status;
+
+	/**
+	 * The error message describing why a run (not a check) failed
+	 */
+	@XmlElement(required = true)
+	private String errorDescription;
+
 	public String getId() {
 		return id;
 	}
@@ -86,8 +98,14 @@ public class Run {
 		return suiteId;
 	}
 
-	public void setSuiteId(String suiteId) {
-		this.suiteId = suiteId;
-	}
+	public void setSuiteId(String suiteId) { this.suiteId = suiteId; }
+
+	public String getStatus() { return status; }
+
+	public void setStatus(String status) { this.status = status; }
+
+	public String getErrorDescription() { return errorDescription; }
+
+	public void setErrorDescription(String errorDescription) { this.errorDescription = errorDescription; }
 
 }
