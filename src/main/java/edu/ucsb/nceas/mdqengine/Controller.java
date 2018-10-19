@@ -57,8 +57,6 @@ public class Controller {
     public static void main(String[] argv) throws Exception {
 
         Controller metadigCtrl = Controller.getInstance();
-
-
         metadigCtrl.start();
         if (metadigCtrl.getIsStarted()) {
             log.info("The controller has been started");

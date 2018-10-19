@@ -1,14 +1,11 @@
 package edu.ucsb.nceas.mdqengine.scheduler;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.InputStream;
-import java.util.*;
-
-import edu.ucsb.nceas.mdqengine.store.MDQStore;
+import edu.ucsb.nceas.mdqengine.MDQconfig;
 import edu.ucsb.nceas.mdqengine.exception.MetadigStoreException;
 import edu.ucsb.nceas.mdqengine.model.Run;
 import edu.ucsb.nceas.mdqengine.store.DatabaseStore;
+import edu.ucsb.nceas.mdqengine.store.MDQStore;
+import org.apache.commons.configuration2.ex.ConfigurationException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpEntity;
@@ -38,6 +35,11 @@ import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathFactory;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
 
 /**
  * <p>
@@ -81,6 +83,16 @@ public class RequestReportJob implements Job {
      */
     public void execute(JobExecutionContext context)
             throws JobExecutionException {
+
+        String qualityServiceUrl = null;
+        try {
+            MDQconfig cfg = new MDQconfig();
+            qualityServiceUrl = cfg.getString("quality.serviceUrl");
+        } catch (ConfigurationException | IOException ce) {
+            JobExecutionException jee = new JobExecutionException("Error executing task.");
+            jee.initCause(ce);
+            throw jee;
+        }
 
         //Log log = LogFactory.getLog(RequestReportJob.class);
         JobKey key = context.getJobDetail().getKey();
@@ -171,7 +183,7 @@ public class RequestReportJob implements Job {
         }
 
         for (String pidStr : pidsToProcess) {
-            submitReportRequest(mnNode, pidStr, suiteId);
+            submitReportRequest(mnNode, qualityServiceUrl, pidStr, suiteId);
         }
 
         try {
@@ -268,7 +280,7 @@ public class RequestReportJob implements Job {
         return found;
     }
 
-    public void submitReportRequest(MultipartMNode mnNode, String pidStr, String suiteId) {
+    public void submitReportRequest(MultipartMNode mnNode, String qualityServiceUrl, String pidStr, String suiteId) {
 
         SystemMetadata sysmeta = null;
         InputStream objectIS = null;
@@ -290,8 +302,8 @@ public class RequestReportJob implements Job {
             e.printStackTrace();
         }
 
-        //String qualityServiceUrl = "https://docker-ucsb-1.dataone.org:30443/quality/suites/" + suiteId + "/run";
-        String qualityServiceUrl = "http://localhost:8080/quality/suites/" + suiteId + "/run";
+        //String qualityServiceUrl = "http://localhost:8080/quality/suites/" + suiteId + "/run";
+        qualityServiceUrl = qualityServiceUrl + "/suites/" + suiteId + "/run";
         HttpPost post = new HttpPost(qualityServiceUrl);
 
         try {
@@ -307,7 +319,7 @@ public class RequestReportJob implements Job {
             post.addHeader("Accept", "application/xml");
 
             // send to service
-            log.debug("submittig: " + qualityServiceUrl);
+            log.info("submitting: " + qualityServiceUrl);
             post.setEntity(entity);
             CloseableHttpClient client = HttpClients.createDefault();
             CloseableHttpResponse response = client.execute(post);

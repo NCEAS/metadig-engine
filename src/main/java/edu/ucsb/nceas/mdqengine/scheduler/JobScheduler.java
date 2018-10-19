@@ -54,11 +54,11 @@ public class JobScheduler {
         int harvestDatetimeInc = 1;
 
         MDQconfig cfg = new MDQconfig();
-        String taskListFilename = cfg.getString("tasklist.filename");
-        log.debug("RabbitMQpassword: " + taskListFilename);
+        String taskListFilename = cfg.getString("task.file");
+        log.debug("task list filename: " + taskListFilename);
 
         // Read the task list
-        Reader in = new FileReader("/Users/slaughter/taskList.csv");
+        Reader in = new FileReader(taskListFilename);
         //Iterable<CSVRecord> records = CSVFormat.RFC4180.withHeader("query","task-type","job-name","job-group","cron-schedule","params").parse(in);
         //Iterable<CSVRecord> records = CSVFormat.RFC4180.withHeader("query","task-type","job-name","job-group","cron-schedule","suite-id","node-id","node-service-url").parse(in);
 

@@ -37,10 +37,13 @@ import edu.ucsb.nceas.mdqengine.serialize.JsonMarshaller;
 import edu.ucsb.nceas.mdqengine.serialize.XmlMarshaller;
 import edu.ucsb.nceas.mdqengine.store.InMemoryStore;
 import edu.ucsb.nceas.mdqengine.store.MNStore;
+import edu.ucsb.nceas.mdqengine.store.MDQStore;
+
+import static org.dataone.configuration.Settings.*;
 
 public class MDQEngine {
 	
-	private static final String RESOLVE_PREFIX = Settings.getConfiguration().getString("D1Client.CN_URL") + "/v2/resolve/";
+	private static final String RESOLVE_PREFIX = getConfiguration().getString("D1Client.CN_URL") + "/v2/resolve/";
 	
 	/**
 	 * Default store uses the in-memory implementation
