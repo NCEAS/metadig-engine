@@ -21,7 +21,7 @@ import static org.dataone.configuration.Settings.getConfiguration;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-
+@Ignore
 public class LTERSuiteTest{
 	
 	protected Log log = LogFactory.getLog(this.getClass());

@@ -13,6 +13,7 @@ import org.dataone.configuration.Settings;
 import org.dataone.service.types.v2.SystemMetadata;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.Ignore;
 
 import edu.ucsb.nceas.mdqengine.MDQEngine;
 import edu.ucsb.nceas.mdqengine.model.Suite;
@@ -20,6 +21,7 @@ import edu.ucsb.nceas.mdqengine.model.SuiteFactory;
 import edu.ucsb.nceas.mdqengine.model.Run;
 import edu.ucsb.nceas.mdqengine.model.RunFactory;
 
+@Ignore
 public class ScorerTest {
 	
 	protected Log log = LogFactory.getLog(this.getClass());
