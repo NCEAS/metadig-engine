@@ -2,10 +2,10 @@
 <xs:schema version="1.0" targetNamespace="https://nceas.ucsb.edu/mdqe/v1" xmlns:tns="https://nceas.ucsb.edu/mdqe/v1" xmlns:xs="http://www.w3.org/2001/XMLSchema">
 
   <xs:element name="check" type="tns:check"/>
-
   <xs:element name="run" type="tns:run"/>
-
   <xs:element name="suite" type="tns:suite"/>
+  <xs:element name="status" type="tns:processingStatus"/>
+  <xs:element name="error" type="tns:error"/>
 
   <xs:complexType name="check">
     <xs:sequence>
@@ -99,19 +99,35 @@
 
   <xs:simpleType name="level">
     <xs:restriction base="xs:string">
-      <xs:enumeration value="INFO"/>
       <xs:enumeration value="OPTIONAL"/>
+      <xs:enumeration value="INFO"/>
       <xs:enumeration value="REQUIRED"/>
     </xs:restriction>
   </xs:simpleType>
 
   <xs:simpleType name="status">
     <xs:restriction base="xs:string">
-      <xs:enumeration value="ERROR"/>
-      <xs:enumeration value="SUCCESS"/>
-      <xs:enumeration value="SKIP"/>
       <xs:enumeration value="FAILURE"/>
+      <xs:enumeration value="SUCCESS"/>
+      <xs:enumeration value="ERROR"/>
+      <xs:enumeration value="SKIP"/>
     </xs:restriction>
   </xs:simpleType>
+
+  <xs:simpleType name="processingStatus">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="SUCCESS"/>
+      <xs:enumeration value="PROCESSING"/>
+      <xs:enumeration value="ERROR"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:complexType name="error">
+    <xs:sequence>
+      <xs:element name="code" type="xs:integer"/>
+      <xs:element name="description" type="xs:string"/>
+    </xs:sequence>
+  </xs:complexType>
+
 </xs:schema>
 
