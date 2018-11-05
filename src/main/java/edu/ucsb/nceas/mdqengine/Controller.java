@@ -2,6 +2,8 @@ package edu.ucsb.nceas.mdqengine;
 
 import com.rabbitmq.client.*;
 import edu.ucsb.nceas.mdqengine.exception.MetadigException;
+import edu.ucsb.nceas.mdqengine.exception.MetadigStoreException;
+import edu.ucsb.nceas.mdqengine.model.Run;
 import org.apache.commons.configuration2.ex.ConfigurationException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -116,16 +118,15 @@ public class Controller {
                     String delims = "[,]";
                     String[] tokens = request.split(delims);
 
-
                     String metadataPid = tokens[0];
 
                     File metadataFile = new File(tokens[1]);
                     InputStream metadata = new FileInputStream(metadataFile);
 
-                    String suiteId = tokens[2];
-
-                    File sysmetaFile = new File(tokens[3]);
+                    File sysmetaFile = new File(tokens[2]);
                     InputStream sysmeta = new FileInputStream(sysmetaFile);
+
+                    String suiteId = tokens[3];
 
                     requestDateTime = new DateTime();
                     log.info("Request queuing of: " + tokens[0] + ", " + tokens[1] + ", " + tokens[2] + ", " + tokens[3]);
