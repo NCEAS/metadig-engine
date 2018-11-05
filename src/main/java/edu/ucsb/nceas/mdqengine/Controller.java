@@ -273,6 +273,17 @@ public class Controller {
             fis.printStackTrace();
         }
 
+        // Save a skeleton run entry, to allow clients to check the status of runs that are queued.
+        Run run = new Run();
+        run.setRunStatus(Run.QUEUED);
+        run.setObjectIdentifier(metadataPid);
+        run.setSuiteId(qualitySuiteId);
+        try {
+            run.save(sysmeta);
+        } catch (MetadigStoreException mse) {
+            log.error("Unable to save run state to 'processing' before queing, continuing..");
+        }
+
         qEntry = new QueueEntry(memberNode, metadataPid, metadataDoc, qualitySuiteId, localFilePath, requestDateTime, sysmeta,
                 runXML, null);
 

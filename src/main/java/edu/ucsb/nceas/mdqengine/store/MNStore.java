@@ -16,7 +16,6 @@ import org.dataone.client.auth.CertificateManager;
 import org.dataone.client.types.AccessPolicyEditor;
 import org.dataone.client.v2.MNode;
 import org.dataone.client.v2.itk.D1Client;
-import org.dataone.configuration.Settings;
 import org.dataone.service.exceptions.ServiceFailure;
 import org.dataone.service.types.v1.Identifier;
 import org.dataone.service.types.v1.ObjectFormatIdentifier;
@@ -39,6 +38,8 @@ import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
 
+import static org.dataone.configuration.Settings.getConfiguration;
+
 public class MNStore implements MDQStore {
 
 	public static final String MDQ_NS = "https://nceas.ucsb.edu/mdqe/v1";
@@ -59,7 +60,7 @@ public class MNStore implements MDQStore {
 		
 		// use the desired MN
 		if (baseUrl == null) {
-			mnURL = Settings.getConfiguration().getString("mn.baseurl", "https://mn-demo-8.test.dataone.org/knb/d1/mn/");
+			mnURL = getConfiguration().getString("mn.baseurl", "https://mn-demo-8.test.dataone.org/knb/d1/mn/");
 		} else {
 			mnURL = baseUrl;
 		}
@@ -335,5 +336,11 @@ public class MNStore implements MDQStore {
 
 	@Override
 	public void saveNode(Node node) throws MetadigStoreException { }
+
+	@Override
+	public void shutdown() {};
+
+	@Override
+	public void saveRun(Run run, SystemMetadata sysmeta) { }
 
 }

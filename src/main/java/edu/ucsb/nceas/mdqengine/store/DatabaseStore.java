@@ -184,6 +184,8 @@ public class DatabaseStore implements MDQStore {
         String metadataId = sysmeta.getIdentifier().getValue().toString();
         String suiteId = run.getSuiteId();
         String datasource = sysmeta.getOriginMemberNode().getValue().toString();
+        String status = run.getRunStatus();
+        String error = run.getErrorDescription();
         String resultStr = null;
         //DateTime now = new DateTime();
         //OffsetDateTime dateTime = OffsetDateTime.now();
@@ -228,18 +230,22 @@ public class DatabaseStore implements MDQStore {
         // Perform an 'upsert' on the 'runs' table - if a record exists for the 'metadata_id, suite_id' already,
         // then update the record with the incoming data.
         try {
-            String sql = "INSERT INTO runs (metadata_id, suite_id, timestamp, results) VALUES (?, ?, ?, ?)"
+            String sql = "INSERT INTO runs (metadata_id, suite_id, timestamp, results, status, error) VALUES (?, ?, ?, ?, ?, ?)"
                     + " ON CONFLICT ON CONSTRAINT metadata_id_suite_id_fk "
-                    + " DO UPDATE SET (timestamp, results) = (?, ?);";
+                    + " DO UPDATE SET (timestamp, results, status, error) = (?, ?, ?, ?);";
 
             stmt = conn.prepareStatement(sql);
             stmt.setString(1, metadataId);
             stmt.setString(2, suiteId);
             stmt.setTimestamp(3, dateTime);
             stmt.setString(4, runStr);
+            stmt.setString(5, status);
+            stmt.setString(6, error);
             // For 'on conflict'
-            stmt.setTimestamp(5, dateTime);
-            stmt.setString(6, runStr);
+            stmt.setTimestamp(7, dateTime);
+            stmt.setString(8, runStr);
+            stmt.setString(9, status);
+            stmt.setString(10, error);
             stmt.executeUpdate();
             stmt.close();
             conn.commit();

@@ -10,6 +10,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.dataone.service.types.v2.SystemMetadata;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.xml.sax.SAXException;
@@ -172,6 +173,9 @@ public class InMemoryStore implements MDQStore{
 	}
 
 	@Override
+	public void saveRun(Run run, SystemMetadata systemMetadata) { }
+
+	@Override
 	public void createRun(Run run) {
 		runs.put(run.getId(), run);
 	}
@@ -192,6 +196,9 @@ public class InMemoryStore implements MDQStore{
 
 	@Override
 	public void saveNode(Node node) throws MetadigStoreException { }
+
+	@Override
+	public void shutdown() {};
 
 
 }

@@ -211,10 +211,19 @@ public class MDQEngine {
 				}
 			}
 			Run run = engine.runSuite(suite, input, null, sysmeta);
+			run.setRunStatus("SUCCESS");
 			System.out.println(XmlMarshaller.toXml(run));
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			try {
+				Run run = new Run();
+				run.setRunStatus(Run.FAILURE);
+				run.setErrorDescription(e.getMessage());
+				System.out.println(XmlMarshaller.toXml(run));
+				e.printStackTrace();
+			} catch (Exception e2) {
+				e2.printStackTrace();
+			}
 		}
 	}
 

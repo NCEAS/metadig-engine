@@ -10,7 +10,6 @@ import edu.ucsb.nceas.mdqengine.model.Run;
 import edu.ucsb.nceas.mdqengine.model.Suite;
 import edu.ucsb.nceas.mdqengine.serialize.XmlMarshaller;
 import edu.ucsb.nceas.mdqengine.solr.IndexApplicationController;
-import edu.ucsb.nceas.mdqengine.store.DatabaseStore;
 import edu.ucsb.nceas.mdqengine.store.InMemoryStore;
 import edu.ucsb.nceas.mdqengine.store.MDQStore;
 import org.apache.commons.codec.digest.DigestUtils;
@@ -31,7 +30,6 @@ import org.dataone.service.types.v2.SystemMetadata;
 import java.io.*;
 import java.math.BigInteger;
 import java.net.InetAddress;
-import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -74,7 +72,7 @@ public class Worker {
     private static long elapsedTimeSecondsIndexing;
     private static long elapsedTimeSecondsProcessing;
     private static long totalElapsedTimeSeconds;
-    private static DatabaseStore dbStore = null;
+
 
     public static void main(String[] argv) throws Exception {
 
@@ -144,6 +142,7 @@ public class Worker {
                     difference = System.currentTimeMillis() - startTimeProcessing;
                     elapsedTimeSecondsProcessing = TimeUnit.MILLISECONDS.toSeconds(difference);
                     qEntry.setProcessingElapsedTimeSeconds(elapsedTimeSecondsProcessing);
+                    log.info("Completed running quality suite.");
                 } catch (java.lang.Exception e) {
                     failFast = true;
                     log.info("Unable to run quality suite.");
@@ -159,10 +158,16 @@ public class Worker {
 
                     // Save the processing report to persistent storage, so that we can save the error and status of the run.
                     try {
+                        log.info("Saving quality run status after error");
                         // convert String into InputStream
+                        if(run == null) run = new Run();
+                        run.setSuiteId(suiteId);
+                        run.setObjectIdentifier(metadataPid);
+                        run.setRunStatus(Run.FAILURE);
                         run.setErrorDescription(e.getMessage());
-                        run.setStatus(Run.FAILURE);
-                        wkr.saveRun(run, sysmeta);
+
+                        run.save(sysmeta);
+                        log.info("Saved quality run status after error");
                     } catch (Exception ex) {
                         log.error("Processing failed, then unable to save the quality report to database:" + e.getMessage());
                     }
@@ -171,9 +176,11 @@ public class Worker {
                 if(!failFast) {
                     /* Save the processing report to persistent storage */
                     try {
+                        log.error("Saving quality run status");
                         // convert String into InputStream
-                        run.setStatus(Run.SUCCESS);
-                        wkr.saveRun(run, sysmeta);
+                        run.setRunStatus(Run.SUCCESS);
+                        run.save(sysmeta);
+                        log.error("Saved quality run status");
                     } catch (MetadigStoreException me) {
                         failFast = true;
                         log.error("Unable to save (then index) quality report to database.");
@@ -201,9 +208,11 @@ public class Worker {
 
                 // Send the report (completed or not) to the controller, with errors that were encountered.
                 try {
+                    log.info("Sending report info back to controller...");
                     totalElapsedTimeSeconds = elapsedTimeSecondsProcessing + elapsedTimeSecondsIndexing;
                     qEntry.setTotalElapsedTimeSeconds(totalElapsedTimeSeconds);
                     wkr.returnReport(metadataPid, suiteId, qEntry, startTimeProcessing);
+                    log.info("Sent report info back to controller...");
                 } catch (IOException ioe) {
                     log.error("Unable to return quality report to controller.");
                     ioe.printStackTrace();
@@ -336,8 +345,6 @@ public class Worker {
             throw new MetadigException("Unable to run quality suite for pid " + message.getMetadataPid() + ", suite: " + suiteId, e);
         }
 
-        //String runXML = XmlMarshaller.toXml(run);
-
         return(run);
     }
 
@@ -371,46 +378,7 @@ public class Worker {
         log.info(" [x] Done indexing metadata PID: " + metadataId + ", suite id: " + suiteId);
     }
 
-    /**
-     * Send a quality report to the Solr server to be added to the index.
-     * <p>
-     * The quality report is added to the Solr index using the DataONE index processing
-     * component, which has been modified for use with metadig_engine.
-     * </p>
-     *
-     * @param run The quality run info to save.
-     * @throws Exception
-     */
-    public void saveRun(Run run, SystemMetadata sysmeta) throws MetadigStoreException {
 
-        if(dbStore == null) {
-            log.debug("Creating new connection to database");
-            dbStore = new DatabaseStore();
-        } else if (!dbStore.isAvailable()) {
-            log.debug("Renewing connection to database");
-            dbStore.renew();
-        }
-
-        log.info("Saving to persistent storage: metadata PID: " + run.getId()  + ", suite id: " + run.getSuiteId());
-        try {
-            dbStore.saveRun(run, sysmeta);
-        } catch (MetadigException me) {
-            log.debug("Error saving run: " + me.getCause());
-            if(me.getCause() instanceof SQLException) {
-                log.debug("Retrying saveRun() due to error");
-                dbStore.saveRun(run, sysmeta);
-           } else {
-            throw(me);
-           }
-        }
-
-        // TODO: shutdown connection when a Worker process/container ends. This may involve catching a SIGTERM
-        // sent to the processing running the worker.
-        // Note that when the connection pooler 'pgbouncer' is used, closing the connection actually just returns
-        // the connection to the pool that pgbouncer maintains.
-        dbStore.shutdown();
-        log.info("Done saving to persistent storage: metadata PID: " + run.getId() + ", suite id: " + run.getSuiteId());
-    }
 
     /**
      * Submit (upload) the newly generated quality report to a member node

@@ -5,6 +5,7 @@ import edu.ucsb.nceas.mdqengine.model.Check;
 import edu.ucsb.nceas.mdqengine.model.Node;
 import edu.ucsb.nceas.mdqengine.model.Run;
 import edu.ucsb.nceas.mdqengine.model.Suite;
+import org.dataone.service.types.v2.SystemMetadata;
 
 import java.util.Collection;
 
@@ -24,8 +25,11 @@ public interface MDQStore {
 	
 	public Collection<String> listRuns();
 	public Run getRun(String suite, String id );
+	public void saveRun(Run run, SystemMetadata systemMetadata) throws MetadigStoreException;
 	public void createRun(Run run);
 	public void deleteRun(Run run);
+
+	public void shutdown();
 
 	public boolean isAvailable();
 	public void renew() throws MetadigStoreException;
