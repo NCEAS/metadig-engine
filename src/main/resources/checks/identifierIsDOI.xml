@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <mdq:check xmlns:mdq="https://nceas.ucsb.edu/mdqe/v1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="https://nceas.ucsb.edu/mdqe/v1 ../schemas/schema1.xsd">
-  <id>check.identifier.is.doi.1</id>
+  <id>check.identifier.is.doi.2</id>
   <name>DOI Identifier</name>
   <description>Identifier should be a DOI.</description>
   <type>identification</type>
@@ -11,7 +11,7 @@ library(stringr)
 
 # Alter the FAILURE message if the source member node is ADC. 
 
-if (is.null(authoritativeMemberNode)) {
+if (!exists("authoritativeMemberNode") || is.null(authoritativeMemberNode)) {
   warningMsg <- "The identifier '%s' does not look like a DOI.."
 } else {
   if (authoritativeMemberNode == "urn:node:ARCTIC" || authoritativeMemberNode == "urn:node:mnTestARCTIC") {
@@ -22,7 +22,7 @@ if (is.null(authoritativeMemberNode)) {
 }
 
 # If the system metadata was provided to the quality engine, then use the metadata pid there.
-if (!is.null(systemMetadataPid)) {
+if (exists("systemMetadataPid") || !is.null(systemMetadataPid)) {
   identifier <- systemMetadataPid
 }
 
@@ -40,7 +40,7 @@ if (length(identifier) == 0) {
 
   if (is_doi) {
     mdq_result <- list(status = "SUCCESS",
-                       output = list(list(value = "The identifier looks like a DOI.")))
+                       output = list(list(value = sprintf("The identifier '%s' looks like a DOI.", identifier))))
   } else {
     mdq_result <- list(status = "FAILURE",
                        output = list(list(value = sprintf(warningMsg, identifier))))

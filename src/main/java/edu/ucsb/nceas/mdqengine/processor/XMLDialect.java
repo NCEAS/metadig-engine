@@ -170,7 +170,9 @@ public class XMLDialect {
 					ByteArrayOutputStream baos = new ByteArrayOutputStream();
 					TypeMarshaller.marshalTypeToOutputStream(systemMetadata, baos);
 					variables.put("systemMetadata", baos.toString("UTF-8"));
-					variables.put("datasource", systemMetadata.getAuthoritativeMemberNode());
+					variables.put("datasource", systemMetadata.getOriginMemberNode().getValue());
+					variables.put("authoritativeMemberNode", systemMetadata.getAuthoritativeMemberNode().getValue());
+					variables.put("systemMetadataPid", systemMetadata.getIdentifier().getValue());
 				} catch (Exception e) {
 					log.error("Could not serialize SystemMetadata for check", e);
 				}
@@ -432,7 +434,7 @@ public class XMLDialect {
 				value = xpath.evaluate(selectorPath, contextNode);
 				value = retypeObject(value);
 			} catch (XPathExpressionException xpee2) {
-				log.error("Could not select single value with given Xpath: " + xpee2.getCause().getMessage());
+				log.error("Selector '" + selector.getName() + "'" + "could not select single value with given Xpath: " + xpee2.getCause().getMessage());
 				value = null;
 			}
 		}
