@@ -277,6 +277,7 @@ public class Controller {
         // Save a skeleton run entry, to allow clients to check the status of runs that are queued.
         Run run = new Run();
         run.setRunStatus(Run.QUEUED);
+        run.setErrorDescription("");
         run.setObjectIdentifier(metadataPid);
         run.setSuiteId(qualitySuiteId);
         try {

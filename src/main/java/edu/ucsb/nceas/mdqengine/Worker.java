@@ -165,7 +165,6 @@ public class Worker {
                         run.setObjectIdentifier(metadataPid);
                         run.setRunStatus(Run.FAILURE);
                         run.setErrorDescription(e.getMessage());
-
                         run.save(sysmeta);
                         log.info("Saved quality run status after error");
                     } catch (Exception ex) {
@@ -179,6 +178,7 @@ public class Worker {
                         log.error("Saving quality run status");
                         // convert String into InputStream
                         run.setRunStatus(Run.SUCCESS);
+                        run.setErrorDescription("");
                         run.save(sysmeta);
                         log.error("Saved quality run status");
                     } catch (MetadigStoreException me) {
