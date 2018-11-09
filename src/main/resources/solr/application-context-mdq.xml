@@ -16,11 +16,11 @@
 				<ref bean="mdq.suiteId"/>
 				<ref bean="mdq.timestamp"/>
 				<ref bean="mdq.metadata.formatId"/>
-				<ref bean="mdq.metadata.datasource"/>
-				<ref bean="mdq.metadata.funder"/>
-				<ref bean="mdq.metadata.funder.lookup"/>
-				<ref bean="mdq.metadata.rightsHolder"/>
-				<ref bean="mdq.metadata.group"/>
+				<ref bean="mdq.datasource"/>
+				<ref bean="mdq.funder"/>
+				<ref bean="mdq.funder.lookup"/>
+				<ref bean="mdq.rightsHolder"/>
+				<ref bean="mdq.group"/>
 				<ref bean="mdq.checks.passed"/>
 				<ref bean="mdq.checks.warned"/>
 				<ref bean="mdq.checks.failed"/>
@@ -56,44 +56,44 @@
 	<bean id="mdq.metadata.formatId" class="org.dataone.cn.indexer.parser.SolrField">
 		<constructor-arg name="name" value="metadataFormatId"/>
 		<constructor-arg name="xpath"
-						 value="//result[check/id[text() = 'check.echo.formatId.2']]/output/text()"/>
+						 value="//result[check/id[text() = 'check.echo.formatId.1']]/output/text()"/>
 		<property name="multivalue" value="false"/>
 	</bean>
 
-	<bean id="mdq.metadata.datasource" class="org.dataone.cn.indexer.parser.SolrField">
-		<constructor-arg name="name" value="metadataDatasource"/>
+	<bean id="mdq.datasource" class="org.dataone.cn.indexer.parser.SolrField">
+		<constructor-arg name="name" value="datasource"/>
 		<constructor-arg name="xpath"
-						 value="//result[check/id[text() = 'check.echo.datasource.2']]/output/text()"/>
+						 value="//result[check/id[text() = 'check.echo.datasource.1']]/output/text()"/>
 		<property name="multivalue" value="false"/>
 	</bean>
 
-	<bean id="mdq.metadata.funder" class="org.dataone.cn.indexer.parser.SolrField">
-		<constructor-arg name="name" value="metadataFunder"/>
+	<bean id="mdq.funder" class="org.dataone.cn.indexer.parser.SolrField">
+		<constructor-arg name="name" value="funder"/>
 		<constructor-arg name="xpath"
-						 value="//result[check/id[text() = 'check.echo.funder.2']]/output/text()"/>
+						 value="//result[check/id[text() = 'check.echo.funder.1']]/output/text()"/>
 		<property name="multivalue" value="true"/>
 		<property name="dedupe" value="true"/>
 	</bean>
 
-	<bean id="mdq.metadata.funder.lookup" class="org.dataone.cn.indexer.parser.SolrField">
-		<constructor-arg name="name" value="metadataFunderLookup"/>
+	<bean id="mdq.funder.lookup" class="org.dataone.cn.indexer.parser.SolrField">
+		<constructor-arg name="name" value="funderLookup"/>
 		<constructor-arg name="xpath"
-						 value="//result[check/id[text() = 'check.lookup.funder.2']]/output/text()"/>
+						 value="//result[check/id[text() = 'check.lookup.funder.1']]/output/text()"/>
 		<property name="multivalue" value="true"/>
 		<property name="dedupe" value="true"/>
 	</bean>
 
-	<bean id="mdq.metadata.rightsHolder" class="org.dataone.cn.indexer.parser.SolrField">
-		<constructor-arg name="name" value="metadataRightsHolder"/>
+	<bean id="mdq.rightsHolder" class="org.dataone.cn.indexer.parser.SolrField">
+		<constructor-arg name="name" value="rightsHolder"/>
 		<constructor-arg name="xpath"
-						 value="//result[check/id[text() = 'check.echo.rightsHolder.2']]/output/text()"/>
+						 value="//result[check/id[text() = 'check.echo.rightsHolder.1']]/output/text()"/>
 		<property name="multivalue" value="false"/>
 	</bean>
 
-	<bean id="mdq.metadata.group" class="org.dataone.cn.indexer.parser.SolrField">
-		<constructor-arg name="name" value="metadataGroup"/>
+	<bean id="mdq.group" class="org.dataone.cn.indexer.parser.SolrField">
+		<constructor-arg name="name" value="group"/>
 		<constructor-arg name="xpath"
-						 value="//result[check/id[text() = 'check.lookup.group.2']]/output/text()"/>
+						 value="//result[check/id[text() = 'check.lookup.group.1']]/output/text()"/>
 		<property name="multivalue" value="true"/>
 		<property name="dedupe" value="true"/>
 	</bean>
