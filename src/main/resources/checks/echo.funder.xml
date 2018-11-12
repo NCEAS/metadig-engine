@@ -6,7 +6,7 @@
 	<name>Funder</name>
 	<description>Check for extracting funder from the metadata for result indexing and analysis.</description>
 	<type>identification</type>
-	<level>INFO</level>
+	<level>METADATA</level>
 	<environment>rscript</environment>
 	<code><![CDATA[
 if (is.null(awards)) {
