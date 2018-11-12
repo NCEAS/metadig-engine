@@ -111,6 +111,7 @@ public class RequestReportJob implements Job {
             mrc = new DefaultHttpMultipartRestClient();
         } catch (Exception e) {
             log.error("Error creating rest client: " + e.getMessage());
+            throw new JobExecutionException("Unable to schedule job", e);
         }
 
         mnNode = new MultipartMNode(mrc, nodeServiceUrl);
@@ -120,6 +121,7 @@ public class RequestReportJob implements Job {
             store = new DatabaseStore();
         } catch (Exception e) {
             e.printStackTrace();
+            throw new JobExecutionException("Unable to schedule job", e);
         }
 
         if(!store.isAvailable()) {
@@ -127,6 +129,7 @@ public class RequestReportJob implements Job {
                 store.renew();
             } catch (MetadigStoreException e) {
                 e.printStackTrace();
+                throw new JobExecutionException("Unable to schedule job", e);
             }
         }
 
@@ -179,11 +182,15 @@ public class RequestReportJob implements Job {
         try {
             pidsToProcess = getPidsToProcess(mnNode, queryStr, suiteId, nodeId, startDTRstr, endDTRstr);
         } catch (Exception e) {
-            throw new JobExecutionException(e.getMessage());
+            throw new JobExecutionException("Unable to get pids to process", e);
         }
 
         for (String pidStr : pidsToProcess) {
-            submitReportRequest(mnNode, qualityServiceUrl, pidStr, suiteId);
+            try {
+                submitReportRequest(mnNode, qualityServiceUrl, pidStr, suiteId);
+            } catch (Exception e) {
+                throw new JobExecutionException("Unable to submit request to create new quality reports", e);
+            }
         }
 
         try {
@@ -191,6 +198,7 @@ public class RequestReportJob implements Job {
             store.saveNode(node);
         } catch (MetadigStoreException mse) {
             log.error("error saveing node: " + node.getNodeId());
+            throw new JobExecutionException("Unable to save new harvest date", mse);
         }
     }
 
@@ -280,7 +288,7 @@ public class RequestReportJob implements Job {
         return found;
     }
 
-    public void submitReportRequest(MultipartMNode mnNode, String qualityServiceUrl, String pidStr, String suiteId) {
+    public void submitReportRequest(MultipartMNode mnNode, String qualityServiceUrl, String pidStr, String suiteId) throws Exception {
 
         SystemMetadata sysmeta = null;
         InputStream objectIS = null;
@@ -292,14 +300,14 @@ public class RequestReportJob implements Job {
         try {
             sysmeta = (SystemMetadata) mnNode.getSystemMetadata(null, pid);
         } catch (Exception e) {
-            e.printStackTrace();
+            throw(e);
         }
 
         try {
             objectIS = mnNode.get(pid);
             log.info("Retrieved metadata object for pid: " + pidStr);
         } catch (Exception e) {
-            e.printStackTrace();
+            throw(e);
         }
 
         //String qualityServiceUrl = "http://localhost:8080/quality/suites/" + suiteId + "/run";
@@ -330,7 +338,7 @@ public class RequestReportJob implements Job {
                 runResultIS = reponseEntity.getContent();
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            throw(e);
         }
     }
 }

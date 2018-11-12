@@ -78,7 +78,7 @@ public class QualityReportSubprocessor implements IDocumentSubprocessor {
         // Get deduped list of check types
         HashSet<String> set = new HashSet<>(checkTypes);
         ArrayList<String> uniqueTypes = new ArrayList<>(set);
-        log.debug("Unique check type name cound: " + uniqueTypes.size());
+        log.debug("Unique check type name count: " + uniqueTypes.size());
 
         String xpathExStr = null;
         SolrElementField sField = null;
