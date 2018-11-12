@@ -64,12 +64,16 @@ public class GroupLookupCheck implements Callable<Result> {
 				}
 			} catch (Exception e) {
 				result.setStatus(Status.ERROR);
-				result.setOutput(new Output(e.getMessage()));
+				// If an error occurs, set the output to blank, as this is the value that will be indexed - we don't want
+				// to index the error. This message is printed even if it's just the case that the user doesn't belong
+				// to a group.
+				result.setOutput(new Output(""));
 				log.error("Could not look up SubjectInfo", e);
 			}
 		} else {
 			result.setStatus(Status.FAILURE);
-			result.setOutput(new Output("No group info found for rightsholder: " + subject));
+			result.setOutput(new Output(""));
+			//result.setOutput(new Output("No group info found for rightsholder: " + subject));
 			log.warn("No SystemMetadata.rightsHolder given, cannot look up group membership");
 		}
 		
