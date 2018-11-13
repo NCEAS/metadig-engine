@@ -245,6 +245,7 @@ public class MDQEngine {
 			System.out.println(XmlMarshaller.toXml(run));
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
+			// Store the error in the 'Run' object so it can be saved to the run store.
 			try {
 				Run run = new Run();
 				run.setRunStatus(Run.FAILURE);
