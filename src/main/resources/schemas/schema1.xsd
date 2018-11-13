@@ -4,8 +4,8 @@
   <xs:element name="check" type="tns:check"/>
   <xs:element name="run" type="tns:run"/>
   <xs:element name="suite" type="tns:suite"/>
-  <xs:element name="status" type="tns:processingStatus"/>
-  <xs:element name="error" type="tns:error"/>
+  <xs:element name="status" type="tns:runStatus"/>
+  <xs:element name="error" type="tns:errorDescription"/>
 
   <xs:complexType name="check">
     <xs:sequence>
@@ -101,10 +101,12 @@
     <xs:restriction base="xs:string">
       <xs:enumeration value="OPTIONAL"/>
       <xs:enumeration value="INFO"/>
+      <xs:enumeration value="METADATA"/>
       <xs:enumeration value="REQUIRED"/>
     </xs:restriction>
   </xs:simpleType>
 
+  <!-- 'status' applies to individual checks -->
   <xs:simpleType name="status">
     <xs:restriction base="xs:string">
       <xs:enumeration value="FAILURE"/>
@@ -114,7 +116,8 @@
     </xs:restriction>
   </xs:simpleType>
 
-  <xs:simpleType name="processingStatus">
+  <!-- 'runStatus' applies to the entire run -->
+  <xs:simpleType name="runStatus">
     <xs:restriction base="xs:string">
       <xs:enumeration value="SUCCESS"/>
       <xs:enumeration value="PROCESSING"/>
@@ -122,12 +125,11 @@
     </xs:restriction>
   </xs:simpleType>
 
-  <xs:complexType name="error">
-    <xs:sequence>
-      <xs:element name="code" type="xs:integer"/>
-      <xs:element name="description" type="xs:string"/>
-    </xs:sequence>
+  <xs:complexType name="errorDescription">
+    <xs:simpleContent>
+      <xs:extension base="xs:string">
+      </xs:extension>
+    </xs:simpleContent>
   </xs:complexType>
-
 </xs:schema>
 
