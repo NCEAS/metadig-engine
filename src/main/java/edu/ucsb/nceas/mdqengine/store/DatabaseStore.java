@@ -190,6 +190,7 @@ public class DatabaseStore implements MDQStore {
         //DateTime now = new DateTime();
         //OffsetDateTime dateTime = OffsetDateTime.now();
         Timestamp dateTime = Timestamp.from(Instant.now());
+        run.setTimestamp(dateTime);
 
         String runStr = null;
 
