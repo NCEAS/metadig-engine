@@ -52,7 +52,7 @@ public class QualityReportSubprocessor implements IDocumentSubprocessor {
         XPathFactory xPathfactory = XPathFactory.newInstance();
         XPath xpath = xPathfactory.newXPath();
         XPathExpression checkTypeXpath = null;
-        XPathExpression checkTypeScoreXpath = null;
+        XPathExpression checkXpath = null;
         Document xmldoc = null;
         DecimalFormat df2 = new DecimalFormat(".##");
         log.debug("Processing document for id: " + identifier);
@@ -82,20 +82,32 @@ public class QualityReportSubprocessor implements IDocumentSubprocessor {
 
         String xpathExStr = null;
         SolrElementField sField = null;
-        Double checkValue;
+        Double checkTypeScore;
+        Double checkCountPassed;
+        Double checkCountFailed;
         String fieldName = null;
         // Calculate the score for each check type. Note that the scores for "passed", "warned", etc are also calculated from the indexer, but those calculations
         // are defined in the MetaDIG application context file "application-context-mdq.xml".
         for (String typeName: uniqueTypes) {
-            xpathExStr = String.format("count(//result[check/type[text() = '%s']]/status[text() = 'SUCCESS']) div count(//result[check/type[text() = '%s']])", typeName, typeName);
-            checkTypeScoreXpath = xpath.compile(xpathExStr);
-            checkValue = (Double) checkTypeScoreXpath.evaluate(xmldoc, XPathConstants.NUMBER);
+            // Count of checks that passed for the current check type
+            xpathExStr = String.format("count(//result[check/level[text() != 'INFO' and text() != 'METADATA'] and check/type[text() = '%s']]/status[text() = 'SUCCESS'])", typeName);
+            checkXpath = xpath.compile(xpathExStr);
+            checkCountPassed = (Double) checkXpath.evaluate(xmldoc, XPathConstants.NUMBER);
+
+            // Count of checks that failed for the current check type
+            xpathExStr = String.format("count(//result[check/level[text() = 'REQUIRED'] and check/type[text() = '%s']]/status[text() = 'ERROR'] | //result[check/level[text() = 'REQUIRED'] and check/type[text() = '%s']]/status[text() = 'FAILURE'])", typeName, typeName);
+            checkXpath = xpath.compile(xpathExStr);
+            checkCountFailed = (Double) checkXpath.evaluate(xmldoc, XPathConstants.NUMBER);
+
+            // The score for this check type: checks pass / (checks passed + checks failed), including only checks for this type
+            checkTypeScore = checkCountPassed / (checkCountPassed + checkCountFailed);
+
             sField = new SolrElementField();
             // Set the dynamic field type to be Float, i.e. append "_f" to the name
             fieldName = "scoreByType_" + typeName + "_f";
             sField.setName(fieldName);
-            sField.setValue(df2.format(checkValue));
-            //sField.setValue(String.valueOf(checkValue));
+            sField.setValue(df2.format(checkTypeScore));
+            //sField.setValue(String.valueOf(checkScore));
             qualityReportSolrDoc.addField(sField);
             log.debug("Added check type field " + sField.getName() + ", value: " + sField.getValue());
             log.debug("Number of fields in document: " + qualityReportSolrDoc.getFieldList().size());

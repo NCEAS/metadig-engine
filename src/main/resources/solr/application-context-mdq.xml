@@ -99,47 +99,53 @@
 	</bean>
 
 	<!-- scoring by result status -->
+	<!-- pass: (Status =  SUCCESS) and (level != INFO & level != METADATA) -->
 	<bean id="mdq.checks.passed" class="org.dataone.cn.indexer.parser.SolrField">
 		<constructor-arg name="name" value="checksPassed"/>
 		<constructor-arg name="xpath"
-						 value="count(//result[check/level[text() != 'INFO']]/status[text() = 'SUCCESS'])"/>
+						 value="count(//result[check/level[text() != 'INFO' and text() != 'METADATA']]/status[text() = 'SUCCESS'])"/>
 		<property name="multivalue" value="false"/>
 	</bean>
+	<!-- warned: (Status = FAILURE | status = ERROR) & (level = OPTIONAL) -->
 	<bean id="mdq.checks.warned" class="org.dataone.cn.indexer.parser.SolrField">
 		<constructor-arg name="name" value="checksWarned"/>
 		<constructor-arg name="xpath"
-						 value="count( //result[check/level[text() != 'INFO']]/status[text() = 'ERROR'] | //result[check/level[text() = 'OPTIONAL']]/status[text() = 'FAILURE'])"/>
+						 value="count(//result[check/level[text() = 'OPTIONAL']]/status[text() = 'ERROR'] | //result[check/level[text() = 'OPTIONAL']]/status[text() = 'FAILURE'])"/>
 		<property name="multivalue" value="false"/>
 	</bean>
+	<!-- failed: (Status = FAILURE | status = ERROR) & (level = REQUIRED) -->
 	<bean id="mdq.checks.failed" class="org.dataone.cn.indexer.parser.SolrField">
 		<constructor-arg name="name" value="checksFailed"/>
 		<constructor-arg name="xpath"
-						 value="count(//result[check/level[text() = 'REQUIRED']]/status[text() = 'FAILURE'])"/>
+						 value="count(//result[check/level[text() = 'REQUIRED']]/status[text() = 'ERROR'] | //result[check/level[text() = 'REQUIRED']]/status[text() = 'FAILURE'])"/>
 		<property name="multivalue" value="false"/>
 	</bean>
-
+	<!-- info: Level = INFO or status = SKIP -->
 	<bean id="mdq.checks.info" class="org.dataone.cn.indexer.parser.SolrField">
 		<constructor-arg name="name" value="checksInfo"/>
 		<constructor-arg name="xpath"
 						 value="count(//result/status[text() = 'SKIP'] | //result[check/level[text() = 'INFO']])"/>
 		<property name="multivalue" value="false"/>
     </bean>
-
+    <!-- checkCount: all checks except level = 'METADATA'. (Not used for overall score -->
 	<bean id="mdq.check.count" class="org.dataone.cn.indexer.parser.SolrField">
 		<constructor-arg name="name" value="checkCount"/>
 		<constructor-arg name="xpath"
-						 value="count(//result)"/>
+						 value="count(//result) - count(//result[check/level[text() = 'METADATA']])"/>
 		<property name="multivalue" value="false"/>
 	</bean>
 
 	<!-- the composite score -->
+	<!-- overallScore: count(pass) div count(pass + fail) -->
 	<bean id="mdq.score.overall" class="org.dataone.cn.indexer.parser.SolrField">
 		<constructor-arg name="name" value="scoreOverall"/>
 		<constructor-arg name="xpath"
-						 value="count(//result[check/level[text() != 'INFO']]/status[text() = 'SUCCESS']) div (count(//result) - count(//result/status[text() = 'SKIP'] | //result[check/level[text() = 'INFO']]))"/>
+						 value="(count(//result[check/level[text() != 'INFO' and text() != 'METADATA']]/status[text() = 'SUCCESS'])) div
+			(count(//result[check/level[text() != 'INFO' and text() != 'METADATA']]/status[text() = 'SUCCESS']) +
+        	count(//result[check/level[text() = 'REQUIRED']]/status[text() = 'ERROR'] | //result[check/level[text() = 'REQUIRED']]/status[text() = 'FAILURE']))"/>
 		<property name="multivalue" value="false"/>
 	</bean>
-
+    <!-- Calculate the scores for check 'types', i.e. -->
 	<bean id="mdqAddDynamicFieldsSubprocessor" class="edu.ucsb.nceas.mdqengine.solr.QualityReportSubprocessor">
 	    <property name="matchDocuments">
 		    <list>
