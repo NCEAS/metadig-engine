@@ -13,12 +13,12 @@ import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
+import org.dataone.client.auth.AuthTokenSession;
 import org.dataone.client.rest.DefaultHttpMultipartRestClient;
 import org.dataone.client.rest.MultipartRestClient;
 import org.dataone.client.v2.impl.MultipartMNode;
-import org.dataone.cn.indexer.XmlDocumentUtility;
 import org.dataone.mimemultipart.SimpleMultipartEntity;
-import org.dataone.service.types.v1.Identifier;
+import org.dataone.service.types.v1.*;
 import org.dataone.service.types.v2.SystemMetadata;
 import org.dataone.service.util.TypeMarshaller;
 import org.joda.time.DateTime;
@@ -26,20 +26,14 @@ import org.joda.time.DateTimeZone;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.quartz.*;
-import org.w3c.dom.Document;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-import org.xml.sax.SAXException;
 
-import javax.xml.xpath.XPath;
-import javax.xml.xpath.XPathConstants;
-import javax.xml.xpath.XPathExpression;
-import javax.xml.xpath.XPathFactory;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
+import java.util.Date;
 
 /**
  * <p>
@@ -98,7 +92,8 @@ public class RequestReportJob implements Job {
         JobKey key = context.getJobDetail().getKey();
         JobDataMap dataMap = context.getJobDetail().getJobDataMap();
 
-        String queryStr = dataMap.getString("queryStr");
+        String authToken = dataMap.getString("authToken");
+        String pidFilter = dataMap.getString("pidFilter");
         String suiteId = dataMap.getString("suiteId");
         String nodeId = dataMap.getString("nodeId");
         String nodeServiceUrl = dataMap.getString("nodeServiceUrl");
@@ -114,7 +109,8 @@ public class RequestReportJob implements Job {
             throw new JobExecutionException("Unable to schedule job", e);
         }
 
-        mnNode = new MultipartMNode(mrc, nodeServiceUrl);
+        Session session = new AuthTokenSession(authToken);
+        mnNode = new MultipartMNode(mrc, nodeServiceUrl, session);
         MDQStore store = null;
 
         try {
@@ -179,15 +175,19 @@ public class RequestReportJob implements Job {
         String endDTRstr = dtfOut.print(endDTR);
 
         ArrayList<String> pidsToProcess = null;
+        log.debug("Getting list of pids to process.");
+        log.debug("    harvest start time: " + startDTRstr);
+        log.debug("    harvest end time: " + endDTRstr);
         try {
-            pidsToProcess = getPidsToProcess(mnNode, queryStr, suiteId, nodeId, startDTRstr, endDTRstr);
+            pidsToProcess = getPidsToProcess(mnNode, session, suiteId, nodeId, pidFilter, startDTRstr, endDTRstr);
         } catch (Exception e) {
             throw new JobExecutionException("Unable to get pids to process", e);
         }
 
         for (String pidStr : pidsToProcess) {
             try {
-                submitReportRequest(mnNode, qualityServiceUrl, pidStr, suiteId);
+                log.debug("submitting pid: " + pidStr);
+                submitReportRequest(mnNode, session, qualityServiceUrl, pidStr, suiteId);
             } catch (Exception e) {
                 throw new JobExecutionException("Unable to submit request to create new quality reports", e);
             }
@@ -202,55 +202,94 @@ public class RequestReportJob implements Job {
         }
     }
 
-    public ArrayList<String> getPidsToProcess(MultipartMNode mnNode, String queryStr, String suiteId, String nodeId,
+    public ArrayList<String> getPidsToProcess(MultipartMNode mnNode, Session session, String suiteId, String nodeId, String pidFilter,
                                               String startHarvestDatetimeStr, String endHarvestDatetimeStr) throws Exception {
 
         ArrayList<String> pids = new ArrayList<String>();
         InputStream qis = null;
+        ObjectList objList = null;
+
+        ObjectFormatIdentifier formatId = null;
+        Identifier identifier = null;
+        Boolean replicaStatus = false;
+        Integer start = new Integer(0);
+        Integer count = new Integer(1000);
+
+        // Do some back-flips to convert the start and end date to the ancient Java 'Date' type that is
+        // used by DataONE 'listObjects()'.
+        ZonedDateTime zdt = ZonedDateTime.parse(startHarvestDatetimeStr);
+        // start date milliseconds since the epoch date "midnight, January 1, 1970 UTC"
+        long msSinceEpoch = zdt.toInstant().toEpochMilli();
+        Date startDate = new Date(msSinceEpoch);
+
+        zdt = ZonedDateTime.parse(endHarvestDatetimeStr);
+        msSinceEpoch = zdt.toInstant().toEpochMilli();
+        Date endDate = new Date(msSinceEpoch);
 
         try {
-            queryStr = queryStr + "+dateUploaded:[" + startHarvestDatetimeStr + "%20TO%20" + endHarvestDatetimeStr + "]&fl=id&rows=10000";
-            qis = mnNode.query(null, "solr", queryStr);
-            log.info("Sent query: " + queryStr);
+            //queryStr = queryStr + "+dateUploaded:[" + startHarvestDatetimeStr + "%20TO%20" + endHarvestDatetimeStr + "]&fl=id&rows=10000";
+            //objList = listObjects(session, fromDate=startHarvestDatetimeStr, toDate=endHarvestDatetimeStr, start=0, count=1000);
+            objList = mnNode.listObjects(session=session, startDate, endDate, formatId, identifier, replicaStatus, start, count);
+
+            //log.info("Sent query: " + queryStr);
         } catch (Exception e) {
             log.error("Error retrieving pids: " + e.getMessage());
             throw e;
         }
 
-        XPathFactory xPathfactory = XPathFactory.newInstance();
-        XPath xpath = xPathfactory.newXPath();
-        XPathExpression idXpath = null;
-        Document xmldoc = null;
+        String thisFormatId = null;
+        String thisPid = null;
 
-        if (qis != null) {
-            try {
-                xmldoc = XmlDocumentUtility.generateXmlDocument(qis);
-            } catch (SAXException e) {
-                log.error("Unable to create w3c Document from input stream", e);
-                e.printStackTrace();
-            } finally {
-                qis.close();
-            }
-        } else {
-            qis.close();
-        }
+        if (objList.getCount() > 0) {
+            for(ObjectInfo oi: objList.getObjectInfoList()) {
+                thisFormatId = oi.getFormatId().getValue();
+                thisPid = oi.getIdentifier().getValue();
 
-        //idXpath = xpath.compile("str[@name='id']/text()")dd;
-        idXpath = xpath.compile("//result/doc/str[@name='id']/text()");
-
-        NodeList result = (NodeList) idXpath.evaluate(xmldoc, XPathConstants.NODESET);
-        log.info("Node count: " + result.getLength());
-
-        String currentPid = null;
-        for(int index = 0; index < result.getLength(); index ++) {
-            Node node = result.item(index);
-            currentPid = node.getTextContent();
-
-            if(!runExists(currentPid, suiteId)) {
-                pids.add(currentPid);
-                log.info("adding pid to process list: " + currentPid);
+                if(!thisFormatId.matches(pidFilter)) {
+                    continue;
+                };
+                if(!runExists(thisPid, suiteId)) {
+                    pids.add(thisPid);
+                    log.info("adding pid " + thisPid + ", formatId: " + thisFormatId);
+                }
             }
         }
+
+//
+//        XPathFactory xPathfactory = XPathFactory.newInstance();
+//        XPath xpath = xPathfactory.newXPath();
+//        XPathExpression idXpath = null;
+//        Document xmldoc = null;
+//
+//        if (qis != null) {
+//            try {
+//                xmldoc = XmlDocumentUtility.generateXmlDocument(qis);
+//            } catch (SAXException e) {
+//                log.error("Unable to create w3c Document from input stream", e);
+//                e.printStackTrace();
+//            } finally {
+//                qis.close();
+//            }
+//        } else {
+//            qis.close();
+//        }
+//
+//        //idXpath = xpath.compile("str[@name='id']/text()")dd;
+//        idXpath = xpath.compile("//result/doc/str[@name='id']/text()");
+//
+//        NodeList result = (NodeList) idXpath.evaluate(xmldoc, XPathConstants.NODESET);
+//        log.info("Node count: " + result.getLength());
+//
+//        String currentPid = null;
+//        for(int index = 0; index < result.getLength(); index ++) {
+//            Node node = result.item(index);
+//            currentPid = node.getTextContent();
+//
+//            if(!runExists(currentPid, suiteId)) {
+//                pids.add(currentPid);
+//                log.info("adding pid to process list: " + currentPid);
+//            }
+//        }
 
         return pids;
     }
@@ -288,7 +327,7 @@ public class RequestReportJob implements Job {
         return found;
     }
 
-    public void submitReportRequest(MultipartMNode mnNode, String qualityServiceUrl, String pidStr, String suiteId) throws Exception {
+    public void submitReportRequest(MultipartMNode mnNode, Session session, String qualityServiceUrl, String pidStr, String suiteId) throws Exception {
 
         SystemMetadata sysmeta = null;
         InputStream objectIS = null;
@@ -298,19 +337,19 @@ public class RequestReportJob implements Job {
         pid.setValue(pidStr);
 
         try {
-            sysmeta = (SystemMetadata) mnNode.getSystemMetadata(null, pid);
+            sysmeta = mnNode.getSystemMetadata(session, pid);
         } catch (Exception e) {
             throw(e);
         }
 
         try {
-            objectIS = mnNode.get(pid);
+            objectIS = mnNode.get(session, pid);
             log.info("Retrieved metadata object for pid: " + pidStr);
         } catch (Exception e) {
             throw(e);
         }
 
-        //String qualityServiceUrl = "http://localhost:8080/quality/suites/" + suiteId + "/run";
+        // quality suite service url, i.e. "http://docke-ucsb-1.dataone.org:30433/quality/suites/knb.suite.1/run
         qualityServiceUrl = qualityServiceUrl + "/suites/" + suiteId + "/run";
         HttpPost post = new HttpPost(qualityServiceUrl);
 

@@ -7,8 +7,6 @@ import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVRecord;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.apache.solr.client.solrj.SolrClient;
-import org.apache.solr.client.solrj.impl.HttpSolrClient;
 import org.quartz.*;
 import org.quartz.impl.StdSchedulerFactory;
 
@@ -37,24 +35,23 @@ public class JobScheduler {
 
     public static void main(String[] argv) throws Exception {
         JobScheduler js = new JobScheduler();
-        // Read properties file
-        js.readConfig();
 
-        String queryStr = null;
         String taskType = null;
         String jobName = null;
         String jobGroup = null;
+        String authToken = null;
+        String authTokenParamName = null;
         String cronSchedule = null;
         String params = null;
 
+        String pidFilter = null;
         String suiteId = null;
         String nodeId = null;
         String nodeServiceUrl = null;
         String startHarvestDatetime = null;
         int harvestDatetimeInc = 1;
 
-        MDQconfig cfg = new MDQconfig();
-        String taskListFilename = cfg.getString("task.file");
+        String taskListFilename = js.readConfig("task.file");
         log.debug("task list filename: " + taskListFilename);
 
         // Read the task list
@@ -77,18 +74,19 @@ public class JobScheduler {
 
         Iterable<CSVRecord> records = CSVFormat.RFC4180.withFirstRecordAsHeader().withQuote('"').withCommentMarker('#').parse(in);
         for (CSVRecord record : records) {
-            queryStr       = record.get("query").trim();
             taskType       = record.get("task-type").trim();
             jobName        = record.get("job-name").trim();
             jobGroup       = record.get("job-group").trim();
+            authTokenParamName = record.get("auth-token").trim();
             cronSchedule   = record.get("cron-schedule").trim();
             params         = record.get("params").trim();
-            System.out.println("Query: " + queryStr);
             System.out.println("Task type: " + taskType);
             System.out.println("cronSchedule: " + cronSchedule);
             params = params.startsWith("\"") ? params.substring(1) : params;
             params = params.endsWith("\"") ? params.substring(0, params.length()-1) : params;
 
+            authToken = js.readConfig(authTokenParamName);
+            //System.out.println("authToken: " + authToken);
             System.out.println("params: " + params);
             if(taskType.equals("quality")) {
                 System.out.println("Scheduling harvest for job name: " + jobName + ", job group: " + jobGroup);
@@ -97,8 +95,11 @@ public class JobScheduler {
                         .toArray(String[]::new);
 
                 int icnt = -1;
-                // Suite identifier
                 System.out.println("Split length: " + splitted.length);
+                // filter to use for removing unneeded pids from harvest list
+                pidFilter      = splitted[++icnt].trim();
+                System.out.println("pidFilter: " + pidFilter);
+                // Suite identifier
                 suiteId        = splitted[++icnt].trim();
                 System.out.println("suiteId: " + suiteId);
                 // DataOne Node identifier
@@ -125,8 +126,9 @@ public class JobScheduler {
                 if(taskType.equals("quality")) {
                     job = newJob(RequestReportJob.class)
                             .withIdentity(jobName, jobGroup)
+                            .usingJobData("authToken", authToken)
+                            .usingJobData("pidFilter", pidFilter)
                             .usingJobData("suiteId", suiteId)
-                            .usingJobData("queryStr", queryStr)
                             .usingJobData("nodeId", nodeId)
                             .usingJobData("nodeServiceUrl", nodeServiceUrl)
                             .usingJobData("startHarvestDatetime", startHarvestDatetime)
@@ -154,16 +156,19 @@ public class JobScheduler {
     public JobScheduler () {
     }
 
-    public void readConfig () throws ConfigurationException, IOException {
+    public String readConfig (String paramName) throws ConfigurationException, IOException {
+        String paramValue = null;
         try {
             MDQconfig cfg = new MDQconfig();
-            solrLocation = cfg.getString("solr.location");
-            SolrClient solrClient = new HttpSolrClient.Builder(solrLocation).build();
-            log.info("Created Solr client");
+            //solrLocation = cfg.getString("solr.location");
+            //SolrClient solrClient = new HttpSolrClient.Builder(solrLocation).build();
+            //log.info("Created Solr client");
+            paramValue = cfg.getString(paramName);
         } catch (Exception e) {
             log.error("Could not create Solr client", e);
             throw e;
         }
+        return paramValue;
     }
 }
 
