@@ -20,10 +20,13 @@
         <moxy.version>2.6.3</moxy.version>
 		<d1_cn_index_processor_version>2.4.0-SNAPSHOT</d1_cn_index_processor_version>
 		<d1_cn_index_common_version>2.4.0-SNAPSHOT</d1_cn_index_common_version>
-		<spring.version>4.3.8.RELEASE</spring.version>
+		<!-- Have to use a very old version of Spring in order to stay compatible with
+		    d1_cn_index_processor -->
+		<!-- <spring.version>4.3.8.RELEASE</spring.version> -->
+		<spring.version>3.1.4.RELEASE</spring.version>
         <!-- <docker.registry>docker.io</docker.registry> -->
         <docker.repo>metadig</docker.repo>
-        <docker.tag>dev</docker.tag>
+        <docker.tag>2.0.0-rc1</docker.tag>
 	</properties>
 
 	<scm>
