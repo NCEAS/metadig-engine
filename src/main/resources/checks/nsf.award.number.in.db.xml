@@ -62,6 +62,6 @@ if (is.null(awards)) {
 ]]></code>
 	<selector>
 		<name>awards</name>
-		<xpath>/eml/dataset/project/funding//para</xpath>
+		<xpath>/eml/dataset/project/funding//para | /eml/dataset/project/funding</xpath>
 	</selector>
 </mdq:check>
