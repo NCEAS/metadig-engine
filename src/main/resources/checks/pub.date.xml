@@ -6,15 +6,26 @@
   <type>identification</type>
   <level>REQUIRED</level>
   <environment>rscript</environment>
-  <code>
+  <code><![CDATA[
   library(metadig)
+  library(lubridate)
 
-  if (length(pub_date) >= 1) {
-    success("A publication date is present.")
-  } else {
+  if (length(pub_date) <= 0) {
     failure("A publication date is not present.")
+  } else {
+    if (nchar(pubDate) == 4 && is.na((as.numeric(pubDate)))) {
+      failure("A publication date is present but should be in YYYY or YYYY-MM-DD format.")
+    } else if (nchar(pubDate) == 4 && !is.na(as.numeric(pubDate))) {
+      success("A publication date is present with YYYY format.")
+    } else if (nchar(pubDate) == 10 && is.na(ymd(pubDate))) {
+      failure("A publication date is present but should be in YYYY or YYYY-MM-DD format.")
+    } else if (nchar(pubDate) == 10 && !is.na(ymd(pubDate))) {
+      success("A publication date is present with YYYY-MM-DD format.")
+    } else {
+      failure("A publication date is present but should be in YYYY or YYYY-MM-DD format.")
+    }
   }
-  </code>
+  ]]></code>
   <selector>
     <name>pub_date</name>
     <xpath>/eml/dataset/pubDate</xpath>
