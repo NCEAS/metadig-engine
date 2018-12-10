@@ -11,8 +11,10 @@
 
   if (length(title) <= 0) {
     failure("No titles are present.")
+  } else if (length(title) == 1) {
+    success("One title is present.")
   } else {
-    success("One or more titles are present.")
+    success(sprintf("%d titles are present.", length(title)))
   }
   ]]></code>
   <selector>
@@ -30,5 +32,5 @@
   <dialect>
       <name>iso</name>
       <xpath>boolean(/*[local-name() = 'MI_Metadata' or local-name() = 'MD_Metadata'])</xpath>
-    </dialect>
+  </dialect>
 </mdq:check>
