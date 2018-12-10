@@ -6,18 +6,18 @@
   <type>identification</type>
   <level>REQUIRED</level>
   <environment>rscript</environment>
-<code><![CDATA[
-    library(metadig)
+  <code><![CDATA[
+  library(metadig)
 
-    if (length(creator) <= 0) {
-      failure("No creators are present.")
+  if (length(creator) <= 0) {
+    failure("No creators are present.")
+  } else {
+    if (creatorCount == 1) {
+      success("One creator is present.")
     } else {
-      if(creatorCount == 1) {
-        success("One creator is present.")
-      } else {
-        success(sprintf("%d creators are present.", creatorCount))
-      }
+      success(sprintf("%d creators are present.", creatorCount))
     }
+  }
   ]]></code>
   <selector>
     <name>creator</name>
@@ -31,5 +31,4 @@
     <name>eml</name>
     <xpath>boolean(/*[local-name() = 'eml'])</xpath>
   </dialect>
-
 </mdq:check>

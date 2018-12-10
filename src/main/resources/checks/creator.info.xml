@@ -3,42 +3,45 @@
 	<id>check.creator.info.1</id>
 	<name>Check creator information</name>
 	<description>Check if the creator contains an email and address.</description>
-	<type>identification</type>  
+	<type>identification</type>
 	<level>INFO</level>
 	<environment>rscript</environment>
 	<code><![CDATA[
-check <- function() {
-  library(base)
-  values <- list()
-  if(creatorCount == 0) {
-    values[[length(values)+1]] <- list(value=sprintf("A 'creator' is not present, so unable to check email and address."))
-    return(list(status="FAILURE", values=values))
-  }
-  
-  # Assume that the check will succeed, until proven otherwise.
-  # The output messages will be gathered into a list
-  status <- "SUCCESS"
-  
-  # Output number of creators that have email addresses
-  if(emailCount == creatorCount) {
-    values[[length(values)+1]] <- list(value=sprintf("All creators have email addresses.", creatorCount))
-  } else {
-    values[[length(values)+1]] <- list(value=sprintf("%d of %d creators have email addresses.", emailCount, creatorCount))
-  }
-  
-  # Output number of creators that have addresses
-  if(addressCount == creatorCount) {
-    values[[length(values)+1]] <- list(value=sprintf("All creators have addresses.", creatorCount))
-  } else {
-    values[[length(values)+1]] <- list(value=sprintf("%d of %d creators have addresses.", addressCount, creatorCount))
+  check <- function() {
+    # Assume that the check will succeed, until proven otherwise
+    status <- "SUCCESS"
+    # The output messages will be gathered into a list
+    values <- list()
+
+    if (creatorCount == 0) {
+      values[[length(values) + 1]] <- list(value = "A creator is not present, so unable to check for email and address.")
+      return(list(status = "FAILURE",
+                  values = values))
+    }
+
+    # Output number of creators that have email addresses
+    if (emailCount == creatorCount) {
+      values[[length(values) + 1]] <- list(value = "All creators have email addresses.")
+    } else {
+      values[[length(values) + 1]] <- list(value = sprintf("%d of %d creators have email addresses.", emailCount, creatorCount))
+    }
+
+    # Output number of creators that have addresses
+    if(addressCount == creatorCount) {
+      values[[length(values) + 1]] <- list(value = "All creators have addresses.")
+    } else {
+      values[[length(values) + 1]] <- list(value = sprintf("%d of %d creators have addresses.", addressCount, creatorCount))
+    }
+
+    return(list(status = status,
+                values = values))
   }
 
-  return(list(status=status, values=values))
-}
+  result <- check()
 
-result <- check()
-mdq_result <- list(status=result$status, output=result$values)
-]]></code>
+  mdq_result <- list(status = result$status,
+                     output = result$values)
+  ]]></code>
   <selector>
 		 <name>creatorCount</name>
 		 <xpath>count(/eml/dataset/creator)</xpath>

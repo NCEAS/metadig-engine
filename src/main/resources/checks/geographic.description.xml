@@ -6,15 +6,15 @@
   <type>discovery</type>
   <level>REQUIRED</level>
   <environment>rscript</environment>
-  <code>
-    library(metadig)
-    
-    if (length(description) >= 1) {
-      success("A textual description of the geographic coverage of this dataset is present.")
-    } else {
-      failure("A textual description of the geographic coverage of this dataset is not present.")
-    }
-  </code>
+  <code><![CDATA[
+  library(metadig)
+
+  if (length(description) >= 1) {
+    success("A textual description of the geographic coverage is present.")
+  } else {
+    failure("A textual description of the geographic coverage is not present.")
+  }
+  ]]></code>
   <selector>
     <name>description</name>
     <xpath>/eml/dataset/coverage/geographicCoverage/geographicDescription</xpath>

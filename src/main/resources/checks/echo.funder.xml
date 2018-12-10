@@ -9,17 +9,18 @@
 	<level>INFO</level>
 	<environment>rscript</environment>
 	<code><![CDATA[
-if (is.null(awards)) {
-  status <- "SUCCESS"
-  output <- "NA"
-  mdq_result <- list(status = status,
-                     output = list(list(value = output)))
-} else {
-  status <- "SUCCESS"  
-  mdq_result <- list(status = status,
-                     output = lapply(awards, function(message) { list(value = message)}))
-                     
-}]]></code>
+  if (is.null(awards)) {
+    status <- "SUCCESS"
+    output <- "NA"
+    mdq_result <- list(status = status,
+                       output = list(list(value = output)))
+  } else {
+    status <- "SUCCESS"
+    mdq_result <- list(status = status,
+                       output = lapply(awards, function(message) { list(value = message)}))
+
+  }
+  ]]></code>
 	<selector>
 		<name>awards</name>
 		<xpath>/eml/dataset/project/funding//para</xpath>

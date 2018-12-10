@@ -9,43 +9,49 @@
 	<level>REQUIRED</level>
 	<environment>rscript</environment>
 	<code><![CDATA[
-library(metadig)
-library(base)
+  library(metadig)
 
-check <- function() {
-    badStepCount <- 0
-    # Recommended minimum word count
-    minWordCount <- 7
-    # Recommended max word count
-    maxWordCount <- 20
-    
-    # Check that a <methods> section is present for the dataset.
-    if(!methodsPresent) {
-        return(list(status = "FAILURE", output = sprintf("A methods section is not present, so unable to check method step descriptions word count.")))
-    }
-    
-    if (methodStepCount > 0) {
-        for(iDescr in 1:length(methodStepDescription)) {
-            thisDescr <- methodStepDescription[[iDescr]]
-            wordCount <- length(unlist(strsplit(thisDescr, "\\s+", perl=T)))
-            if (wordCount < minWordCount) {
-                badStepCount <- badStepCount + 1
-            }
-        }
-    } else {
-        # No methodSteps defined (shouldn't happen, it's a required element for methods)
-        return(list(status="FAILURE", output=sprintf("No method step descriptions are present.")))
-    }
-    
-    if (badStepCount > 0) {
-        return(list(status="FAILURE", output=sprintf("%d of %d method step descriptions have fewer than the minimum recommended %d words", badStepCount, methodStepCount, minWordCount)))
-    } else {
-        return(list(status="SUCCESS", output=sprintf("All method step descriptions are sufficient (> %d words).", minWordCount)))
-    }
-}
-result <- check()
-mdq_result <- list(status=result$status, output=list(list(value=result$output)))
-]]></code>
+  check <- function() {
+      badStepCount <- 0
+      # Recommended minimum word count
+      minWordCount <- 7
+      # Recommended max word count
+      maxWordCount <- 20
+
+      # Check that a methods section is present for the dataset
+      if (!methodsPresent) {
+          return(list(status = "FAILURE",
+                      output = "A methods section is not present, so unable to check method step description word lengths."))
+      }
+
+      if (methodStepCount > 0) {
+          for (iDescr in 1:length(methodStepDescription)) {
+              thisDescr <- methodStepDescription[[iDescr]]
+              wordCount <- length(unlist(strsplit(thisDescr, "\\s+", perl = TRUE)))
+              if (wordCount < minWordCount) {
+                  badStepCount <- badStepCount + 1
+              }
+          }
+      } else {
+          # No methodSteps defined (shouldn't happen, it's a required element for methods)
+          return(list(status = "FAILURE",
+                      output = "No method step descriptions are present."))
+      }
+
+      if (badStepCount > 0) {
+          return(list(status = "FAILURE",
+                      output = sprintf("%d of %d method step descriptions have fewer than the minimum recommended %d words.", badStepCount, methodStepCount, minWordCount)))
+      } else {
+          return(list(status = "SUCCESS",
+                      output = sprintf("All method step descriptions are at least %d words long.", minWordCount)))
+      }
+  }
+
+  result <- check()
+
+  mdq_result <- list(status = result$status,
+                     output = list(list(value = result$output)))
+  ]]></code>
 	<selector>
 		<name>methodsPresent</name>
 		<xpath>boolean(/eml/dataset/methods)</xpath>

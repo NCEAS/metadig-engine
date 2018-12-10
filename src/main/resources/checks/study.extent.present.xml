@@ -9,20 +9,24 @@
 	<level>OPTIONAL</level>
 	<environment>rscript</environment>
 	<code><![CDATA[
-    check <- function() {
-      library(base)
-      # These variables are defined by the MQE from the <xpath> selectors.
-      # "extendDescriptionPresent" - is a methods sampling description present?
-      if(extentDescriptionPresent) {
-        return(list(status="SUCCESS", output="A sampling study extent description is present in the methods section."))
-      } else {
-        return(list(status="FAILURE", output="A sampling study extent description is not present in the methods section."))
-      }
+  check <- function() {
+    # These variables are defined by the MQE from the <xpath> selectors.
+    # "extendDescriptionPresent" - is a methods sampling description present?
+
+    if (extentDescriptionPresent) {
+      return(list(status = "SUCCESS",
+                  output = "A sampling study extent description is present in the methods section."))
+    } else {
+      return(list(status = "FAILURE",
+                  output = "A sampling study extent description is not present in the methods section."))
     }
-  
-    result <- check()
-    mdq_result <- list(status=result$status, output=list(list(value=result$output)))    
-    ]]></code>
+  }
+
+  result <- check()
+
+  mdq_result <- list(status = result$status,
+                     output = list(list(value = result$output)))
+  ]]></code>
 	<selector>
 		<name>extentDescriptionPresent</name>
 		<xpath>boolean(/eml/dataset/methods/sampling/studyExtent/description)</xpath>

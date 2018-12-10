@@ -9,80 +9,85 @@
 	<level>INFO</level>
 	<environment>rscript</environment>
 	<code><![CDATA[
-
-check <- function() {
-  library(base)
   library(metadig)
-  # varialbe defined by MQE from the <xpath> selectors.
-  # "entityName" - the names of each data entity
-  # "entityDescriptionPresent" - is the names of each data entity present
-  # "entityFormatPresent" - is the description for the entity present
-  # "entitySizePresent" - is the description for the entity present
-  # 'entityChecksumPresent" - is the checksum value (e.g. SHA1, MD5) of the entity present
-  
-  outputList <- list()
-  # Assume that the check will succeed, until proven otherwise.
-  # The dataset may have multiple entities, so check each one. All entities are checked
-  # so mdqe can report to the user about all entities, not just the one that failed.
-  # Set quote style to simple quotes
-  skip <- FALSE
-  if (length(entityName) > 0) {
-    for(iEntity in 1:length(entityName)) {
-      # Assume that the check will succeed, until proven otherwise.
-      undefEl <- list()
-      thisEntityType <- entityType[[iEntity]]
-      
-      if(!isDefined("entityName", entityName, iEntity)) {
-        undefEl[[length(undefEl)+1]] <- "name"
-        thisEntityName <- sprintf("%d", iEntity)
-      } else {
-        thisEntityName <- sprintf("%s", entityName[[iEntity]])
-      }
-      
-      if(!isTrueVal("entityFormatPresent", entityFormatPresent, iEntity)) {
-        undefEl[[length(undefEl)+1]] <- "format"
-      }
 
-      if(!isTrueVal("entitySizePresent", entitySizePresent, iEntity)) {
-        undefEl[[length(undefEl)+1]] <- "size"
-      }
+  check <- function() {
+    # The variables defined by MQE from the <xpath> selectors.
+    # "entityName" - the names of each data entity
+    # "entityDescriptionPresent" - is the names of each data entity present
+    # "entityFormatPresent" - is the description for the entity present
+    # "entitySizePresent" - is the description for the entity present
+    # 'entityChecksumPresent" - is the checksum value (e.g. SHA1, MD5) of the entity present
 
-      if(!isTrueVal("entityDescriptionPresent", entityDescriptionPresent, iEntity)) {
-        undefEl[[length(undefEl)+1]] <- "description"
-      }
+    # Assume that the check will succeed, until proven otherwise
+    skip <- FALSE
+    # The output messages will be gathered into a list
+    outputList <- list()
 
-      if(!isTrueVal("entityChecksumPresent", entityChecksumPresent, iEntity)) {
-        undefEl[[length(undefEl)+1]] <- "checksum (authentication)"
-      }
+    # The dataset may have multiple entities, so check each one. All entities are checked
+    # so mdqe can report to the user about all entities, not just the one that failed.
+    # Set quote style to simple quotes
 
-      # Store output for this entity if it didn't pass a check. We will only report on entities that don't have
-      # all the elements we are checking for.
-      if(length(undefEl) > 0) {
-        outputList[[length(outputList)+1]] <- list(value=sprintf("Description for '%s' is missing these items: %s", thisEntityName, paste(sQuote(unlist(undefEl)), collapse=", ")))
+    if (length(entityName) > 0) {
+      for (iEntity in 1:length(entityName)) {
+        # Assume that the check will succeed, until proven otherwise
+        undefEl <- list()
+        thisEntityType <- entityType[[iEntity]]
+
+        if (!isDefined("entityName", entityName, iEntity)) {
+          undefEl[[length(undefEl)+1]] <- "name"
+          thisEntityName <- sprintf("%d", iEntity)
+        } else {
+          thisEntityName <- sprintf("%s", entityName[[iEntity]])
+        }
+
+        if (!isTrueVal("entityFormatPresent", entityFormatPresent, iEntity)) {
+          undefEl[[length(undefEl) + 1]] <- "format"
+        }
+
+        if (!isTrueVal("entitySizePresent", entitySizePresent, iEntity)) {
+          undefEl[[length(undefEl) + 1]] <- "size"
+        }
+
+        if (!isTrueVal("entityDescriptionPresent", entityDescriptionPresent, iEntity)) {
+          undefEl[[length(undefEl) + 1]] <- "description"
+        }
+
+        if (!isTrueVal("entityChecksumPresent", entityChecksumPresent, iEntity)) {
+          undefEl[[length(undefEl) + 1]] <- "checksum (authentication)"
+        }
+
+        # Store output for this entity if it didn't pass a check. We will only report on entities that don't have
+        # all the elements we are checking for.
+        if (length(undefEl) > 0) {
+          outputList[[length(outputList) + 1]] <- list(value = sprintf("The description for '%s' is missing these elements: %s", thisEntityName, paste(sQuote(unlist(undefEl)), collapse = ", ")))
+        }
       }
+    } else {
+        # No data entities were selected by the xpath, so tell the user no check was performed and set status to SKIP
+        outputList[[length(outputList) + 1]] <- list(value = "No data descriptions are present, so unable to check for name, description, format, size, and checksum.")
+        skip <- TRUE
     }
-  } else {
-      # No data entities were selected by the xpath, so tell the user no check was performed and set status to SKIP
-      outputList[[length(outputList)+1]] <- list(value=sprintf("No data descriptions are present, so unable to check entity 'name', 'format', etc"))
-      skip <- TRUE
-  }
-  
-  # If nt output was set, then the check passed, otherwise have to check for SKIP or FAILURE
-  if(length(outputList) > 0) {
-    if(skip) status <- "SKIP" else status <- "FAILURE"
-    return(list(status=status, values=outputList))
-  } else {
-    outputList[[length(outputList)+1]] <- list(value=sprintf("All data description sections have a name, description, format, size and checksum"))
-    return(list(status="SUCCESS", values=outputList))
-  }
-}
 
-result <- check()
-mdq_result <- list(status=result$status, output=result$values) 
-]]></code>
+    # If no output was set, then the check passed, otherwise have to check for SKIP or FAILURE
+    if (length(outputList) > 0) {
+      if (skip) status <- "SKIP" else status <- "FAILURE"
+      return(list(status = status,
+                  values = outputList))
+    } else {
+      outputList[[length(outputList) + 1]] <- list(value = "All data descriptions have a name, description, format, size, and checksum."))
+      return(list(status = "SUCCESS",
+                  values = outputList))
+    }
+  }
 
-	<!-- Don't need a subSelector for entityName, as this element is required, 
-		so their won't be entities that are selected that don't have this value, 
+  result <- check()
+
+  mdq_result <- list(status = result$status,
+                     output = result$values)
+  ]]></code>
+	<!-- Don't need a subSelector for entityName, as this element is required,
+		so their won't be entities that are selected that don't have this value,
 		and therefor no 'blank' values. -->
 	<selector>
 		<name>entityName</name>

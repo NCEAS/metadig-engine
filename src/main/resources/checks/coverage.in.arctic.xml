@@ -7,13 +7,13 @@
   <level>INFO</level>
   <environment>rscript</environment>
   <code><![CDATA[
-library(metadig)
+  library(metadig)
 
-if (any(na.omit(as.numeric(north_bound_coordinates)) >= 45)) {
-  success("At least one geographic coverage is in the Arctic.")
-} else {
-  failure("No geographic coverage is in the Arctic.")
-}
+  if (any(na.omit(as.numeric(north_bound_coordinates)) >= 45)) {
+    success("At least one geographic coverage is in the Arctic.")
+  } else {
+    failure("No geographic coverage is in the Arctic.")
+  }
   ]]></code>
   <selector>
     <name>north_bound_coordinates</name>

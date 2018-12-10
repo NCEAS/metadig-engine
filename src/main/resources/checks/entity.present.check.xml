@@ -9,32 +9,38 @@
 	<level>OPTIONAL</level>
 	<environment>rscript</environment>
 	<code><![CDATA[
-check <- function() {
-  library(base)
   library(metadig)
-  # variables defined by MQE from the <xpath> selectors.
-  # "entityPresent" - is a data entity present?
-  
-  outputList <- list()
-  status <- "SUCCESS"
-  # Assume that the check will succeed, until proven otherwise.
-  # The dataset may have multiple entities, so check each one. 
-  if(entityPresent) {
-    if (entityCount == 1) {
-      outputList[[length(outputList)+1]] <- list(value=sprintf("1 data description is present."))
-    } else {
-      outputList[[length(outputList)+1]] <- list(value=sprintf("%d data descriptions are present", entityCount))
-    }
-    return(list(status=status, values=outputList))
-  } else {
-    outputList[[length(outputList)+1]] <- list(value=sprintf("No data descriptions are present."))
-    return(list(status="FAILURE", values=outputList))
-  }
-}
 
-result <- check()
-mdq_result <- list(status=result$status, output=result$values) 
-]]></code>
+  check <- function() {
+    # The variables defined by MQE from the <xpath> selectors.
+    # "entityPresent" - is a data entity present?
+
+    # Assume that the check will succeed, until proven otherwise
+    status <- "SUCCESS"
+    # The output messages will be gathered into a list
+    outputList <- list()
+
+    # The dataset may have multiple entities, so check each one.
+    if (entityPresent) {
+      if (entityCount == 1) {
+        outputList[[length(outputList) + 1]] <- list(value = "One data description is present.")
+      } else {
+        outputList[[length(outputList) + 1]] <- list(value = sprintf("%d data descriptions are present.", entityCount))
+      }
+      return(list(status = status,
+                  values = outputList))
+    } else {
+      outputList[[length(outputList) + 1]] <- list(value = "No data descriptions are present.")
+      return(list(status = "FAILURE",
+                  values = outputList))
+    }
+  }
+
+  result <- check()
+
+  mdq_result <- list(status = result$status,
+                     output = result$values)
+  ]]></code>
 	<selector>
 		<name>entityPresent</name>
 		<xpath>boolean(/eml/dataset/*[self::dataTable|self::spatialRaster|self::spatialVector|self::storedProcedure|self::view|self::otherEntity])</xpath>

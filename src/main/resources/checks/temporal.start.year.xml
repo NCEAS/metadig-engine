@@ -7,8 +7,9 @@
   <level>REQUIRED</level>
   <environment>rscript</environment>
   <code><![CDATA[
-    library(metadig)
-    check_presence(begin_date)
+  library(metadig)
+
+  check_presence(begin_date)
   ]]></code>
   <selector>
     <name>begin_date</name>

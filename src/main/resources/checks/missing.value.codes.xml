@@ -7,47 +7,56 @@
   <level>OPTIONAL</level>
   <environment>rscript</environment>
   <code><![CDATA[
-library(metadig)
+  library(metadig)
 
-check <- function() {
-  # Skip check if no dataTables
-  if(length(entityName) == 0) {
-    return(list(status="SKIP", values=list(list(value="No data table descriptions are present, so cannot check attribute 'missing value codes'"))))
+  check <- function() {
+    # Skip check if no dataTables
+    if (length(entityName) == 0) {
+      return(list(status = "SKIP",
+                  values = list(list(value = "No data table descriptions are present, so unable to check attribute missing value codes."))))
+    }
+
+    # Skip check if no attributes present
+    if (!attributesPresent) {
+      return(list(status = "SKIP",
+                  values = list(list(value = "No data table attributes are present, so unable to check missing value codes."))))
+    }
+
+    # Assume that the check will succeed, until proven otherwise
+    status <- "SUCCESS"
+    # The output messages will be gathered into a list
+    outputList <- list()
+
+    totalCount <- 0
+    # Check the attribute
+    # Check each dataTable for count of attributes with missing value codes defined
+    for (iEntity in 1:length(entityName)) {
+      thisEntityName <- entityName[[iEntity]]
+      missingCodeCount <- 0
+      thisAttrCount <- attributeCount[[iEntity]]
+      thisCodeCount <- codeCount[[iEntity]]
+      # This dataTable is deficient in missing value codes
+      if (thisCodeCount < thisAttrCount) {
+        status <- "FAILURE"
+        missingCodeCount <- thisAttrCount - thisCodeCount
+        outputList[[length(outputList) + 1]] <- list(value = sprintf("Data table description '%s' does not have missing value codes defined for %d of %d attributes.", thisEntityName, missingCodeCount, thisCodeCount))
+      }
+    }
+
+    # Did we find any deficient dataTables?
+    if (length(outputList > 0)) {
+      return(list(status = status,
+                  values = outputList))
+    } else {
+      return(list(status = "SUCCESS",
+                  values = list(list(value = "All attributes for all data table descriptions have missing value codes defined."))))
+    }
   }
 
-  # Skip check if no attributes present
-  if(!attributesPresent) {
-    return(list(status="SKIP", values=list(list(value="No data table attributes are present, so cannot check missing value codes"))))
-  }
-  
-  status <- "SUCCESS"
-  outputList <- list()
-  totalCount <- 0
-  # Check the attribute
-  # Check each dataTable for count of attributes with missing value codes defined
-  for(iEntity in 1:length(entityName)) {
-    thisEntityName <- entityName[[iEntity]]
-    missingCodeCount <- 0
-    thisAttrCount <- attributeCount[[iEntity]]
-    thisCodeCount <- codeCount[[iEntity]] 
-    # This dataTable is deficient in 'missing value codes'
-    if(thisCodeCount < thisAttrCount) {
-      status <- "FAILURE"
-      missingCodeCount <- thisAttrCount - thisCodeCount
-      outputList[[length(outputList)+1]] <- list(value=sprintf("Data table description '%s' does not have 'missing value codes' defined for %d of %d attributes", thisEntityName, missingCodeCount, thisCodeCount))
-    } 
-  }
+  result <- check()
 
-  # Did we find any deficient dataTables?
-  if(length(outputList > 0)) {
-    return(list(status=status, values=outputList))
-  } else {
-    return(list(status="SUCCESS", values=list(list(value=sprintf("All attributes for all data table descriptions have 'missing value codes' defined.")))))
-  }
-}
-result <- check()
-mdq_result <- list(status=result$status, output=result$values) 
-  
+  mdq_result <- list(status = result$status,
+                     output = result$values)
   ]]></code>
 	<selector>
 		<name>attributesPresent</name>
@@ -77,5 +86,4 @@ mdq_result <- list(status=result$status, output=result$values)
 			<xpath>count(./attributeList/attribute)</xpath>
 		</subSelector>
 	</selector>
-
 </mdq:check>

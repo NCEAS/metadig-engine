@@ -7,23 +7,23 @@
   <level>OPTIONAL</level>
   <environment>rscript</environment>
   <code><![CDATA[
-library(stringr)
+  library(stringr)
 
-patterns <- c("openxmlformats-officedocument", "ms-excel", "msword", "ms-powerpoint")
-detections <- lapply(formats, function(format) { str_detect(format, patterns) })
-matched <- vapply(detections, function(d) any(d), TRUE)
+  patterns <- c("openxmlformats-officedocument", "ms-excel", "msword", "ms-powerpoint")
+  detections <- lapply(formats, function(format) { str_detect(format, patterns) })
+  matched <- vapply(detections, function(d) any(d), TRUE)
 
-if (any(matched)) {
-  messages <- paste0("The following format, '", formats[which(matched)], "', is proprietary.")
+  if (any(matched)) {
+    messages <- paste0("The following format, '", formats[which(matched)], "', is proprietary.")
 
-  mdq_result <- list(status = "FAILURE",
-                     output = lapply(messages, function(message) { list(value = message) } ))
+    mdq_result <- list(status = "FAILURE",
+                       output = lapply(messages, function(message) { list(value = message) } ))
 
-} else {
-  mdq_result <- list(status = "SUCCESS",
-                     output = list(list(value = "All formats appear to be non-proprietary.")))
-}
-]]></code>
+  } else {
+    mdq_result <- list(status = "SUCCESS",
+                       output = list(list(value = "All formats appear to be non-proprietary.")))
+  }
+  ]]></code>
 	<selector>
     <name>entities</name>
     <xpath>/eml/dataset/otherEntity</xpath>

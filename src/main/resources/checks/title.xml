@@ -7,20 +7,21 @@
   <level>REQUIRED</level>
   <environment>rscript</environment>
   <code><![CDATA[
-    library(metadig)
+  library(metadig)
 
-    if (length(title) <= 0) {
-      failure("No title(s) were found.")
-    } else {
-      success("One or more titles were found.")
-    }
+  if (length(title) <= 0) {
+    failure("No titles are present.")
+  } else {
+    success("One or more titles are present.")
+  }
   ]]></code>
   <selector>
     <name>title</name>
     <xpath>
     (/eml/dataset/title)
     |
-    (/*/identificationInfo/*/citation/CI_Citation/title/CharacterString)</xpath>
+    (/*/identificationInfo/*/citation/CI_Citation/title/CharacterString)
+    </xpath>
   </selector>
   <dialect>
     <name>eml</name>

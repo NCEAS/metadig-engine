@@ -3,18 +3,18 @@
   <id>check.bounding.coordinates.1</id>
   <name>Geographic coverage coordinates</name>
   <description>Geographic Coverage should contain bounding coordinates.</description>
-  <type>discovery</type>  
+  <type>discovery</type>
   <level>REQUIRED</level>
   <environment>rscript</environment>
-  <code>
-    library(metadig)
-    
-    if (length(coordinates) >= 1) {
-      success("A set of bounding coordinates describing the geographic coverage of this dataset is present.")
-    } else {
-      failure("A set of bounding coordinates describing the geographic coverage of this dataset is not present.")
-    }
-  </code>
+  <code><![CDATA[
+  library(metadig)
+
+  if (length(coordinates) >= 1) {
+    success("A set of bounding coordinates describing the geographic coverage is present.")
+  } else {
+    failure("A set of bounding coordinates describing the geographic coverage is not present.")
+  }
+  ]]></code>
   <selector>
     <name>coordinates</name>
     <xpath>

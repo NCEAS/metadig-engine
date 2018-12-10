@@ -8,10 +8,9 @@
   <environment>rscript</environment>
   <code><![CDATA[
   check <- function() {
-    library(base)
-
-    if(!titlePresent) {
-      return(list(status = "FAILURE", output = sprintf("The dataset title is not present, so the check is unable to determine title word length.")))
+    if (!titlePresent) {
+      return(list(status = "FAILURE",
+                  output = "A title is not present, so unable to check title word length."))
     }
 
     # Required minimum word count for title
@@ -21,19 +20,26 @@
     # Recommended max word count
     maxWordCount <- 20
 
-    wordCount <- length(unlist(strsplit(datasetTitle, "\\s+", perl=T)))
+    wordCount <- length(unlist(strsplit(datasetTitle, "\\s+", perl = TRUE)))
     if (wordCount < strictMinCount) {
-      return(list(status = "FAILURE", output = sprintf("The number of words in the dataset's title is %d. The minimum required word count is %s.", wordCount, minWordCount))) 
+      return(list(status = "FAILURE",
+                  output = sprintf("The title is %d words long. The minimum recommended word count is %d.", wordCount, minWordCount)))
     } else if (wordCount < minWordCount) {
-      return(list(status = "FAILURE", output = sprintf("The number of words in the dataset's title is %d. The minimum recommended word count is %s.", wordCount, minWordCount))) 
+      return(list(status = "FAILURE",
+                  output = sprintf("The title is %d words long. The minimum recommended word count is %d.", wordCount, minWordCount)))
     } else if (wordCount > maxWordCount) {
-      return(list(status = "FAILURE", output = sprintf("The number of words in the dataset's title is %d. The maximum recommended word count is %s.", wordCount, maxWordCount))) 
+      return(list(status = "FAILURE",
+                  output = sprintf("The title is %d words long. The maximum recommended word count is %d.", wordCount, maxWordCount)))
     } else {
-      return(list(status = "SUCCESS", output = sprintf("The number of words in the dataset's title is sufficient because it is between %d and %d words long.", minWordCount, maxWordCount))) 
+      return(list(status = "SUCCESS",
+                  output = sprintf("The title is %d words long, which is sufficient.", wordCount)))
     }
   }
+
   result <- check()
-  mdq_result <- list(status=result$status, output=list(list(value=result$output)))
+
+  mdq_result <- list(status = result$status,
+                     output = list(list(value = result$output)))
   ]]></code>
   <selector>
     <name>titlePresent</name>

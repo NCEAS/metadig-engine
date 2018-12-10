@@ -9,27 +9,28 @@
 	<level>REQUIRED</level>
 	<environment>rscript</environment>
 	<code><![CDATA[
-if (is.null(awards)) {
-  status <- "FAILURE"
-  output <- "No award numbers were found."
-  mdq_result <- list(status = status,
-                     output = list(list(value = output)))
-} else if (length(awards) < 1) {
-  status <- "FAILURE"
-  output <- paste0("No award numbers were found when one or more were expected.")
-  mdq_result <- list(status = status,
-                     output = list(list(value = output)))
-} else if (all(nchar(awards) <= 0)) {
-  status <- "FAILURE"
-  output <- "Of the award numbers found, none were non-zero in length."
-  mdq_result <- list(status = status,
-                     output = list(list(value = output)))
-} else {
-  status <- "SUCCESS"
-  output <- "At least one award number was found."
-  mdq_result <- list(status = status,
-                     output = list(list(value = output)))
-}]]></code>
+  if (is.null(awards)) {
+    status <- "FAILURE"
+    output <- "No award numbers were found."
+    mdq_result <- list(status = status,
+                       output = list(list(value = output)))
+  } else if (length(title) < 1) {
+    status <- "FAILURE"
+    output <- paste0("No award numbers were found when one or more were expected.")
+    mdq_result <- list(status = status,
+                       output = list(list(value = output)))
+  } else if (all(nchar(awards) <= 0)) {
+    status <- "FAILURE"
+    output <- "Of the award numbers found, none were non-zero in length."
+    mdq_result <- list(status = status,
+                       output = list(list(value = output)))
+  } else {
+    status <- "SUCCESS"
+    output <- "At least one award number was found."
+    mdq_result <- list(status = status,
+                       output = list(list(value = output)))
+  }
+  ]]></code>
 	<selector>
 		<name>awards</name>
 		<xpath>/eml/dataset/project/funding//para</xpath>

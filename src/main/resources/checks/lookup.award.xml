@@ -9,6 +9,7 @@
 	<level>INFO</level>
 	<environment>Java</environment>
 	<code>edu.ucsb.nceas.mdqengine.processor.AwardLookupCheck</code>
+	<!-- not used -->
 	<selector>
 		<name>awards</name>
 		<xpath>/eml/dataset/project/funding//para</xpath>

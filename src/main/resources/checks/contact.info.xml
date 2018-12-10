@@ -7,38 +7,41 @@
 	<level>INFO</level>
 	<environment>rscript</environment>
 	<code><![CDATA[
-check <- function() {
-  library(base)
-  values <- list()
-  if(contactCount == 0) {
-    values[[length(values)+1]] <- list(value=sprintf("A 'contact' is not present, so unable to check email and address."))
-    return(list(status="FAILURE", values=values))
-  }
-  
-  # Assume that the check will succeed, until proven otherwise.
-  # The output messages will be gathered into a list
-  status <- "SUCCESS"
-  
-  # Output number of contacts that have email addresses
-  if(emailCount == contactCount) {
-    values[[length(values)+1]] <- list(value=sprintf("All contacts have email addresses."))
-  } else {
-    values[[length(values)+1]] <- list(value=sprintf("%d of %d contacts have email addresses.", emailCount, contactCount))
-  }
-  
-  # Output number of contact that have addresses
-  if(addressCount == contactCount) {
-    values[[length(values)+1]] <- list(value=sprintf("All contacts have addresses."))
-  } else {
-    values[[length(values)+1]] <- list(value=sprintf("%d of %d contacts have addresses.", addressCount, contactCount))
-  }
-  
-  return(list(status=status, values=values))
-}
+  check <- function() {
+    # Assume that the check will succeed, until proven otherwise
+    status <- "SUCCESS"
+    # The output messages will be gathered into a list
+    values <- list()
 
-result <- check()
-mdq_result <- list(status=result$status, output=result$values)
-]]></code>
+    if (contactCount == 0) {
+      values[[length(values) + 1]] <- list(value = "A contact is not present, so unable to check for email and address.")
+      return(list(status = "FAILURE",
+                  values = values))
+    }
+
+    # Output number of contacts that have email addresses
+    if (emailCount == contactCount) {
+      values[[length(values) + 1]] <- list(value = "All contacts have email addresses.")
+    } else {
+      values[[length(values) + 1]] <- list(value = sprintf("%d of %d contacts have email addresses.", emailCount, contactCount))
+    }
+
+    # Output number of contact that have addresses
+    if (addressCount == contactCount) {
+      values[[length(values) + 1]] <- list(value = "All contacts have addresses.")
+    } else {
+      values[[length(values) + 1]] <- list(value = sprintf("%d of %d contacts have addresses.", addressCount, contactCount))
+    }
+
+    return(list(status = status,
+                values = values))
+  }
+
+  result <- check()
+
+  mdq_result <- list(status = result$status,
+                     output = result$values)
+  ]]></code>
   <selector>
 		 <name>contactCount</name>
 		 <xpath>count(/eml/dataset/contact)</xpath>

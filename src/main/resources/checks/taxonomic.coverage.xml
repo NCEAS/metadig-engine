@@ -10,35 +10,41 @@
 	<environment>rscript</environment>
 	<code><![CDATA[
 	check <- function() {
-      library(base)
       # These variables are defined by the MQE from the <xpath> selectors.
       # "datasetTaxonomicCoverage" - is a taxonomic coverage present at the dataset level
       # "entityTaxonomicCoverage" - is a taxonomic coverage present at the entity level
       # "attributeTaxonomicCoverage" - is a taxonomic coverage present at the attribute level
-      
-      # Return as soon as a taxonomic coverage is found, checking them in order of dataset, entity, attribute.
-      if(datasetTaxonomicCoverage) {
-        return(list(status = "SUCCESS", output = sprintf("A taxonomic coverage is present at the dataset level.")))
-      } else if(entityTaxonomicCoverage) {
-        return(list(status = "SUCCESS", output = sprintf("A taxonomic coverage is present at the entity level.")))
-      } else if(attributeTaxonomicCoverage) {
-        return(list(status = "SUCCESS", output = sprintf("A taxonomic coverage is present at the attribute level.")))
-      } else {
-        return(list(status = "FAILURE", output = sprintf("A taxonomic coverage was not found at the dataset, entity or attribute levels.")))
-      }
-     
-      return(list(status=status, output=output))
-    }
-    result <- check()
-    mdq_result <- list(status=result$status, output=list(list(value=unlist(result$output))))
-    ]]></code>
 
+      # Return as soon as a taxonomic coverage is found, checking them in order of dataset, entity, attribute.
+      if (datasetTaxonomicCoverage) {
+        return(list(status = "SUCCESS",
+                    output = "A taxonomic coverage is present at the dataset level."))
+      } else if (entityTaxonomicCoverage) {
+        return(list(status = "SUCCESS",
+                    output = "A taxonomic coverage is present at the entity level."))
+      } else if (attributeTaxonomicCoverage) {
+        return(list(status = "SUCCESS",
+                    output = "A taxonomic coverage is present at the attribute level."))
+      } else {
+        return(list(status = "FAILURE",
+                    output = "A taxonomic coverage is not present at the dataset, entity, or attribute levels."))
+      }
+
+      return(list(status = status,
+                  output = output))
+  }
+
+  result <- check()
+
+  mdq_result <- list(status = result$status,
+                     output = list(list(value = unlist(result$output))))
+  ]]></code>
 	<!-- Taxonomic coverage at the dataset level -->
 	<selector>
 		<name>datasetTaxonomicCoverage</name>
 		<xpath>boolean(/*[local-name() = 'eml']/dataset/coverage/taxonomicCoverage)</xpath>
 	</selector>
-	<!-- Taxonomic coverage at the entity level. Use the required 'entityName' 
+	<!-- Taxonomic coverage at the entity level. Use the required 'entityName'
 		to ensure that entities are being selected. -->
 	<selector>
 		<name>entityTaxonomicCoverage</name>

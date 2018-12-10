@@ -3,34 +3,35 @@
   <id>check.abstract.100.words.1</id>
   <name>Abstract length</name>
   <description>Abstract should be at least 100 words long.</description>
-  <type>discovery</type>  
+  <type>discovery</type>
   <level>REQUIRED</level>
   <environment>rscript</environment>
   <code><![CDATA[
-    if (length(abstract) == 0) {
-      status <- "FAILURE"
-      message <- "No abstract sections were found."
-    } else if (length(abstract) > 1) {
-      status <- "FAILURE"
-      message <- "More than one abstract section is present, only one is allowed."
+  library(stringr)
+
+  if (length(abstract) == 0) {
+    status <- "FAILURE"
+    message <- "An abstract is not present."
+  } else if (length(abstract) > 1) {
+    status <- "FAILURE"
+    message <- "More than one abstract is present. Only one is allowed."
+  } else {
+    # Trim whitespace, split abstract on whitespace
+    tokens <- trimws(str_split(abstract, "\\s+")[[1]], which = "both")
+    # Remove blank elements (subtly and irritatingly different than whitespace)
+    tokens <- tokens[tokens != ""]
+
+    if (length(tokens) >= 100) {
+      status <- "SUCCESS"
+      message <- sprintf("The abstract is %d words long, which is sufficient.", length(tokens))
     } else {
-      library(stringr)
-      # Trim whitespace, split abstract on whitespace
-      tokens <- trimws(str_split(abstract, "\\s+")[[1]], which="both")
-      # Remove blank elements (subtly and irritatingly different than whitespace)
-      tokens <- tokens[tokens != ""]
-
-      if (length(tokens) >= 100) {
-        status <- "SUCCESS"
-        message <- paste0("The abstract is ", length(tokens), " word(s) long which is sufficient.")
-      } else {
-        status <- "FAILURE"
-        message <- paste0("The abstract is only ", length(tokens), " word(s) long but 100 or more is requried.")
-      }
+      status <- "FAILURE"
+      message <- sprintf("The abstract is only %d words long. 100 or more words are required.", length(tokens))
     }
+  }
 
-    mdq_result <- list(status = status,
-                       output = list(list(value = message)))
+  mdq_result <- list(status = status,
+                     output = list(list(value = message)))
   ]]></code>
   <selector>
     <name>abstract</name>

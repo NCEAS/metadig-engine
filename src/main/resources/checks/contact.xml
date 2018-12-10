@@ -6,18 +6,18 @@
   <type>identification</type>
   <level>REQUIRED</level>
   <environment>rscript</environment>
-<code><![CDATA[
-    library(metadig)
+  <code><![CDATA[
+  library(metadig)
 
-    if (length(contact) <= 0) {
-      failure("No contacts are present.")
+  if (length(contact) <= 0) {
+    failure("No contacts are present.")
+  } else {
+    if (contactCount == 1) {
+      success("One contact is present.")
     } else {
-      if(contactCount == 1) {
-        success("One contact is present.")
-      } else {
-        success(sprintf("%d contacts are present.", contactCount))
-      }
+      success(sprintf("%d contacts are present.", contactCount))
     }
+  }
   ]]></code>
   <selector>
     <name>contact</name>

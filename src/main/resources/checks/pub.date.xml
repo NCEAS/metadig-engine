@@ -7,13 +7,13 @@
   <level>REQUIRED</level>
   <environment>rscript</environment>
   <code>
-    library(metadig)
-    
-    if (length(pub_date) >= 1) {
-      success("A publication date is present.")
-    } else {
-      failure("A publication date is not present.") 
-    }
+  library(metadig)
+
+  if (length(pub_date) >= 1) {
+    success("A publication date is present.")
+  } else {
+    failure("A publication date is not present.")
+  }
   </code>
   <selector>
     <name>pub_date</name>

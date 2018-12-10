@@ -9,23 +9,22 @@
 	<level>REQUIRED</level>
 	<environment>python</environment>
 	<code><![CDATA[
-def call():
-  global output
-  global status
+  def call():
+    global output
+    global status
 
-  # Assume success
-  output = "Keywords are present"
+    # Assume success
+    output = "Keywords are present."
 
-  if(len(keywords) > 0):
-    status = "SUCCESS"
-    return True
+    if(len(keywords) > 0):
+      status = "SUCCESS"
+      return True
 
-  status = "FAILURE"
-  output = "Keywords are not present"
-  return False
-call()
+    status = "FAILURE"
+    output = "Keywords are not present."
+    return False
+  call()
 	]]></code>
-	
 	<selector>
 		<name>keywords</name>
 		<xpath>
@@ -33,9 +32,8 @@ call()
 		|
 		(/*/identificationInfo/*/descriptiveKeywords/MD_Keywords/keyword | /*/identificationInfo/*/descriptiveKeywords/MD_Keywords[normalize-space(type/MD_KeywordTypeCode)='place']/keyword/CharacterString | /*/identificationInfo/*/descriptiveKeywords/MD_Keywords[normalize-space(type/MD_KeywordTypeCode)='instrument']/keyword/CharacterString |
         /*/identificationInfo/*/descriptiveKeywords/MD_Keywords[normalize-space(type/MD_KeywordTypeCode)='platform']/keyword/CharacterString | /*/identificationInfo/*/descriptiveKeywords/MD_Keywords[normalize-space(type/MD_KeywordTypeCode)='project']/keyword/CharacterString)
-        </xpath>
+    </xpath>
 	</selector>
-	
 	<dialect>
 		<name>eml</name>
 		<xpath>boolean(/*[local-name() = 'eml'])</xpath>

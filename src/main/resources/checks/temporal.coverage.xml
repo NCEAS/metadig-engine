@@ -8,14 +8,19 @@
   <environment>rscript</environment>
   <code><![CDATA[
   check <- function() {
-    if(!coveragePresent) {
-      return(list(status = "FAILURE", output = sprintf("A description of this dataset's temporal coverage is not present.")))
+    if (!coveragePresent) {
+      return(list(status = "FAILURE",
+                  output = "A description of the temporal coverage is not present."))
     } else {
-      return(list(status = "SUCCESS", output = sprintf("A description of this dataset's temporal coverage is present.")))
+      return(list(status = "SUCCESS",
+                  output = "A description of the temporal coverage is present."))
     }
   }
+
   result <- check()
-  mdq_result <- list(status=result$status, output=list(list(value=result$output)))
+
+  mdq_result <- list(status = result$status,
+                     output = list(list(value = result$output)))
   ]]></code>
   <selector>
     <name>coveragePresent</name>
