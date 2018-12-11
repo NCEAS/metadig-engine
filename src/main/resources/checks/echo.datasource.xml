@@ -6,7 +6,7 @@
 	<name>Echo datasource</name>
 	<description>Extract datasource (auth MN) from system metadata.</description>
 	<type>identification</type>
-	<level>INFO</level>
+	<level>METADATA</level>
 	<environment>Java</environment>
 	<code>edu.ucsb.nceas.mdqengine.processor.DatasourceEchoCheck</code>
 	<!-- not used -->

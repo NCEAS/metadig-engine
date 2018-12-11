@@ -1,35 +1,7 @@
 package edu.ucsb.nceas.mdqengine.processor;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.StringWriter;
-import java.net.URL;
-import java.nio.file.InvalidPathException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-
-import javax.script.ScriptException;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerException;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
-import javax.xml.xpath.XPath;
-import javax.xml.xpath.XPathConstants;
-import javax.xml.xpath.XPathExpressionException;
-import javax.xml.xpath.XPathFactory;
-
+import edu.ucsb.nceas.mdqengine.dispatch.Dispatcher;
+import edu.ucsb.nceas.mdqengine.model.*;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.BooleanUtils;
@@ -44,14 +16,25 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
-import edu.ucsb.nceas.mdqengine.dispatch.Dispatcher;
-import edu.ucsb.nceas.mdqengine.model.Check;
-import edu.ucsb.nceas.mdqengine.model.Dialect;
-import edu.ucsb.nceas.mdqengine.model.Namespace;
-import edu.ucsb.nceas.mdqengine.model.Output;
-import edu.ucsb.nceas.mdqengine.model.Result;
-import edu.ucsb.nceas.mdqengine.model.Selector;
-import edu.ucsb.nceas.mdqengine.model.Status;
+import javax.script.ScriptException;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathExpressionException;
+import javax.xml.xpath.XPathFactory;
+import java.io.*;
+import java.net.URL;
+import java.nio.file.InvalidPathException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.*;
 
 public class XMLDialect {
 	
@@ -170,8 +153,9 @@ public class XMLDialect {
 					ByteArrayOutputStream baos = new ByteArrayOutputStream();
 					TypeMarshaller.marshalTypeToOutputStream(systemMetadata, baos);
 					variables.put("systemMetadata", baos.toString("UTF-8"));
+					variables.put("datasource", systemMetadata.getOriginMemberNode().getValue());
+					variables.put("authoritativeMemberNode", systemMetadata.getAuthoritativeMemberNode().getValue());
 					variables.put("systemMetadataPid", systemMetadata.getIdentifier().getValue());
-                    variables.put("authoritativeMemberNode", systemMetadata.getAuthoritativeMemberNode());
 				} catch (Exception e) {
 					log.error("Could not serialize SystemMetadata for check", e);
 				}
@@ -326,7 +310,7 @@ public class XMLDialect {
 	public boolean isCheckValid(Check check) throws XPathExpressionException {
 
 		if (check.getDialect() == null) {
-			log.info("No dialects have been specified for check, assuming it is valid for this document");
+			log.debug("No dialects have been specified for check, assuming it is valid for this document");
 			return true;
 		}
 		
@@ -378,6 +362,10 @@ public class XMLDialect {
 				Namespace entry = nsIter.next();
 				String prefix = entry.getPrefix();
 				String uri = entry.getUri();
+                // Some metadata files may have improper xmlns declarations that don't include
+				// a prefix (encountered in Dryad Data), so skip these.
+				if(prefix == null) continue;
+
 				// make sure we are overriding the found namespace[s] with the asserted ones
 				String existing = nsContext.getNamespaceURI(prefix);
 				if (existing == null) {
@@ -426,14 +414,14 @@ public class XMLDialect {
 				value = values;
 			}  
 		} catch (XPathExpressionException xpee) {
-			log.warn("Defaulting to single value selection: " + xpee.getCause().getMessage());
+			log.debug("Defaulting to single value selection: " + xpee.getCause().getMessage());
 			
 			// try just a single value
 			try {
 				value = xpath.evaluate(selectorPath, contextNode);
 				value = retypeObject(value);
 			} catch (XPathExpressionException xpee2) {
-				log.error("Could not select single value with given Xpath: " + xpee2.getCause().getMessage());
+				log.error("Selector '" + selector.getName() + "'" + "could not select single value with given Xpath: " + xpee2.getCause().getMessage());
 				value = null;
 			}
 		}

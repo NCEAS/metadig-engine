@@ -1,5 +1,30 @@
 package edu.ucsb.nceas.mdqengine.store;
 
+import edu.ucsb.nceas.mdqengine.exception.MetadigStoreException;
+import edu.ucsb.nceas.mdqengine.model.Check;
+import edu.ucsb.nceas.mdqengine.model.Node;
+import edu.ucsb.nceas.mdqengine.model.Run;
+import edu.ucsb.nceas.mdqengine.model.Suite;
+import edu.ucsb.nceas.mdqengine.serialize.XmlMarshaller;
+import net.minidev.json.JSONArray;
+import net.minidev.json.JSONObject;
+import net.minidev.json.JSONValue;
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.dataone.client.auth.CertificateManager;
+import org.dataone.client.types.AccessPolicyEditor;
+import org.dataone.client.v2.MNode;
+import org.dataone.client.v2.itk.D1Client;
+import org.dataone.service.exceptions.ServiceFailure;
+import org.dataone.service.types.v1.Identifier;
+import org.dataone.service.types.v1.ObjectFormatIdentifier;
+import org.dataone.service.types.v1.Session;
+import org.dataone.service.types.v1.Subject;
+import org.dataone.service.types.v1.util.ChecksumUtil;
+import org.dataone.service.types.v2.SystemMetadata;
+
+import javax.xml.bind.JAXBException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.InvocationTargetException;
@@ -13,33 +38,7 @@ import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
 
-import javax.xml.bind.JAXBException;
-
-import net.minidev.json.JSONArray;
-import net.minidev.json.JSONObject;
-import net.minidev.json.JSONValue;
-
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.dataone.client.auth.CertificateManager;
-import org.dataone.client.types.AccessPolicyEditor;
-import org.dataone.client.v2.MNode;
-import org.dataone.client.v2.itk.D1Client;
-import org.dataone.configuration.Settings;
-import org.dataone.service.exceptions.ServiceFailure;
-import org.dataone.service.types.v1.Identifier;
-import org.dataone.service.types.v1.ObjectFormatIdentifier;
-import org.dataone.service.types.v1.Session;
-import org.dataone.service.types.v1.Subject;
-import org.dataone.service.types.v1.util.ChecksumUtil;
-import org.dataone.service.types.v2.SystemMetadata;
-
-import edu.ucsb.nceas.mdqengine.MDQStore;
-import edu.ucsb.nceas.mdqengine.model.Check;
-import edu.ucsb.nceas.mdqengine.model.Suite;
-import edu.ucsb.nceas.mdqengine.model.Run;
-import edu.ucsb.nceas.mdqengine.serialize.XmlMarshaller;
+import static org.dataone.configuration.Settings.getConfiguration;
 
 public class MNStore implements MDQStore {
 
@@ -61,7 +60,7 @@ public class MNStore implements MDQStore {
 		
 		// use the desired MN
 		if (baseUrl == null) {
-			mnURL = Settings.getConfiguration().getString("mn.baseurl", "https://mn-demo-8.test.dataone.org/knb/d1/mn/");
+			mnURL = getConfiguration().getString("mn.baseurl", "https://mn-demo-8.test.dataone.org/knb/d1/mn/");
 		} else {
 			mnURL = baseUrl;
 		}
@@ -312,7 +311,7 @@ public class MNStore implements MDQStore {
 	}
 
 	@Override
-	public Run getRun(String id) {
+	public Run getRun(String suite, String id) {
 		return (Run) get(id, Run.class);
 	}
 
@@ -325,5 +324,23 @@ public class MNStore implements MDQStore {
 	public void deleteRun(Run run) {
 		delete(run.getId());
 	}
+
+	@Override
+	public boolean isAvailable() { return true; }
+
+	@Override
+	public void renew() {}
+
+	@Override
+	public Node getNode(String nodeId) { return new Node(); }
+
+	@Override
+	public void saveNode(Node node) throws MetadigStoreException { }
+
+	@Override
+	public void shutdown() {};
+
+	@Override
+	public void saveRun(Run run, SystemMetadata sysmeta) { }
 
 }

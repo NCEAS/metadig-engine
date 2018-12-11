@@ -6,7 +6,7 @@
 	<name>Echo formatId</name>
 	<description>Extract formatId from system metadata.</description>
 	<type>identification</type>
-	<level>INFO</level>
+	<level>METADATA</level>
 	<environment>Java</environment>
 	<code>edu.ucsb.nceas.mdqengine.processor.FormatIdEchoCheck</code>
 	<!-- not used -->

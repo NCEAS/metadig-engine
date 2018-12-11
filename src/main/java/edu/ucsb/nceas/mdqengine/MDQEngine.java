@@ -20,7 +20,10 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.dataone.configuration.Settings;
+import org.dataone.service.types.v2.TypeFactory;
+import org.dataone.exceptions.MarshallingException;
 import org.dataone.service.types.v2.SystemMetadata;
+import org.dataone.service.util.TypeMarshaller;
 import org.xml.sax.SAXException;
 
 import edu.ucsb.nceas.mdqengine.dispatch.MDQCache;
@@ -35,10 +38,13 @@ import edu.ucsb.nceas.mdqengine.serialize.JsonMarshaller;
 import edu.ucsb.nceas.mdqengine.serialize.XmlMarshaller;
 import edu.ucsb.nceas.mdqengine.store.InMemoryStore;
 import edu.ucsb.nceas.mdqengine.store.MNStore;
+import edu.ucsb.nceas.mdqengine.store.MDQStore;
+
+import static org.dataone.configuration.Settings.*;
 
 public class MDQEngine {
 	
-	private static final String RESOLVE_PREFIX = Settings.getConfiguration().getString("D1Client.CN_URL") + "/v2/resolve/";
+	private static final String RESOLVE_PREFIX = getConfiguration().getString("D1Client.CN_URL") + "/v2/resolve/";
 	
 	/**
 	 * Default store uses the in-memory implementation
@@ -193,14 +199,63 @@ public class MDQEngine {
 			String xml = IOUtils.toString(new FileInputStream(args[0]), "UTF-8");
 			Suite suite = (Suite) XmlMarshaller.fromXml(xml , Suite.class);
 			InputStream input = new FileInputStream(args[1]);
-			Run run = engine.runSuite(suite, input, null, null);
+			InputStream sysmetaInputStream = null;
+			SystemMetadata sysmeta = null;
+			Object tmpSysmeta = null;
+
+			// Read in the system metadata XML file if it is provided. Suites can be run without it.
+			// THe drawback to this approach is that it will be necessary to test for sysmeta v3 when it is released.
+			if(args.length >= 3) {
+				Class smClasses[] = {org.dataone.service.types.v2.SystemMetadata.class, org.dataone.service.types.v1.SystemMetadata.class};
+				for (Class thisClass: smClasses) {
+					System.out.println("Trying " + thisClass.getName());
+					sysmetaInputStream = new FileInputStream(args[2]);
+					try {
+						tmpSysmeta = TypeMarshaller.unmarshalTypeFromStream(thisClass, sysmetaInputStream);
+						// Didn't get an error so proceed to convert to sysmeta v2, if needed.
+						System.out.println("marshalling success!");
+						break;
+					} catch (ClassCastException cce) {
+					    System.out.println("Hit ClassCast exception");
+						cce.printStackTrace();
+					   continue;
+					} catch (InstantiationException | IllegalAccessException | IOException | MarshallingException fis) {
+						System.out.println("hit second catch...");
+						fis.printStackTrace();
+						continue;
+					}
+				}
+
+				System.out.println("Testing whether convert is needed...");
+				if (tmpSysmeta.getClass().getName().equals("org.dataone.service.types.v1.SystemMetadata")) {
+					System.out.println("Converting...");
+					try {
+						sysmeta = TypeFactory.convertTypeFromType(tmpSysmeta, SystemMetadata.class);
+						System.out.println("Converted sysmeta to v2");
+					} catch (InstantiationException | IllegalAccessException ce) {
+						System.out.println("Error converted sysmeta to v2");
+						ce.printStackTrace();
+					}
+				} else {
+					sysmeta = (SystemMetadata) tmpSysmeta;
+				}
+			}
+			Run run = engine.runSuite(suite, input, null, sysmeta);
+			run.setRunStatus("SUCCESS");
 			System.out.println(XmlMarshaller.toXml(run));
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			// Store the error in the 'Run' object so it can be saved to the run store.
+			try {
+				Run run = new Run();
+				run.setRunStatus(Run.FAILURE);
+				run.setErrorDescription(e.getMessage());
+				System.out.println(XmlMarshaller.toXml(run));
+				e.printStackTrace();
+			} catch (Exception e2) {
+				e2.printStackTrace();
+			}
 		}
-		
-		
 	}
 
 }

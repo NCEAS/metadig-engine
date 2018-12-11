@@ -1,0 +1,14 @@
+# This role binding allows "dave" to read secrets in the "development" namespace.
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: metadig-all-roleBinding
+  namespace: metadig # This only grants permissions within the "metadig" namespace.
+subjects:
+- kind: User
+  name: metadig # Name is case sensitive
+  apiGroup: rbac.authorization.k8s.io
+roleRef:
+  kind: Role
+  name: metadig-all
+  apiGroup: rbac.authorization.k8s.io

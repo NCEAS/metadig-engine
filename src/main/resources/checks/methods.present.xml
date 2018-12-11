@@ -65,7 +65,7 @@
 		<xpath>/eml/dataset/methods/methodStep</xpath>
 		<subSelector>
 			<name>msd</name>
-			<xpath>./description//para/text()</xpath>
+			<xpath>./description/para/text() | ./description/text() | ./description/section/para/text()</xpath>
 		</subSelector>
 	</selector>
 	<dialect>

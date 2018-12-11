@@ -6,7 +6,7 @@
 	<name>Award lookup</name>
 	<description>Look up award information from NSF using award ID.</description>
 	<type>identification</type>
-	<level>INFO</level>
+	<level>METADATA</level>
 	<environment>Java</environment>
 	<code>edu.ucsb.nceas.mdqengine.processor.AwardLookupCheck</code>
 	<!-- not used -->

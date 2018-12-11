@@ -19,7 +19,7 @@
     }
   }
   ]]></code>
-  <selector namespaceAware="TRUE">
+  <selector namespaceAware="true">
     <name>creator</name>
     <xpath>/*[local-name() = 'eml']/dataset/creator</xpath>
   </selector>

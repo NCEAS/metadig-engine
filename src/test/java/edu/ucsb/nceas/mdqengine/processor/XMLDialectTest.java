@@ -1,31 +1,25 @@
 package edu.ucsb.nceas.mdqengine.processor;
 
-import static org.junit.Assert.*;
+import edu.ucsb.nceas.mdqengine.model.*;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.dataone.service.types.v2.SystemMetadata;
+import org.dataone.service.util.TypeMarshaller;
+import org.junit.Ignore;
+import org.junit.Test;
+import org.xml.sax.SAXException;
 
+import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.xml.parsers.ParserConfigurationException;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.dataone.service.types.v2.SystemMetadata;
-import org.dataone.service.util.TypeMarshaller;
-import org.junit.Test;
-import org.junit.Ignore;
-import org.xml.sax.SAXException;
-
-import edu.ucsb.nceas.mdqengine.model.Check;
-import edu.ucsb.nceas.mdqengine.model.Dialect;
-import edu.ucsb.nceas.mdqengine.model.Level;
-import edu.ucsb.nceas.mdqengine.model.Result;
-import edu.ucsb.nceas.mdqengine.model.Output;
-import edu.ucsb.nceas.mdqengine.model.Selector;
-import edu.ucsb.nceas.mdqengine.model.Status;
-
+@Ignore
 public class XMLDialectTest {
 
 	private Log log = LogFactory.getLog(this.getClass());

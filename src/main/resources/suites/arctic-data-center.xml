@@ -4,8 +4,8 @@
   <name>Arctic Data Center Quality Suite</name>
   <description>This is a provisional Arctic Data Center Quality Suite. It is modeled after the submission guidelines used on the Arctic Data Center (arcticdata.io).</description>
   <check>
-    <id>check.nsf.award.numbers.present.1</id> 
-   </check>
+    <id>check.nsf.award.numbers.present.1</id>
+  </check>
   <check>
     <id>check.nsf.award.numbers.in.nsf.database.1</id>
   </check>
@@ -82,21 +82,21 @@
     <id>coverage.in.arctic.1</id>
   </check>
   <check>
-  	<id>check.echo.funder.1</id>
-  </check>
-   <check>
-  	<id>check.echo.rightsHolder.1</id>
-  </check>
-   <check>
-  	<id>check.echo.datasource.1</id>
-  </check>
-   <check>
-  	<id>check.echo.formatId.1</id>
+    <id>check.echo.funder.1</id>
   </check>
   <check>
-  	<id>check.lookup.group.1</id>
+    <id>check.echo.rightsHolder.1</id>
   </check>
   <check>
-  	<id>check.lookup.award.1</id>
+    <id>check.echo.datasource.1</id>
+  </check>
+  <check>
+    <id>check.echo.formatId.1</id>
+  </check>
+  <check>
+    <id>check.lookup.group.1</id>
+  </check>
+  <check>
+    <id>check.lookup.award.1</id>
   </check>
 </mdq:suite>
