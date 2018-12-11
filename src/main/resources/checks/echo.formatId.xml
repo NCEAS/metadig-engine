@@ -4,7 +4,7 @@
 	xsi:schemaLocation="https://nceas.ucsb.edu/mdqe/v1 ../schemas/schema1.xsd">
 	<id>check.echo.formatId.1</id>
 	<name>Echo formatId</name>
-	<description>Extract formatId from system metadata</description>
+	<description>Extract formatId from system metadata.</description>
 	<type>identification</type>
 	<level>INFO</level>
 	<environment>Java</environment>

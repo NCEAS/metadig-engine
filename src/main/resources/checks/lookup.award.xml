@@ -4,7 +4,7 @@
 	xsi:schemaLocation="https://nceas.ucsb.edu/mdqe/v1 ../schemas/schema1.xsd">
 	<id>check.lookup.award.1</id>
 	<name>Award lookup</name>
-	<description>Look-up award information from NSF using award id</description>
+	<description>Look up award information from NSF using award ID.</description>
 	<type>identification</type>
 	<level>INFO</level>
 	<environment>Java</environment>

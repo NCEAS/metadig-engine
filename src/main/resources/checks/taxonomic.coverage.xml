@@ -3,8 +3,8 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="https://nceas.ucsb.edu/mdqe/v1 ../schemas/schema1.xsd">
 	<id>check.taxonomic.coverage.1</id>
-	<name>Taxonomic coverage present</name>
-	<description>Check that a taxonomic coverage exists at the dataset level, or at least one entity's level, or one attribute's level.</description>
+	<name>Taxonomic coverage</name>
+	<description>Taxonomic coverage should be present at the dataset level, or at least one entity's level or one attribute's level.</description>
 	<type>discovery</type>
 	<level>INFO</level>
 	<environment>rscript</environment>

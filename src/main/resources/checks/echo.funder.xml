@@ -3,8 +3,8 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="https://nceas.ucsb.edu/mdqe/v1 ../schemas/schema1.xsd">
 	<id>check.echo.funder.1</id>
-	<name>Funder</name>
-	<description>Check for extracting funder from the metadata for result indexing and analysis.</description>
+	<name>Echo funder</name>
+	<description>Extract funder from the metadata for result indexing and analysis.</description>
 	<type>identification</type>
 	<level>INFO</level>
 	<environment>rscript</environment>

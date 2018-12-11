@@ -3,8 +3,8 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="https://nceas.ucsb.edu/mdqe/v1 ../schemas/schema1.xsd">
 	<id>check.attribute.name.differs.1</id>
-	<name>Attribute name differs from attribute description.</name>
-	<description>Check that each entity name and definition are not identical.</description>
+	<name>Attribute name differs from attribute description</name>
+	<description>Attribute name should differ from attribute description.</description>
 	<type>interpretation</type>
 	<level>OPTIONAL</level>
 	<environment>rscript</environment>

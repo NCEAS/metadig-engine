@@ -3,15 +3,15 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="https://nceas.ucsb.edu/mdqe/v1 ../schemas/schema1.xsd">
 	<id>check.sampling.study.extent.present.1</id>
-	<name>Sampling extent description present</name>
-	<description>Checks that a sampling study extent is present.</description>
+	<name>Sampling study extent description</name>
+	<description>A sampling study extent description should be present.</description>
 	<type>interpretation</type>
 	<level>OPTIONAL</level>
 	<environment>rscript</environment>
 	<code><![CDATA[
   check <- function() {
     # These variables are defined by the MQE from the <xpath> selectors.
-    # "extendDescriptionPresent" - is a methods sampling description present?
+    # "extentDescriptionPresent" - is a methods sampling description present?
 
     if (extentDescriptionPresent) {
       return(list(status = "SUCCESS",

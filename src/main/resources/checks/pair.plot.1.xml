@@ -2,7 +2,7 @@
 <mdq:check xmlns:mdq="https://nceas.ucsb.edu/mdqe/v1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="https://nceas.ucsb.edu/mdqe/v1 ../schemas/schema1.xsd">
   <id>pair.plot.1</id>
   <name>Pair plot</name>
-  <description>Show a pair / scatter-plot matrix plot. For each data object referenced in the metadata, attempts to download, read, then display the pair plot.</description>
+  <description>Show a pair/scatterplot matrix plot. For each data object referenced in the metadata, attempts to download, read, and then display the pair plot.</description>
   <type>interpretation</type>
   <level>INFO</level>
   <environment>rscript</environment>

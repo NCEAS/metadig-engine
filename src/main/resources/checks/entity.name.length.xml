@@ -4,7 +4,7 @@
 	xsi:schemaLocation="https://nceas.ucsb.edu/mdqe/v1 ../schemas/schema1.xsd">
 	<id>check.entity.name.length.1</id>
 	<name>Entity name length</name>
-	<description>Length of entity name is less than 100 characters.</description>
+	<description>Length of entity name should be less than 100 characters.</description>
 	<type>identification</type>
 	<level>OPTIONAL</level>
 	<environment>rscript</environment>

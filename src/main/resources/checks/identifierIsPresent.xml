@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <mdq:check xmlns:mdq="https://nceas.ucsb.edu/mdqe/v1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="https://nceas.ucsb.edu/mdqe/v1 ../schemas/schema1.xsd">
   <id>check.identifier.is.present.1</id>
-  <name>Identifier present</name>
+  <name>Identifier</name>
   <description>Identifier should be present.</description>
   <type>identification</type>
   <level>REQUIRED</level>

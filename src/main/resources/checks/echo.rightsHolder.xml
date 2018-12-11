@@ -4,7 +4,7 @@
 	xsi:schemaLocation="https://nceas.ucsb.edu/mdqe/v1 ../schemas/schema1.xsd">
 	<id>check.echo.rightsHolder.1</id>
 	<name>Echo rightsHolder</name>
-	<description>Extract rightsHolder from system metadata</description>
+	<description>Extract rightsHolder from system metadata.</description>
 	<type>identification</type>
 	<level>INFO</level>
 	<environment>Java</environment>

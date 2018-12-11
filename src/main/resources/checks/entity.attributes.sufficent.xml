@@ -3,8 +3,8 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="https://nceas.ucsb.edu/mdqe/v1 ../schemas/schema1.xsd">
 	<id>check.attribute.definition.sufficient.1</id>
-	<name>Attribute definition is sufficient.</name>
-	<description>Check that each attribute definition has greater that 4 words.</description>
+	<name>Attribute definition</name>
+	<description>Each attribute definition should be greater that 4 words.</description>
 	<type>interpretation</type>
 	<level>OPTIONAL</level>
 	<environment>rscript</environment>

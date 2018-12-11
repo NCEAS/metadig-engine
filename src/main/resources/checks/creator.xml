@@ -2,7 +2,7 @@
 <mdq:check xmlns:mdq="https://nceas.ucsb.edu/mdqe/v1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="https://nceas.ucsb.edu/mdqe/v1 ../schemas/schema1.xsd">
   <id>check.creator.present.1</id>
   <name>Creator</name>
-  <description>Creator should be present</description>
+  <description>Creator should be present.</description>
   <type>identification</type>
   <level>REQUIRED</level>
   <environment>rscript</environment>
@@ -12,20 +12,16 @@
   if (length(creator) <= 0) {
     failure("No creators are present.")
   } else {
-    if (creatorCount == 1) {
+    if (length(creator) == 1) {
       success("One creator is present.")
     } else {
-      success(sprintf("%d creators are present.", creatorCount))
+      success(sprintf("%d creators are present.", length(creator)))
     }
   }
   ]]></code>
-  <selector>
+  <selector namespaceAware="TRUE">
     <name>creator</name>
-    <xpath>/eml/dataset/creator</xpath>
-  </selector>
-  <selector>
-    <name>creatorCount</name>
-    <xpath>count(/eml/dataset/creator)</xpath>
+    <xpath>/*[local-name() = 'eml']/dataset/creator</xpath>
   </selector>
   <dialect>
     <name>eml</name>

@@ -4,7 +4,7 @@
 	xsi:schemaLocation="https://nceas.ucsb.edu/mdqe/v1 ../schemas/schema1.xsd">
 	<id>check.echo.datasource.1</id>
 	<name>Echo datasource</name>
-	<description>Extract datasource (auth MN) from system metadata</description>
+	<description>Extract datasource (auth MN) from system metadata.</description>
 	<type>identification</type>
 	<level>INFO</level>
 	<environment>Java</environment>

@@ -4,7 +4,7 @@
 	xsi:schemaLocation="https://nceas.ucsb.edu/mdqe/v1 ../schemas/schema1.xsd">
 	<id>check.lookup.group.1</id>
 	<name>Group lookup</name>
-	<description>Look up group information from CN using system metadata info</description>
+	<description>Look up group information from CN using system metadata.</description>
 	<type>identification</type>
 	<level>INFO</level>
 	<environment>Java</environment>

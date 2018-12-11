@@ -2,7 +2,7 @@
 <mdq:check xmlns:mdq="https://nceas.ucsb.edu/mdqe/v1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="https://nceas.ucsb.edu/mdqe/v1 ../schemas/schema1.xsd">
   <id>check.pub.date.1</id>
   <name>Publication date</name>
-  <description>Publication date should be present</description>
+  <description>A publication date should be present.</description>
   <type>identification</type>
   <level>REQUIRED</level>
   <environment>rscript</environment>
@@ -13,13 +13,13 @@
   if (length(pub_date) <= 0) {
     failure("A publication date is not present.")
   } else {
-    if (nchar(pubDate) == 4 && is.na((as.numeric(pubDate)))) {
+    if (nchar(pub_date) == 4 && is.na((as.numeric(pub_date)))) {
       failure("A publication date is present but should be in YYYY or YYYY-MM-DD format.")
-    } else if (nchar(pubDate) == 4 && !is.na(as.numeric(pubDate))) {
+    } else if (nchar(pub_date) == 4 && !is.na(as.numeric(pub_date))) {
       success("A publication date is present with YYYY format.")
-    } else if (nchar(pubDate) == 10 && is.na(ymd(pubDate))) {
+    } else if (nchar(pub_date) == 10 && is.na(ymd(pub_date))) {
       failure("A publication date is present but should be in YYYY or YYYY-MM-DD format.")
-    } else if (nchar(pubDate) == 10 && !is.na(ymd(pubDate))) {
+    } else if (nchar(pub_date) == 10 && !is.na(ymd(pub_date))) {
       success("A publication date is present with YYYY-MM-DD format.")
     } else {
       failure("A publication date is present but should be in YYYY or YYYY-MM-DD format.")

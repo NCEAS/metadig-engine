@@ -3,8 +3,8 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="https://nceas.ucsb.edu/mdqe/v1 ../schemas/schema1.xsd">
 	<id>check.entity.present.1</id>
-	<name>Data entity present check.</name>
-	<description>Check that a data entity is present.</description>
+	<name>Data entity</name>
+	<description>At least one data entity should be present.</description>
 	<type>interpretation</type>
 	<level>OPTIONAL</level>
 	<environment>rscript</environment>
