@@ -98,14 +98,15 @@ This certificate will be used when the k8s 'context' is set for a login session,
 The k8s configuration file ~/.kube/config contains authentication information that is made available to the k8s via the client program `kubectl`. Multiple contexts can be defined for one configuration file, each one associated with a context name, for example `metadig` is the default
 context name for the `metadig` user.
 
-Before the meta
-Create a user entry in the k8s configuration associated with the user `metadig`:
+The `metadig` context was created with the following steps:
+
+- Create a user entry in the k8s configuration associated with the user `metadig`:
 
 ```
 kubectl config set-credentials metadig --client-certificate=~/.kube/metadig.crt  --client-key=~/.kube/metadig.key
 ```
 
-The `metadig` context is created with the command:
+- The `metadig` context is added to the configuration with the command:
 
 ```
 kubectl config set-context metadig --cluster=kubernetes --namespace=metadig --user=metadig
