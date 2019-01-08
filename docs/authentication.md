@@ -122,6 +122,27 @@ The `current-context` field is set in the config file by this command, so that t
 
 The `user` specified in the context is used to determine which role bindings are in effect. In this case, the user `metadig` is associated with the role bindings `metadig-all-roleBinding`, which references the role `metadig-all`, which provides access to all verbs for all resources in the `metadig` namespace.
 
+## ClusterRoles
+
+A ClusterRole differs from the Role already described as it applies to resources across namespaces. ClusterRoles can be used for the same resources used with Roles, but in addition can be applied to cluster-wide resources such as nodes.
+
+ClusterRoles are not currently used by MetaDIG services.
+
+## ClusterRoleBindings
+
+ClusterRoleBindings are used to apply the rules from ClusterRoles cluster-wide.
+
+ClusterRoleBindings are not currently used by MetaDIG services.
+
+## ServiceAccounts
+
+ServiceAccounts provide an identity for pods that require access to the k8s API after the pod has been created. In contrast, "User" and "Group" authentication (in the MetaDIG case via X509 certificates) provides access to the k8s API to the user performing operations such as creating, deleting, listing resources.
+
+Roles and RoleBindings can be applied to ServiceAccounts to define the access they will have.
+
+A ServiceAccount can be defined for a namespace and assigned to a pod. If one is not assigned when a pod is created, the 'default' ServiceAccount will be assigned.
+
+A `metadig` ServiceAccount is currently defined, but is using just the default permissions, as no k8s API operations are performed by MetaDIG services.
 
 
 
