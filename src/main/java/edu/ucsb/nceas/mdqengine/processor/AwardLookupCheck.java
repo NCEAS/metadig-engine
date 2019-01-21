@@ -56,8 +56,10 @@ public class AwardLookupCheck implements Callable<Result> {
 				
 				try {
 					
-					// fetch the results
-					String idString = awardId.toString();
+					// fetch the results, extracting just the award number, if other info is in the string.
+					String idString = awardId.toString().toLowerCase().replace("nsf award", "").trim();
+
+					// Pad the award number with leading zeros if necessary
 					if (awardId instanceof Number) {
 						idString = String.format("%07d", awardId);
 					}
