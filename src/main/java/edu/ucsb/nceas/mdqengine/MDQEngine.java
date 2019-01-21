@@ -1,46 +1,33 @@
 package edu.ucsb.nceas.mdqengine;
 
+import edu.ucsb.nceas.mdqengine.dispatch.MDQCache;
+import edu.ucsb.nceas.mdqengine.model.*;
+import edu.ucsb.nceas.mdqengine.processor.XMLDialect;
+import edu.ucsb.nceas.mdqengine.serialize.JsonMarshaller;
+import edu.ucsb.nceas.mdqengine.serialize.XmlMarshaller;
+import edu.ucsb.nceas.mdqengine.store.InMemoryStore;
+import edu.ucsb.nceas.mdqengine.store.MDQStore;
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.dataone.exceptions.MarshallingException;
+import org.dataone.service.types.v2.SystemMetadata;
+import org.dataone.service.types.v2.TypeFactory;
+import org.dataone.service.util.TypeMarshaller;
+import org.xml.sax.SAXException;
+
+import javax.script.ScriptException;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.xpath.XPathExpressionException;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
-import javax.script.ScriptException;
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.xpath.XPathExpressionException;
-
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.dataone.configuration.Settings;
-import org.dataone.service.types.v2.TypeFactory;
-import org.dataone.exceptions.MarshallingException;
-import org.dataone.service.types.v2.SystemMetadata;
-import org.dataone.service.util.TypeMarshaller;
-import org.xml.sax.SAXException;
-
-import edu.ucsb.nceas.mdqengine.dispatch.MDQCache;
-import edu.ucsb.nceas.mdqengine.model.Check;
-import edu.ucsb.nceas.mdqengine.model.Output;
-import edu.ucsb.nceas.mdqengine.model.Result;
-import edu.ucsb.nceas.mdqengine.model.Run;
-import edu.ucsb.nceas.mdqengine.model.Status;
-import edu.ucsb.nceas.mdqengine.model.Suite;
-import edu.ucsb.nceas.mdqengine.processor.XMLDialect;
-import edu.ucsb.nceas.mdqengine.serialize.JsonMarshaller;
-import edu.ucsb.nceas.mdqengine.serialize.XmlMarshaller;
-import edu.ucsb.nceas.mdqengine.store.InMemoryStore;
-import edu.ucsb.nceas.mdqengine.store.MNStore;
-import edu.ucsb.nceas.mdqengine.store.MDQStore;
-
-import static org.dataone.configuration.Settings.*;
+import static org.dataone.configuration.Settings.getConfiguration;
 
 public class MDQEngine {
 	
@@ -133,7 +120,7 @@ public class MDQEngine {
 	
 	/**
 	 * Executes the given check for a given object
-	 * @param suite
+	 * @param check
 	 * @param input the InputStream for the object to QC
 	 * @param params optional additional parameters to make available for the check
 	 * @return the Run results for this execution
@@ -208,32 +195,24 @@ public class MDQEngine {
 			if(args.length >= 3) {
 				Class smClasses[] = {org.dataone.service.types.v2.SystemMetadata.class, org.dataone.service.types.v1.SystemMetadata.class};
 				for (Class thisClass: smClasses) {
-					System.out.println("Trying " + thisClass.getName());
 					sysmetaInputStream = new FileInputStream(args[2]);
 					try {
 						tmpSysmeta = TypeMarshaller.unmarshalTypeFromStream(thisClass, sysmetaInputStream);
 						// Didn't get an error so proceed to convert to sysmeta v2, if needed.
-						System.out.println("marshalling success!");
 						break;
 					} catch (ClassCastException cce) {
-					    System.out.println("Hit ClassCast exception");
 						cce.printStackTrace();
 					   continue;
 					} catch (InstantiationException | IllegalAccessException | IOException | MarshallingException fis) {
-						System.out.println("hit second catch...");
 						fis.printStackTrace();
 						continue;
 					}
 				}
 
-				System.out.println("Testing whether convert is needed...");
 				if (tmpSysmeta.getClass().getName().equals("org.dataone.service.types.v1.SystemMetadata")) {
-					System.out.println("Converting...");
 					try {
 						sysmeta = TypeFactory.convertTypeFromType(tmpSysmeta, SystemMetadata.class);
-						System.out.println("Converted sysmeta to v2");
 					} catch (InstantiationException | IllegalAccessException ce) {
-						System.out.println("Error converted sysmeta to v2");
 						ce.printStackTrace();
 					}
 				} else {
@@ -250,7 +229,6 @@ public class MDQEngine {
 				Run run = new Run();
 				run.setRunStatus(Run.FAILURE);
 				run.setErrorDescription(e.getMessage());
-				System.out.println(XmlMarshaller.toXml(run));
 				e.printStackTrace();
 			} catch (Exception e2) {
 				e2.printStackTrace();
