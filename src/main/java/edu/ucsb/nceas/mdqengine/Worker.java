@@ -161,6 +161,7 @@ public class Worker {
                         log.info("Saving quality run status after error");
                         // convert String into InputStream
                         if(run == null) run = new Run();
+                        run.setId(metadataPid);
                         run.setSuiteId(suiteId);
                         run.setObjectIdentifier(metadataPid);
                         run.setRunStatus(Run.FAILURE);
@@ -177,6 +178,7 @@ public class Worker {
                     try {
                         log.error("Saving quality run status");
                         // convert String into InputStream
+                        run.setId(metadataPid);
                         run.setRunStatus(Run.SUCCESS);
                         run.setErrorDescription("");
                         run.save(sysmeta);
