@@ -42,14 +42,14 @@
 	<bean id="mdq.suiteId" class="org.dataone.cn.indexer.parser.SolrField">
 		<constructor-arg name="name" value="suiteId"/>
 		<constructor-arg name="xpath"
-						 value="//suiteId"/>
+						 value="/*[local-name() = 'run']/suiteId"/>
 		<property name="multivalue" value="false"/>
 	</bean>
 
 	<bean id="mdq.timestamp" class="org.dataone.cn.indexer.parser.SolrField">
 		<constructor-arg name="name" value="timestamp"/>
 		<constructor-arg name="xpath"
-						 value="//timestamp"/>
+						 value="/*[local-name() = 'run']/timestamp"/>
 		<property name="multivalue" value="false"/>
 		<property name="converter" ref="dateConverter"/>
 	</bean>
@@ -57,14 +57,15 @@
 	<bean id="mdq.metadata.formatId" class="org.dataone.cn.indexer.parser.SolrField">
 		<constructor-arg name="name" value="metadataFormatId"/>
 		<constructor-arg name="xpath"
-						 value="//result[check/id[text() = 'check.echo.formatId.1']]/output/text()"/>
+		                 value="normalize-space(//result[check/id[contains(text(),'check.echo.formatId.')]]/output/text())"/>
 		<property name="multivalue" value="false"/>
 	</bean>
 
 	<bean id="mdq.datasource" class="org.dataone.cn.indexer.parser.SolrField">
 		<constructor-arg name="name" value="datasource"/>
+		<!-- Note: use 'contains' (xpath 1.0, which java supports) so that we can match check name without version number. -->
 		<constructor-arg name="xpath"
-						 value="//result[check/id[text() = 'check.echo.datasource.1']]/output/text()"/>
+						 value="normalize-space(//result[check/id[contains(text(),'check.echo.datasource.')]]/output/text())"/>
 		<property name="multivalue" value="false"/>
 	</bean>
 
@@ -80,15 +81,15 @@
 	<bean id="mdq.funder" class="org.dataone.cn.indexer.parser.SolrField">
 		<constructor-arg name="name" value="funder"/>
 		<constructor-arg name="xpath"
-						 value="//result[check/id[text() = 'check.echo.funder.1']]/output/text()"/>
+						 value="//result[check/id[contains(text(),'check.echo.funder.')]]/output/text()"/>
 		<property name="multivalue" value="true"/>
 		<property name="dedupe" value="true"/>
 	</bean>
 
 	<bean id="mdq.funder.lookup" class="org.dataone.cn.indexer.parser.SolrField">
-		<constructor-arg name="name" value="funderLookup"/>
+		<constructor-arg name="name" value="funderInfo"/>
 		<constructor-arg name="xpath"
-						 value="//result[check/id[text() = 'check.lookup.funder.1']]/output/text()"/>
+						 value="//result[check/id[contains(text(),'check.lookup.award.')]]/output/text()"/>
 		<property name="multivalue" value="true"/>
 		<property name="dedupe" value="true"/>
 	</bean>
@@ -96,14 +97,14 @@
 	<bean id="mdq.rightsHolder" class="org.dataone.cn.indexer.parser.SolrField">
 		<constructor-arg name="name" value="rightsHolder"/>
 		<constructor-arg name="xpath"
-						 value="//result[check/id[text() = 'check.echo.rightsHolder.1']]/output/text()"/>
+						 value="normalize-space(//result[check/id[contains(text(),'check.echo.rightsHolder.')]]/output/text())"/>
 		<property name="multivalue" value="false"/>
 	</bean>
 
 	<bean id="mdq.group" class="org.dataone.cn.indexer.parser.SolrField">
 		<constructor-arg name="name" value="group"/>
 		<constructor-arg name="xpath"
-						 value="//result[check/id[text() = 'check.lookup.group.1']]/output/text()"/>
+						 value="//result[check/id[contains(text(),'check.lookup.group.')]]/output/text()"/>
 		<property name="multivalue" value="true"/>
 		<property name="dedupe" value="true"/>
 	</bean>
