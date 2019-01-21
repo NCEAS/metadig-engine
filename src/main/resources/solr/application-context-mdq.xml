@@ -17,6 +17,7 @@
 				<ref bean="mdq.timestamp"/>
 				<ref bean="mdq.metadata.formatId"/>
 				<ref bean="mdq.datasource"/>
+				<ref bean="mdq.dateUploaded"/>
 				<ref bean="mdq.funder"/>
 				<ref bean="mdq.funder.lookup"/>
 				<ref bean="mdq.rightsHolder"/>
@@ -65,6 +66,15 @@
 		<constructor-arg name="xpath"
 						 value="//result[check/id[text() = 'check.echo.datasource.1']]/output/text()"/>
 		<property name="multivalue" value="false"/>
+	</bean>
+
+	<bean id="mdq.dateUploaded" class="org.dataone.cn.indexer.parser.SolrField">
+		<constructor-arg name="name" value="dateUploaded"/>
+		<constructor-arg name="xpath"
+						 value="normalize-space(//result[check/id[contains(text(),'check.echo.dateUploaded.')]]/output/text())"/>
+		<property name="multivalue" value="false"/>
+		<!-- Note: The dateConverter doesn't work for this field, so determine why. -->
+		<!-- <property name="converter" ref="dateConverter"/> -->
 	</bean>
 
 	<bean id="mdq.funder" class="org.dataone.cn.indexer.parser.SolrField">

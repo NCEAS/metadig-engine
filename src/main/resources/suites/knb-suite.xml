@@ -82,6 +82,9 @@
     <id>check.echo.formatId.1</id>
   </check>
   <check>
+    <id>check.echo.dateUploaded.1</id>
+  </check>
+  <check>
     <id>check.lookup.group.1</id>
   </check>
 </mdq:suite>

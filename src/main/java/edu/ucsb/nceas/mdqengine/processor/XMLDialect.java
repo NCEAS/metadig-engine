@@ -34,6 +34,7 @@ import java.net.URL;
 import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 public class XMLDialect {
@@ -146,7 +147,7 @@ public class XMLDialect {
 			// make the entire dom available
 			// TODO: string seems like only viable option for all env
 			variables.put("document", toXmlString(document));
-			
+
 			// include system metadata if available
 			if (this.systemMetadata != null) {
 				try {
@@ -154,6 +155,12 @@ public class XMLDialect {
 					TypeMarshaller.marshalTypeToOutputStream(systemMetadata, baos);
 					variables.put("systemMetadata", baos.toString("UTF-8"));
 					variables.put("datasource", systemMetadata.getOriginMemberNode().getValue());
+					// dateUploaded
+					// This unusual date format is acceptable to Solr - it must be GMT time, with
+					// no offset
+					SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+					df.setTimeZone(TimeZone.getTimeZone("GMT"));
+					variables.put("dateUploaded", df.format(systemMetadata.getDateUploaded()));
 					variables.put("authoritativeMemberNode", systemMetadata.getAuthoritativeMemberNode().getValue());
 					variables.put("systemMetadataPid", systemMetadata.getIdentifier().getValue());
 				} catch (Exception e) {
