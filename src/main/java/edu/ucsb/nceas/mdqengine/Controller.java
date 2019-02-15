@@ -9,10 +9,12 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.dataone.exceptions.MarshallingException;
 import org.dataone.service.types.v2.SystemMetadata;
+import org.dataone.service.types.v2.TypeFactory;
 import org.dataone.service.util.TypeMarshaller;
 import org.joda.time.DateTime;
 
 import java.io.*;
+import java.lang.reflect.InvocationTargetException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.concurrent.TimeUnit;
@@ -268,13 +270,42 @@ public class Controller {
         // StandardCharsets.UTF_8.name() > JDK 7
         String metadataDoc = buf.toString("UTF-8");
 
-        try {
-            sysmeta = TypeMarshaller.unmarshalTypeFromStream(SystemMetadata.class, systemMetadata);
-        } catch (InstantiationException | IllegalAccessException | IOException | MarshallingException fis) {
-            fis.printStackTrace();
+        //try {
+        //    sysmeta = TypeMarshaller.unmarshalTypeFromStream(SystemMetadata.class, systemMetadata);
+        //} catch (InstantiationException | IllegalAccessException | IOException | MarshallingException fis) {
+        //    fis.printStackTrace();
+        //}
+
+        InputStream sysmetaInputStream = null;
+        Object tmpSysmeta = null;
+
+        Class smClasses[] = {org.dataone.service.types.v2.SystemMetadata.class, org.dataone.service.types.v1.SystemMetadata.class};
+        for (Class thisClass: smClasses) {
+            try {
+                tmpSysmeta = TypeMarshaller.unmarshalTypeFromStream(thisClass, systemMetadata);
+                // Didn't get an error so proceed to convert to sysmeta v2, if needed.
+                break;
+            } catch (ClassCastException cce) {
+                cce.printStackTrace();
+                continue;
+            } catch (InstantiationException | IllegalAccessException | IOException | MarshallingException fis) {
+                fis.printStackTrace();
+                continue;
+            }
         }
 
-        // Save a skeleton run entry, to allow clients to check the status of runs that are queued.
+        if (tmpSysmeta.getClass().getName().equals("org.dataone.service.types.v1.SystemMetadata")) {
+            try {
+                sysmeta = TypeFactory.convertTypeFromType(tmpSysmeta, SystemMetadata.class);
+            } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException ce) {
+                ce.printStackTrace();
+            }
+        } else {
+            sysmeta = (SystemMetadata) tmpSysmeta;
+        }
+
+        // Save a skeleton run entry so that the run status will be set to 'queued', which will allow clients to check the status
+        // of this run and when it was queued.
         Run run = new Run();
         run.setRunStatus(Run.QUEUED);
         run.setErrorDescription("");
