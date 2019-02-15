@@ -71,11 +71,15 @@
   <field name="metadataId" type="string" multiValued="false" indexed="true" required="true" stored="true"/>
   <field name="metadataFormatId" type="string" multiValued="false" indexed="true" required="true" stored="true"/>
   <field name="suiteId" type="string" multiValued="false" indexed="true" required="true" stored="true"/>
-  <field name="datasource" type="string" multiValued="false" indexed="true" required="false" stored="true"/>
-  <field name="funder" type="string" multiValued="true" indexed="true" required="false" stored="true"/>
-  <field name="funder.lookup" type="string" multiValued="true" indexed="true" required="false" stored="true"/>
-  <field name="group" type="string" multiValued="true" indexed="true" required="false" stored="true"/>
-  <field name="rightsHolder" type="string" multiValued="false" indexed="true" required="false" stored="true"/>
+  <field name="datasource" type="string" multiValued="false" indexed="true" required="false" stored="true" docValues="true"/>
+  <field name="dateUploaded" type="pdate" multiValued="false" indexed="true" required="true" stored="true"/>
+  <field name="obsoletes" type="string" multiValued="false" indexed="true" required="false" stored="true" docValues="false"/>
+  <field name="obsoletedBy" type="string" multiValued="false" indexed="true" required="false" stored="true" docValues="false"/>
+  <field name="seriesid" type="string" multiValued="false" indexed="true" required="false" stored="true" docValues="false"/>
+  <field name="funder" type="string" multiValued="true" indexed="true" required="false" stored="true" docValues="true"/>
+  <field name="funderInfo" type="string" multiValued="true" indexed="true" required="false" stored="true"/>
+  <field name="group" type="string" multiValued="true" indexed="true" required="false" stored="true" docValues="true"/>
+  <field name="rightsHolder" type="string" multiValued="false" indexed="true" required="false" stored="true" docValues="true"/>
   <field name="checksPassed" type="pint" multiValued="false" indexed="true" required="true" stored="true"/>
   <field name="checksWarned" type="pint" multiValued="false" indexed="true" required="true" stored="true"/>
   <field name="checksFailed" type="pint" multiValued="false" indexed="true" required="truefalse" stored="true"/>

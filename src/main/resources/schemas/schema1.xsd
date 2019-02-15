@@ -7,6 +7,18 @@
   <xs:element name="status" type="tns:runStatus"/>
   <xs:element name="error" type="tns:errorDescription"/>
 
+  <xs:complexType name="systemMetadata">
+    <xs:sequence>
+      <xs:element name="originMemberNode" type="xs:string" minOccurs="0"/>
+      <xs:element name="rightsHolder" type="xs:string" minOccurs="0"/>
+      <xs:element name="dateUploaded" type="xs:dateTime" minOccurs="0"/>
+      <xs:element name="formatId" type="xs:string" minOccurs="0"/>
+      <xs:element name="obsoletes" type="xs:string" minOccurs="0"/>
+      <xs:element name="obsoletedBy" type="xs:string" minOccurs="0"/>
+      <xs:element name="seriesId" type="xs:string" minOccurs="0"/>
+    </xs:sequence>
+  </xs:complexType>
+
   <xs:complexType name="check">
     <xs:sequence>
       <xs:element name="id" type="xs:string"/>

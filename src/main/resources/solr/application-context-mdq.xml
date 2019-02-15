@@ -16,8 +16,10 @@
 				<ref bean="mdq.suiteId"/>
 				<ref bean="mdq.timestamp"/>
 				<ref bean="mdq.metadata.formatId"/>
-				<ref bean="mdq.datasource"/>
 				<ref bean="mdq.dateUploaded"/>
+				<ref bean="mdq.obsoletes"/>
+				<ref bean="mdq.obsoletedBy"/>
+				<ref bean="mdq.seriesId"/>
 				<ref bean="mdq.funder"/>
 				<ref bean="mdq.funder.lookup"/>
 				<ref bean="mdq.rightsHolder"/>
@@ -57,29 +59,50 @@
 	<bean id="mdq.metadata.formatId" class="org.dataone.cn.indexer.parser.SolrField">
 		<constructor-arg name="name" value="metadataFormatId"/>
 		<constructor-arg name="xpath"
-		                 value="normalize-space(//result[check/id[contains(text(),'check.echo.formatId.')]]/output/text())"/>
+		                 value="normalize-space(/*/sysmeta/formatId)"/>
+		<property name="multivalue" value="false"/>
+	</bean>
+
+	<bean id="mdq.obsoletes" class="org.dataone.cn.indexer.parser.SolrField">
+		<constructor-arg name="name" value="obsoletes"/>
+		<constructor-arg name="xpath"
+						 value="normalize-space(/*/sysmeta/obsoletes)"/>
+		<property name="multivalue" value="false"/>
+	</bean>
+
+	<bean id="mdq.obsoletedBy" class="org.dataone.cn.indexer.parser.SolrField">
+		<constructor-arg name="name" value="obsoletedBy"/>
+		<constructor-arg name="xpath"
+						 value="normalize-space(/*/sysmeta/obsoletedBy)"/>
+		<property name="multivalue" value="false"/>
+	</bean>
+
+	<bean id="mdq.seriesId" class="org.dataone.cn.indexer.parser.SolrField">
+		<constructor-arg name="name" value="seriesId"/>
+		<constructor-arg name="xpath"
+						 value="normalize-space(/*/sysmeta/seriesId)"/>
 		<property name="multivalue" value="false"/>
 	</bean>
 
 	<bean id="mdq.datasource" class="org.dataone.cn.indexer.parser.SolrField">
 		<constructor-arg name="name" value="datasource"/>
-		<!-- Note: use 'contains' (xpath 1.0, which java supports) so that we can match check name without version number. -->
 		<constructor-arg name="xpath"
-						 value="normalize-space(//result[check/id[contains(text(),'check.echo.datasource.')]]/output/text())"/>
+						 value="normalize-space(/*/sysmeta/originMemberNode)"/>
 		<property name="multivalue" value="false"/>
 	</bean>
 
 	<bean id="mdq.dateUploaded" class="org.dataone.cn.indexer.parser.SolrField">
 		<constructor-arg name="name" value="dateUploaded"/>
 		<constructor-arg name="xpath"
-						 value="normalize-space(//result[check/id[contains(text(),'check.echo.dateUploaded.')]]/output/text())"/>
+						 value="normalize-space(/*/sysmeta/dateUploaded)"/>
 		<property name="multivalue" value="false"/>
 		<!-- Note: The dateConverter doesn't work for this field, so determine why. -->
-		<!-- <property name="converter" ref="dateConverter"/> -->
+		<property name="converter" ref="dateConverter"/>
 	</bean>
 
 	<bean id="mdq.funder" class="org.dataone.cn.indexer.parser.SolrField">
 		<constructor-arg name="name" value="funder"/>
+		<!-- Note: use 'contains' (xpath 1.0, which java supports) so that we can match check name without version number. -->
 		<constructor-arg name="xpath"
 						 value="//result[check/id[contains(text(),'check.echo.funder.')]]/output/text()"/>
 		<property name="multivalue" value="true"/>
@@ -97,7 +120,7 @@
 	<bean id="mdq.rightsHolder" class="org.dataone.cn.indexer.parser.SolrField">
 		<constructor-arg name="name" value="rightsHolder"/>
 		<constructor-arg name="xpath"
-						 value="normalize-space(//result[check/id[contains(text(),'check.echo.rightsHolder.')]]/output/text())"/>
+						 value="normalize-space(/*/sysmeta/rightsHolder)"/>
 		<property name="multivalue" value="false"/>
 	</bean>
 

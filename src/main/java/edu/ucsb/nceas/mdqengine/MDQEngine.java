@@ -191,6 +191,8 @@ public class MDQEngine {
 			Object tmpSysmeta = null;
 
 			// Read in the system metadata XML file if it is provided. Suites can be run without it.
+			// The SystemMetadata can be either version 1 or 2. The current type marshaller cannot handle version 1,
+			// so we have to convert v1 to v2 (seems like the marshalling call should do this for us).
 			// THe drawback to this approach is that it will be necessary to test for sysmeta v3 when it is released.
 			if(args.length >= 3) {
 				Class smClasses[] = {org.dataone.service.types.v2.SystemMetadata.class, org.dataone.service.types.v1.SystemMetadata.class};
@@ -221,6 +223,21 @@ public class MDQEngine {
 			}
 			Run run = engine.runSuite(suite, input, null, sysmeta);
 			run.setRunStatus("SUCCESS");
+
+			// Add DataONE sysmeta, if it was provided.
+			if(sysmeta != null) {
+				SysmetaModel smm = new SysmetaModel();
+				// These sysmeta fields are always provided
+				smm.setOriginMemberNode(sysmeta.getOriginMemberNode().getValue());
+				smm.setRightsHolder(sysmeta.getRightsHolder().getValue());
+				smm.setDateUploaded(sysmeta.getDateUploaded());
+				smm.setFormatId(sysmeta.getFormatId().getValue());
+				// These fields aren't required.
+				if (sysmeta.getObsoletes() != null) smm.setObsoletes(sysmeta.getObsoletes().getValue());
+				if (sysmeta.getObsoletedBy() != null) smm.setObsoletedBy(sysmeta.getObsoletedBy().getValue());
+				if (sysmeta.getSeriesId() != null) smm.setSeriesId(sysmeta.getSeriesId().getValue());
+				run.setSysmeta(smm);
+			}
 			System.out.println(XmlMarshaller.toXml(run));
 		} catch (Exception e) {
 			// TODO Auto-generated catch block

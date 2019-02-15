@@ -5,9 +5,7 @@ import edu.ucsb.nceas.mdqengine.exception.MetadigException;
 import edu.ucsb.nceas.mdqengine.exception.MetadigIndexException;
 import edu.ucsb.nceas.mdqengine.exception.MetadigProcessException;
 import edu.ucsb.nceas.mdqengine.exception.MetadigStoreException;
-import edu.ucsb.nceas.mdqengine.model.Result;
-import edu.ucsb.nceas.mdqengine.model.Run;
-import edu.ucsb.nceas.mdqengine.model.Suite;
+import edu.ucsb.nceas.mdqengine.model.*;
 import edu.ucsb.nceas.mdqengine.serialize.XmlMarshaller;
 import edu.ucsb.nceas.mdqengine.solr.IndexApplicationController;
 import edu.ucsb.nceas.mdqengine.store.InMemoryStore;
@@ -346,6 +344,21 @@ public class Worker {
         } catch (Exception e) {
             throw new MetadigException("Unable to run quality suite for pid " + message.getMetadataPid() + ", suite "
                     + suiteId + e.getMessage(), e);
+        }
+
+        // Add DataONE sysmeta, if it was provided.
+        if(sysmeta != null) {
+            SysmetaModel smm = new SysmetaModel();
+            // These sysmeta fields are always provided
+            smm.setOriginMemberNode(sysmeta.getOriginMemberNode().getValue());
+            smm.setRightsHolder(sysmeta.getRightsHolder().getValue());
+            smm.setDateUploaded(sysmeta.getDateUploaded());
+            smm.setFormatId(sysmeta.getFormatId().getValue());
+            // These fields aren't required.
+            if (sysmeta.getObsoletes() != null) smm.setObsoletes(sysmeta.getObsoletes().getValue());
+            if (sysmeta.getObsoletedBy() != null) smm.setObsoletedBy(sysmeta.getObsoletedBy().getValue());
+            if (sysmeta.getSeriesId() != null) smm.setSeriesId(sysmeta.getSeriesId().getValue());
+            run.setSysmeta(smm);
         }
 
         return(run);

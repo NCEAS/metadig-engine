@@ -15,7 +15,7 @@ import java.util.List;
 
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(propOrder = {"id", "timestamp", "objectIdentifier", "suiteId", "status", "runStatus", "errorDescription", "result"})
+@XmlType(propOrder = {"id", "timestamp", "objectIdentifier", "suiteId", "status", "runStatus", "errorDescription", "sysmeta", "result"})
 public class Run {
 
 	public static final String SUCCESS = "success";
@@ -47,7 +47,7 @@ public class Run {
 	 */
 	@XmlElement(required = false)
 	private String objectIdentifier;
-	
+
 	/**
 	 * The list of results for this run. Results contain the check that was run and 
 	 * the outcome of the check.
@@ -79,6 +79,12 @@ public class Run {
 	@XmlElement(required = false)
 	private String errorDescription;
 
+	/**
+	 * SystemMetadata from DataONE
+	 */
+	@XmlElement(required = true)
+	private SysmetaModel sysmeta;
+
 	public String getId() {
 		return id;
 	}
@@ -93,6 +99,14 @@ public class Run {
 
 	public void setTimestamp(Date timestamp) {
 		this.timestamp = timestamp;
+	}
+
+	public SysmetaModel getSysmeta() {
+		return sysmeta;
+	}
+
+	public void setSysmeta(SysmetaModel sysmeta) {
+		this.sysmeta = sysmeta;
 	}
 
 	public List<Result> getResult() {
