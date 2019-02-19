@@ -11,6 +11,7 @@
     <xs:sequence>
       <xs:element name="originMemberNode" type="xs:string" minOccurs="0"/>
       <xs:element name="rightsHolder" type="xs:string" minOccurs="0"/>
+      <xs:element name="group" type="xs:string" minOccurs="0"/>
       <xs:element name="dateUploaded" type="xs:dateTime" minOccurs="0"/>
       <xs:element name="formatId" type="xs:string" minOccurs="0"/>
       <xs:element name="obsoletes" type="xs:string" minOccurs="0"/>

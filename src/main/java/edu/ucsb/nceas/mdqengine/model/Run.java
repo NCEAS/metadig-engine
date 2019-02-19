@@ -6,7 +6,6 @@ import edu.ucsb.nceas.mdqengine.store.MDQStore;
 import edu.ucsb.nceas.mdqengine.store.StoreFactory;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.dataone.service.types.v2.SystemMetadata;
 
 import javax.xml.bind.annotation.*;
 import java.sql.SQLException;
@@ -82,7 +81,7 @@ public class Run {
 	/**
 	 * SystemMetadata from DataONE
 	 */
-	@XmlElement(required = true)
+	@XmlElement(required = false)
 	private SysmetaModel sysmeta;
 
 	public String getId() {
@@ -149,10 +148,9 @@ public class Run {
 	 * The quality report is saved to a database instance.
 	 * </p>
 	 *
-	 * @param sysmeta The DataONE system metadata associated with the metadata document that was assessed.
 	 * @throws Exception
 	 */
-	public void save(SystemMetadata sysmeta) throws MetadigStoreException {
+	public void save() throws MetadigStoreException {
 
 	    boolean persist = true;
 		store = StoreFactory.getStore(persist);
@@ -169,12 +167,12 @@ public class Run {
 		log.debug("Saving to persistent storage: metadata PID: " + this.getId()  + ", suite id: " + this.getSuiteId());
 
 		try {
-			store.saveRun(this, sysmeta);
+			store.saveRun(this);
 		} catch (MetadigException me) {
 			log.debug("Error saving run: " + me.getCause());
 			if(me.getCause() instanceof SQLException) {
 				log.debug("Retrying saveRun() due to error");
-				store.saveRun(this, sysmeta);
+				store.saveRun(this);
 			} else {
 				throw(me);
 			}

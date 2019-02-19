@@ -2,6 +2,7 @@ package edu.ucsb.nceas.mdqengine;
 
 import edu.ucsb.nceas.mdqengine.dispatch.MDQCache;
 import edu.ucsb.nceas.mdqengine.model.*;
+import edu.ucsb.nceas.mdqengine.processor.GroupLookupCheck;
 import edu.ucsb.nceas.mdqengine.processor.XMLDialect;
 import edu.ucsb.nceas.mdqengine.serialize.JsonMarshaller;
 import edu.ucsb.nceas.mdqengine.serialize.XmlMarshaller;
@@ -26,6 +27,9 @@ import java.net.MalformedURLException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 import static org.dataone.configuration.Settings.getConfiguration;
 
@@ -236,6 +240,37 @@ public class MDQEngine {
 				if (sysmeta.getObsoletes() != null) smm.setObsoletes(sysmeta.getObsoletes().getValue());
 				if (sysmeta.getObsoletedBy() != null) smm.setObsoletedBy(sysmeta.getObsoletedBy().getValue());
 				if (sysmeta.getSeriesId() != null) smm.setSeriesId(sysmeta.getSeriesId().getValue());
+
+				// Now make the call to DataONE to get the group information for this rightsHolder.
+				// Only wait for a certain amount of time before we will give up.
+                ExecutorService executorService = Executors.newSingleThreadExecutor();
+
+                // Provide the rightsHolder to the DataONE group lookup.
+				GroupLookupCheck glc = new GroupLookupCheck();
+				glc.setRightsHolder(sysmeta.getRightsHolder().getValue());
+				Future<List<String>> future = executorService.submit(glc);
+
+				List<String> groups = null;
+				for (int i = 0; i < 5; i++) {
+					try {
+						groups = future.get();
+					} catch (Throwable thrown) {
+						System.out.println("Error while waiting for thread completion");
+					}
+					// Sleep for 1 second
+
+					if(groups != null) break;
+                    System.out.println("Waiting 1 second for groups");
+					Thread.sleep(1000);
+				}
+
+				if(groups != null) {
+					System.out.println("Setting groups");
+					smm.setGroups(groups);
+				} else {
+					System.out.println("No groups to set");
+				}
+				executorService.shutdown();
 				run.setSysmeta(smm);
 			}
 			System.out.println(XmlMarshaller.toXml(run));

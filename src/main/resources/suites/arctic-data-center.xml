@@ -85,9 +85,6 @@
     <id>check.echo.funder.1</id>
   </check>
   <check>
-    <id>check.lookup.group.1</id>
-  </check>
-  <check>
     <id>check.lookup.award.1</id>
   </check>
 </mdq:suite>

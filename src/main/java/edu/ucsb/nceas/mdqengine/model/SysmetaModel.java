@@ -2,10 +2,11 @@ package edu.ucsb.nceas.mdqengine.model;
 
 import javax.xml.bind.annotation.*;
 import java.util.Date;
+import java.util.List;
 
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(propOrder = {"originMemberNode", "rightsHolder", "dateUploaded", "formatId", "obsoletes", "obsoletedBy", "seriesId"})
+@XmlType(propOrder = {"originMemberNode", "rightsHolder", "groups", "dateUploaded", "formatId", "obsoletes", "obsoletedBy", "seriesId"})
 public class SysmetaModel {
 
     /**
@@ -15,11 +16,18 @@ public class SysmetaModel {
     private String originMemberNode; // this is 'datasource' in the DataONE Solr index
 
     /**
-    * The data that the object was uploaded to the authoritative Member Node.
-    * user interfaces and reports.
+    * The DataONE user that owns the metadata document.
     */
     @XmlElement(required = true)
     private String rightsHolder;
+
+    /**
+    * The DataONE user groups that this rightsHolder belongs to.
+    * user interfaces and reports.
+    */
+    @XmlElementWrapper(name="groups")
+    @XmlElement(name="group", required = false)
+    private List<String> groups;
 
     /**
     * The data that the object was uploaded to the authoritative Member Node.
@@ -66,6 +74,14 @@ public class SysmetaModel {
 
     public void setRightsHolder(String rightsHolder) {
         this.rightsHolder = rightsHolder;
+    }
+
+    public List<String> getGroups() {
+        return groups;
+    }
+
+    public void setGroups(List<String> groups) {
+        this.groups = groups;
     }
 
     public Date getDateUploaded() {

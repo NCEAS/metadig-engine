@@ -127,7 +127,7 @@
 	<bean id="mdq.group" class="org.dataone.cn.indexer.parser.SolrField">
 		<constructor-arg name="name" value="group"/>
 		<constructor-arg name="xpath"
-						 value="//result[check/id[contains(text(),'check.lookup.group.')]]/output/text()"/>
+						 value="/*/sysmeta/groups/group/text()"/>
 		<property name="multivalue" value="true"/>
 		<property name="dedupe" value="true"/>
 	</bean>

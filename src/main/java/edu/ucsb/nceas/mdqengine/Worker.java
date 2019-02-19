@@ -5,7 +5,11 @@ import edu.ucsb.nceas.mdqengine.exception.MetadigException;
 import edu.ucsb.nceas.mdqengine.exception.MetadigIndexException;
 import edu.ucsb.nceas.mdqengine.exception.MetadigProcessException;
 import edu.ucsb.nceas.mdqengine.exception.MetadigStoreException;
-import edu.ucsb.nceas.mdqengine.model.*;
+import edu.ucsb.nceas.mdqengine.model.Result;
+import edu.ucsb.nceas.mdqengine.model.Run;
+import edu.ucsb.nceas.mdqengine.model.Suite;
+import edu.ucsb.nceas.mdqengine.model.SysmetaModel;
+import edu.ucsb.nceas.mdqengine.processor.GroupLookupCheck;
 import edu.ucsb.nceas.mdqengine.serialize.XmlMarshaller;
 import edu.ucsb.nceas.mdqengine.solr.IndexApplicationController;
 import edu.ucsb.nceas.mdqengine.store.InMemoryStore;
@@ -28,12 +32,8 @@ import org.dataone.service.types.v2.SystemMetadata;
 import java.io.*;
 import java.math.BigInteger;
 import java.net.InetAddress;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
+import java.util.*;
+import java.util.concurrent.*;
 
 /**
  * The Worker class contains methods that create quality reports for metadata documents
@@ -112,7 +112,7 @@ public class Worker {
                 try {
                     qEntry = (QueueEntry) in.readObject();
                 } catch (java.lang.ClassNotFoundException e) {
-                    log.info("Unable to process quality report");
+                    log.error("Unable to process quality report");
                     e.printStackTrace();
                     return;
                 }
@@ -135,6 +135,9 @@ public class Worker {
                     // worker.
                     qEntry.setHostname(InetAddress.getLocalHost().getHostName());
                     run = wkr.processReport(qEntry);
+                    if(run.getObjectIdentifier() == null) {
+                        run.setObjectIdentifier(metadataPid);
+                    }
                     runXML = XmlMarshaller.toXml(run);
                     qEntry.setRunXML(runXML);
                     difference = System.currentTimeMillis() - startTimeProcessing;
@@ -143,7 +146,7 @@ public class Worker {
                     log.info("Completed running quality suite.");
                 } catch (java.lang.Exception e) {
                     failFast = true;
-                    log.info("Unable to run quality suite.");
+                    log.error("Unable to run quality suite.");
                     e.printStackTrace();
                     // Store an exception in the queue entry. This will be returned to the Controller so
                     // so that it can take the appropriate action, for example, to resubmit the entry
@@ -156,16 +159,16 @@ public class Worker {
 
                     // Save the processing report to persistent storage, so that we can save the error and status of the run.
                     try {
-                        log.info("Saving quality run status after error");
+                        log.debug("Saving quality run status after error");
                         // convert String into InputStream
                         if(run == null) run = new Run();
-                        run.setId(metadataPid);
+                        run.setObjectIdentifier(metadataPid);
                         run.setSuiteId(suiteId);
                         run.setObjectIdentifier(metadataPid);
                         run.setRunStatus(Run.FAILURE);
                         run.setErrorDescription(e.getMessage());
-                        run.save(sysmeta);
-                        log.info("Saved quality run status after error");
+                        run.save();
+                        log.debug("Saved quality run status after error");
                     } catch (Exception ex) {
                         log.error("Processing failed, then unable to save the quality report to database:" + e.getMessage());
                     }
@@ -174,13 +177,12 @@ public class Worker {
                 if(!failFast) {
                     /* Save the processing report to persistent storage */
                     try {
-                        log.error("Saving quality run status");
                         // convert String into InputStream
-                        run.setId(metadataPid);
+                        run.setObjectIdentifier(metadataPid);
                         run.setRunStatus(Run.SUCCESS);
                         run.setErrorDescription("");
-                        run.save(sysmeta);
-                        log.error("Saved quality run status");
+                        run.save();
+                        log.debug("Saved quality run status");
                     } catch (MetadigStoreException me) {
                         failFast = true;
                         log.error("Unable to save (then index) quality report to database.");
@@ -193,12 +195,14 @@ public class Worker {
                     try {
                         // convert String into InputStream
                         startTimeIndexing = System.currentTimeMillis();
+                        runXML = XmlMarshaller.toXml(run);
+                        //log.warn("the report: " + runXML);
                         wkr.indexReport(metadataPid, runXML, suiteId, sysmeta);
                         difference = System.currentTimeMillis() - startTimeIndexing;
                         elapsedTimeSecondsIndexing = TimeUnit.MILLISECONDS.toSeconds(difference);
                         qEntry.setIndexingElapsedTimeSeconds(elapsedTimeSecondsIndexing);
                     } catch (Exception e) {
-                        log.info("Unable to index quality report.");
+                        log.error("Unable to index quality report.");
                         e.printStackTrace();
                         MetadigException me = new MetadigIndexException("Unable index the generated quality report.");
                         me.initCause(e);
@@ -208,11 +212,11 @@ public class Worker {
 
                 // Send the report (completed or not) to the controller, with errors that were encountered.
                 try {
-                    log.info("Sending report info back to controller...");
+                    log.debug("Sending report info back to controller...");
                     totalElapsedTimeSeconds = elapsedTimeSecondsProcessing + elapsedTimeSecondsIndexing;
                     qEntry.setTotalElapsedTimeSeconds(totalElapsedTimeSeconds);
                     wkr.returnReport(metadataPid, suiteId, qEntry, startTimeProcessing);
-                    log.info("Sent report info back to controller...");
+                    log.debug("Sent report info back to controller...");
                 } catch (IOException ioe) {
                     log.error("Unable to return quality report to controller.");
                     ioe.printStackTrace();
@@ -333,6 +337,7 @@ public class Worker {
         // Run the Metadata Quality Engine for the specified metadata object.
         // TODO: set suite params correctly
         Map<String, Object> params = new HashMap<String, Object>();
+        // To run the suite, we need the in memory store, that contains all checks and suites.
         MDQStore store = new InMemoryStore();
 
         Run run = null;
@@ -358,6 +363,38 @@ public class Worker {
             if (sysmeta.getObsoletes() != null) smm.setObsoletes(sysmeta.getObsoletes().getValue());
             if (sysmeta.getObsoletedBy() != null) smm.setObsoletedBy(sysmeta.getObsoletedBy().getValue());
             if (sysmeta.getSeriesId() != null) smm.setSeriesId(sysmeta.getSeriesId().getValue());
+
+            // Now make the call to DataONE to get the group information for this rightsHolder.
+            // Only wait for a certain amount of time before we will give up.
+            ExecutorService executorService = Executors.newSingleThreadExecutor();
+
+            // Provide the rightsHolder to the DataONE group lookup.
+            GroupLookupCheck glc = new GroupLookupCheck();
+            glc.setRightsHolder(sysmeta.getRightsHolder().getValue());
+            Future<List<String>> future = executorService.submit(glc);
+
+            List<String> groups = new ArrayList<String>();
+            // Wait for a few seconds for the 'accounts'
+            for (int i = 0; i < 5; i++) {
+                try {
+                    groups = future.get();
+                } catch (Throwable thrown) {
+                    log.error("Error while waiting for thread completion");
+                }
+                // Sleep for 1 second
+
+                if (groups.size() > 0 ) break;
+                log.debug("Waiting 1 second for DataONE group lookup");
+                Thread.sleep(1000);
+            }
+
+            if (groups != null) {
+                smm.setGroups(groups);
+            } else {
+                log.debug("No groups to set");
+            }
+            executorService.shutdown();
+
             run.setSysmeta(smm);
         }
 
@@ -450,7 +487,7 @@ public class Worker {
 
         /* The auth token is read from the config file. */
         Session session = new AuthTokenSession(authToken);
-        log.info(" Created session for subject: " + session.getSubject());
+        log.debug(" Created session for subject: " + session.getSubject());
 
         memberNodeServiceUrl = message.getMemberNode();
 

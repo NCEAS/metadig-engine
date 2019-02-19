@@ -9,7 +9,6 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.dataone.service.types.v2.SystemMetadata;
 import org.dataone.service.util.TypeMarshaller;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
@@ -177,13 +176,17 @@ public class DatabaseStore implements MDQStore {
     /*
      * Save a single run, first populating the 'pids' table, then the 'runs' table.
      */
-    public void saveRun(Run run, SystemMetadata sysmeta) throws MetadigStoreException {
+    public void saveRun(Run run) throws MetadigStoreException {
         //runs.put(run.getId(), run);
 
         PreparedStatement stmt = null;
-        String metadataId = sysmeta.getIdentifier().getValue().toString();
+        String datasource = null;
+        SysmetaModel sysmeta = run.getSysmeta();
+        if(sysmeta != null) {
+            datasource = sysmeta.getOriginMemberNode();
+        }
+        String metadataId = run.getObjectIdentifier();
         String suiteId = run.getSuiteId();
-        String datasource = sysmeta.getOriginMemberNode().getValue().toString();
         String status = run.getRunStatus();
         String error = run.getErrorDescription();
         String resultStr = null;

@@ -4,6 +4,7 @@ import com.rabbitmq.client.*;
 import edu.ucsb.nceas.mdqengine.exception.MetadigException;
 import edu.ucsb.nceas.mdqengine.exception.MetadigStoreException;
 import edu.ucsb.nceas.mdqengine.model.Run;
+import edu.ucsb.nceas.mdqengine.model.SysmetaModel;
 import org.apache.commons.configuration2.ex.ConfigurationException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -310,9 +311,15 @@ public class Controller {
         run.setRunStatus(Run.QUEUED);
         run.setErrorDescription("");
         run.setObjectIdentifier(metadataPid);
+        // The origin mn is required by persistent storage, so set it to a non-null value. It will be reset to the
+        // value from sysmeta (if supplied) when the run is processed.
+        SysmetaModel smm = new SysmetaModel();
+        smm.setOriginMemberNode("");
+        run.setSysmeta(smm);
         run.setSuiteId(qualitySuiteId);
+
         try {
-            run.save(sysmeta);
+            run.save();
         } catch (MetadigStoreException mse) {
             log.error("Unable to save run state to 'processing' before queing, continuing..");
         }

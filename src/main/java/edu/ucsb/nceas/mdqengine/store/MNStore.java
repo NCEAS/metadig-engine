@@ -341,6 +341,6 @@ public class MNStore implements MDQStore {
 	public void shutdown() {};
 
 	@Override
-	public void saveRun(Run run, SystemMetadata sysmeta) { }
+	public void saveRun(Run run) {}
 
 }
