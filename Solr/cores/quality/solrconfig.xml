@@ -89,6 +89,7 @@
   <!-- browse-resources must come before solr-velocity JAR in order to override localized resources -->
   <lib path="${solr.install.dir:../../../..}/example/files/browse-resources"/>
   <lib dir="${solr.install.dir:../../../..}/dist/" regex="solr-velocity-\d.*\.jar" />
+  <!-- <lib dir="${solr.install.dir:../../../..}/dist/" regex="solr-analytics-\d.*\.jar" /> -->
   <!-- an exact 'path' can be used instead of a 'dir' to specify a
        specific jar file.  This will cause a serious error to be logged
        if it can't be loaded.
@@ -673,6 +674,11 @@
        not be initialized until the first request that uses it.
 
     -->
+ <!-- Add analytics pcs 2019 01 14 -->
+ <!-- To handle user requests -->
+ <searchComponent name="analytics" class="org.apache.solr.handler.component.AnalyticsComponent" />
+ <!-- END: Add analytics pcs 2019 01 14 -->
+
   <!-- SearchHandler
 
        http://wiki.apache.org/solr/SearchHandler
@@ -748,7 +754,18 @@
          <str>nameOfCustomComponent2</str>
        </arr>
       -->
+ <!-- Add analytics pcs 2019 01 14 -->
+ <!-- To handle user requests -->
+    <arr name="last-components">
+        <str>analytics</str>
+    </arr>
+ <!-- END: Add analytics pcs 2019 01 14 -->
   </requestHandler>
+
+ <!-- Add analytics pcs 2019 01 14 -->
+ <!-- For inter-shard communication during distributed requests -->
+<requestHandler name="/analytics" class="org.apache.solr.handler.AnalyticsHandler" />
+<!-- END: Add analytics pcs 2019 01 14 -->
 
   <!-- A request handler that returns indented JSON by default -->
   <requestHandler name="/query" class="solr.SearchHandler">
