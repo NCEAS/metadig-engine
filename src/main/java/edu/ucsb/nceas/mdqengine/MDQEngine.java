@@ -40,8 +40,9 @@ public class MDQEngine {
 	/**
 	 * Default store uses the in-memory implementation
 	 */
+
 	private MDQStore store = null;
-	
+
 	protected Log log = LogFactory.getLog(this.getClass());
 	
 	public MDQEngine() {
@@ -95,7 +96,7 @@ public class MDQEngine {
 				// then load it
 				Check origCheck = check;
 				check = store.getCheck(origCheck.getId());
-				
+
 				// handle missing references gracefully
 				if (check == null) {
 					String msg = "Could not locate referenced check in store: " + origCheck.getId();
@@ -107,6 +108,10 @@ public class MDQEngine {
 					results.add(r);
 					continue;
 				}
+
+				// The check type from the suite definition file takes precedence over the check type
+				// defined in the check definition file.
+                if(origCheck.getType() != null) check.setType(origCheck.getType());
 			}
 			Result result = xml.runCheck(check);
 			results.add(result);

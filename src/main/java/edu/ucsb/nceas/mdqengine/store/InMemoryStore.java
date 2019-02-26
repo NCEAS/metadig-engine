@@ -38,11 +38,10 @@ public class InMemoryStore implements MDQStore{
 	
 	Map<String, Run> runs = new HashMap<String, Run>();
 	
-	protected Log log = LogFactory.getLog(this.getClass());
-	
 	public InMemoryStore() {
 		this.init();
 	}
+	protected Log log = LogFactory.getLog(this.getClass());
 	
 	private void init() {
 		
@@ -147,9 +146,7 @@ public class InMemoryStore implements MDQStore{
 	}
 
 	@Override
-	public void createCheck(Check check) {
-		checks.put(check.getId(), check);
-	}
+	public void createCheck(Check check) { checks.put(check.getId(), check); }
 
 	@Override
 	public void updateCheck(Check check) {

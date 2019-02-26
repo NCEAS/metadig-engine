@@ -1,13 +1,9 @@
 package edu.ucsb.nceas.mdqengine.model;
 
-import java.util.List;
+import edu.ucsb.nceas.mdqengine.exception.MetadigException;
 
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlElementWrapper;
-import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlType;
+import javax.xml.bind.annotation.*;
+import java.util.List;
 
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.FIELD)
@@ -73,8 +69,20 @@ public class Suite {
 		this.description = description;
 	}
 
+	// Return all checks contained in the suite.
 	public List<Check> getCheck() {
 		return check;
+	}
+
+	// Find a specific check from the list of checks
+	public Check getCheck(String id) throws Exception {
+		for (Check thisCheck: check) {
+			if(thisCheck.equals(id) ) {
+				return thisCheck;
+			}
+		}
+		// The check was not found
+		throw new MetadigException("Check with id: " + id + " was not found.");
 	}
 
 	public void setCheck(List<Check> check) {
