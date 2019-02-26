@@ -109,8 +109,9 @@ public class MDQEngine {
 					continue;
 				}
 
-				// The check type from the suite definition file takes precedence over the check type
-				// defined in the check definition file.
+				// The check type and level from the suite definition file takes precedence over the check type
+				// and level defined in the check definition file.
+				if(origCheck.getLevel() != null) check.setLevel(origCheck.getLevel());
                 if(origCheck.getType() != null) check.setType(origCheck.getType());
 			}
 			Result result = xml.runCheck(check);
