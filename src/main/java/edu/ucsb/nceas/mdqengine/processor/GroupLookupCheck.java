@@ -43,29 +43,28 @@ public class GroupLookupCheck implements Callable<List<String>> {
 						return groups;
 					}
 				} else {
-                	log.warn("Setting subject to rightsHolder: " + this.rightsHolder);
+                	log.debug("Setting subject to rightsHolder: " + this.rightsHolder);
                 	subject = new Subject();
                 	subject.setValue(this.rightsHolder);
 				}
 
-				log.warn("Looking up SubjectInfo for: " + subject.getValue());
+				log.debug("Looking up SubjectInfo for: " + subject.getValue());
                 try {
 					subjectInfo = D1Client.getCN().getSubjectInfo(null, subject);
 				} catch (org.dataone.service.exceptions.NotFound fn ){
-                	log.warn("Subject: " + subject.getValue() + "not found");
+                	log.debug("Subject: " + subject.getValue() + "not found");
                 	return(groups);
 				}
-				log.warn("Retrieved subject: " + subjectInfo.getPerson(0).getSubject());
 				if (subjectInfo != null && subjectInfo.getPersonList() != null && subjectInfo.getPersonList().size() > 0) {
 					Person person = subjectInfo.getPerson(0);
-					log.warn("Checking person: " + person.getSubject().getValue());
+					log.debug("Checking person: " + person.getSubject().getValue());
 					// get if we are looking up a person or a group
 					if (person.getSubject().equals(subject)) {
-						log.warn("Persons are equal: " + person.getSubject().getValue());
+						log.debug("Persons are equal: " + person.getSubject().getValue());
 						if (person.getIsMemberOfList() != null && person.getIsMemberOfList().size() > 0) {
 							for (Subject group: person.getIsMemberOfList()) {
 								String groupSubject = group.getValue();
-								log.warn("Found group: " + groupSubject);
+								log.debug("Found group: " + groupSubject);
 								groups.add(groupSubject);
 							}
 						}
@@ -74,7 +73,7 @@ public class GroupLookupCheck implements Callable<List<String>> {
 						groups.add(subject.getValue());
 					}
 				} else {
-					log.warn("Didn't find subject info or personList");
+					log.debug("Didn't find subject info or personList");
 				}
 
 			} catch (Exception e) {
