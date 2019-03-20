@@ -1,16 +1,12 @@
 package edu.ucsb.nceas.mdqengine.model;
 
+import org.apache.commons.lang.StringEscapeUtils;
+
+import javax.xml.bind.annotation.*;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.List;
-
-import javax.xml.bind.annotation.XmlAccessType;
-import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlType;
-
-import org.eclipse.persistence.oxm.annotations.XmlCDATA;
 
 /**
  * Checks do the heavy lifting of QC checking. The general idea is that they are fed one or more 
@@ -41,7 +37,7 @@ public class Check {
 	 * The longer more detailed explanation of what the check is doing. This might even include pseudo code or a summary of
 	 * the actions performed by the Check.code
 	 */
-	@XmlCDATA
+	@XmlJavaTypeAdapter(CDataAdapter.class)
 	private String description;
 
 	/**
@@ -73,7 +69,7 @@ public class Check {
 	private String environment;
 
 	/**
-	 * The for scripted environments (not 'Java') this is the code to be executed. When Check.environment is 'Java' this will be the fully qualified class 
+	 * The code for scripted environments (not 'Java') this is the code to be executed. When Check.environment is 'Java' this will be the fully qualified class
 	 * name of the Callable<Result> implementation.
 	 * The script code can take a few different forms, but should minimally return some value that will be captured as a single Result.output.
 	 * The simplest form is just a series of script statements with the final statement returning the desired value for Result.output.
@@ -84,7 +80,7 @@ public class Check {
 	 * variable named 'mdq_result'.
 	 * 
 	 */
-	@XmlCDATA
+	@XmlJavaTypeAdapter(CDataAdapter.class)
 	private String code;
 	
 	/**
@@ -142,7 +138,7 @@ public class Check {
 	}
 
 	public String getDescription() {
-		return description;
+		return StringEscapeUtils.unescapeXml(description);
 	}
 
 	public void setDescription(String description) {
@@ -174,7 +170,7 @@ public class Check {
 	}
 
 	public String getCode() {
-		return code;
+	    return(StringEscapeUtils.unescapeXml(code));
 	}
 
 	public void setCode(String code) {
@@ -217,3 +213,5 @@ public class Check {
 		this.inheritState = inheritState;
 	}
 }
+
+

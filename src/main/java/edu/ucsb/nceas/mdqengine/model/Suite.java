@@ -3,6 +3,7 @@ package edu.ucsb.nceas.mdqengine.model;
 import edu.ucsb.nceas.mdqengine.exception.MetadigException;
 
 import javax.xml.bind.annotation.*;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import java.util.List;
 
 @XmlRootElement
@@ -28,7 +29,7 @@ public class Suite {
 	/**
 	 * A comprehensive sumary of the suite and what it is intended to check.
 	 */
-	@XmlElement(required = false)
+	@XmlJavaTypeAdapter(CDataAdapter.class)
 	private String description;
 	
 	/**

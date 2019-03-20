@@ -112,7 +112,7 @@ public class MNStore implements MDQStore {
 		sysMeta.setAccessPolicy(accessPolicyEditor.getAccessPolicy());
 				
 		// size
-		String obj = XmlMarshaller.toXml(model);
+		String obj = XmlMarshaller.toXml(model, true);
 		sysMeta.setSize(BigInteger.valueOf(obj.getBytes("UTF-8").length));
 		sysMeta.setChecksum(ChecksumUtil.checksum(obj.getBytes("UTF-8"), "MD5"));
 		sysMeta.setFileName(model.getClass().getSimpleName().toLowerCase() + ".xml");
@@ -210,7 +210,7 @@ public class MNStore implements MDQStore {
 				sid = new Identifier();
 				sid.setValue(id);
 			}
-			String obj = XmlMarshaller.toXml(model);
+			String obj = XmlMarshaller.toXml(model, true);
 			SystemMetadata sysMeta = this.generateSystemMetadata(model);
 			sysMeta.setIdentifier(identifier);
 			sysMeta.setSeriesId(sid);
@@ -236,7 +236,7 @@ public class MNStore implements MDQStore {
 			sysMeta.setSeriesId(sid);
 			sysMeta.setObsoletes(oldId);
 
-			String obj = XmlMarshaller.toXml(model);
+			String obj = XmlMarshaller.toXml(model, true);
 			node.update(session, oldId, IOUtils.toInputStream(obj, "UTF-8"), newId , sysMeta );
 		} catch (Exception e) {
 			log.error(e.getMessage(), e);

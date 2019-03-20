@@ -279,7 +279,8 @@ public class MDQEngine {
 				executorService.shutdown();
 				run.setSysmeta(smm);
 			}
-			System.out.println(XmlMarshaller.toXml(run));
+
+			System.out.println(XmlMarshaller.toXml(run, true));
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			// Store the error in the 'Run' object so it can be saved to the run store.

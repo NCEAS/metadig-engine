@@ -1,10 +1,8 @@
 package edu.ucsb.nceas.mdqengine.serialize;
 
-import java.io.ByteArrayOutputStream;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.StringEscapeUtils;
+import org.xml.sax.SAXException;
 
 import javax.xml.XMLConstants;
 import javax.xml.bind.JAXBContext;
@@ -14,13 +12,14 @@ import javax.xml.bind.Unmarshaller;
 import javax.xml.transform.stream.StreamSource;
 import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
-
-import org.apache.commons.io.IOUtils;
-import org.xml.sax.SAXException;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 
 public class XmlMarshaller {
 
-	public static String toXml(Object obj) throws JAXBException, UnsupportedEncodingException {
+	public static String toXml(Object obj, Boolean unescapeXML) throws JAXBException, UnsupportedEncodingException {
 		
 	    JAXBContext context = JAXBContext.newInstance(obj.getClass());
 
@@ -29,8 +28,15 @@ public class XmlMarshaller {
 
 	    ByteArrayOutputStream baos = new ByteArrayOutputStream();
 	    m.marshal(obj, baos);
-	    
-	    return baos.toString("UTF-8");
+
+		// JAXB annotations (e.g. in Check.java) are unable to prevent marshalling from performing
+		// XML special character encoding (i.e. '"' to '&quot', so we have to unescape
+		// these character for the entire report here.
+	    if(unescapeXML) {
+			return StringEscapeUtils.unescapeXml(baos.toString("UTF-8"));
+		} else {
+			return baos.toString("UTF-8");
+		}
 
 	  }
 	

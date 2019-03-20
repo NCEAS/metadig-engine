@@ -199,7 +199,10 @@ public class DatabaseStore implements MDQStore {
 
         MetadigStoreException me = new MetadigStoreException("Unable save quality report to the datdabase.");
         try {
-            runStr = XmlMarshaller.toXml(run);
+            // JAXB annotations (e.g. in Check.java) are unable to prevent marshalling from performing
+            // XML special character encoding (i.e. '"' to '&quot', so we have to unescape
+            // these character for the entire report here.
+            runStr = XmlMarshaller.toXml(run, true);
         } catch (JAXBException e) {
             e.printStackTrace();
             me.initCause(e);

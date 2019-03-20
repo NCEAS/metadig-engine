@@ -138,7 +138,7 @@ public class Worker {
                     if(run.getObjectIdentifier() == null) {
                         run.setObjectIdentifier(metadataPid);
                     }
-                    runXML = XmlMarshaller.toXml(run);
+                    runXML = XmlMarshaller.toXml(run, true);
                     qEntry.setRunXML(runXML);
                     difference = System.currentTimeMillis() - startTimeProcessing;
                     elapsedTimeSecondsProcessing = TimeUnit.MILLISECONDS.toSeconds(difference);
