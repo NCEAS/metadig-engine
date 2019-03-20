@@ -315,6 +315,10 @@
 									</excludes>
 								</filter>
 							</filters>
+                            <!-- Exclude javax.servlet.http.HttpServlet" from the jar so that
+                            we can determine when we are running in a servlet enviromnet. This class will be
+                            provided by the servlet container distribution when running as a sevlet
+                            -->
                             <artifactSet>
                                 <excludes>
                                     <exclude>javax.servlet:*</exclude>
