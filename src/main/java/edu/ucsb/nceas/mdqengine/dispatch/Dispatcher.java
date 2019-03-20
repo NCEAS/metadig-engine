@@ -1,20 +1,15 @@
 package edu.ucsb.nceas.mdqengine.dispatch;
 
-import java.util.Map;
-import java.util.Map.Entry;
-
-import javax.script.Invocable;
-import javax.script.ScriptContext;
-import javax.script.ScriptEngine;
-import javax.script.ScriptEngineManager;
-import javax.script.ScriptException;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import edu.ucsb.nceas.mdqengine.model.Output;
 import edu.ucsb.nceas.mdqengine.model.Result;
 import edu.ucsb.nceas.mdqengine.model.Status;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.python.jsr223.PyScriptEngineFactory;
+
+import javax.script.*;
+import java.util.Map;
+import java.util.Map.Entry;
 
 public class Dispatcher {
 	
@@ -26,6 +21,7 @@ public class Dispatcher {
 	
 	// create a script engine manager:
     protected ScriptEngineManager manager = new ScriptEngineManager();
+    protected PyScriptEngineFactory pySEF;
 
     /**
      * Dispatches the code and variables to the script engine.
@@ -136,9 +132,16 @@ public class Dispatcher {
 	protected Dispatcher() {}
 		
 	private Dispatcher(String engineName) {
-	
+
+	    // Register the Python scripting engine, otherwise the ScriptEngineFactory
+		// discovery mechanism will not find the python engine.
+	    if(engineName.equalsIgnoreCase("python")) {
+			pySEF = new PyScriptEngineFactory();
+			manager.registerEngineName("python", pySEF);
+		}
 		// create a the engine:
 	    engine = manager.getEngineByName(engineName);
+
 	    // check if the engine has loaded correctly:
 	    if (engine == null) {
 	        throw new RuntimeException(engineName + " Engine not found on the classpath.");
@@ -154,6 +157,7 @@ public class Dispatcher {
 			engineName = "Renjin";
 		} else if (env.equalsIgnoreCase("python")) {
 			engineName = "python";
+
 		} else if (env.equalsIgnoreCase("JavaScript")) {
 			engineName = "JavaScript";
 		}
