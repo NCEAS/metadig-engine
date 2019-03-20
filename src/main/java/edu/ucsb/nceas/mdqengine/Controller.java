@@ -2,7 +2,6 @@ package edu.ucsb.nceas.mdqengine;
 
 import com.rabbitmq.client.*;
 import edu.ucsb.nceas.mdqengine.exception.MetadigException;
-import edu.ucsb.nceas.mdqengine.exception.MetadigStoreException;
 import edu.ucsb.nceas.mdqengine.model.Run;
 import edu.ucsb.nceas.mdqengine.model.SysmetaModel;
 import org.apache.commons.configuration2.ex.ConfigurationException;
@@ -320,7 +319,7 @@ public class Controller {
 
         try {
             run.save();
-        } catch (MetadigStoreException mse) {
+        } catch (MetadigException | ConfigurationException mse) {
             log.error("Unable to save run state to 'processing' before queing, continuing..");
         }
 

@@ -1,8 +1,12 @@
 package edu.ucsb.nceas.mdqengine.store;
 
+import edu.ucsb.nceas.mdqengine.exception.MetadigException;
 import edu.ucsb.nceas.mdqengine.exception.MetadigStoreException;
+import org.apache.commons.configuration2.ex.ConfigurationException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
+import java.io.IOException;
 
 public class StoreFactory {
 
@@ -10,7 +14,7 @@ public class StoreFactory {
 
     private static MDQStore store = null;
 
-    public static MDQStore getStore(boolean persist) throws MetadigStoreException {
+    public static MDQStore getStore(boolean persist) throws MetadigException, IOException, ConfigurationException {
         if (store == null) {
             if (persist) {
                 log.debug("Creating new MDQ persistent store");

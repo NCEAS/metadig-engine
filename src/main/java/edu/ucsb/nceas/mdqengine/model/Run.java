@@ -4,10 +4,12 @@ import edu.ucsb.nceas.mdqengine.exception.MetadigException;
 import edu.ucsb.nceas.mdqengine.exception.MetadigStoreException;
 import edu.ucsb.nceas.mdqengine.store.MDQStore;
 import edu.ucsb.nceas.mdqengine.store.StoreFactory;
+import org.apache.commons.configuration2.ex.ConfigurationException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import javax.xml.bind.annotation.*;
+import java.io.IOException;
 import java.sql.SQLException;
 import java.util.Date;
 import java.util.List;
@@ -150,7 +152,7 @@ public class Run {
 	 *
 	 * @throws Exception
 	 */
-	public void save() throws MetadigStoreException {
+	public void save() throws MetadigException, IOException, ConfigurationException {
 
 	    boolean persist = true;
 		store = StoreFactory.getStore(persist);
@@ -196,7 +198,7 @@ public class Run {
 	 * @param suiteId The metadig-engine suite id of the suite to match
 	 * @throws Exception
 	 */
-	public static Run getRun(String metadataId, String suiteId) throws MetadigStoreException {
+	public static Run getRun(String metadataId, String suiteId) throws MetadigException, IOException, ConfigurationException {
 		MDQStore store = null;
 		boolean persist = true;
 		store = StoreFactory.getStore(persist);

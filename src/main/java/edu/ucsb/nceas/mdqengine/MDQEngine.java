@@ -1,6 +1,7 @@
 package edu.ucsb.nceas.mdqengine;
 
 import edu.ucsb.nceas.mdqengine.dispatch.MDQCache;
+import edu.ucsb.nceas.mdqengine.exception.MetadigException;
 import edu.ucsb.nceas.mdqengine.model.*;
 import edu.ucsb.nceas.mdqengine.processor.GroupLookupCheck;
 import edu.ucsb.nceas.mdqengine.processor.XMLDialect;
@@ -8,6 +9,7 @@ import edu.ucsb.nceas.mdqengine.serialize.JsonMarshaller;
 import edu.ucsb.nceas.mdqengine.serialize.XmlMarshaller;
 import edu.ucsb.nceas.mdqengine.store.InMemoryStore;
 import edu.ucsb.nceas.mdqengine.store.MDQStore;
+import org.apache.commons.configuration2.ex.ConfigurationException;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -45,7 +47,7 @@ public class MDQEngine {
 
 	protected Log log = LogFactory.getLog(this.getClass());
 	
-	public MDQEngine() {
+	public MDQEngine() throws MetadigException, IOException, ConfigurationException {
 		 store = new InMemoryStore();
 		 //store = new MNStore();
 		 
@@ -190,9 +192,11 @@ public class MDQEngine {
 	 * 
 	 */
 	public static void main(String args[]) {
-		MDQEngine engine = new MDQEngine();
-		
+
+		MDQEngine engine;
+
 		try {
+			engine = new MDQEngine();
 			String xml = IOUtils.toString(new FileInputStream(args[0]), "UTF-8");
 			Suite suite = (Suite) XmlMarshaller.fromXml(xml , Suite.class);
 			InputStream input = new FileInputStream(args[1]);

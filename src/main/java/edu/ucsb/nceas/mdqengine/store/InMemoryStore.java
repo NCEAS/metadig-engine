@@ -1,11 +1,14 @@
 package edu.ucsb.nceas.mdqengine.store;
 
+import edu.ucsb.nceas.mdqengine.MDQconfig;
+import edu.ucsb.nceas.mdqengine.exception.MetadigException;
 import edu.ucsb.nceas.mdqengine.exception.MetadigStoreException;
 import edu.ucsb.nceas.mdqengine.model.Check;
 import edu.ucsb.nceas.mdqengine.model.Node;
 import edu.ucsb.nceas.mdqengine.model.Run;
 import edu.ucsb.nceas.mdqengine.model.Suite;
 import edu.ucsb.nceas.mdqengine.serialize.XmlMarshaller;
+import org.apache.commons.configuration2.ex.ConfigurationException;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.logging.Log;
@@ -20,8 +23,6 @@ import java.net.URL;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
-
-import static org.dataone.configuration.Settings.getConfiguration;
 
 /**
  * Place-holder storage implementation for 
@@ -38,14 +39,24 @@ public class InMemoryStore implements MDQStore{
 	
 	Map<String, Run> runs = new HashMap<String, Run>();
 	
-	public InMemoryStore() {
+	public InMemoryStore() throws MetadigException, IOException, ConfigurationException {
 		this.init();
 	}
 	protected Log log = LogFactory.getLog(this.getClass());
 	
-	private void init() {
-		
-		String additionalDir = getConfiguration().getString("mdq.store.directory", null);
+	private void init() throws MetadigException, IOException, ConfigurationException {
+
+		MDQconfig cfg = new MDQconfig();
+		String storeDirectory;
+
+		try {
+			storeDirectory = cfg.getString("metadig.store.directory");
+		} catch (ConfigurationException cex) {
+			log.error("Unable to read configuration");
+			MetadigException me = new MetadigException("Unable to read config properties");
+			me.initCause(cex.getCause());
+			throw me;
+		}
 		
 		PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
 		
@@ -54,8 +65,8 @@ public class InMemoryStore implements MDQStore{
 		try {
 			suiteResources  = resolver.getResources("classpath*:/suites/*.xml");
 			// do we have an additional location for these?
-			if (additionalDir != null) {
-				Resource[] additionalSuiteResources = resolver.getResources("file://" + additionalDir + "/suites/*.xml");
+			if (storeDirectory != null) {
+				Resource[] additionalSuiteResources = resolver.getResources("file://" + storeDirectory + "/suites/*.xml");
 				suiteResources = (Resource[]) ArrayUtils.addAll(suiteResources, additionalSuiteResources);
 			}
 		} catch (IOException e) {
@@ -84,8 +95,8 @@ public class InMemoryStore implements MDQStore{
 		try {
 			checkResources  = resolver.getResources("classpath*:/checks/*.xml");
 			// do we have an additional location for these?
-			if (additionalDir != null) {
-				Resource[] additionalCheckResources = resolver.getResources("file://" + additionalDir + "/checks/*.xml");
+			if (storeDirectory != null) {
+				Resource[] additionalCheckResources = resolver.getResources("file://" + storeDirectory + "/checks/*.xml");
 				checkResources = (Resource[]) ArrayUtils.addAll(checkResources, additionalCheckResources);
 			}
 		} catch (IOException e) {

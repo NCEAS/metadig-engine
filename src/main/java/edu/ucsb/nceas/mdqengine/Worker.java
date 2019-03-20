@@ -4,7 +4,6 @@ import com.rabbitmq.client.*;
 import edu.ucsb.nceas.mdqengine.exception.MetadigException;
 import edu.ucsb.nceas.mdqengine.exception.MetadigIndexException;
 import edu.ucsb.nceas.mdqengine.exception.MetadigProcessException;
-import edu.ucsb.nceas.mdqengine.exception.MetadigStoreException;
 import edu.ucsb.nceas.mdqengine.model.Result;
 import edu.ucsb.nceas.mdqengine.model.Run;
 import edu.ucsb.nceas.mdqengine.model.Suite;
@@ -183,7 +182,7 @@ public class Worker {
                         run.setErrorDescription("");
                         run.save();
                         log.debug("Saved quality run status");
-                    } catch (MetadigStoreException me) {
+                    } catch (MetadigException | ConfigurationException me) {
                         failFast = true;
                         log.error("Unable to save (then index) quality report to database.");
                         qEntry.setException(me);
