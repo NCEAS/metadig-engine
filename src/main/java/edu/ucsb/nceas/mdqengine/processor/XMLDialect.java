@@ -391,7 +391,7 @@ public class XMLDialect {
 			
 			if (nodes != null && nodes.getLength() == 1 && selector.getSubSelector() == null) {
 				
-				// just return single value
+				// just return single value, as a String
 				value = nodes.item(0).getTextContent();
 				value = retypeObject(value);
 				
@@ -436,7 +436,12 @@ public class XMLDialect {
 		return value;
 	
 	}
-	
+	/* Retype an object based on a few simple assumptions. A "String" value is
+	 * typically passed in. If only numeric characters are present in the String, then
+	 * the object is caste to type "Number". If the string value appears to be an
+	 * "affermative" or "negative" value (e.g. "Y", "Yes", "N", "No", ...) then the
+	 * value is caste to "Boolean".
+	 */
 	public static Object retypeObject(Object value) {
 		Object result = value;
 		// type the value correctly
