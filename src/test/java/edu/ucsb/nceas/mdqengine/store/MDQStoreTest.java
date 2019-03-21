@@ -1,12 +1,15 @@
 package edu.ucsb.nceas.mdqengine.store;
 
 import edu.ucsb.nceas.mdqengine.MDQEngine;
+import edu.ucsb.nceas.mdqengine.exception.MetadigException;
 import edu.ucsb.nceas.mdqengine.model.*;
 import org.dataone.service.types.v2.SystemMetadata;
+import org.apache.commons.configuration2.ex.ConfigurationException;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.Calendar;
@@ -22,7 +25,7 @@ public class MDQStoreTest {
 	private static MDQStore store = null;
 	
 	@BeforeClass
-	public static void initStore() {
+	public static void initStore() throws MetadigException, IOException, ConfigurationException {
 		
 		// use in-memory impl for now
 		store = new InMemoryStore();

@@ -1,5 +1,6 @@
 package edu.ucsb.nceas.mdqengine;
 
+import edu.ucsb.nceas.mdqengine.exception.MetadigException;
 import edu.ucsb.nceas.mdqengine.model.Result;
 import edu.ucsb.nceas.mdqengine.model.Run;
 import edu.ucsb.nceas.mdqengine.model.Status;
@@ -7,6 +8,7 @@ import edu.ucsb.nceas.mdqengine.model.Suite;
 import edu.ucsb.nceas.mdqengine.serialize.XmlMarshaller;
 import edu.ucsb.nceas.mdqengine.store.InMemoryStore;
 import edu.ucsb.nceas.mdqengine.store.MDQStore;
+import org.apache.commons.configuration2.ex.ConfigurationException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.dataone.service.types.v2.SystemMetadata;
@@ -14,6 +16,7 @@ import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 
@@ -38,13 +41,13 @@ public class LTERSuiteTest{
 	private Suite suite = null;
 	
 	@BeforeClass
-	public static void setUpStore() {
+	public static void setUpStore() throws MetadigException, IOException, ConfigurationException {
 		store = new InMemoryStore();
 	}
 	
 	@Test
 	@Ignore("ignoring LTERSuiteTest")
-	public void runMDQEtestsForId() {
+	public void runMDQEtestsForId() throws MetadigException, IOException, ConfigurationException {
 		MDQEngine mdqe = new MDQEngine();
 		Run run = null;
 		try {
@@ -65,12 +68,12 @@ public class LTERSuiteTest{
 			// run the suite on it
 			run = mdqe.runSuite(suite, input, null, sysMeta);
 			run.setObjectIdentifier(metadataId);
-			log.trace("Run results XML: " + XmlMarshaller.toXml(run));
+			log.trace("Run results XML: " + XmlMarshaller.toXml(run, true));
 			
 			
 			// run a check in the suite
 			for (Result result: run.getResult()) {
-				log.debug("Check result: " + XmlMarshaller.toXml(result));
+				log.debug("Check result: " + XmlMarshaller.toXml(result, true));
 				assertTrue(result.getStatus() != Status.ERROR);
 			}	
 			

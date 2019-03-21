@@ -1,9 +1,11 @@
 package edu.ucsb.nceas.mdqengine;
 
+import edu.ucsb.nceas.mdqengine.exception.MetadigException;
 import edu.ucsb.nceas.mdqengine.model.*;
 import edu.ucsb.nceas.mdqengine.processor.XMLDialect;
 import edu.ucsb.nceas.mdqengine.serialize.JsonMarshaller;
 import edu.ucsb.nceas.mdqengine.serialize.XmlMarshaller;
+import org.apache.commons.configuration2.ex.ConfigurationException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.dataone.service.types.v2.SystemMetadata;
@@ -11,6 +13,7 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 
@@ -56,7 +59,7 @@ public class MDQEngineTest {
 	}
 
 	@Test
-	public void testRunSuiteForId() {
+	public void testRunSuiteForId() throws MetadigException, IOException, ConfigurationException {
 		MDQEngine mdqe = new MDQEngine();
 		Run run = null;
 		try {
@@ -80,7 +83,7 @@ public class MDQEngineTest {
 	
 	@Ignore
 	@Test
-	public void testRunSuiteForPackage() {
+	public void testRunSuiteForPackage() throws MetadigException, IOException, ConfigurationException {
 		MDQEngine mdqe = new MDQEngine();
 		Run run = null;
 		try {

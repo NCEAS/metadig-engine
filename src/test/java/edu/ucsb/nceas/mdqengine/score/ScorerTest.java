@@ -1,10 +1,12 @@
 package edu.ucsb.nceas.mdqengine.score;
 
 import edu.ucsb.nceas.mdqengine.MDQEngine;
+import edu.ucsb.nceas.mdqengine.exception.MetadigException;
 import edu.ucsb.nceas.mdqengine.model.Run;
 import edu.ucsb.nceas.mdqengine.model.RunFactory;
 import edu.ucsb.nceas.mdqengine.model.Suite;
 import edu.ucsb.nceas.mdqengine.model.SuiteFactory;
+import org.apache.commons.configuration2.ex.ConfigurationException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.dataone.service.types.v2.SystemMetadata;
@@ -12,6 +14,7 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 
@@ -34,7 +37,7 @@ public class ScorerTest {
 	}
 	
 	@Test
-	public void testRunSuiteForId() {
+	public void testRunSuiteForId() throws MetadigException, IOException, ConfigurationException {
 		MDQEngine mdqe = new MDQEngine();
 		Run run = null;
 		try {

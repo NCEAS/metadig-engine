@@ -1,15 +1,12 @@
 package edu.ucsb.nceas.mdqengine.serialize;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 import edu.ucsb.nceas.mdqengine.model.*;
-
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.junit.Ignore;
 import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 public class SuiteTest {
 	
@@ -49,7 +46,7 @@ public class SuiteTest {
 	public void testXml() {
 		Suite suite = SuiteFactory.getMockSuite();
 		try {
-			String xml = XmlMarshaller.toXml(suite);
+			String xml = XmlMarshaller.toXml(suite, true);
 			log.debug("XML serialization: " + xml);
 			Suite r = (Suite) XmlMarshaller.fromXml(xml, suite.getClass());
 			assertEquals(suite.getName(), r.getName());
@@ -83,7 +80,7 @@ public class SuiteTest {
 	public void testRunXmlRoundTrip() {
 		Run run = RunFactory.getMockRun();
 		try {
-			String xml = XmlMarshaller.toXml(run);
+			String xml = XmlMarshaller.toXml(run, true);
 			log.debug("Run XML serialization: " + xml);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
