@@ -15,6 +15,7 @@
 				<ref bean="mdq.runId"/>
 				<ref bean="mdq.suiteId"/>
 				<ref bean="mdq.timestamp"/>
+				<ref bean="mdq.datasource"/>
 				<ref bean="mdq.metadata.formatId"/>
 				<ref bean="mdq.dateUploaded"/>
 				<ref bean="mdq.obsoletes"/>
