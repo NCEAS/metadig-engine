@@ -101,6 +101,9 @@ public class QualityReportSubprocessor implements IDocumentSubprocessor {
 
             // The score for this check type: checks pass / (checks passed + checks failed), including only checks for this type
             checkTypeScore = checkCountPassed / (checkCountPassed + checkCountFailed);
+            if(checkTypeScore.isNaN() | checkTypeScore.isInfinite()) {
+                checkTypeScore = 0.0;
+            }
 
             sField = new SolrElementField();
             // Set the dynamic field type to be Float, i.e. append "_f" to the name
