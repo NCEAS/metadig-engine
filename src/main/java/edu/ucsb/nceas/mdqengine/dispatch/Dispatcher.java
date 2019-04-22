@@ -8,20 +8,24 @@ import org.apache.commons.logging.LogFactory;
 import org.python.jsr223.PyScriptEngineFactory;
 
 import javax.script.*;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
 public class Dispatcher {
 	
 	protected Log log = LogFactory.getLog(this.getClass());
-	
+
 	protected ScriptEngine engine = null;
+	protected String engineName = null;
 	
 	protected Map<String, Object> bindings = null;
 	
 	// create a script engine manager:
     protected ScriptEngineManager manager = new ScriptEngineManager();
     protected PyScriptEngineFactory pySEF;
+
+    private static Map<String, Dispatcher> instances = new HashMap<>();
 
     /**
      * Dispatches the code and variables to the script engine.
@@ -130,7 +134,7 @@ public class Dispatcher {
 	}
 	
 	protected Dispatcher() {}
-		
+
 	private Dispatcher(String engineName) {
 
 	    // Register the Python scripting engine, otherwise the ScriptEngineFactory
@@ -148,30 +152,42 @@ public class Dispatcher {
 	    }
 	    
 	}
-	
+
 	public static Dispatcher getDispatcher(String env) {
-	    
+
 		String engineName = null;
 		Dispatcher instance = null;
-		if (env.equalsIgnoreCase("r")) {
+		if (env.equalsIgnoreCase("r") || env.equalsIgnoreCase("rscript") ) {
+			engineName = "r";
+		} else if (env.equalsIgnoreCase("rengin")) {
 			engineName = "Renjin";
 		} else if (env.equalsIgnoreCase("python")) {
 			engineName = "python";
-
 		} else if (env.equalsIgnoreCase("JavaScript")) {
 			engineName = "JavaScript";
-		}
-	
-		if (env.equalsIgnoreCase("Java")) {
-			instance = new JavaDispatcher();
-		} else if (env.equalsIgnoreCase("rscript")) {
-			instance = new RDispatcher();
+		} else if (env.equalsIgnoreCase("Java")) {
+			engineName = "Java";}
+
+		if (!instances.containsKey(engineName)) {
+		    synchronized(Dispatcher.class) {
+				if (!instances.containsKey(engineName)) {
+					if (env.equalsIgnoreCase("Java")) {
+						instance = new JavaDispatcher();
+					} else if (env.equalsIgnoreCase("r") || env.equalsIgnoreCase("rscript")) {
+						instance = new RDispatcher();
+					} else {
+						instance = new Dispatcher(engineName);
+					}
+					instance.engineName = engineName;
+					instances.put(engineName, instance);
+                }
+			}
 		} else {
-			instance = new Dispatcher(engineName);
+			instance = instances.get(engineName);
 		}
-		
+
 		return instance;
-	    
+
 	}
 
 	public Map<String, Object> getBindings() {
