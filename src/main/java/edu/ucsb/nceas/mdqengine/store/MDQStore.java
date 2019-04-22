@@ -23,7 +23,7 @@ public interface MDQStore {
 	public void deleteCheck(Check check);
 	
 	public Collection<String> listRuns();
-	public Run getRun(String suite, String id );
+	public Run getRun(String suite, String id ) throws MetadigStoreException;
 	public void saveRun(Run run) throws MetadigStoreException;
 	public void createRun(Run run);
 	public void deleteRun(Run run);

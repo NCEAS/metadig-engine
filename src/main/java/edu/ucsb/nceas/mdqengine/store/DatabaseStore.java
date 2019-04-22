@@ -39,16 +39,15 @@ public class DatabaseStore implements MDQStore {
 
     protected Log log = LogFactory.getLog(this.getClass());
 
-    //String dbUrl = "jdbc:postgresql://localhost:5432/metadig";
     private static String dbUrl = null;
     private static String dbUser = null;
     private static String dbPasswd = null;
 
-    Map<String, Suite> suites = new HashMap<String, Suite>();
-    Map<String, Check> checks = new HashMap<String, Check>();
-    Map<String, Run> runs = new HashMap<String, Run>();
-    Connection conn = null;
-    DataSource dataSource = null;
+    private Map<String, Suite> suites = new HashMap<String, Suite>();
+    private Map<String, Check> checks = new HashMap<String, Check>();
+    private Map<String, Run> runs = new HashMap<String, Run>();
+    private Connection conn = null;
+    private DataSource dataSource = null;
 
     public DatabaseStore () throws MetadigStoreException {
         log.debug("Initializing a new DatabaseStore to " + dbUrl + ".");
@@ -60,6 +59,7 @@ public class DatabaseStore implements MDQStore {
      */
     private void init() throws MetadigStoreException {
 
+        log.debug("initializing connection");
         try {
             MDQconfig cfg = new MDQconfig();
             dbUrl = cfg.getString("jdbc.url");
@@ -89,13 +89,15 @@ public class DatabaseStore implements MDQStore {
             throw(mse);
         }
 
+        log.debug("Connection initialized");
+
         // For now, load checks into memory from the distribution jar file
         String additionalDir = getConfiguration().getString("mdq.store.directory", null);
 
         PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
 
         Resource[] suiteResources = null;
-        // load all the resources from local files
+        // load all metadig quality suites and checks from local files, if available
         try {
             suiteResources  = resolver.getResources("classpath*:/suites/*.xml");
             // do we have an additional location for these?
@@ -122,7 +124,11 @@ public class DatabaseStore implements MDQStore {
 
             }
         }
-        log.debug("Initialized databasestore: opened database successfully");
+        if(this.isAvailable()) {
+            log.info("Initialized database store: opened database successfully");
+        } else {
+            throw new MetadigStoreException("Error initializing database, connection not available");
+        }
     }
 
     @Override
@@ -134,7 +140,7 @@ public class DatabaseStore implements MDQStore {
      * Get a single run from the 'runs' table.
      */
     @Override
-    public Run getRun(String metadataId, String suiteId) {
+    public Run getRun(String metadataId, String suiteId) throws MetadigStoreException  {
         //return runs.get(id);
         Run run = null;
         Result result = new Result();
@@ -143,6 +149,8 @@ public class DatabaseStore implements MDQStore {
         String sId = null;
         String resultStr = null;
 
+        // Hope for the best, prepare for the worst!
+        MetadigStoreException me = new MetadigStoreException("Unable get quality report to the datdabase.");
         // Select records from the 'runs' table
         try {
             log.debug("preparing statement for query");
@@ -168,7 +176,11 @@ public class DatabaseStore implements MDQStore {
             }
         } catch ( Exception e ) {
             log.error( e.getClass().getName()+": "+ e.getMessage());
+            e.printStackTrace();
+            me.initCause(e);
+            throw(me);
         }
+
 
         return(run);
     }
@@ -272,10 +284,11 @@ public class DatabaseStore implements MDQStore {
      */
     public boolean isAvailable() {
         boolean reachable = false;
+        log.debug("Checking if store (i.e. sql connection) is available.");
         try {
             reachable = conn.isValid(10);
-        } catch (java.sql.SQLException jse) {
-            log.error("Error checking database connection: " + jse.getMessage());
+        } catch (Exception e ) {
+            log.error("Error checking database connection: " + e.getMessage());
         }
         return reachable;
     }

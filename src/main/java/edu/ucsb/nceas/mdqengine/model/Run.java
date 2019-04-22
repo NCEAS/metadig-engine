@@ -1,7 +1,6 @@
 package edu.ucsb.nceas.mdqengine.model;
 
 import edu.ucsb.nceas.mdqengine.exception.MetadigException;
-import edu.ucsb.nceas.mdqengine.exception.MetadigStoreException;
 import edu.ucsb.nceas.mdqengine.store.MDQStore;
 import edu.ucsb.nceas.mdqengine.store.StoreFactory;
 import org.apache.commons.configuration2.ex.ConfigurationException;
@@ -23,7 +22,6 @@ public class Run {
 	public static final String FAILURE = "failure";
 	public static final String QUEUED = "queued";
 	public static final String PROCESSING = "processing";
-	private static MDQStore store = null;
 	public static Log log = LogFactory.getLog(Run.class);
 
 	/**

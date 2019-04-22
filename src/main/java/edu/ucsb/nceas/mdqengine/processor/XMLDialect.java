@@ -182,7 +182,7 @@ public class XMLDialect {
 			if (!check.isInheritState() || dispatcher == null) {
 				// create a fresh dispatcher 
 				dispatcher = Dispatcher.getDispatcher(check.getEnvironment());
-				log.debug("Using new dispatcher for check");
+				log.debug("Creating initial check dispatcher for " + check.getEnvironment());
 			} else {
 
 				// ensure that we can reuse the dispatcher to inherit previous state
@@ -209,6 +209,7 @@ public class XMLDialect {
 
 						// and a fresh dispatcher
 						dispatcher = Dispatcher.getDispatcher(check.getEnvironment());
+						log.debug("Creating new check dispatcher for " + check.getEnvironment());
 					}
 				} else {
 					log.debug("Reusing dispatcher for persistent state check");

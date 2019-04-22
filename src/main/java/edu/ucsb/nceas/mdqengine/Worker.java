@@ -181,8 +181,7 @@ public class Worker {
                         run.setRunStatus(Run.SUCCESS);
                         run.setErrorDescription("");
                         run.save();
-                        log.debug("Saved quality run status");
-                    } catch (MetadigException | ConfigurationException me) {
+                    } catch (MetadigException me) {
                         failFast = true;
                         log.error("Unable to save (then index) quality report to database.");
                         qEntry.setException(me);

@@ -347,8 +347,8 @@ public class Controller {
         factory.setPort(RabbitMQport);
         factory.setPassword(RabbitMQpassword);
         factory.setUsername(RabbitMQusername);
-        log.info("Set RabbitMQ host to: " + RabbitMQhost);
-        log.info("Set RabbitMQ port to: " + RabbitMQport);
+        log.debug("Set RabbitMQ host to: " + RabbitMQhost);
+        log.debug("Set RabbitMQ port to: " + RabbitMQport);
 
         try {
             inProcessConnection = factory.newConnection();

@@ -1,7 +1,6 @@
 package edu.ucsb.nceas.mdqengine.store;
 
 import edu.ucsb.nceas.mdqengine.MDQconfig;
-import edu.ucsb.nceas.mdqengine.exception.MetadigException;
 import edu.ucsb.nceas.mdqengine.exception.MetadigStoreException;
 import edu.ucsb.nceas.mdqengine.model.Check;
 import edu.ucsb.nceas.mdqengine.model.Node;
@@ -39,23 +38,29 @@ public class InMemoryStore implements MDQStore{
 	
 	Map<String, Run> runs = new HashMap<String, Run>();
 	
-	public InMemoryStore() throws MetadigException, IOException, ConfigurationException {
+	public InMemoryStore() throws MetadigStoreException {
 		this.init();
 	}
 	protected Log log = LogFactory.getLog(this.getClass());
 	
-	private void init() throws MetadigException, IOException, ConfigurationException {
+	private void init() throws MetadigStoreException {
 
-		MDQconfig cfg = new MDQconfig();
+		MDQconfig cfg = null;
+
+	    try {
+			cfg = new MDQconfig();
+		} catch (IOException | ConfigurationException e) {
+
+		}
 		String storeDirectory;
 
 		try {
 			storeDirectory = cfg.getString("metadig.store.directory");
 		} catch (ConfigurationException cex) {
 			log.error("Unable to read configuration");
-			MetadigException me = new MetadigException("Unable to read config properties");
-			me.initCause(cex.getCause());
-			throw me;
+			MetadigStoreException mse = new MetadigStoreException("Unable to read config properties");
+			mse.initCause(cex.getCause());
+			throw mse;
 		}
 		
 		PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
