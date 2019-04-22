@@ -150,21 +150,12 @@ public class Run {
 	 *
 	 * @throws Exception
 	 */
-	public void save() throws MetadigException, IOException, ConfigurationException {
+	public void save() throws MetadigException {
 
 	    boolean persist = true;
-		store = StoreFactory.getStore(persist);
+		MDQStore store = StoreFactory.getStore(persist);
 
-		if(!store.isAvailable()) {
-			try {
-				store.renew();
-			} catch (MetadigStoreException e) {
-				e.printStackTrace();
-				throw(e);
-			}
-		}
-
-		log.debug("Saving to persistent storage: metadata PID: " + this.getId()  + ", suite id: " + this.getSuiteId());
+		log.debug("Saving to persistent storage: metadata PID: " + this.getObjectIdentifier()  + ", suite id: " + this.getSuiteId());
 
 		try {
 			store.saveRun(this);
@@ -172,18 +163,18 @@ public class Run {
 			log.debug("Error saving run: " + me.getCause());
 			if(me.getCause() instanceof SQLException) {
 				log.debug("Retrying saveRun() due to error");
+				store.renew();
 				store.saveRun(this);
 			} else {
 				throw(me);
 			}
 		}
 
-		// TODO: shutdown connection when a Worker process/container ends. This may involve catching a SIGTERM
-		// sent to the processing running the worker.
 		// Note that when the connection pooler 'pgbouncer' is used, closing the connection actually just returns
 		// the connection to the pool that pgbouncer maintains.
+        log.debug("Shutting down store");
 		store.shutdown();
-		log.debug("Done saving to persistent storage: metadata PID: " + this.getId() + ", suite id: " + this.getSuiteId());
+		log.debug("Done saving to persistent storage: metadata PID: " + this.getObjectIdentifier() + ", suite id: " + this.getSuiteId());
 	}
 
 	/**
@@ -197,21 +188,27 @@ public class Run {
 	 * @throws Exception
 	 */
 	public static Run getRun(String metadataId, String suiteId) throws MetadigException, IOException, ConfigurationException {
-		MDQStore store = null;
 		boolean persist = true;
-		store = StoreFactory.getStore(persist);
-
-		if(!store.isAvailable()) {
-			try {
-				store.renew();
-			} catch (MetadigStoreException e) {
-				e.printStackTrace();
-				throw(e);
-			}
-		}
+		MDQStore store = StoreFactory.getStore(persist);
 
 		log.debug("Getting run for suiteId: " + suiteId + ", metadataId: " + metadataId);
-		Run run = store.getRun(metadataId, suiteId);
+
+		Run run = null;
+		try {
+			run = store.getRun(metadataId, suiteId);
+		} catch (MetadigException me) {
+			log.debug("Error getting run: " + me.getCause());
+			if(me.getCause() instanceof SQLException) {
+				log.debug("Retrying getRun() due to error");
+				store.renew();
+				store.getRun(metadataId, suiteId);
+			} else {
+				throw(me);
+			}
+		}
+		log.debug("Shutting down store");
+		store.shutdown();
+		log.debug("Done getting from persistent storage: metadata PID: " + metadataId  + ", suite id: " + suiteId);
 		return run;
 	}
 }
