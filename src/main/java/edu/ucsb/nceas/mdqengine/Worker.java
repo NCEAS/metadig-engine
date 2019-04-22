@@ -142,7 +142,7 @@ public class Worker {
                     difference = System.currentTimeMillis() - startTimeProcessing;
                     elapsedTimeSecondsProcessing = TimeUnit.MILLISECONDS.toSeconds(difference);
                     qEntry.setProcessingElapsedTimeSeconds(elapsedTimeSecondsProcessing);
-                    log.info("Completed running quality suite.");
+                    log.debug("Completed running quality suite.");
                 } catch (java.lang.Exception e) {
                     failFast = true;
                     log.error("Unable to run quality suite.");
@@ -194,8 +194,8 @@ public class Worker {
                     try {
                         // convert String into InputStream
                         startTimeIndexing = System.currentTimeMillis();
-                        runXML = XmlMarshaller.toXml(run);
-                        //log.warn("the report: " + runXML);
+                        runXML = XmlMarshaller.toXml(run, true);
+                        log.trace("report: " + runXML);
                         wkr.indexReport(metadataPid, runXML, suiteId, sysmeta);
                         difference = System.currentTimeMillis() - startTimeIndexing;
                         elapsedTimeSecondsIndexing = TimeUnit.MILLISECONDS.toSeconds(difference);
@@ -221,12 +221,13 @@ public class Worker {
                     ioe.printStackTrace();
                 }
 
+                // Inform RabbitMQ that we are done with this task, and am ready for another.
                 inProcessChannel.basicAck(envelope.getDeliveryTag(), false);
                 log.info("Worker completed task");
             }
         };
 
-        log.info("Calling basicConsume");
+        log.debug("Calling basicConsume");
         inProcessChannel.basicConsume(InProcess_QUEUE_NAME, false, consumer);
     }
 

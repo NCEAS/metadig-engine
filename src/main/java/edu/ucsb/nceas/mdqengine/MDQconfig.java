@@ -39,13 +39,13 @@ public class MDQconfig {
             InputStream inputStream = this.getClass().getClassLoader().getResourceAsStream("/metadig.properties");
             String TMP_DIR = System.getProperty("java.io.tmpdir");
             File tempFile = new File(TMP_DIR + "/metadig.properties");
-            log.info("Reading config properties in servlet from: " + tempFile);
+            log.debug("Reading config properties in servlet from: " + tempFile);
             FileOutputStream out = new FileOutputStream(tempFile);
             IOUtils.copy(inputStream, out);
             config = configs.properties(tempFile);
             log.debug("Successfully read properties from: " + tempFile);
         } else {
-            log.info("Reading config properties from: " + configFilePath);
+            log.debug("Reading config properties from: " + configFilePath);
             config = configs.properties(new File(configFilePath));
             log.debug("Successfully read properties from: " + configFilePath);
         }
