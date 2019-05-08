@@ -142,7 +142,7 @@ public class JobScheduler {
                     .withSchedule(cronSchedule(cronSchedule))
                     .build();
 
-                System.out.println("running job");
+                System.out.println("Scheduling job");
                 scheduler.scheduleJob(job, trigger);
 
             } catch (SchedulerException se) {

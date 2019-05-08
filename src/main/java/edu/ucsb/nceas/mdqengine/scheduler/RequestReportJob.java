@@ -16,8 +16,10 @@ import org.apache.http.impl.client.HttpClients;
 import org.dataone.client.auth.AuthTokenSession;
 import org.dataone.client.rest.DefaultHttpMultipartRestClient;
 import org.dataone.client.rest.MultipartRestClient;
+import org.dataone.client.v2.impl.MultipartCNode;
 import org.dataone.client.v2.impl.MultipartMNode;
 import org.dataone.mimemultipart.SimpleMultipartEntity;
+import org.dataone.service.exceptions.NotAuthorized;
 import org.dataone.service.types.v1.*;
 import org.dataone.service.types.v2.SystemMetadata;
 import org.dataone.service.util.TypeMarshaller;
@@ -101,6 +103,8 @@ public class RequestReportJob implements Job {
         int harvestDatetimeInc = dataMap.getInt("harvestDatetimeInc");
         MultipartRestClient mrc = null;
         MultipartMNode mnNode = null;
+        MultipartCNode cnNode = null;
+        Boolean isCN = false;
 
         try {
             mrc = new DefaultHttpMultipartRestClient();
@@ -109,15 +113,33 @@ public class RequestReportJob implements Job {
             throw new JobExecutionException("Unable to schedule job", e);
         }
 
-        Session session = new AuthTokenSession(authToken);
-        mnNode = new MultipartMNode(mrc, nodeServiceUrl, session);
+        Subject subject = new Subject();
+        subject.setValue("public");
+        Session session = null;
+        if(authToken == null || authToken.equals("")) {
+            session = new Session();
+            //session.setSubject(subject);
+        } else {
+            session = new AuthTokenSession(authToken);
+        }
+
+        //log.info("Created session with subject: " + session.getSubject().getValue().toString());
+
+        // Don't know node type yet from the id, so have to manually check if it's a CN
+        if(nodeId.equalsIgnoreCase("urn:node:CN")) {
+            cnNode = new MultipartCNode(mrc, nodeServiceUrl, session);
+            isCN = true;
+        } else {
+            mnNode = new MultipartMNode(mrc, nodeServiceUrl, session);
+        }
+
         MDQStore store = null;
 
         try {
             store = new DatabaseStore();
         } catch (Exception e) {
             e.printStackTrace();
-            throw new JobExecutionException("Unable to schedule job", e);
+            throw new JobExecutionException("Cannot create store, unable to schedule job", e);
         }
 
         if(!store.isAvailable()) {
@@ -125,7 +147,7 @@ public class RequestReportJob implements Job {
                 store.renew();
             } catch (MetadigStoreException e) {
                 e.printStackTrace();
-                throw new JobExecutionException("Unable to schedule job", e);
+                throw new JobExecutionException("Cannot renew store, unable to schedule job", e);
             }
         }
 
@@ -179,7 +201,7 @@ public class RequestReportJob implements Job {
         log.debug("    harvest start time: " + startDTRstr);
         log.debug("    harvest end time: " + endDTRstr);
         try {
-            pidsToProcess = getPidsToProcess(mnNode, session, suiteId, nodeId, pidFilter, startDTRstr, endDTRstr);
+            pidsToProcess = getPidsToProcess(cnNode, mnNode, isCN, session, suiteId, nodeId, pidFilter, startDTRstr, endDTRstr);
         } catch (Exception e) {
             throw new JobExecutionException("Unable to get pids to process", e);
         }
@@ -187,7 +209,7 @@ public class RequestReportJob implements Job {
         for (String pidStr : pidsToProcess) {
             try {
                 log.debug("submitting pid: " + pidStr);
-                submitReportRequest(mnNode, session, qualityServiceUrl, pidStr, suiteId);
+                submitReportRequest(cnNode, mnNode, isCN, session, qualityServiceUrl, pidStr, suiteId);
             } catch (Exception e) {
                 throw new JobExecutionException("Unable to submit request to create new quality reports", e);
             }
@@ -202,7 +224,7 @@ public class RequestReportJob implements Job {
         }
     }
 
-    public ArrayList<String> getPidsToProcess(MultipartMNode mnNode, Session session, String suiteId, String nodeId, String pidFilter,
+    public ArrayList<String> getPidsToProcess(MultipartCNode cnNode, MultipartMNode mnNode, Boolean isCN, Session session, String suiteId, String nodeId, String pidFilter,
                                               String startHarvestDatetimeStr, String endHarvestDatetimeStr) throws Exception {
 
         ArrayList<String> pids = new ArrayList<String>();
@@ -210,6 +232,8 @@ public class RequestReportJob implements Job {
         ObjectList objList = null;
 
         ObjectFormatIdentifier formatId = null;
+        NodeReference nodeRef = null;
+        //nodeRef.setValue(nodeId);
         Identifier identifier = null;
         Boolean replicaStatus = false;
         Integer start = new Integer(0);
@@ -227,11 +251,14 @@ public class RequestReportJob implements Job {
         Date endDate = new Date(msSinceEpoch);
 
         try {
-            //queryStr = queryStr + "+dateUploaded:[" + startHarvestDatetimeStr + "%20TO%20" + endHarvestDatetimeStr + "]&fl=id&rows=10000";
-            //objList = listObjects(session, fromDate=startHarvestDatetimeStr, toDate=endHarvestDatetimeStr, start=0, count=1000);
-            objList = mnNode.listObjects(session=session, startDate, endDate, formatId, identifier, replicaStatus, start, count);
-
-            //log.info("Sent query: " + queryStr);
+            // Even though MultipartMNode and MultipartCNode have the same parent class, their interfaces are differnt, so polymorphism
+            // isn't happening here.
+            if(isCN) {
+                objList = cnNode.listObjects(session=session, startDate, endDate, formatId, nodeRef, identifier, start, count);
+            } else {
+                objList = mnNode.listObjects(session=session, startDate, endDate, formatId, identifier, replicaStatus, start, count);
+            }
+            //log.info("Got " + objList.getCount() + " pids for format: " + formatId.getValue() + " pids.");
         } catch (Exception e) {
             log.error("Error retrieving pids: " + e.getMessage());
             throw e;
@@ -245,51 +272,25 @@ public class RequestReportJob implements Job {
                 thisFormatId = oi.getFormatId().getValue();
                 thisPid = oi.getIdentifier().getValue();
 
-                if(!thisFormatId.matches(pidFilter)) {
-                    continue;
-                };
-                if(!runExists(thisPid, suiteId)) {
-                    pids.add(thisPid);
-                    log.info("adding pid " + thisPid + ", formatId: " + thisFormatId);
+                // Check all pid filters. There could be multiple wildcard filters, which are separated
+                // by ','.
+                String [] filters = pidFilter.split("\\|");
+                Boolean found = false;
+                for(String thisFilter:filters) {
+                    if(thisFormatId.matches(thisFilter)) {
+                        found = true;
+                        continue;
+                    }
+                }
+
+                if(found) {
+                    if (!runExists(thisPid, suiteId)) {
+                        pids.add(thisPid);
+                        log.info("adding pid " + thisPid + ", formatId: " + thisFormatId);
+                    }
                 }
             }
         }
-
-//
-//        XPathFactory xPathfactory = XPathFactory.newInstance();
-//        XPath xpath = xPathfactory.newXPath();
-//        XPathExpression idXpath = null;
-//        Document xmldoc = null;
-//
-//        if (qis != null) {
-//            try {
-//                xmldoc = XmlDocumentUtility.generateXmlDocument(qis);
-//            } catch (SAXException e) {
-//                log.error("Unable to create w3c Document from input stream", e);
-//                e.printStackTrace();
-//            } finally {
-//                qis.close();
-//            }
-//        } else {
-//            qis.close();
-//        }
-//
-//        //idXpath = xpath.compile("str[@name='id']/text()")dd;
-//        idXpath = xpath.compile("//result/doc/str[@name='id']/text()");
-//
-//        NodeList result = (NodeList) idXpath.evaluate(xmldoc, XPathConstants.NODESET);
-//        log.info("Node count: " + result.getLength());
-//
-//        String currentPid = null;
-//        for(int index = 0; index < result.getLength(); index ++) {
-//            Node node = result.item(index);
-//            currentPid = node.getTextContent();
-//
-//            if(!runExists(currentPid, suiteId)) {
-//                pids.add(currentPid);
-//                log.info("adding pid to process list: " + currentPid);
-//            }
-//        }
 
         return pids;
     }
@@ -327,7 +328,7 @@ public class RequestReportJob implements Job {
         return found;
     }
 
-    public void submitReportRequest(MultipartMNode mnNode, Session session, String qualityServiceUrl, String pidStr, String suiteId) throws Exception {
+    public void submitReportRequest(MultipartCNode cnNode, MultipartMNode mnNode, Boolean isCN,  Session session, String qualityServiceUrl, String pidStr, String suiteId) throws Exception {
 
         SystemMetadata sysmeta = null;
         InputStream objectIS = null;
@@ -337,14 +338,28 @@ public class RequestReportJob implements Job {
         pid.setValue(pidStr);
 
         try {
-            sysmeta = mnNode.getSystemMetadata(session, pid);
+            if (isCN) {
+                sysmeta = cnNode.getSystemMetadata(session, pid);
+            } else {
+                sysmeta = mnNode.getSystemMetadata(session, pid);
+            }
+        } catch (NotAuthorized na) {
+            log.error("Not authorized to read sysmeta for pid: " + pid + ", continuing with next pid...");
+            return;
         } catch (Exception e) {
             throw(e);
         }
 
         try {
-            objectIS = mnNode.get(session, pid);
+            if(isCN) {
+                objectIS = cnNode.get(session, pid);
+            } else  {
+                objectIS = mnNode.get(session, pid);
+            }
             log.info("Retrieved metadata object for pid: " + pidStr);
+        } catch (NotAuthorized na) {
+            log.error("Not authorized to read pid: " + pid + ", continuing with next pid...");
+            return;
         } catch (Exception e) {
             throw(e);
         }
