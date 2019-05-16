@@ -135,7 +135,9 @@ public class RequestReportJob implements Job {
             mrc = new DefaultHttpMultipartRestClient();
         } catch (Exception e) {
             log.error("Error creating rest client: " + e.getMessage());
-            throw new JobExecutionException("Unable to schedule job", e);
+            JobExecutionException jee = new JobExecutionException(e);
+            jee.setRefireImmediately(false);
+            throw jee;
         }
 
         Subject subject = new Subject();
@@ -262,7 +264,9 @@ public class RequestReportJob implements Job {
                 pidsToProcess = result.getResult();
                 resultCount = result.getResultCount();
             } catch (Exception e) {
-                throw new JobExecutionException("Unable to get pids to process", e);
+                JobExecutionException jee = new JobExecutionException("Unable to get pids to process", e);
+                jee.setRefireImmediately(false);
+                throw jee;
             }
 
             for (String pidStr : pidsToProcess) {
@@ -270,7 +274,9 @@ public class RequestReportJob implements Job {
                     log.info("submitting pid: " + pidStr);
                     submitReportRequest(cnNode, mnNode, isCN, session, qualityServiceUrl, pidStr, suiteId);
                 } catch (Exception e) {
-                    throw new JobExecutionException("Unable to submit request to create new quality reports", e);
+                    JobExecutionException jee = new JobExecutionException("Unable to submit request to create new quality reports", e);
+                    jee.setRefireImmediately(false);
+                    throw jee;
                 }
             }
 
@@ -283,7 +289,9 @@ public class RequestReportJob implements Job {
                 store.saveNode(node);
             } catch (MetadigStoreException mse) {
                 log.error("error saving node: " + node.getNodeId());
-                throw new JobExecutionException("Unable to save new harvest date", mse);
+                JobExecutionException jee = new JobExecutionException("Unable to save new harvest date", mse);
+                jee.setRefireImmediately(false);
+                throw jee;
             }
             // Check if DataONE returned the max number of results. If so, we have to request more by paging through
             // the results.
