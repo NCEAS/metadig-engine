@@ -50,6 +50,7 @@ public class JobScheduler {
         String nodeServiceUrl = null;
         String startHarvestDatetime = null;
         String solrLocation = null;
+        int countRequested = 1000;
         int harvestDatetimeInc = 1;
 
         String taskListFilename = js.readConfig("task.file");
@@ -141,6 +142,7 @@ public class JobScheduler {
                             .usingJobData("startHarvestDatetime", startHarvestDatetime)
                             .usingJobData("harvestDatetimeInc", harvestDatetimeInc)
                             .usingJobData("solrLocation", solrLocation)
+                            .usingJobData("countRequested", countRequested)
                             .build();
                 }
 

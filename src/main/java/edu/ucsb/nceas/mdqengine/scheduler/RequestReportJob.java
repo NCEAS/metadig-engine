@@ -52,6 +52,27 @@ public class RequestReportJob implements Job {
 
     private Log log = LogFactory.getLog(RequestReportJob.class);
 
+    class ListResult {
+        Integer resultCount;
+        ArrayList<String> result = new ArrayList<>();
+
+        void setResult(ArrayList result) {
+            this.result = result;
+        }
+
+        ArrayList getResult() {
+            return this.result;
+        }
+
+        void setResultCount(Integer count) {
+            this.resultCount = count;
+        }
+
+        Integer getResultCount() {
+            return this.resultCount;
+        }
+    }
+
     // Since Quartz will re-instantiate a class every time it
     // gets executed, members non-static member variables can
     // not be used to maintain state!
@@ -102,10 +123,13 @@ public class RequestReportJob implements Job {
         String startHarvestDatetimeStr = dataMap.getString("startHarvestDatetime");
         int harvestDatetimeInc = dataMap.getInt("harvestDatetimeInc");
         String solrLocation = dataMap.getString("solrLocation");
+        int countRequested = dataMap.getInt("countRequested");
         MultipartRestClient mrc = null;
         MultipartMNode mnNode = null;
         MultipartCNode cnNode = null;
         Boolean isCN = false;
+
+        log.debug("Executing task for node: " + nodeId + ", suiteId: " + suiteId);
 
         try {
             mrc = new DefaultHttpMultipartRestClient();
@@ -162,18 +186,34 @@ public class RequestReportJob implements Job {
         DateTime startDateTimeRange = null;
         DateTime endDateTimeRange = null;
 
+        String lastHarvestDateStr = null;
         edu.ucsb.nceas.mdqengine.model.Node node;
         node = store.getNode(nodeId);
-        String lastHarvestDateStr = null;
 
         // If a 'node' entry has not beeen saved for this nodeId yet, then a 'lastHarvested'
         // DataTime will not be available, in which case the 'startHarvestDataTime' from the
         // config file will be used.
-        if(node.getNodeId() != null) {
-            lastHarvestDateStr = node.getLastHarvestDatetime();
-        } else {
+        if(node.getNodeId() == null) {
+            node = new edu.ucsb.nceas.mdqengine.model.Node();
             node.setNodeId(nodeId);
             lastHarvestDateStr = startHarvestDatetimeStr;
+            node.setLastHarvestDatetime(lastHarvestDateStr);
+            if(!solrLocation.equalsIgnoreCase("")) {
+                node.setSolrLocation(solrLocation);
+            } else {
+                node.setSolrLocation("");
+            }
+        } else {
+            lastHarvestDateStr = node.getLastHarvestDatetime();
+            // Set the solr location for the node specified in the taskList, unless it was
+            // left blank. Note that this is the only route to enter the solr location for a node
+            // into the Database store.
+            // First check the solr location from the task list
+            if (!solrLocation.equalsIgnoreCase("")) {
+                node.setSolrLocation(solrLocation);
+            } else {
+                node.setSolrLocation("");
+            }
         }
 
         DateTime lastHarvestDate = new DateTime(lastHarvestDateStr);
@@ -189,44 +229,78 @@ public class RequestReportJob implements Job {
         }
 
         DateTime endDTR = new DateTime(startDTR);
-        endDTR = endDTR.plusDays(1);
+        endDTR = endDTR.plusDays(harvestDatetimeInc);
         if(endDTR.isAfter(currentDT.toInstant())) {
             endDTR = currentDT;
+        }
+
+        // If the start and end harvest dates are the same (happends for a new node), then
+        // tweek the start so that DataONE listObjects doesn't complain.
+        if(startDTR == endDTR ) {
+            startDTR = startDTR.minusMinutes(1);
         }
 
         String startDTRstr = dtfOut.print(startDTR);
         String endDTRstr = dtfOut.print(endDTR);
 
-        ArrayList<String> pidsToProcess = null;
-        log.debug("Getting list of pids to process.");
-        log.debug("    harvest start time: " + startDTRstr);
-        log.debug("    harvest end time: " + endDTRstr);
-        try {
-            pidsToProcess = getPidsToProcess(cnNode, mnNode, isCN, session, suiteId, nodeId, pidFilter, startDTRstr, endDTRstr);
-        } catch (Exception e) {
-            throw new JobExecutionException("Unable to get pids to process", e);
-        }
+        Integer startCount = new Integer(0);
+        ListResult result = null;
+        Integer resultCount = null;
 
-        for (String pidStr : pidsToProcess) {
+        boolean morePids = true;
+        while(morePids) {
+            ArrayList<String> pidsToProcess = null;
+            log.debug("Getting list of pids to process.");
+            log.debug("    harvest start time: " + startDTRstr);
+            log.debug("    harvest end time: " + endDTRstr);
+
+            log.debug("startCount: " + startCount);
+            log.debug("countRequested: " + countRequested);
+
             try {
-                log.debug("submitting pid: " + pidStr);
-                submitReportRequest(cnNode, mnNode, isCN, session, qualityServiceUrl, pidStr, suiteId);
+                result = getPidsToProcess(cnNode, mnNode, isCN, session, suiteId, nodeId, pidFilter, startDTRstr, endDTRstr, store, startCount, countRequested);
+                pidsToProcess = result.getResult();
+                resultCount = result.getResultCount();
             } catch (Exception e) {
-                throw new JobExecutionException("Unable to submit request to create new quality reports", e);
+                throw new JobExecutionException("Unable to get pids to process", e);
             }
-        }
 
-        try {
+            for (String pidStr : pidsToProcess) {
+                try {
+                    log.info("submitting pid: " + pidStr);
+                    submitReportRequest(cnNode, mnNode, isCN, session, qualityServiceUrl, pidStr, suiteId);
+                } catch (Exception e) {
+                    throw new JobExecutionException("Unable to submit request to create new quality reports", e);
+                }
+            }
+
             node.setLastHarvestDatetime(endDTRstr);
-            store.saveNode(node);
-        } catch (MetadigStoreException mse) {
-            log.error("error saveing node: " + node.getNodeId());
-            throw new JobExecutionException("Unable to save new harvest date", mse);
+            log.debug("nodeid: " + node.getNodeId());
+            log.debug("lastharvestdate: " + node.getLastHarvestDatetime());
+            log.debug("solrLocation: " + node.getSolrLocation());
+
+            try {
+                store.saveNode(node);
+            } catch (MetadigStoreException mse) {
+                log.error("error saving node: " + node.getNodeId());
+                throw new JobExecutionException("Unable to save new harvest date", mse);
+            }
+            // Check if DataONE returned the max number of results. If so, we have to request more by paging through
+            // the results.
+            if(resultCount >= countRequested) {
+                morePids = true;
+                startCount = startCount + resultCount;
+                log.info("Paging through more results, current start is " + startCount);
+            } else {
+                morePids = false;
+            }
         }
     }
 
-    public ArrayList<String> getPidsToProcess(MultipartCNode cnNode, MultipartMNode mnNode, Boolean isCN, Session session, String suiteId, String nodeId, String pidFilter,
-                                              String startHarvestDatetimeStr, String endHarvestDatetimeStr) throws Exception {
+    public ListResult getPidsToProcess(MultipartCNode cnNode, MultipartMNode mnNode, Boolean isCN, Session session,
+                                  String suiteId, String nodeId, String pidFilter, String startHarvestDatetimeStr,
+                                  String endHarvestDatetimeStr, MDQStore store, int startCount,
+                                  int countRequested) throws Exception {
 
         ArrayList<String> pids = new ArrayList<String>();
         InputStream qis = null;
@@ -237,8 +311,6 @@ public class RequestReportJob implements Job {
         //nodeRef.setValue(nodeId);
         Identifier identifier = null;
         Boolean replicaStatus = false;
-        Integer start = new Integer(0);
-        Integer count = new Integer(1000);
 
         // Do some back-flips to convert the start and end date to the ancient Java 'Date' type that is
         // used by DataONE 'listObjects()'.
@@ -255,9 +327,9 @@ public class RequestReportJob implements Job {
             // Even though MultipartMNode and MultipartCNode have the same parent class, their interfaces are differnt, so polymorphism
             // isn't happening here.
             if(isCN) {
-                objList = cnNode.listObjects(session=session, startDate, endDate, formatId, nodeRef, identifier, start, count);
+                objList = cnNode.listObjects(session=session, startDate, endDate, formatId, nodeRef, identifier, startCount, countRequested);
             } else {
-                objList = mnNode.listObjects(session=session, startDate, endDate, formatId, identifier, replicaStatus, start, count);
+                objList = mnNode.listObjects(session=session, startDate, endDate, formatId, identifier, replicaStatus, startCount, countRequested);
             }
             //log.info("Got " + objList.getCount() + " pids for format: " + formatId.getValue() + " pids.");
         } catch (Exception e) {
@@ -284,31 +356,28 @@ public class RequestReportJob implements Job {
                     }
                 }
 
+                // Always re-create a report, even if it exists for a pid, as the sysmeta could have
+                // been updated (i.e. obsoletedBy, access) and the quality report and index contain
+                // sysmeta fields.
                 if(found) {
-                    if (!runExists(thisPid, suiteId)) {
-                        pids.add(thisPid);
-                        log.info("adding pid " + thisPid + ", formatId: " + thisFormatId);
-                    }
+                //    if (!runExists(thisPid, suiteId, store)) {
+                    pids.add(thisPid);
+                    log.info("adding pid " + thisPid + ", formatId: " + thisFormatId);
+                //    }
                 }
             }
         }
 
-        return pids;
+        ListResult result = new ListResult();
+        result.setResultCount(objList.getCount());
+        result.setResult(pids);
+
+        return result;
     }
 
-    public boolean runExists(String pid, String suiteId) throws MetadigStoreException {
+    public boolean runExists(String pid, String suiteId, MDQStore store) throws MetadigStoreException {
 
         boolean found = false;
-        MDQStore store = null;
-
-        if (store == null) {
-            try {
-                store = new DatabaseStore();
-            } catch (Exception e) {
-                e.printStackTrace();
-                throw e;
-            }
-        }
 
         if(!store.isAvailable()) {
             try {
@@ -345,7 +414,7 @@ public class RequestReportJob implements Job {
                 sysmeta = mnNode.getSystemMetadata(session, pid);
             }
         } catch (NotAuthorized na) {
-            log.error("Not authorized to read sysmeta for pid: " + pid + ", continuing with next pid...");
+            log.error("Not authorized to read sysmeta for pid: " + pid.getValue() + ", continuing with next pid...");
             return;
         } catch (Exception e) {
             throw(e);
@@ -357,7 +426,7 @@ public class RequestReportJob implements Job {
             } else  {
                 objectIS = mnNode.get(session, pid);
             }
-            log.info("Retrieved metadata object for pid: " + pidStr);
+            log.debug("Retrieved metadata object for pid: " + pidStr);
         } catch (NotAuthorized na) {
             log.error("Not authorized to read pid: " + pid + ", continuing with next pid...");
             return;
@@ -382,7 +451,7 @@ public class RequestReportJob implements Job {
             post.addHeader("Accept", "application/xml");
 
             // send to service
-            log.info("submitting: " + qualityServiceUrl);
+            log.trace("submitting: " + qualityServiceUrl);
             post.setEntity(entity);
             CloseableHttpClient client = HttpClients.createDefault();
             CloseableHttpResponse response = client.execute(post);
