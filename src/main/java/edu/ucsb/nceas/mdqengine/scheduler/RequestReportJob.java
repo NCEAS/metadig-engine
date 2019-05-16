@@ -101,6 +101,7 @@ public class RequestReportJob implements Job {
         String nodeServiceUrl = dataMap.getString("nodeServiceUrl");
         String startHarvestDatetimeStr = dataMap.getString("startHarvestDatetime");
         int harvestDatetimeInc = dataMap.getInt("harvestDatetimeInc");
+        String solrLocation = dataMap.getString("solrLocation");
         MultipartRestClient mrc = null;
         MultipartMNode mnNode = null;
         MultipartCNode cnNode = null;

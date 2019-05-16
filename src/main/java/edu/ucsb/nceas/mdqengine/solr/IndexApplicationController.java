@@ -43,15 +43,19 @@ public class IndexApplicationController {
      * Create a Solr client that will be used for indexing.
      * @param configFile the path of the Spring configuration file
      */
-    public void initialize(String configFile) throws Exception {
+    public void initialize(String configFile, String solrLocation) throws Exception {
         try {
             MDQconfig cfg = new MDQconfig();
-            solrLocation = cfg.getString("solr.location");
+            // If not specified on command line, use default fallback
+            if(solrLocation == null || solrLocation.equalsIgnoreCase("")) {
+                log.debug("Setting solr location to " + solrLocation);
+                solrLocation = cfg.getString("solr.location.fallback");
+            }
             solrClient = new HttpSolrClient.Builder(solrLocation).build();
             //solrClient = new CloudSolrClient.Builder().withSolrUrl(solrLocations).build();
             //solrClient = new CloudSolrClient.Builder().withZkHost(solrLocation).build();
             //solrClient.setDefaultCollection("quality");
-            log.info("Created Solr client");
+            log.info("Created Solr client at " + solrLocation);
         } catch (Exception e) {
             log.error("Could not create Solr client", e);
             throw e;

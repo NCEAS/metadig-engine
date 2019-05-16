@@ -4,13 +4,11 @@ import com.rabbitmq.client.*;
 import edu.ucsb.nceas.mdqengine.exception.MetadigException;
 import edu.ucsb.nceas.mdqengine.exception.MetadigIndexException;
 import edu.ucsb.nceas.mdqengine.exception.MetadigProcessException;
-import edu.ucsb.nceas.mdqengine.model.Result;
-import edu.ucsb.nceas.mdqengine.model.Run;
-import edu.ucsb.nceas.mdqengine.model.Suite;
-import edu.ucsb.nceas.mdqengine.model.SysmetaModel;
+import edu.ucsb.nceas.mdqengine.model.*;
 import edu.ucsb.nceas.mdqengine.processor.GroupLookupCheck;
 import edu.ucsb.nceas.mdqengine.serialize.XmlMarshaller;
 import edu.ucsb.nceas.mdqengine.solr.IndexApplicationController;
+import edu.ucsb.nceas.mdqengine.store.DatabaseStore;
 import edu.ucsb.nceas.mdqengine.store.InMemoryStore;
 import edu.ucsb.nceas.mdqengine.store.MDQStore;
 import org.apache.commons.codec.digest.DigestUtils;
@@ -195,7 +193,10 @@ public class Worker {
                         startTimeIndexing = System.currentTimeMillis();
                         runXML = XmlMarshaller.toXml(run, true);
                         log.trace("report: " + runXML);
-                        wkr.indexReport(metadataPid, runXML, suiteId, sysmeta);
+                        MDQStore dbstore = new DatabaseStore();
+                        Node node = dbstore.getNode(qEntry.getMemberNode());
+                        String solrLocation = node.getSolrLocation();
+                        wkr.indexReport(metadataPid, runXML, suiteId, sysmeta, solrLocation);
                         difference = System.currentTimeMillis() - startTimeIndexing;
                         elapsedTimeSecondsIndexing = TimeUnit.MILLISECONDS.toSeconds(difference);
                         qEntry.setIndexingElapsedTimeSeconds(elapsedTimeSecondsIndexing);
@@ -413,12 +414,13 @@ public class Worker {
      * @param sysmeta
      * @throws Exception
      */
-    public void indexReport(String metadataId, String runXML, String suiteId, SystemMetadata sysmeta) throws Exception {
+    public void indexReport(String metadataId, String runXML, String suiteId, SystemMetadata sysmeta, String solrLocation) throws Exception {
 
         log.info(" [x] Indexing metadata PID: " + metadataId + ", suite id: " + suiteId);
 
+        MDQStore store = new DatabaseStore();
         IndexApplicationController iac = new IndexApplicationController();
-        iac.initialize(this.springConfigFileURL);
+        iac.initialize(this.springConfigFileURL, solrLocation);
         InputStream runIS = new ByteArrayInputStream(runXML.getBytes());
         Identifier pid = new Identifier();
         pid.setValue(metadataId);

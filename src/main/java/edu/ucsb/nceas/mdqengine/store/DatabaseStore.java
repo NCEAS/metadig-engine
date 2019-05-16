@@ -319,6 +319,7 @@ public class DatabaseStore implements MDQStore {
         Result result = new Result();
         PreparedStatement stmt = null;
         String lastDT = null;
+        String solrLocation = null;
         Node node = new Node();
 
         // Select records from the 'nodes' table
@@ -333,9 +334,13 @@ public class DatabaseStore implements MDQStore {
             if(rs.next()) {
                 node.setNodeId(rs.getString("node_id"));
                 node.setLastHarvestDatetime(rs.getString("last_harvest_datetime"));
+                solrLocation = rs.getString("solr_location");
+                if(rs.wasNull()) {
+                    solrLocation = "";
+                }
+                node.setSolrLocation(solrLocation);
                 rs.close();
                 stmt.close();
-                log.debug("Retrieved lastHarvestDatetime," + lastDT);
             } else {
                 log.debug("No results returned from query");
             }
@@ -353,15 +358,17 @@ public class DatabaseStore implements MDQStore {
         // Perform an 'upsert' on the 'nodes' table - if a record exists for the 'metadata_id, suite_id' already,
         // then update the record with the incoming data.
         try {
-            String sql = "INSERT INTO nodes (node_id, last_harvest_datetime) VALUES (?, ?)"
+            String sql = "INSERT INTO nodes (node_id, last_harvest_datetime, solr_location) VALUES (?, ?, ?)"
                     + " ON CONFLICT ON CONSTRAINT node_id_pk "
-                    + " DO UPDATE SET (node_id, last_harvest_datetime) = (?, ?);";
+                    + " DO UPDATE SET (node_id, last_harvest_datetime, solr_location) = (?, ?, ?);";
 
             stmt = conn.prepareStatement(sql);
             stmt.setString(1, node.getNodeId());
             stmt.setString(2, node.getLastHarvestDatetime());
-            stmt.setString(3, node.getNodeId());
-            stmt.setString(4, node.getLastHarvestDatetime());
+            stmt.setString(3, node.getSolrLocation());
+            stmt.setString(4, node.getNodeId());
+            stmt.setString(5, node.getLastHarvestDatetime());
+            stmt.setString(6, node.getSolrLocation());
             stmt.executeUpdate();
             stmt.close();
             conn.commit();

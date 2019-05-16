@@ -49,6 +49,7 @@ public class JobScheduler {
         String nodeId = null;
         String nodeServiceUrl = null;
         String startHarvestDatetime = null;
+        String solrLocation = null;
         int harvestDatetimeInc = 1;
 
         String taskListFilename = js.readConfig("task.file");
@@ -117,6 +118,12 @@ public class JobScheduler {
                 // range to determine the end of the range. This is specified in number of days.
                 harvestDatetimeInc = Integer.parseInt(splitted[++icnt].trim());
                 System.out.println("harvestDatetimeInc: " + harvestDatetimeInc);
+                // The solr location to index scores to can be specified per task entry.
+                solrLocation = splitted[++icnt].trim();
+                System.out.println("solrLocation: " + solrLocation);
+                // The number of results to return from the DataONE 'listObjects' service
+                countRequested = Integer.parseInt(splitted[++icnt].trim());
+                System.out.println("countRequested: " + countRequested);
             }
 
             try {
@@ -133,6 +140,7 @@ public class JobScheduler {
                             .usingJobData("nodeServiceUrl", nodeServiceUrl)
                             .usingJobData("startHarvestDatetime", startHarvestDatetime)
                             .usingJobData("harvestDatetimeInc", harvestDatetimeInc)
+                            .usingJobData("solrLocation", solrLocation)
                             .build();
                 }
 
