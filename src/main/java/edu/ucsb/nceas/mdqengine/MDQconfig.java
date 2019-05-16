@@ -14,7 +14,7 @@ import java.io.InputStream;
 
 public class MDQconfig {
 
-    private static String configFilePath = "/etc/metadig/metadig.properties";
+    private static String configFilePath = "/opt/local/metadig/metadig.properties";
     private static Log log = LogFactory.getLog(MDQconfig.class);
 
     public static Configuration config;
