@@ -414,22 +414,25 @@ public class Worker {
      * @param sysmeta
      * @throws Exception
      */
-    public void indexReport(String metadataId, String runXML, String suiteId, SystemMetadata sysmeta, String solrLocation) throws Exception {
+    public void indexReport(String metadataId, String runXML, String suiteId, SystemMetadata sysmeta, String solrLocation) throws MetadigIndexException {
 
         log.info(" [x] Indexing metadata PID: " + metadataId + ", suite id: " + suiteId);
 
-        MDQStore store = new DatabaseStore();
-        IndexApplicationController iac = new IndexApplicationController();
-        iac.initialize(this.springConfigFileURL, solrLocation);
-        InputStream runIS = new ByteArrayInputStream(runXML.getBytes());
-        Identifier pid = new Identifier();
-        pid.setValue(metadataId);
-        ObjectFormatIdentifier objFormatId =  new ObjectFormatIdentifier();
-        // Update the sysmeta, setting the cprrect type to a metadig quality report
-        objFormatId.setValue(qualityReportObjectType);
-        sysmeta.setFormatId(objFormatId);
-        iac.insertSolrDoc(pid, sysmeta, runIS);
-        log.info(" [x] Done indexing metadata PID: " + metadataId + ", suite id: " + suiteId);
+        try {
+            IndexApplicationController iac = new IndexApplicationController();
+            iac.initialize(this.springConfigFileURL, solrLocation);
+            InputStream runIS = new ByteArrayInputStream(runXML.getBytes());
+            Identifier pid = new Identifier();
+            pid.setValue(metadataId);
+            ObjectFormatIdentifier objFormatId = new ObjectFormatIdentifier();
+            // Update the sysmeta, setting the cprrect type to a metadig quality report
+            objFormatId.setValue(qualityReportObjectType);
+            sysmeta.setFormatId(objFormatId);
+            iac.insertSolrDoc(pid, sysmeta, runIS);
+            log.info(" [x] Done indexing metadata PID: " + metadataId + ", suite id: " + suiteId);
+        } catch (Exception e) {
+            throw new MetadigIndexException("Error during indexing", e);
+        }
     }
 
 
