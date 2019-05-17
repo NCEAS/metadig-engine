@@ -252,12 +252,7 @@ public class RequestReportJob implements Job {
         boolean morePids = true;
         while(morePids) {
             ArrayList<String> pidsToProcess = null;
-            log.debug("Getting list of pids to process.");
-            log.debug("    harvest start time: " + startDTRstr);
-            log.debug("    harvest end time: " + endDTRstr);
-
-            log.debug("startCount: " + startCount);
-            log.debug("countRequested: " + countRequested);
+            log.info("Getting pids for node: " + nodeId + ", suiteId: " + suiteId + ", harvest start: " + startDTRstr);
 
             try {
                 result = getPidsToProcess(cnNode, mnNode, isCN, session, suiteId, nodeId, pidFilter, startDTRstr, endDTRstr, store, startCount, countRequested);
@@ -269,6 +264,7 @@ public class RequestReportJob implements Job {
                 throw jee;
             }
 
+            log.info("found " + resultCount + " pids");
             for (String pidStr : pidsToProcess) {
                 try {
                     log.info("submitting pid: " + pidStr);
@@ -303,6 +299,7 @@ public class RequestReportJob implements Job {
                 morePids = false;
             }
         }
+        store.shutdown();
     }
 
     public ListResult getPidsToProcess(MultipartCNode cnNode, MultipartMNode mnNode, Boolean isCN, Session session,
