@@ -187,13 +187,15 @@ public class Worker {
                 }
 
                 if(!failFast) {
+                    MDQStore dbstore = null;
                     /* Once the quality report has been created and saved, it can be added to the Solr index */
                     try {
                         // convert String into InputStream
                         startTimeIndexing = System.currentTimeMillis();
                         runXML = XmlMarshaller.toXml(run, true);
                         log.trace("report: " + runXML);
-                        MDQStore dbstore = new DatabaseStore();
+                        // Need to get the solr index location for this task from db
+                        dbstore = new DatabaseStore();
                         Node node = dbstore.getNode(qEntry.getMemberNode());
                         String solrLocation = node.getSolrLocation();
                         wkr.indexReport(metadataPid, runXML, suiteId, sysmeta, solrLocation);
@@ -206,6 +208,8 @@ public class Worker {
                         MetadigException me = new MetadigIndexException("Unable index the generated quality report.");
                         me.initCause(e);
                         qEntry.setException(me);
+                    } finally {
+                        dbstore.shutdown();
                     }
                 }
 
