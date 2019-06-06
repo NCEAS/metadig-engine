@@ -22,6 +22,7 @@ public class MDQconfig {
     public MDQconfig () throws ConfigurationException, IOException {
         // Check if we are running in a servlet
         boolean inServlet = false;
+        /*
         try {
             Class servletClass = Class.forName("javax.servlet.http.HttpServlet");
             inServlet = true;
@@ -31,6 +32,7 @@ public class MDQconfig {
             log.debug("Unable to load javax.servlet.http.HttpServlet - not running in servlet environment.");
             inServlet = false;
         }
+        */
 
         // If running in a servlet, have to get the config info from the webapp context, as we can't
         // read from external dirs on disk.
