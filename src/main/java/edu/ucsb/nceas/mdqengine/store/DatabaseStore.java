@@ -172,7 +172,7 @@ public class DatabaseStore implements MDQStore {
                 run = TypeMarshaller.unmarshalTypeFromStream(Run.class, is);
                 log.debug("Retrieved run successfully, id from run object: " + run.getId());
             } else {
-                log.debug("No results returned from query");
+                log.debug("Run not found for metadata id: " + metadataId + ", suiteId: " + suiteId);
             }
         } catch ( Exception e ) {
             log.error( e.getClass().getName()+": "+ e.getMessage());
