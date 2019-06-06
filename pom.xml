@@ -14,8 +14,8 @@
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <d1_libclient_java.version>2.3.1</d1_libclient_java.version>
-        <renjin.version>0.8.2087</renjin.version>
-        <jython.version>2.7.1b2</jython.version>
+        <renjin.version>0.8.2242</renjin.version>
+        <jython.version>2.7.1</jython.version>
         <gson.version>2.6.2</gson.version>
         <moxy.version>2.6.3</moxy.version>
 		<d1_cn_index_processor_version>2.4.0-SNAPSHOT</d1_cn_index_processor_version>
@@ -44,6 +44,7 @@
 			<artifactId>renjin-script-engine</artifactId>
 			<version>${renjin.version}</version>
 		</dependency>
+		<!-- https://mvnrepository.com/artifact/org.python/jython-standalone -->
 		<dependency>
 			<groupId>org.python</groupId>
 			<artifactId>jython-standalone</artifactId>
@@ -235,59 +236,6 @@
 					<target>1.8</target>
 				</configuration>
 			</plugin>
-            <!--
-			<plugin>
-			    <groupId>org.codehaus.mojo</groupId>
-			    <artifactId>jaxb2-maven-plugin</artifactId>
-			    <version>2.2</version>
-			    <executions>
-			        <execution>
-			            <goals>
-			                <goal>schemagen</goal>
-			            </goals>
-			            <phase>generate-resources</phase>
-			            <configuration>
-			            	<createJavaDocAnnotations>false</createJavaDocAnnotations>
-			                <sources>
-			                    <source>src/main/java/edu/ucsb/nceas/mdqengine/model</source>
-			                </sources>
-			                <outputDirectory>${basedir}/src/main/resources/schemas</outputDirectory>
-			            </configuration>
-			        </execution>
-			    </executions>
-			</plugin>
-        -->
-			<!--
-			The following plugin builds a JAR file with dependencies that automatically runs the main() method of the
-			MDQEngine. This allows me to run a Suite against a document like:
-
-		   		java -jar target/metadig-engine-1.0.0-SNAPSHOT-jar-with-dependencies.jar $SUITE $DOC
-
-			Taken pretty much verbatim from http://maven.apache.org/plugins/maven-assembly-plugin/usage.html.
-			-->
-			<plugin>
-				<artifactId>maven-assembly-plugin</artifactId>
-				<version>2.6</version>
-				<configuration>
-					<descriptorRefs>
-						<descriptorRef>jar-with-dependencies</descriptorRef>
-					</descriptorRefs>
-					<archive>
-						<manifest>
-							<mainClass>edu.ucsb.nceas.mdqengine.MDQEngine</mainClass>
-						</manifest>
-					</archive>
-				</configuration>
-				<executions>
-					<execution>
-						<id>make-assembly</id>
-						<phase>package</phase>
-						<goals>
-							<goal>single</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
 			<!-- Include all dependencies using a 'shade' jar so that the
 				 MetaDIG Controller and Worker can be run directly from this
 				 jar file. This allows deployment either in the MetaDIG web
@@ -332,7 +280,11 @@
 									</manifestEntries>
 									<manifestEntries>
 										<Main-Class>edu.ucsb.nceas.mdqengine.Worker</Main-Class>
-										<Build-Number>12</Build-Number>
+										<Build-Number>1</Build-Number>
+									</manifestEntries>
+									<manifestEntries>
+										<Main-Class>edu.ucsb.nceas.mdqengine.MDQEngine</Main-Class>
+										<Build-Number>1</Build-Number>
 									</manifestEntries>
 								</transformer>
 							</transformers>
