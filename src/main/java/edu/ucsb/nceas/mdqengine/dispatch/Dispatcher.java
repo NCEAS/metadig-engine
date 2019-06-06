@@ -159,7 +159,7 @@ public class Dispatcher {
 		Dispatcher instance = null;
 		if (env.equalsIgnoreCase("r") || env.equalsIgnoreCase("rscript") ) {
 			engineName = "r";
-		} else if (env.equalsIgnoreCase("rengin")) {
+		} else if (env.equalsIgnoreCase("renjin")) {
 			engineName = "Renjin";
 		} else if (env.equalsIgnoreCase("python")) {
 			engineName = "python";
