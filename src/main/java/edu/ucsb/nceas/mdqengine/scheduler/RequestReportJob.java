@@ -14,7 +14,7 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.dataone.client.auth.AuthTokenSession;
-import org.dataone.client.rest.DefaultHttpMultipartRestClient;
+import org.dataone.client.rest.HttpMultipartRestClient;
 import org.dataone.client.rest.MultipartRestClient;
 import org.dataone.client.v2.impl.MultipartCNode;
 import org.dataone.client.v2.impl.MultipartMNode;
@@ -132,7 +132,7 @@ public class RequestReportJob implements Job {
         log.debug("Executing task for node: " + nodeId + ", suiteId: " + suiteId);
 
         try {
-            mrc = new DefaultHttpMultipartRestClient();
+            mrc = new HttpMultipartRestClient();
         } catch (Exception e) {
             log.error("Error creating rest client: " + e.getMessage());
             JobExecutionException jee = new JobExecutionException(e);
@@ -264,7 +264,7 @@ public class RequestReportJob implements Job {
                 throw jee;
             }
 
-            log.info("found " + resultCount + " pids");
+            log.info("Found " + resultCount + " pids" + " for node: " + nodeId);
             for (String pidStr : pidsToProcess) {
                 try {
                     log.info("submitting pid: " + pidStr);
@@ -284,7 +284,7 @@ public class RequestReportJob implements Job {
             try {
                 store.saveNode(node);
             } catch (MetadigStoreException mse) {
-                log.error("error saving node: " + node.getNodeId());
+                log.error("Error saving node: " + node.getNodeId());
                 JobExecutionException jee = new JobExecutionException("Unable to save new harvest date", mse);
                 jee.setRefireImmediately(false);
                 throw jee;
@@ -338,12 +338,13 @@ public class RequestReportJob implements Job {
             }
             //log.info("Got " + objList.getCount() + " pids for format: " + formatId.getValue() + " pids.");
         } catch (Exception e) {
-            log.error("Error retrieving pids: " + e.getMessage());
+            log.error("Error retrieving pids for node " + nodeId + ": " + e.getMessage());
             throw e;
         }
 
         String thisFormatId = null;
         String thisPid = null;
+        int pidCount = 0;
 
         if (objList.getCount() > 0) {
             for(ObjectInfo oi: objList.getObjectInfoList()) {
@@ -366,6 +367,7 @@ public class RequestReportJob implements Job {
                 // sysmeta fields.
                 if(found) {
                 //    if (!runExists(thisPid, suiteId, store)) {
+                    pidCount = pidCount++;
                     pids.add(thisPid);
                     log.info("adding pid " + thisPid + ", formatId: " + thisFormatId);
                 //    }
@@ -374,7 +376,7 @@ public class RequestReportJob implements Job {
         }
 
         ListResult result = new ListResult();
-        result.setResultCount(objList.getCount());
+        result.setResultCount(pidCount);
         result.setResult(pids);
 
         return result;
