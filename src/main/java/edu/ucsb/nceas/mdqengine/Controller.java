@@ -2,8 +2,6 @@ package edu.ucsb.nceas.mdqengine;
 
 import com.rabbitmq.client.*;
 import edu.ucsb.nceas.mdqengine.exception.MetadigException;
-import edu.ucsb.nceas.mdqengine.model.Run;
-import edu.ucsb.nceas.mdqengine.model.SysmetaModel;
 import org.apache.commons.configuration2.ex.ConfigurationException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -304,24 +302,26 @@ public class Controller {
             sysmeta = (SystemMetadata) tmpSysmeta;
         }
 
-        // Save a skeleton run entry so that the run status will be set to 'queued', which will allow clients to check the status
-        // of this run and when it was queued.
-        Run run = new Run();
-        run.setRunStatus(Run.QUEUED);
-        run.setErrorDescription("");
-        run.setObjectIdentifier(metadataPid);
-        // The origin mn is required by persistent storage, so set it to a non-null value. It will be reset to the
-        // value from sysmeta (if supplied) when the run is processed.
-        SysmetaModel smm = new SysmetaModel();
-        smm.setOriginMemberNode("");
-        run.setSysmeta(smm);
-        run.setSuiteId(qualitySuiteId);
-
-        try {
-            run.save();
-        } catch (MetadigException | ConfigurationException mse) {
-            log.error("Unable to save run state to 'processing' before queing, continuing..");
-        }
+        // Disable saving the 'queued' run state, as this limits the throughput of the processing chain. The controller
+        // will exhausts the number of database connections that are held by pgbouncer, and the request is not completed.
+//        // Save a skeleton run entry so that the run status will be set to 'queued', which will allow clients to check the status
+//        // of this run and when it was queued.
+//        Run run = new Run();
+//        run.setRunStatus(Run.QUEUED);
+//        run.setErrorDescription("");
+//        run.setObjectIdentifier(metadataPid);
+//        // The origin mn is required by persistent storage, so set it to a non-null value. It will be reset to the
+//        // value from sysmeta (if supplied) when the run is processed.
+//        SysmetaModel smm = new SysmetaModel();
+//        smm.setOriginMemberNode("");
+//        run.setSysmeta(smm);
+//        run.setSuiteId(qualitySuiteId);
+//
+//        try {
+//            run.save();
+//        } catch (MetadigException me) {
+//            log.error("Unable to save run state to 'processing' before queueing: " + me.getMessage());
+//        }
 
         qEntry = new QueueEntry(memberNode, metadataPid, metadataDoc, qualitySuiteId, localFilePath, requestDateTime, sysmeta,
                 runXML, null);
