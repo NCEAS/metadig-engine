@@ -61,6 +61,7 @@ public class Worker {
     private static String RabbitMQusername = null;
     private static String authToken = null;
     private static SolrClient client = null;
+    private static String DataONEformatsFile = null;
 
     private static long startTimeIndexing;
     private static long startTimeProcessing;
@@ -79,6 +80,7 @@ public class Worker {
             RabbitMQusername = cfg.getString("RabbitMQ.username");
             RabbitMQhost = cfg.getString("RabbitMQ.host");
             RabbitMQport = cfg.getInt("RabbitMQ.port");
+            DataONEformatsFile = cfg.getString("DataONE.formats");
         } catch (ConfigurationException cex) {
             log.error("Unable to read configuration");
             MetadigException me = new MetadigException("Unable to read config properties");
@@ -341,6 +343,7 @@ public class Worker {
         // Run the Metadata Quality Engine for the specified metadata object.
         // TODO: set suite params correctly
         Map<String, Object> params = new HashMap<String, Object>();
+        params.put("DataONEformatsList", DataONEformatsFile);
         // To run the suite, we need the in memory store, that contains all checks and suites.
         MDQStore store = new InMemoryStore();
 

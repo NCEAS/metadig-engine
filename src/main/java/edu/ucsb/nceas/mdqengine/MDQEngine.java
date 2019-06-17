@@ -19,6 +19,7 @@ import org.dataone.service.types.v2.TypeFactory;
 import org.dataone.service.util.TypeMarshaller;
 import org.xml.sax.SAXException;
 
+
 import javax.script.ScriptException;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.xpath.XPathExpressionException;
@@ -46,16 +47,18 @@ public class MDQEngine {
 	private MDQStore store = null;
 
 	protected Log log = LogFactory.getLog(this.getClass());
+	private static String DataONEformatsFile = null;
 	
 	public MDQEngine() throws MetadigException, IOException, ConfigurationException {
-		 store = new InMemoryStore();
-		 //store = new MNStore();
-		 
+		store = new InMemoryStore();
+		//store = new MNStore();
+		MDQconfig cfg = new MDQconfig ();
+		DataONEformatsFile = cfg.getString("DataONE.formats");
 		MDQCache.initialize(null);
 	}
 
 	/**
-	 * Executes the given suite for a given object 
+	 * Executes the given suite for a given object
 	 * @param suite
 	 * @param input the InputStream for the object to QC
 	 * @param params optional additional parameters to make available for the suite
@@ -194,6 +197,7 @@ public class MDQEngine {
 	public static void main(String args[]) {
 
 		MDQEngine engine;
+		Map<String, Object> params = new HashMap<>();
 
 		try {
 			engine = new MDQEngine();
@@ -235,7 +239,12 @@ public class MDQEngine {
 					sysmeta = (SystemMetadata) tmpSysmeta;
 				}
 			}
-			Run run = engine.runSuite(suite, input, null, sysmeta);
+
+			if(DataONEformatsFile != null) {
+				params.put("DataONEformatsFile", DataONEformatsFile);
+			}
+
+			Run run = engine.runSuite(suite, input, params, sysmeta);
 			run.setRunStatus("SUCCESS");
 
 			// Add DataONE sysmeta, if it was provided.
