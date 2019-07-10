@@ -343,7 +343,9 @@ public class Worker {
         // Run the Metadata Quality Engine for the specified metadata object.
         // TODO: set suite params correctly
         Map<String, Object> params = new HashMap<String, Object>();
-        params.put("DataONEformatsList", DataONEformatsFile);
+        if(DataONEformatsFile != null) {
+            params.put("DataONEformatsFile", DataONEformatsFile);
+        }
         // To run the suite, we need the in memory store, that contains all checks and suites.
         MDQStore store = new InMemoryStore();
 
