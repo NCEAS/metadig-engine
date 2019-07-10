@@ -122,7 +122,6 @@ public class RequestReportJob implements Job {
         String nodeServiceUrl = dataMap.getString("nodeServiceUrl");
         String startHarvestDatetimeStr = dataMap.getString("startHarvestDatetime");
         int harvestDatetimeInc = dataMap.getInt("harvestDatetimeInc");
-        String solrLocation = dataMap.getString("solrLocation");
         int countRequested = dataMap.getInt("countRequested");
         MultipartRestClient mrc = null;
         MultipartMNode mnNode = null;
@@ -200,22 +199,8 @@ public class RequestReportJob implements Job {
             node.setNodeId(nodeId);
             lastHarvestDateStr = startHarvestDatetimeStr;
             node.setLastHarvestDatetime(lastHarvestDateStr);
-            if(!solrLocation.equalsIgnoreCase("")) {
-                node.setSolrLocation(solrLocation);
-            } else {
-                node.setSolrLocation("");
-            }
         } else {
             lastHarvestDateStr = node.getLastHarvestDatetime();
-            // Set the solr location for the node specified in the taskList, unless it was
-            // left blank. Note that this is the only route to enter the solr location for a node
-            // into the Database store.
-            // First check the solr location from the task list
-            if (!solrLocation.equalsIgnoreCase("")) {
-                node.setSolrLocation(solrLocation);
-            } else {
-                node.setSolrLocation("");
-            }
         }
 
         DateTime lastHarvestDate = new DateTime(lastHarvestDateStr);
@@ -279,7 +264,6 @@ public class RequestReportJob implements Job {
             node.setLastHarvestDatetime(endDTRstr);
             log.debug("nodeid: " + node.getNodeId());
             log.debug("lastharvestdate: " + node.getLastHarvestDatetime());
-            log.debug("solrLocation: " + node.getSolrLocation());
 
             try {
                 store.saveNode(node);
@@ -459,7 +443,7 @@ public class RequestReportJob implements Job {
 
             // send to service
             log.trace("submitting: " + qualityServiceUrl);
-            post.setEntity(entity);
+            post.setEntity((HttpEntity) entity);
             CloseableHttpClient client = HttpClients.createDefault();
             CloseableHttpResponse response = client.execute(post);
 

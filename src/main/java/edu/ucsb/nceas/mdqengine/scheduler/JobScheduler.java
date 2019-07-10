@@ -119,9 +119,6 @@ public class JobScheduler {
                 // range to determine the end of the range. This is specified in number of days.
                 harvestDatetimeInc = Integer.parseInt(splitted[++icnt].trim());
                 System.out.println("harvestDatetimeInc: " + harvestDatetimeInc);
-                // The solr location to index scores to can be specified per task entry.
-                solrLocation = splitted[++icnt].trim();
-                System.out.println("solrLocation: " + solrLocation);
                 // The number of results to return from the DataONE 'listObjects' service
                 countRequested = Integer.parseInt(splitted[++icnt].trim());
                 System.out.println("countRequested: " + countRequested);
@@ -141,7 +138,6 @@ public class JobScheduler {
                             .usingJobData("nodeServiceUrl", nodeServiceUrl)
                             .usingJobData("startHarvestDatetime", startHarvestDatetime)
                             .usingJobData("harvestDatetimeInc", harvestDatetimeInc)
-                            .usingJobData("solrLocation", solrLocation)
                             .usingJobData("countRequested", countRequested)
                             .build();
                 }
@@ -170,12 +166,9 @@ public class JobScheduler {
         String paramValue = null;
         try {
             MDQconfig cfg = new MDQconfig();
-            //solrLocation = cfg.getString("solr.location");
-            //SolrClient solrClient = new HttpSolrClient.Builder(solrLocation).build();
-            //log.info("Created Solr client");
             paramValue = cfg.getString(paramName);
         } catch (Exception e) {
-            log.error("Could not create Solr client", e);
+            log.error("Could not read configuration for param: " + paramName + ": " + e.getMessage());
             throw e;
         }
         return paramValue;
