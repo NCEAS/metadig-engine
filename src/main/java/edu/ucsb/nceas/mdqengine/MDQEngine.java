@@ -19,7 +19,6 @@ import org.dataone.service.types.v2.TypeFactory;
 import org.dataone.service.util.TypeMarshaller;
 import org.xml.sax.SAXException;
 
-
 import javax.script.ScriptException;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.xpath.XPathExpressionException;
@@ -34,11 +33,9 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
-import static org.dataone.configuration.Settings.getConfiguration;
-
 public class MDQEngine {
 	
-	private static final String RESOLVE_PREFIX = getConfiguration().getString("D1Client.CN_URL") + "/v2/resolve/";
+	//private static final String RESOLVE_PREFIX = getConfiguration().getString("D1Client.CN_URL") + "/v2/resolve/";
 	
 	/**
 	 * Default store uses the in-memory implementation
