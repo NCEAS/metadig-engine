@@ -28,8 +28,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
-import static org.dataone.configuration.Settings.getConfiguration;
-
 /**
  * Persistent storage for quality runs.
  * @author slaughter
@@ -60,11 +58,14 @@ public class DatabaseStore implements MDQStore {
     private void init() throws MetadigStoreException {
 
         log.debug("initializing connection");
+        String additionalDir = null;
         try {
             MDQconfig cfg = new MDQconfig();
             dbUrl = cfg.getString("jdbc.url");
             dbUser = cfg.getString("postgres.user");
             dbPasswd = cfg.getString("postgres.passwd");
+            additionalDir = cfg.getString("mdq.store.directory");
+
         } catch (ConfigurationException | IOException ex ) {
             log.error(ex.getMessage());
             MetadigStoreException mse = new MetadigStoreException("Unable to create new Store");
@@ -90,9 +91,6 @@ public class DatabaseStore implements MDQStore {
         }
 
         log.debug("Connection initialized");
-
-        // For now, load checks into memory from the distribution jar file
-        String additionalDir = getConfiguration().getString("mdq.store.directory", null);
 
         PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
 
@@ -147,6 +145,7 @@ public class DatabaseStore implements MDQStore {
         PreparedStatement stmt = null;
         String mId = null;
         String sId = null;
+        String seqId = null;
         String resultStr = null;
 
         // Hope for the best, prepare for the worst!
@@ -164,12 +163,14 @@ public class DatabaseStore implements MDQStore {
             if(rs.next()) {
                 mId = rs.getString("metadata_id");
                 sId = rs.getString("suite_id");
+                seqId = rs.getString("sequence_id");
                 resultStr = rs.getString("results");
                 rs.close();
                 stmt.close();
                 // Convert the returned run xml document to a 'run' object.
                 InputStream is = new ByteArrayInputStream(resultStr.getBytes());
                 run = TypeMarshaller.unmarshalTypeFromStream(Run.class, is);
+                run.setSequenceId(seqId);
                 log.debug("Retrieved run successfully, id from run object: " + run.getId());
             } else {
                 log.debug("Run not found for metadata id: " + metadataId + ", suiteId: " + suiteId);
@@ -201,6 +202,7 @@ public class DatabaseStore implements MDQStore {
         String suiteId = run.getSuiteId();
         String status = run.getRunStatus();
         String error = run.getErrorDescription();
+        String sequenceId = run.getSequenceId();
         String resultStr = null;
         //DateTime now = new DateTime();
         //OffsetDateTime dateTime = OffsetDateTime.now();
@@ -249,9 +251,9 @@ public class DatabaseStore implements MDQStore {
         // Perform an 'upsert' on the 'runs' table - if a record exists for the 'metadata_id, suite_id' already,
         // then update the record with the incoming data.
         try {
-            String sql = "INSERT INTO runs (metadata_id, suite_id, timestamp, results, status, error) VALUES (?, ?, ?, ?, ?, ?)"
+            String sql = "INSERT INTO runs (metadata_id, suite_id, timestamp, results, status, error, sequence_id) VALUES (?, ?, ?, ?, ?, ?, ?)"
                     + " ON CONFLICT ON CONSTRAINT metadata_id_suite_id_fk "
-                    + " DO UPDATE SET (timestamp, results, status, error) = (?, ?, ?, ?);";
+                    + " DO UPDATE SET (timestamp, results, status, error, sequence_id) = (?, ?, ?, ?, ?);";
 
             stmt = conn.prepareStatement(sql);
             stmt.setString(1, metadataId);
@@ -260,11 +262,13 @@ public class DatabaseStore implements MDQStore {
             stmt.setString(4, runStr);
             stmt.setString(5, status);
             stmt.setString(6, error);
+            stmt.setString(7, sequenceId);
             // For 'on conflict'
-            stmt.setTimestamp(7, dateTime);
-            stmt.setString(8, runStr);
-            stmt.setString(9, status);
-            stmt.setString(10, error);
+            stmt.setTimestamp(8, dateTime);
+            stmt.setString(9, runStr);
+            stmt.setString(10, status);
+            stmt.setString(11, error);
+            stmt.setString(12, sequenceId);
             stmt.executeUpdate();
             stmt.close();
             conn.commit();
@@ -319,7 +323,6 @@ public class DatabaseStore implements MDQStore {
         Result result = new Result();
         PreparedStatement stmt = null;
         String lastDT = null;
-        String solrLocation = null;
         Node node = new Node();
 
         // Select records from the 'nodes' table
@@ -334,11 +337,6 @@ public class DatabaseStore implements MDQStore {
             if(rs.next()) {
                 node.setNodeId(rs.getString("node_id"));
                 node.setLastHarvestDatetime(rs.getString("last_harvest_datetime"));
-                solrLocation = rs.getString("solr_location");
-                if(rs.wasNull()) {
-                    solrLocation = "";
-                }
-                node.setSolrLocation(solrLocation);
                 rs.close();
                 stmt.close();
             } else {
@@ -365,10 +363,8 @@ public class DatabaseStore implements MDQStore {
             stmt = conn.prepareStatement(sql);
             stmt.setString(1, node.getNodeId());
             stmt.setString(2, node.getLastHarvestDatetime());
-            stmt.setString(3, node.getSolrLocation());
-            stmt.setString(4, node.getNodeId());
-            stmt.setString(5, node.getLastHarvestDatetime());
-            stmt.setString(6, node.getSolrLocation());
+            stmt.setString(3, node.getNodeId());
+            stmt.setString(4, node.getLastHarvestDatetime());
             stmt.executeUpdate();
             stmt.close();
             conn.commit();

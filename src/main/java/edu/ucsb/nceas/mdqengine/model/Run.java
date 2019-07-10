@@ -15,7 +15,7 @@ import java.util.List;
 
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(propOrder = {"id", "timestamp", "objectIdentifier", "suiteId", "status", "runStatus", "errorDescription", "sysmeta", "result"})
+@XmlType(propOrder = {"id", "timestamp", "objectIdentifier", "suiteId", "status", "runStatus", "errorDescription", "sysmeta", "result", "sequenceId", "modified"})
 public class Run {
 
 	public static final String SUCCESS = "success";
@@ -23,6 +23,8 @@ public class Run {
 	public static final String QUEUED = "queued";
 	public static final String PROCESSING = "processing";
 	public static Log log = LogFactory.getLog(Run.class);
+
+
 
 	/**
 	 * The unique identifier for the QC run. This will likely be long and opaque
@@ -84,6 +86,19 @@ public class Run {
 	@XmlElement(required = false)
 	private SysmetaModel sysmeta;
 
+	/**
+	 * A series identifier maintained by the Quality Engine
+	 * This is not the DataONE seriesId
+	 */
+	@XmlElement(required = false)
+	private String sequenceId;
+
+	/**
+	 * Has this run been modified since being retrieved from the data store?
+	 */
+	@XmlElement(required = false)
+	private Boolean modified = false;
+
 	public String getId() {
 		return id;
 	}
@@ -142,6 +157,26 @@ public class Run {
 
 	public void setErrorDescription(String errorDescription) { this.errorDescription = errorDescription; }
 
+	public String getSequenceId() { return sequenceId; }
+
+	public void setSequenceId(String sequenceId) { this.sequenceId = sequenceId; }
+
+	public String getObsoletes() {
+		return sysmeta.getObsoletes();
+	}
+
+	public String getObsoletedBy() {
+		return sysmeta.getObsoletedBy();
+	}
+
+	public void setModified(Boolean modified) {
+		this.modified = modified;
+	}
+
+	public Boolean getModified() {
+		return this.modified;
+	}
+
 	/**
 	 * Save a quality report to a DatabaseStore.
 	 * <p>
@@ -178,7 +213,7 @@ public class Run {
 	}
 
 	/**
-	 * Save a quality report to a DatabaseStore.
+	 * Get a quality report from the the DatabaseStore.
 	 * <p>
 	 * The quality report is saved to a database instance.
 	 * </p>

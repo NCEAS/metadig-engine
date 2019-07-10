@@ -48,9 +48,9 @@ public class IndexApplicationController {
             MDQconfig cfg = new MDQconfig();
             // If not specified on command line, use default fallback
             if(solrLocation == null || solrLocation.equalsIgnoreCase("")) {
-                log.debug("Setting solr location to " + solrLocation);
                 solrLocation = cfg.getString("solr.location.fallback");
             }
+            log.debug("Setting solr location to " + solrLocation);
             solrClient = new HttpSolrClient.Builder(solrLocation).build();
             //solrClient = new CloudSolrClient.Builder().withSolrUrl(solrLocations).build();
             //solrClient = new CloudSolrClient.Builder().withZkHost(solrLocation).build();

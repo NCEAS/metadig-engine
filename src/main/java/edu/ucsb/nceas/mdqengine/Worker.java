@@ -1,6 +1,7 @@
 package edu.ucsb.nceas.mdqengine;
 
 import com.rabbitmq.client.*;
+import edu.ucsb.nceas.mdqengine.collections.Runs;
 import edu.ucsb.nceas.mdqengine.exception.MetadigException;
 import edu.ucsb.nceas.mdqengine.exception.MetadigIndexException;
 import edu.ucsb.nceas.mdqengine.exception.MetadigProcessException;
@@ -8,7 +9,6 @@ import edu.ucsb.nceas.mdqengine.model.*;
 import edu.ucsb.nceas.mdqengine.processor.GroupLookupCheck;
 import edu.ucsb.nceas.mdqengine.serialize.XmlMarshaller;
 import edu.ucsb.nceas.mdqengine.solr.IndexApplicationController;
-import edu.ucsb.nceas.mdqengine.store.DatabaseStore;
 import edu.ucsb.nceas.mdqengine.store.InMemoryStore;
 import edu.ucsb.nceas.mdqengine.store.MDQStore;
 import org.apache.commons.codec.digest.DigestUtils;
@@ -99,6 +99,7 @@ public class Worker {
             public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties, byte[] body) throws IOException {
 
                 Run run = null;
+                Runs runsInSequence = new Runs();
                 ByteArrayInputStream bis = new ByteArrayInputStream(body);
                 ObjectInput in = new ObjectInputStream(bis);
                 QueueEntry qEntry = null;
@@ -156,7 +157,8 @@ public class Worker {
                     // Note: Don't explicitly call 'return' from this routine causes the worker to silently loose connection
                     // to rabbitmq, i.e. the message to the completed queue doesn't appear to be queued
 
-                    // Save the processing report to persistent storage, so that we can save the error and status of the run.
+                    // Even though the run didn't complete, save the processing report to
+                    // persistent storage, so that we can save the error and status of the run.
                     try {
                         log.debug("Saving quality run status after error");
                         // convert String into InputStream
@@ -173,13 +175,37 @@ public class Worker {
                     }
                 }
 
+                String sequenceId = null;
                 if(!failFast) {
                     /* Save the processing report to persistent storage */
                     try {
-                        // convert String into InputStream
+                        // Determine the sequence identifier for the metadata pids DataONE obsolescence chain. This is
+                        // not the DataONE seriesId, which may not exist for a pid, but instead is a quality engine maintained
+                        // sequence id.
+                        log.debug("*****");
+                        log.debug("Searching for sequence id for pid: " + run.getObjectIdentifier());
+                        // Add current run to collection, it will be saved during the run.update
                         run.setObjectIdentifier(metadataPid);
                         run.setRunStatus(Run.SUCCESS);
                         run.setErrorDescription("");
+                        // Add the current run to the collection, as a starting point for the sequence id search
+                        runsInSequence.addRun(run.getObjectIdentifier(), run);
+
+                        // Traverse through the collection, stopping if the sequenceId is found. If the sequenceId
+                        // is already found, then all pids in the chain that are stored should already have this
+                        // sequenceId
+                        Boolean stopIfSeqFound = true;
+                        runsInSequence.getRunSequence(run.getObjectIdentifier(), suiteId, stopIfSeqFound);
+                        sequenceId = runsInSequence.getSequenceId();
+                        // Ok, a sequence id wasn't set for these runs (if any), so generate a new one
+                        if(sequenceId == null) {
+                            sequenceId = runsInSequence.generateId();
+                            log.debug("Generatied new sequence id: " + sequenceId);
+                        } else {
+                            log.debug("Using found sequenceId: " + sequenceId);
+                        }
+
+                        run.setSequenceId(sequenceId);
                         run.save();
                     } catch (MetadigException me) {
                         failFast = true;
@@ -188,30 +214,30 @@ public class Worker {
                     }
                 }
 
+                /* Once the quality report has been created and saved to persistent storage,
+                   it can be added to the Solr index */
                 if(!failFast) {
                     MDQStore dbstore = null;
-                    /* Once the quality report has been created and saved, it can be added to the Solr index */
+                    log.debug("Indexing report");
                     try {
-                        // convert String into InputStream
                         startTimeIndexing = System.currentTimeMillis();
                         runXML = XmlMarshaller.toXml(run, true);
-                        log.trace("report: " + runXML);
-                        // Need to get the solr index location for this task from db
-                        dbstore = new DatabaseStore();
-                        Node node = dbstore.getNode(qEntry.getMemberNode());
-                        String solrLocation = node.getSolrLocation();
+                        //log.trace("report: " + runXML);
+                        // For now, use fallback solr location, which will be selected by the indexer
+                        // if null is passed in.
+                        String solrLocation = null;
+                        log.debug("calling indexReport");
                         wkr.indexReport(metadataPid, runXML, suiteId, sysmeta, solrLocation);
+
                         difference = System.currentTimeMillis() - startTimeIndexing;
                         elapsedTimeSecondsIndexing = TimeUnit.MILLISECONDS.toSeconds(difference);
                         qEntry.setIndexingElapsedTimeSeconds(elapsedTimeSecondsIndexing);
                     } catch (Exception e) {
-                        log.error("Unable to index quality report.");
+                        log.error("Unable to index quality report..");
                         e.printStackTrace();
                         MetadigException me = new MetadigIndexException("Unable index the generated quality report.");
                         me.initCause(e);
                         qEntry.setException(me);
-                    } finally {
-                        dbstore.shutdown();
                     }
                 }
 
