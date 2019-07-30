@@ -22,7 +22,7 @@ spec:
       #    containerPort: 80
       #  imagePullPolicy: Always
       - name: metadig-controller
-        image: docker.io/metadig/metadig-controller:dev
+        image: docker.io/metadig/metadig-controller:2.0.0-rc1
         ports:
         - name: metadig-tomcat
           containerPort: 8080

@@ -3,6 +3,7 @@ kind: Deployment
 metadata:
   name: metadig-ingress-controller
   namespace: metadig
+  annotations:
 spec:
   replicas: 1
   selector:
@@ -17,6 +18,15 @@ spec:
         prometheus.io/scrape: 'true'
     spec:
       serviceAccountName: metadig-ingress-serviceaccount
+      tolerations:
+      - key: node-role.kubernetes.io/master
+        effect: NoSchedule
+      - key: "key"
+        operator: "Equal"
+        value: "value"
+        effect: "NoSchedule"
+      #nodeSelector:
+        #kubernetes.io/hostname: docker-ucsb-1
       containers:
         - name: metadig-ingress-controller
           image: quay.io/kubernetes-ingress-controller/nginx-ingress-controller:0.14.0

@@ -8,7 +8,7 @@ spec:
     matchLabels:
       app: metadig-worker
       tier: backend
-  replicas: 1
+  replicas: 75
   template:
     metadata:
       labels:
@@ -18,7 +18,7 @@ spec:
       serviceAccountName: metadig-serviceaccount
       containers:
         - name: metadig-worker
-          image: docker.io/metadig/metadig-worker:dev
+          image: docker.io/metadig/metadig-worker:2.0.0-rc1
           #image: localhost:5000/metadig/metadig-worker:dev
           imagePullPolicy: Always
 
