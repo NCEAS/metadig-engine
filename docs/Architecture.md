@@ -32,7 +32,8 @@ metadata quality reports for holdings in DataONE Member Nodes.
 * Internal functions
     * private processTask()
     * private getTaskFromMaster()
-* Metadig-controller: a controller for managing a pool of MetaDIG engines and a task queue
+* Metadig-controller: a controller for managing a pool of MetaDIG engines and a task 
+queue
     * dependencies
         * metadig-report-worker
         * RabbitMQ
@@ -61,6 +62,17 @@ metadata quality reports for holdings in DataONE Member Nodes.
     * Metadig-r
         * R package used to author and test R quality tests
     * Mdq-webapp: 
+* Metadig-graph-generator
+	* creates graphs of aggregated quality scores
+	* queries the Quality Solr Server for input quality scores
+	* writes graphs of aggregated scores to persistent disk
+	* dependencies
+		* metadig-controller
+	* API
+		* /graph/{suite}/{type}/{name}
+		* suite: the id of the quality suite
+		* type: the aggregation type, i.e. "cn", "mn", "group"
+		* name: the name of the aggregation, i.e. "urn:node:ARCTIC", "CN=SASAP,DC=dataone,DC=org ,"
 
 ## Future modules
     * Metadig-py
@@ -98,4 +110,3 @@ The following diagram shows the various components of the MetaDIG engine:
 
 * The following display shows metadata quality summarized for a DataONE user group:
 ![User Group Metadata Quality](https://github.com/NCEAS/metadig-engine/blob/master/docs/mockups/UserGroup/group-profile.png "UserGroup Profile Page")
-
