@@ -73,16 +73,23 @@ public class Runs {
             }
         }
 
+        // If a run was found for this pid in the chain, check if a sequence id was previously
+        // defined for it. We want to use the sampe sequence id for all pids in the chain, right?
         if(run != null) {
             this.addRun(metadataId, run);
+            // get sequence id for this run
             sequenceId = run.getSequenceId();
             // End recursion if the sequence id is found and termination is requested
             if(sequenceId != null ) {
+                // Has the sequence id for the collection been defined yet and is it different
+                // than the one for the current pid? This can happen if different, separate segments
+                // of the chain were previously processed and now the chain is connected.
                 if(this.sequenceId != null) {
                     if(! this.sequenceId.equals(sequenceId)) {
                         log.error("New sequence: " + sequenceId + " found at pid: " + metadataId);
                     }
                 } else {
+                    // We got the right sequence id for this chain
                     this.sequenceId = sequenceId;
                     log.debug("Found sequence id: " + sequenceId + " at pid: " + metadataId);
                     if(stopIfSIfound) {
@@ -94,6 +101,7 @@ public class Runs {
 
             // Get the sysmeta object within the run, to retrieve the 'obsoletes' or 'obsoletedBy' pid
             sysmetaModel = run.getSysmeta();
+            // Moving in the forward direction, get the next pid in the chain
             if (forward) {
                 obsoletedBy = sysmetaModel.getObsoletedBy();
                 if(obsoletedBy != null) {
@@ -102,6 +110,7 @@ public class Runs {
                     log.debug("Reached end of obsoletedBy chain at pid: " + metadataId);
                 }
             } else {
+                // Moving in the backward direction, get the next pid in the chain
                 obsoletes = sysmetaModel.getObsoletes();
                 if(obsoletes != null) {
                     getNextRun(obsoletes, suiteId, stopIfSIfound, store, forward);
