@@ -71,7 +71,7 @@ public class InMemoryStore implements MDQStore{
 			suiteResources  = resolver.getResources("classpath*:/suites/*.xml");
 			// do we have an additional location for these?
 			if (storeDirectory != null) {
-				log.debug("Reading suites from: file://" + storeDirectory + "/suites");
+				log.info("Reading suites from: file://" + storeDirectory + "/suites");
 				Resource[] additionalSuiteResources = resolver.getResources("file://" + storeDirectory + "/suites/*.xml");
 				log.debug("Adding " + additionalSuiteResources.length + " additional suites");
 				suiteResources = (Resource[]) ArrayUtils.addAll(suiteResources, additionalSuiteResources);
@@ -84,7 +84,7 @@ public class InMemoryStore implements MDQStore{
 				Suite suite = null;
 				try {
 					URL url = resource.getURL();
-					log.trace("Loading suite found at: " + url.toString());
+					log.debug("Loading suite found at: " + url.toString());
 					String xml = IOUtils.toString(url.openStream(), "UTF-8");
 					suite = (Suite) XmlMarshaller.fromXml(xml, Suite.class);
 				} catch (JAXBException | IOException | SAXException e) {
