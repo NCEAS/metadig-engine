@@ -356,9 +356,9 @@ public class DatabaseStore implements MDQStore {
         // Perform an 'upsert' on the 'nodes' table - if a record exists for the 'metadata_id, suite_id' already,
         // then update the record with the incoming data.
         try {
-            String sql = "INSERT INTO nodes (node_id, last_harvest_datetime, solr_location) VALUES (?, ?, ?)"
+            String sql = "INSERT INTO nodes (node_id, last_harvest_datetime) VALUES (?, ?)"
                     + " ON CONFLICT ON CONSTRAINT node_id_pk "
-                    + " DO UPDATE SET (node_id, last_harvest_datetime, solr_location) = (?, ?, ?);";
+                    + " DO UPDATE SET (node_id, last_harvest_datetime) = (?, ?);";
 
             stmt = conn.prepareStatement(sql);
             stmt.setString(1, node.getNodeId());
