@@ -389,7 +389,7 @@ public class XMLDialect {
 		NodeList nodes = null;
 		try {
 			nodes = (NodeList) xpath.evaluate(selectorPath, contextNode, XPathConstants.NODESET);
-			
+
 			if (nodes != null && nodes.getLength() == 1 && selector.getSubSelector() == null) {
 				
 				// just return single value, as a String
@@ -429,7 +429,7 @@ public class XMLDialect {
 				value = xpath.evaluate(selectorPath, contextNode);
 				value = retypeObject(value);
 			} catch (XPathExpressionException xpee2) {
-				log.error("Selector '" + selector.getName() + "'" + "could not select single value with given Xpath: " + xpee2.getCause().getMessage());
+				log.error("Selector '" + selector.getName() + "'" + " could not select single value with given Xpath: " + xpee2.getCause().getMessage());
 				value = null;
 			}
 		}

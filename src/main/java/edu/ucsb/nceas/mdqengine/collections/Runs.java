@@ -60,6 +60,8 @@ public class Runs {
         String sequenceId = null;
         SysmetaModel sysmetaModel = null;
 
+        log.debug("Getting next run: metadataId: " + metadataId + ", suiteId: " + suiteId);
+
         // First see if we have this run in the collection
         run = runs.get(metadataId);
 
@@ -74,26 +76,26 @@ public class Runs {
         }
 
         // If a run was found for this pid in the chain, check if a sequence id was previously
-        // defined for it. We want to use the sampe sequence id for all pids in the chain, right?
+        // defined for it. We want to use the same sequence id for all pids in the chain, right?
         if(run != null) {
             this.addRun(metadataId, run);
             // get sequence id for this run
             sequenceId = run.getSequenceId();
             // End recursion if the sequence id is found and termination is requested
-            if(sequenceId != null ) {
+            if(sequenceId != null) {
                 // Has the sequence id for the collection been defined yet and is it different
                 // than the one for the current pid? This can happen if different, separate segments
                 // of the chain were previously processed and now the chain is connected.
                 if(this.sequenceId != null) {
                     if(! this.sequenceId.equals(sequenceId)) {
-                        log.error("New sequence: " + sequenceId + " found at pid: " + metadataId);
+                        log.error("Warning, new sequenceId found for chain: " + sequenceId + " found at pid: " + metadataId);
                     }
                 } else {
                     // We got the right sequence id for this chain
                     this.sequenceId = sequenceId;
                     log.debug("Found sequence id: " + sequenceId + " at pid: " + metadataId);
                     if(stopIfSIfound) {
-                        log.debug("Terminating traversal as stop is specified.");
+                        log.debug("Terminating traversal as stop (when sequenceId is first found) is specified.");
                         return;
                     }
                 }
@@ -101,21 +103,29 @@ public class Runs {
 
             // Get the sysmeta object within the run, to retrieve the 'obsoletes' or 'obsoletedBy' pid
             sysmetaModel = run.getSysmeta();
+            if(sysmetaModel == null) {
+                log.error("Missing sysmeta model for run with id: " + run.getObjectIdentifier());
+                return;
+            }
             // Moving in the forward direction, get the next pid in the chain
             if (forward) {
+                log.debug("Checking for next forward pid (obsoletedBy)");
                 obsoletedBy = sysmetaModel.getObsoletedBy();
                 if(obsoletedBy != null) {
+                    log.debug("traversing forward to obsoletedBy: " + obsoletedBy);
                     getNextRun(obsoletedBy, suiteId, stopIfSIfound, store, forward);
                 } else {
-                    log.debug("Reached end of obsoletedBy chain at pid: " + metadataId);
+                    log.debug("Reached end of forward (obsoletedBy) chain at pid: " + metadataId);
                 }
             } else {
                 // Moving in the backward direction, get the next pid in the chain
+                log.debug("Checking for next backward pid (obsoletes)");
                 obsoletes = sysmetaModel.getObsoletes();
                 if(obsoletes != null) {
+                    log.debug("traversing backward to obsoletes: " + obsoletes);
                     getNextRun(obsoletes, suiteId, stopIfSIfound, store, forward);
                 } else {
-                    log.debug("Reached end of obsoletes chain at pid: " + metadataId);
+                    log.debug("Reached end of backward (obsoletes) chain at pid: " + metadataId);
                 }
             }
         } else {

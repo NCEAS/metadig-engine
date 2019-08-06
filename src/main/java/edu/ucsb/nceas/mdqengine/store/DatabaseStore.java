@@ -171,7 +171,7 @@ public class DatabaseStore implements MDQStore {
                 InputStream is = new ByteArrayInputStream(resultStr.getBytes());
                 run = TypeMarshaller.unmarshalTypeFromStream(Run.class, is);
                 run.setSequenceId(seqId);
-                log.debug("Retrieved run successfully, id from run object: " + run.getId());
+                log.debug("Retrieved run successfully, metradataId from run object: " + run.getObjectIdentifier());
             } else {
                 log.debug("Run not found for metadata id: " + metadataId + ", suiteId: " + suiteId);
             }
