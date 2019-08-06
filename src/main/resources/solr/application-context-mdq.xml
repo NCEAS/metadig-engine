@@ -20,6 +20,7 @@
 				<ref bean="mdq.dateUploaded"/>
 				<ref bean="mdq.obsoletes"/>
 				<ref bean="mdq.obsoletedBy"/>
+				<ref bean="mdq.sequenceId"/>
 				<ref bean="mdq.seriesId"/>
 				<ref bean="mdq.funder"/>
 				<ref bean="mdq.funder.lookup"/>
@@ -39,6 +40,13 @@
 		<constructor-arg name="name" value="runId"/>
 		<constructor-arg name="xpath"
 						 value="/*[local-name() = 'run']/id"/>
+		<property name="multivalue" value="false"/>
+	</bean>
+
+	<bean id="mdq.sequenceId" class="org.dataone.cn.indexer.parser.SolrField">
+		<constructor-arg name="name" value="sequenceId"/>
+		<constructor-arg name="xpath"
+						 value="/*[local-name() = 'run']/sequenceId"/>
 		<property name="multivalue" value="false"/>
 	</bean>
 
