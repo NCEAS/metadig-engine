@@ -176,42 +176,40 @@ public class Worker {
                 }
 
                 String sequenceId = null;
-                if(!failFast) {
-                    /* Save the processing report to persistent storage */
-                    try {
-                        // Determine the sequence identifier for the metadata pids DataONE obsolescence chain. This is
-                        // not the DataONE seriesId, which may not exist for a pid, but instead is a quality engine maintained
-                        // sequence id.
-                        log.debug("*****");
-                        log.debug("Searching for sequence id for pid: " + run.getObjectIdentifier());
-                        // Add current run to collection, it will be saved during the run.update
-                        run.setObjectIdentifier(metadataPid);
-                        run.setRunStatus(Run.SUCCESS);
-                        run.setErrorDescription("");
-                        // Add the current run to the collection, as a starting point for the sequence id search
-                        runsInSequence.addRun(run.getObjectIdentifier(), run);
+                /* Save the processing report to persistent storage */
+                if(!failFast) try {
+                    // Determine the sequence identifier for the metadata pids DataONE obsolescence chain. This is
+                    // not the DataONE seriesId, which may not exist for a pid, but instead is a quality engine maintained
+                    // sequence id, that is needed to determine the highest score for a obs. chain for each month.
+                    log.debug("*****");
+                    log.debug("Searching for sequence id for pid: " + run.getObjectIdentifier());
+                    // Add current run to collection, it will be saved during the run.update
+                    run.setObjectIdentifier(metadataPid);
+                    run.setRunStatus(Run.SUCCESS);
+                    run.setErrorDescription("");
+                    // Add the current run to the collection, as a starting point for the sequence id search
+                    runsInSequence.addRun(run.getObjectIdentifier(), run);
 
-                        // Traverse through the collection, stopping if the sequenceId is found. If the sequenceId
-                        // is already found, then all pids in the chain that are stored should already have this
-                        // sequenceId
-                        Boolean stopIfSeqFound = true;
-                        runsInSequence.getRunSequence(run.getObjectIdentifier(), suiteId, stopIfSeqFound);
-                        sequenceId = runsInSequence.getSequenceId();
-                        // Ok, a sequence id wasn't set for these runs (if any), so generate a new one
-                        if(sequenceId == null) {
-                            sequenceId = runsInSequence.generateId();
-                            log.debug("Generatied new sequence id: " + sequenceId);
-                        } else {
-                            log.debug("Using found sequenceId: " + sequenceId);
-                        }
-
-                        run.setSequenceId(sequenceId);
-                        run.save();
-                    } catch (MetadigException me) {
-                        failFast = true;
-                        log.error("Unable to save (then index) quality report to database.");
-                        qEntry.setException(me);
+                    // Traverse through the collection, stopping if the sequenceId is found. If the sequenceId
+                    // is already found, then all pids in the chain that are stored should already have this
+                    // sequenceId
+                    Boolean stopIfSeqFound = true;
+                    runsInSequence.getRunSequence(run.getObjectIdentifier(), suiteId, stopIfSeqFound);
+                    sequenceId = runsInSequence.getSequenceId();
+                    // Ok, a sequence id wasn't set for these runs (if any), so generate a new one
+                    if (sequenceId == null) {
+                        sequenceId = runsInSequence.generateId();
+                        log.debug("Generatied new sequence id: " + sequenceId);
+                    } else {
+                        log.debug("Using found sequenceId: " + sequenceId);
                     }
+
+                    run.setSequenceId(sequenceId);
+                    run.save();
+                } catch (MetadigException me) {
+                    failFast = true;
+                    log.error("Unable to save (then index) quality report to database.");
+                    qEntry.setException(me);
                 }
 
                 /* Once the quality report has been created and saved to persistent storage,
@@ -453,6 +451,8 @@ public class Worker {
 
         log.info(" [x] Indexing metadata PID: " + metadataId + ", suite id: " + suiteId);
 
+        // If no Solr server is specified then use the 'fallback' server from the configuration
+        // file.
         try {
             IndexApplicationController iac = new IndexApplicationController();
             iac.initialize(this.springConfigFileURL, solrLocation);
@@ -460,17 +460,44 @@ public class Worker {
             Identifier pid = new Identifier();
             pid.setValue(metadataId);
             ObjectFormatIdentifier objFormatId = new ObjectFormatIdentifier();
-            // Update the sysmeta, setting the cprrect type to a metadig quality report
+            // Update the sysmeta, setting the correct type for a metadig quality report
             objFormatId.setValue(qualityReportObjectType);
             sysmeta.setFormatId(objFormatId);
             iac.insertSolrDoc(pid, sysmeta, runIS);
             log.info(" [x] Done indexing metadata PID: " + metadataId + ", suite id: " + suiteId);
+            iac.shutdown();
         } catch (Exception e) {
             throw new MetadigIndexException("Error during indexing", e);
         }
     }
 
+    /**
+     * Update a value in a quality report on the Solr server
+     * <p>
+     * The quality report is added to the Solr index using the DataONE index processing
+     * component, which has been modified for use with metadig_engine.
+     * </p>
+     *
+     * @param metadataId
+     * @param suiteId
+     * @param fields : field names and values to update in the Solr index entry
+     * @throws Exception
+     */
+    public void updateIndex(String metadataId, String suiteId, HashMap<String, String> fields, String solrLocation) throws MetadigIndexException {
 
+        log.info(" [x] Updating index entry for pid: " + metadataId + ", suite: " + suiteId);
+        try {
+            IndexApplicationController iac = new IndexApplicationController();
+            iac.initialize(this.springConfigFileURL, solrLocation);
+            Identifier pid = new Identifier();
+            pid.setValue(metadataId);
+            iac.updateSolrDoc(pid, suiteId, fields);
+            log.info(" [x] Done updating entry for pid: " + metadataId + ", suite id: " + suiteId);
+            iac.shutdown();
+        } catch (Exception e) {
+            throw new MetadigIndexException("Error during index updating", e);
+        }
+    }
 
     /**
      * Submit (upload) the newly generated quality report to a member node

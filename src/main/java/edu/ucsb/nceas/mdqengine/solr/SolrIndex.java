@@ -25,13 +25,16 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrServerException;
+import org.apache.solr.client.solrj.request.UpdateRequest;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.client.solrj.response.UpdateResponse;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.SolrInputDocument;
 import org.dataone.cn.indexer.XMLNamespaceConfig;
-import org.dataone.cn.indexer.parser.*;
+import org.dataone.cn.indexer.parser.BaseXPathDocumentSubprocessor;
+import org.dataone.cn.indexer.parser.IDocumentSubprocessor;
+import org.dataone.cn.indexer.parser.SolrField;
 import org.dataone.cn.indexer.solrhttp.SolrDoc;
 import org.dataone.cn.indexer.solrhttp.SolrElementField;
 import org.dataone.exceptions.MarshallingException;
@@ -330,7 +333,6 @@ public class SolrIndex {
                     throw e;
                 } catch (IOException e) {
                     throw e;
-
                 }
             }
         }
@@ -371,5 +373,61 @@ public class SolrIndex {
             }
         }
         return list;
+    }
+
+    /*
+     * Update a Solr document with a new value for the specified field.
+     */
+    public synchronized void update(String metadataId, String suiteId, HashMap<String, String> fields) throws SolrServerException, IOException {
+
+        log.info("building query");
+        SolrQuery query = new SolrQuery("metadataId:" + '"' +  metadataId + '"' + "+suiteId:" + suiteId);
+        query.setRows(1);
+        //query.setFields("*");
+        log.info("sending query");
+        QueryResponse response = solrClient.query(query);
+        SolrDocumentList docs = response.getResults();
+
+        String runId = null;
+        SolrDocument resultDoc = null;
+        log.debug("checking if docs null");
+        if(docs != null) {
+            log.info("Found entry for metadataId: " + metadataId + ", suiteId: " + suiteId + ", updating...");
+            resultDoc = docs.get(0);
+            runId = (String)resultDoc.getFieldValue("runId");
+            log.info("RunId: " + runId);
+            // For some reason, the Solr atomic 'update' mechanism isn't working properly with our index. It may be due to
+            // the custom 'UpdateProcessor' (defined in solrconfig.xml). So, it's not possible to just specify the
+            // 'id' field and set another field. Instead, the entire document has to be imported from the existing
+            // record, added to a SolrInputDocument, and then this record will replace the old.
+            SolrInputDocument solrDoc = new SolrInputDocument();
+
+            // Read all fields from the existing document and populate new Solr doc
+            for (String n : resultDoc.getFieldNames()) {
+                log.info("Adding field: " + n);
+                solrDoc.addField(n, resultDoc.getFieldValue(n));
+            }
+
+            // Set the new value for the update fields
+            for (Map.Entry<String,String> entry : fields.entrySet()) {
+                solrDoc.setField(entry.getKey(), entry.getValue());
+            }
+            UpdateRequest updateRequest = new UpdateRequest();
+            updateRequest.setAction( UpdateRequest.ACTION.COMMIT, false, false);
+
+            try {
+                updateRequest.add(solrDoc);
+                UpdateResponse rsp = updateRequest.process(solrClient);
+                //solrClient.commit();
+            } catch (SolrServerException e) {
+                log.error("Unable to update Solr document for metadataId: " + metadataId + ": " + e.getMessage());
+                throw e;
+            } catch (IOException e) {
+                log.error("IO Error during update of SOlr document for metadataId, : " + metadataId + ": " + e.getMessage());
+                throw e;
+            }
+        } else {
+            log.error("Did not find entry for metadataId: " + metadataId + ", suiteId: " + suiteId + ", unable to update.");
+        }
     }
 }

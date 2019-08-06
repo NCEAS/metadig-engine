@@ -11,6 +11,7 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 
 //import org.apache.solr.client.solrj.impl.HttpSolrClient;
@@ -136,5 +137,41 @@ public class IndexApplicationController {
             }
         }
     }
+
+    /**
+     * Insert or update a document in the Solr index
+     *
+     */
+
+    public void updateSolrDoc(Identifier pid, String suiteId, HashMap<String, String> fields) throws IOException, Exception {
+
+        String metadataId = null;
+        try {
+            log.debug("calling solrIndex.update()...");
+            for (SolrIndex solrIndex: solrIndexes) {
+                log.debug("calling solrIndex.update()...");
+                //solrIndex.update(metadataId, suiteId, sequenceId);
+                metadataId = pid.getValue().toString();
+                solrIndex.update(metadataId, suiteId, fields);
+            }
+        } catch (Exception e) {
+            log.error("Unable to update Solr document for metadata id: " + metadataId + ": " + e.getMessage());
+            throw e;
+        }
+    }
+
+    /**
+     * Insert or update a document in the Solr index
+     *
+     */
+
+    public void shutdown() {
+        try {
+            solrClient.close();
+        } catch (Exception e) {
+            log.error("Unable to shutdown Solr client: " + e.getMessage());
+        }
+    }
+
 }
 
