@@ -56,7 +56,7 @@ public class IndexApplicationController {
             //solrClient = new CloudSolrClient.Builder().withSolrUrl(solrLocations).build();
             //solrClient = new CloudSolrClient.Builder().withZkHost(solrLocation).build();
             //solrClient.setDefaultCollection("quality");
-            log.info("Created Solr client at " + solrLocation);
+            log.debug("Created Solr client at " + solrLocation);
         } catch (Exception e) {
             log.error("Could not create Solr client", e);
             throw e;
@@ -69,18 +69,18 @@ public class IndexApplicationController {
         for (SolrIndex solrIndex: solrIndexes) {
             // set the solr client to use
             solrIndex.setSolrClient(solrClient);
-            log.info("Set solr client for solrIndex");
+            log.debug("Set solr client for solrIndex");
         }
-        log.info("ApplicationController initialized");
+        log.debug("ApplicationController initialized");
     }
 
     /**
      * Get the ApplicaionContext of Spring.
      */
     private ClassPathXmlApplicationContext getContext(String configFile) {
-        log.info("Getting context...");
+        log.trace("Getting context...");
         if (context == null) {
-            log.info("Creating new ClassPathXmlApplicationContext");
+            log.trace("Creating new ClassPathXmlApplicationContext");
             context = new ClassPathXmlApplicationContext(configFile);
         }
         return context;

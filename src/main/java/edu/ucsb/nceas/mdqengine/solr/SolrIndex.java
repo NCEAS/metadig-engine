@@ -380,19 +380,16 @@ public class SolrIndex {
      */
     public synchronized void update(String metadataId, String suiteId, HashMap<String, String> fields) throws SolrServerException, IOException {
 
-        log.info("building query");
+        log.debug("Updating entry in Solr index...");
         SolrQuery query = new SolrQuery("metadataId:" + '"' +  metadataId + '"' + "+suiteId:" + suiteId);
         query.setRows(1);
-        //query.setFields("*");
-        log.info("sending query");
         QueryResponse response = solrClient.query(query);
         SolrDocumentList docs = response.getResults();
 
         String runId = null;
         SolrDocument resultDoc = null;
-        log.debug("checking if docs null");
         if(docs != null) {
-            log.info("Found entry for metadataId: " + metadataId + ", suiteId: " + suiteId + ", updating...");
+            log.debug("Found entry for metadataId: " + metadataId + ", suiteId: " + suiteId + ", updating...");
             resultDoc = docs.get(0);
             runId = (String)resultDoc.getFieldValue("runId");
             log.info("RunId: " + runId);
@@ -404,7 +401,7 @@ public class SolrIndex {
 
             // Read all fields from the existing document and populate new Solr doc
             for (String n : resultDoc.getFieldNames()) {
-                log.info("Adding field: " + n);
+                log.debug("Adding field: " + n);
                 solrDoc.addField(n, resultDoc.getFieldValue(n));
             }
 
@@ -426,6 +423,7 @@ public class SolrIndex {
                 log.error("IO Error during update of SOlr document for metadataId, : " + metadataId + ": " + e.getMessage());
                 throw e;
             }
+            log.debug("Updated entry for metadataId: " + metadataId);
         } else {
             log.error("Did not find entry for metadataId: " + metadataId + ", suiteId: " + suiteId + ", unable to update.");
         }

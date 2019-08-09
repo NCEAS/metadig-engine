@@ -95,7 +95,7 @@ public class MDQEngineTest {
 			// run the suite on it
 			run = mdqe.runSuite(suite, input, null, sysMeta);
 			run.setObjectIdentifier(packageId);
-			log.trace("Run results XML: " + XmlMarshaller.toXml(run));
+			log.trace("Run results XML: " + XmlMarshaller.toXml(run, true));
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
