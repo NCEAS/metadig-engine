@@ -62,13 +62,13 @@ public class Worker {
     private static String authToken = null;
     private static SolrClient client = null;
     private static String DataONEformatsFile = null;
+    private static Boolean indexLatest = false; // Determine the latest report in the month and record in the index
 
     private static long startTimeIndexing;
     private static long startTimeProcessing;
     private static long elapsedTimeSecondsIndexing;
     private static long elapsedTimeSecondsProcessing;
     private static long totalElapsedTimeSeconds;
-
 
     public static void main(String[] argv) throws Exception {
 
@@ -81,6 +81,7 @@ public class Worker {
             RabbitMQhost = cfg.getString("RabbitMQ.host");
             RabbitMQport = cfg.getInt("RabbitMQ.port");
             DataONEformatsFile = cfg.getString("DataONE.formats");
+            indexLatest = Boolean.parseBoolean(cfg.getString("index.latest"));
         } catch (ConfigurationException cex) {
             log.error("Unable to read configuration");
             MetadigException me = new MetadigException("Unable to read config properties");
@@ -171,7 +172,7 @@ public class Worker {
                         run.save();
                         log.debug("Saved quality run status after error");
                     } catch (Exception ex) {
-                        log.error("Processing failed, then unable to save the quality report to database:" + e.getMessage());
+                        log.error("Processing failed, then unable to save the quality report to database:" + ex.getMessage());
                     }
                 }
 
@@ -187,25 +188,37 @@ public class Worker {
                     run.setObjectIdentifier(metadataPid);
                     run.setRunStatus(Run.SUCCESS);
                     run.setErrorDescription("");
-                    // Add the current run to the collection, as a starting point for the sequence id search
-                    runsInSequence.addRun(run.getObjectIdentifier(), run);
+                    // Should a 'sequenceId' and 'isLatest' be added to the Solr index?
+                    if(indexLatest) {
+                        // Add the current run to the collection, as a starting point for the sequence id search
+                        runsInSequence.addRun(run.getObjectIdentifier(), run);
 
-                    // Traverse through the collection, stopping if the sequenceId is found. If the sequenceId
-                    // is already found, then all pids in the chain that are stored should already have this
-                    // sequenceId
-                    Boolean stopIfSeqFound = true;
-                    runsInSequence.getRunSequence(run.getObjectIdentifier(), suiteId, stopIfSeqFound);
-                    sequenceId = runsInSequence.getSequenceId();
-                    // Ok, a sequence id wasn't set for these runs (if any), so generate a new one
-                    if (sequenceId == null) {
-                        sequenceId = runsInSequence.generateId();
-                        log.debug("Generatied new sequence id: " + sequenceId);
-                    } else {
-                        log.debug("Using found sequenceId: " + sequenceId);
+                        // Traverse through the collection, stopping if the sequenceId is found. If the sequenceId
+                        // is already found, then all pids in the chain that are stored should already have this
+                        // sequenceId
+                        Boolean stopWhenSIfound = true;
+                        runsInSequence.getRunSequence(run, suiteId, stopWhenSIfound);
+                        sequenceId = runsInSequence.getSequenceId();
+                        // Ok, a sequence id wasn't set for these runs (if any), so generate a new one
+                        if (sequenceId == null) {
+                            sequenceId = runsInSequence.generateId();
+                            log.debug("Generatied new sequence id: " + sequenceId);
+                        } else {
+                            log.debug("Using found sequenceId: " + sequenceId);
+                        }
+
+                        run.setSequenceId(sequenceId);
                     }
-
-                    run.setSequenceId(sequenceId);
                     run.save();
+
+                    // Find and set the run in this collection which is the latest in the month
+                    // This routine also 'unmarks' any run in the sequence that was previously set as the
+                    // latest. These modified runs will be written out to Solr in the indexing section.
+                    if(indexLatest) {
+                        runsInSequence.setLatestRunInMonth(run.getDateUploaded());
+                        // Update modified runs to the datastore
+                        runsInSequence.update();
+                    }
                 } catch (MetadigException me) {
                     failFast = true;
                     log.error("Unable to save (then index) quality report to database.");
@@ -226,6 +239,18 @@ public class Worker {
                         String solrLocation = null;
                         log.debug("calling indexReport");
                         wkr.indexReport(metadataPid, runXML, suiteId, sysmeta, solrLocation);
+
+                        // Update any runs in this sequence that have been modified, either set as latest in sequence
+                        // or unset as latest in sequence.
+                        if(indexLatest) {
+                            // Put files to be updated in a HashMap (can update multiple fields)
+                            HashMap<String, String> fields = new HashMap<>();
+                            for (Run r : runsInSequence.getModifiedRuns()) {
+                                log.info("Updating Solr index with modified run with pid: " + r.getObjectIdentifier() + ", isLatest: " + r.getIsLatest().toString() + ", dateUploaded: " + r.getDateUploaded());
+                                fields.put("isLatest", r.getIsLatest().toString());
+                                wkr.updateIndex(r.getObjectIdentifier(), r.getSuiteId(), fields, solrLocation);
+                            }
+                        }
 
                         difference = System.currentTimeMillis() - startTimeIndexing;
                         elapsedTimeSecondsIndexing = TimeUnit.MILLISECONDS.toSeconds(difference);
@@ -407,19 +432,24 @@ public class Worker {
             Future<List<String>> future = executorService.submit(glc);
 
             List<String> groups = new ArrayList<String>();
-            // Wait for a few seconds for the 'accounts'
-            for (int i = 0; i < 5; i++) {
-                try {
-                    groups = future.get();
-                } catch (Throwable thrown) {
-                    log.error("Error while waiting for thread completion");
-                }
-                // Sleep for 1 second
-
-                if (groups.size() > 0 ) break;
-                log.debug("Waiting 1 second for DataONE group lookup");
-                Thread.sleep(1000);
+            try {
+                groups = future.get();
+            } catch (Throwable thrown) {
+                log.error("Error while waiting for group lookup thread completion");
             }
+            // Wait for a few seconds for the 'accounts'
+//            for (int i = 0; i < 5; i++) {
+//                try {
+//                    groups = future.get();
+//                } catch (Throwable thrown) {
+//                    log.error("Error while waiting for thread completion");
+//                }
+//                // Sleep for 1 second
+//
+//                if (groups.size() > 0 ) break;
+//                log.debug("Waiting 1 second for DataONE group lookup");
+//                Thread.sleep(1000);
+//            }
 
             if (groups != null) {
                 smm.setGroups(groups);

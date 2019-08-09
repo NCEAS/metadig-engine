@@ -7,21 +7,14 @@ import edu.ucsb.nceas.mdqengine.store.MDQStore;
 import edu.ucsb.nceas.mdqengine.store.StoreFactory;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.joda.time.DateTime;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 public class Runs {
 
-    public static final String SUCCESS = "success";
-    public static final String FAILURE = "failure";
-    public static final String QUEUED = "queued";
-    public static final String PROCESSING = "processing";
     public static Log log = LogFactory.getLog(Run.class);
-
     private HashMap<String, Run> runs = new HashMap<>();
-    private Boolean completeChain = false;
     private String sequenceId = null;
 
     public Runs () {
@@ -53,12 +46,15 @@ public class Runs {
      * @throws Exception
      */
 
-    public void getNextRun(String metadataId, String suiteId, Boolean stopIfSIfound, MDQStore store, Boolean forward) {
+    public void getNextRun(String metadataId, String suiteId, Boolean stopWhenSIfound, MDQStore store, Boolean forward,
+                            DateTime minDate, DateTime maxDate) {
         Run run = null;
         String obsoletedBy = null;
         String obsoletes = null;
         String sequenceId = null;
         SysmetaModel sysmetaModel = null;
+        Boolean SIfound = false;
+        Boolean reachedDateBounds = false;
 
         log.debug("Getting next run: metadataId: " + metadataId + ", suiteId: " + suiteId);
 
@@ -68,9 +64,13 @@ public class Runs {
         // If not in the collection, see if it is in the store
         if(run == null) {
             try {
+                log.debug("Run for pid: " + metadataId + " not in collection, getting from store.");
+                // the 'store.getRun' returns null if the run isn't found in the store. This will typically happen
+                // if the next pid in the chain hasn't been cataloged.
                 run = store.getRun(metadataId, suiteId);
             } catch (MetadigException me) {
-                log.debug("Error getting run: " + me.getCause());
+                log.error("Error getting run: " + me.getCause());
+                // Terminate recursion in the current direction
                 return;
             }
         }
@@ -78,11 +78,12 @@ public class Runs {
         // If a run was found for this pid in the chain, check if a sequence id was previously
         // defined for it. We want to use the same sequence id for all pids in the chain, right?
         if(run != null) {
-            this.addRun(metadataId, run);
             // get sequence id for this run
             sequenceId = run.getSequenceId();
-            // End recursion if the sequence id is found and termination is requested
+            // End recursion if the minDate or maxDate have been passed, and possibly if the sequence id for
+            // this chain has been found.
             if(sequenceId != null) {
+                SIfound = true;
                 // Has the sequence id for the collection been defined yet and is it different
                 // than the one for the current pid? This can happen if different, separate segments
                 // of the chain were previously processed and now the chain is connected.
@@ -94,12 +95,41 @@ public class Runs {
                     // We got the right sequence id for this chain
                     this.sequenceId = sequenceId;
                     log.debug("Found sequence id: " + sequenceId + " at pid: " + metadataId);
-                    if(stopIfSIfound) {
-                        log.debug("Terminating traversal as stop (when sequenceId is first found) is specified.");
-                        return;
-                    }
                 }
             }
+
+            // See if we have reached the time persion (month) start or end
+            DateTime thisDate = new DateTime(run.getDateUploaded());
+            if(forward) {
+                if(thisDate.isAfter(maxDate)) reachedDateBounds = true;
+            } else {
+                if(thisDate.isBefore(minDate)) reachedDateBounds = true;
+            }
+
+            // Test if recursion should end
+            // Have all pids (in the current direction) been obtained and has the sequence id been found?
+            if(stopWhenSIfound) {
+                if(SIfound && reachedDateBounds) {
+                    if(forward) {
+                        log.debug("Terminating forward traversal: sequenceId found and reached date boundary.");
+                    } else {
+                        log.debug("Terminating backward traversal: sequenceId found and reached date boundary.");
+                    }
+                    return;
+                }
+            } else {
+                if(reachedDateBounds) {
+                    if (forward) {
+                        log.debug("Terminating forward traversal: reached date boundary.");
+                    } else {
+                        log.debug("Terminating backward traversal: reached date boundary.");
+                    }
+                    return;
+                }
+            }
+
+            // The termination tests have passed, add this run to the collection
+            this.addRun(metadataId, run);
 
             // Get the sysmeta object within the run, to retrieve the 'obsoletes' or 'obsoletedBy' pid
             sysmetaModel = run.getSysmeta();
@@ -113,7 +143,7 @@ public class Runs {
                 obsoletedBy = sysmetaModel.getObsoletedBy();
                 if(obsoletedBy != null) {
                     log.debug("traversing forward to obsoletedBy: " + obsoletedBy);
-                    getNextRun(obsoletedBy, suiteId, stopIfSIfound, store, forward);
+                    getNextRun(obsoletedBy, suiteId, stopWhenSIfound, store, forward, minDate, maxDate);
                 } else {
                     log.debug("Reached end of forward (obsoletedBy) chain at pid: " + metadataId);
                 }
@@ -123,13 +153,14 @@ public class Runs {
                 obsoletes = sysmetaModel.getObsoletes();
                 if(obsoletes != null) {
                     log.debug("traversing backward to obsoletes: " + obsoletes);
-                    getNextRun(obsoletes, suiteId, stopIfSIfound, store, forward);
+                    getNextRun(obsoletes, suiteId, stopWhenSIfound, store, forward, minDate, maxDate);
                 } else {
                     log.debug("Reached end of backward (obsoletes) chain at pid: " + metadataId);
                 }
             }
         } else {
-            log.debug("Run not found for pid: " + metadataId + ", suiteId: " + suiteId);
+            // The run was null, recursion in the current direction ends.
+            log.debug("Run not found in store for pid: " + metadataId + ", suiteId: " + suiteId + ", terminating search in current direction.");
         }
 
         return;
@@ -138,34 +169,42 @@ public class Runs {
     /**
      * Get runs for all pids in a DataONE obsolescence chain from the DataStore
      * <p>
-     * Different versions of a metadata document are represented in DataONE as pids comprising an obsolecence chain (i.e. linked list) or sequence,
+     * Successive versions of a metadata document are represented in DataONE as pids comprising an obsolecence chain (i.e. linked list) or sequence,
      * where new versions 'obsolete' older, outdated ones.
      * This method follows the obsolecence chain to retrieve all runs corresponding to pids in the obsolescence chain.
-     * For efficiency, the search can be terminated early, before the entire chain is received, by specifing <b>stopIfSIfound</b>
+     * The least number of pids to get will be for all versions that are within the current month of the starting pid.
+     * If <b>stopWhenSIfound</b> is specified, the search will continue until the sequenceId is found, or the entire chain is
+     * fetched.
      * </p>
      *
-     * @param metadataId The DataONE identifier of the run to fetch
+     * @param run The starting run - get all pids in this runs obsolesence chain
      * @param suiteId The metadig-engine suite id of the suite to match
      * @throws Exception
      */
 
-    public void getRunSequence(String metadataId, String suiteId, Boolean stopIfSIfound) throws MetadigException {
+    public void getRunSequence(Run run, String suiteId, Boolean stopWhenSIfound) throws MetadigException {
 
         boolean persist = true;
         MDQStore store = StoreFactory.getStore(persist);
         Boolean forward = false;
+        String metadataId = run.getObjectIdentifier();
         this.sequenceId = null;
 
-        // Start the traversal in the backward direction
-        log.debug("Getting all runs (backward) for suiteId: " + suiteId + ", metadataId: " + metadataId);
-        getNextRun(metadataId, suiteId, stopIfSIfound, store, forward);
+        // Convert input date string to JodaTime
+        DateTime targetDate = new DateTime(run.getDateUploaded());
+        // get target month start
+        DateTime minDate = targetDate.withDayOfMonth(1);
+        // get target month end
+        DateTime maxDate = targetDate.plusMonths(1).withDayOfMonth(1).minusDays(1);
 
-        // If the sequence id is not found, continue traversal in the forward direction
-        if(this.sequenceId == null) {
-            log.debug("Getting all runs (forward) for suiteId: " + suiteId + ", metadataId: " + metadataId);
-            forward = true;
-            getNextRun(metadataId, suiteId, stopIfSIfound, store, forward);
-        }
+        // Start the traversal in the backward direction
+        log.debug("Getting all runs (backward) for suiteId: " + suiteId + ", metadataId: " + metadataId + ", minDate: " + minDate + ", " + maxDate);
+        getNextRun(metadataId, suiteId, stopWhenSIfound, store, forward, minDate, maxDate);
+
+        // Continue traversal in the forward direction, if necessary
+        log.debug("Getting all runs (forward) for suiteId: " + suiteId + ", metadataId: " + metadataId);
+        forward = true;
+        getNextRun(metadataId, suiteId, stopWhenSIfound, store, forward, minDate, maxDate);
 
         log.debug("Shutting down store");
         store.shutdown();
@@ -182,7 +221,7 @@ public class Runs {
      * @param sequenceId a quality engine maintained sequence identifier, similiar in function to the DataONE series id.
      */
 
-    public void update(String sequenceId) {
+    public void updateSequenceId(String sequenceId) {
 
         log.debug("Updating runs with new sequence id: " + sequenceId);
 
@@ -211,49 +250,12 @@ public class Runs {
     }
 
     /**
-     * Save eech modified run to the data store.
-     *
-     * @throws Exception
-     */
-
-    public void save() throws MetadigException {
-
-        boolean persist = true;
-        MDQStore store = StoreFactory.getStore(persist);
-
-        log.debug("Saving a set of runs...");
-
-        Run run = null;
-        String pid = null;
-
-        for (Map.Entry<String, Run> entry : runs.entrySet()) {
-            pid = (String) entry.getKey();
-            run = (Run) entry.getValue();
-
-            // If this run has been modified, save it to the DataStore
-            if(run.getModified()) {
-                log.debug("Saving modified run for pid: " + run.getObjectIdentifier() + ", suite id: " + run.getSuiteId());
-                run.save();
-
-                try {
-                    log.debug("Saving quality run...");
-                    // convert String into InputStream
-                    run.save();
-                    log.debug("Saved quality run ");
-                } catch (Exception ex) {
-                    log.error("Unable to save quality run for pid: " + pid + ", suiteId: " + run.getSuiteId());
-                    continue;
-                }
-            }
-        }
-    }
-
-    /**
      * Add a run to the collection
      */
 
     public void addRun(String metadataPid, Run run) {
         if(! this.runs.containsKey(metadataPid)) {
+            log.trace("Adding run for pid: " + metadataPid);
             this.runs.put(metadataPid, run);
         }
     }
@@ -267,6 +269,133 @@ public class Runs {
         String uuid = "urn:uuid:" + (UUID.randomUUID().toString());
         return uuid;
     }
+
+    /**
+     * <p> Determine which run in this obsolecense sequence is the latest in the month, give a date.</p>
+     *
+     * @param date the date to use for comparison
+     */
+    public void setLatestRunInMonth (Date date) {
+
+        Run run = null;
+
+        // Convert input date string to JodaTime
+        DateTime targetDate = new DateTime(date);
+        // get target month start
+        DateTime minDate = targetDate.withDayOfMonth(1);
+        // get target month end
+        DateTime maxDate = targetDate.plusMonths(1).withDayOfMonth(1).minusDays(1);
+
+        // Get the run with the latest date in the month from the input date
+        run = getLatestRun(targetDate, minDate, maxDate);
+        String latestPid = run.getObjectIdentifier();
+        Boolean latestSet = false;
+        String thisPid = null;
+
+        DateTime dateUploaded = null;
+        // Check all other runs in this collection that are in the month and unmark them
+        // as latest, if they had previously been marked.
+        log.debug(this.runs.size() + " runs in collection");
+        for (Map.Entry<String, Run> entry : this.runs.entrySet()) {
+            thisPid = entry.getKey();
+            run = entry.getValue();
+            dateUploaded = new DateTime(run.getDateUploaded());
+            latestSet = run.getIsLatest();
+            log.debug("Checking run with pid: " + thisPid + ", dateUploaded: " + dateUploaded + ", isLatest: " + latestSet);
+            // Don't consider this run if it is outside the target month
+            if(dateUploaded.isBefore(minDate) || dateUploaded.isAfter(maxDate)) {
+                log.debug("Skipping out of date range pid: " + run.getObjectIdentifier());
+                continue;
+            }
+            // Update the run for the latest pid.
+            if(thisPid.equalsIgnoreCase(latestPid)) {
+                log.info("Setting latest run in month to pid: " + run.getObjectIdentifier() + " with date: " + run.getDateUploaded());
+                run.setIsLatest(true);
+                run.setModified(true);
+                // Update the collection with this updated run
+                this.runs.replace(thisPid, run);
+            } else {
+                // Not the latest pid, 'unmark' it if needed
+                if(latestSet) {
+                    log.info("Unsetting latest run in month to pid: " + run.getObjectIdentifier() + " with date: " + run.getDateUploaded());
+                    run.setIsLatest(false);
+                    run.setModified(true);
+                    // Update the collection with this updated run
+                    this.runs.replace(thisPid, run);
+                }
+            }
+        }
+        return;
+    }
+
+    /**
+     * <p> Return the run from the collection that is the latest in the given month. The
+     * field 'dateUploaded' is used for comparision. Since all runs in the collection are
+     * in the same DateONE obsolecense chain, returning the 'latest' in a given month
+     * should correspond to the pid with the highest metadata quality score.
+     * Finding this run (pid) can be useful to aggregation and display routines to filter out
+     * the 'best' runs in a month, to more accurately represent the progression of
+     * quality scores over time.
+     * </p>
+     *
+     * @return Run - the latest run in the month
+     */
+    public Run getLatestRun(DateTime targetDate,  DateTime minDate, DateTime maxDate) {
+
+        Run run = null;
+
+        // Assume that the input pid is the latest
+        DateTime latestDate = targetDate;
+        String latestPid = null;
+        DateTime thisDate = null;
+
+        String thisPid = null;
+        //DateTimeFormatter fmt = DateTimeFormat.forPattern("yyyy MM dd");
+        log.debug("Getting latest pid in date range " + minDate.toString() + " to " + maxDate.toString());
+
+        // Loop through each run, find latest in the month specified
+        for (Map.Entry<String, Run> entry : this.runs.entrySet()) {
+            thisPid = entry.getKey();
+            run = entry.getValue();
+
+            Date entryDate = run.getDateUploaded();
+            // This run doesn't contain a sysmeta and so doesn't have a date. This probably
+            // should never happen but just in case...
+            if(entryDate == null) {
+                log.debug("Run pid: " + thisPid + ", date is null");
+                continue;
+            } else {
+                // Convert to JodaTime, so that we can easily check it
+                thisDate = new DateTime(run.getDateUploaded());
+                log.debug("Run pid: " + thisPid + ", date: " + thisDate.toString());
+            }
+
+            // Is this current month
+            if(thisDate.isBefore(minDate)) {
+                log.debug("Skipping pid: " + thisPid + " with date: " + entryDate + " (after end of month)");
+                continue;
+            }
+            if(thisDate.isAfter(maxDate)) {
+                log.debug("Skipping pid: " + thisPid + " with date: " + entryDate + " before start of month");
+                continue;
+            }
+
+            // If the date of this entry is after the input date, then we have
+            // a new 'leader'. This assumes that the newer pid in this sequence
+            // is actually 'better' than the previous one.
+            // Have to check for date equals in case this is the only pid in the sequence
+            if(thisDate.isAfter(targetDate) || thisDate.isEqual(targetDate)) {
+                log.trace("Setting latest pid: " + thisPid + ", date: " + thisDate);
+                latestPid = thisPid;
+                latestDate = thisDate;
+            }
+        }
+
+        log.debug("Latest pid in month is: " + latestPid + " with date: " + latestDate.toString());
+
+        return this.runs.get(latestPid);
+    }
+
 
     /**
      * Set the sequence identifier for the run sequence.
@@ -285,4 +414,60 @@ public class Runs {
     public HashMap<String, Run> getRuns() {
         return this.runs;
     }
+
+    /**
+     * Get the runs in this collection that are marked as modified.
+     *
+     */
+
+    public ArrayList<Run> getModifiedRuns() {
+
+        ArrayList<Run> modRuns = new ArrayList<>();
+
+        String thisPid = null;
+        Run run = null;
+
+        for (Map.Entry<String, Run> entry : this.runs.entrySet()) {
+            thisPid = entry.getKey();
+            run = entry.getValue();
+            if(run.getModified()) {
+                modRuns.add(run);
+            }
+        }
+        return modRuns;
+    }
+
+
+    /**
+     * Update all modified runs in the collection to the datastore.
+     *
+     */
+
+    public void update() {
+
+        String thisPid = null;
+        Run run = null;
+        Boolean modified = false;
+
+        log.debug("Updating modified runs to datastore.");
+
+        for (Map.Entry<String, Run> entry : this.runs.entrySet()) {
+            thisPid = entry.getKey();
+            run = entry.getValue();
+            modified = run.getModified();
+            if(modified) {
+                try {
+                    log.debug("Updating modified quality run for pid: " + run.getObjectIdentifier() + ", suite: "
+                                    + run.getSuiteId() + ", dateUploaded: " + run.getDateUploaded() + ", sequenceId: "
+                                    + run.getSequenceId() + ", isLatest: " + run.getIsLatest());
+                    run.save();
+                    // Keep modified setting for modified runs in case we need to do other operations on the runs (e.g. indexing)
+                    //this.runs.replace(thisPid, run);
+                } catch (Exception ex) {
+                    log.error("Unable to save the quality report to database:" + ex.getMessage());
+                }
+            }
+        }
+    }
+
 }

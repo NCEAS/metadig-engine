@@ -15,7 +15,7 @@ import java.util.List;
 
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(propOrder = {"id", "timestamp", "objectIdentifier", "suiteId", "status", "runStatus", "errorDescription", "sysmeta", "result", "sequenceId", "modified"})
+@XmlType(propOrder = {"id", "timestamp", "objectIdentifier", "suiteId", "status", "runStatus", "errorDescription", "sysmeta", "result", "sequenceId"})
 public class Run {
 
 	public static final String SUCCESS = "success";
@@ -23,8 +23,6 @@ public class Run {
 	public static final String QUEUED = "queued";
 	public static final String PROCESSING = "processing";
 	public static Log log = LogFactory.getLog(Run.class);
-
-
 
 	/**
 	 * The unique identifier for the QC run. This will likely be long and opaque
@@ -95,9 +93,19 @@ public class Run {
 
 	/**
 	 * Has this run been modified since being retrieved from the data store?
+     * This field is not included in the Solr index.
 	 */
-	@XmlElement(required = false)
+	@XmlTransient
 	private Boolean modified = false;
+
+	/**
+	 * For internal use by the 'Runs' collection. Is this the latest run in a series
+	 * for a specified time period.
+	 * Note that this field is maintained in the Solr index separately from the DataONE
+	 * indexing.
+	 */
+	@XmlTransient
+	private Boolean isLatest = false;
 
 	public String getId() {
 		return id;
@@ -175,6 +183,23 @@ public class Run {
 
 	public Boolean getModified() {
 		return this.modified;
+	}
+
+	public void setIsLatest(Boolean isLatest) {
+		this.isLatest = isLatest;
+	}
+
+	public Boolean getIsLatest() {
+		return this.isLatest;
+	}
+
+	// Passthru to nested sysmeta
+	public Date getDateUploaded() {
+		if(sysmeta != null) {
+			return sysmeta.getDateUploaded();
+		} else {
+			return null;
+		}
 	}
 
 	/**

@@ -123,7 +123,7 @@ public class DatabaseStore implements MDQStore {
             }
         }
         if(this.isAvailable()) {
-            log.info("Initialized database store: opened database successfully");
+            log.debug("Initialized database store: opened database successfully");
         } else {
             throw new MetadigStoreException("Error initializing database, connection not available");
         }
@@ -146,6 +146,7 @@ public class DatabaseStore implements MDQStore {
         String mId = null;
         String sId = null;
         String seqId = null;
+        Boolean isLatest = false;
         String resultStr = null;
 
         // Hope for the best, prepare for the worst!
@@ -164,14 +165,18 @@ public class DatabaseStore implements MDQStore {
                 mId = rs.getString("metadata_id");
                 sId = rs.getString("suite_id");
                 seqId = rs.getString("sequence_id");
+                isLatest = rs.getBoolean("is_latest");
                 resultStr = rs.getString("results");
                 rs.close();
                 stmt.close();
                 // Convert the returned run xml document to a 'run' object.
                 InputStream is = new ByteArrayInputStream(resultStr.getBytes());
                 run = TypeMarshaller.unmarshalTypeFromStream(Run.class, is);
+                // Note: These fields are in the Solr index, but don't need to be in the run XML, so
+                // have to be manually added after the JAXB marshalling has created the run object.
                 run.setSequenceId(seqId);
-                log.debug("Retrieved run successfully, metradataId from run object: " + run.getObjectIdentifier());
+                run.setIsLatest(isLatest);
+                log.debug("Retrieved run successfully for metadata id: " + run.getObjectIdentifier());
             } else {
                 log.debug("Run not found for metadata id: " + metadataId + ", suiteId: " + suiteId);
             }
@@ -203,6 +208,7 @@ public class DatabaseStore implements MDQStore {
         String status = run.getRunStatus();
         String error = run.getErrorDescription();
         String sequenceId = run.getSequenceId();
+        Boolean isLatest = run.getIsLatest();
         String resultStr = null;
         //DateTime now = new DateTime();
         //OffsetDateTime dateTime = OffsetDateTime.now();
@@ -251,9 +257,9 @@ public class DatabaseStore implements MDQStore {
         // Perform an 'upsert' on the 'runs' table - if a record exists for the 'metadata_id, suite_id' already,
         // then update the record with the incoming data.
         try {
-            String sql = "INSERT INTO runs (metadata_id, suite_id, timestamp, results, status, error, sequence_id) VALUES (?, ?, ?, ?, ?, ?, ?)"
+            String sql = "INSERT INTO runs (metadata_id, suite_id, timestamp, results, status, error, sequence_id, is_latest) VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
                     + " ON CONFLICT ON CONSTRAINT metadata_id_suite_id_fk "
-                    + " DO UPDATE SET (timestamp, results, status, error, sequence_id) = (?, ?, ?, ?, ?);";
+                    + " DO UPDATE SET (timestamp, results, status, error, sequence_id, is_latest) = (?, ?, ?, ?, ?, ?);";
 
             stmt = conn.prepareStatement(sql);
             stmt.setString(1, metadataId);
@@ -263,12 +269,14 @@ public class DatabaseStore implements MDQStore {
             stmt.setString(5, status);
             stmt.setString(6, error);
             stmt.setString(7, sequenceId);
+            stmt.setBoolean(8, isLatest);
             // For 'on conflict'
-            stmt.setTimestamp(8, dateTime);
-            stmt.setString(9, runStr);
-            stmt.setString(10, status);
-            stmt.setString(11, error);
-            stmt.setString(12, sequenceId);
+            stmt.setTimestamp(9, dateTime);
+            stmt.setString(10, runStr);
+            stmt.setString(11, status);
+            stmt.setString(12, error);
+            stmt.setString(13, sequenceId);
+            stmt.setBoolean(14, isLatest);
             stmt.executeUpdate();
             stmt.close();
             conn.commit();
