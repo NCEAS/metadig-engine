@@ -44,13 +44,13 @@ public class MDQEngine {
 	private MDQStore store = null;
 
 	protected Log log = LogFactory.getLog(this.getClass());
-	private static String DataONEformatsFile = null;
+	private static String metadigDataDir = null;
 	
 	public MDQEngine() throws MetadigException, IOException, ConfigurationException {
 		store = new InMemoryStore();
 		//store = new MNStore();
 		MDQconfig cfg = new MDQconfig ();
-		DataONEformatsFile = cfg.getString("DataONE.formats");
+		metadigDataDir = cfg.getString("metadig.data.dir");
 		MDQCache.initialize(null);
 	}
 
@@ -237,8 +237,8 @@ public class MDQEngine {
 				}
 			}
 
-			if(DataONEformatsFile != null) {
-				params.put("DataONEformatsFile", DataONEformatsFile);
+			if(metadigDataDir != null) {
+				params.put("metadigDataDir", metadigDataDir);
 			}
 
 			Run run = engine.runSuite(suite, input, params, sysmeta);
