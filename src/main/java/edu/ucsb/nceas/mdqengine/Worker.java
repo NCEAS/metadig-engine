@@ -43,8 +43,14 @@ import java.util.concurrent.*;
  */
 public class Worker {
 
-    private final static String InProcess_QUEUE_NAME = "InProcess";
-    private final static String Completed_QUEUE_NAME = "Completed";
+    private final static String EXCHANGE_NAME = "metadig";
+    private final static String QUALITY_QUEUE_NAME = "quality";
+    private final static String COMPLETED_QUEUE_NAME = "completed";
+
+    private final static String QUALITY_ROUTING_KEY = "quality";
+    private final static String COMPLETED_ROUTING_KEY = "completed";
+    private final static String MESSAGE_TYPE_QUALITY = "quality";
+
     private final static String springConfigFileURL = "/metadig-index-processor-context.xml";
     private final static String qualityReportObjectType = "https://nceas.ucsb.edu/mdqe/v1";
 
@@ -283,7 +289,7 @@ public class Worker {
         };
 
         log.debug("Calling basicConsume");
-        inProcessChannel.basicConsume(InProcess_QUEUE_NAME, false, consumer);
+    inProcessChannel.basicConsume(QUALITY_QUEUE_NAME, false, consumer);
     }
 
     private void returnReport(String metadataPid, String suiteId, QueueEntry qEntry, long startTime) throws IOException {
@@ -344,26 +350,30 @@ public class Worker {
         log.info("Set RabbitMQ host to: " + RabbitMQhost);
         log.info("Set RabbitMQ port to: " + RabbitMQport);
 
+
         try {
             inProcessConnection = factory.newConnection();
             inProcessChannel = inProcessConnection.createChannel();
-            inProcessChannel.queueDeclare(InProcess_QUEUE_NAME, false, false, false, null);
+            inProcessChannel.exchangeDeclare(EXCHANGE_NAME, "direct", false);
+            inProcessChannel.queueDeclare(QUALITY_QUEUE_NAME, false, false, false, null);
+            inProcessChannel.queueBind(QUALITY_QUEUE_NAME, EXCHANGE_NAME, QUALITY_ROUTING_KEY);
             // Channel will only send one request for each worker at a time.
             inProcessChannel.basicQos(1);
-            log.info("Connected to RabbitMQ queue " + InProcess_QUEUE_NAME);
+            log.info("Connected to RabbitMQ queue " + QUALITY_QUEUE_NAME);
             log.info(" [*] Waiting for messages. To exit press CTRL+C");
         } catch (Exception e) {
-            log.error("Error connecting to RabbitMQ queue " + InProcess_QUEUE_NAME);
+            log.error("Error connecting to RabbitMQ queue " + QUALITY_QUEUE_NAME);
             log.error(e.getMessage());
         }
 
         try {
             completedConnection = factory.newConnection();
             completedChannel = completedConnection.createChannel();
-            completedChannel.queueDeclare(Completed_QUEUE_NAME, false, false, false, null);
-            log.info("Connected to RabbitMQ queue " + Completed_QUEUE_NAME);
+            completedChannel.exchangeDeclare(EXCHANGE_NAME, "direct", false);
+            completedChannel.queueDeclare(COMPLETED_QUEUE_NAME, false, false, false, null);
+            log.info("Connected to RabbitMQ queue " + COMPLETED_QUEUE_NAME);
         } catch (Exception e) {
-            log.error("Error connecting to RabbitMQ queue " + Completed_QUEUE_NAME);
+            log.error("Error connecting to RabbitMQ queue " + COMPLETED_QUEUE_NAME);
             log.error(e.getMessage());
         }
     }
@@ -618,7 +628,14 @@ public class Worker {
      * @throws IOException
      */
     public void writeCompletedQueue (byte[] message) throws IOException {
-        completedChannel.basicPublish("", Completed_QUEUE_NAME, MessageProperties.PERSISTENT_TEXT_PLAIN, message);
+        // Include the message type in this queue entry sent back to the controller. The controller gets messages
+        // to the "Completed" queue from different clients (aggregator, quality worker) which each have different
+        // messages types and formsts, so the controller needs to know what type of message it is getting.
+        AMQP.BasicProperties basicProperties = new AMQP.BasicProperties.Builder()
+                .contentType("text/plain")
+                .type(MESSAGE_TYPE_QUALITY)
+                .build();
+        completedChannel.basicPublish(EXCHANGE_NAME, COMPLETED_ROUTING_KEY, basicProperties, message);
     }
 
     /**

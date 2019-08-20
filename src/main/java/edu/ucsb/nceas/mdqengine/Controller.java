@@ -30,8 +30,16 @@ import java.util.concurrent.TimeoutException;
  */
 public class Controller {
 
-    private final static String InProcess_QUEUE_NAME = "InProcess";
-    private final static String Completed_QUEUE_NAME = "Completed";
+    private final static String EXCHANGE_NAME = "metadig";
+    private final static String QUALITY_QUEUE_NAME = "quality";
+    private final static String AGGREGATOR_QUEUE_NAME = "aggregator";
+    private final static String COMPLETED_QUEUE_NAME = "completed";
+
+    private final static String QUALITY_ROUTING_KEY = "quality";
+    private final static String AGGREGATOR_ROUTING_KEY = "aggregator";
+    private final static String COMPLETED_ROUTING_KEY = "completed";
+
+    private final static String MESSAGE_TYPE_QUALITY = "quality";
 
     private static com.rabbitmq.client.Connection inProcessConnection;
     private static com.rabbitmq.client.Channel inProcessChannel;
@@ -331,7 +339,7 @@ public class Controller {
         out.writeObject(qEntry);
         message = bos.toByteArray();
 
-        this.writeInProcessQueue(message);
+        this.writeInProcessChannel(message, QUALITY_ROUTING_KEY);
         log.info(" [x] Queued report request for pid: '" + qEntry.getMetadataPid() + "'" + " quality suite " + qualitySuiteId);
     }
 
@@ -350,15 +358,21 @@ public class Controller {
         log.debug("Set RabbitMQ host to: " + RabbitMQhost);
         log.debug("Set RabbitMQ port to: " + RabbitMQport);
 
+        // Setup the 'InProcess' queue with a routing key - messages consumed by this queue require that
+        // this routine key be used. The routine key QUALITY_ROUTING_KEY sends messages to the quality report worker,
+        // the routing key AGGREGATION_ROUTING_KEY sends messages to the aggregation stats grapher.
         try {
             inProcessConnection = factory.newConnection();
             inProcessChannel = inProcessConnection.createChannel();
-            inProcessChannel.queueDeclare(InProcess_QUEUE_NAME, false, false, false, null);
+            inProcessChannel.exchangeDeclare(EXCHANGE_NAME, "direct", false);
+            inProcessChannel.queueDeclare(QUALITY_QUEUE_NAME, false, false, false, null);
+            inProcessChannel.queueDeclare(AGGREGATOR_QUEUE_NAME, false, false, false, null);
             // Channel will only send one request for each worker at a time.
             inProcessChannel.basicQos(1);
-            log.info("Connected to RabbitMQ queue " + InProcess_QUEUE_NAME);
+            log.info("Connected to RabbitMQ queue " + QUALITY_QUEUE_NAME);
+            log.info("Connected to RabbitMQ queue " + AGGREGATOR_QUEUE_NAME);
         } catch (Exception e) {
-            log.error("Error connecting to RabbitMQ queue " + InProcess_QUEUE_NAME);
+            log.error("Error connecting to RabbitMQ queue " + QUALITY_QUEUE_NAME);
             log.error(e.getMessage());
             throw e;
         }
@@ -366,10 +380,12 @@ public class Controller {
         try {
             completedConnection = factory.newConnection();
             completedChannel = completedConnection.createChannel();
-            completedChannel.queueDeclare(Completed_QUEUE_NAME, false, false, false, null);
-            log.info("Connected to RabbitMQ queue " + Completed_QUEUE_NAME);
+            completedChannel.exchangeDeclare("completed", "direct", false);
+            completedChannel.queueDeclare(COMPLETED_QUEUE_NAME, false, false, false, null);
+            completedChannel.queueBind(COMPLETED_QUEUE_NAME, EXCHANGE_NAME, COMPLETED_ROUTING_KEY);
+            log.info("Connected to RabbitMQ queue " + COMPLETED_QUEUE_NAME);
         } catch (Exception e) {
-            log.error("Error connecting to RabbitMQ queue " + Completed_QUEUE_NAME);
+            log.error("Error connecting to RabbitMQ queue " + COMPLETED_QUEUE_NAME);
             log.error(e.getMessage());
             throw e;
         }
@@ -383,52 +399,57 @@ public class Controller {
 
                 ByteArrayInputStream bis = new ByteArrayInputStream(body);
                 ObjectInput in = new ObjectInputStream(bis);
-                QueueEntry qEntry = null;
-                try {
-                    qEntry = (QueueEntry) in.readObject();
-                } catch (java.lang.ClassNotFoundException e) {
-                    log.info("Class 'QueueEntry' not found");
-                } finally {
-                    completedChannel.basicAck(envelope.getDeliveryTag(), false);
-                }
+                if(properties.getType().equalsIgnoreCase(MESSAGE_TYPE_QUALITY)) {
 
-                log.info(" [x] Controller received completed report for pid: '" + qEntry.getMetadataPid() + "'" + ", " +
-                        "hostsname: " + qEntry.getHostname());
-                log.info("Total processing time for worker " + qEntry.getHostname() + " for PID " + qEntry.getMetadataPid() + ": " + qEntry.getProcessingElapsedTimeSeconds());
-                log.info("Total indexing time for worker " + qEntry.getHostname() + " for PID " + qEntry.getMetadataPid() + ": " + qEntry.getIndexingElapsedTimeSeconds());
-                log.info("Total elapsed time for worker " + qEntry.getHostname() + " for PID " + qEntry.getMetadataPid() + ": " + qEntry.getTotalElapsedTimeSeconds());
+                    QueueEntry qEntry = null;
+                    try {
+                        qEntry = (QueueEntry) in.readObject();
+                    } catch (java.lang.ClassNotFoundException e) {
+                        log.info("Class 'QueueEntry' not found");
+                    } finally {
+                        completedChannel.basicAck(envelope.getDeliveryTag(), false);
+                    }
 
-                /* An exception caught by the worker will be passed back to the controller via the queue entry
-                 * 'exception' field. Check this now and take the appropriate action.
-                 */
-                Exception me = qEntry.getException();
-                if (me instanceof MetadigException) {
-                    log.error("Error running suite: " + qEntry.getQualitySuiteId()+ ", pid: " + qEntry.getMetadataPid() + ", error msg: ");
-                    log.error("\t" + me.getMessage());
-                    Throwable thisCause = me.getCause();
-                    if(thisCause != null) {
-                        log.error("\tcause: " + thisCause.getMessage());
+                    log.info(" [x] Controller received completed report for pid: '" + qEntry.getMetadataPid() + "'" + ", " +
+                            "hostsname: " + qEntry.getHostname());
+                    log.info("Total processing time for worker " + qEntry.getHostname() + " for PID " + qEntry.getMetadataPid() + ": " + qEntry.getProcessingElapsedTimeSeconds());
+                    log.info("Total indexing time for worker " + qEntry.getHostname() + " for PID " + qEntry.getMetadataPid() + ": " + qEntry.getIndexingElapsedTimeSeconds());
+                    log.info("Total elapsed time for worker " + qEntry.getHostname() + " for PID " + qEntry.getMetadataPid() + ": " + qEntry.getTotalElapsedTimeSeconds());
+
+                    /* An exception caught by the worker will be passed back to the controller via the queue entry
+                     * 'exception' field. Check this now and take the appropriate action.
+                     */
+                    Exception me = qEntry.getException();
+                    if (me instanceof MetadigException) {
+                        log.error("Error running suite: " + qEntry.getQualitySuiteId() + ", pid: " + qEntry.getMetadataPid() + ", error msg: ");
+                        log.error("\t" + me.getMessage());
+                        Throwable thisCause = me.getCause();
+                        if (thisCause != null) {
+                            log.error("\tcause: " + thisCause.getMessage());
+                        }
+                        return;
                     }
-                    return;
-                }
-                if(testMode) {
-                    long elapsedSeconds = qEntry.getTotalElapsedTimeSeconds();
-                    totalElapsedSeconds += elapsedSeconds;
-                    runCount += 1;
-                    if(runCount == testCount) {
-                        log.info("Tests for this run are complete.");
-                        log.info("Number of tests run: " + runCount);
-                        log.info("Cummulative elapsed time for all workers: " + TimeUnit.SECONDS.toMinutes(totalElapsedSeconds) + " minutes");
-                        log.info("Average worker elapsed time: " + totalElapsedSeconds/runCount + " seconds");
-                        log.info("Total elapsed time for controller: "
-                                + String.format("%d", totalElapsedSeconds) + " seconds");
-                        disableTestMode();
+                    if (testMode) {
+                        long elapsedSeconds = qEntry.getTotalElapsedTimeSeconds();
+                        totalElapsedSeconds += elapsedSeconds;
+                        runCount += 1;
+                        if (runCount == testCount) {
+                            log.info("Tests for this run are complete.");
+                            log.info("Number of tests run: " + runCount);
+                            log.info("Cummulative elapsed time for all workers: " + TimeUnit.SECONDS.toMinutes(totalElapsedSeconds) + " minutes");
+                            log.info("Average worker elapsed time: " + totalElapsedSeconds / runCount + " seconds");
+                            log.info("Total elapsed time for controller: "
+                                    + String.format("%d", totalElapsedSeconds) + " seconds");
+                            disableTestMode();
+                        }
                     }
+                } else {
+                    log.error("Unknown RabbitMQ message from from client type: " + properties.getType());
                 }
             }
         };
 
-        completedChannel.basicConsume(Completed_QUEUE_NAME, false, consumer);
+        completedChannel.basicConsume(COMPLETED_QUEUE_NAME, false, consumer);
     }
 
     /**
@@ -437,9 +458,10 @@ public class Controller {
      * @param message
      * @throws IOException
      */
-    public void writeInProcessQueue(byte[] message) throws IOException {
+    public void writeInProcessChannel(byte[] message, String routingKey) throws IOException {
 
-        inProcessChannel.basicPublish("", InProcess_QUEUE_NAME, MessageProperties.PERSISTENT_TEXT_PLAIN, message);
+        //inProcessChannel.basicPublish("", InProcess_QUEUE_NAME, MessageProperties.PERSISTENT_TEXT_PLAIN, message);
+        inProcessChannel.basicPublish(EXCHANGE_NAME, routingKey, MessageProperties.PERSISTENT_TEXT_PLAIN, message);
     }
 
     /**
