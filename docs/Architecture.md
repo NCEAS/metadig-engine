@@ -61,7 +61,12 @@ queue
             * Resource map and its sysmeta
     * Metadig-r
         * R package used to author and test R quality tests
-    * Mdq-webapp: 
+    * Metadig-py
+        * Python module used to author and test quality tests written in python
+    * Mdq-webapp:
+        * The Apache Tomcat based webapp that accepts MetaDIG service requests and forwards
+          them to metadig-controller
+
 * Metadig-graph-generator
 	* creates graphs of aggregated quality scores
 	* queries the Quality Solr Server for input quality scores
@@ -69,14 +74,30 @@ queue
 	* dependencies
 		* metadig-controller
 	* API
-		* /graph/{suite}/{type}/{name}
-		* suite: the id of the quality suite
-		* type: the aggregation type, i.e. "cn", "mn", "group"
-		* name: the name of the aggregation, i.e. "urn:node:ARCTIC", "CN=SASAP,DC=dataone,DC=org ,"
+		* POST
+		    * requests that a graph is created for the specified aggregation type
+		    * syntax: /graph?project=<id>&node=<nodeId>&suite=<name>&dialect=<name>
+		        * example: /graph?project=urn:uuid:dddaa020-1038-4c34-a270-67a5a16e2f23
+		    * parameters
+		        * project: the project (collection) to create the graph for
+		            * not required, no default
+		        * node: the DataONE CN or MN id to obtain data from
+		            * required, default: urn:node:CN
+		        * suite: the quality suite id, e.g. "FAIR.suite.1"
+		            * if not specified, default: FAIR.suite.1
+		        * dialect: the metadata format family names, e.g. "iso19115, eml"
+		            * required, no default
+		    * Note that specifying a project causes the pids that are associated with that
+		      project to be the set of pids included in the aggregation graph. If a project is
+		      not specified, then all pids for a node are included, but filtered by dialect
+		* GET
+		    * retrieves a pre-generated graph
+		    * syntax: /graph?project=<id>&node=<nodeId>&suite=<name>&dialect=<name>
+		        * example: /graph?project=urn:uri:1234-4567
+		    * parameters - same as POST
 
-## Future modules
-    * Metadig-py
-        * Python module used to author and test quality tests written in python
+* Metadig-py
+    * Python module used to author and test quality tests written in python
     
 ## MetaDIG engine components
 
@@ -94,11 +115,11 @@ The following diagram shows the various components of the MetaDIG engine:
 
 ![Queue Event Sequence](https://github.com/NCEAS/metadig-engine/blob/master/docs/images/queue-event-trigger_sequence.png "Queue Event Sequence")
 
-## The metadig-engine index-monitor 
+## The metadig-engine scheduler
 
-* This sequence diagram shows how the index-monitor determines which DataONE metadata documents to create quality reports for, then submits requests to metadig-engine to create the reports.
+* This sequence diagram shows how the scheduler determines which DataONE metadata documents to create quality reports for, then submits requests to metadig-engine to create the reports.
 
-![Index Monitor Sequence](https://github.com/NCEAS/metadig-engine/blob/master/docs/images/index-monitor_sequence.png "Index Monitor Sequence")
+![Scheduler Sequence](https://github.com/NCEAS/metadig-engine/blob/master/docs/images/index-monitor_sequence.png "Scheduler Sequence")
 
 ## Metadata Quality Display Mockups
 * The following display shows metadata quality summarized for all of DataONE:

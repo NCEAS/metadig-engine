@@ -5,7 +5,7 @@
 	<key>ApplicationVersion</key>
 	<array>
 		<string>com.omnigroup.OmniGraffle7</string>
-		<string>196.7.0.336351</string>
+		<string>196.10.0.336887</string>
 	</array>
 	<key>ColorProfiles</key>
 	<array>
@@ -119,7 +119,7 @@
 	<key>MasterSheets</key>
 	<array/>
 	<key>ModificationDate</key>
-	<string>2019-07-31 21:09:26 +0000</string>
+	<string>2019-08-26 19:21:16 +0000</string>
 	<key>Modifier</key>
 	<string>Peter Slaughter</string>
 	<key>MovementHandleVisible</key>
@@ -4115,8 +4115,6 @@ Controller}</string>
 							<key>w</key>
 							<string>0</string>
 						</dict>
-						<key>Font</key>
-						<string>HelveticaNeue</string>
 						<key>Size</key>
 						<real>12</real>
 					</dict>
@@ -4127,7 +4125,7 @@ Controller}</string>
 						<key>ID</key>
 						<integer>160</integer>
 						<key>Position</key>
-						<real>0.67400858073907399</real>
+						<real>0.67400860786437988</real>
 						<key>RotationType</key>
 						<integer>0</integer>
 					</dict>
@@ -4252,8 +4250,6 @@ createGraph(queueEntry)}</string>
 							<key>w</key>
 							<string>0</string>
 						</dict>
-						<key>Font</key>
-						<string>HelveticaNeue</string>
 						<key>Size</key>
 						<real>12</real>
 					</dict>
@@ -4264,7 +4260,7 @@ createGraph(queueEntry)}</string>
 						<key>ID</key>
 						<integer>164</integer>
 						<key>Position</key>
-						<real>0.76218447063165062</real>
+						<real>0.76218444108963013</real>
 						<key>RotationType</key>
 						<integer>0</integer>
 					</dict>
@@ -4377,8 +4373,6 @@ entry w/status}</string>
 							<key>w</key>
 							<string>0</string>
 						</dict>
-						<key>Font</key>
-						<string>HelveticaNeue</string>
 						<key>Size</key>
 						<real>12</real>
 					</dict>
@@ -4441,8 +4435,6 @@ processReport(queueEntry)}</string>
 							<key>w</key>
 							<string>0</string>
 						</dict>
-						<key>Font</key>
-						<string>HelveticaNeue</string>
 						<key>Size</key>
 						<real>12</real>
 					</dict>
@@ -4802,7 +4794,7 @@ entry w/status}</string>
 						<key>ID</key>
 						<integer>130</integer>
 						<key>Position</key>
-						<real>0.48276456956863556</real>
+						<real>0.48276457190513611</real>
 						<key>RotationType</key>
 						<integer>0</integer>
 					</dict>
@@ -4821,32 +4813,14 @@ entry w/status}</string>
 					</dict>
 					<key>Text</key>
 					<dict>
-						<key>RTFD</key>
-						<data>
-						BAtzdHJlYW10eXBlZIHoA4QBQISE
-						hBJOU0F0dHJpYnV0ZWRTdHJpbmcA
-						hIQITlNPYmplY3QAhZKEhIQITlNT
-						dHJpbmcBlIQBKxdzYXZlIHJlcG9y
-						dCB0byBkYXRhYmFzZYaEAmlJAReS
-						hISEDE5TRGljdGlvbmFyeQCUhAFp
-						A5KElpYHTlNDb2xvcoaShISEB05T
-						Q29sb3IAlIQBYwOEAmZmAAGGkoSW
-						lhBOU1BhcmFncmFwaFN0eWxlhpKE
-						hIQQTlNQYXJhZ3JhcGhTdHlsZQCU
-						hARDQ0BTAgCFAIaShJaWBk5TRm9u
-						dIaShISEBk5TRm9udB6UmSCEBVsz
-						MmNdBgAAABgAAAD//kIAbwBvAGsA
-						QQBuAHQAaQBxAHUAYQCEAWYOmwCb
-						AZsAmwCGhoY=
-						</data>
 						<key>Text</key>
 						<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf500
 {\fonttbl\f0\froman\fcharset0 BookAntiqua;}
-{\colortbl;\red255\green255\blue255;\red0\green0\blue0;}
-{\*\expandedcolortbl;;\csgray\c0;}
+{\colortbl;\red255\green255\blue255;}
+{\*\expandedcolortbl;;}
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\qc\partightenfactor0
 
-\f0\fs28 \cf2 save report to database}</string>
+\f0\fs28 \cf0 save report to database}</string>
 						<key>TextAlongPathGlyphAnchor</key>
 						<string>center</string>
 					</dict>
@@ -4869,7 +4843,7 @@ entry w/status}</string>
 						<key>ID</key>
 						<integer>116</integer>
 						<key>Position</key>
-						<real>0.59065561578970482</real>
+						<real>0.5906556248664856</real>
 						<key>RotationType</key>
 						<integer>0</integer>
 					</dict>
@@ -4888,32 +4862,14 @@ entry w/status}</string>
 					</dict>
 					<key>Text</key>
 					<dict>
-						<key>RTFD</key>
-						<data>
-						BAtzdHJlYW10eXBlZIHoA4QBQISE
-						hBJOU0F0dHJpYnV0ZWRTdHJpbmcA
-						hIQITlNPYmplY3QAhZKEhIQITlNT
-						dHJpbmcBlIQBKxdzZW5kIGluZm8g
-						dG8gYmUgaW5kZXhlZIaEAmlJAReS
-						hISEDE5TRGljdGlvbmFyeQCUhAFp
-						A5KElpYHTlNDb2xvcoaShISEB05T
-						Q29sb3IAlIQBYwOEAmZmAAGGkoSW
-						lhBOU1BhcmFncmFwaFN0eWxlhpKE
-						hIQQTlNQYXJhZ3JhcGhTdHlsZQCU
-						hARDQ0BTAgCFAIaShJaWBk5TRm9u
-						dIaShISEBk5TRm9udB6UmSCEBVsz
-						MmNdBgAAABgAAAD//kIAbwBvAGsA
-						QQBuAHQAaQBxAHUAYQCEAWYOmwCb
-						AZsAmwCGhoY=
-						</data>
 						<key>Text</key>
 						<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf500
 {\fonttbl\f0\froman\fcharset0 BookAntiqua;}
-{\colortbl;\red255\green255\blue255;\red0\green0\blue0;}
-{\*\expandedcolortbl;;\csgray\c0;}
+{\colortbl;\red255\green255\blue255;}
+{\*\expandedcolortbl;;}
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\qc\partightenfactor0
 
-\f0\fs28 \cf2 send info to be indexed}</string>
+\f0\fs28 \cf0 send info to be indexed}</string>
 						<key>TextAlongPathGlyphAnchor</key>
 						<string>center</string>
 					</dict>
@@ -4993,142 +4949,6 @@ entry w/status}</string>
 					<dict>
 						<key>ID</key>
 						<integer>131</integer>
-					</dict>
-				</dict>
-				<dict>
-					<key>Bounds</key>
-					<string>{{733.86295987526864, 1553.8128435863862}, {159.58000000000175, 24.33599853515625}}</string>
-					<key>Class</key>
-					<string>ShapedGraphic</string>
-					<key>FitText</key>
-					<string>YES</string>
-					<key>Flow</key>
-					<string>Resize</string>
-					<key>FontInfo</key>
-					<dict>
-						<key>Color</key>
-						<dict>
-							<key>space</key>
-							<string>gg22</string>
-							<key>w</key>
-							<string>0</string>
-						</dict>
-						<key>Size</key>
-						<real>12</real>
-					</dict>
-					<key>ID</key>
-					<integer>154</integer>
-					<key>Line</key>
-					<dict>
-						<key>ID</key>
-						<integer>153</integer>
-						<key>Position</key>
-						<real>0.53100162744522095</real>
-						<key>RotationType</key>
-						<integer>0</integer>
-					</dict>
-					<key>Style</key>
-					<dict>
-						<key>shadow</key>
-						<dict>
-							<key>Draws</key>
-							<string>NO</string>
-						</dict>
-						<key>stroke</key>
-						<dict>
-							<key>Draws</key>
-							<string>NO</string>
-						</dict>
-					</dict>
-					<key>Text</key>
-					<dict>
-						<key>Text</key>
-						<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf500
-{\fonttbl\f0\fnil\fcharset0 HelveticaNeue;}
-{\colortbl;\red255\green255\blue255;}
-{\*\expandedcolortbl;;}
-\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\qc\partightenfactor0
-
-\f0\fs24 \cf0 save graph info to database}</string>
-						<key>TextAlongPathGlyphAnchor</key>
-						<string>center</string>
-					</dict>
-					<key>Wrap</key>
-					<string>NO</string>
-				</dict>
-				<dict>
-					<key>Class</key>
-					<string>LineGraphic</string>
-					<key>Head</key>
-					<dict>
-						<key>ID</key>
-						<integer>148</integer>
-						<key>Info</key>
-						<integer>4</integer>
-					</dict>
-					<key>ID</key>
-					<integer>153</integer>
-					<key>LogicalPath</key>
-					<dict>
-						<key>elements</key>
-						<array>
-							<dict>
-								<key>element</key>
-								<string>MOVETO</string>
-								<key>point</key>
-								<string>{542.48973779375683, 1655.9704461899166}</string>
-							</dict>
-							<dict>
-								<key>element</key>
-								<string>LINETO</string>
-								<key>point</key>
-								<string>{793.07345360824695, 1572.128704896907}</string>
-							</dict>
-							<dict>
-								<key>element</key>
-								<string>LINETO</string>
-								<key>point</key>
-								<string>{928.35051546391696, 1531.716427601606}</string>
-							</dict>
-							<dict>
-								<key>element</key>
-								<string>LINETO</string>
-								<key>point</key>
-								<string>{1046.1781385877291, 1470.7896389404966}</string>
-							</dict>
-						</array>
-					</dict>
-					<key>Points</key>
-					<array>
-						<string>{542.48973779375683, 1655.9704461899166}</string>
-						<string>{793.07345360824695, 1572.128704896907}</string>
-						<string>{928.35051546391696, 1531.716427601606}</string>
-						<string>{1046.1781385877291, 1470.7896389404966}</string>
-					</array>
-					<key>Style</key>
-					<dict>
-						<key>fill</key>
-						<dict>
-							<key>Draws</key>
-							<string>NO</string>
-						</dict>
-						<key>shadow</key>
-						<dict>
-							<key>Draws</key>
-							<string>NO</string>
-						</dict>
-						<key>stroke</key>
-						<dict>
-							<key>Legacy</key>
-							<true/>
-							<key>TailArrow</key>
-							<string>SharpArrow</string>
-						</dict>
-					</dict>
-					<key>Tail</key>
-					<dict>
-						<key>ID</key>
-						<integer>128</integer>
 					</dict>
 				</dict>
 				<dict>
@@ -5330,211 +5150,6 @@ entry w/status}</string>
 \f0\b\fs30 \cf0 Metadig-engine Graph Generator}</string>
 						<key>TextAlongPathGlyphAnchor</key>
 						<string>center</string>
-					</dict>
-				</dict>
-				<dict>
-					<key>Bounds</key>
-					<string>{{966.96555564367691, 943.8725839582587}, {129, 52}}</string>
-					<key>Class</key>
-					<string>ShapedGraphic</string>
-					<key>FitText</key>
-					<string>YES</string>
-					<key>Flow</key>
-					<string>Resize</string>
-					<key>FontInfo</key>
-					<dict>
-						<key>Color</key>
-						<dict>
-							<key>space</key>
-							<string>gg22</string>
-							<key>w</key>
-							<string>0</string>
-						</dict>
-						<key>Size</key>
-						<real>12</real>
-					</dict>
-					<key>ID</key>
-					<integer>137</integer>
-					<key>Line</key>
-					<dict>
-						<key>ID</key>
-						<integer>138</integer>
-						<key>Position</key>
-						<real>0.55741697549819946</real>
-						<key>RotationType</key>
-						<integer>0</integer>
-					</dict>
-					<key>Style</key>
-					<dict>
-						<key>shadow</key>
-						<dict>
-							<key>Draws</key>
-							<string>NO</string>
-						</dict>
-						<key>stroke</key>
-						<dict>
-							<key>Draws</key>
-							<string>NO</string>
-						</dict>
-					</dict>
-					<key>Text</key>
-					<dict>
-						<key>Text</key>
-						<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf500
-{\fonttbl\f0\fswiss\fcharset0 Helvetica;}
-{\colortbl;\red255\green255\blue255;}
-{\*\expandedcolortbl;;}
-\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\qc\partightenfactor0
-
-\f0\fs24 \cf0 inserts reports, sends \
-queries/recieves \
-results}</string>
-						<key>TextAlongPathGlyphAnchor</key>
-						<string>left</string>
-					</dict>
-					<key>Wrap</key>
-					<string>NO</string>
-				</dict>
-				<dict>
-					<key>Class</key>
-					<string>LineGraphic</string>
-					<key>ID</key>
-					<integer>138</integer>
-					<key>LogicalPath</key>
-					<dict>
-						<key>elements</key>
-						<array>
-							<dict>
-								<key>element</key>
-								<string>MOVETO</string>
-								<key>point</key>
-								<string>{1140.7036167615199, 983.13042685962773}</string>
-							</dict>
-							<dict>
-								<key>element</key>
-								<string>LINETO</string>
-								<key>point</key>
-								<string>{944.73172501304646, 959.34600110821737}</string>
-							</dict>
-						</array>
-					</dict>
-					<key>Points</key>
-					<array>
-						<string>{1140.7036167615199, 983.13042685962773}</string>
-						<string>{944.73172501304646, 959.34600110821737}</string>
-					</array>
-					<key>Style</key>
-					<dict>
-						<key>fill</key>
-						<dict>
-							<key>Draws</key>
-							<string>NO</string>
-						</dict>
-						<key>shadow</key>
-						<dict>
-							<key>Draws</key>
-							<string>NO</string>
-						</dict>
-						<key>stroke</key>
-						<dict>
-							<key>Legacy</key>
-							<true/>
-							<key>TailArrow</key>
-							<string>SharpArrow</string>
-						</dict>
-					</dict>
-					<key>Tail</key>
-					<dict>
-						<key>ID</key>
-						<integer>136</integer>
-					</dict>
-				</dict>
-				<dict>
-					<key>Bounds</key>
-					<string>{{1141.1999744921923, 950.71497103383774}, {156.33174263515969, 83.924833025160524}}</string>
-					<key>Class</key>
-					<string>ShapedGraphic</string>
-					<key>ID</key>
-					<integer>136</integer>
-					<key>Style</key>
-					<dict>
-						<key>stroke</key>
-						<dict>
-							<key>CornerRadius</key>
-							<real>9</real>
-						</dict>
-					</dict>
-					<key>Text</key>
-					<dict>
-						<key>Text</key>
-						<string>{\rtf1\ansi\ansicpg1252\cocoartf1671\cocoasubrtf500
-{\fonttbl\f0\fswiss\fcharset0 Helvetica-Bold;\f1\fswiss\fcharset0 Helvetica;}
-{\colortbl;\red255\green255\blue255;}
-{\*\expandedcolortbl;;}
-\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\qc\partightenfactor0
-
-\f0\b\fs30 \cf0 Quality Store (PostgresQL)\
-\pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\qc\partightenfactor0
-
-\f1\b0\fs24 \cf0 Contains completed runs, status for current and completed runs}</string>
-						<key>TextAlongPathGlyphAnchor</key>
-						<string>left</string>
-					</dict>
-				</dict>
-				<dict>
-					<key>Class</key>
-					<string>LineGraphic</string>
-					<key>ID</key>
-					<integer>135</integer>
-					<key>LogicalPath</key>
-					<dict>
-						<key>elements</key>
-						<array>
-							<dict>
-								<key>element</key>
-								<string>MOVETO</string>
-								<key>point</key>
-								<string>{725.73825316720604, 1708.2265196072101}</string>
-							</dict>
-							<dict>
-								<key>element</key>
-								<string>LINETO</string>
-								<key>point</key>
-								<string>{605.52934631180176, 1708.6371712098328}</string>
-							</dict>
-						</array>
-					</dict>
-					<key>Points</key>
-					<array>
-						<string>{725.73825316720604, 1708.2265196072101}</string>
-						<string>{605.52934631180176, 1708.6371712098328}</string>
-					</array>
-					<key>Style</key>
-					<dict>
-						<key>fill</key>
-						<dict>
-							<key>Draws</key>
-							<string>NO</string>
-						</dict>
-						<key>shadow</key>
-						<dict>
-							<key>Draws</key>
-							<string>NO</string>
-						</dict>
-						<key>stroke</key>
-						<dict>
-							<key>Legacy</key>
-							<true/>
-							<key>TailArrow</key>
-							<string>SharpArrow</string>
-						</dict>
-					</dict>
-					<key>Tail</key>
-					<dict>
-						<key>ID</key>
-						<integer>131</integer>
-						<key>Info</key>
-						<integer>1</integer>
 					</dict>
 				</dict>
 				<dict>
@@ -6230,8 +5845,6 @@ suite}</string>
 								</dict>
 								<key>Font</key>
 								<string>BookAntiqua-Bold</string>
-								<key>Size</key>
-								<real>16</real>
 							</dict>
 							<key>ID</key>
 							<integer>126</integer>
@@ -6282,18 +5895,6 @@ generation request to be queued}</string>
 							<string>Vertical</string>
 							<key>Flow</key>
 							<string>Resize</string>
-							<key>FontInfo</key>
-							<dict>
-								<key>Color</key>
-								<dict>
-									<key>space</key>
-									<string>gg22</string>
-									<key>w</key>
-									<string>0</string>
-								</dict>
-								<key>Font</key>
-								<string>HelveticaNeue</string>
-							</dict>
 							<key>ID</key>
 							<integer>79</integer>
 							<key>Style</key>
@@ -6357,7 +5958,7 @@ generation request to be queued}</string>
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{807.41870836778196, 1102.8814029258181}, {97, 25}}</string>
+					<string>{{944.75019676262195, 1109.1149163386183}, {97, 25}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>FitText</key>
@@ -6436,20 +6037,20 @@ generation request to be queued}</string>
 								<key>element</key>
 								<string>MOVETO</string>
 								<key>point</key>
-								<string>{807.59164399776978, 1213.7574049812977}</string>
+								<string>{844.68530201369549, 1213.9422605400916}</string>
 							</dict>
 							<dict>
 								<key>element</key>
 								<string>LINETO</string>
 								<key>point</key>
-								<string>{866.56585369546656, 1093.707758886077}</string>
+								<string>{1025.9811769510643, 1101.273876289978}</string>
 							</dict>
 						</array>
 					</dict>
 					<key>Points</key>
 					<array>
-						<string>{807.59164399776978, 1213.7574049812977}</string>
-						<string>{866.56585369546656, 1093.707758886077}</string>
+						<string>{844.68530201369549, 1213.9422605400916}</string>
+						<string>{1025.9811769510643, 1101.273876289978}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -7259,7 +6860,7 @@ cmds}</string>
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{1074.3397993599474, 559.04586607441888}, {143, 24}}</string>
+					<string>{{1074.3398015758683, 622.05769586048109}, {143, 24}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>FitText</key>
@@ -7315,7 +6916,7 @@ cmds}</string>
 
 \f0\fs24 \cf0 GET /reports/\{suite\}/\{pid\}}</string>
 						<key>TextAlongPathGlyphAnchor</key>
-						<string>left</string>
+						<string>center</string>
 					</dict>
 					<key>Wrap</key>
 					<string>NO</string>
@@ -7338,7 +6939,7 @@ cmds}</string>
 								<key>element</key>
 								<string>MOVETO</string>
 								<key>point</key>
-								<string>{1246.430007488091, 634.25600133125215}</string>
+								<string>{1246.4300074880907, 779.07771708801374}</string>
 							</dict>
 							<dict>
 								<key>element</key>
@@ -7350,7 +6951,7 @@ cmds}</string>
 					</dict>
 					<key>Points</key>
 					<array>
-						<string>{1246.430007488091, 634.25600133125215}</string>
+						<string>{1246.4300074880907, 779.07771708801374}</string>
 						<string>{1068.3629464265614, 522.3599905371666}</string>
 					</array>
 					<key>Style</key>
@@ -7750,7 +7351,7 @@ cn/q=*:*, quality-solr/q=*:*,metadig-worker, suite=arctic.1.1\
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{615.02360565103038, 1023.2548057523684}, {70, 39}}</string>
+					<string>{{668.85917839450553, 1025.7142530050457}, {70, 39}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>FitText</key>
@@ -7766,8 +7367,6 @@ cn/q=*:*, quality-solr/q=*:*,metadig-worker, suite=arctic.1.1\
 							<key>w</key>
 							<string>0</string>
 						</dict>
-						<key>Font</key>
-						<string>HelveticaNeue</string>
 						<key>Size</key>
 						<real>12</real>
 					</dict>
@@ -7832,7 +7431,7 @@ cn/q=*:*, quality-solr/q=*:*,metadig-worker, suite=arctic.1.1\
 								<key>element</key>
 								<string>MOVETO</string>
 								<key>point</key>
-								<string>{788.39998237788689, 1041.7512377874068}</string>
+								<string>{948.23997880518448, 1049.0534372168568}</string>
 							</dict>
 							<dict>
 								<key>element</key>
@@ -7844,7 +7443,7 @@ cn/q=*:*, quality-solr/q=*:*,metadig-worker, suite=arctic.1.1\
 					</dict>
 					<key>Points</key>
 					<array>
-						<string>{788.39998237788689, 1041.7512377874068}</string>
+						<string>{948.23997880518448, 1049.0534372168568}</string>
 						<string>{579.74758202266685, 1043.2644792073795}</string>
 					</array>
 					<key>Style</key>
@@ -8264,8 +7863,6 @@ cn/q=*:*, quality-solr/q=*:*,metadig-worker, suite=arctic.1.1\
 							<key>w</key>
 							<string>0</string>
 						</dict>
-						<key>Font</key>
-						<string>HelveticaNeue</string>
 						<key>Size</key>
 						<real>12</real>
 					</dict>
@@ -8311,7 +7908,7 @@ cn/q=*:*, quality-solr/q=*:*,metadig-worker, suite=arctic.1.1\
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{683.19798302230845, 1050.8499924805669}, {70, 39}}</string>
+					<string>{{789.20242452218872, 1055.6927448334011}, {70, 39}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>FitText</key>
@@ -8327,8 +7924,6 @@ cn/q=*:*, quality-solr/q=*:*,metadig-worker, suite=arctic.1.1\
 							<key>w</key>
 							<string>0</string>
 						</dict>
-						<key>Font</key>
-						<string>HelveticaNeue</string>
 						<key>Size</key>
 						<real>12</real>
 					</dict>
@@ -8502,14 +8097,14 @@ cn/q=*:*, quality-solr/q=*:*,metadig-worker, suite=arctic.1.1\
 								<key>element</key>
 								<string>LINETO</string>
 								<key>point</key>
-								<string>{788.39998237788689, 1070.4300609195527}</string>
+								<string>{948.23997880518448, 1077.7322603490027}</string>
 							</dict>
 						</array>
 					</dict>
 					<key>Points</key>
 					<array>
 						<string>{579.96738470332252, 1070.1923344604384}</string>
-						<string>{788.39998237788689, 1070.4300609195527}</string>
+						<string>{948.23997880518448, 1077.7322603490027}</string>
 					</array>
 					<key>Style</key>
 					<dict>
@@ -8541,7 +8136,7 @@ cn/q=*:*, quality-solr/q=*:*,metadig-worker, suite=arctic.1.1\
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{788.39998237788677, 1018.7999772280455}, {156.33174263515969, 74.907781658031581}}</string>
+					<string>{{948.23997880518436, 1026.1021766574954}, {156.33174263515969, 74.907781658031581}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>ID</key>
@@ -9118,10 +8713,9 @@ manages queues}</string>
 {\*\expandedcolortbl;;}
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\qc\partightenfactor0
 
-\f0\b\fs30 \cf0 Metadig-engine \
-Controller}</string>
+\f0\b\fs30 \cf0 Metadig-engine }</string>
 						<key>TextAlongPathGlyphAnchor</key>
-						<string>left</string>
+						<string>center</string>
 					</dict>
 				</dict>
 				<dict>
@@ -9171,7 +8765,7 @@ Controller}</string>
 				</dict>
 				<dict>
 					<key>Bounds</key>
-					<string>{{216.47826164373589, 634.25600133125215}, {1132.0882548881789, 554.35230193809457}}</string>
+					<string>{{216.47826164373566, 779.07771708801386}, {1132.0882548881789, 554.35230193809457}}</string>
 					<key>Class</key>
 					<string>ShapedGraphic</string>
 					<key>FontInfo</key>
@@ -12380,7 +11974,7 @@ REST Service}</string>
 		<key>Sidebar_Tab</key>
 		<integer>0</integer>
 		<key>VisibleRegion</key>
-		<string>{{28.350515463917237, 843.29896907216482}, {1393.8144329896907, 960.82474226804118}}</string>
+		<string>{{-15.463917525773148, 589.1752577319586}, {1393.8144329896909, 960.82474226804118}}</string>
 		<key>WindowInfo_InspectorTab</key>
 		<array>
 			<string>com.omnigroup.OmniGraffle.inspectorGroup.object</string>
