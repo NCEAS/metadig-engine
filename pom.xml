@@ -4,7 +4,7 @@
 
 	<groupId>edu.ucsb.nceas</groupId>
 	<artifactId>metadig-engine</artifactId>
-	<version>2.0.2</version>
+	<version>2.1.0</version>
 	<packaging>jar</packaging>
 
 	<name>metadig-engine</name>
@@ -13,7 +13,7 @@
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <d1_libclient_java.version>2.3.1</d1_libclient_java.version>
+		<d1_libclient_java.version>2.4.0-SNAPSHOT</d1_libclient_java.version>
         <renjin.version>0.8.2242</renjin.version>
         <jython.version>2.7.1</jython.version>
         <gson.version>2.6.2</gson.version>
@@ -26,7 +26,7 @@
 		<spring.version>3.1.4.RELEASE</spring.version>
         <!-- <docker.registry>docker.io</docker.registry> -->
         <docker.repo>metadig</docker.repo>
-        <docker.tag>2.0.2-dev</docker.tag>
+        <docker.tag>2.1.0</docker.tag>
 		<!-- <modules.test.includes>**/*Test.java</modules.test.includes> -->
 		<modules.test.excludes>**/LTERSuiteTest.java</modules.test.excludes>
 	</properties>
@@ -120,7 +120,7 @@
 		<dependency>
 			<groupId>com.rabbitmq</groupId>
 			<artifactId>amqp-client</artifactId>
-			<version>5.3.0</version>
+			<version>5.7.3</version>
 		</dependency>
 		<!-- https://mvnrepository.com/artifact/joda-time/joda-time -->
 		<dependency>
@@ -322,7 +322,7 @@
 			<plugin>
 				<groupId>io.fabric8</groupId>
 				<artifactId>docker-maven-plugin</artifactId>
-				<version>0.25.2</version>
+				<version>0.30.0</version>
 				<configuration>
 					<images>
                         <image>
