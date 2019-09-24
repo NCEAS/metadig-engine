@@ -56,7 +56,6 @@ public class IndexApplicationController {
             //solrClient = new CloudSolrClient.Builder().withSolrUrl(solrLocations).build();
             //solrClient = new CloudSolrClient.Builder().withZkHost(solrLocation).build();
             //solrClient.setDefaultCollection("quality");
-            log.debug("Created Solr client at " + solrLocation);
         } catch (Exception e) {
             log.error("Could not create Solr client", e);
             throw e;
@@ -128,7 +127,7 @@ public class IndexApplicationController {
         if (sysmeta != null) {
             try {
                 for (SolrIndex solrIndex: solrIndexes) {
-                    log.debug("calling solrIndex.insert()...");
+                    log.trace("calling solrIndex.insert()...");
                     solrIndex.insert(pid, sysmeta, tFile.getAbsolutePath());
                 }
             } catch (Exception e) {

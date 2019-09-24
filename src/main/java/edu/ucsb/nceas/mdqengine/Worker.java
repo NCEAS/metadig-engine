@@ -68,6 +68,9 @@ public class Worker {
     private static String authToken = null;
     private static SolrClient client = null;
     private static Boolean indexLatest = false; // Determine the latest report in the month and record in the index
+    // create a sequenceId based on obsolesence chain. Currently this item is always performed, but it could be
+    // controlled by a metadig.properties config item in the future if desired.
+    private static Boolean indexSequenceId = true;
 
     private static long startTimeIndexing;
     private static long startTimeProcessing;
@@ -193,7 +196,7 @@ public class Worker {
                     run.setRunStatus(Run.SUCCESS);
                     run.setErrorDescription("");
                     // Should a 'sequenceId' and 'isLatest' be added to the Solr index?
-                    if(indexLatest) {
+                    if(indexSequenceId) {
                         // Add the current run to the collection, as a starting point for the sequence id search
                         runsInSequence.addRun(run.getObjectIdentifier(), run);
 
@@ -204,23 +207,26 @@ public class Worker {
                         runsInSequence.getRunSequence(run, suiteId, stopWhenSIfound);
                         sequenceId = runsInSequence.getSequenceId();
                         // Ok, a sequence id wasn't set for these runs (if any), so generate a new one
-                        if (sequenceId == null) {
+                        // Only assign a new pid if the first pid in the sequence is found, so that we don't
+                        // have multiple segments of a chain with different sequenceIds.
+                        if (sequenceId == null && runsInSequence.getFoundFirstPid()) {
                             sequenceId = runsInSequence.generateId();
-                            log.debug("Generatied new sequence id: " + sequenceId);
+                            runsInSequence.setSequenceId(sequenceId);
+                            log.debug("Generated new sequence id: " + sequenceId);
                         } else {
                             log.debug("Using found sequenceId: " + sequenceId);
                         }
 
                         run.setSequenceId(sequenceId);
                     }
+
                     run.save();
 
-                    // Find and set the run in this collection which is the latest in the month
-                    // This routine also 'unmarks' any run in the sequence that was previously set as the
-                    // latest. These modified runs will be written out to Solr in the indexing section.
-                    if(indexLatest) {
-                        runsInSequence.setLatestRunInMonth(run.getDateUploaded());
-                        // Update modified runs to the datastore
+                    // Update runs in persist storage with sequenceId for this obsolesence chain
+                    if(indexSequenceId && sequenceId != null) {
+                        log.debug("Updating sequenceId to " + sequenceId);
+                        sequenceId = runsInSequence.getSequenceId();
+                        runsInSequence.updateSequenceId(sequenceId);
                         runsInSequence.update();
                     }
                 } catch (MetadigException me) {
@@ -256,6 +262,16 @@ public class Worker {
                             }
                         }
 
+                        if (indexSequenceId) {
+                            // Put files to be updated in a HashMap (can update multiple fields)
+                            HashMap<String, String> fields = new HashMap<>();
+                            fields.put("sequenceId", sequenceId);
+                            for (Run r : runsInSequence.getModifiedRuns()) {
+                                log.info("Updating Solr index with sequenceId: " + sequenceId + " for pid: " + r.getObjectIdentifier());
+                                wkr.updateIndex(r.getObjectIdentifier(), r.getSuiteId(), fields, solrLocation);
+                            }
+                        }
+
                         difference = System.currentTimeMillis() - startTimeIndexing;
                         elapsedTimeSecondsIndexing = TimeUnit.MILLISECONDS.toSeconds(difference);
                         qEntry.setIndexingElapsedTimeSeconds(elapsedTimeSecondsIndexing);
@@ -273,7 +289,7 @@ public class Worker {
                     log.debug("Sending report info back to controller...");
                     totalElapsedTimeSeconds = elapsedTimeSecondsProcessing + elapsedTimeSecondsIndexing;
                     qEntry.setTotalElapsedTimeSeconds(totalElapsedTimeSeconds);
-                    wkr.returnReport(metadataPid, suiteId, qEntry, startTimeProcessing);
+                    wkr.returnReport(metadataPid, suiteId, qEntry);
                     log.debug("Sent report info back to controller...");
                 } catch (IOException ioe) {
                     log.error("Unable to return quality report to controller.");
@@ -290,10 +306,14 @@ public class Worker {
     inProcessChannel.basicConsume(QUALITY_QUEUE_NAME, false, consumer);
     }
 
-    private void returnReport(String metadataPid, String suiteId, QueueEntry qEntry, long startTime) throws IOException {
-        /* Put the quality report in a queue message and return in to the controller
-           uploaded and indexed.
-        */
+    /**
+     * Put the quality report in a queue message and return in to the controller
+     * uploaded and indexed.
+     * @param metadataPid The identifier of the metadata document associated with the report
+     * @param suiteId The identifier for the suite used to score the metadata
+     * @param qEntry The message passed via RabbitMQ back to metadig-controller
+     */
+    private void returnReport(String metadataPid, String suiteId, QueueEntry qEntry) throws IOException {
         byte[] message = null;
         try {
             log.info("Elapsed time processing (seconds): "
@@ -476,7 +496,7 @@ public class Worker {
      * component, which has been modified for use with metadig_engine.
      * </p>
      *
-     * @param metadataId
+     * @param metadataId The identifier of the metadata document associated with the report
      * @param runXML
      * @param suiteId
      * @param sysmeta
@@ -513,8 +533,8 @@ public class Worker {
      * component, which has been modified for use with metadig_engine.
      * </p>
      *
-     * @param metadataId
-     * @param suiteId
+     * @param metadataId The identifier of the metadata document associated with the report
+     * @param suiteId The identifier for the suite used to score the metadata
      * @param fields : field names and values to update in the Solr index entry
      * @throws Exception
      */
@@ -618,8 +638,9 @@ public class Worker {
     }
 
     /**
+     * Write a message to the RabbitMQ 'completed' queue, which will be read by metadig-controller
      *
-     * @param message
+     * @param message The message to send to the controller
      * @throws IOException
      */
     public void writeCompletedQueue (byte[] message) throws IOException {

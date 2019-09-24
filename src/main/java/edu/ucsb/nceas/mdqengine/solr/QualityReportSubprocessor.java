@@ -72,7 +72,7 @@ public class QualityReportSubprocessor implements IDocumentSubprocessor {
         for(int index = 0; index < result.getLength(); index ++) {
             Node node = result.item(index);
             checkTypes.add(node.getTextContent());
-            log.debug("found check type: " + node.getTextContent());
+            log.trace("found check type: " + node.getTextContent());
         }
 
         // Get deduped list of check types
@@ -112,8 +112,8 @@ public class QualityReportSubprocessor implements IDocumentSubprocessor {
             sField.setValue(df2.format(checkTypeScore));
             //sField.setValue(String.valueOf(checkScore));
             qualityReportSolrDoc.addField(sField);
-            log.debug("Added check type field " + sField.getName() + ", value: " + sField.getValue());
-            log.debug("Number of fields in document: " + qualityReportSolrDoc.getFieldList().size());
+            log.trace("Added check type field " + sField.getName() + ", value: " + sField.getValue());
+            log.trace("Number of fields in document: " + qualityReportSolrDoc.getFieldList().size());
         }
 
         // Only one Solr document will be updated

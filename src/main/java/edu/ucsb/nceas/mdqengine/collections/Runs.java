@@ -16,6 +16,7 @@ public class Runs {
     public static Log log = LogFactory.getLog(Run.class);
     private HashMap<String, Run> runs = new HashMap<>();
     private String sequenceId = null;
+    private Boolean foundFirstPid = false;
 
     public Runs () {
     }
@@ -42,12 +43,17 @@ public class Runs {
      * Recursion ends when either the next run is not available (not in store) or the pointer to the
      * next pid in the chain isn't specified (we are at the end of the chain).
      * </p>
+     * @param metadataId The identifier of the metadata document associated with the report
+     * @param suiteId The identifier for the suite used to score the metadata
+     * @param stopWhenSIfound
+     * @param store
+     * @param forward
      *
      * @throws Exception
      */
 
-    public void getNextRun(String metadataId, String suiteId, Boolean stopWhenSIfound, MDQStore store, Boolean forward,
-                            DateTime minDate, DateTime maxDate) {
+    public void getNextRun(String metadataId, String suiteId, Boolean stopWhenSIfound, MDQStore store, Boolean forward) {
+
         Run run = null;
         String obsoletedBy = null;
         String obsoletes = null;
@@ -84,9 +90,7 @@ public class Runs {
             // this chain has been found.
             if(sequenceId != null) {
                 SIfound = true;
-                // Has the sequence id for the collection been defined yet and is it different
-                // than the one for the current pid? This can happen if different, separate segments
-                // of the chain were previously processed and now the chain is connected.
+                // Has the sequence id for the collection been defined yet?
                 if(this.sequenceId != null) {
                     if(! this.sequenceId.equals(sequenceId)) {
                         log.error("Warning, new sequenceId found for chain: " + sequenceId + " found at pid: " + metadataId);
@@ -98,35 +102,6 @@ public class Runs {
                 }
             }
 
-            // See if we have reached the time persion (month) start or end
-            DateTime thisDate = new DateTime(run.getDateUploaded());
-            if(forward) {
-                if(thisDate.isAfter(maxDate)) reachedDateBounds = true;
-            } else {
-                if(thisDate.isBefore(minDate)) reachedDateBounds = true;
-            }
-
-            // Test if recursion should end
-            // Have all pids (in the current direction) been obtained and has the sequence id been found?
-            if(stopWhenSIfound) {
-                if(SIfound && reachedDateBounds) {
-                    if(forward) {
-                        log.debug("Terminating forward traversal: sequenceId found and reached date boundary.");
-                    } else {
-                        log.debug("Terminating backward traversal: sequenceId found and reached date boundary.");
-                    }
-                    return;
-                }
-            } else {
-                if(reachedDateBounds) {
-                    if (forward) {
-                        log.debug("Terminating forward traversal: reached date boundary.");
-                    } else {
-                        log.debug("Terminating backward traversal: reached date boundary.");
-                    }
-                    return;
-                }
-            }
 
             // The termination tests have passed, add this run to the collection
             this.addRun(metadataId, run);
@@ -143,7 +118,7 @@ public class Runs {
                 obsoletedBy = sysmetaModel.getObsoletedBy();
                 if(obsoletedBy != null) {
                     log.debug("traversing forward to obsoletedBy: " + obsoletedBy);
-                    getNextRun(obsoletedBy, suiteId, stopWhenSIfound, store, forward, minDate, maxDate);
+                    getNextRun(obsoletedBy, suiteId, stopWhenSIfound, store, forward);
                 } else {
                     log.debug("Reached end of forward (obsoletedBy) chain at pid: " + metadataId);
                 }
@@ -153,9 +128,14 @@ public class Runs {
                 obsoletes = sysmetaModel.getObsoletes();
                 if(obsoletes != null) {
                     log.debug("traversing backward to obsoletes: " + obsoletes);
-                    getNextRun(obsoletes, suiteId, stopWhenSIfound, store, forward, minDate, maxDate);
+                    getNextRun(obsoletes, suiteId, stopWhenSIfound, store, forward);
                 } else {
-                    log.debug("Reached end of backward (obsoletes) chain at pid: " + metadataId);
+                    // Have we reached the first run in the sequence (not obsoleted by any pid)?
+                    if(run.getObsoletes() == null) {
+                        this.foundFirstPid = true;
+                        log.debug("Found first pid in sequence: " + run.getObjectIdentifier());
+                    }
+                    log.debug("Reached beginning of obsoletes chain at pid: " + metadataId);
                 }
             }
         } else {
@@ -175,6 +155,11 @@ public class Runs {
      * The least number of pids to get will be for all versions that are within the current month of the starting pid.
      * If <b>stopWhenSIfound</b> is specified, the search will continue until the sequenceId is found, or the entire chain is
      * fetched.
+     *
+     * A new sequenceId can only be assinged to the first version in a chain. If pids are processed out of 'dateUploaded' order,
+     * i.e. due to multi-processing, there may be 'breaks' in the chain and pids may temporarily be without sequenceIds. When a
+     * new pid is added, a check will be made to re-link pids back to the chain by traversing backward until a sequenceId is
+     * found, then previously saved pids with no sequenceId will have the correct one assinged.
      * </p>
      *
      * @param run The starting run - get all pids in this runs obsolesence chain
@@ -186,7 +171,7 @@ public class Runs {
 
         boolean persist = true;
         MDQStore store = StoreFactory.getStore(persist);
-        Boolean forward = false;
+        Boolean forward;
         String metadataId = run.getObjectIdentifier();
         this.sequenceId = null;
 
@@ -199,12 +184,20 @@ public class Runs {
 
         // Start the traversal in the backward direction
         log.debug("Getting all runs (backward) for suiteId: " + suiteId + ", metadataId: " + metadataId + ", minDate: " + minDate + ", " + maxDate);
-        getNextRun(metadataId, suiteId, stopWhenSIfound, store, forward, minDate, maxDate);
+        forward = false;
+        getNextRun(metadataId, suiteId, stopWhenSIfound, store, forward);
 
+        // If the sequenceId has not been obtained when searching in the backward direction, then there
+        // is no reason to search forward, as this means that the first pid in the series has not been found,
+        // it will not be found searching forward.
+        if(getSequenceId() == null && !foundFirstPid) {
+            log.debug("Unable to find sequenceId for this sequence, will not search in forward direction.");
+            return;
+        }
         // Continue traversal in the forward direction, if necessary
         log.debug("Getting all runs (forward) for suiteId: " + suiteId + ", metadataId: " + metadataId);
         forward = true;
-        getNextRun(metadataId, suiteId, stopWhenSIfound, store, forward, minDate, maxDate);
+        getNextRun(metadataId, suiteId, stopWhenSIfound, store, forward);
 
         log.debug("Shutting down store");
         store.shutdown();
@@ -214,8 +207,9 @@ public class Runs {
     /**
      * Update each run in an obsolescence sequence with a new sequenceId.
      * <p>
-     * The runs in a sequence have already been fetched via <b>getRunsInSeq</b>. This method is used when the sequence hasn't
-     * already been assigned a sequence id, as it will assign the sequence id to each run.
+     * The runs in a sequence have already been fetched via <b>getRunsInSeq</b>, but some of them may not
+     * have been assigned a sequenceId, i.e. possibly due to broken chains that have now been joined. Check
+     * each pid in the sequence and assign it the sequenceId if it doesn't have it already.
      * </p>
      *
      * @param sequenceId a quality engine maintained sequence identifier, similiar in function to the DataONE series id.
@@ -338,6 +332,10 @@ public class Runs {
      * quality scores over time.
      * </p>
      *
+     * @param targetDate
+     * @param minDate
+     * @param maxDate
+     *
      * @return Run - the latest run in the month
      */
     public Run getLatestRun(DateTime targetDate,  DateTime minDate, DateTime maxDate) {
@@ -400,6 +398,8 @@ public class Runs {
     /**
      * Set the sequence identifier for the run sequence.
      *
+     * @param sequenceId
+     *
      */
 
     public void setSequenceId(String sequenceId)  {
@@ -409,6 +409,7 @@ public class Runs {
     /**
      * Get the runs in this collection
      *
+     * @return runs
      */
 
     public HashMap<String, Run> getRuns() {
@@ -470,4 +471,13 @@ public class Runs {
         }
     }
 
+    /**
+     * If pids are missing in the current obsolesence chain, then a traversal may not reach the starting pid, i.e.
+     * the very first one in the chain. This must be determined, as we only assign a sequenceId when the first pids is found.
+     *
+     * @return foundFirstPid - was the starting pid in this obsolesense chain reached?
+     */
+    public Boolean getFoundFirstPid() {
+        return this.foundFirstPid;
+    }
 }

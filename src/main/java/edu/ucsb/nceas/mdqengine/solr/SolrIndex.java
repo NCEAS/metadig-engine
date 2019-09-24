@@ -154,7 +154,6 @@ public class SolrIndex {
      */
     private Map<String, SolrDoc> process(String id, SystemMetadata systemMetadata, String objectPath)
             throws IOException, SAXException, MarshallingException, SolrServerException {
-        log.debug("SolrIndex.process - trying to generate the solr doc object for the pid "+id);
         // Load the System Metadata document
         ByteArrayOutputStream systemMetadataOutputStream = new ByteArrayOutputStream();
         TypeMarshaller.marshalTypeToOutputStream(systemMetadata, systemMetadataOutputStream);
@@ -173,27 +172,20 @@ public class SolrIndex {
 
         // get the format id for this object
         String formatId = indexDocument.getFirstFieldValue(SolrElementField.FIELD_OBJECTFORMAT);
-        log.debug("SolrIndex.process - the object format id for the pid "+id+" is "+formatId);
         // Determine if subprocessors are available for this ID
         if (subprocessors != null) {
             // for each subprocessor loaded from the spring config
             for (IDocumentSubprocessor subprocessor : subprocessors) {
                 // Does this subprocessor apply?
-                log.debug("SolrIndex.process - trying subprocessor "+ subprocessor.getClass().getName());
                 if (subprocessor.canProcess(formatId)) {
                     log.debug("SolrIndex.process - using subprocessor "+ subprocessor.getClass().getName());
                     // if so, then extract the additional information from the
                     // document.
                     try {
-                        // docObject = the resource map document or science
-                        // metadata document.
-                        // note that resource map processing touches all objects
-                        // referenced by the resource map.
                         FileInputStream dataStream = new FileInputStream(objectPath);
                         if (!dataStream.getFD().valid()) {
                             log.error("SolrIndex.process - subprocessor "+ subprocessor.getClass().getName() +" couldn't process since it could not load OBJECT file for ID,Path=" + id + ", "
                                     + objectPath);
-                            //throw new Exception("Could not load OBJECT for ID " + id );
                         } else {
                             log.debug("SolrIndex.process - subprocessor "+ subprocessor.getClass().getName() +" generating solr doc for id "+id);
                             docs = subprocessor.processDocument(id, docs, dataStream);
@@ -283,12 +275,11 @@ public class SolrIndex {
     public synchronized void insert(Identifier pid, SystemMetadata systemMetadata, String objectPath)
             throws IOException, SAXException, ParserConfigurationException,
             XPathExpressionException, SolrServerException, MarshallingException, EncoderException, NotImplemented, NotFound, UnsupportedType {
-        log.debug("Identifier: " + pid.getValue());
-        log.debug("sysmeta pid" + systemMetadata.getIdentifier().getValue());
-        log.debug("objectPath: " + objectPath);
+        log.trace("Identifier: " + pid.getValue());
+        log.trace("sysmeta pid" + systemMetadata.getIdentifier().getValue());
+        log.trace("objectPath: " + objectPath);
 
         checkParams(pid, systemMetadata, objectPath);
-        log.info("SolrIndex.insert - trying to insert the solrDoc for object "+pid.getValue());
         Map<String, SolrDoc> docs = process(pid.getValue(), systemMetadata, objectPath);
 
         //transform the Map to the SolrInputDocument which can be used by the solr server
@@ -401,7 +392,7 @@ public class SolrIndex {
 
             // Read all fields from the existing document and populate new Solr doc
             for (String n : resultDoc.getFieldNames()) {
-                log.debug("Adding field: " + n);
+                log.trace("Adding field: " + n);
                 solrDoc.addField(n, resultDoc.getFieldValue(n));
             }
 
