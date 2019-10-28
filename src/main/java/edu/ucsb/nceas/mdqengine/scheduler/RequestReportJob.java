@@ -254,10 +254,15 @@ public class RequestReportJob implements Job {
                 try {
                     log.info("submitting pid: " + pidStr);
                     submitReportRequest(cnNode, mnNode, isCN, session, qualityServiceUrl, pidStr, suiteId);
+                } catch (org.dataone.service.exceptions.NotFound nfe) {
+                    log.error("Unable to process pid: " + pidStr +  nfe.getMessage());
+                    continue;
                 } catch (Exception e) {
-                    JobExecutionException jee = new JobExecutionException("Unable to submit request to create new quality reports", e);
-                    jee.setRefireImmediately(false);
-                    throw jee;
+                    log.error("Unable to process pid:  " + pidStr + " - " + e.getMessage());
+                    continue;
+                    //JobExecutionException jee = new JobExecutionException("Unable to submit request to create new quality reports", e);
+                    //jee.setRefireImmediately(false);
+                    //throw jee;
                 }
             }
 
