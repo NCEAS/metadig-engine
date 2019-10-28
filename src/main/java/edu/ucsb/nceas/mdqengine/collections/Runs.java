@@ -443,7 +443,7 @@ public class Runs {
      *
      */
 
-    public void update() {
+    public void updateIndex() {
 
         String thisPid = null;
         Run run = null;
@@ -469,5 +469,4 @@ public class Runs {
             }
         }
     }
-
 }
