@@ -30,7 +30,6 @@ import static org.quartz.TriggerBuilder.newTrigger;
  */
 public class JobScheduler {
 
-    private String solrLocation = null;
     public static Log log = LogFactory.getLog(Controller.class);
 
     public static void main(String[] argv) throws Exception {
@@ -49,9 +48,12 @@ public class JobScheduler {
         String nodeId = null;
         String nodeServiceUrl = null;
         String startHarvestDatetime = null;
-        String solrLocation = null;
         int countRequested = 1000;
         int harvestDatetimeInc = 1;
+
+        // Additional parameters for graph jobs
+        String aggregationId = null;
+        String aggregationName = null;
 
         String taskListFilename = js.readConfig("task.file");
         log.debug("task list filename: " + taskListFilename);
@@ -122,6 +124,44 @@ public class JobScheduler {
                 // The number of results to return from the DataONE 'listObjects' service
                 countRequested = Integer.parseInt(splitted[++icnt].trim());
                 System.out.println("countRequested: " + countRequested);
+            } else if(taskType.equals("graph")) {
+                System.out.println("Scheduling harvest for job name: " + jobName + ", job group: " + jobGroup);
+                String[] splitted = Arrays.stream(params.split(";"))
+                        .map(String::trim)
+                        .toArray(String[]::new);
+
+                int icnt = -1;
+                System.out.println("Split length: " + splitted.length);
+                // filter to use for removing unneeded pids from harvest list
+                pidFilter      = splitted[++icnt].trim();
+                System.out.println("pidFilter: " + pidFilter);
+                // Suite identifier
+                suiteId        = splitted[++icnt].trim();
+                System.out.println("suiteId: " + suiteId);
+                // DataOne Node identifier
+                nodeId         = splitted[++icnt].trim();
+                System.out.println("nodeId: " + nodeId);
+                // Dataone base service URL
+                nodeServiceUrl = splitted[++icnt].trim();
+                System.out.println("nodeServiceUrl: " + nodeServiceUrl);
+                // Start harvest datetime. This is the beginning of the date range for the first harvest.
+                // After the first harvest, the end of the harvest date range will be used as the beginning
+                // for the next harvest.
+                startHarvestDatetime = splitted[++icnt].trim();
+                System.out.println("startHarvestDatetime: " + startHarvestDatetime);
+                // Harvest datetime increment. This value will be added to the beginning of the harvest datetime
+                // range to determine the end of the range. This is specified in number of days.
+                harvestDatetimeInc = Integer.parseInt(splitted[++icnt].trim());
+                System.out.println("harvestDatetimeInc: " + harvestDatetimeInc);
+                // The number of results to return from the DataONE 'listObjects' service
+                countRequested = Integer.parseInt(splitted[++icnt].trim());
+                System.out.println("countRequested: " + countRequested);
+
+                // Additional parameters for graph jobs
+                aggregationId = splitted[++icnt].trim();
+                System.out.println("aggregationId: " + aggregationId);
+                aggregationName = splitted[++icnt].trim();
+                System.out.println("aggregationName: " + aggregationName);
             }
 
             try {
@@ -139,6 +179,20 @@ public class JobScheduler {
                             .usingJobData("startHarvestDatetime", startHarvestDatetime)
                             .usingJobData("harvestDatetimeInc", harvestDatetimeInc)
                             .usingJobData("countRequested", countRequested)
+                            .build();
+                } else if (taskType.equalsIgnoreCase("graph")) {
+                    job = newJob(RequestGraphJob.class)
+                            .withIdentity(jobName, jobGroup)
+                            .usingJobData("authToken", authToken)
+                            .usingJobData("pidFilter", pidFilter)
+                            .usingJobData("suiteId", suiteId)
+                            .usingJobData("nodeId", nodeId)
+                            .usingJobData("nodeServiceUrl", nodeServiceUrl)
+                            .usingJobData("startHarvestDatetime", startHarvestDatetime)
+                            .usingJobData("harvestDatetimeInc", harvestDatetimeInc)
+                            .usingJobData("countRequested", countRequested)
+                            .usingJobData("aggregationId", aggregationId)
+                            .usingJobData("aggregationName", aggregationName)
                             .build();
                 }
 
