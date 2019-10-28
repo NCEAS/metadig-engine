@@ -52,7 +52,7 @@ public class Runs {
      * @throws Exception
      */
 
-    public void getNextRun(String metadataId, String suiteId, Boolean stopWhenSIfound, MDQStore store, Boolean forward) {
+    public void getNextRun(String metadataId, String suiteId, Boolean stopWhenSIfound, MDQStore store, Boolean forward, Integer level) {
 
         Run run = null;
         String obsoletedBy = null;
@@ -60,9 +60,10 @@ public class Runs {
         String sequenceId = null;
         SysmetaModel sysmetaModel = null;
         Boolean SIfound = false;
-        Boolean reachedDateBounds = false;
 
+        level += 1;
         log.debug("Getting next run: metadataId: " + metadataId + ", suiteId: " + suiteId);
+        log.debug("Recursion level: " + level);
 
         // First see if we have this run in the collection
         run = runs.get(metadataId);
@@ -86,8 +87,7 @@ public class Runs {
         if(run != null) {
             // get sequence id for this run
             sequenceId = run.getSequenceId();
-            // End recursion if the minDate or maxDate have been passed, and possibly if the sequence id for
-            // this chain has been found.
+            // End recursion if the sequence id for this chain has been found.
             if(sequenceId != null) {
                 SIfound = true;
                 // Has the sequence id for the collection been defined yet?
@@ -102,6 +102,8 @@ public class Runs {
                 }
             }
 
+            if(stopWhenSIfound)
+                if(SIfound) return;
 
             // The termination tests have passed, add this run to the collection
             this.addRun(metadataId, run);
@@ -117,8 +119,13 @@ public class Runs {
                 log.debug("Checking for next forward pid (obsoletedBy)");
                 obsoletedBy = sysmetaModel.getObsoletedBy();
                 if(obsoletedBy != null) {
+                    // Check for an invalid obsoletedBy - pid links to itself
+                    if(obsoletedBy.compareToIgnoreCase(metadataId) == 0) {
+                        log.debug("Stopping traversal at invalid obsoletedBy, pid " + metadataId + " obsoletes itself");
+                        return;
+                    }
                     log.debug("traversing forward to obsoletedBy: " + obsoletedBy);
-                    getNextRun(obsoletedBy, suiteId, stopWhenSIfound, store, forward);
+                    getNextRun(obsoletedBy, suiteId, stopWhenSIfound, store, forward, level);
                 } else {
                     log.debug("Reached end of forward (obsoletedBy) chain at pid: " + metadataId);
                 }
@@ -127,8 +134,13 @@ public class Runs {
                 log.debug("Checking for next backward pid (obsoletes)");
                 obsoletes = sysmetaModel.getObsoletes();
                 if(obsoletes != null) {
+                    // Check for an invalid obsoletedBy - pid links to itself
+                    if(obsoletes.compareToIgnoreCase(metadataId) == 0) {
+                        log.debug("Stopping traversal at invalid obsoletes, pid " + metadataId + " is obsoleted by itself");
+                        return;
+                    }
                     log.debug("traversing backward to obsoletes: " + obsoletes);
-                    getNextRun(obsoletes, suiteId, stopWhenSIfound, store, forward);
+                    getNextRun(obsoletes, suiteId, stopWhenSIfound, store, forward, level);
                 } else {
                     // Have we reached the first run in the sequence (not obsoleted by any pid)?
                     if(run.getObsoletes() == null) {
@@ -175,6 +187,9 @@ public class Runs {
         String metadataId = run.getObjectIdentifier();
         this.sequenceId = null;
 
+        // Keep track of the current recursion level
+        Integer level = 0;
+
         // Convert input date string to JodaTime
         DateTime targetDate = new DateTime(run.getDateUploaded());
         // get target month start
@@ -185,7 +200,7 @@ public class Runs {
         // Start the traversal in the backward direction
         log.debug("Getting all runs (backward) for suiteId: " + suiteId + ", metadataId: " + metadataId + ", minDate: " + minDate + ", " + maxDate);
         forward = false;
-        getNextRun(metadataId, suiteId, stopWhenSIfound, store, forward);
+        getNextRun(metadataId, suiteId, stopWhenSIfound, store, forward, level);
 
         // If the sequenceId has not been obtained when searching in the backward direction, then there
         // is no reason to search forward, as this means that the first pid in the series has not been found,
@@ -197,7 +212,7 @@ public class Runs {
         // Continue traversal in the forward direction, if necessary
         log.debug("Getting all runs (forward) for suiteId: " + suiteId + ", metadataId: " + metadataId);
         forward = true;
-        getNextRun(metadataId, suiteId, stopWhenSIfound, store, forward);
+        getNextRun(metadataId, suiteId, stopWhenSIfound, store, forward, level);
 
         log.debug("Shutting down store");
         store.shutdown();
