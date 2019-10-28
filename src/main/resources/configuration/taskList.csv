@@ -1,5 +1,29 @@
-query,task-type,job-name,job-group,cron-schedule,params
-# Query string, tassk type, job name, job group, cron schedule, "suite id; node id; D1 node bases url; harvest begin date; harvest increment;1"
-?q=formatId:eml*, quality, quality-mnTestKNB, metadig, 0 0/5 * * * ?, "knb.suite.1;urn:node:mnTestKNB;https://dev.nceas.ucsb.edu/knb/d1/mn;2018-10-10T00:00:00.00Z;1"
-#?q=formatId:eml*, quality, quality-knb, metadig, 0 0/5 * * * ?, "knb.suite.1;urn:node:KNB;https://knb.ecoinformatics.org/knb/d1/mn;2018-09-01T00:00:00.00Z;1"
-#?q=formatId:eml*, quality, quality-arctic, metadig, 0 0/5 * * * ?, "arctic.data.center.suite.1;urn:node:ARCTIC;https://arcticdata.io/metacat/d1/mn;1"
+task-type,job-name,job-group,auth-token,cron-schedule,params
+# task type, job name, job group, cron schedule, "formatId filter (regex); suite id; node id; D1 node base url; harvest begin date; harvest increment (days);solr location;requestCount"
+# - task type: currently only 'quality' jobs are supported.
+# - job name: any unique string, i.e. 'quality-knb'
+# - job group: currently only 'metadig' is used
+# - cron schedule: 
+#   - seconds, minutes, hours, day of month, month, day of week, year
+# - params
+#   - formatId filter (regex): This is a list of wildcards that will match records harvest, delimeted by '|'
+#   - suite id: the metadig suite id
+#   - node id: the DataONE node URN
+#   - D1 node base url: the base service URL for an MN or CN
+#   - harvest begin date: the first date to use for the DataONE 'listObjects' service
+#   - harvest increment (days): the time span for each search
+#   - requestCount: the number of itmes to request from DataONE listObjects
+# - additional params for graph tasks
+#   - aggregationId: the unique id of the item to create the aggregated report for (e.g. DataONE project SID)
+#   - aggregationName: the unique name of the aggregation to create the report for (e.g. DataONE project name)
+#
+#quality,quality-mnTestKNB-knb,metadig,mnTestKNB.authToken,* 0/1 * * * ?,"^eml.*;knb.suite.1;urn:node:mnTestKNB;https://dev.nceas.ucsb.edu/knb/d1/mn;2018-10-01T00:00:00.00Z;1;100"
+#quality,quality-mnTestKNB-arctic,metadig,0/10 * * * * ?,"^eml.*;arctic.data.center.suite.1;urn:node:ARCTIC;https://arcticdata.io/metacat/d1/mn;2018-10-03T00:00:00.00Z;1;100"
+#quality,quality-knb,metadig,,0 0/1 * * * ?,"^eml.*;knb.suite.1;urn:node:KNB;https://knb.ecoinformatics.org/knb/d1/mn;2019-05-01T00:00:00.00Z;1;100"
+#quality,quality-knb-test,metadig,,0 0/1 * * * ?,"^eml.*;knb.suite.1;urn:node:KNB;https://dev.nceas.ucsb.edu/knb/d1/mn;2019-05-01T00:00:00.00Z;1;100"
+quality,quality-arctic,metadig,ARCTIC.authToken,0 0/1 * * * ?, "^eml.*;arctic.data.center.suite.1;urn:node:ARCTIC;https://arcticdata.io/metacat/d1/mn;2018-11-27T14:30:00.00Z;1;100"
+#quality,quality-arctic-test,metadig,,0 0/1 * * * ?, "^eml.*;arctic.data.center.suite.test.1;urn:node:mnTestARCTIC;https://test.arcticdata.foo/metacat/d1/mn;2019-04-01T00:00:00.00Z;1;100"
+#quality,quality-dataone,metadig,,0 0/1 * * * ?, "^eml.*|.*www.isotc211.org.*;FAIR.suite.1;urn:node:CN;https://cn.dataone.org/cn/;2019-05-01T00:00:00.00Z;1;100"
+#
+# Entry for creating aggregated graphs for a DataONE project
+graph,graph-dev-fair,metadig,,0 0/1 * * * ?, "^eml.*|.*www.isotc211.org.*;FAIR.suite.1;urn:node:mnTestKNB;https://dev.nceas.ucsb.edu/d1/mn/v2/;2019-08-01T00:00:00.00Z;1;1234;lauren-test"
