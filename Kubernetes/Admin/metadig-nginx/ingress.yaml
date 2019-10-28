@@ -25,4 +25,3 @@ spec:
   - secretName: metadig-tls-cert
     hosts:
     - docker-ucsb-4.dataone.org
-

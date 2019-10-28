@@ -7,5 +7,3 @@ kubectl delete -f udp-services-configmap.yaml
 kubectl delete -f metadig-ingress-controller-deploy.yaml
 kubectl delete -f metadig-nginx-service.yaml
 kubectl delete -f ingress.yaml
-
-

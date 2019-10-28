@@ -1,7 +1,7 @@
 apiVersion: apps/v1beta1
 kind: Deployment
 metadata:
-  name: metadig-worker 
+  name: metadig-worker
   namespace: metadig
 spec:
   selector:
@@ -15,10 +15,22 @@ spec:
         app: metadig-worker
         tier: backend
     spec:
-      serviceAccountName: metadig-serviceaccount
+      #serviceAccountName: metadig-serviceaccount
       containers:
-        - name: metadig-worker
-          image: docker.io/metadig/metadig-worker:2.0.0-rc1
-          #image: localhost:5000/metadig/metadig-worker:dev
-          imagePullPolicy: Always
-
+      - name: metadig-worker
+        #image: docker.io/metadig/metadig-worker:2.0.2
+        image: docker.io/metadig/metadig-worker:2.2.0dev
+        imagePullPolicy: Always
+        env:
+        - name: JYTHONPATH
+          value: "/opt/local/metadig/metadig-py"
+        #imagePullPolicy: IfNotPresent
+        volumeMounts:
+        - name: nfs-pv
+          #mountPath: "/etc/metadig"
+          mountPath: "/opt/local"
+          readOnly: false
+      volumes:
+      - name: nfs-pv
+        persistentVolumeClaim:
+          claimName: nfs-pvc

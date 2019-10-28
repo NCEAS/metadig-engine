@@ -15,15 +15,16 @@ spec:
         app: metadig-scheduler
         tier: backend
     spec:
-      serviceAccountName: metadig-serviceaccount
+      #serviceAccountName: metadig-serviceaccount
       containers:
-        - name: metadig-scheduler
-          image: docker.io/metadig/metadig-scheduler:2.0.0-rc1
-          imagePullPolicy: Always
-          volumeMounts:
-          - name: nfs-pv
-            mountPath: /opt/local
-            readOnly: true
+      - name: metadig-scheduler
+        #image: docker.io/metadig/metadig-scheduler:2.0.2
+        image: docker.io/metadig/metadig-scheduler:2.2.0dev
+        imagePullPolicy: Always
+        volumeMounts:
+        - name: nfs-pv
+          mountPath: /opt/local
+          readOnly: true
       restartPolicy: Always
       volumes:
       - name: nfs-pv

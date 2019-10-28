@@ -13,25 +13,14 @@ spec:
       labels:
         app: metadig-controller
     spec:
-      serviceAccountName: metadig-serviceaccount
       containers:
-      #- name: metadig-httpd
-      #  image: localhost:5000/metadig/metadig-httpd:dev
-      #  ports:
-      #  - name: metadig-httpd
-      #    containerPort: 80
-      #  imagePullPolicy: Always
       - name: metadig-controller
-        image: docker.io/metadig/metadig-controller:2.0.0-rc1
+        image: docker.io/metadig/metadig-controller:2.2.0dev
         ports:
         - name: metadig-tomcat
           containerPort: 8080
         imagePullPolicy: Always
       restartPolicy: Always
-      #volumes:
-      #- name: metadig-ctl-claim0
-      #  persistentVolumeClaim:
-      #    claimName: metadig-ctl-claim0
 
 ---
 
@@ -44,10 +33,6 @@ spec:
   selector:
     app: metadig-controller
   ports:
-  #- name: metadig-httpd
-  #  port: 80 
-  #  protocol: TCP
-  #  targetPort: metadig-httpd
   - name: metadig-controller
     port: 8080
     protocol: TCP
