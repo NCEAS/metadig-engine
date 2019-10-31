@@ -3,6 +3,7 @@ package edu.ucsb.nceas.mdqengine.grapher;
 import com.rabbitmq.client.*;
 import edu.ucsb.nceas.mdqengine.MDQconfig;
 import edu.ucsb.nceas.mdqengine.exception.MetadigException;
+import edu.ucsb.nceas.mdqengine.exception.MetadigProcessException;
 import edu.ucsb.nceas.mdqengine.filestore.MetadigFile;
 import edu.ucsb.nceas.mdqengine.filestore.MetadigFileStore;
 import edu.ucsb.nceas.mdqengine.filestore.StorageType;
@@ -23,12 +24,11 @@ import org.dataone.client.rest.DefaultHttpMultipartRestClient;
 import org.dataone.client.rest.MultipartRestClient;
 import org.dataone.client.v2.impl.MultipartCNode;
 import org.dataone.client.v2.impl.MultipartMNode;
-import org.dataone.service.types.v1.Session;
-import org.dataone.service.types.v1.Subject;
+import org.dataone.client.v2.impl.MultipartD1Node; // Don't include org.dataone.client.rest.MultipartD1Node (this is what IDEA selects)
+import org.dataone.service.types.v1.*;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
-import org.quartz.JobExecutionException;
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
 
@@ -43,6 +43,8 @@ import java.net.URLEncoder;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * The Grapher class contains methods that create graphs of aggregated quality scores.
@@ -63,12 +65,13 @@ public class Grapher {
     private static Connection completedConnection;
     private static Channel completedChannel;
 
-    public static Log log = LogFactory.getLog(Grapher.class);
+    private static Log log = LogFactory.getLog(Grapher.class);
     private static String RabbitMQhost = null;
     private static int RabbitMQport = 0;
     private static String RabbitMQpassword = null;
     private static String RabbitMQusername = null;
-    private static String authToken = null;
+    private static String CNauthToken = null;
+    private static String CNserviceUrl = null;
     private static SolrClient client = null;
     private static String solrLocation = null;
     private static String filestoreBase = null;
@@ -88,6 +91,8 @@ public class Grapher {
             RabbitMQport = cfg.getInt("RabbitMQ.port");
             solrLocation = cfg.getString("solr.location");
             filestoreBase = cfg.getString("metadig.store.directory");
+            CNauthToken =  cfg.getString("CN.authToken");
+            CNserviceUrl = cfg.getString("CN.serviceUrl");
         } catch (ConfigurationException cex) {
             log.error("Unable to read configuration");
             MetadigException me = new MetadigException("Unable to read config properties");
@@ -111,6 +116,8 @@ public class Grapher {
                 ObjectInput in = new ObjectInputStream(bis);
                 GraphQueueEntry qEntry = null;
                 String graphFilename = null;
+                MetadigException metadigException = null;
+
                 //long startTime = System.nanoTime();
                 startTimeProcessing = System.currentTimeMillis();
                 elapsedTimeSecondsProcessing = 0L;
@@ -127,7 +134,8 @@ public class Grapher {
                 // The components of the graph queue request
                 String collectionId = qEntry.getProjectId();
                 String projectName = qEntry.getProjectName();
-                String nodeId = qEntry.getMemberNode();
+                String nodeId = qEntry.getNodeId();
+                String serviceUrl = qEntry.getServiceUrl();
                 String formatFamily = qEntry.getFormatFamily();
                 String suiteId = qEntry.getQualitySuiteId();
                 MetadigFile mdFile = new MetadigFile();
@@ -150,13 +158,8 @@ public class Grapher {
                     // Only scores for these pids will be included in the graph.
                     // TODO: improve filestore so that filenames are unique
                     if(collectionId != null) {
-                        collectionPids = gfr.getCollectionPids(collectionId, nodeId);
-                        graphFilename = collectionId + "-" + nodeId + "-" + suiteId + ".jpg";
-                    } else {
-                        graphFilename = nodeId + "-" + suiteId +  ".jpg";
+                        collectionPids = gfr.getCollectionPids(collectionId, nodeId, serviceUrl);
                     }
-
-                    log.debug("Graph file to use: " + graphFilename);
 
                     // Quality scores will now be obtained from the MetaDIG quality Solr index, using the list of pids obtained
                     // for the collection.
@@ -187,11 +190,16 @@ public class Grapher {
                     mdFile.setFileExt(".png");
 
                     Boolean replace = true;
+                    // Save the generated graph file to the MetaDIG filestore
                     outfile = filestore.saveFile(mdFile, filePath, replace);
                     log.debug("Output graphics file " + outfile);
                 } catch (Exception e) {
                     log.error("Error creating graph: " + e.getMessage());
+                    metadigException = new MetadigProcessException("Unable to query solr: " + e.getMessage());
+                    metadigException.initCause(e);
+                    qEntry.setException(metadigException);
                 }
+
                 // Send the report (completed or not) to the controller, with errors that were encountered.
                 try {
                     difference = System.currentTimeMillis() - startTimeProcessing;
@@ -227,10 +235,11 @@ public class Grapher {
      * @param
      * @return a List of quality scores fetched from Solr
      */
-    private ArrayList<String> getCollectionPids(String collectionId, String nodeId) throws Exception {
+    private ArrayList<String> getCollectionPids(String collectionId, String nodeId, String serviceUrl) throws Exception {
 
         Document xmldoc = null;
         String queryStr = null;
+        String thisToken = null;
         // Page though the results, requesting a certain amount of pids at each request
         int startPos = 0;
         int countRequested = 1000;
@@ -241,16 +250,9 @@ public class Grapher {
         ArrayList<String> pids = new ArrayList<>();
         queryStr = "?q=id:" + escapeSpecialChars(collectionId) + "&fl=collectionQuery,label&q.op=AND";
 
-        //TODO: check that a result was returned
-        //TODO: retrieve the sysmeta for the collection id and get the rightsHolder, then get the groups
-        // that the rightsholder belongs to. Next add those groups into the query so that the same set of
-        // pids that the portal owner would retrieve are retrieved by this query. The DataONE CN auth token
-        // will be needed to get this info.
-
         startPos = 0;
         countRequested = 10000;
-        // First get the collectionQuery field
-        xmldoc = queryD1Solr(queryStr, nodeId, startPos, countRequested);
+        xmldoc = queryD1Solr(queryStr, serviceUrl, startPos, countRequested, CNauthToken);
 
         if(xmldoc == null) {
             throw new MetadigException("No result returned from Solr query: " + queryStr);
@@ -285,11 +287,48 @@ public class Grapher {
         String projectName = node.getTextContent();
         log.debug("Project name: " + projectName);
 
+        // Get account information for the collection owner. The account info will be used when the 'collectionQuery'
+        // query is made, which will use the owner's identity and group memberships, so that the pids that are returned
+        // from the query are the ones that the user would see when viewing their portal page.
+        // First get the sysmeta from the collection pid, in order to determine the owner. Next, get the account info
+        // from the CN. Then add those groups into the query. Each group will be included in the filter query in this format:
+        //     "(readPermission:"http://orcid.org/0000-0002-2192-403X")
+        //      OR (rightsHolder:"http://orcid.org/0000-0002-2192-403X")"
+        SystemMetadata sysmeta = null;
+        try {
+            sysmeta = getSystemMetadata(collectionId, serviceUrl, CNauthToken);
+        } catch (MetadigProcessException mpe) {
+            log.error("Unable to get system metadata for collection: " + collectionId);
+            throw(mpe);
+        }
+
+        Subject rightsHolder = sysmeta.getRightsHolder();
+        SubjectInfo subjectInfo = getSubjectInfo(rightsHolder, serviceUrl, CNauthToken);
+        String groupStr = null;
+
+        // Assemble the
+        for(Group group : subjectInfo.getGroupList()) {
+            log.debug("Adding group to query: " + group.getGroupName());
+            if(groupStr == null) {
+                groupStr = "(readPermission: " + "\"" + group.getGroupName()
+                        + "\")" + " OR (rightsHolder:\"" + group.getGroupName() + "\"";
+            } else {
+                groupStr += " OR (readPermission: " + "\"" + group.getGroupName()
+                        + "\")" + " OR (rightsHolder:\"" + group.getGroupName() + "\"";
+            }
+        }
+
         // Send the collectionQuery string to Solr to get the pids associated with the collection
         // The 'collectionQuery' Solr field may have backslashes that are used to escape special characters (i.e. ":") that are not
         // intended to be interpreted by Solr. These backslashes however, have to be encoded in the URL sent to Solr. Re have
         // to be selective in what is encoded, as encoded other chars causes problems.
-        queryStr = "?q=" + URLencodeChars(collectionQuery, "\\ ") + "&fl=id";
+        if(groupStr != null) {
+            groupStr = "&fq:" + groupStr;
+            queryStr = "?q=" + URLencodeChars(collectionQuery, "\\ ") + groupStr + "&fl=id";
+        } else {
+            queryStr = "?q=" + URLencodeChars(collectionQuery, "\\ ") + "&fl=id";
+        }
+
         int resultCount = 0;
         startPos = 0;
         countRequested = 1000;
@@ -301,10 +340,12 @@ public class Grapher {
         // Now setup the xpath to retrieve the ids returned from the collection query.
         fieldXpath = xpath.compile("//result/doc/str[@name='id']/text()");
         // Loop through the Solr result. As the result may be large, page through the results, accumulating
-        // the pids returned.
+        // the pids returned
+
+        log.debug("query string: " + queryStr);
         do {
             //TODO: check that a result was returned
-            xmldoc = queryD1Solr(queryStr, nodeId, startPos, countRequested);
+            xmldoc = queryD1Solr(queryStr, serviceUrl, startPos, countRequested, thisToken);
             if(xmldoc == null) {
                 log.debug("no values returned from query");
                 break;
@@ -356,7 +397,7 @@ public class Grapher {
         String formatFamilySearchTerm = null;
 
         // The metadata format family can be specified to filter the quality scores that will be included
-        // in the graph.
+        // in the graph./
         if (formatFamily != null) {
             if(formatFamily.split(",").length == 1) {
                 formatFamilySearchTerm = "*" + formatFamily + "*";
@@ -382,7 +423,6 @@ public class Grapher {
             int totalPidCnt = collectionPids.size();
             int pidsLeft = totalPidCnt;
             do {
-                //TODO: Replace with live value
                 // On the last run, the pids to retrieve may be less that the 'desired' amount
                 pidCntToRequest = Math.min(pidsLeft, pidCntToRequest);
                 log.debug("startPosInResult: " + startPosInResult + ", pidCntToRequest: " + pidCntToRequest + ", pids left: " + pidsLeft);
@@ -547,76 +587,40 @@ public class Grapher {
      * Send a query to the DataONE Query Service , using the DataONE CN or MN API
      *
      * @param queryStr the query string to pass to the Solr server
-     * @param nodeId the node identifier to send the query to
+     * @param serviceUrl the service URL for the DataONE CN or MN
      * @param startPos the start of the query result to return, if query pagination is being used
      * @param countRequested the number of results to return
      * @return an XML document containing the query result
      * @throws Exception
      */
-    private Document queryD1Solr(String queryStr, String nodeId, int startPos, int countRequested) throws Exception {
+    private Document queryD1Solr(String queryStr, String serviceUrl, int startPos, int countRequested, String authToken) throws Exception {
 
-        String cnNodeServiceUrl = "https://cn.dataone.org/cn/v2";
-        String mnNodeServiceUrl = null;
-        Boolean isCN = false;
         MultipartRestClient mrc = null;
         // Polymorphism doesn't work with D1 node classes, so have to use the derived classes
-        MultipartMNode mnNode = null;
-        MultipartCNode cnNode = null;
+        MultipartD1Node d1Node = null;
 
         Subject subject = new Subject();
         subject.setValue("public");
-        Session session = null;
-
-        // query Solr - either the member node or cn, for the project 'solrquery' field
-        if (authToken == null || authToken.equals("")) {
-            log.info("Using public session");
-            session = new Session();
-            //session.setSubject(subject);
-        } else {
-            log.info("Using authorized session");
-            session = new AuthTokenSession(authToken);
-        }
-
-        // First create an HTTP client
-        try {
-            mrc = new DefaultHttpMultipartRestClient();
-            log.info("Created rest client.");
-        } catch (Exception e) {
-            log.error("Error creating rest client: " + e.getMessage());
-            JobExecutionException jee = new JobExecutionException(e);
-            jee.setRefireImmediately(false);
-            throw jee;
-        }
-
-        // Now create a DataONE object that uses the rest client
-        if (nodeId.equalsIgnoreCase("urn:node:CN")) {
-            log.info("creating cn MultipartMNode");
-            cnNode = new MultipartCNode(mrc, cnNodeServiceUrl, session);
-            isCN = true;
-            log.info("created cn for " + cnNode.getNodeId().toString());
-        } else {
-            // TODO: get this from the cn
-            log.info("creating mn MultipartMNode");
-            // TODO: replace this test url with the one from the cn
-            mnNodeServiceUrl = "https://dev.nceas.ucsb.edu/knb/d1/mn";
-            //mnNodeServiceUrl = "https://knb.ecoinformatics.org/knb/d1/mn";
-            mnNode = new MultipartMNode(mrc, mnNodeServiceUrl, session);
-        }
+        Session session = getSession(subject, authToken);
 
         // Add the start and count, if pagination is being used
         queryStr = queryStr + "&start=" + startPos + "&rows=" + countRequested;
         // Query the MN or CN Solr engine to get the query associated with this project that will return all project related pids.
         InputStream qis = null;
+        MetadigException metadigException = null;
+
+        try {
+            d1Node = getMultipartD1Node(session, serviceUrl);
+        } catch (Exception ex) {
+            metadigException = new MetadigProcessException("Unable to query solr: " + ex.getMessage());
+            metadigException.initCause(ex);
+            throw metadigException;
+        }
 
         // Send a query to a CN or MN
         try {
-            if(isCN) {
-                log.info("Sending CN query: " + queryStr);
-                qis = cnNode.query(session, "solr", queryStr);
-            } else {
-                log.info("Sending MN query: " + queryStr);
-                qis = mnNode.query(null, "solr", queryStr);
-            }
+            qis = d1Node.query(session, "solr", queryStr);
+            log.info("Sending MN query: " + queryStr);
         } catch (Exception e) {
             log.error("Error retrieving pids: " + e.getMessage());
             throw e;
@@ -756,6 +760,197 @@ public class Grapher {
         completedChannel.basicPublish(EXCHANGE_NAME, COMPLETED_ROUTING_KEY, basicProperties, message);
     }
 
+    /**
+     * Get a DataONE system metadata object
+     * @param pid the pid to get the system metadata for
+     * @param serviceUrl the service URL of the DataONE node to request the sysmeta
+     * @param authToken the authorization token to use for the request
+     * @return a DataONE system metadata object
+     * @throws MetadigProcessException
+     */
+    private SystemMetadata getSystemMetadata(String pid, String serviceUrl, String authToken) throws MetadigProcessException {
+
+        SystemMetadata sysmeta = null;
+        Boolean isCN = false;
+        MultipartRestClient mrc = null;
+        MultipartD1Node d1Node = null;
+        MetadigProcessException metadigException = null;
+
+        Subject subject = new Subject();
+        subject.setValue("public");
+        Session session = null;
+
+        // query Solr - either the member node or cn, for the project 'solrquery' field
+        if (authToken == null || authToken.equals("")) {
+            log.info("Using public session");
+            session = new Session();
+            //session.setSubject(subject);
+        } else {
+            log.info("Using authorized session");
+            session = new AuthTokenSession(authToken);
+        }
+
+        Identifier identifier = new Identifier();
+        identifier.setValue(pid);
+
+        try {
+            d1Node = getMultipartD1Node(session, serviceUrl);
+        } catch (Exception ex) {
+            metadigException = new MetadigProcessException("Unable to get subject info for subject: " + subject.getValue());
+            metadigException.initCause(ex);
+            throw metadigException;
+        }
+
+        try {
+            sysmeta = d1Node.getSystemMetadata(session, identifier);
+            log.debug("retrieved sysmeta for pid: " + sysmeta.getIdentifier().getValue());
+        } catch (Exception ex) {
+            log.error("Unable to retrieve sysmte for pid: " + pid);
+            metadigException = new MetadigProcessException("Unable to get collection pids");
+            metadigException.initCause(ex);
+            throw metadigException;
+        }
+
+        return sysmeta;
+    }
+
+    /**
+     * Get a DataONE subject information object
+     * @param subject the DataONE idenotity to get info for
+     * @param serviceUrl the service URL of the DataONE node to request the subject info from
+     * @param authToken the authorization token to use for the request
+     * @return a DataONE subject information object
+     * @throws MetadigProcessException
+     */
+    private SubjectInfo getSubjectInfo(Subject subject, String serviceUrl, String authToken) throws MetadigProcessException {
+
+        MultipartCNode cnNode = null;
+        MultipartD1Node d1Node = null;
+        MetadigProcessException metadigException = null;
+        Boolean isCN = false;
+
+        SubjectInfo subjectInfo = null;
+        Session session = getSession(subject, authToken);
+
+        // Identity node as either a CN or MN based on the serviceUrl
+        String pattern = "https*://cn.*?\\.dataone\\.org|https*://cn.*?\\.test\\.dataone\\.org";
+        Pattern r = Pattern.compile(pattern);
+        Matcher m = r.matcher(serviceUrl);
+        if (m.find()) {
+            log.debug("service URL is for a CN: " + serviceUrl);
+        } else {
+            log.error("Must call a CN to get subject information");
+            metadigException = new MetadigProcessException("Must call a CN to get subject information.");
+            throw metadigException;
+        }
+
+        // Only CNs can call the 'subjectInfo' service (aka accounts), so we have to use
+        // a MultipartCNode instance here.
+        try {
+            cnNode = (MultipartCNode) getMultipartD1Node(session, serviceUrl);
+        } catch (Exception ex) {
+            metadigException = new MetadigProcessException("Unable to get subject info for subject: " + subject.getValue());
+            metadigException.initCause(ex);
+            throw metadigException;
+        }
+
+        try {
+            subjectInfo = cnNode.getSubjectInfo(session, subject);
+            log.debug("retrieved subject information for subject: " + subject.getValue());
+        } catch (Exception ex) {
+            metadigException = new MetadigProcessException("Unable to get collection pids");
+            metadigException.initCause(ex);
+            throw metadigException;
+        }
+
+        return subjectInfo;
+    }
+
+    /**
+     * Get a DataONE authenticated session
+     * <p>
+     *     If no subject or authentication token are provided, a public session is returned
+     * </p>
+     * @param subject the dataone identity to create the session for
+     * @param authToken the authentication token
+     * @return the DataONE session
+     */
+    Session getSession(Subject subject, String authToken) {
+        Session session = null;
+
+        // query Solr - either the member node or cn, for the project 'solrquery' field
+        if (authToken == null || authToken.equals("")) {
+            log.debug("Using public session");
+            session = new Session();
+            session.setSubject(subject);
+        } else {
+            log.debug("Using authentication session");
+            session = new AuthTokenSession(authToken);
+        }
+
+        return session;
+    }
+
+    /**
+     * Get a DataONE MultipartCNode object, which will be used to communication with a CN
+     *
+     * @param session a DataONE authentication session
+     * @param serviceUrl the service URL for the node we are connecting to
+     * @return a DataONE MultipartCNode object
+     * @throws MetadigException
+     */
+    MultipartD1Node getMultipartD1Node(Session session, String serviceUrl) throws MetadigException {
+
+        MultipartRestClient mrc = null;
+        MultipartD1Node d1Node = null;
+        MetadigProcessException metadigException = null;
+        Boolean isCN;
+
+        // First create an HTTP client
+        try {
+            mrc = new DefaultHttpMultipartRestClient();
+            log.info("Created rest client.");
+        } catch (Exception ex) {
+            log.error("Error creating rest client: " + ex.getMessage());
+            metadigException = new MetadigProcessException("Unable to get collection pids");
+            metadigException.initCause(ex);
+            throw metadigException;
+        }
+
+        // Identity node as either a CN or MN based on the serviceUrl
+        String pattern = "https*://cn.*?\\.dataone\\.org|https*://cn.*?\\.test\\.dataone\\.org";
+        Pattern r = Pattern.compile(pattern);
+        Matcher m = r.matcher(serviceUrl);
+        if (m.find()) {
+            isCN = true;
+            log.debug("service URL is for a CN: " + serviceUrl);
+        } else {
+            log.debug("service URL is not for a CN: " + serviceUrl);
+            isCN = false;
+        }
+
+        // First create an HTTP client
+        try {
+            mrc = new DefaultHttpMultipartRestClient();
+            log.info("Created rest client.");
+        } catch (Exception e) {
+            log.error("Error creating rest client: " + e.getMessage());
+            metadigException = new MetadigProcessException("Unable to get collection pids");
+            metadigException.initCause(e);
+            throw metadigException;
+        }
+
+        // Now create a DataONE object that uses the rest client
+        if (isCN) {
+            log.info("creating cn MultipartMNode");
+            d1Node = new MultipartCNode(mrc, serviceUrl, session);
+            log.info("created cn for " + d1Node.getNodeId().toString());
+        } else {
+            log.info("creating mn MultipartMNode");
+            d1Node = new MultipartMNode(mrc, serviceUrl, session);
+        }
+        return d1Node;
+    }
     /**
      * Read a file from a Java resources folder.
      *
