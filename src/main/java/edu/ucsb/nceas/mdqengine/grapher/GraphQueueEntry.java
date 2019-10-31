@@ -12,6 +12,7 @@ public class GraphQueueEntry implements Serializable {
 
     private static final long serialVersionUID = -2643076659001464940L;
     private String nodeId;              // the DataONE node identifier of the node that is the datasource
+    private String serviceUrl;          // the DataONE CN or MN serviceUrl
     private String qualitySuiteId;      // the MetaDIG quality suite to graph
     private String collectionid;        // the DataONE collection (portal) to graph data for
     private String projectName;         // the name of the portal or project
@@ -23,11 +24,19 @@ public class GraphQueueEntry implements Serializable {
     // Hostsname of the machine that is running metadig engine
     private String hostname;
 
-    public String getMemberNode() {
+    public String getServiceUrl() {
+        return serviceUrl;
+    }
+
+    public void setServiceUrl(String serviceUrl) {
+        this.serviceUrl = serviceUrl;
+    }
+
+    public String getNodeId() {
         return nodeId;
     }
 
-    public void setMemberNode(String nodeId) {
+    public void setNodeId(String nodeId) {
         this.nodeId = nodeId;
     }
 
