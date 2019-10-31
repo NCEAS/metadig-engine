@@ -28,7 +28,7 @@ public class MetadigFile {
     private String metadataFormatFilter = "";
     private String storageType = null;
     private DateTime creationDatetime;
-    private String fileExt = null;
+    private String fileExt = "";
     private String altFilename = ""; // Use this name for the file instead of a uuid
     private String path; // the complete path to the file
 
