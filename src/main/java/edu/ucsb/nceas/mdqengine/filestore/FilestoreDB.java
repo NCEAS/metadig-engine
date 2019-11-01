@@ -78,6 +78,7 @@ public class FilestoreDB {
         PreparedStatement stmt = null;
 
         String collectionId = mdFile.getCollectionId();
+        String metadataId = mdFile.getMetadataId();
         String suiteId = mdFile.getSuiteId();
         String nodeId = mdFile.getNodeId();
         String mdFormatFilter = mdFile.getMetadataFormatFilter();
@@ -90,20 +91,22 @@ public class FilestoreDB {
         MetadigFile resultMdFile = new MetadigFile();
 
         try {
-            String sql = "select * from filestore where collection_id = ? and suite_id = ? and node_id = ? and format_filter = ? and storage_type = ?";
+            String sql = "select * from filestore where collection_id = ? and metadata_id = ? and suite_id = ? and node_id = ? and format_filter = ? and storage_type = ?";
 
             stmt = conn.prepareStatement(sql);
             stmt.setString(1, collectionId);
-            stmt.setString(2, suiteId);
-            stmt.setString(3, nodeId);
-            stmt.setString(4, mdFormatFilter);
-            stmt.setString(5, storageType);
+            stmt.setString(2, metadataId);
+            stmt.setString(3, suiteId);
+            stmt.setString(4, nodeId);
+            stmt.setString(5, mdFormatFilter);
+            stmt.setString(6, storageType);
 
             log.debug("issuing query: " + sql);
             ResultSet rs = stmt.executeQuery();
             if(rs.next()) {
+                resultMdFile.setFileId(rs.getString("file_id"));
                 resultMdFile.setCollectionId(rs.getString("collection_id"));
-                resultMdFile.setCollectionId(rs.getString("metadata_id"));
+                resultMdFile.setMetadataId(rs.getString("metadata_id"));
                 resultMdFile.setSuiteId(rs.getString("suite_id"));
                 resultMdFile.setNodeId(rs.getString("node_id"));
                 resultMdFile.setMetadataFormatFilter(rs.getString("format_filter"));
@@ -117,9 +120,9 @@ public class FilestoreDB {
 
                 rs.close();
                 stmt.close();
-                log.debug("Retrieved filestore successfully for collection id: " + resultMdFile.getCollectionId());
+                log.debug("Retrieved filestore successfully for file id: " + resultMdFile.getFileId());
             } else {
-                log.debug("Filestore entry not found for collection id: " + collectionId + ", suiteId: " + suiteId);
+                log.debug("Filestore entry not found for collection id: " + collectionId + ", metadataId: " + metadataId + ", suiteId: " + suiteId);
             }
         } catch ( Exception e ) {
             log.error( e.getClass().getName()+": "+ e.getMessage());
@@ -151,14 +154,14 @@ public class FilestoreDB {
 
         MetadigStoreException me = new MetadigStoreException("Unable save metadig file info to the datdabase.");
 
-        // Attempt to insert a new record. If the unique constraint is violated (updating an existing record), don't perform an 'upsert', as the calling
-        // program should simply re-use the file_id and path, which will have to be obtained by a new read.
+        // Attempt to insert a new record. If the unique constraint is violated (updating an existing record), perform an 'upsert', replacing
+        // the original record.
         try {
             String sql = "INSERT INTO filestore (file_id, collection_id, metadata_id, suite_id, node_id, format_filter, storage_type," +
-                    " creation_datetime, file_ext, alt_filename) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-                    //+ " ON CONFLICT ON CONSTRAINT file_id_fk "
-                    //+ " DO UPDATE SET (collection_id, metadata_id, suite_id, node_id, format_filter, storage_type, " +
-                    //"timestamp, file_ext) = (?, ?, ?, ?, ?, ?);";
+                    " creation_datetime, file_ext, alt_filename) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+                    + " ON CONFLICT ON CONSTRAINT all_properties_fk"
+                    + " DO UPDATE SET (file_id, collection_id, metadata_id, suite_id, node_id, format_filter, storage_type, " +
+                    "creation_datetime, file_ext, alt_filename) = (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
             stmt = conn.prepareStatement(sql);
             stmt.setString(1, fileId);
@@ -171,6 +174,16 @@ public class FilestoreDB {
             stmt.setTimestamp(8, timestamp);
             stmt.setString(9, fileExt);
             stmt.setString(10, altFilename);
+            stmt.setString(11, fileId);
+            stmt.setString(12, collectionId);
+            stmt.setString(13, metadataId);
+            stmt.setString(14, suiteId);
+            stmt.setString(15, nodeId);
+            stmt.setString(16, metadataFormatFilter);
+            stmt.setString(17, storageType);
+            stmt.setTimestamp(18, timestamp);
+            stmt.setString(19, fileExt);
+            stmt.setString(20, altFilename);
 
             stmt.executeUpdate();
             stmt.close();
