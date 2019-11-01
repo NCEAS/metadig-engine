@@ -153,11 +153,10 @@ public class Grapher {
                 try {
                     Graph graph = new Graph();
                     Grapher gfr = new Grapher();
-
                     // If creating a graph for a collection, get the set of pids associated with the collection.
                     // Only scores for these pids will be included in the graph.
-                    // TODO: improve filestore so that filenames are unique
-                    if(collectionId != null) {
+                    if(collectionId != null && ! collectionId.isEmpty()) {
+                        log.info("Getting pids for collection " + collectionId);
                         collectionPids = gfr.getCollectionPids(collectionId, nodeId, serviceUrl);
                     }
 
@@ -166,7 +165,6 @@ public class Grapher {
                     List<QualityScore> scores = gfr.getQualityScores(collectionId, suiteId, nodeId, formatFamily, collectionPids);
                     log.debug("# of quality scores returned: " + scores.size());
                     File scoreFile = gfr.createScoreFile(scores);
-
                     log.debug("Created score file: " + scoreFile.getPath());
 
                     // Create the graph and write to the filestore
@@ -182,7 +180,9 @@ public class Grapher {
                     //String outfile = projectName + "-" + suiteId + ".png";
                     String outfile;
 
-                    mdFile.setCreationDatetime(DateTime.now());
+                    DateTime createDateTime = DateTime.now();
+
+                    mdFile.setCreationDatetime(createDateTime);
                     mdFile.setCollectionId(collectionId);
                     mdFile.setSuiteId(suiteId);
                     mdFile.setNodeId(nodeId);
@@ -193,6 +193,19 @@ public class Grapher {
                     // Save the generated graph file to the MetaDIG filestore
                     outfile = filestore.saveFile(mdFile, filePath, replace);
                     log.debug("Output graphics file " + outfile);
+
+                    // Now save the score file, as this may be requested from a client
+                    // This should have all the same info as the graphics file, except
+                    // for fileid, storagetype, extension
+                    mdFile = new MetadigFile();
+                    mdFile.setCreationDatetime(createDateTime);
+                    mdFile.setCollectionId(collectionId);
+                    mdFile.setSuiteId(suiteId);
+                    mdFile.setNodeId(nodeId);
+                    mdFile.setStorageType(StorageType.DATA.toString());
+                    mdFile.setFileExt(".csv");
+                    outfile = filestore.saveFile(mdFile, scoreFile.getPath(), replace);
+                    log.debug("Output data file " + outfile);
                 } catch (Exception e) {
                     log.error("Error creating graph: " + e.getMessage());
                     metadigException = new MetadigProcessException("Unable to query solr: " + e.getMessage());
@@ -220,7 +233,6 @@ public class Grapher {
             }
         };
 
-        log.debug("Calling basicConsume");
         inProcessChannel.basicConsume(GRAPH_QUEUE_NAME, false, consumer);
     }
 
@@ -258,9 +270,6 @@ public class Grapher {
             throw new MetadigException("No result returned from Solr query: " + queryStr);
         }
 
-        log.debug("Done with collectionQuery query");
-        log.debug("xmldoc: " + xmldoc.toString());
-
         // Extract the ids from the Solr result XML
         XPathFactory xPathfactory = XPathFactory.newInstance();
         XPath xpath = xPathfactory.newXPath();
@@ -278,14 +287,11 @@ public class Grapher {
             throw new MetadigException("Unable to fetch collectionQuery field for collection id: " + collectionId);
         }
 
-        log.debug("Found collectionQuery string: " + collectionQuery);
-
         // Extract the portal 'label' (title)
         fieldXpath = xpath.compile("//result/doc/str[@name='label']/text()");
         xpathResult = (org.w3c.dom.NodeList) fieldXpath.evaluate(xmldoc, XPathConstants.NODESET);
         node = xpathResult.item(0);
         String projectName = node.getTextContent();
-        log.debug("Project name: " + projectName);
 
         // Get account information for the collection owner. The account info will be used when the 'collectionQuery'
         // query is made, which will use the owner's identity and group memberships, so that the pids that are returned
@@ -347,7 +353,7 @@ public class Grapher {
             //TODO: check that a result was returned
             xmldoc = queryD1Solr(queryStr, serviceUrl, startPos, countRequested, thisToken);
             if(xmldoc == null) {
-                log.debug("no values returned from query");
+                log.info("no values returned from query");
                 break;
             }
             xpathResult = (org.w3c.dom.NodeList) fieldXpath.evaluate(xmldoc, XPathConstants.NODESET);
@@ -361,13 +367,9 @@ public class Grapher {
                 pids.add(currentPid);
             }
 
-            log.debug("pid[ " + startPos + "]: " + pids.get(startPos));
-            log.info("Retrieved " + pids.size() + " docs from Solr query");
             startPos += thisResultLength;
         } while (thisResultLength > 0);
 
-        log.debug("Returning " + pids.size() + " pids from collectionQuery");
-        log.debug("pid[1]: " + pids.get(1));
         return pids;
     }
 
@@ -418,14 +420,14 @@ public class Grapher {
         int startPosInQuery = 0; // this will always be zero - we are listing the pids to retrieve, so will always want to start at the first result
 
         // Now accumulate the Quality Solr document results for the list of pids for the project.
-        if (collectionId != null) {
+        if (collectionId != null && ! collectionId.isEmpty()) {
+            log.info("Getting quality scores for collection: " + collectionId);
             int pidCntToRequest = 25;
             int totalPidCnt = collectionPids.size();
             int pidsLeft = totalPidCnt;
             do {
                 // On the last run, the pids to retrieve may be less that the 'desired' amount
                 pidCntToRequest = Math.min(pidsLeft, pidCntToRequest);
-                log.debug("startPosInResult: " + startPosInResult + ", pidCntToRequest: " + pidCntToRequest + ", pids left: " + pidsLeft);
                 tmpList = new ArrayList(collectionPids.subList(startPosInResult, startPosInResult+pidCntToRequest));
                 startPosInResult += pidCntToRequest;
                 //pidStr = "metadataId:(" + "\"" + listString + "\"" + ")";
@@ -448,45 +450,41 @@ public class Grapher {
                 if (suiteId != null) {
                     queryStr += " AND suiteId:" + suiteId;
                 }
+                log.debug("query to quality Solr server: " + queryStr);
                 // Send query to Quality Solr Server
                 // Get all the pids in this pid string
-                resultList = querySolr(queryStr, startPosInQuery, pidCntToRequest);
-                log.debug("Solr result count: " + resultList.size());
+                resultList = queryQualitySolr(queryStr, startPosInQuery, pidCntToRequest);
                 // It's possible that none of the pids from the collection have quality scores
                 // This should not happen but check just in case.
                 if(resultList.size() > 0) {
                     // Add results from this pid range to the accumulator of all results.
                     allResults.addAll(resultList);
                 }
-                log.debug("Allresults count so far: " + allResults.size());
                 pidsLeft -= pidCntToRequest;
             } while (pidsLeft > 0);
         } else {
-            log.debug("Query is not for a collection");
+            log.info("Getting quality scores for suiteId: " + suiteId + ", datasource: " + nodeId + " formats: " + formatFamily);
             countRequested = 1000;
+            formatFamilySearchTerm = null;
+            queryStr = "metadataId:*";
+            if(suiteId != null) {
+                queryStr += " AND suiteId:" + "\"" + suiteId + "\"";
+            }
+            if(nodeId != null) {
+                queryStr += " AND datasource:" + "\"" + nodeId + "\"";
+            }
+            if (formatFamilySearchTerm != null) {
+                queryStr += " AND metadataFormatId:" + "\"" + formatFamilySearchTerm + "\"";
+            }
+            log.debug("query to quality Solr server: " + queryStr);
             do {
-                queryStr = "?q=metadataId:*+suiteId=" + suiteId;
-                // Add a search term for the metadata formats to include. If none is specified, then
-                // any formatId will be included.
-                if (formatFamily!= null)  {
-                    String terms[] = formatFamily.split(",");
-                    for(String term : terms) {
-                        if(formatFamilySearchTerm != null) {
-                            formatFamilySearchTerm += formatFamilySearchTerm + "," + "*" + term + "*";
-                        } else {
-                            formatFamilySearchTerm += formatFamilySearchTerm + "*" + term + "*";
-                        }
-                    }
-                    queryStr = queryStr + "+metadataId:" + formatFamilySearchTerm;
-                }
-
-                resultList = querySolr(queryStr, startPosInQuery, countRequested);
-                log.info("result count: " + resultList.size());
+                resultList = queryQualitySolr(queryStr, startPosInQuery, countRequested);
                 // If no more results, break
                 if(resultList.size() == 0) break;
                 // Add results from this pid range to the accumulator of all results.
                 allResults.addAll(resultList);
-                startPosInQuery += resultList.size();
+                //startPosInQuery += resultList.size();
+                startPosInQuery += countRequested;
             } while (resultList.size() > 0);
         }
         return allResults;
@@ -612,7 +610,7 @@ public class Grapher {
         try {
             d1Node = getMultipartD1Node(session, serviceUrl);
         } catch (Exception ex) {
-            metadigException = new MetadigProcessException("Unable to query solr: " + ex.getMessage());
+            metadigException = new MetadigProcessException("Unable create multipart node client to query DataONE solr: " + ex.getMessage());
             metadigException.initCause(ex);
             throw metadigException;
         }
@@ -620,7 +618,6 @@ public class Grapher {
         // Send a query to a CN or MN
         try {
             qis = d1Node.query(session, "solr", queryStr);
-            log.info("Sending MN query: " + queryStr);
         } catch (Exception e) {
             log.error("Error retrieving pids: " + e.getMessage());
             throw e;
@@ -632,7 +629,6 @@ public class Grapher {
         // If results were returned, create an XML document from them
         if (qis.available() == 1) {
             try {
-                log.info("Building xml doc");
                 DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
                 builder = factory.newDocumentBuilder();
                 xmldoc = builder.parse(new InputSource(qis));
@@ -647,9 +643,6 @@ public class Grapher {
             qis.close();
         }
 
-        // Did we get anything?
-        log.info("from doc: " + xmldoc.getFirstChild().getNodeName());
-
         return xmldoc;
     }
 
@@ -661,7 +654,7 @@ public class Grapher {
      * @return a list of 'QualityScore' POJOs that contain the quality scores that were retrieved
      * @throws Exception
      */
-    private List<QualityScore> querySolr(String queryStr, int startPos, int countRequested) throws SolrServerException, IOException {
+    private List<QualityScore> queryQualitySolr(String queryStr, int startPos, int countRequested) throws SolrServerException, IOException {
 
         SolrClient solrClient = new HttpSolrClient.Builder(solrLocation).build();
         SolrQuery query = new SolrQuery(queryStr);
@@ -672,10 +665,8 @@ public class Grapher {
         List<QualityScore> scores = null;
         QueryResponse response = null;
 
-        //log.debug("Sending query: " + query.toString());
         try {
             response = solrClient.query("quality", query);
-            log.debug("response status: " + response.getStatus());
             scores = response.getBeans(QualityScore.class);
             solrClient.close();
         } catch (SolrServerException | IOException oe) {
@@ -688,7 +679,7 @@ public class Grapher {
             throw be;
         } catch (Exception e) {
             log.error("Error querying solr: " + e.getMessage());
-            log.debug("query: " + query.toString());
+            log.error("query: " + query.toString());
             throw e;
         }
 
@@ -782,11 +773,10 @@ public class Grapher {
 
         // query Solr - either the member node or cn, for the project 'solrquery' field
         if (authToken == null || authToken.equals("")) {
-            log.info("Using public session");
+            log.debug("Using public session");
             session = new Session();
-            //session.setSubject(subject);
         } else {
-            log.info("Using authorized session");
+            log.debug("Using authorized session");
             session = new AuthTokenSession(authToken);
         }
 
@@ -836,9 +826,7 @@ public class Grapher {
         String pattern = "https*://cn.*?\\.dataone\\.org|https*://cn.*?\\.test\\.dataone\\.org";
         Pattern r = Pattern.compile(pattern);
         Matcher m = r.matcher(serviceUrl);
-        if (m.find()) {
-            log.debug("service URL is for a CN: " + serviceUrl);
-        } else {
+        if (!m.find()) {
             log.error("Must call a CN to get subject information");
             metadigException = new MetadigProcessException("Must call a CN to get subject information.");
             throw metadigException;
@@ -856,7 +844,6 @@ public class Grapher {
 
         try {
             subjectInfo = cnNode.getSubjectInfo(session, subject);
-            log.debug("retrieved subject information for subject: " + subject.getValue());
         } catch (Exception ex) {
             metadigException = new MetadigProcessException("Unable to get collection pids");
             metadigException.initCause(ex);
@@ -960,7 +947,6 @@ public class Grapher {
     private InputStream getResourceFile(String fileName) {
 
         StringBuilder result = new StringBuilder("");
-
         //Get file from resources folder
         ClassLoader classLoader = getClass().getClassLoader();
         File file = new File(classLoader.getResource(fileName).getFile());
