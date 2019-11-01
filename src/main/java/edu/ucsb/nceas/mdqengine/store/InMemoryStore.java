@@ -55,7 +55,7 @@ public class InMemoryStore implements MDQStore{
 		String storeDirectory;
 
 		try {
-			storeDirectory = cfg.getString("metadig.store.directory");
+			storeDirectory = cfg.getString("metadig.base.directory");
 		} catch (ConfigurationException cex) {
 			log.error("Unable to read configuration");
 			MetadigStoreException mse = new MetadigStoreException("Unable to read config properties");
