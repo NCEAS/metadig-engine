@@ -57,9 +57,7 @@ public class MetadigFileStore {
             throw mse;
         }
 
-        //path = this.getFilePath(resultFile);
-        path = this.filestoreBase + "/" + mdFile.getRelativePath();
-
+        path = this.getFilePath(resultFile);
         File storeFile = new File(path);
 
         if (!storeFile.exists()) {

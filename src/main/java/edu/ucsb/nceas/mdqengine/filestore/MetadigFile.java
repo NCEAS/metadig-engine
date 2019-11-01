@@ -104,7 +104,7 @@ public class MetadigFile {
     }
 
     public void setStorageType(String type) {
-        this.storageType = type;
+        this.storageType = type.toLowerCase();
     }
 
     public DateTime getCreationDateTime() {
@@ -136,19 +136,31 @@ public class MetadigFile {
         String pattern = "\\.";
         String path = null;
         String filename = null;
+        String newFileExt = null;
 
-        if(altFilename != "") {
+        if(altFilename != null && ! altFilename.isEmpty()) {
             filename = altFilename;
         } else {
             filename = fileId;
         }
+
         // Don't include a '.' if it is already in the fileExt.
         Pattern r = Pattern.compile(pattern);
         Matcher m = r.matcher(fileExt);
         if (m.find()) {
-            path = storageType + "/" + filename + fileExt;
+            newFileExt = fileExt;
         } else {
-            path = storageType + "/" + filename + "." + fileExt;
+            newFileExt = "." + fileExt;
+        }
+
+        pattern = newFileExt;
+        // Don't include fileExt if already in file
+        r = Pattern.compile(pattern);
+        m = r.matcher(filename);
+        if (m.find()) {
+            path = storageType + "/" + filename;
+        } else {
+            path = storageType + "/" + filename + newFileExt;
         }
 
         return path;
