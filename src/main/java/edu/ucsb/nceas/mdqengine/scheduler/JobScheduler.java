@@ -51,6 +51,13 @@ public class JobScheduler {
         int countRequested = 1000;
         int harvestDatetimeInc = 1;
 
+        // Filestore variables
+        String dirIncludeMatch = null;
+        String dirExcludeMatch = null;
+        String fileIncludeMatch = null;
+        String fileExcludeMatch = null;
+        String logFile = null;
+
         // Additional parameters for graph jobs
         String aggregationId = null;
         String aggregationName = null;
@@ -162,6 +169,28 @@ public class JobScheduler {
                 System.out.println("aggregationId: " + aggregationId);
                 aggregationName = splitted[++icnt].trim();
                 System.out.println("aggregationName: " + aggregationName);
+            } else if(taskType.equals("filestore")) {
+                System.out.println("Scheduling filestore ingest job name: " + jobName + ", job group: " + jobGroup);
+                String[] splitted = Arrays.stream(params.split(";"))
+                        .map(String::trim)
+                        .toArray(String[]::new);
+
+                int icnt = -1;
+                System.out.println("Split length: " + splitted.length);
+                // Filestore staging directories include in the ingest
+                dirIncludeMatch = splitted[++icnt].trim();
+                System.out.println("dirIncludeMatch: " + dirIncludeMatch);
+                // Filestore staging directories to include in the ingest
+                dirExcludeMatch = splitted[++icnt].trim();
+                System.out.println("dirExcludeMatch: " + dirExcludeMatch);
+                // Filestore staging files to include in the ingest
+                fileIncludeMatch = splitted[++icnt].trim();
+                System.out.println("fileIncludeMatch: " + fileIncludeMatch);
+                // Filestore staging files to exclude from the ingest
+                fileExcludeMatch = splitted[++icnt].trim();
+                System.out.println("fileExcludeMatch: " + fileExcludeMatch);
+                logFile = splitted[++icnt].trim();
+                System.out.println("log file: " + logFile);
             }
 
             try {
@@ -193,6 +222,15 @@ public class JobScheduler {
                             .usingJobData("countRequested", countRequested)
                             .usingJobData("aggregationId", aggregationId)
                             .usingJobData("aggregationName", aggregationName)
+                            .build();
+                } else if (taskType.equalsIgnoreCase("filestore")) {
+                    job = newJob(FilestoreIngestJob.class)
+                            .withIdentity(jobName, jobGroup)
+                            .usingJobData("dirIncludeMatch", dirIncludeMatch)
+                            .usingJobData("dirExcludeMatch", dirExcludeMatch)
+                            .usingJobData("fileIncludeMatch", fileIncludeMatch)
+                            .usingJobData("fileExcludeMatch", fileExcludeMatch)
+                            .usingJobData("logFile", logFile)
                             .build();
                 }
 
