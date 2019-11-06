@@ -5,10 +5,11 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.joda.time.DateTime;
 
-import java.util.Date;
+import java.io.IOException;
 import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
 
 /**
  * This is a data transfer object that contains information about a file entry in
@@ -17,10 +18,8 @@ import java.util.regex.Pattern;
 public class MetadigFile {
 
     public static Log log = LogFactory.getLog(MetadigFile.class);
-    //private static final String DEFAULT_VALUE = "n/a";
 
     private String fileId = null;
-    //private String filestoreBase = null;
     private String collectionId = "";
     private String metadataId = "";
     private String suiteId = "";
@@ -28,17 +27,19 @@ public class MetadigFile {
     private String metadataFormatFilter = "";
     private String storageType = null;
     private DateTime creationDatetime;
-    private String fileExt = "";
+    private String mediaType = "";
     private String altFilename = ""; // Use this name for the file instead of a uuid
     private String path; // the complete path to the file
+    private MediaTypes mediaTypes = null;
 
-    public MetadigFile() {
+    public MetadigFile() throws MetadigStoreException {
         this.fileId = UUID.randomUUID().toString();
         this.creationDatetime = DateTime.now();
+        this.init();
     };
 
     public MetadigFile (String collectionId, String metadataId, String suiteId, String nodeId, String metadataFormatFilter, String storageType,
-                        String relativePath, DateTime createtionDate, String fileExt) {
+                        String relativePath, DateTime createtionDate, String mediaType) throws MetadigStoreException {
 
         this.fileId = UUID.randomUUID().toString();
         this.collectionId = collectionId;
@@ -48,7 +49,19 @@ public class MetadigFile {
         this.metadataFormatFilter = metadataFormatFilter;
         this.storageType = storageType;
         this.creationDatetime = creationDatetime;
-        this.fileExt = fileExt;
+        this.mediaType = mediaType;
+        this.init();
+    }
+
+    private void init() throws MetadigStoreException {
+        try {
+            mediaTypes = new MediaTypes();
+        } catch (IOException ioe) {
+            log.error("Unable to intialize Metadig fileStore: " + ioe.getMessage());
+            MetadigStoreException mse = new MetadigStoreException("Unable to intialize Metadig filestore");
+            mse.initCause(ioe.getCause());
+            throw mse;
+        }
     }
 
     public String getFileId() {
@@ -115,13 +128,9 @@ public class MetadigFile {
         this.creationDatetime = time;
     }
 
-    public String getFileExt() {
-        return fileExt;
-    }
+    public String getMediaType() { return mediaType; }
 
-    public void setFileExt(String ext) {
-        this.fileExt = ext;
-    }
+    public void setMediaType(String type) { this.mediaType = type; }
 
     public String getAltFilename() {
         return altFilename;
@@ -134,9 +143,9 @@ public class MetadigFile {
     public String getRelativePath() {
 
         String pattern = "\\.";
-        String path = null;
+        String filePath = null;
         String filename = null;
-        String newFileExt = null;
+        String fileExt = null;
 
         if(altFilename != null && ! altFilename.isEmpty()) {
             filename = altFilename;
@@ -144,6 +153,10 @@ public class MetadigFile {
             filename = fileId;
         }
 
+        String newFileExt = null;
+        log.debug("Getting file ext for mediatype: " + mediaType);
+        fileExt = mediaTypes.getFileExtension(this.mediaType);
+        log.debug("Got file ext: " + fileExt);
         // Don't include a '.' if it is already in the fileExt.
         Pattern r = Pattern.compile(pattern);
         Matcher m = r.matcher(fileExt);
@@ -153,17 +166,28 @@ public class MetadigFile {
             newFileExt = "." + fileExt;
         }
 
-        pattern = newFileExt;
         // Don't include fileExt if already in file
-        r = Pattern.compile(pattern);
+        r = Pattern.compile(newFileExt);
         m = r.matcher(filename);
         if (m.find()) {
-            path = storageType + "/" + filename;
+            filePath = storageType + "/" + filename;
         } else {
-            path = storageType + "/" + filename + newFileExt;
+            if(fileExt != null) {
+                filePath = storageType + "/" + filename + "." + fileExt;
+            } else {
+                filePath = storageType + "/" + filename;
+            }
         }
 
-        return path;
+        return filePath;
     }
+
+//    public String getFileExt(String mediaType) {
+//        log.debug("getting file extension for mediaType: " + mediaType);
+//        String extension = null;
+//        log.debug("media type uses file extension: " + extension);
+//
+//        return mediaTypes.getFileExtension(mediaType);
+//    }
 }
 

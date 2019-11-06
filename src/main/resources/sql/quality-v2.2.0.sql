@@ -53,10 +53,10 @@ create TABLE filestore (
   format_filter TEXT not null,
   creation_datetime TIMESTAMP WITH TIME ZONE not NULL,
   storage_type TEXT not NULL,
-  file_ext TEXT not NULL,
+  media_type TEXT not NULL,
   alt_filename TEXT not NULL,
   CONSTRAINT file_id_pk PRIMARY KEY (file_id),
-  CONSTRAINT all_properties_fk UNIQUE (collection_id, metadata_id, suite_id, node_id, format_filter, storage_type, file_ext, alt_filename)
+  CONSTRAINT all_properties_fk UNIQUE (collection_id, metadata_id, suite_id, node_id, format_filter, storage_type, media_type, alt_filename)
 );
 
 alter table filestore owner to metadig;

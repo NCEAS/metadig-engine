@@ -187,7 +187,7 @@ public class Grapher {
                     mdFile.setSuiteId(suiteId);
                     mdFile.setNodeId(nodeId);
                     mdFile.setStorageType(StorageType.GRAPH.toString());
-                    mdFile.setFileExt(".png");
+                    mdFile.setMediaType("image/jpg");
 
                     Boolean replace = true;
                     // Save the generated graph file to the MetaDIG filestore
@@ -203,7 +203,7 @@ public class Grapher {
                     mdFile.setSuiteId(suiteId);
                     mdFile.setNodeId(nodeId);
                     mdFile.setStorageType(StorageType.DATA.toString());
-                    mdFile.setFileExt(".csv");
+                    mdFile.setMediaType("text/csv");
                     outfile = filestore.saveFile(mdFile, scoreFile.getPath(), replace);
                     log.debug("Output data file " + outfile);
                 } catch (Exception e) {

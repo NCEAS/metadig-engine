@@ -115,7 +115,7 @@ public class FilestoreDB {
                 DateTime ct = new DateTime(dateTime);
                 resultMdFile.setCreationDatetime(ct);
                 resultMdFile.setStorageType(rs.getString("storage_type"));
-                resultMdFile.setFileExt(rs.getString("file_ext"));
+                resultMdFile.setMediaType(rs.getString("media_type"));
                 resultMdFile.setAltFilename(rs.getString("alt_filename"));
 
                 rs.close();
@@ -147,10 +147,8 @@ public class FilestoreDB {
         String storageType = mdFile.getStorageType();
         String altFilename = mdFile.getAltFilename();
         DateTime creationDatetime = mdFile.getCreationDateTime();
-
         Timestamp timestamp = new Timestamp(creationDatetime.getMillis());
-
-        String fileExt = mdFile.getFileExt();
+        String mediaType = mdFile.getMediaType();
 
         MetadigStoreException me = new MetadigStoreException("Unable save metadig file info to the datdabase.");
 
@@ -158,10 +156,10 @@ public class FilestoreDB {
         // the original record.
         try {
             String sql = "INSERT INTO filestore (file_id, collection_id, metadata_id, suite_id, node_id, format_filter, storage_type," +
-                    " creation_datetime, file_ext, alt_filename) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+                    " creation_datetime, media_type, alt_filename) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
                     + " ON CONFLICT ON CONSTRAINT all_properties_fk"
                     + " DO UPDATE SET (file_id, collection_id, metadata_id, suite_id, node_id, format_filter, storage_type, " +
-                    "creation_datetime, file_ext, alt_filename) = (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                    "creation_datetime, media_type, alt_filename) = (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
             stmt = conn.prepareStatement(sql);
             stmt.setString(1, fileId);
@@ -172,7 +170,7 @@ public class FilestoreDB {
             stmt.setString(6, metadataFormatFilter);
             stmt.setString(7, storageType);
             stmt.setTimestamp(8, timestamp);
-            stmt.setString(9, fileExt);
+            stmt.setString(9, mediaType);
             stmt.setString(10, altFilename);
             stmt.setString(11, fileId);
             stmt.setString(12, collectionId);
@@ -182,7 +180,7 @@ public class FilestoreDB {
             stmt.setString(16, metadataFormatFilter);
             stmt.setString(17, storageType);
             stmt.setTimestamp(18, timestamp);
-            stmt.setString(19, fileExt);
+            stmt.setString(19, mediaType);
             stmt.setString(20, altFilename);
 
             stmt.executeUpdate();

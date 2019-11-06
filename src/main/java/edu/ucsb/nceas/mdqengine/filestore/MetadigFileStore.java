@@ -13,7 +13,6 @@ import java.io.IOException;
 
 public class MetadigFileStore {
 
-
     protected Log log = LogFactory.getLog(this.getClass());
     private String file;
     private String filestoreBase = null;
@@ -136,7 +135,6 @@ public class MetadigFileStore {
         }
 
         fsdb.shutdown();
-        //TODO: make sure file is readable
         return path;
     }
 
