@@ -45,7 +45,7 @@ public class MediaTypes {
         if(mediaTypes.containsKey(mediaTypeName)) {
             fileExt = mediaTypes.get(mediaTypeName);
         } else {
-            log.error("Unable to find media type " + "\"" + mediaTypeName + "\\" + " in list created from MediaTypes.csv");
+            log.error("Unable to find media type " + "\"" + mediaTypeName + "\"" + " in list created from MediaTypes.csv");
         }
 
         return fileExt;
@@ -62,7 +62,6 @@ public class MediaTypes {
         //Get file from resources folder
         ClassLoader classLoader = getClass().getClassLoader();
         File file = new File(classLoader.getResource(fileName).getFile());
-        log.info(file.getName());
         InputStream is = classLoader.getResourceAsStream(fileName);
         return is;
     }

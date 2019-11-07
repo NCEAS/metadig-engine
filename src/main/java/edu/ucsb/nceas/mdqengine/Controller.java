@@ -1,6 +1,7 @@
 package edu.ucsb.nceas.mdqengine;
 
 import com.rabbitmq.client.*;
+import edu.ucsb.nceas.mdqengine.exception.MetadigProcessException;
 import edu.ucsb.nceas.mdqengine.grapher.Graph;
 import edu.ucsb.nceas.mdqengine.grapher.GraphQueueEntry;
 import edu.ucsb.nceas.mdqengine.exception.MetadigException;
@@ -139,32 +140,34 @@ public class Controller {
                             log.debug("Processing graph request");
                             String collectionId = tokens[0];
                             String projectName = tokens[1];
-                            String memberNode = tokens[2];
-                            String formatFamily = tokens[3];
-                            String qualitySuiteId = tokens[4];
+                            String authTokenName = tokens[2];
+                            String memberNode = tokens[3];
+                            String serviceUrl = tokens[4];
+                            String formatFamily = tokens[5];
+                            String qualitySuiteId = tokens[6];
 
                             requestDateTime = new DateTime();
-                            log.info("Request queuing of: " + tokens[0] + ", " + tokens[1] + ", " + tokens[2] + ", " + tokens[3] + ", " + tokens[4]);
+                            log.info("Request queuing of: " + tokens[0] + ", " + tokens[1] + ", " + tokens[2] + ", " + tokens[3] + ", " + tokens[4]
+                                    + ", " + tokens[5] + "," + tokens[6]);
 
-                            metadigCtrl.processGraphRequest(collectionId, projectName, memberNode,
+                            metadigCtrl.processGraphRequest(collectionId, projectName, authTokenName,  memberNode, serviceUrl,
                                     formatFamily, qualitySuiteId, requestDateTime);
                             break;
                         case "quality":
                             log.debug("Processing quality request");
-                    String metadataPid = tokens[0];
+                            String metadataPid = tokens[0];
 
-                    File metadataFile = new File(tokens[1]);
-                    InputStream metadata = new FileInputStream(metadataFile);
+                            File metadataFile = new File(tokens[1]);
+                            InputStream metadata = new FileInputStream(metadataFile);
 
-                    File sysmetaFile = new File(tokens[2]);
-                    InputStream sysmeta = new FileInputStream(sysmetaFile);
+                            File sysmetaFile = new File(tokens[2]);
+                            InputStream sysmeta = new FileInputStream(sysmetaFile);
 
-                    String suiteId = tokens[3];
-
-                    requestDateTime = new DateTime();
-                    log.info("Request queuing of: " + tokens[0] + ", " + tokens[1] + ", " + tokens[2] + ", " + tokens[3]);
-                    metadigCtrl.processRequest("urn:node:mnTestKNB", metadataPid,
-                            metadata, suiteId, "/tmp", requestDateTime, sysmeta);
+                            String suiteId = tokens[3];
+                            requestDateTime = new DateTime();
+                            String nodeId = tokens[4];
+                            log.info("Request queuing of: " + tokens[0] + ", " + tokens[3] + ", " + tokens[4]);
+                            metadigCtrl.processQualityRequest(nodeId, metadataPid, metadata, suiteId, "/tmp", requestDateTime, sysmeta);
                             break;
                         default:
                             System.out.println("no match");
@@ -250,6 +253,19 @@ public class Controller {
         log.debug("RabbitMQport: " + RabbitMQport);
     }
 
+
+    public String readConfigParam (String paramName) throws ConfigurationException, IOException {
+        String paramValue = null;
+        try {
+            MDQconfig cfg = new MDQconfig();
+            paramValue = cfg.getString(paramName);
+        } catch (Exception e) {
+            log.error("Could not read configuration for param: " + paramName + ": " + e.getMessage());
+            throw e;
+        }
+        return paramValue;
+    }
+
     /**
      * Disable test mode
      * <p>
@@ -281,7 +297,7 @@ public class Controller {
      * @return
      * @throws java.io.IOException
      */
-    public void processRequest(String memberNode,
+    public void processQualityRequest(String memberNode,
                                String metadataPid,
                                InputStream metadata,
                                String qualitySuiteId,
@@ -372,15 +388,27 @@ public class Controller {
      */
     public void processGraphRequest(String collectionId,
                                String projectName,
+                               String authTokenName,
                                String memberNode,
+                               String serviceUrl,
                                String formatFamily,
                                String qualitySuiteId,
-                               DateTime requestDateTime ) throws java.io.IOException {
+                               DateTime requestDateTime) throws java.io.IOException, MetadigException {
 
         GraphQueueEntry qEntry = null;
         byte[] message = null;
+        String authToken = null;
 
-        qEntry = new GraphQueueEntry (collectionId, projectName, qualitySuiteId, memberNode, formatFamily, requestDateTime);
+        try {
+            authToken = readConfigParam(authTokenName);
+        } catch (ConfigurationException ce) {
+            log.error("Error reading configuration for param " + "\"" + authTokenName + "\"" + ": " + ce.getMessage());
+            MetadigException metadigException = new MetadigProcessException("Error reading configuration for param " + authTokenName + ": " + ce.getMessage());
+            metadigException.initCause(ce);
+            throw metadigException;
+        }
+
+        qEntry = new GraphQueueEntry (collectionId, projectName, authToken, qualitySuiteId, memberNode, serviceUrl, formatFamily, requestDateTime);
 
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         ObjectOutput out = new ObjectOutputStream(bos);
@@ -576,7 +604,7 @@ public class Controller {
         }
 
         try {
-            metadigCtrl.processRequest("urn:node:mnTestKNB", "1234",
+            metadigCtrl.processQualityRequest("urn:node:mnTestKNB", "1234",
                     metadata, "metadig-test.suite.1", "/tmp", requestDateTime, sysmeta);
         } catch (IOException ioe) {
             ioe.printStackTrace();

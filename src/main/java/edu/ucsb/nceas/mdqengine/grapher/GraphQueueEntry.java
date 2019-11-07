@@ -16,6 +16,7 @@ public class GraphQueueEntry implements Serializable {
     private String qualitySuiteId;      // the MetaDIG quality suite to graph
     private String collectionid;        // the DataONE collection (portal) to graph data for
     private String projectName;         // the name of the portal or project
+    private String authToken;           // the name of the DataONE authorization token
     private String formatFamily;        // the metadata dialect to include in the graph
     private DateTime requestDataTime;   // when the original graph request was made
     private long processingElapsedTimeSeconds;  // how long the graph request took to fulfill
@@ -52,9 +53,11 @@ public class GraphQueueEntry implements Serializable {
         return this.projectName;
     }
 
-    public void setProjectName(String projectName) {
-        this.projectName = projectName;
-    }
+    public void setProjectName(String projectName) { this.projectName = projectName; }
+
+    public String getAuthToken() { return this.authToken; }
+
+    public void setAuthToken(String authToken) { this.authToken = authToken; }
 
     public String getFormatFamily() {
         return this.formatFamily;
@@ -96,12 +99,14 @@ public class GraphQueueEntry implements Serializable {
 
     public String getHostname() { return hostname; }
 
-    public GraphQueueEntry (String collectionid, String projectName, String qualitySuiteId,
-                            String nodeId, String formatFamily, DateTime requestDataTime) {
+    public GraphQueueEntry (String collectionid, String projectName, String authToken, String qualitySuiteId,
+                            String nodeId, String serviceUrl, String formatFamily, DateTime requestDataTime) {
         this.collectionid = collectionid;
         this.projectName = projectName;
+        this.authToken = authToken;
         this.qualitySuiteId = qualitySuiteId;
         this.nodeId = nodeId;
+        this.serviceUrl = serviceUrl;
         this.formatFamily = formatFamily;
         this.requestDataTime = requestDataTime;
     }

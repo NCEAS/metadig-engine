@@ -25,7 +25,12 @@ import org.dataone.client.rest.MultipartRestClient;
 import org.dataone.client.v2.impl.MultipartCNode;
 import org.dataone.client.v2.impl.MultipartMNode;
 import org.dataone.client.v2.impl.MultipartD1Node; // Don't include org.dataone.client.rest.MultipartD1Node (this is what IDEA selects)
-import org.dataone.service.types.v1.*;
+import org.dataone.service.types.v1.Session;
+import org.dataone.service.types.v1.Subject;
+import org.dataone.service.types.v1.Group;
+import org.dataone.service.types.v1.Identifier;
+import org.dataone.service.types.v1.SubjectInfo;
+import org.dataone.service.types.v1.SystemMetadata;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
@@ -40,6 +45,7 @@ import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathFactory;
 import java.io.*;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -71,6 +77,7 @@ public class Grapher {
     private static String RabbitMQpassword = null;
     private static String RabbitMQusername = null;
     private static String CNauthToken = null;
+    private static String CNsubjectId = null;
     private static String CNserviceUrl = null;
     private static SolrClient client = null;
     private static String solrLocation = null;
@@ -93,6 +100,7 @@ public class Grapher {
             filestoreBase = cfg.getString("metadig.store.directory");
             CNauthToken =  cfg.getString("CN.authToken");
             CNserviceUrl = cfg.getString("CN.serviceUrl");
+            CNsubjectId = cfg.getString("CN.subjectId");
         } catch (ConfigurationException cex) {
             log.error("Unable to read configuration");
             MetadigException me = new MetadigException("Unable to read config properties");
@@ -126,7 +134,7 @@ public class Grapher {
                 try {
                     qEntry = (GraphQueueEntry) in.readObject();
                 } catch (java.lang.ClassNotFoundException e) {
-                    log.error("Unable to process quality report");
+                    log.error("Unable to process graph request");
                     e.printStackTrace();
                     return;
                 }
@@ -134,11 +142,11 @@ public class Grapher {
                 // The components of the graph queue request
                 String collectionId = qEntry.getProjectId();
                 String projectName = qEntry.getProjectName();
+                String authToken = qEntry.getAuthToken();
                 String nodeId = qEntry.getNodeId();
                 String serviceUrl = qEntry.getServiceUrl();
                 String formatFamily = qEntry.getFormatFamily();
                 String suiteId = qEntry.getQualitySuiteId();
-                MetadigFile mdFile = new MetadigFile();
 
                 // Pids associated with a collection, based on query results using 'collectionQuery' field in solr.
                 ArrayList<String> collectionPids = null;
@@ -151,13 +159,16 @@ public class Grapher {
                 // - a graph for all pids included in a DataONE collection (portal), and a specified suite id
                 // - a graph for specified filters: member node, suite id, metadata format
                 try {
+                    MetadigFile mdFile = new MetadigFile();
                     Graph graph = new Graph();
                     Grapher gfr = new Grapher();
                     // If creating a graph for a collection, get the set of pids associated with the collection.
                     // Only scores for these pids will be included in the graph.
                     if(collectionId != null && ! collectionId.isEmpty()) {
                         log.info("Getting pids for collection " + collectionId);
-                        collectionPids = gfr.getCollectionPids(collectionId, nodeId, serviceUrl);
+                        // Always use the CN subject id and authentication token from the configuration file, as
+                        // requests that this method uses need CN subject privs
+                        collectionPids = gfr.getCollectionPids(collectionId, nodeId, serviceUrl, CNsubjectId, CNauthToken);
                     }
 
                     // Quality scores will now be obtained from the MetaDIG quality Solr index, using the list of pids obtained
@@ -187,7 +198,7 @@ public class Grapher {
                     mdFile.setSuiteId(suiteId);
                     mdFile.setNodeId(nodeId);
                     mdFile.setStorageType(StorageType.GRAPH.toString());
-                    mdFile.setMediaType("image/jpg");
+                    mdFile.setMediaType("image/jpeg");
 
                     Boolean replace = true;
                     // Save the generated graph file to the MetaDIG filestore
@@ -208,7 +219,7 @@ public class Grapher {
                     log.debug("Output data file " + outfile);
                 } catch (Exception e) {
                     log.error("Error creating graph: " + e.getMessage());
-                    metadigException = new MetadigProcessException("Unable to query solr: " + e.getMessage());
+                    metadigException = new MetadigProcessException("Unable to create graph: " + e.getMessage());
                     metadigException.initCause(e);
                     qEntry.setException(metadigException);
                 }
@@ -247,11 +258,10 @@ public class Grapher {
      * @param
      * @return a List of quality scores fetched from Solr
      */
-    private ArrayList<String> getCollectionPids(String collectionId, String nodeId, String serviceUrl) throws Exception {
+    private ArrayList<String> getCollectionPids(String collectionId, String nodeId, String serviceUrl, String subjectId, String authToken) throws Exception {
 
         Document xmldoc = null;
         String queryStr = null;
-        String thisToken = null;
         // Page though the results, requesting a certain amount of pids at each request
         int startPos = 0;
         int countRequested = 1000;
@@ -264,7 +274,7 @@ public class Grapher {
 
         startPos = 0;
         countRequested = 10000;
-        xmldoc = queryD1Solr(queryStr, serviceUrl, startPos, countRequested, CNauthToken);
+        xmldoc = queryD1Solr(queryStr, serviceUrl, startPos, countRequested, subjectId, authToken);
 
         if(xmldoc == null) {
             throw new MetadigException("No result returned from Solr query: " + queryStr);
@@ -302,38 +312,41 @@ public class Grapher {
         //      OR (rightsHolder:"http://orcid.org/0000-0002-2192-403X")"
         SystemMetadata sysmeta = null;
         try {
-            sysmeta = getSystemMetadata(collectionId, serviceUrl, CNauthToken);
+            sysmeta = getSystemMetadata(collectionId, serviceUrl, subjectId, authToken);
         } catch (MetadigProcessException mpe) {
             log.error("Unable to get system metadata for collection: " + collectionId);
             throw(mpe);
         }
 
         Subject rightsHolder = sysmeta.getRightsHolder();
-        SubjectInfo subjectInfo = getSubjectInfo(rightsHolder, serviceUrl, CNauthToken);
+        SubjectInfo subjectInfo = getSubjectInfo(rightsHolder, serviceUrl, subjectId, authToken);
         String groupStr = null;
+
+        groupStr = "(readPermission:" + "\"" + rightsHolder.getValue()
+                + "\")" + " OR (rightsHolder:\"" + rightsHolder.getValue() + "\"" + ")"
+                + " OR (readPermission:\"public\")";
 
         // Assemble the
         for(Group group : subjectInfo.getGroupList()) {
-            log.debug("Adding group to query: " + group.getGroupName());
+            log.debug("Adding group to query: " + group.getSubject().getValue());
             if(groupStr == null) {
-                groupStr = "(readPermission: " + "\"" + group.getGroupName()
-                        + "\")" + " OR (rightsHolder:\"" + group.getGroupName() + "\"";
+                groupStr = "(readPermission:" + "\"" + group.getSubject().getValue()
+                        + "\")" + " OR (rightsHolder:\"" + group.getSubject().getValue() + "\"" + ")";
             } else {
-                groupStr += " OR (readPermission: " + "\"" + group.getGroupName()
-                        + "\")" + " OR (rightsHolder:\"" + group.getGroupName() + "\"";
+                groupStr += " OR (readPermission:" + "\"" + group.getSubject().getValue()
+                        + "\")" + " OR (rightsHolder:\"" + group.getSubject().getValue() + "\"" + ")";
             }
         }
+
+        //groupStr = "+AND+" + "(" + groupStr + ")";
+        //groupStr = "&fq=" + encodeValue("rightsHolder:\"CN=PASTA-GMN,O=LTER,ST=New Mexico,C=US\"");
+        groupStr = "&fq=" + encodeValue(groupStr);
 
         // Send the collectionQuery string to Solr to get the pids associated with the collection
         // The 'collectionQuery' Solr field may have backslashes that are used to escape special characters (i.e. ":") that are not
         // intended to be interpreted by Solr. These backslashes however, have to be encoded in the URL sent to Solr. Re have
         // to be selective in what is encoded, as encoded other chars causes problems.
-        if(groupStr != null) {
-            groupStr = "&fq:" + groupStr;
-            queryStr = "?q=" + URLencodeChars(collectionQuery, "\\ ") + groupStr + "&fl=id";
-        } else {
-            queryStr = "?q=" + URLencodeChars(collectionQuery, "\\ ") + "&fl=id";
-        }
+        queryStr = "?q=" + encodeValue(collectionQuery) + groupStr + "&fl=id&q.op=AND";
 
         int resultCount = 0;
         startPos = 0;
@@ -351,7 +364,7 @@ public class Grapher {
         log.debug("query string: " + queryStr);
         do {
             //TODO: check that a result was returned
-            xmldoc = queryD1Solr(queryStr, serviceUrl, startPos, countRequested, thisToken);
+            xmldoc = queryD1Solr(queryStr, serviceUrl, startPos, countRequested, subjectId, authToken);
             if(xmldoc == null) {
                 log.info("no values returned from query");
                 break;
@@ -359,7 +372,7 @@ public class Grapher {
             xpathResult = (org.w3c.dom.NodeList) fieldXpath.evaluate(xmldoc, XPathConstants.NODESET);
             String currentPid = null;
             thisResultLength = xpathResult.getLength();
-            log.debug("Got " + thisResultLength + " pids this query");
+            log.trace("Got " + thisResultLength + " pids this query");
             if(thisResultLength == 0) break;
             for (int index = 0; index < xpathResult.getLength(); index++) {
                 node = xpathResult.item(index);
@@ -450,7 +463,7 @@ public class Grapher {
                 if (suiteId != null) {
                     queryStr += " AND suiteId:" + suiteId;
                 }
-                log.debug("query to quality Solr server: " + queryStr);
+                log.trace("query to quality Solr server: " + queryStr);
                 // Send query to Quality Solr Server
                 // Get all the pids in this pid string
                 resultList = queryQualitySolr(queryStr, startPosInQuery, pidCntToRequest);
@@ -487,6 +500,7 @@ public class Grapher {
                 startPosInQuery += countRequested;
             } while (resultList.size() > 0);
         }
+        log.debug("Got " + allResults.size() + " scores from Quality Solr server");
         return allResults;
     }
 
@@ -591,15 +605,18 @@ public class Grapher {
      * @return an XML document containing the query result
      * @throws Exception
      */
-    private Document queryD1Solr(String queryStr, String serviceUrl, int startPos, int countRequested, String authToken) throws Exception {
+    private Document queryD1Solr(String queryStr, String serviceUrl, int startPos, int countRequested, String subjectId, String authToken) throws Exception {
 
         MultipartRestClient mrc = null;
         // Polymorphism doesn't work with D1 node classes, so have to use the derived classes
         MultipartD1Node d1Node = null;
 
         Subject subject = new Subject();
-        subject.setValue("public");
-        Session session = getSession(subject, authToken);
+        if(subjectId != null && !subjectId.isEmpty()) {
+            subject.setValue(subjectId);
+        }
+
+        Session session = getSession(subjectId, authToken);
 
         // Add the start and count, if pagination is being used
         queryStr = queryStr + "&start=" + startPos + "&rows=" + countRequested;
@@ -610,7 +627,8 @@ public class Grapher {
         try {
             d1Node = getMultipartD1Node(session, serviceUrl);
         } catch (Exception ex) {
-            metadigException = new MetadigProcessException("Unable create multipart node client to query DataONE solr: " + ex.getMessage());
+            log.error("Unable to create MultipartD1Node for Solr query");
+            metadigException = new MetadigProcessException("Unable to create multipart node client to query DataONE solr: " + ex.getMessage());
             metadigException.initCause(ex);
             throw metadigException;
         }
@@ -759,7 +777,7 @@ public class Grapher {
      * @return a DataONE system metadata object
      * @throws MetadigProcessException
      */
-    private SystemMetadata getSystemMetadata(String pid, String serviceUrl, String authToken) throws MetadigProcessException {
+    private SystemMetadata getSystemMetadata(String pid, String serviceUrl, String subjectId, String authToken) throws MetadigProcessException {
 
         SystemMetadata sysmeta = null;
         Boolean isCN = false;
@@ -768,18 +786,11 @@ public class Grapher {
         MetadigProcessException metadigException = null;
 
         Subject subject = new Subject();
-        subject.setValue("public");
-        Session session = null;
-
-        // query Solr - either the member node or cn, for the project 'solrquery' field
-        if (authToken == null || authToken.equals("")) {
-            log.debug("Using public session");
-            session = new Session();
-        } else {
-            log.debug("Using authorized session");
-            session = new AuthTokenSession(authToken);
+        if(subjectId != null && ! subjectId.isEmpty()) {
+            subject.setValue(subjectId);
         }
 
+        Session session = getSession(subjectId, authToken);
         Identifier identifier = new Identifier();
         identifier.setValue(pid);
 
@@ -812,15 +823,19 @@ public class Grapher {
      * @return a DataONE subject information object
      * @throws MetadigProcessException
      */
-    private SubjectInfo getSubjectInfo(Subject subject, String serviceUrl, String authToken) throws MetadigProcessException {
+    private SubjectInfo getSubjectInfo(Subject rightsHolder, String serviceUrl, String subjectId, String authToken) throws MetadigProcessException {
 
+        log.debug("Getting subject info for: " + rightsHolder);
         MultipartCNode cnNode = null;
-        MultipartD1Node d1Node = null;
         MetadigProcessException metadigException = null;
-        Boolean isCN = false;
 
         SubjectInfo subjectInfo = null;
-        Session session = getSession(subject, authToken);
+        Subject requestingSubject = new Subject();
+        if(subjectId != null && ! subjectId.isEmpty()) {
+            requestingSubject.setValue(subjectId);
+        }
+
+        Session session = getSession(subjectId, authToken);
 
         // Identity node as either a CN or MN based on the serviceUrl
         String pattern = "https*://cn.*?\\.dataone\\.org|https*://cn.*?\\.test\\.dataone\\.org";
@@ -837,15 +852,15 @@ public class Grapher {
         try {
             cnNode = (MultipartCNode) getMultipartD1Node(session, serviceUrl);
         } catch (Exception ex) {
-            metadigException = new MetadigProcessException("Unable to get subject info for subject: " + subject.getValue());
+            metadigException = new MetadigProcessException("Unable to create multipart D1 node: " + requestingSubject.getValue() + ": " + ex.getMessage());
             metadigException.initCause(ex);
             throw metadigException;
         }
 
         try {
-            subjectInfo = cnNode.getSubjectInfo(session, subject);
+            subjectInfo = cnNode.getSubjectInfo(session, rightsHolder);
         } catch (Exception ex) {
-            metadigException = new MetadigProcessException("Unable to get collection pids");
+            metadigException = new MetadigProcessException("Unable to get subject information." + ex.getMessage());
             metadigException.initCause(ex);
             throw metadigException;
         }
@@ -858,22 +873,25 @@ public class Grapher {
      * <p>
      *     If no subject or authentication token are provided, a public session is returned
      * </p>
-     * @param subject the dataone identity to create the session for
      * @param authToken the authentication token
      * @return the DataONE session
      */
-    Session getSession(Subject subject, String authToken) {
-        Session session = null;
+    Session getSession(String subjectId, String authToken) {
 
+        Session session;
+
+        Subject subject = new Subject();
+        subject.setValue(subjectId);
         // query Solr - either the member node or cn, for the project 'solrquery' field
-        if (authToken == null || authToken.equals("")) {
-            log.debug("Using public session");
+        if (authToken == null || authToken.isEmpty()) {
+            log.debug("Creating public session");
             session = new Session();
-            session.setSubject(subject);
         } else {
-            log.debug("Using authentication session");
+            log.debug("Creating authentication session");
             session = new AuthTokenSession(authToken);
         }
+
+        session.setSubject(subject);
 
         return session;
     }
@@ -896,7 +914,6 @@ public class Grapher {
         // First create an HTTP client
         try {
             mrc = new DefaultHttpMultipartRestClient();
-            log.info("Created rest client.");
         } catch (Exception ex) {
             log.error("Error creating rest client: " + ex.getMessage());
             metadigException = new MetadigProcessException("Unable to get collection pids");
@@ -916,24 +933,12 @@ public class Grapher {
             isCN = false;
         }
 
-        // First create an HTTP client
-        try {
-            mrc = new DefaultHttpMultipartRestClient();
-            log.info("Created rest client.");
-        } catch (Exception e) {
-            log.error("Error creating rest client: " + e.getMessage());
-            metadigException = new MetadigProcessException("Unable to get collection pids");
-            metadigException.initCause(e);
-            throw metadigException;
-        }
-
         // Now create a DataONE object that uses the rest client
         if (isCN) {
-            log.info("creating cn MultipartMNode");
+            log.debug("creating cn MultipartMNode" + ", subjectId: " + session.getSubject().getValue());
             d1Node = new MultipartCNode(mrc, serviceUrl, session);
-            log.info("created cn for " + d1Node.getNodeId().toString());
         } else {
-            log.info("creating mn MultipartMNode");
+            log.debug("creating mn MultipartMNode" + " , subjectId: " + session.getSubject().getValue());
             d1Node = new MultipartMNode(mrc, serviceUrl, session);
         }
         return d1Node;
@@ -1001,6 +1006,14 @@ public class Grapher {
         //value = value.replace("'", "\\'");
 
         return value;
+    }
+
+    private static String encodeValue(String value) {
+        try {
+            return URLEncoder.encode(value, StandardCharsets.UTF_8.toString());
+        } catch (UnsupportedEncodingException ex) {
+            throw new RuntimeException(ex.getCause());
+        }
     }
 }
 
