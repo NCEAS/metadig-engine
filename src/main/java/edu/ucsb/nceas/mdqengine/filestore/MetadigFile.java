@@ -154,9 +154,7 @@ public class MetadigFile {
         }
 
         String newFileExt = null;
-        log.debug("Getting file ext for mediatype: " + mediaType);
         fileExt = mediaTypes.getFileExtension(this.mediaType);
-        log.debug("Got file ext: " + fileExt);
         // Don't include a '.' if it is already in the fileExt.
         Pattern r = Pattern.compile(pattern);
         Matcher m = r.matcher(fileExt);
@@ -181,13 +179,5 @@ public class MetadigFile {
 
         return filePath;
     }
-
-//    public String getFileExt(String mediaType) {
-//        log.debug("getting file extension for mediaType: " + mediaType);
-//        String extension = null;
-//        log.debug("media type uses file extension: " + extension);
-//
-//        return mediaTypes.getFileExtension(mediaType);
-//    }
 }
 
