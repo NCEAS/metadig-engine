@@ -101,14 +101,14 @@ public class Graph {
 
         switch(type) {
             case CUMULATIVE:
-                mdFile.setFileExt(".R");
+                mdFile.setMediaType("text/x-rsrc");
                 mdFile.setAltFilename("graph_" + GraphType.CUMULATIVE.toString().toLowerCase() + "_quality_scores.R");
 
                 codeFile = fileStore.getFile(mdFile);
                 dispatcherType = "r";
                 break;
             case MONTHLY:
-                mdFile.setFileExt(".R");
+                mdFile.setMediaType("text/x-rsrc");
                 mdFile.setAltFilename("graph_" + GraphType.CUMULATIVE.toString().toLowerCase() + "_quality_scores.R");
 
                 codeFile = fileStore.getFile(mdFile);
