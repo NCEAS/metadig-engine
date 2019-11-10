@@ -1,10 +1,8 @@
 package edu.ucsb.nceas.mdqengine.store;
 
+import com.sun.javafx.scene.control.skin.TableCellSkin;
 import edu.ucsb.nceas.mdqengine.exception.MetadigStoreException;
-import edu.ucsb.nceas.mdqengine.model.Check;
-import edu.ucsb.nceas.mdqengine.model.Node;
-import edu.ucsb.nceas.mdqengine.model.Run;
-import edu.ucsb.nceas.mdqengine.model.Suite;
+import edu.ucsb.nceas.mdqengine.model.*;
 
 import java.util.Collection;
 
@@ -32,8 +30,11 @@ public interface MDQStore {
 
 	public boolean isAvailable();
 	public void renew() throws MetadigStoreException;
+//
+//	public Node getNode(String nodeId, String jobName);
+//	public void saveNode(Node node) throws MetadigStoreException;
 
-	public Node getNode(String nodeId);
-	public void saveNode(Node node) throws MetadigStoreException;
+	public Task getTask(String taskName);
+	public void saveTask(Task task) throws MetadigStoreException;
 
 }

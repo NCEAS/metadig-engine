@@ -36,8 +36,8 @@ public class JobScheduler {
         JobScheduler js = new JobScheduler();
 
         String taskType = null;
-        String jobName = null;
-        String jobGroup = null;
+        String taskName = null;
+        String taskGroup = null;
         String authToken = null;
         String authTokenParamName = null;
         String cronSchedule = null;
@@ -57,10 +57,6 @@ public class JobScheduler {
         String fileIncludeMatch = null;
         String fileExcludeMatch = null;
         String logFile = null;
-
-        // Additional parameters for graph jobs
-        String aggregationId = null;
-        String aggregationName = null;
 
         String taskListFilename = js.readConfig("task.file");
         log.debug("task list filename: " + taskListFilename);
@@ -86,8 +82,8 @@ public class JobScheduler {
         Iterable<CSVRecord> records = CSVFormat.RFC4180.withFirstRecordAsHeader().withQuote('"').withCommentMarker('#').parse(in);
         for (CSVRecord record : records) {
             taskType       = record.get("task-type").trim();
-            jobName        = record.get("job-name").trim();
-            jobGroup       = record.get("job-group").trim();
+            taskName        = record.get("task-name").trim();
+            taskGroup       = record.get("task-group").trim();
             authTokenParamName = record.get("auth-token").trim();
             cronSchedule   = record.get("cron-schedule").trim();
             params         = record.get("params").trim();
@@ -100,7 +96,7 @@ public class JobScheduler {
             //System.out.println("authToken: " + authToken);
             System.out.println("params: " + params);
             if(taskType.equals("quality")) {
-                System.out.println("Scheduling harvest for job name: " + jobName + ", job group: " + jobGroup);
+                System.out.println("Scheduling harvest for task name: " + taskName + ", task group: " + taskGroup);
                 String[] splitted = Arrays.stream(params.split(";"))
                         .map(String::trim)
                         .toArray(String[]::new);
@@ -132,7 +128,7 @@ public class JobScheduler {
                 countRequested = Integer.parseInt(splitted[++icnt].trim());
                 System.out.println("countRequested: " + countRequested);
             } else if(taskType.equals("graph")) {
-                System.out.println("Scheduling harvest for job name: " + jobName + ", job group: " + jobGroup);
+                System.out.println("Scheduling harvest for task name: " + taskName + ", task group: " + taskGroup);
                 String[] splitted = Arrays.stream(params.split(";"))
                         .map(String::trim)
                         .toArray(String[]::new);
@@ -163,14 +159,8 @@ public class JobScheduler {
                 // The number of results to return from the DataONE 'listObjects' service
                 countRequested = Integer.parseInt(splitted[++icnt].trim());
                 System.out.println("countRequested: " + countRequested);
-
-                // Additional parameters for graph jobs
-                aggregationId = splitted[++icnt].trim();
-                System.out.println("aggregationId: " + aggregationId);
-                aggregationName = splitted[++icnt].trim();
-                System.out.println("aggregationName: " + aggregationName);
             } else if(taskType.equals("filestore")) {
-                System.out.println("Scheduling filestore ingest job name: " + jobName + ", job group: " + jobGroup);
+                System.out.println("Scheduling filestore ingest task name: " + taskName + ", task group: " + taskGroup);
                 String[] splitted = Arrays.stream(params.split(";"))
                         .map(String::trim)
                         .toArray(String[]::new);
@@ -194,12 +184,14 @@ public class JobScheduler {
             }
 
             try {
-                System.out.println("Setting job");
+                System.out.println("Setting task");
                 // Currently there is only taskType="quality", but there could be more in the future!
                 JobDetail job = null;
                 if(taskType.equals("quality")) {
                     job = newJob(RequestReportJob.class)
-                            .withIdentity(jobName, jobGroup)
+                            .withIdentity(taskName, taskGroup)
+                            .usingJobData("taskName", taskName)
+                            .usingJobData("taskType", taskType)
                             .usingJobData("authToken", authToken)
                             .usingJobData("pidFilter", pidFilter)
                             .usingJobData("suiteId", suiteId)
@@ -211,7 +203,9 @@ public class JobScheduler {
                             .build();
                 } else if (taskType.equalsIgnoreCase("graph")) {
                     job = newJob(RequestGraphJob.class)
-                            .withIdentity(jobName, jobGroup)
+                            .withIdentity(taskName, taskGroup)
+                            .usingJobData("taskName", taskName)
+                            .usingJobData("taskType", taskType)
                             .usingJobData("authToken", authToken)
                             .usingJobData("pidFilter", pidFilter)
                             .usingJobData("suiteId", suiteId)
@@ -220,12 +214,12 @@ public class JobScheduler {
                             .usingJobData("startHarvestDatetime", startHarvestDatetime)
                             .usingJobData("harvestDatetimeInc", harvestDatetimeInc)
                             .usingJobData("countRequested", countRequested)
-                            .usingJobData("aggregationId", aggregationId)
-                            .usingJobData("aggregationName", aggregationName)
                             .build();
                 } else if (taskType.equalsIgnoreCase("filestore")) {
                     job = newJob(FilestoreIngestJob.class)
-                            .withIdentity(jobName, jobGroup)
+                            .withIdentity(taskName, taskGroup)
+                            .usingJobData("taskName", taskName)
+                            .usingJobData("taskType", taskType)
                             .usingJobData("dirIncludeMatch", dirIncludeMatch)
                             .usingJobData("dirExcludeMatch", dirExcludeMatch)
                             .usingJobData("fileIncludeMatch", fileIncludeMatch)
@@ -236,11 +230,11 @@ public class JobScheduler {
 
                 System.out.println("Setting trigger");
                 CronTrigger trigger = newTrigger()
-                    .withIdentity(jobName + "-trigger", jobGroup)
+                    .withIdentity(taskName + "-trigger", taskGroup)
                     .withSchedule(cronSchedule(cronSchedule))
                     .build();
 
-                System.out.println("Scheduling job");
+                System.out.println("Scheduling task");
                 scheduler.scheduleJob(job, trigger);
 
             } catch (SchedulerException se) {

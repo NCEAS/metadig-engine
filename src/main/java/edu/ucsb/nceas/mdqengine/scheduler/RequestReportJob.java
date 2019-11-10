@@ -3,6 +3,7 @@ package edu.ucsb.nceas.mdqengine.scheduler;
 import edu.ucsb.nceas.mdqengine.MDQconfig;
 import edu.ucsb.nceas.mdqengine.exception.MetadigStoreException;
 import edu.ucsb.nceas.mdqengine.model.Run;
+import edu.ucsb.nceas.mdqengine.model.Task;
 import edu.ucsb.nceas.mdqengine.store.DatabaseStore;
 import edu.ucsb.nceas.mdqengine.store.MDQStore;
 import org.apache.commons.configuration2.ex.ConfigurationException;
@@ -36,6 +37,8 @@ import java.io.InputStream;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * <p>
@@ -115,6 +118,8 @@ public class RequestReportJob implements Job {
         JobKey key = context.getJobDetail().getKey();
         JobDataMap dataMap = context.getJobDetail().getJobDataMap();
 
+        String taskName = dataMap.getString("taskName");
+        String taskType = dataMap.getString("taskType");
         String authToken = dataMap.getString("authToken");
         String pidFilter = dataMap.getString("pidFilter");
         String suiteId = dataMap.getString("suiteId");
@@ -126,7 +131,6 @@ public class RequestReportJob implements Job {
         MultipartRestClient mrc = null;
         MultipartMNode mnNode = null;
         MultipartCNode cnNode = null;
-        Boolean isCN = false;
 
         log.debug("Executing task for node: " + nodeId + ", suiteId: " + suiteId);
 
@@ -142,7 +146,7 @@ public class RequestReportJob implements Job {
         Subject subject = new Subject();
         subject.setValue("public");
         Session session = null;
-        if(authToken == null || authToken.equals("")) {
+        if(authToken == null || authToken.isEmpty()) {
             session = new Session();
             //session.setSubject(subject);
         } else {
@@ -152,13 +156,14 @@ public class RequestReportJob implements Job {
         //log.info("Created session with subject: " + session.getSubject().getValue().toString());
 
         // Don't know node type yet from the id, so have to manually check if it's a CN
-        if(nodeId.equalsIgnoreCase("urn:node:CN")) {
+        Boolean isCN = isCN(nodeServiceUrl);
+        if(isCN) {
             cnNode = new MultipartCNode(mrc, nodeServiceUrl, session);
-            isCN = true;
         } else {
             mnNode = new MultipartMNode(mrc, nodeServiceUrl, session);
         }
 
+        // Don't know node type yet from the id, so have to manually check if it's a CN
         MDQStore store = null;
 
         try {
@@ -188,19 +193,22 @@ public class RequestReportJob implements Job {
         DateTime endDateTimeRange = null;
 
         String lastHarvestDateStr = null;
-        edu.ucsb.nceas.mdqengine.model.Node node;
-        node = store.getNode(nodeId);
+        //edu.ucsb.nceas.mdqengine.model.Node node;
+        //node = store.getNode(nodeId, jobName);
 
-        // If a 'node' entry has not beeen saved for this nodeId yet, then a 'lastHarvested'
+        Task task;
+        task = store.getTask(taskName);
+        // If a 'task' entry has not been saved for this task name yet, then a 'lastHarvested'
         // DataTime will not be available, in which case the 'startHarvestDataTime' from the
         // config file will be used.
-        if(node.getNodeId() == null) {
-            node = new edu.ucsb.nceas.mdqengine.model.Node();
-            node.setNodeId(nodeId);
+        if(task.getLastHarvestDatetime() == null) {
+            task = new Task();
+            task.setTaskName(taskName);
+            task.setTaskType(taskType);
             lastHarvestDateStr = startHarvestDatetimeStr;
-            node.setLastHarvestDatetime(lastHarvestDateStr);
+            task.setLastHarvestDatetime(lastHarvestDateStr);
         } else {
-            lastHarvestDateStr = node.getLastHarvestDatetime();
+            lastHarvestDateStr = task.getLastHarvestDatetime();
         }
 
         DateTime lastHarvestDate = new DateTime(lastHarvestDateStr);
@@ -240,7 +248,7 @@ public class RequestReportJob implements Job {
             log.info("Getting pids for node: " + nodeId + ", suiteId: " + suiteId + ", harvest start: " + startDTRstr);
 
             try {
-                result = getPidsToProcess(cnNode, mnNode, isCN, session, suiteId, nodeId, pidFilter, startDTRstr, endDTRstr, store, startCount, countRequested);
+                result = getPidsToProcess(cnNode, mnNode, isCN, session, suiteId, nodeId, pidFilter, startDTRstr, endDTRstr, startCount, countRequested);
                 pidsToProcess = result.getResult();
                 resultCount = result.getResultCount();
             } catch (Exception e) {
@@ -261,18 +269,19 @@ public class RequestReportJob implements Job {
                 }
             }
 
-            node.setLastHarvestDatetime(endDTRstr);
-            log.debug("nodeid: " + node.getNodeId());
-            log.debug("lastharvestdate: " + node.getLastHarvestDatetime());
-
+            task.setLastHarvestDatetime(endDTRstr);
+            log.debug("taskName: " + task.getTaskName());
+            log.debug("taskType: " + task.getTaskType());
+            log.debug("lastharvestdate: " + task.getLastHarvestDatetime());
             try {
-                store.saveNode(node);
+                store.saveTask(task);
             } catch (MetadigStoreException mse) {
-                log.error("Error saving node: " + node.getNodeId());
+                log.error("Error saving task: " + task.getTaskName());
                 JobExecutionException jee = new JobExecutionException("Unable to save new harvest date", mse);
                 jee.setRefireImmediately(false);
                 throw jee;
             }
+
             // Check if DataONE returned the max number of results. If so, we have to request more by paging through
             // the results.
             if(resultCount >= countRequested) {

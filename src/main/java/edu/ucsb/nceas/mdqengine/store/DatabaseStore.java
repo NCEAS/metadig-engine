@@ -325,54 +325,93 @@ public class DatabaseStore implements MDQStore {
         }
     }
 
-    public Node getNode(String nodeId) {
+//    public Node getNode(String nodeId, String jobName) {
+//
+//        //return runs.get(id);
+//        Result result = new Result();
+//        PreparedStatement stmt = null;
+//        String lastDT = null;
+//        Node node = new Node();
+//
+//        // Select records from the 'nodes' table
+//        try {
+//            log.debug("preparing statement for query");
+//            String sql = "select * from nodes where node_id = ? and job_name = ?";
+//            stmt = conn.prepareStatement(sql);
+//            stmt.setString(1, nodeId);
+//            stmt.setString(2, jobName);
+//
+//            log.debug("issuing query: " + sql);
+//            ResultSet rs = stmt.executeQuery();
+//            if(rs.next()) {
+//                node.setNodeId(rs.getString("node_id"));
+//                node.setJobName(rs.getString("job_name"));
+//                node.setLastHarvestDatetime(rs.getString("last_harvest_datetime"));
+//                rs.close();
+//                stmt.close();
+//            } else {
+//                log.debug("No results returned from query");
+//            }
+//        } catch ( Exception e ) {
+//            log.error( e.getClass().getName()+": "+ e.getMessage());
+//        }
+//
+//        return(node);
+//    }
 
-        //return runs.get(id);
-        Result result = new Result();
-        PreparedStatement stmt = null;
-        String lastDT = null;
-        Node node = new Node();
 
-        // Select records from the 'nodes' table
-        try {
-            log.debug("preparing statement for query");
-            String sql = "select * from nodes where node_id = ?";
-            stmt = conn.prepareStatement(sql);
-            stmt.setString(1, nodeId);
+//    public void saveNode(Node node) throws MetadigStoreException {
+//
+//        PreparedStatement stmt = null;
+//
+//        // Perform an 'upsert' on the 'nodes' table - if a record exists for the 'metadata_id, suite_id' already,
+//        // then update the record with the incoming data.
+//        try {
+//            String sql = "INSERT INTO nodes (node_id, job_name, last_harvest_datetime) VALUES (?, ?, ?)"
+//                    + " ON CONFLICT ON CONSTRAINT nodes_id_job_name_pk"
+//                    + " DO UPDATE SET (node_id, job_name, last_harvest_datetime) = (?, ?, ?);";
+//
+//            stmt = conn.prepareStatement(sql);
+//            stmt.setString(1, node.getNodeId());
+//            stmt.setString(2, node.getJobName());
+//            stmt.setString(3, node.getLastHarvestDatetime());
+//            stmt.setString(4, node.getNodeId());
+//            stmt.setString(5, node.getJobName());
+//            stmt.setString(6, node.getLastHarvestDatetime());
+//            stmt.executeUpdate();
+//            stmt.close();
+//            conn.commit();
+//            //conn.close();
+//        } catch (SQLException e) {
+//            log.error( e.getClass().getName()+": "+ e.getMessage());
+//            MetadigStoreException me = new MetadigStoreException("Unable save last harvest date to the datdabase.");
+//            me.initCause(e);
+//            throw(me);
+//        }
+//
+//        // Next, insert a record into the child table ('runs')
+//        log.debug("Records created successfully");
+//    }
 
-            log.debug("issuing query: " + sql);
-            ResultSet rs = stmt.executeQuery();
-            if(rs.next()) {
-                node.setNodeId(rs.getString("node_id"));
-                node.setLastHarvestDatetime(rs.getString("last_harvest_datetime"));
-                rs.close();
-                stmt.close();
-            } else {
-                log.debug("No results returned from query");
-            }
-        } catch ( Exception e ) {
-            log.error( e.getClass().getName()+": "+ e.getMessage());
-        }
 
-        return(node);
-    }
-
-    public void saveNode(Node node) throws MetadigStoreException {
+    public void saveTask(Task task) throws MetadigStoreException {
 
         PreparedStatement stmt = null;
 
         // Perform an 'upsert' on the 'nodes' table - if a record exists for the 'metadata_id, suite_id' already,
         // then update the record with the incoming data.
         try {
-            String sql = "INSERT INTO nodes (node_id, last_harvest_datetime) VALUES (?, ?)"
-                    + " ON CONFLICT ON CONSTRAINT node_id_pk "
-                    + " DO UPDATE SET (node_id, last_harvest_datetime) = (?, ?);";
+            String sql = "INSERT INTO tasks (task_name, task_type, last_harvest_datetime) VALUES (?, ?, ?)"
+                    + " ON CONFLICT ON CONSTRAINT task_name_pk"
+                    + " DO UPDATE SET (task_name, task_type, last_harvest_datetime) = (?, ?, ?);";
 
             stmt = conn.prepareStatement(sql);
-            stmt.setString(1, node.getNodeId());
-            stmt.setString(2, node.getLastHarvestDatetime());
-            stmt.setString(3, node.getNodeId());
-            stmt.setString(4, node.getLastHarvestDatetime());
+            stmt.setString(1, task.getTaskName());
+            stmt.setString(2, task.getTaskType());
+            stmt.setString(3, task.getLastHarvestDatetime());
+            stmt.setString(4, task.getTaskName());
+            stmt.setString(5, task.getTaskType());
+            stmt.setString(6, task.getLastHarvestDatetime());
             stmt.executeUpdate();
             stmt.close();
             conn.commit();
@@ -386,6 +425,39 @@ public class DatabaseStore implements MDQStore {
 
         // Next, insert a record into the child table ('runs')
         log.debug("Records created successfully");
+    }
+
+    public Task getTask(String taskName) {
+
+        //return runs.get(id);
+        Result result = new Result();
+        PreparedStatement stmt = null;
+        String lastDT = null;
+        Task task = new Task();
+
+        // Select records from the 'nodes' table
+        try {
+            log.debug("preparing statement for query");
+            String sql = "select * from tasks where task_name = ?";
+            stmt = conn.prepareStatement(sql);
+            stmt.setString(1, taskName);
+
+            log.debug("issuing query: " + sql);
+            ResultSet rs = stmt.executeQuery();
+            if(rs.next()) {
+                task.setTaskName(rs.getString("task_name"));
+                task.setTaskType(rs.getString("task_type"));
+                task.setLastHarvestDatetime(rs.getString("last_harvest_datetime"));
+                rs.close();
+                stmt.close();
+            } else {
+                log.debug("No results returned from query");
+            }
+        } catch ( Exception e ) {
+            log.error( e.getClass().getName()+": "+ e.getMessage());
+        }
+
+        return(task);
     }
 
     @Override

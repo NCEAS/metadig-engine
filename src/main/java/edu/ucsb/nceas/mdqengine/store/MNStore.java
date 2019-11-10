@@ -1,10 +1,8 @@
 package edu.ucsb.nceas.mdqengine.store;
 
+import com.sun.javafx.scene.control.skin.TableCellSkin;
 import edu.ucsb.nceas.mdqengine.exception.MetadigStoreException;
-import edu.ucsb.nceas.mdqengine.model.Check;
-import edu.ucsb.nceas.mdqengine.model.Node;
-import edu.ucsb.nceas.mdqengine.model.Run;
-import edu.ucsb.nceas.mdqengine.model.Suite;
+import edu.ucsb.nceas.mdqengine.model.*;
 import edu.ucsb.nceas.mdqengine.serialize.XmlMarshaller;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
@@ -81,36 +79,36 @@ public class MNStore implements MDQStore {
 
 	}
 	
-	private SystemMetadata generateSystemMetadata(Object model) 
-			throws UnsupportedEncodingException, JAXBException, 
-			NoSuchMethodException, SecurityException, IllegalAccessException, 
+	private SystemMetadata generateSystemMetadata(Object model)
+			throws UnsupportedEncodingException, JAXBException,
+			NoSuchMethodException, SecurityException, IllegalAccessException,
 			IllegalArgumentException, InvocationTargetException, NoSuchAlgorithmException {
-		
+
 		SystemMetadata sysMeta = new SystemMetadata();
-		
+
 		// find the SID
 		String id = (String) model.getClass().getMethod("getId", null).invoke(model, null);
 		Identifier seriesId = new Identifier();
 		seriesId.setValue(id);
 		sysMeta.setSeriesId(seriesId);
-		sysMeta.setSerialVersion(BigInteger.ONE);		
-		
+		sysMeta.setSerialVersion(BigInteger.ONE);
+
 		// use the simple classname added to the NS
 		ObjectFormatIdentifier formatId = new ObjectFormatIdentifier();
 		formatId.setValue(MDQ_NS + "#" + model.getClass().getSimpleName().toLowerCase());
 		sysMeta.setFormatId(formatId);
-		
+
 		// roles
-		sysMeta.setRightsHolder(session.getSubject());	
+		sysMeta.setRightsHolder(session.getSubject());
 		sysMeta.setSubmitter(session.getSubject());
-		sysMeta.setAuthoritativeMemberNode(node.getNodeId());
-		sysMeta.setOriginMemberNode(node.getNodeId());
-		
+		//sysMeta.setAuthoritativeMemberNode(node.getNodeId());
+		//sysMeta.setOriginMemberNode(node.getNodeId());
+
 		// for now, make them all public for easier debugging
 		AccessPolicyEditor accessPolicyEditor = new AccessPolicyEditor(null);
 		accessPolicyEditor.setPublicAccess();
 		sysMeta.setAccessPolicy(accessPolicyEditor.getAccessPolicy());
-				
+
 		// size
 		String obj = XmlMarshaller.toXml(model, true);
 		sysMeta.setSize(BigInteger.valueOf(obj.getBytes("UTF-8").length));
@@ -121,7 +119,7 @@ public class MNStore implements MDQStore {
 		Date now = Calendar.getInstance().getTime();
 		sysMeta.setDateSysMetadataModified(now);
 		sysMeta.setDateUploaded(now);
-		
+
 		return sysMeta;
 	}
 
@@ -331,11 +329,17 @@ public class MNStore implements MDQStore {
 	@Override
 	public void renew() {}
 
-	@Override
-	public Node getNode(String nodeId) { return new Node(); }
+//	@Override
+//	public Node getNode(String nodeId, String jobName) { return new Node(); }
+//
+//	@Override
+//	public void saveNode(Node node) throws MetadigStoreException { }
 
 	@Override
-	public void saveNode(Node node) throws MetadigStoreException { }
+	public Task getTask(String taskName) { return new Task(); }
+
+	@Override
+	public void saveTask(Task task) throws MetadigStoreException { }
 
 	@Override
 	public void shutdown() {};

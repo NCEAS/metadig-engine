@@ -21,13 +21,14 @@ CREATE TABLE identifiers (
 
 alter table identifiers owner to metadig;
 
-create table nodes {
-  node_id TEXT not null,
+create table tasks (
+  task_name TEXT not null,
+  task_type TEXT not null,
   last_harvest_datetime TEXT not null,
-  CONSTRAINT node_id_pk PRIMARY KEY (node_id)
-}
+  CONSTRAINT task_name_task_type PRIMARY KEY (task_name, task_type)
+);
 
-alter table nodes owner to metadig;
+alter table tasks owner to metadig;
 
 create TABLE runs (
   metadata_id TEXT not null,
