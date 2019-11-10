@@ -40,26 +40,13 @@ public class FilestoreTestIT {
     @Test
     public void saveFile() throws IOException, MetadigStoreException {
 
-        String fileId = null;
-        String filestoreBase = null;
-        String collectionId = null;
-        String metadataId = null;
-        String suiteId = null;
-        String nodeId = null;
-        String metadataFormatFilter = null;
-        String storageType = null;
-        DateTime creationDatetime;
-        String fileExt = null;
-        String altFilename = null; // Use this name for the file instead of a uuid
-        String path; // the complete path to the file
-
         MetadigFile mdFile = new MetadigFile();
         mdFile.setCreationDatetime(DateTime.now());
         mdFile.setCollectionId("1234");
         mdFile.setSuiteId("FAIR.suite.1");
         mdFile.setNodeId("urn:node:KNB");
         mdFile.setStorageType(StorageType.TMP.toString());
-        mdFile.setFileExt("png");
+        mdFile.setMediaType("image/jpeg");
 
         MetadigFileStore mfs;
         try {
@@ -114,7 +101,7 @@ public class FilestoreTestIT {
         mdFile = new MetadigFile();
         mdFile.setCreationDatetime(DateTime.now());
         mdFile.setStorageType(StorageType.TMP.toString());
-        mdFile.setFileExt("png");
+        mdFile.setMediaType("image/jpeg");
         mdFile.setAltFilename("sample-FAIR.suite.1.png");
 
         try {

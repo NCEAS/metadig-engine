@@ -83,6 +83,7 @@ public class FilestoreDB {
         String nodeId = mdFile.getNodeId();
         String mdFormatFilter = mdFile.getMetadataFormatFilter();
         String storageType = mdFile.getStorageType().toString();
+        String mediaType = mdFile.getMediaType();
 
         // Hope for the best, prepare for the worst!
         MetadigStoreException me = new MetadigStoreException("Unable get file from filestore.");
@@ -91,7 +92,8 @@ public class FilestoreDB {
         MetadigFile resultMdFile = new MetadigFile();
 
         try {
-            String sql = "select * from filestore where collection_id = ? and metadata_id = ? and suite_id = ? and node_id = ? and format_filter = ? and storage_type = ?";
+            String sql = "select * from filestore where collection_id = ? and metadata_id = ? and suite_id = ?" +
+                    " and node_id = ? and format_filter = ? and storage_type = ? and media_type = ?";
 
             stmt = conn.prepareStatement(sql);
             stmt.setString(1, collectionId);
@@ -100,6 +102,8 @@ public class FilestoreDB {
             stmt.setString(4, nodeId);
             stmt.setString(5, mdFormatFilter);
             stmt.setString(6, storageType);
+            stmt.setString(7, mediaType);
+
 
             log.debug("issuing query: " + sql);
             ResultSet rs = stmt.executeQuery();
