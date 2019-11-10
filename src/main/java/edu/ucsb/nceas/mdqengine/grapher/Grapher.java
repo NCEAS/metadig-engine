@@ -148,6 +148,18 @@ public class Grapher {
                 String formatFamily = qEntry.getFormatFamily();
                 String suiteId = qEntry.getQualitySuiteId();
 
+                // Requests coming from the controller via webapp will not have
+                // authToken or serviceUrl set, so use the default.
+                if(authToken == null || authToken.isEmpty()) {
+                    authToken = CNauthToken;
+                }
+
+                if(serviceUrl == null || serviceUrl.isEmpty()) {
+                    serviceUrl = CNserviceUrl;
+                }
+
+                //TODO: set subjectId
+
                 // Pids associated with a collection, based on query results using 'collectionQuery' field in solr.
                 ArrayList<String> collectionPids = null;
 
@@ -168,7 +180,7 @@ public class Grapher {
                         log.info("Getting pids for collection " + collectionId);
                         // Always use the CN subject id and authentication token from the configuration file, as
                         // requests that this method uses need CN subject privs
-                        collectionPids = gfr.getCollectionPids(collectionId, nodeId, serviceUrl, CNsubjectId, CNauthToken);
+                        collectionPids = gfr.getCollectionPids(collectionId, nodeId, serviceUrl, null, CNauthToken);
                     }
 
                     // Quality scores will now be obtained from the MetaDIG quality Solr index, using the list of pids obtained
@@ -780,7 +792,6 @@ public class Grapher {
     private SystemMetadata getSystemMetadata(String pid, String serviceUrl, String subjectId, String authToken) throws MetadigProcessException {
 
         SystemMetadata sysmeta = null;
-        Boolean isCN = false;
         MultipartRestClient mrc = null;
         MultipartD1Node d1Node = null;
         MetadigProcessException metadigException = null;
@@ -880,8 +891,6 @@ public class Grapher {
 
         Session session;
 
-        Subject subject = new Subject();
-        subject.setValue(subjectId);
         // query Solr - either the member node or cn, for the project 'solrquery' field
         if (authToken == null || authToken.isEmpty()) {
             log.debug("Creating public session");
@@ -891,7 +900,11 @@ public class Grapher {
             session = new AuthTokenSession(authToken);
         }
 
-        session.setSubject(subject);
+        if (subjectId != null && !subjectId.isEmpty()) {
+            Subject subject = new Subject();
+            subject.setValue(subjectId);
+            session.setSubject(subject);
+        }
 
         return session;
     }
@@ -909,7 +922,6 @@ public class Grapher {
         MultipartRestClient mrc = null;
         MultipartD1Node d1Node = null;
         MetadigProcessException metadigException = null;
-        Boolean isCN;
 
         // First create an HTTP client
         try {
@@ -921,17 +933,7 @@ public class Grapher {
             throw metadigException;
         }
 
-        // Identity node as either a CN or MN based on the serviceUrl
-        String pattern = "https*://cn.*?\\.dataone\\.org|https*://cn.*?\\.test\\.dataone\\.org";
-        Pattern r = Pattern.compile(pattern);
-        Matcher m = r.matcher(serviceUrl);
-        if (m.find()) {
-            isCN = true;
-            log.debug("service URL is for a CN: " + serviceUrl);
-        } else {
-            log.debug("service URL is not for a CN: " + serviceUrl);
-            isCN = false;
-        }
+        Boolean isCN = isCN(serviceUrl);
 
         // Now create a DataONE object that uses the rest client
         if (isCN) {
@@ -1014,6 +1016,23 @@ public class Grapher {
         } catch (UnsupportedEncodingException ex) {
             throw new RuntimeException(ex.getCause());
         }
+    }
+
+    private Boolean isCN(String serviceUrl) {
+
+        Boolean isCN = false;
+        // Identity node as either a CN or MN based on the serviceUrl
+        String pattern = "https*://cn.*?\\.dataone\\.org|https*://cn.*?\\.test\\.dataone\\.org";
+        Pattern r = Pattern.compile(pattern);
+        Matcher m = r.matcher(serviceUrl);
+        if (m.find()) {
+            isCN = true;
+            log.debug("service URL is for a CN: " + serviceUrl);
+        } else {
+            log.debug("service URL is not for a CN: " + serviceUrl);
+            isCN = false;
+        }
+        return isCN;
     }
 }
 

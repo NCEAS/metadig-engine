@@ -1,10 +1,12 @@
 package edu.ucsb.nceas.mdqengine;
 
 import com.rabbitmq.client.*;
+import com.rabbitmq.client.impl.ChannelN;
 import edu.ucsb.nceas.mdqengine.exception.MetadigProcessException;
 import edu.ucsb.nceas.mdqengine.grapher.Graph;
 import edu.ucsb.nceas.mdqengine.grapher.GraphQueueEntry;
 import edu.ucsb.nceas.mdqengine.exception.MetadigException;
+import net.minidev.asm.ConvertDate;
 import org.apache.commons.configuration2.ex.ConfigurationException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -246,11 +248,6 @@ public class Controller {
         RabbitMQusername = cfg.getString("RabbitMQ.username");
         RabbitMQhost = cfg.getString("RabbitMQ.host");
         RabbitMQport = cfg.getInt("RabbitMQ.port");
-        log.debug("Read config:");
-        log.debug("RabbitMQpassword: " + RabbitMQpassword);
-        log.debug("RabbitMQusername: " + RabbitMQusername);
-        log.debug("RabbitMQhost: " + RabbitMQhost);
-        log.debug("RabbitMQport: " + RabbitMQport);
     }
 
 
@@ -395,17 +392,21 @@ public class Controller {
                                String qualitySuiteId,
                                DateTime requestDateTime) throws java.io.IOException, MetadigException {
 
+        log.error("porcessGraphRequest");
+        log.info("Processing graph request, collection: " + collectionId + ", suite: " + qualitySuiteId);
         GraphQueueEntry qEntry = null;
         byte[] message = null;
         String authToken = null;
 
-        try {
-            authToken = readConfigParam(authTokenName);
-        } catch (ConfigurationException ce) {
-            log.error("Error reading configuration for param " + "\"" + authTokenName + "\"" + ": " + ce.getMessage());
-            MetadigException metadigException = new MetadigProcessException("Error reading configuration for param " + authTokenName + ": " + ce.getMessage());
-            metadigException.initCause(ce);
-            throw metadigException;
+        if(authTokenName != null) {
+            try {
+                authToken = readConfigParam(authTokenName);
+            } catch (ConfigurationException ce) {
+                log.error("Error reading configuration for param " + "\"" + authTokenName + "\"" + ": " + ce.getMessage());
+                MetadigException metadigException = new MetadigProcessException("Error reading configuration for param " + authTokenName + ": " + ce.getMessage());
+                metadigException.initCause(ce);
+                throw metadigException;
+            }
         }
 
         qEntry = new GraphQueueEntry (collectionId, projectName, authToken, qualitySuiteId, memberNode, serviceUrl, formatFamily, requestDateTime);

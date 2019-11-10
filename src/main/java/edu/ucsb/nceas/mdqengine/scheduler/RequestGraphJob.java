@@ -1,6 +1,11 @@
 package edu.ucsb.nceas.mdqengine.scheduler;
 
+import com.sun.javafx.scene.control.skin.TableCellSkin;
 import edu.ucsb.nceas.mdqengine.MDQconfig;
+import edu.ucsb.nceas.mdqengine.exception.MetadigStoreException;
+import edu.ucsb.nceas.mdqengine.model.Task;
+import edu.ucsb.nceas.mdqengine.store.DatabaseStore;
+import edu.ucsb.nceas.mdqengine.store.MDQStore;
 import org.apache.commons.configuration2.ex.ConfigurationException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -10,28 +15,31 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.dataone.client.auth.AuthTokenSession;
+import org.dataone.client.rest.DefaultHttpMultipartRestClient;
 import org.dataone.client.rest.HttpMultipartRestClient;
 import org.dataone.client.rest.MultipartRestClient;
 import org.dataone.client.v2.impl.MultipartCNode;
 import org.dataone.client.v2.impl.MultipartMNode;
-import org.dataone.cn.indexer.XmlDocumentUtility;
 import org.dataone.mimemultipart.SimpleMultipartEntity;
 import org.dataone.service.exceptions.NotAuthorized;
 import org.dataone.service.types.v1.*;
 import org.dataone.service.types.v2.SystemMetadata;
 import org.dataone.service.util.TypeMarshaller;
+import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 import org.quartz.*;
-import org.w3c.dom.Document;
 
-import javax.xml.xpath.XPath;
-import javax.xml.xpath.XPathConstants;
-import javax.xml.xpath.XPathExpression;
-import javax.xml.xpath.XPathFactory;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * <p>
@@ -111,6 +119,8 @@ public class RequestGraphJob implements Job {
         JobKey key = context.getJobDetail().getKey();
         JobDataMap dataMap = context.getJobDetail().getJobDataMap();
 
+        String taskName = dataMap.getString("taskName");
+        String taskType = dataMap.getString("taskType");
         String authToken = dataMap.getString("authToken");
         String pidFilter = dataMap.getString("pidFilter");
         String suiteId = dataMap.getString("suiteId");
@@ -122,12 +132,11 @@ public class RequestGraphJob implements Job {
         MultipartRestClient mrc = null;
         MultipartMNode mnNode = null;
         MultipartCNode cnNode = null;
-        Boolean isCN = false;
 
         log.debug("Executing task for node: " + nodeId + ", suiteId: " + suiteId);
 
         try {
-            mrc = new HttpMultipartRestClient();
+            mrc = new DefaultHttpMultipartRestClient();
         } catch (Exception e) {
             log.error("Error creating rest client: " + e.getMessage());
             JobExecutionException jee = new JobExecutionException(e);
@@ -135,37 +144,103 @@ public class RequestGraphJob implements Job {
             throw jee;
         }
 
-        Subject subject = new Subject();
-        subject.setValue("public");
-        Session session = null;
-        if(authToken == null || authToken.equals("")) {
-            session = new Session();
-            //session.setSubject(subject);
-        } else {
-            session = new AuthTokenSession(authToken);
-        }
+        // TODO: get subject from JobScheduler
+        Session session = getSession("CN=urn:node:cnStageUCSB2,DC=dataone,DC=org", authToken);
 
         //log.info("Created session with subject: " + session.getSubject().getValue().toString());
 
         // Don't know node type yet from the id, so have to manually check if it's a CN
-        if(nodeId.equalsIgnoreCase("urn:node:CN")) {
+        Boolean isCN = isCN(nodeServiceUrl);
+        if(isCN) {
             cnNode = new MultipartCNode(mrc, nodeServiceUrl, session);
-            isCN = true;
+            log.debug("Created cnNode: " + cnNode.toString());
         } else {
             mnNode = new MultipartMNode(mrc, nodeServiceUrl, session);
+            log.debug("Created mnNode for serviceUrl: " + nodeServiceUrl);
         }
 
+        MDQStore store = null;
+
+        try {
+            store = new DatabaseStore();
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new JobExecutionException("Cannot create store, unable to schedule job", e);
+        }
+
+        if(!store.isAvailable()) {
+            try {
+                store.renew();
+            } catch (MetadigStoreException e) {
+                e.printStackTrace();
+                throw new JobExecutionException("Cannot renew store, unable to schedule job", e);
+            }
+        }
+
+        // Set UTC as the default time zone for all DateTime operations.
+        // Get current datetime, which may be used for start time range.
+        DateTimeZone.setDefault(DateTimeZone.UTC);
+        DateTime currentDT = new DateTime(DateTimeZone.UTC);
+        DateTimeFormatter dtfOut = DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ss.SS'Z'");
+        String currentDatetimeStr = dtfOut.print(currentDT);
+        DateTime startDateTimeRange = null;
+        DateTime endDateTimeRange = null;
+        String lastHarvestDateStr = null;
+
+        Task task;
+        task = store.getTask(taskName);
+
+        // If a 'task' entry has not been saved for this task name yet, then a 'lastHarvested'
+        // DataTime will not be available, in which case the 'startHarvestDataTime' from the
+        // config file will be used.
+        if(task.getLastHarvestDatetime() == null) {
+            task = new Task();
+            task.setTaskName(taskName);
+            task.setTaskType(taskType);
+            lastHarvestDateStr = startHarvestDatetimeStr;
+            task.setLastHarvestDatetime(lastHarvestDateStr);
+        } else {
+            lastHarvestDateStr = task.getLastHarvestDatetime();
+        }
+
+        DateTime lastHarvestDate = new DateTime(lastHarvestDateStr);
+        // Set the search start datetime to the last harvest datetime, unless it is in the
+        // future. (This can happen when the previous time range end was for the current day,
+        // as the end datetime range for the previous task run will have been stored as the
+        // new lastharvestDateTime.
+        DateTime startDTR = null;
+        if(lastHarvestDate.isAfter(currentDT.toInstant())) {
+            startDTR = currentDT;
+        } else {
+            startDTR = new DateTime(lastHarvestDate);
+        }
+
+        DateTime endDTR = new DateTime(startDTR);
+        endDTR = endDTR.plusDays(harvestDatetimeInc);
+        if(endDTR.isAfter(currentDT.toInstant())) {
+            endDTR = currentDT;
+        }
+
+        // If the start and end harvest dates are the same (happends for a new node), then
+        // tweek the start so that DataONE listObjects doesn't complain.
+        if(startDTR == endDTR ) {
+            startDTR = startDTR.minusMinutes(1);
+        }
+
+        String startDTRstr = dtfOut.print(startDTR);
+        String endDTRstr = dtfOut.print(endDTR);
+
         Integer startCount = new Integer(0);
-        ListResult result = null;
+        RequestGraphJob.ListResult result = null;
         Integer resultCount = null;
 
         boolean morePids = true;
         while(morePids) {
             ArrayList<String> pidsToProcess = null;
-            log.info("Getting aggregation pids for node: " + nodeId);
+            log.info("Getting pids for node: " + nodeId);
 
             try {
-                result = getPidsToProcess(cnNode, mnNode, isCN, session, nodeId, pidFilter, startCount, countRequested);
+                result = getPidsToProcess(cnNode, mnNode, isCN, session, suiteId, nodeId, pidFilter, startDTRstr, endDTRstr, startCount, countRequested);
                 pidsToProcess = result.getResult();
                 resultCount = result.getResultCount();
             } catch (Exception e) {
@@ -186,6 +261,19 @@ public class RequestGraphJob implements Job {
                 }
             }
 
+            task.setLastHarvestDatetime(endDTRstr);
+            log.debug("taskName: " + task.getTaskName());
+            log.debug("taskType: " + task.getTaskType());
+            log.debug("lastharvestdate: " + task.getLastHarvestDatetime());
+
+            try {
+                store.saveTask(task);
+            } catch (MetadigStoreException mse) {
+                log.error("Error saving task: " + task.getTaskName());
+                JobExecutionException jee = new JobExecutionException("Unable to save new harvest date", mse);
+                jee.setRefireImmediately(false);
+                throw jee;
+            }
             // Check if DataONE returned the max number of results. If so, we have to request more by paging through
             // the results.
             if(resultCount >= countRequested) {
@@ -196,131 +284,153 @@ public class RequestGraphJob implements Job {
                 morePids = false;
             }
         }
+        store.shutdown();
     }
 
-    public ListResult getPidsToProcess(MultipartCNode cnNode, MultipartMNode mnNode, Boolean isCN, Session session, String nodeId,
-                                       String pidFilter, int startCount, int countRequested) throws Exception {
+    public ListResult getPidsToProcess(MultipartCNode cnNode, MultipartMNode mnNode, Boolean isCN, Session session, String suiteId, String nodeId,
+                                       String pidFilter, String startHarvestDatetimeStr, String endHarvestDatetimeStr,
+                                       int startCount, int countRequested) throws Exception {
 
         ArrayList<String> pids = new ArrayList<String>();
         InputStream qis = null;
+        ObjectList objList = null;
 
-        // Get MN or CN base url from nodeId to get base of queryStr
-        // TODO: replace this hard-coded query url
-        String queryStr = "https://dev.nceas.ucsb.edu/knb/d1/mn/v2/query/solr/q=projectName:*+-obsoletedBy:*&fl=projectName,seriesId";
+        ObjectFormatIdentifier formatId = null;
+        NodeReference nodeRef = null;
+        //nodeRef.setValue(nodeId);
+        Identifier identifier = null;
+        Boolean replicaStatus = false;
 
-        // There may be many pids in the result set, so update the query to allow paging through them.
-        // Page though the results, requesting a certain amount of pids at each request
-        queryStr += "&start=" + startCount + "&count=" + countRequested;
-        queryStr += "&q.op=AND&sort=dateUploaded%20desc";
+        // Do some back-flips to convert the start and end date to the ancient Java 'Date' type that is
+        // used by DataONE 'listObjects()'.
+        ZonedDateTime zdt = ZonedDateTime.parse(startHarvestDatetimeStr);
+        // start date milliseconds since the epoch date "midnight, January 1, 1970 UTC"
+        long msSinceEpoch = zdt.toInstant().toEpochMilli();
+        Date startDate = new Date(msSinceEpoch);
 
-        log.debug("Sending Solr query:" + queryStr);
+        zdt = ZonedDateTime.parse(endHarvestDatetimeStr);
+        msSinceEpoch = zdt.toInstant().toEpochMilli();
+        Date endDate = new Date(msSinceEpoch);
 
-        // TODO: use CN or MN depending on nodeId
-        // TODO: may need to create an authorized session
         try {
-            qis = mnNode.query(session, "solr", queryStr);
-            log.info("Sent query: " + queryStr);
+            // Even though MultipartMNode and MultipartCNode have the same parent class, their interfaces are differnt, so polymorphism
+            // isn't happening here.
+            if(isCN) {
+                log.debug("cnNode: " + cnNode);
+                log.debug("Listing objects for CN");
+                log.debug("session: " + session.getSubject().getValue());
+                log.debug("startDate: " + startDate);
+                log.debug("endDate: " + endDate);
+                log.debug("formatId: " + formatId);
+                log.debug("Identifier: " + identifier);
+                log.debug("startCount: " + startCount);
+                log.debug("countRequested: " + countRequested);
+                objList = cnNode.listObjects(session, startDate, endDate, formatId, nodeRef, identifier, startCount, countRequested);
+            } else {
+                objList = mnNode.listObjects(session, startDate, endDate, formatId, identifier, replicaStatus, startCount, countRequested);
+            }
+            log.info("Got " + objList.getCount() + " pids ");
         } catch (Exception e) {
-            log.error("Error retrieving pids: " + e.getMessage());
+            log.error("Error retrieving pids for node: " + e.getMessage());
             throw e;
         }
 
-        XPathFactory xPathfactory = XPathFactory.newInstance();
-        XPath xpath = xPathfactory.newXPath();
-        XPathExpression idXpath = null;
-        Document xmldoc = null;
-
-        if (qis != null) {
-            try {
-                xmldoc = XmlDocumentUtility.generateXmlDocument(qis);
-            } catch (Exception e) {
-                log.error("Unable to create w3c Document from input stream", e);
-                e.printStackTrace();
-            } finally {
-                qis.close();
-            }
-        } else {
-            qis.close();
-        }
-
-        //idXpath = xpath.compile("str[@name='id']/text()")dd;
-        idXpath = xpath.compile("//result/doc/str[@name='seriesId']/text()");
-
-        org.w3c.dom.NodeList xpathResult = (org.w3c.dom.NodeList) idXpath.evaluate(xmldoc, XPathConstants.NODESET);
-        String currentPid = null;
-
+        String thisFormatId = null;
+        String thisPid = null;
         int pidCount = 0;
-        for(int index = 0; index < xpathResult.getLength(); index ++) {
-            org.w3c.dom.Node node = xpathResult.item(index);
-            currentPid = node.getTextContent();
-            pidCount++;
-            pids.add(currentPid);
+
+        if (objList.getCount() > 0) {
+            for(ObjectInfo oi: objList.getObjectInfoList()) {
+                thisFormatId = oi.getFormatId().getValue();
+                thisPid = oi.getIdentifier().getValue();
+
+                // Check all pid filters. There could be multiple wildcard filters, which are separated
+                // by ','.
+                String [] filters = pidFilter.split("\\|");
+                Boolean found = false;
+                for(String thisFilter:filters) {
+                    if(thisFormatId.matches(thisFilter)) {
+                        found = true;
+                        continue;
+                    }
+                }
+
+                // Always re-create a report, even if it exists for a pid, as the sysmeta could have
+                // been updated (i.e. obsoletedBy, access) and the quality report and index contain
+                // sysmeta fields.
+                if(found) {
+                    //    if (!runExists(thisPid, suiteId, store)) {
+                    pidCount = pidCount++;
+                    pids.add(thisPid);
+                    log.info("adding pid " + thisPid + ", formatId: " + thisFormatId);
+                    //    }
+                }
+            }
         }
 
-        ListResult result = new ListResult();
+        RequestGraphJob.ListResult result = new RequestGraphJob.ListResult();
         result.setResultCount(pidCount);
         result.setResult(pids);
 
         return result;
-
     }
 
     public void submitGraphRequest(MultipartCNode cnNode, MultipartMNode mnNode, Boolean isCN, Session session,
                                    String graphServiceUrl, String pidStr, String suiteId) throws Exception {
 
-        SystemMetadata sysmeta = null;
-        InputStream objectIS = null;
+        log.debug("SubmitGraphRequest");
+//        SystemMetadata sysmeta = null;
+//        InputStream objectIS = null;
         InputStream runResultIS = null;
 
         Identifier pid = new Identifier();
         pid.setValue(pidStr);
 
-        try {
-            if (isCN) {
-                sysmeta = cnNode.getSystemMetadata(session, pid);
-            } else {
-                sysmeta = mnNode.getSystemMetadata(session, pid);
-            }
-        } catch (NotAuthorized na) {
-            log.error("Not authorized to read sysmeta for pid: " + pid.getValue() + ", continuing with next pid...");
-            return;
-        } catch (Exception e) {
-            throw(e);
-        }
+//        try {
+//            if (isCN) {
+//                sysmeta = cnNode.getSystemMetadata(session, pid);
+//            } else {
+//                sysmeta = mnNode.getSystemMetadata(session, pid);
+//            }
+//        } catch (NotAuthorized na) {
+//            log.error("Not authorized to read sysmeta for pid: " + pid.getValue() + ", continuing with next pid...");
+//            return;
+//        } catch (Exception e) {
+//            throw(e);
+//        }
+//
+//        try {
+//            if(isCN) {
+//                objectIS = cnNode.get(session, pid);
+//            } else  {
+//                objectIS = mnNode.get(session, pid);
+//            }
+//            log.debug("Retrieved metadata object for pid: " + pidStr);
+//        } catch (NotAuthorized na) {
+//            log.error("Not authorized to read pid: " + pid + ", continuing with next pid...");
+//            return;
+//        } catch (Exception e) {
+//            throw(e);
+//        }
 
-        try {
-            if(isCN) {
-                objectIS = cnNode.get(session, pid);
-            } else  {
-                objectIS = mnNode.get(session, pid);
-            }
-            log.debug("Retrieved metadata object for pid: " + pidStr);
-        } catch (NotAuthorized na) {
-            log.error("Not authorized to read pid: " + pid + ", continuing with next pid...");
-            return;
-        } catch (Exception e) {
-            throw(e);
-        }
-
-        // quality suite service url, i.e. "http://docke-ucsb-1.dataone.org:30433/quality/suites/knb.suite.1/run
-        graphServiceUrl = graphServiceUrl + "/suites/" + suiteId + "/run";
+        graphServiceUrl = graphServiceUrl + "/graph/" + pidStr + "/" + suiteId;
         HttpPost post = new HttpPost(graphServiceUrl);
 
         try {
             // add document
-            SimpleMultipartEntity entity = new SimpleMultipartEntity();
-            entity.addFilePart("document", objectIS);
+            //SimpleMultipartEntity entity = new SimpleMultipartEntity();
+            //entity.addFilePart("document", objectIS);
 
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            TypeMarshaller.marshalTypeToOutputStream(sysmeta, baos);
-            entity.addFilePart("systemMetadata", new ByteArrayInputStream(baos.toByteArray()));
+            //ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            //TypeMarshaller.marshalTypeToOutputStream(sysmeta, baos);
+            //entity.addFilePart("systemMetadata", new ByteArrayInputStream(baos.toByteArray()));
 
             // make sure we get XML back
             post.addHeader("Accept", "application/xml");
 
             // send to service
             log.trace("submitting: " + graphServiceUrl);
-            post.setEntity((HttpEntity) entity);
+            //post.setEntity((HttpEntity) entity);
             CloseableHttpClient client = HttpClients.createDefault();
             CloseableHttpResponse response = client.execute(post);
 
@@ -332,6 +442,54 @@ public class RequestGraphJob implements Job {
         } catch (Exception e) {
             throw(e);
         }
+    }
+
+    private Boolean isCN(String serviceUrl) {
+
+        Boolean isCN = false;
+        // Identity node as either a CN or MN based on the serviceUrl
+        String pattern = "https*://cn.*?\\.dataone\\.org|https*://cn.*?\\.test\\.dataone\\.org";
+        Pattern r = Pattern.compile(pattern);
+        Matcher m = r.matcher(serviceUrl);
+        if (m.find()) {
+            isCN = true;
+            log.debug("service URL is for a CN: " + serviceUrl);
+        } else {
+            log.debug("service URL is not for a CN: " + serviceUrl);
+            isCN = false;
+        }
+
+        return isCN;
+    }
+
+    /**
+     * Get a DataONE authenticated session
+     * <p>
+     *     If no subject or authentication token are provided, a public session is returned
+     * </p>
+     * @param authToken the authentication token
+     * @return the DataONE session
+     */
+    Session getSession(String subjectId, String authToken) {
+
+        Session session;
+
+        Subject subject = new Subject();
+        subject.setValue(subjectId);
+        // query Solr - either the member node or cn, for the project 'solrquery' field
+        if (authToken == null || authToken.isEmpty()) {
+            log.debug("Creating public session");
+            session = new Session();
+        } else {
+            log.debug("Creating authentication session");
+            session = new AuthTokenSession(authToken);
+        }
+
+        if(subject != null) {
+            session.setSubject(subject);
+        }
+
+        return session;
     }
 }
 

@@ -297,7 +297,7 @@ public class RequestReportJob implements Job {
 
     public ListResult getPidsToProcess(MultipartCNode cnNode, MultipartMNode mnNode, Boolean isCN, Session session,
                                   String suiteId, String nodeId, String pidFilter, String startHarvestDatetimeStr,
-                                  String endHarvestDatetimeStr, MDQStore store, int startCount,
+                                  String endHarvestDatetimeStr, int startCount,
                                   int countRequested) throws Exception {
 
         ArrayList<String> pids = new ArrayList<String>();
@@ -325,9 +325,9 @@ public class RequestReportJob implements Job {
             // Even though MultipartMNode and MultipartCNode have the same parent class, their interfaces are differnt, so polymorphism
             // isn't happening here.
             if(isCN) {
-                objList = cnNode.listObjects(session=session, startDate, endDate, formatId, nodeRef, identifier, startCount, countRequested);
+                objList = cnNode.listObjects(session, startDate, endDate, formatId, nodeRef, identifier, startCount, countRequested);
             } else {
-                objList = mnNode.listObjects(session=session, startDate, endDate, formatId, identifier, replicaStatus, startCount, countRequested);
+                objList = mnNode.listObjects(session, startDate, endDate, formatId, identifier, replicaStatus, startCount, countRequested);
             }
             //log.info("Got " + objList.getCount() + " pids for format: " + formatId.getValue() + " pids.");
         } catch (Exception e) {
@@ -464,5 +464,23 @@ public class RequestReportJob implements Job {
         } catch (Exception e) {
             throw(e);
         }
+    }
+
+    private Boolean isCN(String serviceUrl) {
+
+        Boolean isCN = false;
+        // Identity node as either a CN or MN based on the serviceUrl
+        String pattern = "https*://cn.*?\\.dataone\\.org|https*://cn.*?\\.test\\.dataone\\.org";
+        Pattern r = Pattern.compile(pattern);
+        Matcher m = r.matcher(serviceUrl);
+        if (m.find()) {
+            isCN = true;
+            log.debug("service URL is for a CN: " + serviceUrl);
+        } else {
+            log.debug("service URL is not for a CN: " + serviceUrl);
+            isCN = false;
+        }
+
+        return isCN;
     }
 }
