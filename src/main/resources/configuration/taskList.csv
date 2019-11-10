@@ -1,4 +1,4 @@
-task-type,job-name,job-group,auth-token,cron-schedule,params
+task-type,task-name,job-group,auth-token,cron-schedule,params
 # Format for quality request
 # task type, job name, job group, cron schedule, "formatId filter (regex); suite id; node id; D1 node base url; harvest begin date; harvest increment (days);solr location;requestCount"
 # - task type: currently only 'quality' jobs are supported.
@@ -14,9 +14,6 @@ task-type,job-name,job-group,auth-token,cron-schedule,params
 #   - harvest begin date: the first date to use for the DataONE 'listObjects' service
 #   - harvest increment (days): the time span for each search
 #   - requestCount: the number of itmes to request from DataONE listObjects
-# - additional params for graph tasks
-#   - aggregationId: the unique id of the item to create the aggregated report for (e.g. DataONE project SID)
-#   - aggregationName: the unique name of the aggregation to create the report for (e.g. DataONE project name)
 #
 #quality,quality-mnTestKNB-knb,metadig,mnTestKNB.authToken,* 0/1 * * * ?,"^eml.*;knb.suite.1;urn:node:mnTestKNB;https://dev.nceas.ucsb.edu/knb/d1/mn;2018-10-01T00:00:00.00Z;1;100"
 #quality,quality-mnTestKNB-arctic,metadig,0/10 * * * * ?,"^eml.*;arctic.data.center.suite.1;urn:node:ARCTIC;https://arcticdata.io/metacat/d1/mn;2018-10-03T00:00:00.00Z;1;100"
@@ -27,5 +24,5 @@ quality,quality-arctic,metadig,ARCTIC.authToken,0 0/1 * * * ?, "^eml.*;arctic.da
 #quality,quality-dataone,metadig,,0 0/1 * * * ?, "^eml.*|.*www.isotc211.org.*;FAIR.suite.1;urn:node:CN;https://cn.dataone.org/cn/;2019-05-01T00:00:00.00Z;1;100"
 #
 # format for graph requests (Entry for creating aggregated graphs for a DataONE project)
-graph,graph-dev-fair,metadig,,0 0/1 * * * ?, "^eml.*|.*www.isotc211.org.*;FAIR.suite.1;urn:node:mnTestKNB;https://dev.nceas.ucsb.edu/d1/mn/v2/;2019-08-01T00:00:00.00Z;1;1234;lauren-test"
+graph,graph-dev-fair,metadig,,0 0/1 * * * ?, ".*portal.*;FAIR.suite.1;;https://cn-stage-2.test.dataone.org/cn/;2019-11-07T00:00:00.00Z;1;100"
 filestore,ingest,metadig,,0 0/1 * * * ?, "stage;;*.*;README.txt;filestore-ingest.log"
