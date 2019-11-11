@@ -150,15 +150,20 @@ public class Grapher {
 
                 // Requests coming from the controller via webapp will not have
                 // authToken or serviceUrl set, so use the default.
-                if(authToken == null || authToken.isEmpty()) {
+                if(authToken == null || authToken.isEmpty())
                     authToken = CNauthToken;
-                }
 
-                if(serviceUrl == null || serviceUrl.isEmpty()) {
+                if(serviceUrl == null || serviceUrl.isEmpty())
                     serviceUrl = CNserviceUrl;
-                }
 
-                //TODO: set subjectId
+                if(nodeId == null)
+                    nodeId = "";
+
+                if(formatFamily == null)
+                    formatFamily = "";
+
+                if(suiteId == null)
+                    suiteId = "";
 
                 // Pids associated with a collection, based on query results using 'collectionQuery' field in solr.
                 ArrayList<String> collectionPids = null;
@@ -180,7 +185,7 @@ public class Grapher {
                         log.info("Getting pids for collection " + collectionId);
                         // Always use the CN subject id and authentication token from the configuration file, as
                         // requests that this method uses need CN subject privs
-                        collectionPids = gfr.getCollectionPids(collectionId, nodeId, serviceUrl, null, CNauthToken);
+                        collectionPids = gfr.getCollectionPids(collectionId, nodeId, serviceUrl, CNsubjectId, CNauthToken);
                     }
 
                     // Quality scores will now be obtained from the MetaDIG quality Solr index, using the list of pids obtained
@@ -252,7 +257,7 @@ public class Grapher {
 
                 // Inform RabbitMQ that we are done with this task, and am ready for another.
                 inProcessChannel.basicAck(envelope.getDeliveryTag(), false);
-                log.info("Worker completed task");
+                log.info("Grapher completed task");
             }
         };
 
@@ -475,7 +480,7 @@ public class Grapher {
                 if (suiteId != null) {
                     queryStr += " AND suiteId:" + suiteId;
                 }
-                log.trace("query to quality Solr server: " + queryStr);
+                log.debug("query to quality Solr server: " + queryStr);
                 // Send query to Quality Solr Server
                 // Get all the pids in this pid string
                 resultList = queryQualitySolr(queryStr, startPosInQuery, pidCntToRequest);
@@ -501,7 +506,7 @@ public class Grapher {
             if (formatFamilySearchTerm != null) {
                 queryStr += " AND metadataFormatId:" + "\"" + formatFamilySearchTerm + "\"";
             }
-            log.debug("query to quality Solr server: " + queryStr);
+            log.trace("query to quality Solr server: " + queryStr);
             do {
                 resultList = queryQualitySolr(queryStr, startPosInQuery, countRequested);
                 // If no more results, break
