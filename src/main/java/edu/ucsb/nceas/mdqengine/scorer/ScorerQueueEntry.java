@@ -5,10 +5,10 @@ import org.joda.time.DateTime;
 import java.io.Serializable;
 
 /**
- * The GraphQueueEntry class holds information that is passed between metadig-controller and metadig-grapher
+ * The ScorerQueueEntry class holds information that is passed between metadig-controller and metadig-grapher
  * via RabbitMQ.
  */
-public class GraphQueueEntry implements Serializable {
+public class ScorerQueueEntry implements Serializable {
 
     private static final long serialVersionUID = -2643076659001464940L;
     private String nodeId;              // the DataONE node identifier of the node that is the datasource
@@ -99,7 +99,7 @@ public class GraphQueueEntry implements Serializable {
 
     public String getHostname() { return hostname; }
 
-    public GraphQueueEntry (String collectionid, String projectName, String authToken, String qualitySuiteId,
+    public ScorerQueueEntry(String collectionid, String projectName, String authToken, String qualitySuiteId,
                             String nodeId, String serviceUrl, String formatFamily, DateTime requestDataTime) {
         this.collectionid = collectionid;
         this.projectName = projectName;

@@ -53,11 +53,11 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * The Grapher class contains methods that create graphs of aggregated quality scores.
+ * The Scorer class contains methods that create graphs of aggregated quality scores.
  *
  * Peter Slaughter
  */
-public class Grapher {
+public class Scorer {
 
     private final static String EXCHANGE_NAME = "metadig";
     private final static String GRAPH_QUEUE_NAME = "graph";
@@ -71,7 +71,7 @@ public class Grapher {
     private static Connection completedConnection;
     private static Channel completedChannel;
 
-    private static Log log = LogFactory.getLog(Grapher.class);
+    private static Log log = LogFactory.getLog(Scorer.class);
     private static String RabbitMQhost = null;
     private static int RabbitMQport = 0;
     private static String RabbitMQpassword = null;
@@ -88,7 +88,7 @@ public class Grapher {
 
     public static void main(String[] argv) throws Exception {
 
-        Grapher gfr = new Grapher();
+        Scorer gfr = new Scorer();
         MDQconfig cfg = new MDQconfig ();
 
         try {
@@ -122,7 +122,7 @@ public class Grapher {
                 // Read the queue entry
                 ByteArrayInputStream bis = new ByteArrayInputStream(body);
                 ObjectInput in = new ObjectInputStream(bis);
-                GraphQueueEntry qEntry = null;
+                ScorerQueueEntry qEntry = null;
                 String graphFilename = null;
                 MetadigException metadigException = null;
 
@@ -132,7 +132,7 @@ public class Grapher {
 
                 // Read the queue entry passed to the callback from RabbitMQ
                 try {
-                    qEntry = (GraphQueueEntry) in.readObject();
+                    qEntry = (ScorerQueueEntry) in.readObject();
                 } catch (java.lang.ClassNotFoundException e) {
                     log.error("Unable to process graph request");
                     e.printStackTrace();
@@ -178,7 +178,7 @@ public class Grapher {
                 try {
                     MetadigFile mdFile = new MetadigFile();
                     Graph graph = new Graph();
-                    Grapher gfr = new Grapher();
+                    Scorer gfr = new Scorer();
                     // If creating a graph for a collection, get the set of pids associated with the collection.
                     // Only scores for these pids will be included in the graph.
                     if(collectionId != null && ! collectionId.isEmpty()) {
@@ -257,7 +257,7 @@ public class Grapher {
 
                 // Inform RabbitMQ that we are done with this task, and am ready for another.
                 inProcessChannel.basicAck(envelope.getDeliveryTag(), false);
-                log.info("Grapher completed task");
+                log.info("Scorer completed task");
             }
         };
 
@@ -523,7 +523,7 @@ public class Grapher {
 
     /**
       * Create a CSV (Comma Separated Values) file that contains metadata quality scores from
-      * the Quality Solr Server. This file is in a format that is needed by the Quality Grapher
+      * the Quality Solr Server. This file is in a format that is needed by the Quality Scorer
       *
       * @param allResults the quality scores returned from the MetaDIG Quality Solr Server
       * @return a File for the generated score file.
@@ -587,7 +587,7 @@ public class Grapher {
      * @param qEntry the queue entry containing status and other information about the graph request
      * @throws IOException
      */
-    private void returnGraphStatus(String metadataPid, String suiteId, GraphQueueEntry qEntry) throws IOException {
+    private void returnGraphStatus(String metadataPid, String suiteId, ScorerQueueEntry qEntry) throws IOException {
         byte[] message = null;
         try {
             log.info("Elapsed time processing (seconds): "

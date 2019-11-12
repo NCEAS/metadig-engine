@@ -16,7 +16,6 @@ import org.joda.time.DateTime;
 
 import javax.script.ScriptException;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.HashMap;
@@ -47,7 +46,7 @@ public class Graph {
 
     public void init() throws MetadigException {
 
-        Grapher gfr = new Grapher();
+        Scorer gfr = new Scorer();
 
         try {
             MDQconfig cfg = new MDQconfig ();

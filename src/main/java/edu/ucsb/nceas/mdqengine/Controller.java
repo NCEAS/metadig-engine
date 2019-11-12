@@ -1,12 +1,9 @@
 package edu.ucsb.nceas.mdqengine;
 
 import com.rabbitmq.client.*;
-import com.rabbitmq.client.impl.ChannelN;
 import edu.ucsb.nceas.mdqengine.exception.MetadigProcessException;
-import edu.ucsb.nceas.mdqengine.grapher.Graph;
-import edu.ucsb.nceas.mdqengine.grapher.GraphQueueEntry;
+import edu.ucsb.nceas.mdqengine.scorer.ScorerQueueEntry;
 import edu.ucsb.nceas.mdqengine.exception.MetadigException;
-import net.minidev.asm.ConvertDate;
 import org.apache.commons.configuration2.ex.ConfigurationException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -152,7 +149,7 @@ public class Controller {
                             log.info("Request queuing of: " + tokens[0] + ", " + tokens[1] + ", " + tokens[2] + ", " + tokens[3] + ", " + tokens[4]
                                     + ", " + tokens[5] + "," + tokens[6]);
 
-                            metadigCtrl.processGraphRequest(collectionId, projectName, authTokenName,  memberNode, serviceUrl,
+                            metadigCtrl.processScorerRequest(collectionId, projectName, authTokenName,  memberNode, serviceUrl,
                                     formatFamily, qualitySuiteId, requestDateTime);
                             break;
                         case "quality":
@@ -172,7 +169,7 @@ public class Controller {
                             metadigCtrl.processQualityRequest(nodeId, metadataPid, metadata, suiteId, "/tmp", requestDateTime, sysmeta);
                             break;
                         default:
-                            System.out.println("no match");
+                            log.error("Invalid request type recieved by controller: " + requestType);
                     }
                 }
                 // Close current connection, then start again with new connection
@@ -195,6 +192,7 @@ public class Controller {
         if (instance == null) {
             synchronized (Controller.class) {
                 if (instance == null) {
+                    log.debug("Creating new controller instance");
                     instance = new Controller();
                 }
             }
@@ -218,6 +216,7 @@ public class Controller {
             this.readConfig();
             this.setupQueues();
             this.isStarted = true;
+            log.debug("Controller is started");
         } catch (java.io.IOException | java.util.concurrent.TimeoutException | ConfigurationException e) {
             e.printStackTrace();
             log.error("Error starting queue:");
@@ -302,6 +301,7 @@ public class Controller {
                                DateTime requestDateTime,
                                InputStream systemMetadata) throws java.io.IOException {
 
+        log.info("Processing quality report request, id" + metadataPid + ", suite: " + qualitySuiteId);
         QueueEntry qEntry = null;
         SystemMetadata sysmeta = null;
         byte[] message = null;
@@ -369,7 +369,7 @@ public class Controller {
      * Forward a graph request to the "InProcess" queue.
      * <p>
      * A request to create a graph of aggregated quality scores is serialized and placed on the RabbitMQ "InProcess"
-     * queue. This queue is read by worker processes that call the grapher program to obtain the quality scores and
+     * queue. This queue is read by worker processes that call the scorer program to obtain the quality scores and
      * create the graph from them.
      * </p>
      *
@@ -383,7 +383,7 @@ public class Controller {
      * @return
      * @throws java.io.IOException
      */
-    public void processGraphRequest(String collectionId,
+    public void processScorerRequest(String collectionId,
                                String projectName,
                                String authTokenName,
                                String memberNode,
@@ -392,9 +392,8 @@ public class Controller {
                                String qualitySuiteId,
                                DateTime requestDateTime) throws java.io.IOException, MetadigException {
 
-        log.error("porcessGraphRequest");
-        log.info("Processing graph request, collection: " + collectionId + ", suite: " + qualitySuiteId);
-        GraphQueueEntry qEntry = null;
+        log.info("Processing scorer request, collection: " + collectionId + ", suite: " + qualitySuiteId);
+        ScorerQueueEntry qEntry = null;
         byte[] message = null;
         String authToken = null;
 
@@ -409,7 +408,7 @@ public class Controller {
             }
         }
 
-        qEntry = new GraphQueueEntry (collectionId, projectName, authToken, qualitySuiteId, memberNode, serviceUrl, formatFamily, requestDateTime);
+        qEntry = new ScorerQueueEntry(collectionId, projectName, authToken, qualitySuiteId, memberNode, serviceUrl, formatFamily, requestDateTime);
 
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         ObjectOutput out = new ObjectOutputStream(bos);
@@ -417,7 +416,7 @@ public class Controller {
         message = bos.toByteArray();
 
         this.writeInProcessChannel(message, GRAPH_ROUTING_KEY);
-        log.info(" [x] Queued graph request for collectionld: '" + qEntry.getProjectId() + "'" + " quality suite " + qualitySuiteId);
+        log.info(" [x] Queued Scorer request for collectionld: '" + qEntry.getProjectId() + "'" + " quality suite " + qualitySuiteId);
     }
 
     /**
@@ -437,7 +436,7 @@ public class Controller {
 
         // Setup the 'InProcess' queue with a routing key - messages consumed by this queue require that
         // this routine key be used. The routine key QUALITY_ROUTING_KEY sends messages to the quality report worker,
-        // the routing key GRAPH_ROUTING_KEY sends messages to the aggregation stats grapher.
+        // the routing key GRAPH_ROUTING_KEY sends messages to the aggregation stats scorer.
         try {
             inProcessConnection = factory.newConnection();
             inProcessChannel = inProcessConnection.createChannel();
@@ -526,16 +525,16 @@ public class Controller {
                         }
                     }
                 } else if(properties.getType().equalsIgnoreCase(MESSAGE_TYPE_GRAPH)) {
-                    GraphQueueEntry qEntry = null;
+                    ScorerQueueEntry qEntry = null;
                     try {
-                        qEntry = (GraphQueueEntry) in.readObject();
+                        qEntry = (ScorerQueueEntry) in.readObject();
                     } catch (java.lang.ClassNotFoundException e) {
-                        log.info("Class 'GraphQueueEntry' not found");
+                        log.info("Class 'ScorerQueueEntry' not found");
                     } finally {
                         completedChannel.basicAck(envelope.getDeliveryTag(), false);
                     }
 
-                    log.info(" [x] Controller received notification of completed graph for: '" + qEntry.getProjectId() + "'" + ", " +
+                    log.info(" [x] Controller received notification of completed score for: '" + qEntry.getProjectId() + "'" + ", " +
                             "hostsname: " + qEntry.getHostname());
                     log.info("Total processing time for worker " + qEntry.getHostname() + " for PID " + qEntry.getProjectId() + ": " + qEntry.getProcessingElapsedTimeSeconds());
 
