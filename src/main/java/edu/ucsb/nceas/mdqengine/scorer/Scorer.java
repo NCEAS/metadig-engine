@@ -1,4 +1,4 @@
-package edu.ucsb.nceas.mdqengine.grapher;
+package edu.ucsb.nceas.mdqengine.scorer;
 
 import com.rabbitmq.client.*;
 import edu.ucsb.nceas.mdqengine.MDQconfig;
@@ -480,7 +480,7 @@ public class Scorer {
                 if (suiteId != null) {
                     queryStr += " AND suiteId:" + suiteId;
                 }
-                log.debug("query to quality Solr server: " + queryStr);
+                log.trace("query to quality Solr server: " + queryStr);
                 // Send query to Quality Solr Server
                 // Get all the pids in this pid string
                 resultList = queryQualitySolr(queryStr, startPosInQuery, pidCntToRequest);

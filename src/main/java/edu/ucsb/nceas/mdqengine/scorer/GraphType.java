@@ -1,4 +1,4 @@
-package edu.ucsb.nceas.mdqengine.grapher;
+package edu.ucsb.nceas.mdqengine.scorer;
 
 public enum GraphType {
     CUMULATIVE("cumulative"),

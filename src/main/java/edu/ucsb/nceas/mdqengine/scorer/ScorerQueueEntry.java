@@ -1,11 +1,11 @@
-package edu.ucsb.nceas.mdqengine.grapher;
+package edu.ucsb.nceas.mdqengine.scorer;
 
 import org.joda.time.DateTime;
 
 import java.io.Serializable;
 
 /**
- * The ScorerQueueEntry class holds information that is passed between metadig-controller and metadig-grapher
+ * The ScorerQueueEntry class holds information that is passed between metadig-controller and metadig-scorer
  * via RabbitMQ.
  */
 public class ScorerQueueEntry implements Serializable {

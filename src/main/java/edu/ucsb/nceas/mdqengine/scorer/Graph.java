@@ -1,4 +1,4 @@
-package edu.ucsb.nceas.mdqengine.grapher;
+package edu.ucsb.nceas.mdqengine.scorer;
 
 import edu.ucsb.nceas.mdqengine.MDQconfig;
 import edu.ucsb.nceas.mdqengine.dispatch.Dispatcher;
