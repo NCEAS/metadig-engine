@@ -34,14 +34,14 @@ public class Controller {
 
     private final static String EXCHANGE_NAME = "metadig";
     private final static String QUALITY_QUEUE_NAME = "quality";
-    private final static String GRAPH_QUEUE_NAME = "graph";
+    private final static String SCORER_QUEUE_NAME = "scorer";
     private final static String COMPLETED_QUEUE_NAME = "completed";
 
     private final static String QUALITY_ROUTING_KEY = "quality";
-    private final static String GRAPH_ROUTING_KEY = "graph";
+    private final static String SCORER_ROUTING_KEY = "scorer";
     private final static String COMPLETED_ROUTING_KEY = "completed";
     private final static String MESSAGE_TYPE_QUALITY = "quality";
-    private final static String MESSAGE_TYPE_GRAPH = "graph";
+    private final static String MESSAGE_TYPE_SCORER = "scorer";
 
     private static com.rabbitmq.client.Connection inProcessConnection;
     private static com.rabbitmq.client.Channel inProcessChannel;
@@ -415,7 +415,7 @@ public class Controller {
         out.writeObject(qEntry);
         message = bos.toByteArray();
 
-        this.writeInProcessChannel(message, GRAPH_ROUTING_KEY);
+        this.writeInProcessChannel(message, SCORER_ROUTING_KEY);
         log.info(" [x] Queued Scorer request for collectionld: '" + qEntry.getProjectId() + "'" + " quality suite " + qualitySuiteId);
     }
 
@@ -436,7 +436,7 @@ public class Controller {
 
         // Setup the 'InProcess' queue with a routing key - messages consumed by this queue require that
         // this routine key be used. The routine key QUALITY_ROUTING_KEY sends messages to the quality report worker,
-        // the routing key GRAPH_ROUTING_KEY sends messages to the aggregation stats scorer.
+        // the routing key SCORER_ROUTING_KEY sends messages to the aggregation stats scorer.
         try {
             inProcessConnection = factory.newConnection();
             inProcessChannel = inProcessConnection.createChannel();
@@ -445,13 +445,13 @@ public class Controller {
             inProcessChannel.queueDeclare(QUALITY_QUEUE_NAME, false, false, false, null);
             inProcessChannel.queueBind(QUALITY_QUEUE_NAME, EXCHANGE_NAME, QUALITY_ROUTING_KEY);
 
-            inProcessChannel.queueDeclare(GRAPH_QUEUE_NAME, false, false, false, null);
-            inProcessChannel.queueBind(GRAPH_QUEUE_NAME, EXCHANGE_NAME, GRAPH_ROUTING_KEY);
+            inProcessChannel.queueDeclare(SCORER_QUEUE_NAME, false, false, false, null);
+            inProcessChannel.queueBind(SCORER_QUEUE_NAME, EXCHANGE_NAME, SCORER_ROUTING_KEY);
 
             // Channel will only send one request for each worker at a time.
             inProcessChannel.basicQos(1);
             log.info("Connected to RabbitMQ queue " + QUALITY_QUEUE_NAME);
-            log.info("Connected to RabbitMQ queue " + GRAPH_QUEUE_NAME);
+            log.info("Connected to RabbitMQ queue " + SCORER_QUEUE_NAME);
         } catch (Exception e) {
             log.error("Error connecting to RabbitMQ queue " + QUALITY_QUEUE_NAME);
             log.error(e.getMessage());
@@ -524,7 +524,7 @@ public class Controller {
                             disableTestMode();
                         }
                     }
-                } else if(properties.getType().equalsIgnoreCase(MESSAGE_TYPE_GRAPH)) {
+                } else if(properties.getType().equalsIgnoreCase(MESSAGE_TYPE_SCORER)) {
                     ScorerQueueEntry qEntry = null;
                     try {
                         qEntry = (ScorerQueueEntry) in.readObject();

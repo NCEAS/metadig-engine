@@ -60,11 +60,11 @@ import java.util.regex.Pattern;
 public class Scorer {
 
     private final static String EXCHANGE_NAME = "metadig";
-    private final static String GRAPH_QUEUE_NAME = "graph";
+    private final static String SCORER_QUEUE_NAME = "scorer";
     private final static String COMPLETED_QUEUE_NAME = "completed";
-    private final static String GRAPH_ROUTING_KEY = "graph";
+    private final static String SCORER_ROUTING_KEY = "scorer";
     private final static String COMPLETED_ROUTING_KEY = "completed";
-    private final static String MESSAGE_TYPE_GRAPH = "graph";
+    private final static String MESSAGE_TYPE_SCORER = "scorer";
 
     private static Connection inProcessConnection;
     private static Channel inProcessChannel;
@@ -261,7 +261,7 @@ public class Scorer {
             }
         };
 
-        inProcessChannel.basicConsume(GRAPH_QUEUE_NAME, false, consumer);
+        inProcessChannel.basicConsume(SCORER_QUEUE_NAME, false, consumer);
     }
 
     /**
@@ -743,14 +743,14 @@ public class Scorer {
         try {
             inProcessConnection = factory.newConnection();
             inProcessChannel = inProcessConnection.createChannel();
-            inProcessChannel.queueDeclare(GRAPH_QUEUE_NAME, false, false, false, null);
-            inProcessChannel.queueBind(GRAPH_QUEUE_NAME, EXCHANGE_NAME, GRAPH_ROUTING_KEY);
+            inProcessChannel.queueDeclare(SCORER_QUEUE_NAME, false, false, false, null);
+            inProcessChannel.queueBind(SCORER_QUEUE_NAME, EXCHANGE_NAME, SCORER_ROUTING_KEY);
             // Channel will only send one request for each worker at a time.
             inProcessChannel.basicQos(1);
-            log.info("Connected to RabbitMQ queue " + GRAPH_QUEUE_NAME);
+            log.info("Connected to RabbitMQ queue " + SCORER_QUEUE_NAME);
             log.info(" [*] Waiting for messages. To exit press CTRL+C");
         } catch (Exception e) {
-            log.error("Error connecting to RabbitMQ queue " + GRAPH_QUEUE_NAME);
+            log.error("Error connecting to RabbitMQ queue " + SCORER_QUEUE_NAME);
             log.error(e.getMessage());
         }
 
@@ -781,7 +781,7 @@ public class Scorer {
         // The completed queue doesn't use an exchange
         AMQP.BasicProperties basicProperties = new AMQP.BasicProperties.Builder()
                 .contentType("text/plain")
-                .type(MESSAGE_TYPE_GRAPH)
+                .type(MESSAGE_TYPE_SCORER)
                 .build();
         completedChannel.basicPublish(EXCHANGE_NAME, COMPLETED_ROUTING_KEY, basicProperties, message);
     }
