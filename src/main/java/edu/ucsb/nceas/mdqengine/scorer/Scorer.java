@@ -165,6 +165,9 @@ public class Scorer {
                 if(suiteId == null)
                     suiteId = "";
 
+                if(collectionId == null)
+                    collectionId = "";
+
                 // Pids associated with a collection, based on query results using 'collectionQuery' field in solr.
                 ArrayList<String> collectionPids = null;
 
