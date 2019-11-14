@@ -1,13 +1,15 @@
 package edu.ucsb.nceas.mdqengine.filestore;
 
 import edu.ucsb.nceas.mdqengine.MDQconfig;
-import edu.ucsb.nceas.mdqengine.exception.MetadigStoreException;
+import edu.ucsb.nceas.mdqengine.exception.MetadigEntryNotFound;
+import edu.ucsb.nceas.mdqengine.exception.MetadigFilestoreException;
 import org.apache.commons.configuration2.ex.ConfigurationException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import edu.ucsb.nceas.mdqengine.model.*;
 import org.joda.time.DateTime;
+import sun.tools.tree.NewArrayExpression;
 
 import java.io.IOException;
 import java.sql.*;
@@ -29,7 +31,7 @@ public class FilestoreDB {
     /*
      * Get a connection to the database that contains the quality reports.
      */
-    private void init() throws MetadigStoreException {
+    private void init() throws MetadigFilestoreException {
 
         log.debug("initializing connection");
         try {
@@ -40,7 +42,7 @@ public class FilestoreDB {
 
         } catch (ConfigurationException | IOException ex) {
             log.error(ex.getMessage());
-            MetadigStoreException mse = new MetadigStoreException("Unable to create new Store");
+            MetadigFilestoreException mse = new MetadigFilestoreException("Unable to create new Store");
             mse.initCause(ex.getCause());
             throw mse;
         }
@@ -57,22 +59,22 @@ public class FilestoreDB {
         } catch (Exception e) {
             e.printStackTrace();
             log.error(e.getClass().getName() + ": " + e.getMessage());
-            MetadigStoreException mse = new MetadigStoreException("Unable to create the database store.");
+            MetadigFilestoreException mse = new MetadigFilestoreException("Unable to create the database store.");
             mse.initCause(e);
             throw (mse);
         }
     }
 
-    public FilestoreDB () throws MetadigStoreException {
+    public FilestoreDB () throws MetadigFilestoreException {
         try {
             this.init();
-        } catch (MetadigStoreException mse) {
+        } catch (MetadigFilestoreException mse) {
             log.error("Error initializing filestore database: " + mse.getMessage());
             throw(mse);
         }
     }
 
-    public MetadigFile getFileEntry(MetadigFile mdFile) throws MetadigStoreException {
+    public MetadigFile getFileEntry(MetadigFile mdFile) throws MetadigFilestoreException {
 
         Result result = new Result();
         PreparedStatement stmt = null;
@@ -82,31 +84,44 @@ public class FilestoreDB {
         String suiteId = mdFile.getSuiteId();
         String nodeId = mdFile.getNodeId();
         String mdFormatFilter = mdFile.getMetadataFormatFilter();
-        String storageType = mdFile.getStorageType().toString();
+        String storageType = mdFile.getStorageType();
+        if(storageType != null)
+            storageType = storageType.toString();
+        else
+            storageType = "";
         String mediaType = mdFile.getMediaType();
+        String altFilename = mdFile.getAltFilename();
 
         // Hope for the best, prepare for the worst!
-        MetadigStoreException me = new MetadigStoreException("Unable get file from filestore.");
+        MetadigFilestoreException me = new MetadigFilestoreException("Unable get file from filestore.");
         // Select records from the 'filestore' table
 
         MetadigFile resultMdFile = new MetadigFile();
-
+        String sql = null;
         try {
-            String sql = "select * from filestore where collection_id = ? and metadata_id = ? and suite_id = ?" +
-                    " and node_id = ? and format_filter = ? and storage_type = ? and media_type = ?";
-
-            stmt = conn.prepareStatement(sql);
-            stmt.setString(1, collectionId);
-            stmt.setString(2, metadataId);
-            stmt.setString(3, suiteId);
-            stmt.setString(4, nodeId);
-            stmt.setString(5, mdFormatFilter);
-            stmt.setString(6, storageType);
-            stmt.setString(7, mediaType);
-
+            // If the alternate filename is specified, then the query will need to just include the
+            // storageType and the alternate filename, as this combination should be unique.
+            if(altFilename != null && ! altFilename.isEmpty()) {
+                sql = "select * from filestore where storage_type = ? and alt_filename= ?";
+                stmt = conn.prepareStatement(sql);
+                stmt.setString(1, storageType);
+                stmt.setString(2, altFilename);
+            } else {
+                sql = "select * from filestore where collection_id = ? and metadata_id = ? and suite_id = ?" +
+                        " and node_id = ? and format_filter = ? and storage_type = ? and media_type = ?";
+                stmt = conn.prepareStatement(sql);
+                stmt.setString(1, collectionId);
+                stmt.setString(2, metadataId);
+                stmt.setString(3, suiteId);
+                stmt.setString(4, nodeId);
+                stmt.setString(5, mdFormatFilter);
+                stmt.setString(6, storageType);
+                stmt.setString(7, mediaType);
+            }
 
             log.debug("issuing query: " + sql);
             ResultSet rs = stmt.executeQuery();
+            // TODO: The resultset should contain only one row
             if(rs.next()) {
                 resultMdFile.setFileId(rs.getString("file_id"));
                 resultMdFile.setCollectionId(rs.getString("collection_id"));
@@ -126,11 +141,18 @@ public class FilestoreDB {
                 stmt.close();
                 log.debug("Retrieved filestore successfully for file id: " + resultMdFile.getFileId());
             } else {
-                log.debug("Filestore entry not found for collection id: " + collectionId + ", metadataId: " + metadataId + ", suiteId: " + suiteId);
+                log.debug("Filestore entry not found for collection id: " + collectionId + ", metadataId: " + metadataId + ", suiteId: " + suiteId +
+                        ", nodeId" + nodeId + ", formatFilter: " + mdFormatFilter + ", storageType: " + storageType + ", mediaType: "  + mediaType +
+                        ", alt filename: " + altFilename);
+                me.initCause(new MetadigEntryNotFound("Filestore db entry not found"));
+                throw me;
             }
+        } catch ( MetadigFilestoreException e ) {
+            // Catch the exception we just threw.
+            throw me;
         } catch ( Exception e ) {
+            // Catch some other exception
             log.error( e.getClass().getName()+": "+ e.getMessage());
-            e.printStackTrace();
             me.initCause(e);
             throw(me);
         }
@@ -138,7 +160,7 @@ public class FilestoreDB {
         return resultMdFile;
     }
 
-    public void saveFileEntry(MetadigFile mdFile) throws MetadigStoreException {
+    public void saveFileEntry(MetadigFile mdFile) throws MetadigFilestoreException {
 
         PreparedStatement stmt = null;
 
@@ -154,7 +176,7 @@ public class FilestoreDB {
         Timestamp timestamp = new Timestamp(creationDatetime.getMillis());
         String mediaType = mdFile.getMediaType();
 
-        MetadigStoreException me = new MetadigStoreException("Unable save metadig file info to the datdabase.");
+        MetadigFilestoreException me = new MetadigFilestoreException("Unable save metadig file info to the datdabase.");
 
         // Attempt to insert a new record. If the unique constraint is violated (updating an existing record), perform an 'upsert', replacing
         // the original record.
@@ -200,11 +222,11 @@ public class FilestoreDB {
         log.debug("Filestore record created successfully");
     }
 
-    public void deleteFileEntry(MetadigFile mdFile) throws MetadigStoreException {
+    public void deleteFileEntry(MetadigFile mdFile) throws MetadigFilestoreException {
 
         PreparedStatement stmt = null;
         String fileId = mdFile.getFileId();
-        MetadigStoreException me = new MetadigStoreException("Unable to remove entry for fileId: " + fileId + " from the datdabase.");
+        MetadigFilestoreException me = new MetadigFilestoreException("Unable to remove entry for fileId: " + fileId + " from the datdabase.");
 
         try {
             String sql = "DELETE from filestore where file_id=?";
@@ -240,7 +262,7 @@ public class FilestoreDB {
     /*
      * Reset the store, i.e. renew the database connection.
      */
-    public void renew() throws MetadigStoreException {
+    public void renew() throws MetadigFilestoreException {
         if(!this.isAvailable()) {
             log.debug("Renewing connection to database");
             this.init();

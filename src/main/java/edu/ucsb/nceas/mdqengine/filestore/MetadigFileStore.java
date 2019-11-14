@@ -1,7 +1,8 @@
 package edu.ucsb.nceas.mdqengine.filestore;
 
 import edu.ucsb.nceas.mdqengine.MDQconfig;
-import edu.ucsb.nceas.mdqengine.exception.MetadigStoreException;
+import edu.ucsb.nceas.mdqengine.exception.MetadigEntryNotFound;
+import edu.ucsb.nceas.mdqengine.exception.MetadigFilestoreException;
 import org.apache.commons.configuration2.ex.ConfigurationException;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.logging.Log;
@@ -17,21 +18,21 @@ public class MetadigFileStore {
     private String file;
     private String filestoreBase = null;
 
-    public MetadigFileStore() throws MetadigStoreException {
+    public MetadigFileStore() throws MetadigFilestoreException {
         this.init();
     }
 
     /*
      * Get a connection to the database that contains the quality reports.
      */
-    private void init() throws MetadigStoreException {
+    private void init() throws MetadigFilestoreException {
 
         try {
             MDQconfig cfg = new MDQconfig();
             this.filestoreBase = cfg.getString("metadig.store.directory");
         } catch (ConfigurationException | IOException ex) {
             log.error(ex.getMessage());
-            MetadigStoreException mse = new MetadigStoreException("Unable to create new Store");
+            MetadigFilestoreException mse = new MetadigFilestoreException("Unable to create new Store");
             mse.initCause(ex.getCause());
             throw mse;
         }
@@ -41,7 +42,7 @@ public class MetadigFileStore {
         return;
     }
 
-    public File getFile(MetadigFile mdFile) throws MetadigStoreException {
+    public File getFile(MetadigFile mdFile) throws MetadigFilestoreException {
         String path = null;
 
         // First query the database to find a match based on the data in the MetadigFile entry. In this version of
@@ -51,7 +52,7 @@ public class MetadigFileStore {
 
         try {
             resultFile = fsdb.getFileEntry(mdFile);
-        } catch (MetadigStoreException mse) {
+        } catch (MetadigFilestoreException mse) {
             log.error("Unable to get file: " + mse.getMessage());
             throw mse;
         }
@@ -60,13 +61,13 @@ public class MetadigFileStore {
         File storeFile = new File(path);
 
         if (!storeFile.exists()) {
-            MetadigStoreException metadigStoreException = new MetadigStoreException("File " + path + " doesn't exist");
-            throw metadigStoreException;
+            MetadigFilestoreException metadigFilestoreException = new MetadigFilestoreException("File " + path + " doesn't exist");
+            throw metadigFilestoreException;
         }
 
         if (!storeFile.canRead()) {
-            MetadigStoreException metadigStoreException = new MetadigStoreException("File " + path + " is not readable");
-            throw metadigStoreException;
+            MetadigFilestoreException metadigFilestoreException = new MetadigFilestoreException("File " + path + " is not readable");
+            throw metadigFilestoreException;
         }
 
         fsdb.shutdown();
@@ -76,7 +77,7 @@ public class MetadigFileStore {
     /*
      * Copy the input file to the specified filename in the MetaDIG filestore
      */
-    public String saveFile(MetadigFile mdFile, String inputFile, Boolean replace) throws IOException, MetadigStoreException {
+    public String saveFile(MetadigFile mdFile, String inputFile, Boolean replace) throws IOException, MetadigFilestoreException {
         String path = null;
 
         File infile = new File(inputFile);
@@ -92,7 +93,7 @@ public class MetadigFileStore {
      * absolute path will be "/filestore base/storage type/filename", for example
      * "/data/metadig/store/graph/testproj-urn:node:mnTestKNB-FAIR.suite.1.jpg"
      */
-    public String saveFile(MetadigFile mdFile, FileInputStream fis, Boolean replace) throws MetadigStoreException {
+    public String saveFile(MetadigFile mdFile, FileInputStream fis, Boolean replace) throws MetadigFilestoreException {
         String path = null;
         FilestoreDB fsdb;
 
@@ -103,7 +104,7 @@ public class MetadigFileStore {
 
         try {
             fsdb = new FilestoreDB();
-        } catch (MetadigStoreException mse) {
+        } catch (MetadigFilestoreException mse) {
             log.error("Unable to connect to filestore database");
             throw (mse);
         }
@@ -111,14 +112,18 @@ public class MetadigFileStore {
         Boolean duplicate = false;
         try {
             fsdb.saveFileEntry(mdFile);
-        } catch (MetadigStoreException mse) {
+        } catch (MetadigFilestoreException mse) {
             duplicate = true;
         }
 
-        MetadigFile existingFile;
+        MetadigFile existingFile = null;
         // If the file is a duplicate, we have to get the file_id to replace it.
         if (duplicate) {
-            existingFile = fsdb.getFileEntry(mdFile);
+            try {
+                existingFile = fsdb.getFileEntry(mdFile);
+            } catch (MetadigFilestoreException me) {
+                log.trace("File already exists.");
+            }
             path = filestoreBase + "/" + existingFile.getRelativePath();
         } else {
             path = filestoreBase + "/" + mdFile.getRelativePath();
@@ -138,7 +143,7 @@ public class MetadigFileStore {
         return path;
     }
 
-    public boolean deleteFile(MetadigFile mdFile) throws MetadigStoreException {
+    public boolean deleteFile(MetadigFile mdFile) throws MetadigFilestoreException {
 
         String path = null;
         FilestoreDB fsdb;
@@ -146,7 +151,7 @@ public class MetadigFileStore {
         try {
             fsdb = new FilestoreDB();
             fsdb.deleteFileEntry(mdFile);
-        } catch (MetadigStoreException mse) {
+        } catch (MetadigFilestoreException mse) {
             log.error("Unable to connect to filestore database");
             throw (mse);
         }

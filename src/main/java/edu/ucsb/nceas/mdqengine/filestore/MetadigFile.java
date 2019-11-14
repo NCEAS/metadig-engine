@@ -1,6 +1,6 @@
 package edu.ucsb.nceas.mdqengine.filestore;
 
-import edu.ucsb.nceas.mdqengine.exception.MetadigStoreException;
+import edu.ucsb.nceas.mdqengine.exception.MetadigFilestoreException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.joda.time.DateTime;
@@ -32,14 +32,14 @@ public class MetadigFile {
     private String path; // the complete path to the file
     private MediaTypes mediaTypes = null;
 
-    public MetadigFile() throws MetadigStoreException {
+    public MetadigFile() throws MetadigFilestoreException {
         this.fileId = UUID.randomUUID().toString();
         this.creationDatetime = DateTime.now();
         this.init();
     };
 
     public MetadigFile (String collectionId, String metadataId, String suiteId, String nodeId, String metadataFormatFilter, String storageType,
-                        String relativePath, DateTime createtionDate, String mediaType) throws MetadigStoreException {
+                        String relativePath, DateTime createtionDate, String mediaType) throws MetadigFilestoreException {
 
         this.fileId = UUID.randomUUID().toString();
         this.collectionId = collectionId;
@@ -53,12 +53,12 @@ public class MetadigFile {
         this.init();
     }
 
-    private void init() throws MetadigStoreException {
+    private void init() throws MetadigFilestoreException {
         try {
             mediaTypes = new MediaTypes();
         } catch (IOException ioe) {
             log.error("Unable to intialize Metadig fileStore: " + ioe.getMessage());
-            MetadigStoreException mse = new MetadigStoreException("Unable to intialize Metadig filestore");
+            MetadigFilestoreException mse = new MetadigFilestoreException("Unable to intialize Metadig filestore");
             mse.initCause(ioe.getCause());
             throw mse;
         }
