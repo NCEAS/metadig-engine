@@ -3,7 +3,7 @@ package edu.ucsb.nceas.mdqengine.scorer;
 import edu.ucsb.nceas.mdqengine.MDQconfig;
 import edu.ucsb.nceas.mdqengine.dispatch.Dispatcher;
 import edu.ucsb.nceas.mdqengine.exception.MetadigException;
-import edu.ucsb.nceas.mdqengine.exception.MetadigStoreException;
+import edu.ucsb.nceas.mdqengine.exception.MetadigFilestoreException;
 import edu.ucsb.nceas.mdqengine.filestore.MetadigFile;
 import edu.ucsb.nceas.mdqengine.filestore.MetadigFileStore;
 import edu.ucsb.nceas.mdqengine.filestore.StorageType;
@@ -81,7 +81,7 @@ public class Graph {
 
         try {
             this.fileStore = new MetadigFileStore();
-        } catch (MetadigStoreException mse) {
+        } catch (MetadigFilestoreException mse) {
             throw (mse);
         }
 

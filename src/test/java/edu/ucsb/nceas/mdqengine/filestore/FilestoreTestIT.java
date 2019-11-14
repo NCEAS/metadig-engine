@@ -1,7 +1,7 @@
 package edu.ucsb.nceas.mdqengine.filestore;
 
 import edu.ucsb.nceas.mdqengine.exception.MetadigException;
-import edu.ucsb.nceas.mdqengine.exception.MetadigStoreException;
+import edu.ucsb.nceas.mdqengine.exception.MetadigFilestoreException;
 import edu.ucsb.nceas.mdqengine.store.MDQStore;
 import org.apache.commons.configuration2.ex.ConfigurationException;
 import org.joda.time.DateTime;
@@ -38,7 +38,7 @@ public class FilestoreTestIT {
     }
 
     @Test
-    public void saveFile() throws IOException, MetadigStoreException {
+    public void saveFile() throws IOException, MetadigFilestoreException {
 
         MetadigFile mdFile = new MetadigFile();
         mdFile.setCreationDatetime(DateTime.now());
@@ -51,7 +51,7 @@ public class FilestoreTestIT {
         MetadigFileStore mfs;
         try {
             mfs = new MetadigFileStore();
-        } catch (MetadigStoreException mse) {
+        } catch (MetadigFilestoreException mse) {
             System.out.println("Error creating filestore: " + mse.getMessage());
             throw mse;
         }

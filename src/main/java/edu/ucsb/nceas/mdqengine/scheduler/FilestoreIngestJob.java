@@ -1,6 +1,7 @@
 package edu.ucsb.nceas.mdqengine.scheduler;
 
 import edu.ucsb.nceas.mdqengine.MDQconfig;
+import edu.ucsb.nceas.mdqengine.exception.MetadigFilestoreException;
 import edu.ucsb.nceas.mdqengine.exception.MetadigStoreException;
 import edu.ucsb.nceas.mdqengine.filestore.MetadigFile;
 import edu.ucsb.nceas.mdqengine.filestore.MetadigFileStore;
@@ -88,7 +89,7 @@ public class FilestoreIngestJob implements Job {
                 try {
                     log.info("Searching for files in " + file.getAbsolutePath() + " to ingest into filestore");
                     searchDir(file, dirIncludeMatch, dirExcludeMatch, fileIncludeMatch, fileExcludeMatch);
-                } catch (MetadigStoreException mse) {
+                } catch (MetadigFilestoreException mse) {
                     JobExecutionException jee = new JobExecutionException("Error executing task.");
                     jee.initCause(mse);
                     throw jee;
@@ -98,7 +99,7 @@ public class FilestoreIngestJob implements Job {
     }
 
     private void searchDir(File file, String dirIncludeMatch, String dirExcludeMatch, String fileIncludeMatch,
-                                 String fileExcludeMatch) throws MetadigStoreException {
+                                 String fileExcludeMatch) throws MetadigFilestoreException {
 
         List<String> inDirs = Arrays.asList(dirIncludeMatch.split(","));
         File[] fileList = file.listFiles();
@@ -106,7 +107,7 @@ public class FilestoreIngestJob implements Job {
             if(thisFile.isDirectory() && inDirs.contains(file.getName())) {
                 try {
                     searchDir(thisFile, dirIncludeMatch, dirExcludeMatch, fileIncludeMatch, fileExcludeMatch);
-                } catch (MetadigStoreException mse) {
+                } catch (MetadigFilestoreException mse) {
                     log.error("Error searching directory " + thisFile.getName() + ": " + mse.getMessage());
                     throw mse;
                 }
@@ -117,7 +118,7 @@ public class FilestoreIngestJob implements Job {
         }
     }
 
-    private File ingestFile(File dir, File file) throws MetadigStoreException {
+    private File ingestFile(File dir, File file) throws MetadigFilestoreException {
 
         //MetadigFile mf = MetadigFile(collectionId, metadataId, suiteId, nodeId, metadataFormatFilter, storageType, relativePath, createtionDate, fileExt);
         MetadigFileStore metadigFileStore = null;
@@ -126,7 +127,7 @@ public class FilestoreIngestJob implements Job {
         try {
             metadigFileStore = new MetadigFileStore();
             metadigFile = new MetadigFile();
-        } catch (MetadigStoreException mse) {
+        } catch (MetadigFilestoreException mse) {
             log.error("Unable to ingest file, cannot intialize MetadigFileStore: " + mse.getMessage());
             throw mse;
         }
@@ -144,7 +145,7 @@ public class FilestoreIngestJob implements Job {
             file.delete();
         } catch (Exception e) {
             log.error("Unable to save file " + "\"" + file.getName() + "\" to filestore: " + e.getMessage());
-            MetadigStoreException mse = new MetadigStoreException("Unable to save file " + "\"" + file.getName() + "\" to filestore");
+            MetadigFilestoreException mse = new MetadigFilestoreException("Unable to save file " + "\"" + file.getName() + "\" to filestore");
             mse.initCause(e.getCause());
             throw mse;
         }
