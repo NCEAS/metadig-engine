@@ -5,7 +5,10 @@ import edu.ucsb.nceas.mdqengine.collections.Runs;
 import edu.ucsb.nceas.mdqengine.exception.MetadigException;
 import edu.ucsb.nceas.mdqengine.exception.MetadigIndexException;
 import edu.ucsb.nceas.mdqengine.exception.MetadigProcessException;
-import edu.ucsb.nceas.mdqengine.model.*;
+import edu.ucsb.nceas.mdqengine.model.Result;
+import edu.ucsb.nceas.mdqengine.model.Run;
+import edu.ucsb.nceas.mdqengine.model.Suite;
+import edu.ucsb.nceas.mdqengine.model.SysmetaModel;
 import edu.ucsb.nceas.mdqengine.processor.GroupLookupCheck;
 import edu.ucsb.nceas.mdqengine.serialize.XmlMarshaller;
 import edu.ucsb.nceas.mdqengine.solr.IndexApplicationController;
@@ -254,17 +257,28 @@ public class Worker {
                         // or unset as latest in sequence.
                         if(indexLatest) {
                             // Put files to be updated in a HashMap (can update multiple fields)
-                            HashMap<String, String> fields = new HashMap<>();
+                            HashMap<String, Object> fields = new HashMap<>();
                             for (Run r : runsInSequence.getModifiedRuns()) {
                                 log.info("Updating Solr index with modified run with pid: " + r.getObjectIdentifier() + ", isLatest: " + r.getIsLatest().toString() + ", dateUploaded: " + r.getDateUploaded());
-                                fields.put("isLatest", r.getIsLatest().toString());
-                                wkr.updateIndex(r.getObjectIdentifier(), r.getSuiteId(), fields, solrLocation);
+                                fields.put("isLatest", r.getIsLatest());
+                                try {
+                                    wkr.updateIndex(r.getObjectIdentifier(), r.getSuiteId(), fields, solrLocation);
+                                } catch (MetadigIndexException mie) {
+                                    // Retry the update if the first attemp fails
+                                    log.info("Retrying updating Solr index with modified run with pid: " + r.getObjectIdentifier() + ", isLatest: " + r.getIsLatest().toString() + ", dateUploaded: " + r.getDateUploaded());
+                                    try {
+                                        wkr.updateIndex(r.getObjectIdentifier(), r.getSuiteId(), fields, solrLocation);
+                                        log.info("Sucessfully updated Solr index with modified run with pid: " + r.getObjectIdentifier() + ", isLatest: " + r.getIsLatest().toString() + ", dateUploaded: " + r.getDateUploaded());
+                                    } catch (Exception mie2) {
+                                        log.error("Failed 2nd attempt to update Solr index with modified run with pid: " + r.getObjectIdentifier() + ", isLatest: " + r.getIsLatest().toString() + ", dateUploaded: " + r.getDateUploaded()) ;
+                                    }
+                                }
                             }
                         }
 
                         if (indexSequenceId) {
                             // Put files to be updated in a HashMap (can update multiple fields)
-                            HashMap<String, String> fields = new HashMap<>();
+                            HashMap<String, Object> fields = new HashMap<>();
                             fields.put("sequenceId", sequenceId);
                             for (Run r : runsInSequence.getModifiedRuns()) {
                                 log.info("Updating Solr index with sequenceId: " + sequenceId + " for pid: " + r.getObjectIdentifier());
@@ -538,20 +552,21 @@ public class Worker {
      * @param fields : field names and values to update in the Solr index entry
      * @throws Exception
      */
-    public void updateIndex(String metadataId, String suiteId, HashMap<String, String> fields, String solrLocation) throws MetadigIndexException {
+    public void updateIndex(String metadataId, String suiteId, HashMap<String, Object> fields, String solrLocation) throws MetadigIndexException {
 
-        log.info(" [x] Updating index entry for pid: " + metadataId + ", suite: " + suiteId);
         try {
             IndexApplicationController iac = new IndexApplicationController();
             iac.initialize(this.springConfigFileURL, solrLocation);
             Identifier pid = new Identifier();
             pid.setValue(metadataId);
-            iac.updateSolrDoc(pid, suiteId, fields);
-            log.info(" [x] Done updating entry for pid: " + metadataId + ", suite id: " + suiteId);
+            // Update the solr doc fields, replacing the current value (other types of updates are available)
+            String updateFieldModifier = "set";
+            iac.updateSolrDoc(pid, suiteId, fields, updateFieldModifier);
             iac.shutdown();
         } catch (Exception e) {
             throw new MetadigIndexException("Error during index updating", e);
         }
+        log.debug("Done updating entry for pid: " + metadataId + ", suite id: " + suiteId);
     }
 
     /**

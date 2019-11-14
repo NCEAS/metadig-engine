@@ -52,7 +52,6 @@ public class RDispatcher extends Dispatcher {
 			log.debug("output: \n" + output.getAbsolutePath());
 			
 			String combinedCode = preCode + code + postCode;
-			log.debug("Running scripted code: \n" + combinedCode);
 			
 			// write code to script file
 			IOUtils.write(combinedCode, new FileOutputStream(script), "UTF-8");
@@ -75,9 +74,7 @@ public class RDispatcher extends Dispatcher {
 			
 			String stdOut = IOUtils.toString(p.getInputStream(), "UTF-8");
 			String stdErr = IOUtils.toString(p.getErrorStream(), "UTF-8");
-			log.debug("stdOut:" + stdOut);
-			log.debug("stdErr:" + stdErr);
-			
+
 			if (ret > 0) {
 				// report an error
 				result = new Result();
@@ -86,7 +83,6 @@ public class RDispatcher extends Dispatcher {
 			} else {
 				// read result from output
 				String jsonOutput = IOUtils.toString(new FileInputStream(output), "UTF-8");
-				log.debug("jsonOutput=" + jsonOutput);
 				result = (Result) JsonMarshaller.fromJson(jsonOutput, Result.class);
 			}
 						

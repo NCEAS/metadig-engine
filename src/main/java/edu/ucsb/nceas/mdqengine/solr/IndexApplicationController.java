@@ -49,7 +49,7 @@ public class IndexApplicationController {
             MDQconfig cfg = new MDQconfig();
             // If not specified on command line, use default fallback
             if(solrLocation == null || solrLocation.equalsIgnoreCase("")) {
-                solrLocation = cfg.getString("solr.location.fallback");
+                solrLocation = cfg.getString("solr.location");
             }
             log.debug("Setting solr location to " + solrLocation);
             solrClient = new HttpSolrClient.Builder(solrLocation).build();
@@ -142,16 +142,14 @@ public class IndexApplicationController {
      *
      */
 
-    public void updateSolrDoc(Identifier pid, String suiteId, HashMap<String, String> fields) throws IOException, Exception {
+    public void updateSolrDoc(Identifier pid, String suiteId, HashMap<String, Object> fields, String updateFieldModifier) throws IOException, Exception {
 
         String metadataId = null;
         try {
             log.debug("calling solrIndex.update()...");
             for (SolrIndex solrIndex: solrIndexes) {
-                log.debug("calling solrIndex.update()...");
-                //solrIndex.update(metadataId, suiteId, sequenceId);
-                metadataId = pid.getValue().toString();
-                solrIndex.update(metadataId, suiteId, fields);
+                metadataId = pid.getValue();
+                solrIndex.update(metadataId, suiteId, fields, updateFieldModifier);
             }
         } catch (Exception e) {
             log.error("Unable to update Solr document for metadata id: " + metadataId + ": " + e.getMessage());

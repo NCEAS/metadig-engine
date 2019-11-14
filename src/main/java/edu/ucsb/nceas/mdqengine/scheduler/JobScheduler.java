@@ -30,15 +30,14 @@ import static org.quartz.TriggerBuilder.newTrigger;
  */
 public class JobScheduler {
 
-    private String solrLocation = null;
     public static Log log = LogFactory.getLog(Controller.class);
 
     public static void main(String[] argv) throws Exception {
         JobScheduler js = new JobScheduler();
 
         String taskType = null;
-        String jobName = null;
-        String jobGroup = null;
+        String taskName = null;
+        String taskGroup = null;
         String authToken = null;
         String authTokenParamName = null;
         String cronSchedule = null;
@@ -49,9 +48,15 @@ public class JobScheduler {
         String nodeId = null;
         String nodeServiceUrl = null;
         String startHarvestDatetime = null;
-        String solrLocation = null;
         int countRequested = 1000;
         int harvestDatetimeInc = 1;
+
+        // Filestore variables
+        String dirIncludeMatch = null;
+        String dirExcludeMatch = null;
+        String fileIncludeMatch = null;
+        String fileExcludeMatch = null;
+        String logFile = null;
 
         String taskListFilename = js.readConfig("task.file");
         log.debug("task list filename: " + taskListFilename);
@@ -77,8 +82,8 @@ public class JobScheduler {
         Iterable<CSVRecord> records = CSVFormat.RFC4180.withFirstRecordAsHeader().withQuote('"').withCommentMarker('#').parse(in);
         for (CSVRecord record : records) {
             taskType       = record.get("task-type").trim();
-            jobName        = record.get("job-name").trim();
-            jobGroup       = record.get("job-group").trim();
+            taskName        = record.get("task-name").trim();
+            taskGroup       = record.get("task-group").trim();
             authTokenParamName = record.get("auth-token").trim();
             cronSchedule   = record.get("cron-schedule").trim();
             params         = record.get("params").trim();
@@ -91,7 +96,7 @@ public class JobScheduler {
             //System.out.println("authToken: " + authToken);
             System.out.println("params: " + params);
             if(taskType.equals("quality")) {
-                System.out.println("Scheduling harvest for job name: " + jobName + ", job group: " + jobGroup);
+                System.out.println("Scheduling harvest for task name: " + taskName + ", task group: " + taskGroup);
                 String[] splitted = Arrays.stream(params.split(";"))
                         .map(String::trim)
                         .toArray(String[]::new);
@@ -122,15 +127,71 @@ public class JobScheduler {
                 // The number of results to return from the DataONE 'listObjects' service
                 countRequested = Integer.parseInt(splitted[++icnt].trim());
                 System.out.println("countRequested: " + countRequested);
+            } else if(taskType.equals("graph")) {
+                System.out.println("Scheduling harvest for task name: " + taskName + ", task group: " + taskGroup);
+                String[] splitted = Arrays.stream(params.split(";"))
+                        .map(String::trim)
+                        .toArray(String[]::new);
+
+                int icnt = -1;
+                System.out.println("Split length: " + splitted.length);
+                // filter to use for removing unneeded pids from harvest list
+                pidFilter      = splitted[++icnt].trim();
+                System.out.println("pidFilter: " + pidFilter);
+                // Suite identifier
+                suiteId        = splitted[++icnt].trim();
+                System.out.println("suiteId: " + suiteId);
+                // DataOne Node identifier
+                nodeId         = splitted[++icnt].trim();
+                System.out.println("nodeId: " + nodeId);
+                // Dataone base service URL
+                nodeServiceUrl = splitted[++icnt].trim();
+                System.out.println("nodeServiceUrl: " + nodeServiceUrl);
+                // Start harvest datetime. This is the beginning of the date range for the first harvest.
+                // After the first harvest, the end of the harvest date range will be used as the beginning
+                // for the next harvest.
+                startHarvestDatetime = splitted[++icnt].trim();
+                System.out.println("startHarvestDatetime: " + startHarvestDatetime);
+                // Harvest datetime increment. This value will be added to the beginning of the harvest datetime
+                // range to determine the end of the range. This is specified in number of days.
+                harvestDatetimeInc = Integer.parseInt(splitted[++icnt].trim());
+                System.out.println("harvestDatetimeInc: " + harvestDatetimeInc);
+                // The number of results to return from the DataONE 'listObjects' service
+                countRequested = Integer.parseInt(splitted[++icnt].trim());
+                System.out.println("countRequested: " + countRequested);
+            } else if(taskType.equals("filestore")) {
+                System.out.println("Scheduling filestore ingest task name: " + taskName + ", task group: " + taskGroup);
+                String[] splitted = Arrays.stream(params.split(";"))
+                        .map(String::trim)
+                        .toArray(String[]::new);
+
+                int icnt = -1;
+                System.out.println("Split length: " + splitted.length);
+                // Filestore staging directories include in the ingest
+                dirIncludeMatch = splitted[++icnt].trim();
+                System.out.println("dirIncludeMatch: " + dirIncludeMatch);
+                // Filestore staging directories to include in the ingest
+                dirExcludeMatch = splitted[++icnt].trim();
+                System.out.println("dirExcludeMatch: " + dirExcludeMatch);
+                // Filestore staging files to include in the ingest
+                fileIncludeMatch = splitted[++icnt].trim();
+                System.out.println("fileIncludeMatch: " + fileIncludeMatch);
+                // Filestore staging files to exclude from the ingest
+                fileExcludeMatch = splitted[++icnt].trim();
+                System.out.println("fileExcludeMatch: " + fileExcludeMatch);
+                logFile = splitted[++icnt].trim();
+                System.out.println("log file: " + logFile);
             }
 
             try {
-                System.out.println("Setting job");
+                System.out.println("Setting task");
                 // Currently there is only taskType="quality", but there could be more in the future!
                 JobDetail job = null;
                 if(taskType.equals("quality")) {
                     job = newJob(RequestReportJob.class)
-                            .withIdentity(jobName, jobGroup)
+                            .withIdentity(taskName, taskGroup)
+                            .usingJobData("taskName", taskName)
+                            .usingJobData("taskType", taskType)
                             .usingJobData("authToken", authToken)
                             .usingJobData("pidFilter", pidFilter)
                             .usingJobData("suiteId", suiteId)
@@ -140,15 +201,40 @@ public class JobScheduler {
                             .usingJobData("harvestDatetimeInc", harvestDatetimeInc)
                             .usingJobData("countRequested", countRequested)
                             .build();
+                } else if (taskType.equalsIgnoreCase("graph")) {
+                    job = newJob(RequestGraphJob.class)
+                            .withIdentity(taskName, taskGroup)
+                            .usingJobData("taskName", taskName)
+                            .usingJobData("taskType", taskType)
+                            .usingJobData("authToken", authToken)
+                            .usingJobData("pidFilter", pidFilter)
+                            .usingJobData("suiteId", suiteId)
+                            .usingJobData("nodeId", nodeId)
+                            .usingJobData("nodeServiceUrl", nodeServiceUrl)
+                            .usingJobData("startHarvestDatetime", startHarvestDatetime)
+                            .usingJobData("harvestDatetimeInc", harvestDatetimeInc)
+                            .usingJobData("countRequested", countRequested)
+                            .build();
+                } else if (taskType.equalsIgnoreCase("filestore")) {
+                    job = newJob(FilestoreIngestJob.class)
+                            .withIdentity(taskName, taskGroup)
+                            .usingJobData("taskName", taskName)
+                            .usingJobData("taskType", taskType)
+                            .usingJobData("dirIncludeMatch", dirIncludeMatch)
+                            .usingJobData("dirExcludeMatch", dirExcludeMatch)
+                            .usingJobData("fileIncludeMatch", fileIncludeMatch)
+                            .usingJobData("fileExcludeMatch", fileExcludeMatch)
+                            .usingJobData("logFile", logFile)
+                            .build();
                 }
 
                 System.out.println("Setting trigger");
                 CronTrigger trigger = newTrigger()
-                    .withIdentity(jobName + "-trigger", jobGroup)
+                    .withIdentity(taskName + "-trigger", taskGroup)
                     .withSchedule(cronSchedule(cronSchedule))
                     .build();
 
-                System.out.println("Scheduling job");
+                System.out.println("Scheduling task");
                 scheduler.scheduleJob(job, trigger);
 
             } catch (SchedulerException se) {

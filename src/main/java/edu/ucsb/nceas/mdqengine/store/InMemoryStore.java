@@ -1,11 +1,9 @@
 package edu.ucsb.nceas.mdqengine.store;
 
+import com.sun.javafx.scene.control.skin.TableCellSkin;
 import edu.ucsb.nceas.mdqengine.MDQconfig;
 import edu.ucsb.nceas.mdqengine.exception.MetadigStoreException;
-import edu.ucsb.nceas.mdqengine.model.Check;
-import edu.ucsb.nceas.mdqengine.model.Node;
-import edu.ucsb.nceas.mdqengine.model.Run;
-import edu.ucsb.nceas.mdqengine.model.Suite;
+import edu.ucsb.nceas.mdqengine.model.*;
 import edu.ucsb.nceas.mdqengine.serialize.XmlMarshaller;
 import org.apache.commons.configuration2.ex.ConfigurationException;
 import org.apache.commons.io.IOUtils;
@@ -55,7 +53,7 @@ public class InMemoryStore implements MDQStore{
 		String storeDirectory;
 
 		try {
-			storeDirectory = cfg.getString("metadig.store.directory");
+			storeDirectory = cfg.getString("metadig.base.directory");
 		} catch (ConfigurationException cex) {
 			log.error("Unable to read configuration");
 			MetadigStoreException mse = new MetadigStoreException("Unable to read config properties");
@@ -206,11 +204,17 @@ public class InMemoryStore implements MDQStore{
 	@Override
 	public void renew() {};
 
-	@Override
-	public Node getNode(String nodeId) { return new Node(); }
+//	@Override
+//	public Node getNode(String nodeId, String jobName) { return new Node(); }
+//
+//	@Override
+//	public void saveNode(Node node) throws MetadigStoreException { }
 
 	@Override
-	public void saveNode(Node node) throws MetadigStoreException { }
+	public Task getTask(String taskName) { return new Task(); }
+
+	@Override
+	public void saveTask(Task task) throws MetadigStoreException { }
 
 	@Override
 	public void shutdown() {};

@@ -369,7 +369,7 @@ public class SolrIndex {
     /*
      * Update a Solr document with a new value for the specified field.
      */
-    public synchronized void update(String metadataId, String suiteId, HashMap<String, String> fields) throws SolrServerException, IOException {
+    public synchronized void update(String metadataId, String suiteId, HashMap<String, Object> fields, String updateFieldModifier) throws SolrServerException, IOException {
 
         log.debug("Updating entry in Solr index...");
         SolrQuery query = new SolrQuery("metadataId:" + '"' +  metadataId + '"' + "+suiteId:" + suiteId);
@@ -377,29 +377,57 @@ public class SolrIndex {
         QueryResponse response = solrClient.query(query);
         SolrDocumentList docs = response.getResults();
 
+        // Use the default field modifier type, if not specified in the arg list.
+        if (updateFieldModifier == null) updateFieldModifier = "set";
+
         String runId = null;
         SolrDocument resultDoc = null;
         if(docs != null) {
-            log.debug("Found entry for metadataId: " + metadataId + ", suiteId: " + suiteId + ", updating...");
+            log.info("Found entry for metadataId: " + metadataId + ", suiteId: " + suiteId + ", updating...");
             resultDoc = docs.get(0);
             runId = (String)resultDoc.getFieldValue("runId");
             log.info("RunId: " + runId);
-            // For some reason, the Solr atomic 'update' mechanism isn't working properly with our index. It may be due to
-            // the custom 'UpdateProcessor' (defined in solrconfig.xml). So, it's not possible to just specify the
-            // 'id' field and set another field. Instead, the entire document has to be imported from the existing
-            // record, added to a SolrInputDocument, and then this record will replace the old.
             SolrInputDocument solrDoc = new SolrInputDocument();
 
-            // Read all fields from the existing document and populate new Solr doc
+            // The Atomic update capability with Solr doesn't appear to work with our index or I'm using it
+            // incorrectly - so we have to update the entire document by exporting the result document to
+            // a new document, with any updated fields that have been passed in. Because this method uses
+            // the '_version_' field from the result document for the new one, the Solr 'optimistic concurrency'
+            // mechanism should be enabled, preventing this update from updating another update to this record that
+            // came before us.
             for (String n : resultDoc.getFieldNames()) {
-                log.trace("Adding field: " + n);
+                // Don't add fields twice, i.e. from updated fields and from existing Solr doc
+                if(fields.containsKey(n)) continue;
+                log.info("Adding field: " + n);
                 solrDoc.addField(n, resultDoc.getFieldValue(n));
             }
 
-            // Set the new value for the update fields
-            for (Map.Entry<String,String> entry : fields.entrySet()) {
-                solrDoc.setField(entry.getKey(), entry.getValue());
+            // Add requested fields with updated values
+            for (Map.Entry<String, Object> entry : fields.entrySet()) {
+                log.info("Adding field: " + entry.getKey());
+                solrDoc.addField(entry.getKey(), entry.getValue());
             }
+
+            // Atomic update strategy from http://yonik.com/solr/atomic-updates/
+            // Atomic updates are enabled by using the 'field modifier' for the fields to be updated.
+//            solrDoc.setField("runId", runId);
+//            solrDoc.setField("_version_", String.valueOf(resultDoc.getFieldValue("_version_")));
+//            for (Map.Entry<String, Object> entry : fields.entrySet()) {
+//                //Map<String, String> fieldModifier = new HashMap<>(1);
+//                Map<String, Object> fieldModifier = new HashMap<>(1);
+//                // If the 'result' (existing) doc already contains the item, then use 'set' for the Solr field modifier
+//                // If not, then use 'add'.
+//                if (resultDoc.containsKey(entry.getKey())) {
+//                    log.info("Setting field: " + entry.getKey() + ", value: " + entry.getValue());
+//                    fieldModifier.put("set", entry.getValue());
+//                } else {
+//                    log.info("Adding field: " + entry.getKey() + ", value: " + entry.getValue());
+//                    //fieldModifier.put(updateFieldModifier, entry.getValue());
+//                    fieldModifier.put("add", entry.getValue());
+//                }
+//                solrDoc.addField(entry.getKey(), fieldModifier);
+//            }
+
             UpdateRequest updateRequest = new UpdateRequest();
             updateRequest.setAction( UpdateRequest.ACTION.COMMIT, false, false);
 
@@ -410,13 +438,14 @@ public class SolrIndex {
             } catch (SolrServerException e) {
                 log.error("Unable to update Solr document for metadataId: " + metadataId + ": " + e.getMessage());
                 throw e;
-            } catch (IOException e) {
-                log.error("IO Error during update of SOlr document for metadataId, : " + metadataId + ": " + e.getMessage());
-                throw e;
+            } catch (IOException ioe) {
+                log.error("IO Error during update of SOlr document for metadataId, : " + metadataId + ": " + ioe.getMessage());
+                throw ioe;
             }
-            log.debug("Updated entry for metadataId: " + metadataId);
+            log.info("Updated entry for metadataId: " + metadataId + ", suiteId: " + suiteId);
         } else {
             log.error("Did not find entry for metadataId: " + metadataId + ", suiteId: " + suiteId + ", unable to update.");
         }
     }
+
 }

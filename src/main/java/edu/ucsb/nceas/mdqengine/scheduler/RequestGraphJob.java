@@ -1,8 +1,8 @@
 package edu.ucsb.nceas.mdqengine.scheduler;
 
+import com.sun.javafx.scene.control.skin.TableCellSkin;
 import edu.ucsb.nceas.mdqengine.MDQconfig;
 import edu.ucsb.nceas.mdqengine.exception.MetadigStoreException;
-import edu.ucsb.nceas.mdqengine.model.Run;
 import edu.ucsb.nceas.mdqengine.model.Task;
 import edu.ucsb.nceas.mdqengine.store.DatabaseStore;
 import edu.ucsb.nceas.mdqengine.store.MDQStore;
@@ -15,6 +15,7 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.dataone.client.auth.AuthTokenSession;
+import org.dataone.client.rest.DefaultHttpMultipartRestClient;
 import org.dataone.client.rest.HttpMultipartRestClient;
 import org.dataone.client.rest.MultipartRestClient;
 import org.dataone.client.v2.impl.MultipartCNode;
@@ -51,9 +52,9 @@ import java.util.regex.Pattern;
  */
 @PersistJobDataAfterExecution
 @DisallowConcurrentExecution
-public class RequestReportJob implements Job {
+public class RequestGraphJob implements Job {
 
-    private Log log = LogFactory.getLog(RequestReportJob.class);
+    private Log log = LogFactory.getLog(RequestGraphJob.class);
 
     class ListResult {
         Integer resultCount;
@@ -89,7 +90,7 @@ public class RequestReportJob implements Job {
      * scheduler can instantiate the class whenever it needs.
      * </p>
      */
-    public RequestReportJob() {
+    public RequestGraphJob() {
     }
 
     /**
@@ -104,17 +105,17 @@ public class RequestReportJob implements Job {
     public void execute(JobExecutionContext context)
             throws JobExecutionException {
 
-        String qualityServiceUrl = null;
+        String graphServiceUrl  = null;
         try {
             MDQconfig cfg = new MDQconfig();
-            qualityServiceUrl = cfg.getString("quality.serviceUrl");
+            graphServiceUrl = cfg.getString("graph.serviceUrl");
         } catch (ConfigurationException | IOException ce) {
             JobExecutionException jee = new JobExecutionException("Error executing task.");
             jee.initCause(ce);
             throw jee;
         }
 
-        //Log log = LogFactory.getLog(RequestReportJob.class);
+        //Log log = LogFactory.getLog(RequestGraphJob.class);
         JobKey key = context.getJobDetail().getKey();
         JobDataMap dataMap = context.getJobDetail().getJobDataMap();
 
@@ -135,7 +136,7 @@ public class RequestReportJob implements Job {
         log.debug("Executing task for node: " + nodeId + ", suiteId: " + suiteId);
 
         try {
-            mrc = new HttpMultipartRestClient();
+            mrc = new DefaultHttpMultipartRestClient();
         } catch (Exception e) {
             log.error("Error creating rest client: " + e.getMessage());
             JobExecutionException jee = new JobExecutionException(e);
@@ -143,15 +144,8 @@ public class RequestReportJob implements Job {
             throw jee;
         }
 
-        Subject subject = new Subject();
-        subject.setValue("public");
-        Session session = null;
-        if(authToken == null || authToken.isEmpty()) {
-            session = new Session();
-            //session.setSubject(subject);
-        } else {
-            session = new AuthTokenSession(authToken);
-        }
+        // TODO: get subject from JobScheduler
+        Session session = getSession("CN=urn:node:cnStageUCSB2,DC=dataone,DC=org", authToken);
 
         //log.info("Created session with subject: " + session.getSubject().getValue().toString());
 
@@ -159,11 +153,12 @@ public class RequestReportJob implements Job {
         Boolean isCN = isCN(nodeServiceUrl);
         if(isCN) {
             cnNode = new MultipartCNode(mrc, nodeServiceUrl, session);
+            log.debug("Created cnNode: " + cnNode.toString());
         } else {
             mnNode = new MultipartMNode(mrc, nodeServiceUrl, session);
+            log.debug("Created mnNode for serviceUrl: " + nodeServiceUrl);
         }
 
-        // Don't know node type yet from the id, so have to manually check if it's a CN
         MDQStore store = null;
 
         try {
@@ -188,16 +183,13 @@ public class RequestReportJob implements Job {
         DateTime currentDT = new DateTime(DateTimeZone.UTC);
         DateTimeFormatter dtfOut = DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ss.SS'Z'");
         String currentDatetimeStr = dtfOut.print(currentDT);
-
         DateTime startDateTimeRange = null;
         DateTime endDateTimeRange = null;
-
         String lastHarvestDateStr = null;
-        //edu.ucsb.nceas.mdqengine.model.Node node;
-        //node = store.getNode(nodeId, jobName);
 
         Task task;
         task = store.getTask(taskName);
+
         // If a 'task' entry has not been saved for this task name yet, then a 'lastHarvested'
         // DataTime will not be available, in which case the 'startHarvestDataTime' from the
         // config file will be used.
@@ -239,13 +231,13 @@ public class RequestReportJob implements Job {
         String endDTRstr = dtfOut.print(endDTR);
 
         Integer startCount = new Integer(0);
-        ListResult result = null;
+        RequestGraphJob.ListResult result = null;
         Integer resultCount = null;
 
         boolean morePids = true;
         while(morePids) {
             ArrayList<String> pidsToProcess = null;
-            log.info("Getting pids for node: " + nodeId + ", suiteId: " + suiteId + ", harvest start: " + startDTRstr);
+            log.info("Getting pids for node: " + nodeId);
 
             try {
                 result = getPidsToProcess(cnNode, mnNode, isCN, session, suiteId, nodeId, pidFilter, startDTRstr, endDTRstr, startCount, countRequested);
@@ -261,16 +253,11 @@ public class RequestReportJob implements Job {
             for (String pidStr : pidsToProcess) {
                 try {
                     log.info("submitting pid: " + pidStr);
-                    submitReportRequest(cnNode, mnNode, isCN, session, qualityServiceUrl, pidStr, suiteId);
-                } catch (org.dataone.service.exceptions.NotFound nfe) {
-                    log.error("Unable to process pid: " + pidStr +  nfe.getMessage());
-                    continue;
+                    submitGraphRequest(cnNode, mnNode, isCN, session, graphServiceUrl, pidStr, suiteId);
                 } catch (Exception e) {
-                    log.error("Unable to process pid:  " + pidStr + " - " + e.getMessage());
-                    continue;
-                    //JobExecutionException jee = new JobExecutionException("Unable to submit request to create new quality reports", e);
-                    //jee.setRefireImmediately(false);
-                    //throw jee;
+                    JobExecutionException jee = new JobExecutionException("Unable to submit request to create new quality reports", e);
+                    jee.setRefireImmediately(false);
+                    throw jee;
                 }
             }
 
@@ -278,6 +265,7 @@ public class RequestReportJob implements Job {
             log.debug("taskName: " + task.getTaskName());
             log.debug("taskType: " + task.getTaskType());
             log.debug("lastharvestdate: " + task.getLastHarvestDatetime());
+
             try {
                 store.saveTask(task);
             } catch (MetadigStoreException mse) {
@@ -286,7 +274,6 @@ public class RequestReportJob implements Job {
                 jee.setRefireImmediately(false);
                 throw jee;
             }
-
             // Check if DataONE returned the max number of results. If so, we have to request more by paging through
             // the results.
             if(resultCount >= countRequested) {
@@ -300,10 +287,9 @@ public class RequestReportJob implements Job {
         store.shutdown();
     }
 
-    public ListResult getPidsToProcess(MultipartCNode cnNode, MultipartMNode mnNode, Boolean isCN, Session session,
-                                  String suiteId, String nodeId, String pidFilter, String startHarvestDatetimeStr,
-                                  String endHarvestDatetimeStr, int startCount,
-                                  int countRequested) throws Exception {
+    public ListResult getPidsToProcess(MultipartCNode cnNode, MultipartMNode mnNode, Boolean isCN, Session session, String suiteId, String nodeId,
+                                       String pidFilter, String startHarvestDatetimeStr, String endHarvestDatetimeStr,
+                                       int startCount, int countRequested) throws Exception {
 
         ArrayList<String> pids = new ArrayList<String>();
         InputStream qis = null;
@@ -330,13 +316,22 @@ public class RequestReportJob implements Job {
             // Even though MultipartMNode and MultipartCNode have the same parent class, their interfaces are differnt, so polymorphism
             // isn't happening here.
             if(isCN) {
+                log.debug("cnNode: " + cnNode);
+                log.debug("Listing objects for CN");
+                log.debug("session: " + session.getSubject().getValue());
+                log.debug("startDate: " + startDate);
+                log.debug("endDate: " + endDate);
+                log.debug("formatId: " + formatId);
+                log.debug("Identifier: " + identifier);
+                log.debug("startCount: " + startCount);
+                log.debug("countRequested: " + countRequested);
                 objList = cnNode.listObjects(session, startDate, endDate, formatId, nodeRef, identifier, startCount, countRequested);
             } else {
                 objList = mnNode.listObjects(session, startDate, endDate, formatId, identifier, replicaStatus, startCount, countRequested);
             }
-            //log.info("Got " + objList.getCount() + " pids for format: " + formatId.getValue() + " pids.");
+            log.info("Got " + objList.getCount() + " pids ");
         } catch (Exception e) {
-            log.error("Error retrieving pids for node " + nodeId + ": " + e.getMessage());
+            log.error("Error retrieving pids for node: " + e.getMessage());
             throw e;
         }
 
@@ -364,100 +359,78 @@ public class RequestReportJob implements Job {
                 // been updated (i.e. obsoletedBy, access) and the quality report and index contain
                 // sysmeta fields.
                 if(found) {
-                //    if (!runExists(thisPid, suiteId, store)) {
+                    //    if (!runExists(thisPid, suiteId, store)) {
                     pidCount = pidCount++;
                     pids.add(thisPid);
                     log.info("adding pid " + thisPid + ", formatId: " + thisFormatId);
-                //    }
+                    //    }
                 }
             }
         }
 
-        ListResult result = new ListResult();
+        RequestGraphJob.ListResult result = new RequestGraphJob.ListResult();
         result.setResultCount(pidCount);
         result.setResult(pids);
 
         return result;
     }
 
-    public boolean runExists(String pid, String suiteId, MDQStore store) throws MetadigStoreException {
+    public void submitGraphRequest(MultipartCNode cnNode, MultipartMNode mnNode, Boolean isCN, Session session,
+                                   String graphServiceUrl, String pidStr, String suiteId) throws Exception {
 
-        boolean found = false;
-
-        if(!store.isAvailable()) {
-            try {
-                store.renew();
-            } catch (MetadigStoreException e) {
-                e.printStackTrace();
-                throw e;
-            }
-        }
-
-        Run run = store.getRun(pid, suiteId);
-        if(run != null) {
-            found = true;
-        } else {
-            found = false;
-        }
-
-        return found;
-    }
-
-    public void submitReportRequest(MultipartCNode cnNode, MultipartMNode mnNode, Boolean isCN,  Session session, String qualityServiceUrl, String pidStr, String suiteId) throws Exception {
-
-        SystemMetadata sysmeta = null;
-        InputStream objectIS = null;
+        log.debug("SubmitGraphRequest");
+//        SystemMetadata sysmeta = null;
+//        InputStream objectIS = null;
         InputStream runResultIS = null;
 
         Identifier pid = new Identifier();
         pid.setValue(pidStr);
 
-        try {
-            if (isCN) {
-                sysmeta = cnNode.getSystemMetadata(session, pid);
-            } else {
-                sysmeta = mnNode.getSystemMetadata(session, pid);
-            }
-        } catch (NotAuthorized na) {
-            log.error("Not authorized to read sysmeta for pid: " + pid.getValue() + ", continuing with next pid...");
-            return;
-        } catch (Exception e) {
-            throw(e);
-        }
+//        try {
+//            if (isCN) {
+//                sysmeta = cnNode.getSystemMetadata(session, pid);
+//            } else {
+//                sysmeta = mnNode.getSystemMetadata(session, pid);
+//            }
+//        } catch (NotAuthorized na) {
+//            log.error("Not authorized to read sysmeta for pid: " + pid.getValue() + ", continuing with next pid...");
+//            return;
+//        } catch (Exception e) {
+//            throw(e);
+//        }
+//
+//        try {
+//            if(isCN) {
+//                objectIS = cnNode.get(session, pid);
+//            } else  {
+//                objectIS = mnNode.get(session, pid);
+//            }
+//            log.debug("Retrieved metadata object for pid: " + pidStr);
+//        } catch (NotAuthorized na) {
+//            log.error("Not authorized to read pid: " + pid + ", continuing with next pid...");
+//            return;
+//        } catch (Exception e) {
+//            throw(e);
+//        }
 
-        try {
-            if(isCN) {
-                objectIS = cnNode.get(session, pid);
-            } else  {
-                objectIS = mnNode.get(session, pid);
-            }
-            log.debug("Retrieved metadata object for pid: " + pidStr);
-        } catch (NotAuthorized na) {
-            log.error("Not authorized to read pid: " + pid + ", continuing with next pid...");
-            return;
-        } catch (Exception e) {
-            throw(e);
-        }
-
-        // quality suite service url, i.e. "http://docke-ucsb-1.dataone.org:30433/quality/suites/knb.suite.1/run
-        qualityServiceUrl = qualityServiceUrl + "/suites/" + suiteId + "/run";
-        HttpPost post = new HttpPost(qualityServiceUrl);
+        graphServiceUrl = graphServiceUrl + "/graph/" + pidStr + "/" + suiteId;
+        HttpPost post = new HttpPost(graphServiceUrl);
 
         try {
             // add document
-            SimpleMultipartEntity entity = new SimpleMultipartEntity();
-            entity.addFilePart("document", objectIS);
+            //SimpleMultipartEntity entity = new SimpleMultipartEntity();
+            //entity.addFilePart("document", objectIS);
 
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            TypeMarshaller.marshalTypeToOutputStream(sysmeta, baos);
-            entity.addFilePart("systemMetadata", new ByteArrayInputStream(baos.toByteArray()));
+            //ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            //TypeMarshaller.marshalTypeToOutputStream(sysmeta, baos);
+            //entity.addFilePart("systemMetadata", new ByteArrayInputStream(baos.toByteArray()));
 
             // make sure we get XML back
             post.addHeader("Accept", "application/xml");
 
             // send to service
-            log.trace("submitting: " + qualityServiceUrl);
-            post.setEntity((HttpEntity) entity);
+            log.trace("submitting: " + graphServiceUrl);
+            //post.setEntity((HttpEntity) entity);
             CloseableHttpClient client = HttpClients.createDefault();
             CloseableHttpResponse response = client.execute(post);
 
@@ -488,4 +461,35 @@ public class RequestReportJob implements Job {
 
         return isCN;
     }
+
+    /**
+     * Get a DataONE authenticated session
+     * <p>
+     *     If no subject or authentication token are provided, a public session is returned
+     * </p>
+     * @param authToken the authentication token
+     * @return the DataONE session
+     */
+    Session getSession(String subjectId, String authToken) {
+
+        Session session;
+
+        Subject subject = new Subject();
+        subject.setValue(subjectId);
+        // query Solr - either the member node or cn, for the project 'solrquery' field
+        if (authToken == null || authToken.isEmpty()) {
+            log.debug("Creating public session");
+            session = new Session();
+        } else {
+            log.debug("Creating authentication session");
+            session = new AuthTokenSession(authToken);
+        }
+
+        if(subject != null) {
+            session.setSubject(subject);
+        }
+
+        return session;
+    }
 }
+

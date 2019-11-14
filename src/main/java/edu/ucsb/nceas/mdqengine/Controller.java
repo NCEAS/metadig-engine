@@ -1,6 +1,8 @@
 package edu.ucsb.nceas.mdqengine;
 
 import com.rabbitmq.client.*;
+import edu.ucsb.nceas.mdqengine.exception.MetadigProcessException;
+import edu.ucsb.nceas.mdqengine.scorer.ScorerQueueEntry;
 import edu.ucsb.nceas.mdqengine.exception.MetadigException;
 import org.apache.commons.configuration2.ex.ConfigurationException;
 import org.apache.commons.logging.Log;
@@ -19,10 +21,10 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 /**
- * The Controller class accepts requests for generating quality documents from
+ * The Controller class accepts requests for generating quality reports from
  * metadata documents. As the report generation process can take a significant
  * amount of time, the controller delegates report generation to worker processes
- * via a RabbitMQ queue that the worker processes read from.
+ * via a RabbitMQ queue that the worker processes reads from.
  *
  * @author      Peter Slaughter
  * @version     %I%, %G%
@@ -32,14 +34,14 @@ public class Controller {
 
     private final static String EXCHANGE_NAME = "metadig";
     private final static String QUALITY_QUEUE_NAME = "quality";
-    private final static String AGGREGATOR_QUEUE_NAME = "aggregator";
+    private final static String SCORER_QUEUE_NAME = "scorer";
     private final static String COMPLETED_QUEUE_NAME = "completed";
 
     private final static String QUALITY_ROUTING_KEY = "quality";
-    private final static String AGGREGATOR_ROUTING_KEY = "aggregator";
+    private final static String SCORER_ROUTING_KEY = "scorer";
     private final static String COMPLETED_ROUTING_KEY = "completed";
-
     private final static String MESSAGE_TYPE_QUALITY = "quality";
+    private final static String MESSAGE_TYPE_SCORER = "scorer";
 
     private static com.rabbitmq.client.Connection inProcessConnection;
     private static com.rabbitmq.client.Channel inProcessChannel;
@@ -107,7 +109,12 @@ public class Controller {
                     break;
                 }
 
-                // First line contains the number of tests that will be run
+                // First line contains the type of test, either 'quality' or 'graph'
+                // Second line contains the number of tests that will be run
+                String requestType = info;
+                log.debug("Processing request type: " + requestType);
+                // Now read the number of requests that will be sent from the client
+                info = in.readLine();
                 int cnt = Integer.parseInt(info);
                 log.info(cnt + " tests will be run.");
                 metadigCtrl.initTests(cnt);
@@ -115,6 +122,7 @@ public class Controller {
                 while ((request = in.readLine()) != null) {
                     // Stop reading all requests
                     if ("Stop".equals(request)) {
+                        log.info("Stopping tests as client has requested.");
                         stop = true;
                         break;
                     }
@@ -126,20 +134,43 @@ public class Controller {
                     String delims = "[,]";
                     String[] tokens = request.split(delims);
 
-                    String metadataPid = tokens[0];
+                    switch(requestType) {
+                        case "graph":
+                            log.debug("Processing graph request");
+                            String collectionId = tokens[0];
+                            String projectName = tokens[1];
+                            String authTokenName = tokens[2];
+                            String memberNode = tokens[3];
+                            String serviceUrl = tokens[4];
+                            String formatFamily = tokens[5];
+                            String qualitySuiteId = tokens[6];
 
-                    File metadataFile = new File(tokens[1]);
-                    InputStream metadata = new FileInputStream(metadataFile);
+                            requestDateTime = new DateTime();
+                            log.info("Request queuing of: " + tokens[0] + ", " + tokens[1] + ", " + tokens[2] + ", " + tokens[3] + ", " + tokens[4]
+                                    + ", " + tokens[5] + "," + tokens[6]);
 
-                    File sysmetaFile = new File(tokens[2]);
-                    InputStream sysmeta = new FileInputStream(sysmetaFile);
+                            metadigCtrl.processScorerRequest(collectionId, projectName, authTokenName,  memberNode, serviceUrl,
+                                    formatFamily, qualitySuiteId, requestDateTime);
+                            break;
+                        case "quality":
+                            log.debug("Processing quality request");
+                            String metadataPid = tokens[0];
 
-                    String suiteId = tokens[3];
+                            File metadataFile = new File(tokens[1]);
+                            InputStream metadata = new FileInputStream(metadataFile);
 
-                    requestDateTime = new DateTime();
-                    log.info("Request queuing of: " + tokens[0] + ", " + tokens[1] + ", " + tokens[2] + ", " + tokens[3]);
-                    metadigCtrl.processRequest("urn:node:mnTestKNB", metadataPid,
-                            metadata, suiteId, "/tmp", requestDateTime, sysmeta);
+                            File sysmetaFile = new File(tokens[2]);
+                            InputStream sysmeta = new FileInputStream(sysmetaFile);
+
+                            String suiteId = tokens[3];
+                            requestDateTime = new DateTime();
+                            String nodeId = tokens[4];
+                            log.info("Request queuing of: " + tokens[0] + ", " + tokens[3] + ", " + tokens[4]);
+                            metadigCtrl.processQualityRequest(nodeId, metadataPid, metadata, suiteId, "/tmp", requestDateTime, sysmeta);
+                            break;
+                        default:
+                            log.error("Invalid request type recieved by controller: " + requestType);
+                    }
                 }
                 // Close current connection, then start again with new connection
                 clientSocket.close();
@@ -161,6 +192,7 @@ public class Controller {
         if (instance == null) {
             synchronized (Controller.class) {
                 if (instance == null) {
+                    log.debug("Creating new controller instance");
                     instance = new Controller();
                 }
             }
@@ -184,6 +216,7 @@ public class Controller {
             this.readConfig();
             this.setupQueues();
             this.isStarted = true;
+            log.debug("Controller is started");
         } catch (java.io.IOException | java.util.concurrent.TimeoutException | ConfigurationException e) {
             e.printStackTrace();
             log.error("Error starting queue:");
@@ -214,11 +247,19 @@ public class Controller {
         RabbitMQusername = cfg.getString("RabbitMQ.username");
         RabbitMQhost = cfg.getString("RabbitMQ.host");
         RabbitMQport = cfg.getInt("RabbitMQ.port");
-        log.debug("Read config:");
-        log.debug("RabbitMQpassword: " + RabbitMQpassword);
-        log.debug("RabbitMQusername: " + RabbitMQusername);
-        log.debug("RabbitMQhost: " + RabbitMQhost);
-        log.debug("RabbitMQport: " + RabbitMQport);
+    }
+
+
+    public String readConfigParam (String paramName) throws ConfigurationException, IOException {
+        String paramValue = null;
+        try {
+            MDQconfig cfg = new MDQconfig();
+            paramValue = cfg.getString(paramName);
+        } catch (Exception e) {
+            log.error("Could not read configuration for param: " + paramName + ": " + e.getMessage());
+            throw e;
+        }
+        return paramValue;
     }
 
     /**
@@ -252,7 +293,7 @@ public class Controller {
      * @return
      * @throws java.io.IOException
      */
-    public void processRequest(String memberNode,
+    public void processQualityRequest(String memberNode,
                                String metadataPid,
                                InputStream metadata,
                                String qualitySuiteId,
@@ -260,6 +301,7 @@ public class Controller {
                                DateTime requestDateTime,
                                InputStream systemMetadata) throws java.io.IOException {
 
+        log.info("Processing quality report request, id" + metadataPid + ", suite: " + qualitySuiteId);
         QueueEntry qEntry = null;
         SystemMetadata sysmeta = null;
         byte[] message = null;
@@ -310,27 +352,6 @@ public class Controller {
             sysmeta = (SystemMetadata) tmpSysmeta;
         }
 
-        // Disable saving the 'queued' run state, as this limits the throughput of the processing chain. The controller
-        // will exhausts the number of database connections that are held by pgbouncer, and the request is not completed.
-//        // Save a skeleton run entry so that the run status will be set to 'queued', which will allow clients to check the status
-//        // of this run and when it was queued.
-//        Run run = new Run();
-//        run.setRunStatus(Run.QUEUED);
-//        run.setErrorDescription("");
-//        run.setObjectIdentifier(metadataPid);
-//        // The origin mn is required by persistent storage, so set it to a non-null value. It will be reset to the
-//        // value from sysmeta (if supplied) when the run is processed.
-//        SysmetaModel smm = new SysmetaModel();
-//        smm.setOriginMemberNode("");
-//        run.setSysmeta(smm);
-//        run.setSuiteId(qualitySuiteId);
-//
-//        try {
-//            run.save();
-//        } catch (MetadigException me) {
-//            log.error("Unable to save run state to 'processing' before queueing: " + me.getMessage());
-//        }
-
         qEntry = new QueueEntry(memberNode, metadataPid, metadataDoc, qualitySuiteId, localFilePath, requestDateTime, sysmeta,
                 runXML, null);
 
@@ -341,6 +362,61 @@ public class Controller {
 
         this.writeInProcessChannel(message, QUALITY_ROUTING_KEY);
         log.info(" [x] Queued report request for pid: '" + qEntry.getMetadataPid() + "'" + " quality suite " + qualitySuiteId);
+    }
+
+
+    /**
+     * Forward a graph request to the "InProcess" queue.
+     * <p>
+     * A request to create a graph of aggregated quality scores is serialized and placed on the RabbitMQ "InProcess"
+     * queue. This queue is read by worker processes that call the scorer program to obtain the quality scores and
+     * create the graph from them.
+     * </p>
+     *
+     * @param collectionId
+     * @param projectName
+     * @param memberNode
+     * @param formatFamily
+     * @param qualitySuiteId
+     * @param requestDateTime
+     *
+     * @return
+     * @throws java.io.IOException
+     */
+    public void processScorerRequest(String collectionId,
+                               String projectName,
+                               String authTokenName,
+                               String memberNode,
+                               String serviceUrl,
+                               String formatFamily,
+                               String qualitySuiteId,
+                               DateTime requestDateTime) throws java.io.IOException, MetadigException {
+
+        log.info("Processing scorer request, collection: " + collectionId + ", suite: " + qualitySuiteId);
+        ScorerQueueEntry qEntry = null;
+        byte[] message = null;
+        String authToken = null;
+
+        if(authTokenName != null) {
+            try {
+                authToken = readConfigParam(authTokenName);
+            } catch (ConfigurationException ce) {
+                log.error("Error reading configuration for param " + "\"" + authTokenName + "\"" + ": " + ce.getMessage());
+                MetadigException metadigException = new MetadigProcessException("Error reading configuration for param " + authTokenName + ": " + ce.getMessage());
+                metadigException.initCause(ce);
+                throw metadigException;
+            }
+        }
+
+        qEntry = new ScorerQueueEntry(collectionId, projectName, authToken, qualitySuiteId, memberNode, serviceUrl, formatFamily, requestDateTime);
+
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        ObjectOutput out = new ObjectOutputStream(bos);
+        out.writeObject(qEntry);
+        message = bos.toByteArray();
+
+        this.writeInProcessChannel(message, SCORER_ROUTING_KEY);
+        log.info(" [x] Queued Scorer request for collectionld: '" + qEntry.getProjectId() + "'" + " quality suite " + qualitySuiteId);
     }
 
     /**
@@ -360,17 +436,22 @@ public class Controller {
 
         // Setup the 'InProcess' queue with a routing key - messages consumed by this queue require that
         // this routine key be used. The routine key QUALITY_ROUTING_KEY sends messages to the quality report worker,
-        // the routing key AGGREGATION_ROUTING_KEY sends messages to the aggregation stats grapher.
+        // the routing key SCORER_ROUTING_KEY sends messages to the aggregation stats scorer.
         try {
             inProcessConnection = factory.newConnection();
             inProcessChannel = inProcessConnection.createChannel();
             inProcessChannel.exchangeDeclare(EXCHANGE_NAME, "direct", false);
+
             inProcessChannel.queueDeclare(QUALITY_QUEUE_NAME, false, false, false, null);
-            inProcessChannel.queueDeclare(AGGREGATOR_QUEUE_NAME, false, false, false, null);
+            inProcessChannel.queueBind(QUALITY_QUEUE_NAME, EXCHANGE_NAME, QUALITY_ROUTING_KEY);
+
+            inProcessChannel.queueDeclare(SCORER_QUEUE_NAME, false, false, false, null);
+            inProcessChannel.queueBind(SCORER_QUEUE_NAME, EXCHANGE_NAME, SCORER_ROUTING_KEY);
+
             // Channel will only send one request for each worker at a time.
             inProcessChannel.basicQos(1);
             log.info("Connected to RabbitMQ queue " + QUALITY_QUEUE_NAME);
-            log.info("Connected to RabbitMQ queue " + AGGREGATOR_QUEUE_NAME);
+            log.info("Connected to RabbitMQ queue " + SCORER_QUEUE_NAME);
         } catch (Exception e) {
             log.error("Error connecting to RabbitMQ queue " + QUALITY_QUEUE_NAME);
             log.error(e.getMessage());
@@ -380,7 +461,7 @@ public class Controller {
         try {
             completedConnection = factory.newConnection();
             completedChannel = completedConnection.createChannel();
-            completedChannel.exchangeDeclare("completed", "direct", false);
+            completedChannel.exchangeDeclare(EXCHANGE_NAME, "direct", false);
             completedChannel.queueDeclare(COMPLETED_QUEUE_NAME, false, false, false, null);
             completedChannel.queueBind(COMPLETED_QUEUE_NAME, EXCHANGE_NAME, COMPLETED_ROUTING_KEY);
             log.info("Connected to RabbitMQ queue " + COMPLETED_QUEUE_NAME);
@@ -443,6 +524,33 @@ public class Controller {
                             disableTestMode();
                         }
                     }
+                } else if(properties.getType().equalsIgnoreCase(MESSAGE_TYPE_SCORER)) {
+                    ScorerQueueEntry qEntry = null;
+                    try {
+                        qEntry = (ScorerQueueEntry) in.readObject();
+                    } catch (java.lang.ClassNotFoundException e) {
+                        log.info("Class 'ScorerQueueEntry' not found");
+                    } finally {
+                        completedChannel.basicAck(envelope.getDeliveryTag(), false);
+                    }
+
+                    log.info(" [x] Controller received notification of completed score for: '" + qEntry.getProjectId() + "'" + ", " +
+                            "hostsname: " + qEntry.getHostname());
+                    log.info("Total processing time for worker " + qEntry.getHostname() + " for PID " + qEntry.getProjectId() + ": " + qEntry.getProcessingElapsedTimeSeconds());
+
+                    /* An exception caught by the worker will be passed back to the controller via the queue entry
+                     * 'exception' field. Check this now and take the appropriate action.
+                     */
+                    Exception me = qEntry.getException();
+                    if (me instanceof MetadigException) {
+                        log.error("Error running suite: " + qEntry.getQualitySuiteId() + ", pid: " + qEntry.getProjectId() + ", error msg: ");
+                        log.error("\t" + me.getMessage());
+                        Throwable thisCause = me.getCause();
+                        if (thisCause != null) {
+                            log.error("\tcause: " + thisCause.getMessage());
+                        }
+                        return;
+                    }
                 } else {
                     log.error("Unknown RabbitMQ message from from client type: " + properties.getType());
                 }
@@ -496,7 +604,7 @@ public class Controller {
         }
 
         try {
-            metadigCtrl.processRequest("urn:node:mnTestKNB", "1234",
+            metadigCtrl.processQualityRequest("urn:node:mnTestKNB", "1234",
                     metadata, "metadig-test.suite.1", "/tmp", requestDateTime, sysmeta);
         } catch (IOException ioe) {
             ioe.printStackTrace();
