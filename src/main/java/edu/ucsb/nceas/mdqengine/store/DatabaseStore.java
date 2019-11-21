@@ -402,7 +402,7 @@ public class DatabaseStore implements MDQStore {
         // then update the record with the incoming data.
         try {
             String sql = "INSERT INTO tasks (task_name, task_type, last_harvest_datetime) VALUES (?, ?, ?)"
-                    + " ON CONFLICT ON CONSTRAINT task_name_pk"
+                    + " ON CONFLICT ON CONSTRAINT task_name_task_type"
                     + " DO UPDATE SET (task_name, task_type, last_harvest_datetime) = (?, ?, ?);";
 
             stmt = conn.prepareStatement(sql);
