@@ -97,23 +97,19 @@ public class RequestScorerJob implements Job {
     public void execute(JobExecutionContext context)
             throws JobExecutionException {
 
-        String graphServiceUrl  = null;
-        try {
-            MDQconfig cfg = new MDQconfig();
-            graphServiceUrl = cfg.getString("graph.serviceUrl");
-        } catch (ConfigurationException | IOException ce) {
-            JobExecutionException jee = new JobExecutionException("Error executing task.");
-            jee.initCause(ce);
-            throw jee;
-        }
+        String authToken = null;
+        String qualityServiceUrl  = null;
+        String CNsubjectId = null;
+        String CNauthToken = null;
+        MDQconfig cfg = null;
 
-        //Log log = LogFactory.getLog(RequestGraphJob.class);
         JobKey key = context.getJobDetail().getKey();
         JobDataMap dataMap = context.getJobDetail().getJobDataMap();
 
         String taskName = dataMap.getString("taskName");
         String taskType = dataMap.getString("taskType");
-        String authToken = dataMap.getString("authToken");
+        String authTokenName = dataMap.getString("authTokenName");
+        String subjectId = dataMap.getString("ubjectid");
         String pidFilter = dataMap.getString("pidFilter");
         String suiteId = dataMap.getString("suiteId");
         String nodeId = dataMap.getString("nodeId");
@@ -121,11 +117,34 @@ public class RequestScorerJob implements Job {
         String startHarvestDatetimeStr = dataMap.getString("startHarvestDatetime");
         int harvestDatetimeInc = dataMap.getInt("harvestDatetimeInc");
         int countRequested = dataMap.getInt("countRequested");
+        // TODO: add formatFamily to scheduler request
+        String formatFamily = null;
         MultipartRestClient mrc = null;
         MultipartMNode mnNode = null;
         MultipartCNode cnNode = null;
 
-        log.debug("Executing task for node: " + nodeId + ", suiteId: " + suiteId);
+        try {
+            cfg = new MDQconfig();
+            qualityServiceUrl = cfg.getString("quality.serviceUrl");
+            CNsubjectId = cfg.getString("CN.subjectId");
+            CNauthToken = cfg.getString("CN.authToken");
+
+            if(authTokenName != null && !authTokenName.isEmpty()) {
+                authToken = cfg.getString(authTokenName);
+            } else {
+                authToken = CNauthToken;
+            }
+        } catch (ConfigurationException | IOException ce) {
+            JobExecutionException jee = new JobExecutionException("Error executing task.");
+            jee.initCause(ce);
+            throw jee;
+        }
+
+        if(subjectId == null || subjectId.isEmpty()) {
+            subjectId = CNsubjectId;
+        }
+
+        log.debug("Executing task: " + taskName + ", taskType: " + taskType);
 
         try {
             mrc = new DefaultHttpMultipartRestClient();
@@ -136,10 +155,7 @@ public class RequestScorerJob implements Job {
             throw jee;
         }
 
-        // TODO: get subject from JobScheduler
-        Session session = getSession("CN=urn:node:cnStageUCSB2,DC=dataone,DC=org", authToken);
-
-        //log.info("Created session with subject: " + session.getSubject().getValue().toString());
+        Session session = getSession(subjectId, authToken);
 
         // Don't know node type yet from the id, so have to manually check if it's a CN
         Boolean isCN = isCN(nodeServiceUrl);
@@ -223,7 +239,7 @@ public class RequestScorerJob implements Job {
         String endDTRstr = dtfOut.print(endDTR);
 
         Integer startCount = new Integer(0);
-        RequestGraphJob.ListResult result = null;
+        RequestScorerJob.ListResult result = null;
         Integer resultCount = null;
 
         boolean morePids = true;
@@ -245,7 +261,7 @@ public class RequestScorerJob implements Job {
             for (String pidStr : pidsToProcess) {
                 try {
                     log.info("submitting pid: " + pidStr);
-                    submitGraphRequest(cnNode, mnNode, isCN, session, graphServiceUrl, pidStr, suiteId);
+                    submitScorerRequest(cnNode, mnNode, isCN, session, qualityServiceUrl, pidStr, suiteId, nodeId, formatFamily);
                 } catch (Exception e) {
                     JobExecutionException jee = new JobExecutionException("Unable to submit request to create new quality reports", e);
                     jee.setRefireImmediately(false);
@@ -321,7 +337,7 @@ public class RequestScorerJob implements Job {
             } else {
                 objList = mnNode.listObjects(session, startDate, endDate, formatId, identifier, replicaStatus, startCount, countRequested);
             }
-            log.info("Got " + objList.getCount() + " pids ");
+            log.debug("Retrieved " + objList.getCount() + " pids");
         } catch (Exception e) {
             log.error("Error retrieving pids for node: " + e.getMessage());
             throw e;
@@ -331,6 +347,7 @@ public class RequestScorerJob implements Job {
         String thisPid = null;
         int pidCount = 0;
 
+        log.info("Checking retrieved pids for matches with pid filter");
         if (objList.getCount() > 0) {
             for(ObjectInfo oi: objList.getObjectInfoList()) {
                 thisFormatId = oi.getFormatId().getValue();
@@ -354,59 +371,35 @@ public class RequestScorerJob implements Job {
                     //    if (!runExists(thisPid, suiteId, store)) {
                     pidCount = pidCount++;
                     pids.add(thisPid);
-                    log.info("adding pid " + thisPid + ", formatId: " + thisFormatId);
+                    log.info("adding pid to process: " + thisPid + ", formatId: " + thisFormatId);
                     //    }
                 }
             }
         }
 
-        RequestGraphJob.ListResult result = new RequestGraphJob.ListResult();
+        if(pids.size() == 0) {
+            log.info("No matching pids found");
+        } else {
+            log.info(pids.size() + " matching pids found.");
+        }
+
+        RequestScorerJob.ListResult result = new RequestScorerJob.ListResult();
         result.setResultCount(pidCount);
         result.setResult(pids);
 
         return result;
     }
 
-    public void submitGraphRequest(MultipartCNode cnNode, MultipartMNode mnNode, Boolean isCN, Session session,
-                                   String graphServiceUrl, String pidStr, String suiteId) throws Exception {
+    public void submitScorerRequest(MultipartCNode cnNode, MultipartMNode mnNode, Boolean isCN, Session session,
+                                   String qualityServiceUrl, String pidStr, String suiteId, String nodeId, String formatFamily) throws Exception {
 
-        log.debug("SubmitGraphRequest");
-//        SystemMetadata sysmeta = null;
-//        InputStream objectIS = null;
         InputStream runResultIS = null;
 
         Identifier pid = new Identifier();
         pid.setValue(pidStr);
 
-//        try {
-//            if (isCN) {
-//                sysmeta = cnNode.getSystemMetadata(session, pid);
-//            } else {
-//                sysmeta = mnNode.getSystemMetadata(session, pid);
-//            }
-//        } catch (NotAuthorized na) {
-//            log.error("Not authorized to read sysmeta for pid: " + pid.getValue() + ", continuing with next pid...");
-//            return;
-//        } catch (Exception e) {
-//            throw(e);
-//        }
-//
-//        try {
-//            if(isCN) {
-//                objectIS = cnNode.get(session, pid);
-//            } else  {
-//                objectIS = mnNode.get(session, pid);
-//            }
-//            log.debug("Retrieved metadata object for pid: " + pidStr);
-//        } catch (NotAuthorized na) {
-//            log.error("Not authorized to read pid: " + pid + ", continuing with next pid...");
-//            return;
-//        } catch (Exception e) {
-//            throw(e);
-//        }
-
-        graphServiceUrl = graphServiceUrl + "/graph/" + pidStr + "/" + suiteId;
-        HttpPost post = new HttpPost(graphServiceUrl);
+        String scorerServiceUrl = qualityServiceUrl + "/scores" + "?collection=" + pidStr + "&suite=" + suiteId;
+        HttpPost post = new HttpPost(scorerServiceUrl);
 
         try {
             // add document

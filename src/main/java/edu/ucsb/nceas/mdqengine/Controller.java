@@ -387,6 +387,7 @@ public class Controller {
     public void processScorerRequest(String collectionId,
                                String projectName,
                                String authTokenName,
+                               String subjectIdName,
                                String memberNode,
                                String serviceUrl,
                                String formatFamily,
@@ -409,7 +410,7 @@ public class Controller {
             }
         }
 
-        qEntry = new ScorerQueueEntry(collectionId, projectName, authToken, qualitySuiteId, memberNode, serviceUrl, formatFamily, requestDateTime);
+        qEntry = new ScorerQueueEntry(collectionId, projectName, authTokenName, subjectIdName, qualitySuiteId, memberNode, serviceUrl, formatFamily, requestDateTime);
 
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         ObjectOutput out = new ObjectOutputStream(bos);

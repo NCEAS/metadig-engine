@@ -89,7 +89,7 @@ public class Scorer {
     public static void main(String[] argv) throws Exception {
 
         Scorer gfr = new Scorer();
-        MDQconfig cfg = new MDQconfig ();
+        MDQconfig cfg = new MDQconfig();
 
         try {
             RabbitMQpassword = cfg.getString("RabbitMQ.password");
@@ -125,6 +125,8 @@ public class Scorer {
                 ScorerQueueEntry qEntry = null;
                 String graphFilename = null;
                 MetadigException metadigException = null;
+                String subjectId = null;
+                String authToken = null;
 
                 //long startTime = System.nanoTime();
                 startTimeProcessing = System.currentTimeMillis();
@@ -142,7 +144,8 @@ public class Scorer {
                 // The components of the graph queue request
                 String collectionId = qEntry.getProjectId();
                 String projectName = qEntry.getProjectName();
-                String authToken = qEntry.getAuthToken();
+                String authTokenName = qEntry.getAuthTokenName();
+                String subjectIdName = qEntry.getSubjectIdName();
                 String nodeId = qEntry.getNodeId();
                 String serviceUrl = qEntry.getServiceUrl();
                 String formatFamily = qEntry.getFormatFamily();
@@ -150,23 +153,52 @@ public class Scorer {
 
                 // Requests coming from the controller via webapp will not have
                 // authToken or serviceUrl set, so use the default.
-                if(authToken == null || authToken.isEmpty())
+                if(authTokenName != null && !authTokenName.isEmpty()) {
+                    try {
+                        MDQconfig cfg = new MDQconfig ();
+                        authToken = cfg.getString(authTokenName);
+                    } catch (ConfigurationException cex) {
+                        log.error("Unable to read authToken from metadig configuration");
+                    }
+                } else {
                     authToken = CNauthToken;
+                }
+
+                if(subjectIdName != null && !subjectIdName.isEmpty()) {
+                    try {
+                        MDQconfig cfg = new MDQconfig ();
+                        subjectId = cfg.getString(subjectIdName);
+                    } catch (ConfigurationException cex) {
+                        log.error("Unable to read subjectId from metadig configuration");
+                    }
+                } else {
+                    subjectId = CNsubjectId;
+                }
+
+                if(subjectId == null || subjectId.isEmpty()) {
+                    subjectId = CNsubjectId;
+                }
+                log.debug("subjectId: " + subjectId);
 
                 if(serviceUrl == null || serviceUrl.isEmpty())
                     serviceUrl = CNserviceUrl;
+                log.debug("serviceUrl: " + serviceUrl);
 
                 if(nodeId == null)
                     nodeId = "";
+                log.debug("nodeId: " + nodeId);
 
                 if(formatFamily == null)
                     formatFamily = "";
+                log.debug("formatFamily: " + formatFamily);
 
                 if(suiteId == null)
                     suiteId = "";
+                log.debug("suiteId: " + suiteId);
 
                 if(collectionId == null)
                     collectionId = "";
+                log.debug("collectionId: " + collectionId);
 
                 // Pids associated with a collection, based on query results using 'collectionQuery' field in solr.
                 ArrayList<String> collectionPids = null;

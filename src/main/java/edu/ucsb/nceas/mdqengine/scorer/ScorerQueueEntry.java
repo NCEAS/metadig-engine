@@ -16,7 +16,8 @@ public class ScorerQueueEntry implements Serializable {
     private String qualitySuiteId;      // the MetaDIG quality suite to graph
     private String collectionid;        // the DataONE collection (portal) to graph data for
     private String projectName;         // the name of the portal or project
-    private String authToken;           // the name of the DataONE authorization token
+    private String authTokenName;       // the name of the DataONE authorization token
+    private String subjectIdName;       // the name of the DataONE authorization subjectId
     private String formatFamily;        // the metadata dialect to include in the graph
     private DateTime requestDataTime;   // when the original graph request was made
     private long processingElapsedTimeSeconds;  // how long the graph request took to fulfill
@@ -55,9 +56,14 @@ public class ScorerQueueEntry implements Serializable {
 
     public void setProjectName(String projectName) { this.projectName = projectName; }
 
-    public String getAuthToken() { return this.authToken; }
+    public String getAuthTokenName() { return this.authTokenName; }
 
-    public void setAuthToken(String authToken) { this.authToken = authToken; }
+    public void setAuthTokenName(String authTokenName) { this.authTokenName = authTokenName; }
+
+
+    public String getSubjectIdName() { return this.subjectIdName; }
+
+    public void setSubjectIdName(String subjectIdName) { this.subjectIdName = subjectIdName; }
 
     public String getFormatFamily() {
         return this.formatFamily;
@@ -99,11 +105,12 @@ public class ScorerQueueEntry implements Serializable {
 
     public String getHostname() { return hostname; }
 
-    public ScorerQueueEntry(String collectionid, String projectName, String authToken, String qualitySuiteId,
+    public ScorerQueueEntry(String collectionid, String projectName, String authTokenName, String subjectIdName, String qualitySuiteId,
                             String nodeId, String serviceUrl, String formatFamily, DateTime requestDataTime) {
         this.collectionid = collectionid;
         this.projectName = projectName;
-        this.authToken = authToken;
+        this.authTokenName = authTokenName;
+        this.subjectIdName = subjectIdName;
         this.qualitySuiteId = qualitySuiteId;
         this.nodeId = nodeId;
         this.serviceUrl = serviceUrl;
