@@ -385,7 +385,9 @@ public class Scorer {
         }
 
         Subject rightsHolder = sysmeta.getRightsHolder();
-        SubjectInfo subjectInfo = getSubjectInfo(rightsHolder, serviceUrl, subjectId, authToken);
+        // The subject info can only be obtained from a CN, so use the CN auth info for the current DataONE environment,
+        // which should be configured in the metadig.properties file
+        SubjectInfo subjectInfo = getSubjectInfo(rightsHolder, CNserviceUrl, CNsubjectId, CNauthToken);
         String groupStr = null;
 
         groupStr = "(readPermission:" + "\"" + rightsHolder.getValue()
