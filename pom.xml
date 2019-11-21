@@ -308,7 +308,7 @@
 							<target name="copy files">
 								<copy file="${project.build.directory}/metadig-engine-${project.version}.jar" tofile="${project.basedir}/Kubernetes/metadig-worker/metadig-engine.jar" />
 								<copy file="${project.build.directory}/metadig-engine-${project.version}.jar" tofile="${project.basedir}/Kubernetes/metadig-scheduler/metadig-engine.jar" />
-                                <copy file="${project.build.directory}/metadig-engine-${project.version}.jar" tofile="${project.basedir}/Kubernetes/metadig-grapher/metadig-engine.jar" />
+                                <copy file="${project.build.directory}/metadig-engine-${project.version}.jar" tofile="${project.basedir}/Kubernetes/metadig-scorer/metadig-engine.jar" />
                                 <copy file="${project.build.directory}/classes/solr/application-context-mdq.xml" tofile="${project.basedir}/Kubernetes/metadig-worker/solr/application-context-mdq.xml" />
                                 <copy file="${project.build.directory}/classes/solr/application-context-systemmeta-200.xml" tofile="${project.basedir}/Kubernetes/metadig-worker/solr/application-context-systemmeta-200.xml" />
 								<copy file="${project.build.directory}/classes/solr/metadig-index-processor-context.xml" tofile="${project.basedir}/Kubernetes/metadig-worker/solr/metadig-index-processor-context.xml" />
@@ -334,6 +334,12 @@
 							<name>${docker.repo}/metadig-scheduler:${docker.tag}</name>
 							<build>
 								<dockerFileDir>${project.basedir}/Kubernetes/metadig-scheduler</dockerFileDir>
+							</build>
+						</image>
+						<image>
+							<name>${docker.repo}/metadig-scorer:${docker.tag}</name>
+							<build>
+								<dockerFileDir>${project.basedir}/Kubernetes/metadig-scorer</dockerFileDir>
 							</build>
 						</image>
 					</images>
