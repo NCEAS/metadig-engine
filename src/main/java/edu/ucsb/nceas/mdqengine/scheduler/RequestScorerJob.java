@@ -1,6 +1,5 @@
 package edu.ucsb.nceas.mdqengine.scheduler;
 
-import com.sun.javafx.scene.control.skin.TableCellSkin;
 import edu.ucsb.nceas.mdqengine.MDQconfig;
 import edu.ucsb.nceas.mdqengine.exception.MetadigStoreException;
 import edu.ucsb.nceas.mdqengine.model.Task;
@@ -16,23 +15,16 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.dataone.client.auth.AuthTokenSession;
 import org.dataone.client.rest.DefaultHttpMultipartRestClient;
-import org.dataone.client.rest.HttpMultipartRestClient;
 import org.dataone.client.rest.MultipartRestClient;
 import org.dataone.client.v2.impl.MultipartCNode;
 import org.dataone.client.v2.impl.MultipartMNode;
-import org.dataone.mimemultipart.SimpleMultipartEntity;
-import org.dataone.service.exceptions.NotAuthorized;
 import org.dataone.service.types.v1.*;
-import org.dataone.service.types.v2.SystemMetadata;
-import org.dataone.service.util.TypeMarshaller;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.quartz.*;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.time.ZonedDateTime;
@@ -52,9 +44,9 @@ import java.util.regex.Pattern;
  */
 @PersistJobDataAfterExecution
 @DisallowConcurrentExecution
-public class RequestGraphJob implements Job {
+public class RequestScorerJob implements Job {
 
-    private Log log = LogFactory.getLog(RequestGraphJob.class);
+    private Log log = LogFactory.getLog(RequestScorerJob.class);
 
     class ListResult {
         Integer resultCount;
@@ -90,7 +82,7 @@ public class RequestGraphJob implements Job {
      * scheduler can instantiate the class whenever it needs.
      * </p>
      */
-    public RequestGraphJob() {
+    public RequestScorerJob() {
     }
 
     /**
@@ -429,7 +421,7 @@ public class RequestGraphJob implements Job {
             post.addHeader("Accept", "application/xml");
 
             // send to service
-            log.trace("submitting: " + graphServiceUrl);
+            log.trace("submitting: " + scorerServiceUrl);
             //post.setEntity((HttpEntity) entity);
             CloseableHttpClient client = HttpClients.createDefault();
             CloseableHttpResponse response = client.execute(post);

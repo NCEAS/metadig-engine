@@ -127,7 +127,7 @@ public class JobScheduler {
                 // The number of results to return from the DataONE 'listObjects' service
                 countRequested = Integer.parseInt(splitted[++icnt].trim());
                 System.out.println("countRequested: " + countRequested);
-            } else if(taskType.equals("graph")) {
+            } else if(taskType.equals("score")) {
                 System.out.println("Scheduling harvest for task name: " + taskName + ", task group: " + taskGroup);
                 String[] splitted = Arrays.stream(params.split(";"))
                         .map(String::trim)
@@ -201,8 +201,8 @@ public class JobScheduler {
                             .usingJobData("harvestDatetimeInc", harvestDatetimeInc)
                             .usingJobData("countRequested", countRequested)
                             .build();
-                } else if (taskType.equalsIgnoreCase("graph")) {
-                    job = newJob(RequestGraphJob.class)
+                } else if (taskType.equalsIgnoreCase("score")) {
+                    job = newJob(RequestScorerJob.class)
                             .withIdentity(taskName, taskGroup)
                             .usingJobData("taskName", taskName)
                             .usingJobData("taskType", taskType)

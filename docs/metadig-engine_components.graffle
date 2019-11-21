@@ -5113,7 +5113,7 @@ entry w/status}</string>
 {\*\expandedcolortbl;;}
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\qc\partightenfactor0
 
-\f0\b\fs30 \cf0 edu.ucsb.nceas.mdqengine.grapher.Graph Worker\
+\f0\b\fs30 \cf0 edu.ucsb.nceas.mdqengine.scorer.Graph Worker\
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\qc\partightenfactor0
 
 \f1\b0\fs24 \cf0 Coordinates creation and storage of quality graph}</string>
@@ -5147,7 +5147,7 @@ entry w/status}</string>
 {\*\expandedcolortbl;;}
 \pard\tx560\tx1120\tx1680\tx2240\tx2800\tx3360\tx3920\tx4480\tx5040\tx5600\tx6160\tx6720\pardirnatural\qc\partightenfactor0
 
-\f0\b\fs30 \cf0 Metadig-engine edu.ucsb.nceas.mdqengine.grapher.Graph Generator}</string>
+\f0\b\fs30 \cf0 Metadig-engine edu.ucsb.nceas.mdqengine.scorer.Graph Generator}</string>
 						<key>TextAlongPathGlyphAnchor</key>
 						<string>center</string>
 					</dict>

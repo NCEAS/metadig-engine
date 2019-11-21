@@ -109,7 +109,7 @@ public class Controller {
                     break;
                 }
 
-                // First line contains the type of test, either 'quality' or 'graph'
+                // First line contains the type of test, either 'quality' or 'score'
                 // Second line contains the number of tests that will be run
                 String requestType = info;
                 log.debug("Processing request type: " + requestType);
@@ -135,21 +135,22 @@ public class Controller {
                     String[] tokens = request.split(delims);
 
                     switch(requestType) {
-                        case "graph":
-                            log.debug("Processing graph request");
+                        case "score":
+                            log.debug("Processing score request");
                             String collectionId = tokens[0];
                             String projectName = tokens[1];
                             String authTokenName = tokens[2];
-                            String memberNode = tokens[3];
-                            String serviceUrl = tokens[4];
-                            String formatFamily = tokens[5];
-                            String qualitySuiteId = tokens[6];
+                            String subjectIdName = tokens[3];
+                            String memberNode = tokens[4];
+                            String serviceUrl = tokens[5];
+                            String formatFamily = tokens[6];
+                            String qualitySuiteId = tokens[7];
 
                             requestDateTime = new DateTime();
                             log.info("Request queuing of: " + tokens[0] + ", " + tokens[1] + ", " + tokens[2] + ", " + tokens[3] + ", " + tokens[4]
                                     + ", " + tokens[5] + "," + tokens[6]);
 
-                            metadigCtrl.processScorerRequest(collectionId, projectName, authTokenName,  memberNode, serviceUrl,
+                            metadigCtrl.processScorerRequest(collectionId, projectName, authTokenName,  subjectIdName, memberNode, serviceUrl,
                                     formatFamily, qualitySuiteId, requestDateTime);
                             break;
                         case "quality":
@@ -366,7 +367,7 @@ public class Controller {
 
 
     /**
-     * Forward a graph request to the "InProcess" queue.
+     * Forward a scorer request to the "InProcess" queue.
      * <p>
      * A request to create a graph of aggregated quality scores is serialized and placed on the RabbitMQ "InProcess"
      * queue. This queue is read by worker processes that call the scorer program to obtain the quality scores and
