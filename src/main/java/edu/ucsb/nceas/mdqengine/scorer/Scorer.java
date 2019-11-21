@@ -210,23 +210,36 @@ public class Scorer {
                 // Two types of graphs are currently supported:
                 // - a graph for all pids included in a DataONE collection (portal), and a specified suite id
                 // - a graph for specified filters: member node, suite id, metadata format
-                try {
+                label: try {
                     MetadigFile mdFile = new MetadigFile();
                     Graph graph = new Graph();
                     Scorer gfr = new Scorer();
                     // If creating a graph for a collection, get the set of pids associated with the collection.
                     // Only scores for these pids will be included in the graph.
-                    if(collectionId != null && ! collectionId.isEmpty()) {
+                    if (collectionId != null && !collectionId.isEmpty()) {
                         log.info("Getting pids for collection " + collectionId);
                         // Always use the CN subject id and authentication token from the configuration file, as
                         // requests that this method uses need CN subject privs
-                        collectionPids = gfr.getCollectionPids(collectionId, nodeId, serviceUrl, CNsubjectId, CNauthToken);
+                        collectionPids = gfr.getCollectionPids(collectionId, nodeId, serviceUrl, subjectId, authToken);
                     }
 
+                    // Don't continue if no pids (and thus scores) were found for this collection
+                    if(collectionPids.size() == 0) {
+                        log.info("No pids returned for this collection.");
+                        break label;
+                    }
                     // Quality scores will now be obtained from the MetaDIG quality Solr index, using the list of pids obtained
                     // for the collection.
                     List<QualityScore> scores = gfr.getQualityScores(collectionId, suiteId, nodeId, formatFamily, collectionPids);
-                    log.debug("# of quality scores returned: " + scores.size());
+
+                    // Don't continue if no quality scores were found for this collection
+                    if(scores.size() == 0) {
+                        log.info("No quality scores found for collection: " + collectionId);
+                        break label;
+                    } else {
+                        log.debug("# of quality scores returned: " + scores.size());
+                    }
+
                     File scoreFile = gfr.createScoreFile(scores);
                     log.debug("Created score file: " + scoreFile.getPath());
 
@@ -283,7 +296,7 @@ public class Scorer {
                     log.debug("Sending report info back to controller...");
                     qEntry.setProcessingElapsedTimeSeconds(elapsedTimeSecondsProcessing);
                     // Send a message to the controller for this job
-                    gfr.returnGraphStatus(collectionId, projectName, qEntry);
+                    gfr.returnGraphStatus(collectionId, suiteId, qEntry);
                     log.debug("Sent report info back to controller...");
                 } catch (IOException ioe) {
                     log.error("Unable to return quality report to controller.");
@@ -312,6 +325,7 @@ public class Scorer {
      */
     private ArrayList<String> getCollectionPids(String collectionId, String nodeId, String serviceUrl, String subjectId, String authToken) throws Exception {
 
+        log.debug("getCollectionPids");
         Document xmldoc = null;
         String queryStr = null;
         // Page though the results, requesting a certain amount of pids at each request
@@ -332,7 +346,7 @@ public class Scorer {
             throw new MetadigException("No result returned from Solr query: " + queryStr);
         }
 
-        // Extract the ids from the Solr result XML
+        // Extract the collection query from the Solr result XML
         XPathFactory xPathfactory = XPathFactory.newInstance();
         XPath xpath = xPathfactory.newXPath();
         XPathExpression fieldXpath = null;
@@ -403,7 +417,7 @@ public class Scorer {
         int resultCount = 0;
         startPos = 0;
         countRequested = 1000;
-        // Now get the pids associated with the project
+        // Now get the pids associated with the collection
         // One query can return many documents, so use the paging mechanism to make sure we retrieve them all.
         // Keep paging through query results until all pids have been fetched. The last 'page' of query
         // results is indicated by the number of items returned being less than the number requested.
@@ -435,6 +449,7 @@ public class Scorer {
             startPos += thisResultLength;
         } while (thisResultLength > 0);
 
+        log.debug("Got " + pids.size() + " pids associated with this collection.");
         return pids;
     }
 
@@ -465,7 +480,7 @@ public class Scorer {
 
         // The metadata format family can be specified to filter the quality scores that will be included
         // in the graph./
-        if (formatFamily != null) {
+        if (formatFamily != null && ! formatFamily.isEmpty()) {
             if(formatFamily.split(",").length == 1) {
                 formatFamilySearchTerm = "*" + formatFamily + "*";
             } else {
@@ -479,6 +494,7 @@ public class Scorer {
                 }
                 formatFamilySearchTerm = "(" + formatFamilySearchTerm + ")";
             }
+            log.debug("FormatFamily query term: " + formatFamilySearchTerm);
         }
 
         int startPosInResult = 0;
