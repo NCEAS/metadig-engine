@@ -5,11 +5,14 @@ import java.io.Reader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.File;
+
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVRecord;
 import java.util.HashMap;
+import java.util.Map;
 
 public class MediaTypes {
 
@@ -49,6 +52,31 @@ public class MediaTypes {
         }
 
         return fileExt;
+    }
+
+    /**
+     * Get the mediaType associated with a filename.
+     *
+     * <p>
+     * The file extension is extracted and this is used to obtain a matching mediaType
+     * Only the first match is returned.
+     * </p>
+     *
+     * @return the mediaType associated with the file
+     */
+    public String getMediaTypeName(File file) {
+
+        String mediaTypeName = null;
+        String fileExt = FilenameUtils.getExtension(file.getName());
+
+        for (Map.Entry<String, String> entry : mediaTypes.entrySet()) {
+            if(entry.getValue().equalsIgnoreCase(fileExt)) {
+                mediaTypeName = entry.getKey();
+                break;
+            }
+        }
+
+        return mediaTypeName;
     }
 
     /**

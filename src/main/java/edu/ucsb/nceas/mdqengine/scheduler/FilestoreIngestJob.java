@@ -3,10 +3,12 @@ package edu.ucsb.nceas.mdqengine.scheduler;
 import edu.ucsb.nceas.mdqengine.MDQconfig;
 import edu.ucsb.nceas.mdqengine.exception.MetadigFilestoreException;
 import edu.ucsb.nceas.mdqengine.exception.MetadigStoreException;
+import edu.ucsb.nceas.mdqengine.filestore.MediaTypes;
 import edu.ucsb.nceas.mdqengine.filestore.MetadigFile;
 import edu.ucsb.nceas.mdqengine.filestore.MetadigFileStore;
 import edu.ucsb.nceas.mdqengine.filestore.StorageType;
 import org.apache.commons.configuration2.ex.ConfigurationException;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.quartz.*;
@@ -133,13 +135,18 @@ public class FilestoreIngestJob implements Job {
         }
 
         // The directory name should be the Metadig filestore storage type, i.e. "code" or "graph", etc
-        //StorageType storageType = StorageType.getValue(dir.getName());
-        //metadigFile.setStorageType(storageType.getStorageTyp());
+        StorageType storageType = StorageType.getValue(dir.getName());
         metadigFile.setStorageType(StorageType.CODE.toString());
+        log.debug("setting storage type to " + metadigFile.getStorageType());
         metadigFile.setAltFilename(file.getName());
 
         Boolean replace = true;
         try {
+            // Get the mediaType from the file extension
+            MediaTypes mediaTypes = new MediaTypes();
+            String mediaTypeName = mediaTypes.getMediaTypeName(file);
+            metadigFile.setMediaType(mediaTypeName);
+            log.debug("Setting mediaType to: " + mediaTypeName);
             String newFile = metadigFileStore.saveFile(metadigFile, file.getAbsolutePath(), replace);
             // Now that the file has been saved to the filestore, remove the file from the staging area
             file.delete();
