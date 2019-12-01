@@ -302,7 +302,7 @@ public class Controller {
                                DateTime requestDateTime,
                                InputStream systemMetadata) throws java.io.IOException {
 
-        log.info("Processing quality report request, id" + metadataPid + ", suite: " + qualitySuiteId);
+        log.info("Processing quality report request, id: " + metadataPid + ", suite: " + qualitySuiteId);
         QueueEntry qEntry = null;
         SystemMetadata sysmeta = null;
         byte[] message = null;
