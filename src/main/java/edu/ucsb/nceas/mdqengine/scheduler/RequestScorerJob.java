@@ -1,5 +1,6 @@
 package edu.ucsb.nceas.mdqengine.scheduler;
 
+import edu.ucsb.nceas.mdqengine.Controller;
 import edu.ucsb.nceas.mdqengine.MDQconfig;
 import edu.ucsb.nceas.mdqengine.exception.MetadigStoreException;
 import edu.ucsb.nceas.mdqengine.model.Task;
@@ -47,6 +48,7 @@ import java.util.regex.Pattern;
 public class RequestScorerJob implements Job {
 
     private Log log = LogFactory.getLog(RequestScorerJob.class);
+    private static Controller metadigCtrl = null;
 
     class ListResult {
         Integer resultCount;
@@ -101,6 +103,8 @@ public class RequestScorerJob implements Job {
         String qualityServiceUrl  = null;
         String CNsubjectId = null;
         String CNauthToken = null;
+        String CNserviceUrl = null;
+        String subjectId = null;
         MDQconfig cfg = null;
 
         JobKey key = context.getJobDetail().getKey();
@@ -109,9 +113,11 @@ public class RequestScorerJob implements Job {
         String taskName = dataMap.getString("taskName");
         String taskType = dataMap.getString("taskType");
         String authTokenName = dataMap.getString("authTokenName");
-        String subjectId = dataMap.getString("ubjectid");
+        String subjectIdName = dataMap.getString("subjectIdName");
         String pidFilter = dataMap.getString("pidFilter");
         String suiteId = dataMap.getString("suiteId");
+        // The nodeId is used for filterine queries based on DataONE sysmeta 'datasource'.
+        // For example, if one wished to get scores for Arctic Data Center, the urn:node:ARCTIC would be specified.
         String nodeId = dataMap.getString("nodeId");
         String nodeServiceUrl = dataMap.getString("nodeServiceUrl");
         String startHarvestDatetimeStr = dataMap.getString("startHarvestDatetime");
@@ -128,23 +134,50 @@ public class RequestScorerJob implements Job {
             qualityServiceUrl = cfg.getString("quality.serviceUrl");
             CNsubjectId = cfg.getString("CN.subjectId");
             CNauthToken = cfg.getString("CN.authToken");
+            CNserviceUrl = cfg.getString("CN.nodeServiceUrl");
 
+            if(nodeId == null || nodeId.isEmpty()) {
+                //nodeId = cfg.getString("CN.nodeId");
+                nodeId = "";
+            }
+
+            log.debug("nodeId from request: " + nodeId);
+
+            // First try to use a passed in auth token name, which is the name of metadig.properties entry
             if(authTokenName != null && !authTokenName.isEmpty()) {
                 authToken = cfg.getString(authTokenName);
-            } else {
-                authToken = CNauthToken;
+                log.debug("Using authToken: " + authTokenName);
             }
+            // If no auth token can be found, und the CN one
+            if(authToken == null || authToken.isEmpty()) {
+                authToken = CNauthToken;
+                log.debug("Using CN authToken");
+            }
+
+            // First try to use a passed in auth token name, which is the name of metadig.properties entry
+            if(subjectIdName != null && !subjectIdName.isEmpty()) {
+                subjectId = cfg.getString(subjectIdName);
+                log.debug("Using subjectId: " + subjectId);
+            }
+
+            if(subjectId == null || subjectId.isEmpty()) {
+                subjectId = CNsubjectId;
+                log.debug("Using CN subjectId");
+            }
+
+            if(nodeServiceUrl == null || nodeServiceUrl.isEmpty()) {
+                nodeServiceUrl = CNserviceUrl;
+            }
+
+            log.debug("nodeServiceUrl: " + nodeServiceUrl);
+
         } catch (ConfigurationException | IOException ce) {
             JobExecutionException jee = new JobExecutionException("Error executing task.");
             jee.initCause(ce);
             throw jee;
         }
 
-        if(subjectId == null || subjectId.isEmpty()) {
-            subjectId = CNsubjectId;
-        }
-
-        log.debug("Executing task: " + taskName + ", taskType: " + taskType);
+        log.info("Executing task: " + taskName + ", taskType: " + taskType);
 
         try {
             mrc = new DefaultHttpMultipartRestClient();
@@ -161,7 +194,7 @@ public class RequestScorerJob implements Job {
         Boolean isCN = isCN(nodeServiceUrl);
         if(isCN) {
             cnNode = new MultipartCNode(mrc, nodeServiceUrl, session);
-            log.debug("Created cnNode: " + cnNode.toString());
+            log.debug("Created cnNode for serviceUrl: " + nodeServiceUrl);
         } else {
             mnNode = new MultipartMNode(mrc, nodeServiceUrl, session);
             log.debug("Created mnNode for serviceUrl: " + nodeServiceUrl);
@@ -245,7 +278,6 @@ public class RequestScorerJob implements Job {
         boolean morePids = true;
         while(morePids) {
             ArrayList<String> pidsToProcess = null;
-            log.info("Getting pids for node: " + nodeId);
 
             try {
                 result = getPidsToProcess(cnNode, mnNode, isCN, session, suiteId, nodeId, pidFilter, startDTRstr, endDTRstr, startCount, countRequested);
@@ -257,11 +289,12 @@ public class RequestScorerJob implements Job {
                 throw jee;
             }
 
-            log.info("Found " + resultCount + " pids" + " for node: " + nodeId);
+            log.info("Found " + resultCount + " pids" + " for servierUrl: " + nodeServiceUrl);
             for (String pidStr : pidsToProcess) {
                 try {
                     log.info("submitting pid: " + pidStr);
-                    submitScorerRequest(cnNode, mnNode, isCN, session, qualityServiceUrl, pidStr, suiteId, nodeId, formatFamily);
+                    submitScorerRequest(qualityServiceUrl, pidStr, suiteId, nodeId, formatFamily);
+
                 } catch (Exception e) {
                     JobExecutionException jee = new JobExecutionException("Unable to submit request to create new quality reports", e);
                     jee.setRefireImmediately(false);
@@ -390,31 +423,32 @@ public class RequestScorerJob implements Job {
         return result;
     }
 
-    public void submitScorerRequest(MultipartCNode cnNode, MultipartMNode mnNode, Boolean isCN, Session session,
-                                   String qualityServiceUrl, String pidStr, String suiteId, String nodeId, String formatFamily) throws Exception {
+    public void submitScorerRequest(String qualityServiceUrl, String collectionId, String suiteId, String nodeId, String formatFamily) throws  Exception {
 
         InputStream runResultIS = null;
 
-        Identifier pid = new Identifier();
-        pid.setValue(pidStr);
+        String scorerServiceUrl = qualityServiceUrl + "/scores" + "?suite=" + suiteId;
 
-        String scorerServiceUrl = qualityServiceUrl + "/scores" + "?collection=" + pidStr + "&suite=" + suiteId;
+        if(collectionId != null && ! collectionId.isEmpty()) {
+            scorerServiceUrl += "&collection=" + collectionId;
+        }
+
+        if(nodeId != null && ! nodeId.isEmpty()) {
+            scorerServiceUrl += "&node=" + nodeId;
+        }
+
+        if(formatFamily != null && ! formatFamily.isEmpty()) {
+            scorerServiceUrl += "&format=" + formatFamily;
+        }
+
         HttpPost post = new HttpPost(scorerServiceUrl);
 
         try {
-            // add document
-            //SimpleMultipartEntity entity = new SimpleMultipartEntity();
-            //entity.addFilePart("document", objectIS);
-
-            //ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            //TypeMarshaller.marshalTypeToOutputStream(sysmeta, baos);
-            //entity.addFilePart("systemMetadata", new ByteArrayInputStream(baos.toByteArray()));
-
             // make sure we get XML back
             post.addHeader("Accept", "application/xml");
 
             // send to service
-            log.trace("submitting: " + scorerServiceUrl);
+            log.trace("submitting scores request : " + scorerServiceUrl);
             //post.setEntity((HttpEntity) entity);
             CloseableHttpClient client = HttpClients.createDefault();
             CloseableHttpResponse response = client.execute(post);
@@ -476,5 +510,7 @@ public class RequestScorerJob implements Job {
 
         return session;
     }
+
+
 }
 

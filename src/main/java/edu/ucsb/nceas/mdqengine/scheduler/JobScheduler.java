@@ -38,8 +38,8 @@ public class JobScheduler {
         String taskType = null;
         String taskName = null;
         String taskGroup = null;
-        String authToken = null;
-        String authTokenParamName = null;
+        String authTokenName = null;
+        String subjectIdName = null;
         String cronSchedule = null;
         String params = null;
 
@@ -84,15 +84,18 @@ public class JobScheduler {
             taskType       = record.get("task-type").trim();
             taskName        = record.get("task-name").trim();
             taskGroup       = record.get("task-group").trim();
-            authTokenParamName = record.get("auth-token").trim();
+            authTokenName = record.get("auth-token").trim();
+            subjectIdName = record.get("subject-id").trim();
             cronSchedule   = record.get("cron-schedule").trim();
             params         = record.get("params").trim();
             System.out.println("Task type: " + taskType);
+            System.out.println("auth-token: " + authTokenName);
+            System.out.println("subject-id: " + subjectIdName);
             System.out.println("cronSchedule: " + cronSchedule);
             params = params.startsWith("\"") ? params.substring(1) : params;
             params = params.endsWith("\"") ? params.substring(0, params.length()-1) : params;
 
-            authToken = js.readConfig(authTokenParamName);
+            //authToken = js.readConfig(authTokenParamName);
             //System.out.println("authToken: " + authToken);
             System.out.println("params: " + params);
             if(taskType.equals("quality")) {
@@ -192,7 +195,8 @@ public class JobScheduler {
                             .withIdentity(taskName, taskGroup)
                             .usingJobData("taskName", taskName)
                             .usingJobData("taskType", taskType)
-                            .usingJobData("authToken", authToken)
+                            .usingJobData("authTokenName", authTokenName)
+                            .usingJobData("subjectIdName", subjectIdName)
                             .usingJobData("pidFilter", pidFilter)
                             .usingJobData("suiteId", suiteId)
                             .usingJobData("nodeId", nodeId)
@@ -206,7 +210,8 @@ public class JobScheduler {
                             .withIdentity(taskName, taskGroup)
                             .usingJobData("taskName", taskName)
                             .usingJobData("taskType", taskType)
-                            .usingJobData("authToken", authToken)
+                            .usingJobData("authTokenName", authTokenName)
+                            .usingJobData("subjectIdName", subjectIdName)
                             .usingJobData("pidFilter", pidFilter)
                             .usingJobData("suiteId", suiteId)
                             .usingJobData("nodeId", nodeId)
