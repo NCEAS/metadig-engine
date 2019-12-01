@@ -105,14 +105,6 @@ public class RequestReportJob implements Job {
             throws JobExecutionException {
 
         String qualityServiceUrl = null;
-        try {
-            MDQconfig cfg = new MDQconfig();
-            qualityServiceUrl = cfg.getString("quality.serviceUrl");
-        } catch (ConfigurationException | IOException ce) {
-            JobExecutionException jee = new JobExecutionException("Error executing task.");
-            jee.initCause(ce);
-            throw jee;
-        }
 
         //Log log = LogFactory.getLog(RequestReportJob.class);
         JobKey key = context.getJobDetail().getKey();
@@ -120,7 +112,8 @@ public class RequestReportJob implements Job {
 
         String taskName = dataMap.getString("taskName");
         String taskType = dataMap.getString("taskType");
-        String authToken = dataMap.getString("authToken");
+        String authTokenName = dataMap.getString("authTokenName");
+        String subjectIdNmae = dataMap.getString("subjectIdName");
         String pidFilter = dataMap.getString("pidFilter");
         String suiteId = dataMap.getString("suiteId");
         String nodeId = dataMap.getString("nodeId");
@@ -131,6 +124,21 @@ public class RequestReportJob implements Job {
         MultipartRestClient mrc = null;
         MultipartMNode mnNode = null;
         MultipartCNode cnNode = null;
+
+        String authToken = null;
+        try {
+            MDQconfig cfg = new MDQconfig();
+            qualityServiceUrl = cfg.getString("quality.serviceUrl");
+            // First try to use a passed in auth token name, which is the name of metadig.properties entry
+            if(authTokenName != null && !authTokenName.isEmpty()) {
+                authToken = cfg.getString(authTokenName);
+                log.debug("Using authToken: " + authTokenName);
+            }
+        } catch (ConfigurationException | IOException ce) {
+            JobExecutionException jee = new JobExecutionException("Error executing task.");
+            jee.initCause(ce);
+            throw jee;
+        }
 
         log.debug("Executing task for node: " + nodeId + ", suiteId: " + suiteId);
 
@@ -146,14 +154,14 @@ public class RequestReportJob implements Job {
         Subject subject = new Subject();
         subject.setValue("public");
         Session session = null;
+
         if(authToken == null || authToken.isEmpty()) {
             session = new Session();
             //session.setSubject(subject);
         } else {
             session = new AuthTokenSession(authToken);
         }
-
-        //log.info("Created session with subject: " + session.getSubject().getValue().toString());
+        log.info("Created session with subject: " + session.getSubject().getValue().toString());
 
         // Don't know node type yet from the id, so have to manually check if it's a CN
         Boolean isCN = isCN(nodeServiceUrl);
