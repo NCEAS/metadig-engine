@@ -13,12 +13,14 @@ COPY metadig-engine.jar metadig-engine.jar
 
 #COPY metadig.properties /etc/metadig/metadig.properties
 #COPY taskList.csv /etc/metadig/taskList.csv
+COPY log4j.properties .
 
-COPY run.sh run.sh
+#COPY run.sh run.sh
 # The 'run.sh' script copies config files that should be available from persistent volume to the standard location where the software
 # will access them, and then starts the Java 'JobScheduler' class.
 
 # Run the MetaDIG Engine Scheduler process
 #CMD java -XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap -XX:+UseSerialGC -cp ./metadig-engine.jar:./solr edu.ucsb.nceas.mdqengine.scheduler.JobScheduler
 
-CMD [ "./run.sh" ]
+#CMD [ "./run.sh" ]
+CMD java -XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap -XX:+UseSerialGC -cp ./metadig-engine.jar: edu.ucsb.nceas.mdqengine.scheduler.JobScheduler
