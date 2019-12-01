@@ -69,6 +69,7 @@ public class SolrIndex {
     private List<IDocumentSubprocessor> subprocessors = null;
 
     private SolrClient solrClient = null;
+    private static final String SOLR_COLLECTION = "quality";
     private XMLNamespaceConfig xmlNamespaceConfig = null;
     private List<SolrField> sysmetaSolrFields = null;
 
@@ -202,6 +203,7 @@ public class SolrIndex {
             log.debug("Subproccor list is null");
         }
 
+        log.debug("Subprocessor returning " + docs.size() + " docs");
         return docs;
     }
 
@@ -302,6 +304,7 @@ public class SolrIndex {
      * Insert a SolrDoc to the solr server.
      */
     private synchronized void insertToIndex(SolrDoc doc) throws SolrServerException, IOException {
+        log.debug("insertToIndex");
         if(doc != null ) {
             SolrInputDocument solrDoc = new SolrInputDocument();
             List<SolrElementField> list = doc.getFieldList();
@@ -318,8 +321,9 @@ public class SolrIndex {
             }
             if(!solrDoc.isEmpty()) {
                 try {
-                    UpdateResponse response = solrClient.add(solrDoc);
-                    solrClient.commit();
+                    log.debug("Updating collection: " + SOLR_COLLECTION);
+                    UpdateResponse response = solrClient.add(SOLR_COLLECTION, solrDoc);
+                    solrClient.commit(SOLR_COLLECTION);
                 } catch (SolrServerException e) {
                     throw e;
                 } catch (IOException e) {
@@ -355,7 +359,7 @@ public class SolrIndex {
         SolrQuery query = new SolrQuery(IDQUERY);
         query.setRows(Integer.MAX_VALUE);
         query.setFields(ID);
-        QueryResponse response = solrClient.query(query);
+        QueryResponse response = solrClient.query(SOLR_COLLECTION, query);
         SolrDocumentList docs = response.getResults();
         if(docs != null) {
             for(SolrDocument doc :docs) {
@@ -374,7 +378,7 @@ public class SolrIndex {
         log.debug("Updating entry in Solr index...");
         SolrQuery query = new SolrQuery("metadataId:" + '"' +  metadataId + '"' + "+suiteId:" + suiteId);
         query.setRows(1);
-        QueryResponse response = solrClient.query(query);
+        QueryResponse response = solrClient.query(SOLR_COLLECTION, query);
         SolrDocumentList docs = response.getResults();
 
         // Use the default field modifier type, if not specified in the arg list.
@@ -429,11 +433,14 @@ public class SolrIndex {
 //            }
 
             UpdateRequest updateRequest = new UpdateRequest();
-            updateRequest.setAction( UpdateRequest.ACTION.COMMIT, false, false);
+            updateRequest.setAction(UpdateRequest.ACTION.COMMIT, false, false);
 
             try {
+                log.debug("Processing update request");
                 updateRequest.add(solrDoc);
+                updateRequest.setParam("collection", SOLR_COLLECTION);
                 UpdateResponse rsp = updateRequest.process(solrClient);
+                //UpdateResponse rsp = updateRequest.commit(solrClient, SOLR_COLLECTION);
                 //solrClient.commit();
             } catch (SolrServerException e) {
                 log.error("Unable to update Solr document for metadataId: " + metadataId + ": " + e.getMessage());
