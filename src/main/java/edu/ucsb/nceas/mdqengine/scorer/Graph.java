@@ -108,7 +108,7 @@ public class Graph {
                 break;
             case MONTHLY:
                 mdFile.setMediaType("text/x-rsrc");
-                mdFile.setAltFilename("graph_" + GraphType.CUMULATIVE.toString().toLowerCase() + "_quality_scores.R");
+                mdFile.setAltFilename("graph_" + GraphType.MONTHLY.toString().toLowerCase() + "_quality_scores.R");
 
                 codeFile = fileStore.getFile(mdFile);
                 dispatcherType = "r";
@@ -116,10 +116,12 @@ public class Graph {
         }
 
         // The the graph program the title of the graph
-        variables.put("title", title);
+        // Currently we aren't putting titles on the graphs
+        //variables.put("title", title);
+        variables.put("title", "");
         // Set the input data file to read
         variables.put("inFile", inputFile);
-        File tmpfile = File.createTempFile("accumulated-graph", ".jpg");
+        File tmpfile = File.createTempFile("accumulated-graph", ".png");
         log.debug("generating tmp output graphics file to: " + tmpfile.getCanonicalPath());
         variables.put("outFile", tmpfile.getCanonicalPath());
 
