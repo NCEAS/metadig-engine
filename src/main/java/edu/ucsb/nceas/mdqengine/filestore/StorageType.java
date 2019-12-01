@@ -7,7 +7,7 @@ public enum StorageType {
     CODE("code"),
     TMP("tmp");
 
-    private final String type;
+    private String type;
 
     StorageType(String type) {
         this.type = type;
@@ -44,7 +44,7 @@ public enum StorageType {
             return null;
     }
 
-    public String getStorageTyp() {
-        return this.type.toLowerCase();
-    }
+//    public String getStorageType() {
+//        return this.toString();
+//    }
 }

@@ -155,26 +155,30 @@ public class MetadigFile {
 
         String newFileExt = null;
         fileExt = mediaTypes.getFileExtension(this.mediaType);
-        // Don't include a '.' if it is already in the fileExt.
-        Pattern r = Pattern.compile(pattern);
-        Matcher m = r.matcher(fileExt);
-        if (m.find()) {
-            newFileExt = fileExt;
-        } else {
-            newFileExt = "." + fileExt;
-        }
-
-        // Don't include fileExt if already in file
-        r = Pattern.compile(newFileExt);
-        m = r.matcher(filename);
-        if (m.find()) {
-            filePath = storageType + "/" + filename;
-        } else {
-            if(fileExt != null) {
-                filePath = storageType + "/" + filename + "." + fileExt;
+        if(fileExt != null && ! fileExt.isEmpty()) {
+            // Don't include a '.' if it is already in the fileExt.
+            Pattern r = Pattern.compile(pattern);
+            Matcher m = r.matcher(fileExt);
+            if (m.find()) {
+                newFileExt = fileExt;
             } else {
-                filePath = storageType + "/" + filename;
+                newFileExt = "." + fileExt;
             }
+
+            // Don't include fileExt if already in file
+            r = Pattern.compile(newFileExt);
+            m = r.matcher(filename);
+            if (m.find()) {
+                filePath = storageType + "/" + filename;
+            } else {
+                if (fileExt != null) {
+                    filePath = storageType + "/" + filename + "." + fileExt;
+                } else {
+                    filePath = storageType + "/" + filename;
+                }
+            }
+        } else {
+            filePath = storageType + "/" + filename;
         }
 
         return filePath;
