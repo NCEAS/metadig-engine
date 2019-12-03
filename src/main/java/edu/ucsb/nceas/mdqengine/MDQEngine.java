@@ -70,7 +70,14 @@ public class MDQEngine {
 	public Run runSuite(Suite suite, InputStream input, Map<String, Object> params, SystemMetadata sysMeta) 
 			throws MalformedURLException, IOException, SAXException, 
 			ParserConfigurationException, XPathExpressionException, ScriptException {
-			
+
+	    // Make the location of the data directory available to checks that need to
+		// read data files located there.
+		if(metadigDataDir != null || ! params.containsKey("metadigDataDir")) {
+			log.debug("Setting metadigDataDir: " + metadigDataDir);
+			params.put("metadigDataDir", metadigDataDir);
+		}
+
 		log.debug("Running suite: " + suite.getId());
 
 		String content = IOUtils.toString(input, "UTF-8");
@@ -235,10 +242,6 @@ public class MDQEngine {
 				} else {
 					sysmeta = (SystemMetadata) tmpSysmeta;
 				}
-			}
-
-			if(metadigDataDir != null) {
-				params.put("metadigDataDir", metadigDataDir);
 			}
 
 			Run run = engine.runSuite(suite, input, params, sysmeta);
