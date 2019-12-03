@@ -133,6 +133,8 @@ public class RequestReportJob implements Job {
             if(authTokenName != null && !authTokenName.isEmpty()) {
                 authToken = cfg.getString(authTokenName);
                 log.debug("Using authToken: " + authTokenName);
+            } else {
+                log.debug("Not using an authToken");
             }
         } catch (ConfigurationException | IOException ce) {
             JobExecutionException jee = new JobExecutionException("Error executing task.");
@@ -156,12 +158,13 @@ public class RequestReportJob implements Job {
         Session session = null;
 
         if(authToken == null || authToken.isEmpty()) {
+            log.debug("Creating non-authenticationed session");
             session = new Session();
             //session.setSubject(subject);
         } else {
+            log.debug("Creating authenticated session");
             session = new AuthTokenSession(authToken);
         }
-        log.info("Created session with subject: " + session.getSubject().getValue().toString());
 
         // Don't know node type yet from the id, so have to manually check if it's a CN
         Boolean isCN = isCN(nodeServiceUrl);
