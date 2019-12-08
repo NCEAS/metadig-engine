@@ -36,6 +36,8 @@ RUN apt -y install r-cran-tidyr
 RUN apt -y install r-cran-scales
 RUN apt -y install r-cran-lubridate
 RUN apt -y install r-cran-ggplot2
+RUN apt -y install r-cran-magrittr
+# Debian stretch doesn't have a pre-cooked package for readr, so install now.
 RUN Rscript --vanilla -e 'install.packages("readr", repos="https://cran.cnr.berkeley.edu/")'
 RUN Rscript --vanilla -e 'install.packages("metadig.tar.gz", repos=NULL)'
 

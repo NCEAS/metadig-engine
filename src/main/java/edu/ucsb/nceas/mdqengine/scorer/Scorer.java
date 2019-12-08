@@ -275,7 +275,8 @@ public class Scorer {
 
                     // Generate a temporary graph file based on the quality scores
                     log.debug("Creating graph for collection id: " + collectionId);
-                    String filePath = graph.create(GraphType.CUMULATIVE, title, scoreFile.getPath());
+                    //String filePath = graph.create(GraphType.CUMULATIVE, title, scoreFile.getPath());
+                    String filePath = graph.create(GraphType.MONTHLY, title, scoreFile.getPath());
                     // Now save the graphics file to permanent storage
                     //String outfile = projectName + "-" + suiteId + ".png";
                     String outfile;
