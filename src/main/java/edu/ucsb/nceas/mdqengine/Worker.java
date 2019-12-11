@@ -206,16 +206,17 @@ public class Worker {
                         // Traverse through the collection, stopping if the sequenceId is found. If the sequenceId
                         // is already found, then all pids in the chain that are stored should already have this
                         // sequenceId
-                        Boolean stopWhenSIfound = true;
+                        //Boolean stopWhenSIfound = true;
+                        Boolean stopWhenSIfound = false;
                         runsInSequence.getRunSequence(run, suiteId, stopWhenSIfound);
                         sequenceId = runsInSequence.getSequenceId();
                         // Ok, a sequence id wasn't set for these runs (if any), so generate a new one
                         // Only assign a new pid if the first pid in the sequence is found, so that we don't
                         // have multiple segments of a chain with different sequenceIds.
                         if (sequenceId == null && runsInSequence.getFoundFirstPid()) {
-                            sequenceId = runsInSequence.generateId();
+                            sequenceId = runsInSequence.getFirstPidInSequence();
                             runsInSequence.setSequenceId(sequenceId);
-                            log.debug("Generated new sequence id: " + sequenceId);
+                            log.debug("Setting sequenceId to first pid in sequence: " + sequenceId);
                         } else {
                             log.debug("Using found sequenceId: " + sequenceId);
                         }
@@ -228,7 +229,7 @@ public class Worker {
                     // Update runs in persist storage with sequenceId for this obsolesence chain
                     if(indexSequenceId && sequenceId != null) {
                         log.debug("Updating sequenceId to " + sequenceId);
-                        sequenceId = runsInSequence.getSequenceId();
+                        //sequenceId = runsInSequence.getSequenceId();
                         runsInSequence.updateSequenceId(sequenceId);
                         runsInSequence.update();
                     }
@@ -276,7 +277,8 @@ public class Worker {
                             }
                         }
 
-                        if (indexSequenceId) {
+                        // Now update one or more runs in the Solr index with the sequenceId
+                        if (indexSequenceId && sequenceId != null) {
                             // Put files to be updated in a HashMap (can update multiple fields)
                             HashMap<String, Object> fields = new HashMap<>();
                             fields.put("sequenceId", sequenceId);

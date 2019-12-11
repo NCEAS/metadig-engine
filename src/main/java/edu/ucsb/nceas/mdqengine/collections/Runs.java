@@ -17,6 +17,7 @@ public class Runs {
     private HashMap<String, Run> runs = new HashMap<>();
     private String sequenceId = null;
     private Boolean foundFirstPid = false;
+    private String firstPidInSequence = null;
 
     public Runs () {
     }
@@ -146,6 +147,7 @@ public class Runs {
                     if(run.getObsoletes() == null) {
                         this.foundFirstPid = true;
                         log.debug("Found first pid in sequence: " + run.getObjectIdentifier());
+                        firstPidInSequence = run.getObjectIdentifier();
                     }
                     log.debug("Reached beginning of obsoletes chain at pid: " + metadataId);
                 }
@@ -496,4 +498,12 @@ public class Runs {
         return this.foundFirstPid;
     }
 
+    /**
+     * Return the first pid in the sequence.
+     *
+     * @return firstPid - the starting pid in this obsolesense chain
+     */
+    public String getFirstPidInSequence() {
+        return firstPidInSequence;
+    }
 }

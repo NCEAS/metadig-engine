@@ -44,6 +44,7 @@ import org.dataone.service.exceptions.UnsupportedType;
 import org.dataone.service.types.v1.Identifier;
 import org.dataone.service.types.v2.SystemMetadata;
 import org.dataone.service.util.TypeMarshaller;
+import org.python.core.buffer.Strided1DBuffer;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
@@ -371,14 +372,14 @@ public class SolrIndex {
     }
 
     /*
-     * Update a Solr document with a new value for the specified field.
+     * Update a Solr document with new values for the specified field.
      */
     public synchronized void update(String metadataId, String suiteId, HashMap<String, Object> fields, String updateFieldModifier) throws SolrServerException, IOException {
 
-        log.debug("Updating entry in Solr index...");
         SolrQuery query = new SolrQuery("metadataId:" + '"' +  metadataId + '"' + "+suiteId:" + suiteId);
         query.setRows(1);
         QueryResponse response = solrClient.query(SOLR_COLLECTION, query);
+
         SolrDocumentList docs = response.getResults();
 
         // Use the default field modifier type, if not specified in the arg list.
@@ -387,63 +388,81 @@ public class SolrIndex {
         String runId = null;
         SolrDocument resultDoc = null;
         if(docs != null) {
-            log.info("Found entry for metadataId: " + metadataId + ", suiteId: " + suiteId + ", updating...");
+            log.info("Updating Solr index for entry for metadataId: " + metadataId + ", suiteId: " + suiteId + ", updating...");
             resultDoc = docs.get(0);
-            runId = (String)resultDoc.getFieldValue("runId");
-            log.info("RunId: " + runId);
             SolrInputDocument solrDoc = new SolrInputDocument();
 
-            // The Atomic update capability with Solr doesn't appear to work with our index or I'm using it
-            // incorrectly - so we have to update the entire document by exporting the result document to
-            // a new document, with any updated fields that have been passed in. Because this method uses
-            // the '_version_' field from the result document for the new one, the Solr 'optimistic concurrency'
-            // mechanism should be enabled, preventing this update from updating another update to this record that
-            // came before us.
+            // Use the 'optimistic' concurrency update Solr update method, where the '_version_' field
+            // from the retrieved document must match the document in the index. If it doesn't then this
+            // indicates that the record has been updated by someone else.
+            // We are amending this feature here, by not sending the update if all the fields in the retrieved
+            // document have the same value as the fields in the list to update (no update necessary, another
+            // worker did it for us). This makes sense especially for the 'sequenceId', as this will always be
+            // set to the first pid in the chain, so all workers updating a chain are trying to update with the
+            // same value.
+            // Note: the unique key 'runId' will be added here
+            // Also note: the "_version_" field will be added here, but needs to be added as a 'parameter' below
+            // in order to enable optimistic concurrency
             for (String n : resultDoc.getFieldNames()) {
-                // Don't add fields twice, i.e. from updated fields and from existing Solr doc
+                // Don't add fields twice, i.e. from updated filds and from existing Solr doc
                 if(fields.containsKey(n)) continue;
-                log.info("Adding field: " + n);
+                log.debug("Adding existing field: " + n);
                 solrDoc.addField(n, resultDoc.getFieldValue(n));
             }
 
+            // Now check if all the fields to be updated already have the desired value. If yes, then exit.
+
+            Boolean updateNeeded = false;
+            String str1 = null;
+            String str2 = null;
             // Add requested fields with updated values
             for (Map.Entry<String, Object> entry : fields.entrySet()) {
-                log.info("Adding field: " + entry.getKey());
-                solrDoc.addField(entry.getKey(), entry.getValue());
+                // Check if all the fields to be updated already have the desired value. If yes, then exit.
+                // Don't check if we have already determined that the update is needed.
+                if(!updateNeeded) {
+                    if(!resultDoc.containsKey(entry.getKey())) {
+                        updateNeeded = true;
+                    } else {
+                        str1 = resultDoc.getFieldValue(entry.getKey()).toString();
+                        str2 = entry.getValue().toString();
+                        if(str1.compareTo(str2) != 0) {
+                            updateNeeded = true;
+                        }
+                    }
+                }
             }
 
-            // Atomic update strategy from http://yonik.com/solr/atomic-updates/
-            // Atomic updates are enabled by using the 'field modifier' for the fields to be updated.
-//            solrDoc.setField("runId", runId);
-//            solrDoc.setField("_version_", String.valueOf(resultDoc.getFieldValue("_version_")));
-//            for (Map.Entry<String, Object> entry : fields.entrySet()) {
-//                //Map<String, String> fieldModifier = new HashMap<>(1);
-//                Map<String, Object> fieldModifier = new HashMap<>(1);
-//                // If the 'result' (existing) doc already contains the item, then use 'set' for the Solr field modifier
-//                // If not, then use 'add'.
-//                if (resultDoc.containsKey(entry.getKey())) {
-//                    log.info("Setting field: " + entry.getKey() + ", value: " + entry.getValue());
-//                    fieldModifier.put("set", entry.getValue());
-//                } else {
-//                    log.info("Adding field: " + entry.getKey() + ", value: " + entry.getValue());
-//                    //fieldModifier.put(updateFieldModifier, entry.getValue());
-//                    fieldModifier.put("add", entry.getValue());
-//                }
-//                solrDoc.addField(entry.getKey(), fieldModifier);
-//            }
+            if(updateNeeded) {
+                // Set the fields to be updated
+                for (Map.Entry<String, Object> entry : fields.entrySet()) {
+                    log.info("Setting field: " + entry.getKey());
+                    solrDoc.setField(entry.getKey(), entry.getValue());
+                }
+            } else {
+                log.debug("Update not needed, fields already updated for metadataId: " + metadataId + ", suiteId: " + suiteId + ", ");
+                return;
+            }
 
             UpdateRequest updateRequest = new UpdateRequest();
             updateRequest.setAction(UpdateRequest.ACTION.COMMIT, false, false);
 
+            UpdateResponse rsp = null;
             try {
-                log.debug("Processing update request");
+                log.debug("Processing update request to collection: " + SOLR_COLLECTION);
                 updateRequest.add(solrDoc);
+                //updateRequest.add(resultDoc);
+                String version = resultDoc.getFieldValue("_version_").toString();
+                // Enable 'optimistic concurrency' update
+                updateRequest.setParam("version", version);
                 updateRequest.setParam("collection", SOLR_COLLECTION);
-                UpdateResponse rsp = updateRequest.process(solrClient);
-                //UpdateResponse rsp = updateRequest.commit(solrClient, SOLR_COLLECTION);
+                //UpdateResponse rsp = updateRequest.process(solrClient);
+                log.debug("* Commiting updating to Solr doc with version: " + version);
+                rsp = updateRequest.commit(solrClient, SOLR_COLLECTION);
+                log.info("Update response: " + rsp.getStatus());
                 //solrClient.commit();
             } catch (SolrServerException e) {
                 log.error("Unable to update Solr document for metadataId: " + metadataId + ": " + e.getMessage());
+                if(rsp != null) log.error("Update response: " + rsp.getStatus());
                 throw e;
             } catch (IOException ioe) {
                 log.error("IO Error during update of SOlr document for metadataId, : " + metadataId + ": " + ioe.getMessage());

@@ -145,15 +145,27 @@ public class IndexApplicationController {
     public void updateSolrDoc(Identifier pid, String suiteId, HashMap<String, Object> fields, String updateFieldModifier) throws IOException, Exception {
 
         String metadataId = null;
-        try {
-            log.debug("calling solrIndex.update()...");
-            for (SolrIndex solrIndex: solrIndexes) {
-                metadataId = pid.getValue();
-                solrIndex.update(metadataId, suiteId, fields, updateFieldModifier);
+        Boolean done = false;
+        int maxAttempts = 10;
+        int attempts = 0;
+
+        while (!done) {
+            attempts += 1;
+            try {
+                log.debug("calling solrIndex.update()...");
+                for (SolrIndex solrIndex : solrIndexes) {
+                    metadataId = pid.getValue();
+                    solrIndex.update(metadataId, suiteId, fields, updateFieldModifier);
+                }
+                done = true;
+            } catch (Exception e) {
+                if(attempts > maxAttempts) {
+                    log.error("Unable to update Solr document (after " + attempts + " attempts) for metadata id: " + metadataId + ": " + e.getMessage());
+                    throw e;
+                } else {
+                    log.debug(attempts + " failed attempts to update Solr document (will retry) for metadata id: " + metadataId + ": " + e.getMessage());
+                }
             }
-        } catch (Exception e) {
-            log.error("Unable to update Solr document for metadata id: " + metadataId + ": " + e.getMessage());
-            throw e;
         }
     }
 
