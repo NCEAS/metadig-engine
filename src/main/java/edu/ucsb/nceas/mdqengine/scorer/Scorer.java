@@ -2,6 +2,7 @@ package edu.ucsb.nceas.mdqengine.scorer;
 
 import com.rabbitmq.client.*;
 import edu.ucsb.nceas.mdqengine.MDQconfig;
+import edu.ucsb.nceas.mdqengine.authentication.DataONE;
 import edu.ucsb.nceas.mdqengine.exception.MetadigException;
 import edu.ucsb.nceas.mdqengine.exception.MetadigProcessException;
 import edu.ucsb.nceas.mdqengine.filestore.MetadigFile;
@@ -433,6 +434,16 @@ public class Scorer {
             throw metadigException;
         }
 
+        // The collectionQuery original design included a Solr query clause that ensured that only the most recent versions
+        // of a dataset (pids at the HEAD of the obsolesence chain) would be included. The aggregated quality reports should contain
+        // all version of pids, so we have to remove this clause from the Solr query before using the query to get the pids for
+        // this collection.
+        // Here is an example collectionQuery: (((project:"State of Alaska\'s Salmon and People") AND (-obsoletedBy:* AND formatType:METADATA)))
+        // We have to remove the 'AND (-obsoletedBy:* AND formatType:METADATA)' portion
+
+        collectionQuery = collectionQuery.replaceAll("\\s*AND\\s*\\(-obsoletedBy:\\*\\s*AND\\s*formatType:METADATA\\)", "");
+        log.debug("Edited collectionQuery: " + collectionQuery);
+
         // Get account information for the collection owner. The account info will be used when the 'collectionQuery'
         // query is made, which will use the owner's identity and group memberships, so that the pids that are returned
         // from the query are the ones that the user would see when viewing their portal page.
@@ -763,13 +774,13 @@ public class Scorer {
         MultipartRestClient mrc = null;
         // Polymorphism doesn't work with D1 node classes, so have to use the derived classes
         MultipartD1Node d1Node = null;
+//
+//        Subject subject = new Subject();
+//        if(subjectId != null && !subjectId.isEmpty()) {
+//            subject.setValue(subjectId);
+//        }
 
-        Subject subject = new Subject();
-        if(subjectId != null && !subjectId.isEmpty()) {
-            subject.setValue(subjectId);
-        }
-
-        Session session = getSession(subjectId, authToken);
+        Session session = DataONE.getSession(subjectId, authToken);
 
         // Add the start and count, if pagination is being used
         queryStr = queryStr + "&start=" + startPos + "&rows=" + countRequested;
@@ -948,12 +959,12 @@ public class Scorer {
         log.debug("serviceUrl: " + serviceUrl);
         log.debug("subjectId: " + subjectId);
 
-        Subject subject = new Subject();
-        if(subjectId != null && ! subjectId.isEmpty()) {
-            subject.setValue(subjectId);
-        }
+//        Subject subject = new Subject();
+//        if(subjectId != null && ! subjectId.isEmpty()) {
+//            subject.setValue(subjectId);
+//        }
 
-        Session session = getSession(subjectId, authToken);
+        Session session = DataONE.getSession(subjectId, authToken);
         Identifier identifier = new Identifier();
         identifier.setValue(pid);
 
@@ -992,12 +1003,12 @@ public class Scorer {
         MetadigProcessException metadigException = null;
 
         SubjectInfo subjectInfo = null;
-        Subject requestingSubject = new Subject();
-        if(subjectId != null && ! subjectId.isEmpty()) {
-            requestingSubject.setValue(subjectId);
-        }
+        //Subject requestingSubject = new Subject();
+//        if(subjectId != null && ! subjectId.isEmpty()) {
+//            requestingSubject.setValue(subjectId);
+//        }
 
-        Session session = getSession(subjectId, authToken);
+        Session session = DataONE.getSession(subjectId, authToken);
 
         // Identity node as either a CN or MN based on the serviceUrl
         String pattern = "https*://cn.*?\\.dataone\\.org|https*://cn.*?\\.test\\.dataone\\.org";
@@ -1014,7 +1025,7 @@ public class Scorer {
         try {
             cnNode = (MultipartCNode) getMultipartD1Node(session, serviceUrl);
         } catch (Exception ex) {
-            metadigException = new MetadigProcessException("Unable to create multipart D1 node: " + requestingSubject.getValue() + ": " + ex.getMessage());
+            metadigException = new MetadigProcessException("Unable to create multipart D1 node: " + subjectId + ": " + ex.getMessage());
             metadigException.initCause(ex);
             throw metadigException;
         }
@@ -1030,35 +1041,35 @@ public class Scorer {
         return subjectInfo;
     }
 
-    /**
-     * Get a DataONE authenticated session
-     * <p>
-     *     If no subject or authentication token are provided, a public session is returned
-     * </p>
-     * @param authToken the authentication token
-     * @return the DataONE session
-     */
-    Session getSession(String subjectId, String authToken) {
-
-        Session session;
-
-        // query Solr - either the member node or cn, for the project 'solrquery' field
-        if (authToken == null || authToken.isEmpty()) {
-            log.debug("Creating public session");
-            session = new Session();
-        } else {
-            log.debug("Creating authentication session");
-            session = new AuthTokenSession(authToken);
-        }
-
-        if (subjectId != null && !subjectId.isEmpty()) {
-            Subject subject = new Subject();
-            subject.setValue(subjectId);
-            session.setSubject(subject);
-        }
-
-        return session;
-    }
+//    /**
+//     * Get a DataONE authenticated session
+//     * <p>
+//     *     If no subject or authentication token are provided, a public session is returned
+//     * </p>
+//     * @param authToken the authentication token
+//     * @return the DataONE session
+//     */
+//    Session getSession(String subjectId, String authToken) {
+//
+//        Session session;
+//
+//        // query Solr - either the member node or cn, for the project 'solrquery' field
+//        if (authToken == null || authToken.isEmpty()) {
+//            log.debug("Creating public session");
+//            session = new Session();
+//        } else {
+//            log.debug("Creating authentication session");
+//            session = new AuthTokenSession(authToken);
+//        }
+//
+//        if (subjectId != null && !subjectId.isEmpty()) {
+//            Subject subject = new Subject();
+//            subject.setValue(subjectId);
+//            session.setSubject(subject);
+//        }
+//
+//        return session;
+//    }
 
     /**
      * Get a DataONE MultipartCNode object, which will be used to communication with a CN

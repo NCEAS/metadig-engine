@@ -2,6 +2,7 @@ package edu.ucsb.nceas.mdqengine.scheduler;
 
 import edu.ucsb.nceas.mdqengine.Controller;
 import edu.ucsb.nceas.mdqengine.MDQconfig;
+import edu.ucsb.nceas.mdqengine.authentication.DataONE;
 import edu.ucsb.nceas.mdqengine.exception.MetadigStoreException;
 import edu.ucsb.nceas.mdqengine.model.Task;
 import edu.ucsb.nceas.mdqengine.store.DatabaseStore;
@@ -188,7 +189,7 @@ public class RequestScorerJob implements Job {
             throw jee;
         }
 
-        Session session = getSession(subjectId, authToken);
+        Session session = DataONE.getSession(subjectId, authToken);
 
         // Don't know node type yet from the id, so have to manually check if it's a CN
         Boolean isCN = isCN(nodeServiceUrl);
@@ -481,35 +482,6 @@ public class RequestScorerJob implements Job {
         return isCN;
     }
 
-    /**
-     * Get a DataONE authenticated session
-     * <p>
-     *     If no subject or authentication token are provided, a public session is returned
-     * </p>
-     * @param authToken the authentication token
-     * @return the DataONE session
-     */
-    Session getSession(String subjectId, String authToken) {
-
-        Session session;
-
-        Subject subject = new Subject();
-        subject.setValue(subjectId);
-        // query Solr - either the member node or cn, for the project 'solrquery' field
-        if (authToken == null || authToken.isEmpty()) {
-            log.debug("Creating public session");
-            session = new Session();
-        } else {
-            log.debug("Creating authentication session");
-            session = new AuthTokenSession(authToken);
-        }
-
-        if(subject != null) {
-            session.setSubject(subject);
-        }
-
-        return session;
-    }
 
 
 }

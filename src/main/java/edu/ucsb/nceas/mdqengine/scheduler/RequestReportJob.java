@@ -153,18 +153,7 @@ public class RequestReportJob implements Job {
             throw jee;
         }
 
-        Subject subject = new Subject();
-        subject.setValue("public");
-        Session session = null;
-
-        if(authToken == null || authToken.isEmpty()) {
-            log.debug("Creating non-authenticationed session");
-            session = new Session();
-            //session.setSubject(subject);
-        } else {
-            log.debug("Creating authenticated session");
-            session = new AuthTokenSession(authToken);
-        }
+        Session session = DataONE.getSession(subjectId, authToken);
 
         // Don't know node type yet from the id, so have to manually check if it's a CN
         Boolean isCN = isCN(nodeServiceUrl);
