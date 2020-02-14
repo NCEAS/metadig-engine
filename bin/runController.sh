@@ -1,6 +1,6 @@
 #!/bin/bash
 
-version=2.1.0
+version=2.2.0
 #mvn exec:java -Dexec.mainClass="edu.ucsb.nceas.metadig.Controller" -Dexec.args="hi there"
 
 # Use first argument if sending jobs via port, for testing, for example:

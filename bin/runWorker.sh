@@ -1,6 +1,6 @@
 #!/bin/bash
 
-version=2.1.0
+version=2.2.0
 #mvn exec:java -Dexec.mainClass="edu.ucsb.nceas.metadig.Worker" -Dexec.args="hi there"
 
 # Include the MetaDIG python library
