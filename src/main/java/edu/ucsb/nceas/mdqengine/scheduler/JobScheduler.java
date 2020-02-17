@@ -39,7 +39,7 @@ public class JobScheduler {
         String taskName = null;
         String taskGroup = null;
         String authTokenName = null;
-        String subjectIdName = null;
+        String subjectId = null;
         String cronSchedule = null;
         String params = null;
 
@@ -85,12 +85,12 @@ public class JobScheduler {
             taskName        = record.get("task-name").trim();
             taskGroup       = record.get("task-group").trim();
             authTokenName = record.get("auth-token").trim();
-            subjectIdName = record.get("subject-id").trim();
+            subjectId = record.get("subject-id").trim();
             cronSchedule   = record.get("cron-schedule").trim();
             params         = record.get("params").trim();
             System.out.println("Task type: " + taskType);
             System.out.println("auth-token: " + authTokenName);
-            System.out.println("subject-id: " + subjectIdName);
+            System.out.println("subject-id: " + subjectId);
             System.out.println("cronSchedule: " + cronSchedule);
             params = params.startsWith("\"") ? params.substring(1) : params;
             params = params.endsWith("\"") ? params.substring(0, params.length()-1) : params;
@@ -196,7 +196,7 @@ public class JobScheduler {
                             .usingJobData("taskName", taskName)
                             .usingJobData("taskType", taskType)
                             .usingJobData("authTokenName", authTokenName)
-                            .usingJobData("subjectIdName", subjectIdName)
+                            .usingJobData("subjectId", subjectId)
                             .usingJobData("pidFilter", pidFilter)
                             .usingJobData("suiteId", suiteId)
                             .usingJobData("nodeId", nodeId)
@@ -211,7 +211,7 @@ public class JobScheduler {
                             .usingJobData("taskName", taskName)
                             .usingJobData("taskType", taskType)
                             .usingJobData("authTokenName", authTokenName)
-                            .usingJobData("subjectIdName", subjectIdName)
+                            .usingJobData("subjectId", subjectId)
                             .usingJobData("pidFilter", pidFilter)
                             .usingJobData("suiteId", suiteId)
                             .usingJobData("nodeId", nodeId)
