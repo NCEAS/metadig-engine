@@ -17,12 +17,17 @@ library(magrittr)
 # mdq_result, output, status
 
 # Define these variable for local testing only
-#inFile <- "sasap.csv"
 #inFile <- "dbo.csv"
 #outFile <- "dbo.png"
+#inFile <- "sasap.csv"
 #outFile <- "sasap.png"
 #inFile <- "FAIR-scores-eml.csv"
 #outFile <- "FAIR-scores-eml.png"
+axisTextFontSize <- 6
+legendTextFontSize <- 6
+axisTitleFontSize <- 8
+legendTitleFontSize <- 8
+
 # Load data
 fsr <- read_csv(inFile)
 
@@ -87,20 +92,25 @@ p <- ggplot(data=score_monthly, mapping=aes(x=ym, y=mean, color=metric)) +
   theme_bw() +
   theme(panel.border = element_blank(),
         axis.line = element_line(colour = "black"),
+        axis.text = element_text(size = axisTextFontSize),
+        axis.title = element_text(size = axisTitleFontSize),
+        legend.title = element_text(size = legendTitleFontSize),
+        legend.text = element_text(size = legendTextFontSize),
         panel.grid.minor = element_blank(),
         panel.background = element_blank()) +
+  #scale_color_manual(name = "Metric", labels = c("Findable",  "Accessible", "Interoperable", "Reusable"),
+  #                   values=d1_colors) +
   scale_color_manual(name = "Metric", labels = c(sprintf("Findable (%.0f%%)", mf),
                                 sprintf("Accessible (%.0f%%)", ma),
                                 sprintf("Interoperable (%.0f%%)", mi),
                                 sprintf("Reusable (%.0f%%)", mr)), values=d1_colors) +
-  #scale_colour_manual(values=d1_colors) +
   scale_x_date(date_breaks=dateBreaks, date_minor_breaks=dateMinorBreaks, labels=date_format(dateFormat)) +
   xlab(xLabel) +
   scale_y_continuous(limits=c(0,100)) +
   ylab("Average FAIR Score") +
   #ggtitle(paste0("DataONE: FAIR scores for ", format(sum(standards$n), big.mark=","), " EML and ISO metadata records"))
   #scale_fill_discrete(name = "metric", labels = c("Finabl", "Accessibl", "Interoperabl", "Reusabl")) +
-  ggsave(outFile, width = 8, height = 3)
+  ggsave(outFile, width = 7.5, height = 2.5)
 
 output <- sprintf("Created graphics file %s", outFile)
 status <- "SUCCESS"
