@@ -1,6 +1,7 @@
 package edu.ucsb.nceas.mdqengine.scheduler;
 
 import edu.ucsb.nceas.mdqengine.MDQconfig;
+import edu.ucsb.nceas.mdqengine.authentication.DataONE;
 import edu.ucsb.nceas.mdqengine.exception.MetadigStoreException;
 import edu.ucsb.nceas.mdqengine.model.Run;
 import edu.ucsb.nceas.mdqengine.model.Task;
@@ -24,6 +25,7 @@ import org.dataone.service.exceptions.NotAuthorized;
 import org.dataone.service.types.v1.*;
 import org.dataone.service.types.v2.SystemMetadata;
 import org.dataone.service.util.TypeMarshaller;
+import org.eclipse.jetty.server.Authentication;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.joda.time.format.DateTimeFormat;
@@ -111,16 +113,27 @@ public class RequestReportJob implements Job {
         JobDataMap dataMap = context.getJobDetail().getJobDataMap();
 
         String taskName = dataMap.getString("taskName");
+        log.debug("taskName: " + taskName);
         String taskType = dataMap.getString("taskType");
+        log.debug("taskType: " + taskType);
         String authTokenName = dataMap.getString("authTokenName");
-        String subjectIdNmae = dataMap.getString("subjectIdName");
+        log.debug("authTokenName: " + authTokenName);
+        String subjectId = dataMap.getString("subjectId");
+        log.debug("subjectId: " + subjectId);
         String pidFilter = dataMap.getString("pidFilter");
+        log.debug("pidFilter: " + pidFilter);
         String suiteId = dataMap.getString("suiteId");
+        log.debug("suiteId: " + suiteId);
         String nodeId = dataMap.getString("nodeId");
+        log.debug("nodeId: " + nodeId);
         String nodeServiceUrl = dataMap.getString("nodeServiceUrl");
+        log.debug("nodeServerUrl: " + nodeServiceUrl);
         String startHarvestDatetimeStr = dataMap.getString("startHarvestDatetime");
+        log.debug("startHavestDatetimeStr: " + startHarvestDatetimeStr);
         int harvestDatetimeInc = dataMap.getInt("harvestDatetimeInc");
+        log.debug("harvestDatetimeInc: " + harvestDatetimeInc);
         int countRequested = dataMap.getInt("countRequested");
+        log.debug("countRequested: " + countRequested);
         MultipartRestClient mrc = null;
         MultipartMNode mnNode = null;
         MultipartCNode cnNode = null;
