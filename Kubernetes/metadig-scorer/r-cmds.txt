@@ -1,3 +1,0 @@
-install.packages("readr", repos="https://cran.mtu.edu")
-install.packages("metadig.tar.gz", repos=NULL)
-

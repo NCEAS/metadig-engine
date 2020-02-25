@@ -19,10 +19,6 @@ COPY metadig-engine.jar metadig-engine.jar
 # do this extra step.
 COPY solr solr
 
-# For testing
-#COPY FAIR-scores.csv .
-#COPY plot.R .
-
 # DataONE indexer prints copious error msgs if these files don't exist
 RUN mkdir -p /etc/dataone/index && touch /etc/dataone/index/d1client.properties && touch /etc/dataone/node.properties && touch /etc/dataone/index/cn-index-processor.properties
 
@@ -38,7 +34,7 @@ RUN apt -y install r-cran-lubridate
 RUN apt -y install r-cran-ggplot2
 RUN apt -y install r-cran-magrittr
 # Debian stretch doesn't have a pre-cooked package for readr, so install now.
-RUN Rscript --vanilla -e 'install.packages("readr", repos="https://cran.cnr.berkeley.edu/")'
+RUN Rscript --vanilla -e 'install.packages("readr", repos="https://cran.mtu.edu/")'
 RUN Rscript --vanilla -e 'install.packages("metadig.tar.gz", repos=NULL)'
 
 # Run the Scorer process
