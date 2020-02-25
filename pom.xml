@@ -26,7 +26,7 @@
 		<spring.version>3.1.4.RELEASE</spring.version>
         <!-- <docker.registry>docker.io</docker.registry> -->
         <docker.repo>metadig</docker.repo>
-        <docker.tag>2.2.0dev</docker.tag>
+        <docker.tag>2.2.0</docker.tag>
 		<!-- <modules.test.includes>**/*Test.java</modules.test.includes> -->
 		<modules.test.excludes>**/LTERSuiteTest.java</modules.test.excludes>
 	</properties>
@@ -312,6 +312,9 @@
                                 <copy file="${project.build.directory}/classes/solr/application-context-mdq.xml" tofile="${project.basedir}/Kubernetes/metadig-worker/solr/application-context-mdq.xml" />
                                 <copy file="${project.build.directory}/classes/solr/application-context-systemmeta-200.xml" tofile="${project.basedir}/Kubernetes/metadig-worker/solr/application-context-systemmeta-200.xml" />
 								<copy file="${project.build.directory}/classes/solr/metadig-index-processor-context.xml" tofile="${project.basedir}/Kubernetes/metadig-worker/solr/metadig-index-processor-context.xml" />
+								<copy file="${project.build.directory}/classes/solr/application-context-mdq.xml" tofile="${project.basedir}/Kubernetes/metadig-scorer/solr/application-context-mdq.xml" />
+								<copy file="${project.build.directory}/classes/solr/application-context-systemmeta-200.xml" tofile="${project.basedir}/Kubernetes/metadig-scorer/solr/application-context-systemmeta-200.xml" />
+								<copy file="${project.build.directory}/classes/solr/metadig-index-processor-context.xml" tofile="${project.basedir}/Kubernetes/metadig-scorer/solr/metadig-index-processor-context.xml" />
 							</target>
 						</configuration>
 					</execution>
