@@ -1,0 +1,95 @@
+..
+    @startuml images/generate-metadata-assessment-graph.png
+    !include ./plantuml-styles.txt
+
+    autonumber "<font color=999999>"
+    title "Generating a metadata assessment graph"
+    participant "metadig-scheduler"
+    participant MN
+    participant "metadig-controller"
+    participant "rabbitmq"
+    participant "metadig-scorer"
+    participant CN
+    participant "metadig Solr"
+    participant R
+
+    "metadig-scheduler"  o-> MN : "listObjects()"
+
+    note right 
+        The MetaDIG task queries 
+        for any new pids added 
+        to the MN
+    end note
+
+    activate MN
+        MN -> "metadig-scheduler" : pids
+
+        note right
+            metadig-scheduler filters pids 
+            for collection (portal) pids
+        end note
+    deactivate MN
+
+    "metadig-scheduler" -> "metadig-controller" : ./scores/?suite=<suiteId>&collection=<collectionId>
+    activate "metadig-controller"
+
+    "metadig-controller" -> rabbitmq : "scorer-queue" : collectionId, suiteId
+    deactivate "metadig-controller"
+    activate rabbitmq
+        note right
+            a request to create a graph is queued
+        end note
+
+    rabbitmq -> "metadig-scorer" : collectionId, suiteId
+    deactivate rabbitmq
+    activate "metadig-scorer"
+
+    "metadig-scorer" -> MN : query(?pid)
+    MN -> "metadig-scorer" : "collectionQuery,rightHolder"
+
+    "metadig-scorer" -> CN : "getSubjectInfo(rightsHolder)"
+
+    activate CN
+        note right 
+            rightsholder's user groups will be 
+            used for the Solr query
+        end note
+        CN -> "metadig-scorer" : "subjectInfo"
+    deactivate CN
+
+    "metadig-scorer" -> CN : "query(q?<collectionQuery>+readPermission:<group list>)"
+
+    note right
+        execute collectionQuery on the CN
+    end note
+
+    activate CN
+
+    CN -> "metadig-scorer" : "pids"
+    note right
+        pids are returned that correspond to the 
+        set of pids returned by a portal's 
+        query filters
+    end note
+
+    deactivate CN
+
+    "metadig-scorer" -> "metadig Solr" : query(q?pid:<pids>, suiteId:FAIR.suite.n)
+    activate "metadig Solr"
+
+    note right
+        quality scores are retrieved from 
+        the MetaDIG Solr instance
+    end note
+
+    "metadig Solr" -> "metadig-scorer" : scores
+    deactivate "metadig Solr"
+
+    "metadig-scorer" -> R : generate_cummulative_graph()
+
+    activate R
+    R -> "metadig-scorer" : collection-graph.png
+    deactivate "metadig-scorer"
+    deactivate R
+
+    @enduml
