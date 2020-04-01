@@ -94,7 +94,7 @@ queue
 		        * example: /graph?project=urn:uri:1234-4567
 		    * parameters - same as POST
 	* The following sequence diagram shows the events that occur during the generation of an
-	accumulated metadata assessment graphic ![MetaDIG Graph Generator](https://github.com/NCEAS/metadig-engine/blob/master/docs/images/generate-metadata-assessment.png "MetaDIG Engine Grapher")
+	accumulated metadata assessment graphic ![MetaDIG Graph Generator](https://github.com/NCEAS/metadig-engine/blob/master/docs/images/generate-metadata-assessment-graph.png "MetaDIG Engine Grapher")
 
 * Metadig-py
     * Python module used to author and test quality tests written in python
