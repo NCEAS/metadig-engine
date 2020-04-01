@@ -1,0 +1,48 @@
+' Change the default styles
+skinparam shadowing false   
+skinparam roundcorner 5
+skinparam linetype ortho
+
+' Style the sequences
+skinparam sequence {
+  ArrowColor #1F4260
+  LifeLineBorderColor #1F4260
+  LifeLineBackgroundColor #428BCA
+  ParticipantBorderColor #AAAAAA
+  ParticipantBackgroundColor #F5F5F5
+  ActorBackgroundColor #DDDDDD
+  ActorBorderColor #333333
+}
+
+' Style the notes
+skinparam noteFontColor #C49858
+skinparam note {
+  BackgroundColor #FCF8E4
+  BorderColor #FCEED6   
+}
+
+' Style the classes
+skinparam class {
+  BackgroundColor #F5F5F5
+  BorderColor #333333
+  ArrowColor #333333   
+}   
+
+' Style the packages
+skinparam packageFontColor #9DA0A4
+skinparam package {
+  BorderColor #CCCCCC
+}
+
+' Style the components
+skinparam component {
+    BackgroundColor #F5F5F5
+    BorderColor #333333
+    Style uml2
+}
+
+' Style the interfaces
+skinparam interface {
+    BackgroundColor #F5F5F5
+    BorderColor #333333
+}
