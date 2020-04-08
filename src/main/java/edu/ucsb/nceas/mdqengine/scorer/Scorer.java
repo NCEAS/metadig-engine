@@ -20,7 +20,6 @@ import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.beans.BindingException;
 import org.apache.solr.client.solrj.impl.HttpSolrClient;
 import org.apache.solr.client.solrj.response.QueryResponse;
-import org.dataone.client.auth.AuthTokenSession;
 import org.dataone.client.rest.DefaultHttpMultipartRestClient;
 import org.dataone.client.rest.MultipartRestClient;
 import org.dataone.client.v2.impl.MultipartCNode;
@@ -35,7 +34,6 @@ import org.dataone.service.types.v1.SystemMetadata;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
-import org.quartz.JobExecutionException;
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
 
@@ -78,9 +76,9 @@ public class Scorer {
     private static String CNauthToken = null;
     private static String CNsubjectId = null;
     private static String CNserviceUrl = null;
+    private static String CNnodeId="urn:node:CN";
     private static SolrClient client = null;
     private static String solrLocation = null;
-    private static String filestoreBase = null;
     private static final String SOLR_COLLECTION = "quality";
 
     private static long startTimeProcessing;
@@ -127,7 +125,6 @@ public class Scorer {
             RabbitMQhost = cfg.getString("RabbitMQ.host");
             RabbitMQport = cfg.getInt("RabbitMQ.port");
             solrLocation = cfg.getString("solr.location");
-            filestoreBase = cfg.getString("metadig.store.directory");
             CNauthToken =  cfg.getString("CN.authToken");
             CNserviceUrl = cfg.getString("CN.serviceUrl");
             CNsubjectId = cfg.getString("CN.subjectId");
@@ -161,6 +158,7 @@ public class Scorer {
                 MetadigException metadigException = null;
                 String subjectId = null;
                 String authToken = null;
+                String nodeServiceUrl = null;
                 String label = null;
                 String title = null;
 
@@ -178,20 +176,12 @@ public class Scorer {
                 }
 
                 // The components of the graph queue request
-                String collectionId = qEntry.getProjectId();
-                //String projectName = qEntry.getProjectName();
-                //String authTokenName = qEntry.getAuthTokenName();
-                //String subjectIdName = qEntry.getSubjectIdName();
+                String collectionId = qEntry.getCollectionId();
                 // Select quality scores based on the nodeId
                 String nodeId = qEntry.getNodeId();
-                //String serviceUrl = qEntry.getServiceUrl();
                 String formatFamily = qEntry.getFormatFamily();
                 String suiteId = qEntry.getQualitySuiteId();
-                String serviceUrl = null;
-                Scorer scorer = new Scorer();
                 long difference;
-
-                log.debug("read score query entry");
 
                 if(formatFamily == null) {
                     formatFamily = "";
@@ -208,16 +198,26 @@ public class Scorer {
                 }
                 log.debug("collectionId: " + collectionId);
 
+                // A nodeId is not specified, then the CN will be used
                 if(nodeId == null) {
-                    nodeId = "";
+                    nodeId=CNnodeId;
                 }
+                log.debug("nodeId: " + nodeId);
 
                 label: try {
                     MDQconfig cfg = new MDQconfig();
                     // Pids associated with a collection, based on query results using 'collectionQuery' field in solr.
                     ArrayList<String> collectionPids = null;
 
-                    //String title = "Project " + projectName;
+                    // The harvesting and evaluation of the collectionQuery is based on the nodeId that is passed in, i.e.
+                    // If an MN is specified, then the collection (portal) Solr entry will be obtained from the MN, and the
+                    // collectionQuery string will also be evaluated on that node.
+                    String nodeAbbr = nodeId.replace("urn:node:", "");
+                    authToken = cfg.getString(nodeAbbr + ".authToken");
+                    subjectId = cfg.getString(nodeAbbr + ".subjectId");
+                    // TODO:  Cache the node values from the CN listNode service
+                    nodeServiceUrl = cfg.getString(nodeAbbr + ".serviceUrl");
+
                     HashMap<String, Object> variables = new HashMap<>();
                     // Create the graph.
                     // Two types of graphs are currently supported:
@@ -228,16 +228,19 @@ public class Scorer {
                     //Scorer gfr = new Scorer();
                     // If creating a graph for a collection, get the set of pids associated with the collection.
                     // Only scores for these pids will be included in the graph.
+
                     if (collectionId != null && !collectionId.isEmpty()) {
-                        // The collection query is evaluated on the CN
-                        authToken = CNauthToken;
-                        subjectId = CNsubjectId;
-                        serviceUrl = CNserviceUrl;
-                        log.info("* Getting pids for collection " + collectionId);
+                        // If the nodeId is specified, use if to determine the values for authTokenName and subjectIdName,
+                        // if those values are not defined
+                        log.debug("collectionId is not null: " + collectionId);
+                            String id = nodeId.replace("urn:node:", "").toUpperCase().trim();
+
+                        // The collection query is obtained from the MN and evaluated on the CN
+                        log.info("Getting pids for collection " + collectionId);
                         // Always use the CN subject id and authentication token from the configuration file, as
                         // requests that this method uses need CN subject privs
                         ScorerResult result = null;
-                        result = gfr.getCollectionPids(collectionId, nodeId, serviceUrl, subjectId, authToken);
+                        result = gfr.getCollectionPids(collectionId, nodeServiceUrl, subjectId, authToken);
                         collectionPids = result.getResult();
                         label = result.getLabel();
                         // Don't continue if no pids (and thus scores) were found for this collection
@@ -250,9 +253,10 @@ public class Scorer {
                         }
                     }
 
+                    log.debug("Getting quality scores...");
                     // Quality scores will now be obtained from the MetaDIG quality Solr index, using the list of pids obtained
                     // for the collection.
-                    List<QualityScore> scores = gfr.getQualityScores(collectionId, suiteId, nodeId, formatFamily, collectionPids);
+                    List<QualityScore> scores = gfr.getQualityScores(collectionId, suiteId, formatFamily, collectionPids);
 
                     // Don't continue if no quality scores were found for this collection
                     if(scores.size() == 0) {
@@ -279,13 +283,12 @@ public class Scorer {
                     //String filePath = graph.create(GraphType.CUMULATIVE, title, scoreFile.getPath());
                     String filePath = graph.create(GraphType.MONTHLY, title, scoreFile.getPath());
                     // Now save the graphics file to permanent storage
-                    //String outfile = projectName + "-" + suiteId + ".png";
                     String outfile;
 
                     DateTime createDateTime = DateTime.now();
 
                     mdFile.setCreationDatetime(createDateTime);
-                    mdFile.setCollectionId(collectionId);
+                    mdFile.setPid(collectionId);
                     mdFile.setSuiteId(suiteId);
                     mdFile.setNodeId(nodeId);
                     mdFile.setStorageType(StorageType.GRAPH.toString());
@@ -301,7 +304,7 @@ public class Scorer {
                     // for fileid, storagetype, extension
                     mdFile = new MetadigFile();
                     mdFile.setCreationDatetime(createDateTime);
-                    mdFile.setCollectionId(collectionId);
+                    mdFile.setPid(collectionId);
                     mdFile.setSuiteId(suiteId);
                     mdFile.setNodeId(nodeId);
                     mdFile.setStorageType(StorageType.DATA.toString());
@@ -344,12 +347,16 @@ public class Scorer {
      * <p>First the 'collectionQuery' field is retrieved from DataONE Solr for the collection</p>
      * <p>Next, a query is issued with the query from collectionQuery field, to retrieve all Solr docs for the collection ids./p>
      *
+     * <p>Note that in the current design, the collection query is always obtained by querying the node specified in the taskList.csv file,
+     * which is usually an MN, but the collectionQuery is always evaluated on the CN</p>
+     *
      * @param collectionId a DataONE project id to fetch scores for, e.g. urn:uuid:f137095e-4266-4474-aa5f-1e1fcaa5e2dc
-     * @param nodeId a DataONE node identifier, e.g. "urn:node:KNB"
-     * @param
+     * @param serviceUrl the DataONE service URL to obtain the collectionQuery string from
+     * @param subjectId the DataONE subjectId to use for the query, associated with the authentication token
+     * @param authToken the DataONE authentication token
      * @return a List of quality scores fetched from Solr
      */
-    private ScorerResult getCollectionPids(String collectionId, String nodeId, String serviceUrl, String subjectId, String authToken) throws MetadigProcessException {
+    private ScorerResult getCollectionPids(String collectionId, String serviceUrl, String subjectId, String authToken) throws MetadigProcessException {
 
         Document xmldoc = null;
         String queryStr = null;
@@ -362,12 +369,14 @@ public class Scorer {
            which will be used to query DataONE Solr for all the pids associated with that project (that's 2 queries!)
          */
         ArrayList<String> pids = new ArrayList<>();
-        queryStr = "?q=id:" + escapeSpecialChars(collectionId) + "&fl=collectionQuery,label&q.op=AND";
+        queryStr = "?q=id:" + escapeSpecialChars(collectionId) + "&fl=collectionQuery,label,rightsHolder&q.op=AND";
 
         startPos = 0;
         countRequested = 10000;
 
+        // Get the collectionQuery from Solr
         try {
+            log.debug("Getting collectionQuery with query: " + queryStr);
             xmldoc = queryD1Solr(queryStr, serviceUrl, startPos, countRequested, subjectId, authToken);
         } catch (MetadigProcessException mpe) {
             log.error("Unable to query Solr for collectionQuery field for collection id: " + collectionId);
@@ -385,13 +394,13 @@ public class Scorer {
         XPath xpath = null;
         org.w3c.dom.Node node = null;
         String label = null;
+        String rightsHolder = null;
 
         try {
             log.debug("Getting collectionQuery for id: " + collectionId);
             // Extract the collection query from the Solr result XML
             XPathFactory xPathfactory = XPathFactory.newInstance();
             xpath = xPathfactory.newXPath();
-            // TODO: replace this test query with the live one
             fieldXpath = xpath.compile("//result/doc/str[@name='collectionQuery']/text()");
 
             // extract the 'collectionQuery' field from the Solr result
@@ -400,7 +409,6 @@ public class Scorer {
                 log.debug("collectionQuery not found for collection id: " + collectionId);
                 ScorerResult result = new ScorerResult();
                 result.setResult(pids);
-                result.setLabel("");
                 return result;
             } else {
                 node = xpathResult.item(0);
@@ -414,14 +422,13 @@ public class Scorer {
                 log.debug("got collectionQuery: " + collectionQuery);
             }
 
-            // Extract the portal 'label' (title)
+            // Extract the portal 'label'
             fieldXpath = xpath.compile("//result/doc/str[@name='label']/text()");
             xpathResult = (org.w3c.dom.NodeList) fieldXpath.evaluate(xmldoc, XPathConstants.NODESET);
             if(xpathResult.getLength() == 0) {
-                log.debug("label not found for collection id: " + collectionId);
+                log.debug("Title (label) not found for collection id: " + collectionId);
                 ScorerResult result = new ScorerResult();
                 result.setResult(pids);
-                result.setLabel("");
                 return result;
             } else {
                 node = xpathResult.item(0);
@@ -457,7 +464,7 @@ public class Scorer {
         collectionQuery = collectionQuery.replaceAll("\\s*AND\\s*\\(-obsoletedBy:\\*\\s*AND\\s*formatType:METADATA\\)", "");
         log.debug("Edited collectionQuery: " + collectionQuery);
 
-        // Get account information for the collection owner. The account info will be used when the 'collectionQuery'
+        // Get account information for the collection rightsHolder (owner). The account info will be used when the 'collectionQuery'
         // query is made, which will use the owner's identity and group memberships, so that the pids that are returned
         // from the query are the ones that the user would see when viewing their portal page.
         // First get the sysmeta from the collection pid, in order to determine the owner. Next, get the account info
@@ -465,19 +472,21 @@ public class Scorer {
         //     "(readPermission:"http://orcid.org/0000-0002-2192-403X")
         //      OR (rightsHolder:"http://orcid.org/0000-0002-2192-403X")"
 
-        Subject rightsHolder = sysmeta.getRightsHolder();
+        // Use the rightsHolder obtained from the Solr query
+        Subject subject = new Subject();
+        subject.setValue(rightsHolder);
         // The subject info can only be obtained from a CN, so use the CN auth info for the current DataONE environment,
         // which should be configured in the metadig.properties file
-        SubjectInfo subjectInfo = getSubjectInfo(rightsHolder, CNserviceUrl, CNsubjectId, CNauthToken);
+        SubjectInfo subjectInfo = getSubjectInfo(subject, CNserviceUrl, CNsubjectId, CNauthToken);
         String groupStr = null;
 
-        groupStr = "(readPermission:" + "\"" + rightsHolder.getValue()
-                + "\")" + " OR (rightsHolder:\"" + rightsHolder.getValue() + "\"" + ")"
+        groupStr = "(readPermission:" + "\"" + rightsHolder
+                + "\")" + " OR (rightsHolder:\"" + rightsHolder + "\"" + ")"
                 + " OR (readPermission:\"public\")";
 
-        // Assemble the
+        // Assemble the query string that selects pids based on permissions from the rightsHolder
         for(Group group : subjectInfo.getGroupList()) {
-            log.debug("Adding group to query: " + group.getSubject().getValue());
+            log.trace("Adding group to query: " + group.getSubject().getValue());
             if(groupStr == null) {
                 groupStr = "(readPermission:" + "\"" + group.getSubject().getValue()
                         + "\")" + " OR (rightsHolder:\"" + group.getSubject().getValue() + "\"" + ")";
@@ -490,6 +499,9 @@ public class Scorer {
         //groupStr = "+AND+" + "(" + groupStr + ")";
         //groupStr = "&fq=" + encodeValue("rightsHolder:\"CN=PASTA-GMN,O=LTER,ST=New Mexico,C=US\"");
         groupStr = "&fq=" + encodeValue(groupStr);
+        log.trace("groupStr: " + groupStr);
+
+        // Now evaluate the collectionQuery
 
         // Send the collectionQuery string to Solr to get the pids associated with the collection
         // The 'collectionQuery' Solr field may have backslashes that are used to escape special characters (i.e. ":") that are not
@@ -500,7 +512,8 @@ public class Scorer {
         int resultCount = 0;
         startPos = 0;
         countRequested = 1000;
-        // Now get the pids associated with the collection
+        // Now get the pids associated with the collection by sending the collectionQuery to the DataONE CN
+        // The collectionQuery is always evaluated on the CN, as portals should have all DataONE data available to them.
         // One query can return many documents, so use the paging mechanism to make sure we retrieve them all.
         // Keep paging through query results until all pids have been fetched. The last 'page' of query
         // results is indicated by the number of items returned being less than the number requested.
@@ -517,11 +530,23 @@ public class Scorer {
         // Loop through the Solr result. As the result may be large, page through the results, accumulating
         // the pids returned
 
-        log.debug("query string: " + queryStr);
-        log.debug("Sending collectionQuery to Solr using subjectId: " + subjectId + ", servicerUrl: " + serviceUrl);
+        // Determine where the collectionQuery should be evaluated. When the DataONE quata service is ready, query it
+        // for this collection to determine if the collectionQuery should be sent to the CN. Since this service is
+        // not ready, send the query to the same serviceUrl, subjectId, authToken which was used to harvest the
+        // collection document and obtain the collectionQuery string
+
+        // When the service is available, use the DataONE quota service to set these variable conditionally
+        String evalServiceUrl = serviceUrl;
+        String evalSubjectId = subjectId;
+        String evalAuthToken = authToken;
+
+        log.debug("Sending collectionQuery to Solr using subjectId: " + evalSubjectId + ", servicerUrl: " + evalServiceUrl);
+        log.trace("query string: " + queryStr);
+
         do {
             //TODO: check that a result was returned
-            xmldoc = queryD1Solr(queryStr, serviceUrl, startPos, countRequested, subjectId, authToken);
+            // Note: the collectionQuery is always evaluated on the CN, so that the entire DataONE network is queried.
+            xmldoc = queryD1Solr(queryStr, evalServiceUrl, startPos, countRequested, evalSubjectId, evalAuthToken);
             if(xmldoc == null) {
                 log.info("no values returned from query");
                 break;
@@ -560,12 +585,11 @@ public class Scorer {
        *
        * @param collectionId a DataONE project id to fetch scores for, e.g. urn:uuid:f137095e-4266-4474-aa5f-1e1fcaa5e2dc
        * @param suiteId a MetaDIG quality suite id, e.g. "FAIR.suite.1"
-       * @param nodeId a DataONE node identifier, e.g. "urn:node:KNB"
        * @param formatFamily list of MetaDIG metadata format "families", e.g. "iso19115,eml"
-       * @param
+       * @param collectionPids the list of pids to get scores for
        * @return a List of quality scores fetched from Solr
        */
-    private List<QualityScore> getQualityScores(String collectionId, String suiteId, String nodeId, String formatFamily, ArrayList<String> collectionPids) throws Exception {
+    private List<QualityScore> getQualityScores(String collectionId, String suiteId, String formatFamily, ArrayList<String> collectionPids) throws Exception {
         // Now that we have all the pids, query the Quality Solr server for the scores for each pid associate with the project.
         // These scores will be written out to a file that will be used by the graphing routine to create a plot of the aggregated statistics.
         // If a project wasn't specified, then we are not building a special query for a list of pids, so try to get the max amount
@@ -596,7 +620,7 @@ public class Scorer {
                 }
                 formatFamilySearchTerm = "(" + formatFamilySearchTerm + ")";
             }
-            log.debug("FormatFamily query term: " + formatFamilySearchTerm);
+            log.trace("FormatFamily query term: " + formatFamilySearchTerm);
         }
 
         int startPosInResult = 0;
@@ -646,16 +670,14 @@ public class Scorer {
                 pidsLeft -= pidCntToRequest;
             } while (pidsLeft > 0);
         } else {
-            log.info("Getting quality scores for suiteId: " + suiteId + ", datasource: " + nodeId + " formats: " + formatFamily);
+            log.info("Getting quality scores for suiteId: " + suiteId + ", datasource: " + " formats: " + formatFamily);
             countRequested = 1000;
             formatFamilySearchTerm = null;
             queryStr = "metadataId:*";
             if(suiteId != null) {
                 queryStr += " AND suiteId:" + "\"" + suiteId + "\"";
             }
-            if(nodeId != null) {
-                queryStr += " AND datasource:" + "\"" + nodeId + "\"";
-            }
+
             if (formatFamilySearchTerm != null) {
                 queryStr += " AND metadataFormatId:" + "\"" + formatFamilySearchTerm + "\"";
             }
@@ -756,7 +778,7 @@ public class Scorer {
 
             log.info(" [x] Done");
             this.writeCompletedQueue(message);
-            log.info(" [x] Sent completed report for project id: '" + qEntry.getProjectId() + "'");
+            log.info(" [x] Sent completed report for project id: '" + qEntry.getCollectionId() + "'");
         } catch (Exception e) {
             // If we couldn't prepare the message, then there is nothing left to do
             log.error(" Unable to return report to controller");
@@ -1004,7 +1026,7 @@ public class Scorer {
      */
     private SubjectInfo getSubjectInfo(Subject rightsHolder, String serviceUrl, String subjectId, String authToken) throws MetadigProcessException {
 
-        log.debug("Getting subject info for: " + rightsHolder);
+        log.debug("Getting subject info for: " + rightsHolder.getValue());
         MultipartCNode cnNode = null;
         MetadigProcessException metadigException = null;
 
