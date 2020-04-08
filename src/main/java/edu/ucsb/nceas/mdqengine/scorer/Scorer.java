@@ -427,6 +427,19 @@ public class Scorer {
                 node = xpathResult.item(0);
                 label = node.getTextContent();
             }
+
+            // Extract the portal 'rightsHolder'
+            fieldXpath = xpath.compile("//result/doc/str[@name='rightsHolder']/text()");
+            xpathResult = (org.w3c.dom.NodeList) fieldXpath.evaluate(xmldoc, XPathConstants.NODESET);
+            if(xpathResult.getLength() == 0) {
+                log.debug("RightsHolder not found for collection id: " + collectionId);
+                ScorerResult result = new ScorerResult();
+                result.setResult(pids);
+                return result;
+            } else {
+                node = xpathResult.item(0);
+                rightsHolder = node.getTextContent();
+            }
         } catch (XPathExpressionException xpe) {
             log.error("Error extracting collectinQuery from solr result doc: " + xpe.getMessage());
             metadigException = new MetadigProcessException("Unable to get collection pids: " + xpe.getMessage());
@@ -451,13 +464,6 @@ public class Scorer {
         // from the CN. Then add those groups into the query. Each group will be included in the filter query in this format:
         //     "(readPermission:"http://orcid.org/0000-0002-2192-403X")
         //      OR (rightsHolder:"http://orcid.org/0000-0002-2192-403X")"
-        SystemMetadata sysmeta = null;
-        try {
-            sysmeta = getSystemMetadata(collectionId, serviceUrl, subjectId, authToken);
-        } catch (MetadigProcessException mpe) {
-            log.error("Unable to get system metadata for collection: " + collectionId);
-            throw(mpe);
-        }
 
         Subject rightsHolder = sysmeta.getRightsHolder();
         // The subject info can only be obtained from a CN, so use the CN auth info for the current DataONE environment,
