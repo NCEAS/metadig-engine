@@ -1,26 +1,20 @@
-task-type,task-name,task-group,auth-token,subject-id,cron-schedule,params
-# task type, job name, job group, cron schedule, "formatId filter (regex); suite id; node id; D1 node base url; harvest begin date; harvest increment (days);solr location;requestCount"
-# - task type:
-# - job name:
-# - job group:
+task-type,task-name,task-group,cron-schedule,params
+# task type, task name, task group, cron schedule, "formatId filter (regex); suite id; node id; D1 node base url; harvest begin date; harvest increment (days);requestCount"
+# - task type: currently 'quality' and 'score' task are supported.
+# - task name: any unique string, i.e. 'quality-knb'
+# - task group: currently only 'metadig' is used
+# - nodeId
 # - cron schedule:
 #   - seconds, minutes, hours, day of month, month, day of week, year
 # - params
-#   - formatId filter (regex):
-#   - suite id:
-#   - node id:
-#   - D1 node base url:
-#   - harvest begin date:
-#   - harvest increment (days):
-#   - requestCount:
-quality,quality-knb,metadig,KNB.authToken,"CN=urn:node:KNB,DC=dataone,DC=org",0 0/1 * * * ?,"^eml.*|^http.*eml.*;knb.suite.1;urn:node:KNB;https://knb.ecoinformatics.org/knb/d1/mn;2019-12-01T00:00:00.00Z;1;100"
-quality,quality-arctic,metadig,ADC.authToken,"CN=urn:node:ARCTIC,DC=dataone,DC=org",20 0/1 * * * ?,"^eml.*|^http.*eml.*;arctic.data.center.suite.1;urn:node:ARCTIC;https://arcticdata.io/metacat/d1/mn;2019-12-01T14:30:00.00Z;1;100"
-quality,quality-dataone,metadig,CN.authToken,"CN=urn:node:CN,DC=dataone,DC=org",30 0/2 * * * ?,"^eml.*|^http.*eml.*|.*www.isotc211.org.*;FAIR.suite.1;urn:node:CN;https://cn.dataone.org/cn/;2019-12-01T00:00:00.00Z;1;100"
-quality,quality-ess-dive,metadig,ESS-DIVE.authToken,"CN=urn:node:ESS_DIVE,DC=dataone,DC=org",40 0/1 * * * ?, "^eml.*|^http.*eml.*;ess-dive.data.center.suite.1;urn:node:ESS_DIVE;https://data.ess-dive.lbl.gov/catalog/d1/mn;2019-12-01T00:00:00.00Z;1;100"
-#score,KNB-fair,metadig,KNB.authToken,"CN=urn:node:KNB,DC=dataone,DC=org",0 0/30 * * * ?,".*portal.*;FAIR.suite.1;urn:node:KNB;https://knb.ecoinformatics.org/knb/d1/mn;2019-12-01T00:00:00.00Z;1;100"
-#score,ADC-fair,metadig,ADC.authToken,"CN=urn:node:ARCTIC,DC=dataone,DC=org",0 0/32 * * * ?,".*portal.*;FAIR.suite.1;urn:node:ARCTIC;https://arcticdata.io/metacat/d1/mn;2019-12-01T00:00:00.00Z;1;100"
-#score,CN-fair,metadig,CN.authToken,"CN=urn:node:CN,DC=dataone,DC=org",0 0/1 * * * ?,".*portal.*;FAIR.suite.1;urn:node:CN;https://cn.dataone.org/cn/v2;2019-12-01T00:00:00.00Z;1;100"
-#filestore,ingest,metadig,,,0 0/30 * * * ?,"stage;;*.*;README.txt;filestore-ingest.log"
-# Admin NOTE: it appears that DataONE HttpMultipartRestClient can't handle two clients being created at the same time, even if they are by different threads. This needs to be
-# investigated further and potentially a bug needs to be logged in redmine for this. Until then, an easy workaround is to ensure that no two tasks are started
-# at the same time, so adjust the cron schedule accordingly.
+#   - formatId filter (regex): This is a list of wildcards that will match records with these formatIds to harvest, delimeted by '|
+#   - suite id: the metadig suite id
+#   - node id: a DataONE node URN - data will be filtered using this (DataONE sysmeta "datasource")
+#   - D1 node base url: the base service URL for an MN or CN that will be used to query for pids to be processed
+#   - harvest begin date: the first date to use for the DataONE 'listObjects' service
+#   - harvest increment (days): the time span for each search
+#   - requestCount: the number of itmes to request from DataONE listObjects
+score,score-DataONE-fair,metadig,35 0/1 * * * ?,".*portal.*;FAIR.suite.1;urn:node:CN;2019-12-01T00:00:00.00Z;1;100;refresh"
+quality,quality-arctic,metadig,20 0/1 * * * ?,"^eml.*|^http.*eml.*;arctic.data.center.suite.1;urn:node:ARCTIC;1;100"
+filestore,ingest,metadig,0 0/1 * * * ?,"stage;;*.*;README.txt;filestore-ingest.log"
+

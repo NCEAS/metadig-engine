@@ -15,7 +15,6 @@ import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
-import org.dataone.client.auth.AuthTokenSession;
 import org.dataone.client.rest.HttpMultipartRestClient;
 import org.dataone.client.rest.MultipartRestClient;
 import org.dataone.client.v2.impl.MultipartCNode;
@@ -25,7 +24,6 @@ import org.dataone.service.exceptions.NotAuthorized;
 import org.dataone.service.types.v1.*;
 import org.dataone.service.types.v2.SystemMetadata;
 import org.dataone.service.util.TypeMarshaller;
-import org.eclipse.jetty.server.Authentication;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.joda.time.format.DateTimeFormat;
@@ -116,18 +114,12 @@ public class RequestReportJob implements Job {
         log.debug("taskName: " + taskName);
         String taskType = dataMap.getString("taskType");
         log.debug("taskType: " + taskType);
-        String authTokenName = dataMap.getString("authTokenName");
-        log.debug("authTokenName: " + authTokenName);
-        String subjectId = dataMap.getString("subjectId");
-        log.debug("subjectId: " + subjectId);
         String pidFilter = dataMap.getString("pidFilter");
         log.debug("pidFilter: " + pidFilter);
         String suiteId = dataMap.getString("suiteId");
         log.debug("suiteId: " + suiteId);
         String nodeId = dataMap.getString("nodeId");
         log.debug("nodeId: " + nodeId);
-        String nodeServiceUrl = dataMap.getString("nodeServiceUrl");
-        log.debug("nodeServerUrl: " + nodeServiceUrl);
         String startHarvestDatetimeStr = dataMap.getString("startHarvestDatetime");
         log.debug("startHavestDatetimeStr: " + startHarvestDatetimeStr);
         int harvestDatetimeInc = dataMap.getInt("harvestDatetimeInc");
@@ -139,16 +131,18 @@ public class RequestReportJob implements Job {
         MultipartCNode cnNode = null;
 
         String authToken = null;
+        String subjectId = null;
+        String nodeServiceUrl = null;
+
         try {
             MDQconfig cfg = new MDQconfig();
             qualityServiceUrl = cfg.getString("quality.serviceUrl");
-            // First try to use a passed in auth token name, which is the name of metadig.properties entry
-            if(authTokenName != null && !authTokenName.isEmpty()) {
-                authToken = cfg.getString(authTokenName);
-                log.debug("Using authToken: " + authTokenName);
-            } else {
-                log.debug("Not using an authToken");
-            }
+
+            String nodeAbbr = nodeId.replace("urn:node:", "");
+            authToken = cfg.getString(nodeAbbr + ".authToken");
+            subjectId = cfg.getString(nodeAbbr + ".subjectId");
+            // TODO:  Cache the node values from the CN listNode service
+            nodeServiceUrl = cfg.getString(nodeAbbr + ".serviceUrl");
         } catch (ConfigurationException | IOException ce) {
             JobExecutionException jee = new JobExecutionException("Error executing task.");
             jee.initCause(ce);
