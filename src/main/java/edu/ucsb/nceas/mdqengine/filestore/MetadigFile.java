@@ -20,8 +20,7 @@ public class MetadigFile {
     public static Log log = LogFactory.getLog(MetadigFile.class);
 
     private String fileId = null;
-    private String collectionId = "";
-    private String metadataId = "";
+    private String pid = "";
     private String suiteId = "";
     private String nodeId = "";
     private String metadataFormatFilter = "";
@@ -38,12 +37,11 @@ public class MetadigFile {
         this.init();
     };
 
-    public MetadigFile (String collectionId, String metadataId, String suiteId, String nodeId, String metadataFormatFilter, String storageType,
+    public MetadigFile (String pid, String suiteId, String nodeId, String metadataFormatFilter, String storageType,
                         String relativePath, DateTime createtionDate, String mediaType) throws MetadigFilestoreException {
 
         this.fileId = UUID.randomUUID().toString();
-        this.collectionId = collectionId;
-        this.metadataId = metadataId;
+        this.pid = pid;
         this.suiteId = suiteId;
         this.nodeId = nodeId;
         this.metadataFormatFilter = metadataFormatFilter;
@@ -72,21 +70,9 @@ public class MetadigFile {
         this.fileId = id;
     }
 
-    public String getCollectionId() {
-        return collectionId;
-    }
+    public String getPid() { return pid; }
 
-    public void setCollectionId(String id) {
-        this.collectionId = id;
-    }
-
-    public String getMetadataId() {
-        return metadataId;
-    }
-
-    public void setMetadataId(String id) {
-        this.metadataId = id;
-    }
+    public void setPid(String id) { this.pid = id; }
 
     public String getSuiteId() {
         return suiteId;
