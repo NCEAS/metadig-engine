@@ -1041,36 +1041,6 @@ public class Scorer {
         return subjectInfo;
     }
 
-//    /**
-//     * Get a DataONE authenticated session
-//     * <p>
-//     *     If no subject or authentication token are provided, a public session is returned
-//     * </p>
-//     * @param authToken the authentication token
-//     * @return the DataONE session
-//     */
-//    Session getSession(String subjectId, String authToken) {
-//
-//        Session session;
-//
-//        // query Solr - either the member node or cn, for the project 'solrquery' field
-//        if (authToken == null || authToken.isEmpty()) {
-//            log.debug("Creating public session");
-//            session = new Session();
-//        } else {
-//            log.debug("Creating authentication session");
-//            session = new AuthTokenSession(authToken);
-//        }
-//
-//        if (subjectId != null && !subjectId.isEmpty()) {
-//            Subject subject = new Subject();
-//            subject.setValue(subjectId);
-//            session.setSubject(subject);
-//        }
-//
-//        return session;
-//    }
-
     /**
      * Get a DataONE MultipartCNode object, which will be used to communication with a CN
      *
