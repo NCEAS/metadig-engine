@@ -133,25 +133,20 @@ public class Controller {
                     }
                     String delims = "[,]";
                     String[] tokens = request.split(delims);
+                    String nodeId = null;
 
                     switch(requestType) {
                         case "score":
                             log.debug("Processing score request");
                             String collectionId = tokens[0];
-                            String projectName = tokens[1];
-                            String authTokenName = tokens[2];
-                            String subjectIdName = tokens[3];
-                            String memberNode = tokens[4];
-                            String serviceUrl = tokens[5];
-                            String formatFamily = tokens[6];
-                            String qualitySuiteId = tokens[7];
+                            nodeId = tokens[1];
+                            String formatFamily = tokens[2];
+                            String qualitySuiteId = tokens[3];
 
                             requestDateTime = new DateTime();
-                            log.info("Request queuing of: " + tokens[0] + ", " + tokens[1] + ", " + tokens[2] + ", " + tokens[3] + ", " + tokens[4]
-                                    + ", " + tokens[5] + "," + tokens[6]);
+                            log.info("Request queuing of: " + tokens[0] + ", " + tokens[1] + ", " + tokens[2] + ", " + tokens[3]);
 
-                            metadigCtrl.processScorerRequest(collectionId, projectName, authTokenName,  subjectIdName, memberNode, serviceUrl,
-                                    formatFamily, qualitySuiteId, requestDateTime);
+                            metadigCtrl.processScorerRequest(collectionId, nodeId, formatFamily, qualitySuiteId, requestDateTime);
                             break;
                         case "quality":
                             log.debug("Processing quality request");
@@ -165,7 +160,7 @@ public class Controller {
 
                             String suiteId = tokens[3];
                             requestDateTime = new DateTime();
-                            String nodeId = tokens[4];
+                            nodeId = tokens[4];
                             log.info("Request queuing of: " + tokens[0] + ", " + tokens[3] + ", " + tokens[4]);
                             metadigCtrl.processQualityRequest(nodeId, metadataPid, metadata, suiteId, "/tmp", requestDateTime, sysmeta);
                             break;
@@ -375,8 +370,7 @@ public class Controller {
      * </p>
      *
      * @param collectionId
-     * @param projectName
-     * @param memberNode
+     * @param nodeId
      * @param formatFamily
      * @param qualitySuiteId
      * @param requestDateTime
@@ -385,11 +379,7 @@ public class Controller {
      * @throws java.io.IOException
      */
     public void processScorerRequest(String collectionId,
-                               String projectName,
-                               String authTokenName,
-                               String subjectIdName,
-                               String memberNode,
-                               String serviceUrl,
+                               String nodeId,
                                String formatFamily,
                                String qualitySuiteId,
                                DateTime requestDateTime) throws java.io.IOException, MetadigException {
@@ -399,18 +389,7 @@ public class Controller {
         byte[] message = null;
         String authToken = null;
 
-        if(authTokenName != null) {
-            try {
-                authToken = readConfigParam(authTokenName);
-            } catch (ConfigurationException ce) {
-                log.error("Error reading configuration for param " + "\"" + authTokenName + "\"" + ": " + ce.getMessage());
-                MetadigException metadigException = new MetadigProcessException("Error reading configuration for param " + authTokenName + ": " + ce.getMessage());
-                metadigException.initCause(ce);
-                throw metadigException;
-            }
-        }
-
-        qEntry = new ScorerQueueEntry(collectionId, projectName, authTokenName, subjectIdName, qualitySuiteId, memberNode, serviceUrl, formatFamily, requestDateTime);
+        qEntry = new ScorerQueueEntry(collectionId, qualitySuiteId, nodeId, formatFamily, requestDateTime);
 
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         ObjectOutput out = new ObjectOutputStream(bos);
@@ -418,7 +397,7 @@ public class Controller {
         message = bos.toByteArray();
 
         this.writeInProcessChannel(message, SCORER_ROUTING_KEY);
-        log.info(" [x] Queued Scorer request for collectionld: '" + qEntry.getProjectId() + "'" + " quality suite " + qualitySuiteId);
+        log.info(" [x] Queued Scorer request for collectionld: '" + qEntry.getCollectionId() + "'" + ", quality suite " + qualitySuiteId + ", nodeId: " + nodeId + ", formatFamily: " + formatFamily);
     }
 
     /**
@@ -536,16 +515,16 @@ public class Controller {
                         completedChannel.basicAck(envelope.getDeliveryTag(), false);
                     }
 
-                    log.info(" [x] Controller received notification of completed score for: '" + qEntry.getProjectId() + "'" + ", " +
+                    log.info(" [x] Controller received notification of completed score for: '" + qEntry.getCollectionId() + "'" + ", " +
                             "hostsname: " + qEntry.getHostname());
-                    log.info("Total processing time for worker " + qEntry.getHostname() + " for PID " + qEntry.getProjectId() + ": " + qEntry.getProcessingElapsedTimeSeconds());
+                    log.info("Total processing time for worker " + qEntry.getHostname() + " for PID " + qEntry.getCollectionId() + ": " + qEntry.getProcessingElapsedTimeSeconds());
 
                     /* An exception caught by the worker will be passed back to the controller via the queue entry
                      * 'exception' field. Check this now and take the appropriate action.
                      */
                     Exception me = qEntry.getException();
                     if (me instanceof MetadigException) {
-                        log.error("Error running suite: " + qEntry.getQualitySuiteId() + ", pid: " + qEntry.getProjectId() + ", error msg: ");
+                        log.error("Error running suite: " + qEntry.getQualitySuiteId() + ", pid: " + qEntry.getCollectionId() + ", error msg: ");
                         log.error("\t" + me.getMessage());
                         Throwable thisCause = me.getCause();
                         if (thisCause != null) {
