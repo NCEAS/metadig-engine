@@ -38,15 +38,10 @@ scores <- mutate(fsr, ym = as.Date(sprintf("%4s-%02d-01", year(dateUploaded), mo
   mutate(scoreR = scoreReusable * 100.0)
 
 # Use this when sequenceId problem has been resolved (github metadig-engine #232)
-#most_recent <- scores %>%
-#  arrange(ym, sequenceId, dateUploaded) %>%
-#  group_by(ym, sequenceId) %>%
-#  top_n(1, dateUploaded)
-#head(most_recent)
-
 most_recent <- scores %>%
-  arrange(ym) %>%
-  group_by(ym)
+  arrange(ym, sequenceId, dateUploaded) %>%
+  group_by(ym, sequenceId) %>%
+  top_n(1, dateUploaded)
 head(most_recent)
 
 # calculate cummulative overall

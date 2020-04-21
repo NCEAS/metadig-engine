@@ -38,15 +38,12 @@ public class JobScheduler {
         String taskType = null;
         String taskName = null;
         String taskGroup = null;
-        String authTokenName = null;
-        String subjectId = null;
         String cronSchedule = null;
         String params = null;
 
         String pidFilter = null;
         String suiteId = null;
         String nodeId = null;
-        String nodeServiceUrl = null;
         String startHarvestDatetime = null;
         int countRequested = 1000;
         int harvestDatetimeInc = 1;
@@ -66,7 +63,7 @@ public class JobScheduler {
         //Iterable<CSVRecord> records = CSVFormat.RFC4180.withHeader("query","task-type","job-name","job-group","cron-schedule","params").parse(in);
         //Iterable<CSVRecord> records = CSVFormat.RFC4180.withHeader("query","task-type","job-name","job-group","cron-schedule","suite-id","node-id","node-service-url").parse(in);
 
-        System.out.println("creating scheduler");
+        log.debug("creating scheduler");
         SchedulerFactory sf = new StdSchedulerFactory();
         Scheduler scheduler = sf.getScheduler();
 
@@ -74,9 +71,9 @@ public class JobScheduler {
         //      query,task-type,job-name,job-group,cron-schedule,params
         //      ?q=formatId:eml*, quality, quality-knb, metadig, 0/10 * * * * ?, "knb.suite.1;urn:node:KNB;https://knb.ecoinformatics.org/knb/d1/mn;2018-10-10T00:00:00.00Z,1"
         //
-        System.out.println("Scheduler name is: " + scheduler.getSchedulerName());
-        System.out.println("Scheduler instance ID is: " + scheduler.getSchedulerInstanceId());
-        System.out.println("Scheduler context's value for key QuartzTopic is " + scheduler.getContext().getString("QuartzTopic"));
+        log.debug("Scheduler name is: " + scheduler.getSchedulerName());
+        log.debug("Scheduler instance ID is: " + scheduler.getSchedulerInstanceId());
+        log.debug("Scheduler context's value for key QuartzTopic is " + scheduler.getContext().getString("QuartzTopic"));
         scheduler.start();
 
         Iterable<CSVRecord> records = CSVFormat.RFC4180.withFirstRecordAsHeader().withQuote('"').withCommentMarker('#').parse(in);
@@ -84,110 +81,104 @@ public class JobScheduler {
             taskType       = record.get("task-type").trim();
             taskName        = record.get("task-name").trim();
             taskGroup       = record.get("task-group").trim();
-            authTokenName = record.get("auth-token").trim();
-            subjectId = record.get("subject-id").trim();
             cronSchedule   = record.get("cron-schedule").trim();
             params         = record.get("params").trim();
-            System.out.println("Task type: " + taskType);
-            System.out.println("auth-token: " + authTokenName);
-            System.out.println("subject-id: " + subjectId);
-            System.out.println("cronSchedule: " + cronSchedule);
+            log.debug("Task type: " + taskType);
+            log.debug("cronSchedule: " + cronSchedule);
             params = params.startsWith("\"") ? params.substring(1) : params;
             params = params.endsWith("\"") ? params.substring(0, params.length()-1) : params;
 
-            //authToken = js.readConfig(authTokenParamName);
-            //System.out.println("authToken: " + authToken);
-            System.out.println("params: " + params);
+            log.debug("params: " + params);
             if(taskType.equals("quality")) {
-                System.out.println("Scheduling harvest for task name: " + taskName + ", task group: " + taskGroup);
+                // Example taskList.csv entry:
+                // quality,quality-arctic,metadig,20 0/1 * * * ?,"^eml.*|^http.*eml.*;arctic.data.center.suite.1;urn:node:ARCTIC;2019-12-01T14:30:00.00Z;1;100"
+                log.debug("Scheduling harvest for task name: " + taskName + ", task group: " + taskGroup);
                 String[] splitted = Arrays.stream(params.split(";"))
                         .map(String::trim)
                         .toArray(String[]::new);
 
                 int icnt = -1;
-                System.out.println("Split length: " + splitted.length);
+                log.debug("Split length: " + splitted.length);
                 // filter to use for removing unneeded pids from harvest list
                 pidFilter      = splitted[++icnt].trim();
-                System.out.println("pidFilter: " + pidFilter);
+                log.debug("pidFilter: " + pidFilter);
                 // Suite identifier
                 suiteId        = splitted[++icnt].trim();
-                System.out.println("suiteId: " + suiteId);
+                log.debug("suiteId: " + suiteId);
                 // DataOne Node identifier
                 nodeId         = splitted[++icnt].trim();
-                System.out.println("nodeId: " + nodeId);
-                // Dataone base service URL
-                nodeServiceUrl = splitted[++icnt].trim();
-                System.out.println("nodeServiceUrl: " + nodeServiceUrl);
+                log.debug("nodeId: " + nodeId);
                 // Start harvest datetime. This is the beginning of the date range for the first harvest.
                 // After the first harvest, the end of the harvest date range will be used as the beginning
                 // for the next harvest.
                 startHarvestDatetime = splitted[++icnt].trim();
-                System.out.println("startHarvestDatetime: " + startHarvestDatetime);
+                log.debug("startHarvestDatetime: " + startHarvestDatetime);
                 // Harvest datetime increment. This value will be added to the beginning of the harvest datetime
                 // range to determine the end of the range. This is specified in number of days.
                 harvestDatetimeInc = Integer.parseInt(splitted[++icnt].trim());
-                System.out.println("harvestDatetimeInc: " + harvestDatetimeInc);
+                log.debug("harvestDatetimeInc: " + harvestDatetimeInc);
                 // The number of results to return from the DataONE 'listObjects' service
                 countRequested = Integer.parseInt(splitted[++icnt].trim());
-                System.out.println("countRequested: " + countRequested);
+                log.debug("countRequested: " + countRequested);
             } else if(taskType.equals("score")) {
-                System.out.println("Scheduling harvest for task name: " + taskName + ", task group: " + taskGroup);
+                // Example taskList.csv entry:
+                // score,CN-fair,metadig,35 0/1 * * * ?,".*portal.*;FAIR.suite.1;urn:node:CN;2019-12-01T00:00:00.00Z;1;100"
+                log.debug("Scheduling harvest for task name: " + taskName + ", task group: " + taskGroup);
                 String[] splitted = Arrays.stream(params.split(";"))
                         .map(String::trim)
                         .toArray(String[]::new);
-
+                log.debug("Split length: " + splitted.length);
                 int icnt = -1;
-                System.out.println("Split length: " + splitted.length);
                 // filter to use for removing unneeded pids from harvest list
                 pidFilter      = splitted[++icnt].trim();
-                System.out.println("pidFilter: " + pidFilter);
                 // Suite identifier
                 suiteId        = splitted[++icnt].trim();
-                System.out.println("suiteId: " + suiteId);
                 // DataOne Node identifier
                 nodeId         = splitted[++icnt].trim();
-                System.out.println("nodeId: " + nodeId);
-                // Dataone base service URL
-                nodeServiceUrl = splitted[++icnt].trim();
-                System.out.println("nodeServiceUrl: " + nodeServiceUrl);
                 // Start harvest datetime. This is the beginning of the date range for the first harvest.
                 // After the first harvest, the end of the harvest date range will be used as the beginning
                 // for the next harvest.
                 startHarvestDatetime = splitted[++icnt].trim();
-                System.out.println("startHarvestDatetime: " + startHarvestDatetime);
                 // Harvest datetime increment. This value will be added to the beginning of the harvest datetime
                 // range to determine the end of the range. This is specified in number of days.
                 harvestDatetimeInc = Integer.parseInt(splitted[++icnt].trim());
-                System.out.println("harvestDatetimeInc: " + harvestDatetimeInc);
                 // The number of results to return from the DataONE 'listObjects' service
                 countRequested = Integer.parseInt(splitted[++icnt].trim());
-                System.out.println("countRequested: " + countRequested);
+
+                log.debug("pidFilter: " + pidFilter);
+                log.debug("suiteId: " + suiteId);
+                log.debug("nodeId: " + nodeId);
+                log.debug("startHarvestDatetime: " + startHarvestDatetime);
+                log.debug("harvestDatetimeInc: " + harvestDatetimeInc);
+                log.debug("countRequested: " + countRequested);
             } else if(taskType.equals("filestore")) {
-                System.out.println("Scheduling filestore ingest task name: " + taskName + ", task group: " + taskGroup);
+                // Example taskList.csv entry:
+                // filestore,ingest,metadig,,,0 0/30 * * * ?,"stage;;*.*;README.txt;filestore-ingest.log"
+                log.debug("Scheduling filestore ingest task name: " + taskName + ", task group: " + taskGroup);
                 String[] splitted = Arrays.stream(params.split(";"))
                         .map(String::trim)
                         .toArray(String[]::new);
 
                 int icnt = -1;
-                System.out.println("Split length: " + splitted.length);
+                log.debug("Split length: " + splitted.length);
                 // Filestore staging directories include in the ingest
                 dirIncludeMatch = splitted[++icnt].trim();
-                System.out.println("dirIncludeMatch: " + dirIncludeMatch);
+                log.debug("dirIncludeMatch: " + dirIncludeMatch);
                 // Filestore staging directories to include in the ingest
                 dirExcludeMatch = splitted[++icnt].trim();
-                System.out.println("dirExcludeMatch: " + dirExcludeMatch);
+                log.debug("dirExcludeMatch: " + dirExcludeMatch);
                 // Filestore staging files to include in the ingest
                 fileIncludeMatch = splitted[++icnt].trim();
-                System.out.println("fileIncludeMatch: " + fileIncludeMatch);
+                log.debug("fileIncludeMatch: " + fileIncludeMatch);
                 // Filestore staging files to exclude from the ingest
                 fileExcludeMatch = splitted[++icnt].trim();
-                System.out.println("fileExcludeMatch: " + fileExcludeMatch);
+                log.debug("fileExcludeMatch: " + fileExcludeMatch);
                 logFile = splitted[++icnt].trim();
-                System.out.println("log file: " + logFile);
+                log.debug("log file: " + logFile);
             }
 
             try {
-                System.out.println("Setting task");
+                log.debug("Setting task");
                 // Currently there is only taskType="quality", but there could be more in the future!
                 JobDetail job = null;
                 if(taskType.equals("quality")) {
@@ -195,12 +186,9 @@ public class JobScheduler {
                             .withIdentity(taskName, taskGroup)
                             .usingJobData("taskName", taskName)
                             .usingJobData("taskType", taskType)
-                            .usingJobData("authTokenName", authTokenName)
-                            .usingJobData("subjectId", subjectId)
                             .usingJobData("pidFilter", pidFilter)
                             .usingJobData("suiteId", suiteId)
                             .usingJobData("nodeId", nodeId)
-                            .usingJobData("nodeServiceUrl", nodeServiceUrl)
                             .usingJobData("startHarvestDatetime", startHarvestDatetime)
                             .usingJobData("harvestDatetimeInc", harvestDatetimeInc)
                             .usingJobData("countRequested", countRequested)
@@ -210,12 +198,9 @@ public class JobScheduler {
                             .withIdentity(taskName, taskGroup)
                             .usingJobData("taskName", taskName)
                             .usingJobData("taskType", taskType)
-                            .usingJobData("authTokenName", authTokenName)
-                            .usingJobData("subjectId", subjectId)
                             .usingJobData("pidFilter", pidFilter)
                             .usingJobData("suiteId", suiteId)
                             .usingJobData("nodeId", nodeId)
-                            .usingJobData("nodeServiceUrl", nodeServiceUrl)
                             .usingJobData("startHarvestDatetime", startHarvestDatetime)
                             .usingJobData("harvestDatetimeInc", harvestDatetimeInc)
                             .usingJobData("countRequested", countRequested)
@@ -233,13 +218,13 @@ public class JobScheduler {
                             .build();
                 }
 
-                System.out.println("Setting trigger");
+                log.debug("Setting trigger");
                 CronTrigger trigger = newTrigger()
                     .withIdentity(taskName + "-trigger", taskGroup)
                     .withSchedule(cronSchedule(cronSchedule))
                     .build();
 
-                System.out.println("Scheduling task");
+                log.debug("Scheduling task");
                 scheduler.scheduleJob(job, trigger);
 
             } catch (SchedulerException se) {

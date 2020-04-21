@@ -1,0 +1,129 @@
+..
+    @startuml images/generate-metadata-assessment-graph.png
+    !include ./plantuml-styles.txt
+
+    autonumber "<font color=999999>"
+    title "Generating a metadata assessment graph"
+    participant "metadig-scheduler"
+    participant Bookkeeper
+    participant "metadig-controller"
+    participant "rabbitmq"
+    participant "metadig-scorer"
+    participant CN
+    participant "metadig Solr"
+    participant R
+
+    "metadig-scheduler"  o-> CN : listObjects()
+        note right 
+            The MetaDIG task queries 
+            for any new pids added 
+            to the CN
+        end note
+        activate CN
+        CN --> "metadig-scheduler" : pid,sid
+        deactivate CN
+
+    activate "metadig-scheduler"
+        note right
+            metadig-scheduler filters pids
+            for collection (portal) pids
+        end note
+
+        "metadig-scheduler" -> Bookkeeper : getUsage(session, sid, quoataName)
+    deactivate "metadig-scheduler"
+
+    activate Bookkeeper
+        "Bookkeeper" --> "metadig-scheduler" : usage
+    deactivate Bookkeeper
+
+    alt usage sufficient
+
+        activate "metadig-scheduler"
+            "metadig-scheduler" -> "metadig-controller" : ./scores/?suite=<suiteId>&collection=<collectionId>
+        deactivate "metadig-scheduler"
+
+        activate "metadig-controller"
+            "metadig-controller" -> rabbitmq : "scorer-queue" : collectionId,suiteId
+        deactivate "metadig-controller"
+
+        activate rabbitmq
+            note right
+                a request to create a graph is queued
+            end note
+
+            rabbitmq -> "metadig-scorer" : collectionId,suiteId
+        deactivate rabbitmq
+
+        activate "metadig-scorer"
+            "metadig-scorer" -> CN : ./query/solr/?q=id:<collectionPid>
+            note left
+                the collection query string
+                and rightsHoler are obtained
+                from Solr
+            end note
+        deactivate "metadig-scorer"
+
+        activate "CN"
+            CN --> "metadig-scorer" : collectionQuery,rightHolder
+        deactivate CN
+
+        activate "metadig-scorer"
+            "metadig-scorer" -> CN : getSubjectInfo(rightsHolder)
+        deactivate "metadig-scorer"
+
+        activate CN
+            note right
+                rightsholder's user groups will be
+                used for the Solr query
+            end note
+            CN --> "metadig-scorer" : subjectInfo
+        deactivate CN
+
+        activate "metadig-scorer"
+            "metadig-scorer" -> CN : ./query/solr/q?=<collectionQuery>+readPermission:<group list>)
+        deactivate "metadig-scorer"
+
+        note right
+            execute collectionQuery on the CN
+        end note
+
+        activate CN
+            CN --> "metadig-scorer" : pids
+        deactivate CN
+
+        activate "metadig-scorer"
+            note right
+                pids are returned that correspond to the
+                set of pids returned by a portal's
+                query filters
+            end note
+            "metadig-scorer" -> "metadig Solr" : ./query/solr?q=pid:<pids>+suiteId:FAIR.suite.n
+        deactivate "metadig-scorer"
+
+        activate "metadig Solr"
+            note right
+                quality scores are retrieved from
+                the MetaDIG Solr instance
+            end note
+            "metadig Solr" --> "metadig-scorer" : scores
+        deactivate "metadig Solr"
+
+        activate "metadig-scorer"
+            "metadig-scorer" -> R : generate_cummulative_graph()
+        deactivate "metadig-scorer"
+
+        activate R
+            R --> "metadig-scorer" : collection-graph.png
+        deactivate R
+
+        activate "metadig-scorer"
+            "metadig-scorer" --> "metadig-controller" : status
+        deactivate "metadig-scorer"
+
+    else usage not sufficient
+            "metadig-scheduler" --> "metadig-scheduler" : log error
+        'activate "metadig-scheduler"
+        'deactivate "metadig-scheduler"
+    end
+
+    @enduml

@@ -67,10 +67,8 @@ queue
         * The Apache Tomcat based webapp that accepts MetaDIG service requests and forwards
           them to metadig-controller
 
-* Metadig-graph-generator
-	* creates graphs of aggregated quality scores
-	* queries the Quality Solr Server for input quality scores
-	* writes graphs of aggregated scores to persistent disk
+* Metadig Graph Generator (metadig-scorer)
+	* creates graphs and CSV of aggregated quality scores and writes them to disk
 	* dependencies
 		* metadig-controller
 	* API
@@ -95,6 +93,8 @@ queue
 		    * syntax: /graph?project=<id>&node=<nodeId>&suite=<name>&dialect=<name>
 		        * example: /graph?project=urn:uri:1234-4567
 		    * parameters - same as POST
+	* The following sequence diagram shows the events that occur during the generation of an
+	accumulated metadata assessment graphic ![MetaDIG Graph Generator](https://github.com/NCEAS/metadig-engine/blob/master/docs/images/generate-metadata-assessment-graph.png "MetaDIG Engine Grapher")
 
 * Metadig-py
     * Python module used to author and test quality tests written in python
@@ -121,6 +121,7 @@ The following diagram shows the various components of the MetaDIG engine:
 
 ![Scheduler Sequence](https://github.com/NCEAS/metadig-engine/blob/master/docs/images/index-monitor_sequence.png "Scheduler Sequence")
 
+## Metadata Assessment
 ## Metadata Quality Display Mockups
 * The following display shows metadata quality summarized for all of DataONE:
 

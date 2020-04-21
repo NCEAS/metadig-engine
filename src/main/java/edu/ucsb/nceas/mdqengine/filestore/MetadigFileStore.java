@@ -101,6 +101,8 @@ public class MetadigFileStore {
         // check if a file with the same properties exists. If the file already exists, then
         // we need to obtain the path in the filestore (including the fileId), update the
         // creation time in the db and write the replacement file out to disk.
+        // Note: in the current implementation, the SQL statement (FilestoreDB.saveEntry()) handles
+        // the update in case of a duplicate.
 
         try {
             fsdb = new FilestoreDB();

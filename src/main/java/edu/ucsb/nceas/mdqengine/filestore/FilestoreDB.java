@@ -79,8 +79,7 @@ public class FilestoreDB {
         Result result = new Result();
         PreparedStatement stmt = null;
 
-        String collectionId = mdFile.getCollectionId();
-        String metadataId = mdFile.getMetadataId();
+        String pid = mdFile.getPid();
         String suiteId = mdFile.getSuiteId();
         String nodeId = mdFile.getNodeId();
         String mdFormatFilter = mdFile.getMetadataFormatFilter();
@@ -107,16 +106,15 @@ public class FilestoreDB {
                 stmt.setString(1, storageType);
                 stmt.setString(2, altFilename);
             } else {
-                sql = "select * from filestore where collection_id = ? and metadata_id = ? and suite_id = ?" +
+                sql = "select * from filestore where pid = ? and suite_id = ?" +
                         " and node_id = ? and format_filter = ? and storage_type = ? and media_type = ?";
                 stmt = conn.prepareStatement(sql);
-                stmt.setString(1, collectionId);
-                stmt.setString(2, metadataId);
-                stmt.setString(3, suiteId);
-                stmt.setString(4, nodeId);
-                stmt.setString(5, mdFormatFilter);
-                stmt.setString(6, storageType);
-                stmt.setString(7, mediaType);
+                stmt.setString(1, pid);
+                stmt.setString(2, suiteId);
+                stmt.setString(3, nodeId);
+                stmt.setString(4, mdFormatFilter);
+                stmt.setString(5, storageType);
+                stmt.setString(6, mediaType);
             }
 
             log.debug("issuing query: " + sql);
@@ -124,8 +122,7 @@ public class FilestoreDB {
             // TODO: The resultset should contain only one row
             if(rs.next()) {
                 resultMdFile.setFileId(rs.getString("file_id"));
-                resultMdFile.setCollectionId(rs.getString("collection_id"));
-                resultMdFile.setMetadataId(rs.getString("metadata_id"));
+                resultMdFile.setPid(rs.getString("pid"));
                 resultMdFile.setSuiteId(rs.getString("suite_id"));
                 resultMdFile.setNodeId(rs.getString("node_id"));
                 resultMdFile.setMetadataFormatFilter(rs.getString("format_filter"));
@@ -141,7 +138,7 @@ public class FilestoreDB {
                 stmt.close();
                 log.debug("Retrieved filestore successfully for file id: " + resultMdFile.getFileId());
             } else {
-                log.debug("Filestore entry not found for collection id: " + collectionId + ", metadataId: " + metadataId + ", suiteId: " + suiteId +
+                log.debug("Filestore entry not found for pid: " + pid + ", suiteId: " + suiteId +
                         ", nodeId" + nodeId + ", formatFilter: " + mdFormatFilter + ", storageType: " + storageType + ", mediaType: "  + mediaType +
                         ", alt filename: " + altFilename);
                 me.initCause(new MetadigEntryNotFound("Filestore db entry not found"));
@@ -165,8 +162,7 @@ public class FilestoreDB {
         PreparedStatement stmt = null;
 
         String fileId = mdFile.getFileId();
-        String collectionId = mdFile.getCollectionId();
-        String metadataId = mdFile.getMetadataId();
+        String pid = mdFile.getPid();
         String suiteId = mdFile.getSuiteId();
         String nodeId = mdFile.getNodeId();
         String metadataFormatFilter = mdFile.getMetadataFormatFilter();
@@ -181,33 +177,31 @@ public class FilestoreDB {
         // Attempt to insert a new record. If the unique constraint is violated (updating an existing record), perform an 'upsert', replacing
         // the original record.
         try {
-            String sql = "INSERT INTO filestore (file_id, collection_id, metadata_id, suite_id, node_id, format_filter, storage_type," +
-                    " creation_datetime, media_type, alt_filename) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+            String sql = "INSERT INTO filestore (file_id, pid, suite_id, node_id, format_filter, storage_type," +
+                    " creation_datetime, media_type, alt_filename) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)"
                     + " ON CONFLICT ON CONSTRAINT all_properties_fk"
-                    + " DO UPDATE SET (file_id, collection_id, metadata_id, suite_id, node_id, format_filter, storage_type, " +
-                    "creation_datetime, media_type, alt_filename) = (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                    + " DO UPDATE SET (file_id, pid, suite_id, node_id, format_filter, storage_type, " +
+                    "creation_datetime, media_type, alt_filename) = (?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
             stmt = conn.prepareStatement(sql);
             stmt.setString(1, fileId);
-            stmt.setString(2, collectionId);
-            stmt.setString(3, metadataId);
-            stmt.setString(4, suiteId);
-            stmt.setString(5, nodeId);
-            stmt.setString(6, metadataFormatFilter);
-            stmt.setString(7, storageType);
-            stmt.setTimestamp(8, timestamp);
-            stmt.setString(9, mediaType);
-            stmt.setString(10, altFilename);
-            stmt.setString(11, fileId);
-            stmt.setString(12, collectionId);
-            stmt.setString(13, metadataId);
-            stmt.setString(14, suiteId);
-            stmt.setString(15, nodeId);
-            stmt.setString(16, metadataFormatFilter);
-            stmt.setString(17, storageType);
-            stmt.setTimestamp(18, timestamp);
-            stmt.setString(19, mediaType);
-            stmt.setString(20, altFilename);
+            stmt.setString(2, pid);
+            stmt.setString(3, suiteId);
+            stmt.setString(4, nodeId);
+            stmt.setString(5, metadataFormatFilter);
+            stmt.setString(6, storageType);
+            stmt.setTimestamp(7, timestamp);
+            stmt.setString(8, mediaType);
+            stmt.setString(9, altFilename);
+            stmt.setString(10, fileId);
+            stmt.setString(11, pid);
+            stmt.setString(12, suiteId);
+            stmt.setString(13, nodeId);
+            stmt.setString(14, metadataFormatFilter);
+            stmt.setString(15, storageType);
+            stmt.setTimestamp(16, timestamp);
+            stmt.setString(17, mediaType);
+            stmt.setString(18, altFilename);
 
             stmt.executeUpdate();
             stmt.close();

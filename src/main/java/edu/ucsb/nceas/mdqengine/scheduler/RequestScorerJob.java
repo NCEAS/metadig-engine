@@ -38,8 +38,8 @@ import java.util.regex.Pattern;
 /**
  * <p>
  * Run a MetaDIG Quality Engine Scheduler task, for example,
- * query a member node for new pids and request that a quality
- * report is created for each one.
+ * query a member node for new pids and request that an aggregated quality
+ * graphic is created for each one.
  * </p>
  *
  * @author Peter Slaughter
@@ -94,18 +94,22 @@ public class RequestScorerJob implements Job {
      * <code>{@link org.quartz.Trigger}</code> fires that is associated with
      * the <code>Job</code>.
      * </p>
+     * <p>
+     * This method sends a request from the scheduler (metadig-scheduler) to the controller (metadig-controller)
+     * to execute a 'scorer' request (metadig-scorer). This request goes through the controller so that it can
+     * keep track and log all requests and their completion status. The current method to send requests to the
+     * controller is to send a REST request to the servlet running the controller, using the metadig-engine API.
+     * </p>
      *
      * @throws JobExecutionException if there is an exception while executing the job.
      */
     public void execute(JobExecutionContext context)
             throws JobExecutionException {
 
-        String authToken = null;
         String qualityServiceUrl  = null;
         String CNsubjectId = null;
         String CNauthToken = null;
         String CNserviceUrl = null;
-        String subjectId = null;
         MDQconfig cfg = null;
 
         JobKey key = context.getJobDetail().getKey();
@@ -113,14 +117,11 @@ public class RequestScorerJob implements Job {
 
         String taskName = dataMap.getString("taskName");
         String taskType = dataMap.getString("taskType");
-        String authTokenName = dataMap.getString("authTokenName");
-        String subjectIdName = dataMap.getString("subjectIdName");
         String pidFilter = dataMap.getString("pidFilter");
         String suiteId = dataMap.getString("suiteId");
         // The nodeId is used for filterine queries based on DataONE sysmeta 'datasource'.
         // For example, if one wished to get scores for Arctic Data Center, the urn:node:ARCTIC would be specified.
         String nodeId = dataMap.getString("nodeId");
-        String nodeServiceUrl = dataMap.getString("nodeServiceUrl");
         String startHarvestDatetimeStr = dataMap.getString("startHarvestDatetime");
         int harvestDatetimeInc = dataMap.getInt("harvestDatetimeInc");
         int countRequested = dataMap.getInt("countRequested");
@@ -130,48 +131,20 @@ public class RequestScorerJob implements Job {
         MultipartMNode mnNode = null;
         MultipartCNode cnNode = null;
 
+        String authToken = null;
+        String subjectId = null;
+        String nodeServiceUrl = null;
+
         try {
             cfg = new MDQconfig();
             qualityServiceUrl = cfg.getString("quality.serviceUrl");
-            CNsubjectId = cfg.getString("CN.subjectId");
-            CNauthToken = cfg.getString("CN.authToken");
-            CNserviceUrl = cfg.getString("CN.nodeServiceUrl");
-
-            if(nodeId == null || nodeId.isEmpty()) {
-                //nodeId = cfg.getString("CN.nodeId");
-                nodeId = "";
-            }
-
             log.debug("nodeId from request: " + nodeId);
-
-            // First try to use a passed in auth token name, which is the name of metadig.properties entry
-            if(authTokenName != null && !authTokenName.isEmpty()) {
-                authToken = cfg.getString(authTokenName);
-                log.debug("Using authToken: " + authTokenName);
-            }
-            // If no auth token can be found, und the CN one
-            if(authToken == null || authToken.isEmpty()) {
-                authToken = CNauthToken;
-                log.debug("Using CN authToken");
-            }
-
-            // First try to use a passed in auth token name, which is the name of metadig.properties entry
-            if(subjectIdName != null && !subjectIdName.isEmpty()) {
-                subjectId = cfg.getString(subjectIdName);
-                log.debug("Using subjectId: " + subjectId);
-            }
-
-            if(subjectId == null || subjectId.isEmpty()) {
-                subjectId = CNsubjectId;
-                log.debug("Using CN subjectId");
-            }
-
-            if(nodeServiceUrl == null || nodeServiceUrl.isEmpty()) {
-                nodeServiceUrl = CNserviceUrl;
-            }
-
+            String nodeAbbr = nodeId.replace("urn:node:", "");
+            authToken = cfg.getString(nodeAbbr + ".authToken");
+            subjectId = cfg.getString(nodeAbbr + ".subjectId");
+            // TODO:  Cache the node values from the CN listNode service
+            nodeServiceUrl = cfg.getString(nodeAbbr + ".serviceUrl");
             log.debug("nodeServiceUrl: " + nodeServiceUrl);
-
         } catch (ConfigurationException | IOException ce) {
             JobExecutionException jee = new JobExecutionException("Error executing task.");
             jee.initCause(ce);
@@ -281,7 +254,7 @@ public class RequestScorerJob implements Job {
             ArrayList<String> pidsToProcess = null;
 
             try {
-                result = getPidsToProcess(cnNode, mnNode, isCN, session, suiteId, nodeId, pidFilter, startDTRstr, endDTRstr, startCount, countRequested);
+                result = getPidsToProcess(cnNode, mnNode, isCN, session, nodeId, pidFilter, startDTRstr, endDTRstr, startCount, countRequested);
                 pidsToProcess = result.getResult();
                 resultCount = result.getResultCount();
             } catch (Exception e) {
@@ -329,7 +302,23 @@ public class RequestScorerJob implements Job {
         store.shutdown();
     }
 
-    public ListResult getPidsToProcess(MultipartCNode cnNode, MultipartMNode mnNode, Boolean isCN, Session session, String suiteId, String nodeId,
+    /**
+     * Query a DataONE CN or MN object store for a list of object that match the time range and formatId filters provided.
+     *
+     * @param cnNode the CN to query
+     * @param mnNode the MN to query
+     * @param isCN was a CN or MN specified
+     * @param session the authentication session to use
+     * @param nodeId the DataONE nodeId of the node to query
+     * @param pidFilter
+     * @param startHarvestDatetimeStr
+     * @param endHarvestDatetimeStr
+     * @param startCount
+     * @param countRequested
+     * @return a ListResult object containing the matching pids
+     * @throws Exception
+     */
+    public ListResult getPidsToProcess(MultipartCNode cnNode, MultipartMNode mnNode, Boolean isCN, Session session, String nodeId,
                                        String pidFilter, String startHarvestDatetimeStr, String endHarvestDatetimeStr,
                                        int startCount, int countRequested) throws Exception {
 
