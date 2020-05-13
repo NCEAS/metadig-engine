@@ -56,7 +56,13 @@ public class RequestReportJob implements Job {
     private Log log = LogFactory.getLog(RequestReportJob.class);
 
     class ListResult {
-        Integer resultCount;
+        // The total result count returned from DataONE
+        Integer totalResultCount;
+        // The filtered result count returned from DataONE.
+        // The DataONE listObjects service returns all new pids for all formatIds
+        // but we are typically only interested in a subset of those, i.e. EML metadata pids,
+        // so this is the count of pids from the result that we are actually interested in.
+        Integer filteredResultCount;
         ArrayList<String> result = new ArrayList<>();
 
         void setResult(ArrayList result) {
@@ -67,12 +73,19 @@ public class RequestReportJob implements Job {
             return this.result;
         }
 
-        void setResultCount(Integer count) {
-            this.resultCount = count;
+        void setTotalResultCount(Integer count) {
+            this.totalResultCount = count;
+        }
+        void setFilteredResultCount(Integer count) {
+            this.filteredResultCount = count;
         }
 
-        Integer getResultCount() {
-            return this.resultCount;
+        Integer getTotalResultCount() {
+            return this.totalResultCount;
+        }
+
+        Integer getFilteredResultCount() {
+            return this.filteredResultCount;
         }
     }
 
@@ -247,7 +260,8 @@ public class RequestReportJob implements Job {
 
         Integer startCount = new Integer(0);
         ListResult result = null;
-        Integer resultCount = null;
+        Integer totalResultCount = null;
+        Integer filteredResultCount = null;
 
         boolean morePids = true;
         while(morePids) {
@@ -257,14 +271,15 @@ public class RequestReportJob implements Job {
             try {
                 result = getPidsToProcess(cnNode, mnNode, isCN, session, suiteId, nodeId, pidFilter, startDTRstr, endDTRstr, startCount, countRequested);
                 pidsToProcess = result.getResult();
-                resultCount = result.getResultCount();
+                totalResultCount = result.getTotalResultCount();
+                filteredResultCount = result.getFilteredResultCount();
             } catch (Exception e) {
                 JobExecutionException jee = new JobExecutionException("Unable to get pids to process", e);
                 jee.setRefireImmediately(false);
                 throw jee;
             }
 
-            log.info("Found " + resultCount + " pids" + " for node: " + nodeId);
+            log.info("Found " + filteredResultCount + " pids" + " for node: " + nodeId);
             for (String pidStr : pidsToProcess) {
                 try {
                     log.info("submitting pid: " + pidStr);
@@ -295,10 +310,10 @@ public class RequestReportJob implements Job {
             }
 
             // Check if DataONE returned the max number of results. If so, we have to request more by paging through
-            // the results.
-            if(resultCount >= countRequested) {
+            // the results returned pidsToProcess (i.e. DataONE listObjects service).
+            if(totalResultCount >= countRequested) {
                 morePids = true;
-                startCount = startCount + resultCount;
+                startCount = startCount + totalResultCount;
                 log.info("Paging through more results, current start is " + startCount);
             } else {
                 morePids = false;
@@ -355,6 +370,7 @@ public class RequestReportJob implements Job {
             for(ObjectInfo oi: objList.getObjectInfoList()) {
                 thisFormatId = oi.getFormatId().getValue();
                 thisPid = oi.getIdentifier().getValue();
+                log.debug("Checking pid: " + thisPid + ", format: " + thisFormatId);
 
                 // Check all pid filters. There could be multiple wildcard filters, which are separated
                 // by ','.
@@ -381,7 +397,11 @@ public class RequestReportJob implements Job {
         }
 
         ListResult result = new ListResult();
-        result.setResultCount(pidCount);
+        // Set the count for the number of desired pids filtered from the total result set
+        result.setFilteredResultCount(pidCount);
+        // Set the count for the total number of pids returned from DataONE (all formatIds) for this query
+        // Set the count for the total number of pids returned from DataONE (all formatIds) for this query
+        result.setTotalResultCount(objList.getCount());
         result.setResult(pids);
 
         return result;
