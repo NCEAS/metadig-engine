@@ -1,12 +1,13 @@
 package edu.ucsb.nceas.mdqengine;
 
 import com.rabbitmq.client.*;
-import edu.ucsb.nceas.mdqengine.exception.MetadigProcessException;
+import edu.ucsb.nceas.mdqengine.authentication.BookkeeperClient;
 import edu.ucsb.nceas.mdqengine.scorer.ScorerQueueEntry;
 import edu.ucsb.nceas.mdqengine.exception.MetadigException;
 import org.apache.commons.configuration2.ex.ConfigurationException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.dataone.bookkeeper.api.Usage;
 import org.dataone.exceptions.MarshallingException;
 import org.dataone.service.types.v2.SystemMetadata;
 import org.dataone.service.types.v2.TypeFactory;
@@ -17,6 +18,8 @@ import java.io.*;
 import java.lang.reflect.InvocationTargetException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
@@ -272,6 +275,52 @@ public class Controller {
     }
 
     /**
+     * Query DataONE bookkeeper service to determine if a portal is active
+     *
+     * <p>
+     *     Before generating a metadata assessment graph for a portal, check
+     *     if the portal is active. A portal can be marked to inactive by
+     *     the portal owner, or by the bookkeeper admin if usage fees are
+     *     delinquent.
+     * </p>
+     * @param collectionId The DataONE collection identifier
+     * @return
+     * @throws MetadigException
+     */
+    // Check the portal quota with DataONE bookkeaper
+    public Boolean isPortalActive(String collectionId) throws MetadigException {
+        // Check the portal quota with DataONE bookkeeper
+        log.debug("Checking bookkeeper portal Usage for collection: " + collectionId);
+        String msg = null;
+        BookkeeperClient bkClient = BookkeeperClient.getInstance();
+        List<Usage> usages = null;
+        Usage usage = null;
+        List<String> subjects = new ArrayList<String>();
+        try {
+            if(bkClient.getBookkeeperEnabled()) {
+                // Set status = null so that any usage will be returned.
+                String status = null;
+                usages = bkClient.listUsages(0, collectionId, "portal", status , subjects);
+                usage = usages.get(0);
+                log.debug("Usage for portal " + collectionId + " is " + usage.getStatus());
+                if(usage.getStatus().compareToIgnoreCase("active") == 0) {
+                    return true;
+                } else {
+                    return false;
+                }
+            } else {
+                msg = "Metadig config param 'bookkeeper.enabled is blank or missing";
+                log.error(msg);
+                throw(new MetadigException(msg));
+            }
+        } catch (Exception e) {
+            msg = "Unable to get usage from bookkeeper for collection id: " + collectionId;
+            log.error(msg);
+            throw(new MetadigException(msg));
+        }
+    };
+
+    /**
      * Forward a request to the "InProcess" queue.
      * <p>
      * A request to create a quality report is serialized and placed on the RabbitMQ "InProcess"
@@ -369,11 +418,11 @@ public class Controller {
      * create the graph from them.
      * </p>
      *
-     * @param collectionId
-     * @param nodeId
-     * @param formatFamily
-     * @param qualitySuiteId
-     * @param requestDateTime
+     * @param collectionId the DataONE collection identifier
+     * @param nodeId the node identifier the collection resides on
+     * @param formatFamily a string representing the DataONE formats to create score for
+     * @param qualitySuiteId the quality suite used to create the score graph
+     * @param requestDateTime the datetime that the request was made
      *
      * @return
      * @throws java.io.IOException
@@ -389,15 +438,19 @@ public class Controller {
         byte[] message = null;
         String authToken = null;
 
-        qEntry = new ScorerQueueEntry(collectionId, qualitySuiteId, nodeId, formatFamily, requestDateTime);
+        if(!isPortalActive(collectionId)) {
+            log.info("[x} Skipping Scorer request for inactive portal, collectionld: '" + qEntry.getCollectionId() + "'" + ", quality suite " + qualitySuiteId + ", nodeId: " + nodeId + ", formatFamily: " + formatFamily);
+        } else {
+            qEntry = new ScorerQueueEntry(collectionId, qualitySuiteId, nodeId, formatFamily, requestDateTime);
 
-        ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        ObjectOutput out = new ObjectOutputStream(bos);
-        out.writeObject(qEntry);
-        message = bos.toByteArray();
+            ByteArrayOutputStream bos = new ByteArrayOutputStream();
+            ObjectOutput out = new ObjectOutputStream(bos);
+            out.writeObject(qEntry);
+            message = bos.toByteArray();
 
-        this.writeInProcessChannel(message, SCORER_ROUTING_KEY);
-        log.info(" [x] Queued Scorer request for collectionld: '" + qEntry.getCollectionId() + "'" + ", quality suite " + qualitySuiteId + ", nodeId: " + nodeId + ", formatFamily: " + formatFamily);
+            this.writeInProcessChannel(message, SCORER_ROUTING_KEY);
+            log.info(" [x] Queued Scorer request for collectionld: '" + qEntry.getCollectionId() + "'" + ", quality suite " + qualitySuiteId + ", nodeId: " + nodeId + ", formatFamily: " + formatFamily);
+        }
     }
 
     /**
