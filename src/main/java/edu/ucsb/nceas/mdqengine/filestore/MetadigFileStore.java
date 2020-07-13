@@ -48,13 +48,16 @@ public class MetadigFileStore {
         // First query the database to find a match based on the data in the MetadigFile entry. In this version of
         // the filestore, only one file should match.
         MetadigFile resultFile = null;
-        FilestoreDB fsdb = new FilestoreDB();
+        FilestoreDB fsdb = null;
 
         try {
+            fsdb = new FilestoreDB();
             resultFile = fsdb.getFileEntry(mdFile);
         } catch (MetadigFilestoreException mse) {
             log.error("Unable to get file: " + mse.getMessage());
             throw mse;
+        } finally {
+            fsdb.shutdown();
         }
 
         path = this.getFilePath(resultFile);
@@ -70,7 +73,6 @@ public class MetadigFileStore {
             throw metadigFilestoreException;
         }
 
-        fsdb.shutdown();
         return storeFile;
     }
 
@@ -139,16 +141,17 @@ public class MetadigFileStore {
             log.debug("Wrote file to path: " + path);
         } catch (IOException ioe) {
             log.error("Error writing to path: " + path);
+        } finally {
+        fsdb.shutdown();
         }
 
-        fsdb.shutdown();
         return path;
     }
 
     public boolean deleteFile(MetadigFile mdFile) throws MetadigFilestoreException {
 
         String path = null;
-        FilestoreDB fsdb;
+        FilestoreDB fsdb = null;
 
         try {
             fsdb = new FilestoreDB();
@@ -156,6 +159,8 @@ public class MetadigFileStore {
         } catch (MetadigFilestoreException mse) {
             log.error("Unable to connect to filestore database");
             throw (mse);
+        } finally {
+            fsdb.shutdown();
         }
 
         File fileToDelete = FileUtils.getFile(getFilePath(mdFile));
