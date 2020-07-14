@@ -66,4 +66,16 @@ public class MDQconfig {
     public int getInt(String paramName) throws ConfigurationException {
         return(config.getInt(paramName));
     }
+
+    public static String readConfigParam (String paramName) throws ConfigurationException, IOException {
+        String paramValue = null;
+        try {
+            MDQconfig cfg = new MDQconfig();
+            paramValue = cfg.getString(paramName);
+        } catch (Exception e) {
+            log.error("Could not read configuration for param: " + paramName + ": " + e.getMessage());
+            throw e;
+        }
+        return paramValue;
+    }
 }
