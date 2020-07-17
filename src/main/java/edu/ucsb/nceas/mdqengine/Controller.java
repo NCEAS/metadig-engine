@@ -1,7 +1,7 @@
 package edu.ucsb.nceas.mdqengine;
 
 import com.rabbitmq.client.*;
-import edu.ucsb.nceas.mdqengine.authentication.BookkeeperClient;
+import edu.ucsb.nceas.mdqengine.authorization.BookkeeperClient;
 import edu.ucsb.nceas.mdqengine.scorer.ScorerQueueEntry;
 import edu.ucsb.nceas.mdqengine.exception.MetadigException;
 import org.apache.commons.configuration2.ex.ConfigurationException;
@@ -56,6 +56,7 @@ public class Controller {
     // where metadig-controller and the RabbitMQ server are running in containers that belong
     // to the same Pod. These defaults will be used if the properties file cannot be read.
     // These values are read from a config file, see class 'MDQconfig'
+    private static Boolean bookkeeperEnabled = false;
     private static String RabbitMQhost = null;
     private static int RabbitMQport = 0;
     private static String RabbitMQpassword = null;
@@ -246,6 +247,7 @@ public class Controller {
         RabbitMQusername = cfg.getString("RabbitMQ.username");
         RabbitMQhost = cfg.getString("RabbitMQ.host");
         RabbitMQport = cfg.getInt("RabbitMQ.port");
+        bookkeeperEnabled = new Boolean(cfg.getString("bookkeeper.enabled"));
     }
 
 
@@ -297,25 +299,18 @@ public class Controller {
         Usage usage = null;
         List<String> subjects = new ArrayList<String>();
         try {
-            if(bkClient.getBookkeeperEnabled()) {
-                // Set status = null so that any usage will be returned.
-                String status = null;
-                usages = bkClient.listUsages(0, collectionId, "portal", status , subjects);
-                usage = usages.get(0);
-                log.debug("Usage for portal " + collectionId + " is " + usage.getStatus());
-                if(usage.getStatus().compareToIgnoreCase("active") == 0) {
-                    return true;
-                } else {
-                    return false;
-                }
+            // Set status = null so that any usage will be returned.
+            String status = null;
+            usages = bkClient.listUsages(0, collectionId, "portal", status , subjects);
+            usage = usages.get(0);
+            log.debug("Usage for portal " + collectionId + " is " + usage.getStatus());
+            if(usage.getStatus().compareToIgnoreCase("active") == 0) {
+                return true;
             } else {
-                msg = "Metadig config param 'bookkeeper.enabled is blank or missing";
-                log.error(msg);
-                throw(new MetadigException(msg));
+                return false;
             }
         } catch (Exception e) {
             msg = "Unable to get usage from bookkeeper for collection id: " + collectionId;
-            log.error(msg);
             throw(new MetadigException(msg));
         }
     };
@@ -431,16 +426,29 @@ public class Controller {
                                String nodeId,
                                String formatFamily,
                                String qualitySuiteId,
-                               DateTime requestDateTime) throws java.io.IOException, MetadigException {
+                               DateTime requestDateTime) throws java.io.IOException {
 
         log.info("Processing scorer request, collection: " + collectionId + ", suite: " + qualitySuiteId);
         ScorerQueueEntry qEntry = null;
         byte[] message = null;
-        String authToken = null;
 
-        if(!isPortalActive(collectionId)) {
-            log.info("[x} Skipping Scorer request for inactive portal, collectionld: '" + qEntry.getCollectionId() + "'" + ", quality suite " + qualitySuiteId + ", nodeId: " + nodeId + ", formatFamily: " + formatFamily);
-        } else {
+        /**
+         * Bookkeeper checking can be disabled via a metadig-engine configuration parameter. The primary use case for
+         * doing this is for testing purposes, otherwise checking should always be enabled.
+         */
+        if (bookkeeperEnabled) {
+            try {
+                if (!isPortalActive(collectionId)) {
+                    log.info("Skipping Scorer request for inactive portal with pid: '" + collectionId + "'" + ", quality suite " + qualitySuiteId);
+                    return;
+                }
+            } catch (MetadigException me) {
+                log.error("Unable to contact DataONE bookkeeper: "  + me.getMessage()
+                        + "\nSkipping Scorer request for portal with pid: '" + collectionId
+                        + "'" + ", quality suite " + qualitySuiteId);
+                return;
+            }
+
             qEntry = new ScorerQueueEntry(collectionId, qualitySuiteId, nodeId, formatFamily, requestDateTime);
 
             ByteArrayOutputStream bos = new ByteArrayOutputStream();
@@ -450,6 +458,10 @@ public class Controller {
 
             this.writeInProcessChannel(message, SCORER_ROUTING_KEY);
             log.info(" [x] Queued Scorer request for collectionld: '" + qEntry.getCollectionId() + "'" + ", quality suite " + qualitySuiteId + ", nodeId: " + nodeId + ", formatFamily: " + formatFamily);
+        } else {
+            log.info("Skipping Scorer request for portal, collectionld: '" + collectionId
+                    + "'" + ", quality suite " + qualitySuiteId
+            + "\n as DataONE bookkeeper service is disabled via metadig-engine configuration.");
         }
     }
 

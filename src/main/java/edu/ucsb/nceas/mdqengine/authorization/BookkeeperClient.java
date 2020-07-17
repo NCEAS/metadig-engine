@@ -1,6 +1,7 @@
-package edu.ucsb.nceas.mdqengine.authentication;
+package edu.ucsb.nceas.mdqengine.authorization;
 
 import edu.ucsb.nceas.mdqengine.MDQconfig;
+import edu.ucsb.nceas.mdqengine.authentication.DataONE;
 import edu.ucsb.nceas.mdqengine.exception.MetadigException;
 import org.apache.commons.configuration2.ex.ConfigurationException;
 import org.apache.commons.logging.Log;
@@ -24,7 +25,6 @@ public class BookkeeperClient {
     private static BookkeeperClient instance;
     public static Log log = LogFactory.getLog(DataONE.class);
     private String bookkeeperURL = null;
-    private Boolean bookkeeperEnabled = true;
     private String bookkeeperAuthToken = null;
 
     private BookkeeperClient () {
@@ -57,18 +57,10 @@ public class BookkeeperClient {
 
         try {
             bookkeeperURL = MDQconfig.readConfigParam("bookkeeper.url");
-            bookkeeperEnabled = new Boolean(MDQconfig.readConfigParam("bookkeeper.enabled"));
             bookkeeperAuthToken  = MDQconfig.readConfigParam("bookkeeper.authToken");
         } catch (ConfigurationException | IOException e) {
             throw new MetadigException("Unable to initialize DataONE bookkeeper client: " + e.getMessage());
         }
-    }
-
-    /**
-     * Get the value that indicates whether bookkeeper quota/usage checking is enabled.
-     */
-    public Boolean getBookkeeperEnabled() {
-         return(this.bookkeeperEnabled);
     }
 
     /**
@@ -102,8 +94,6 @@ public class BookkeeperClient {
             }
         }
 
-        // Is bookkeeper authentication/checking enabled?
-        log.debug("bookkeeper checking is enabled.");
         log.debug("Using serviceURL: " + serviceURL);
         HttpGet httpGet = new HttpGet(serviceURL);
 

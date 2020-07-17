@@ -35,6 +35,7 @@ public static Log log = LogFactory.getLog(DataONE.class);
             Subject subject = new Subject();
             subject.setValue(subjectId);
             session.setSubject(subject);
+            log.debug("Set session subjectId to: " + session.getSubject().getValue());
         }
 
         return session;
