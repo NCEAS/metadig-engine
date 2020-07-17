@@ -56,7 +56,8 @@ create TABLE filestore (
   media_type TEXT not NULL,
   alt_filename TEXT not NULL,
   CONSTRAINT file_id_pk PRIMARY KEY (file_id),
-  CONSTRAINT all_properties_fk UNIQUE (pid, suite_id, node_id, format_filter, storage_type, media_type, alt_filename)
+  -- CONSTRAINT all_properties_fk UNIQUE (pid, suite_id, node_id, format_filter, storage_type, media_type, alt_filename)
+  CONSTRAINT all_properties_fk UNIQUE (pid, storage_type, media_type, alt_filename)
 );
 
 alter table filestore owner to metadig;
