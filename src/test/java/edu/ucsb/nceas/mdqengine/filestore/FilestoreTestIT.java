@@ -42,7 +42,7 @@ public class FilestoreTestIT {
 
         MetadigFile mdFile = new MetadigFile();
         mdFile.setCreationDatetime(DateTime.now());
-        mdFile.setCollectionId("1234");
+        mdFile.setPid("1234");
         mdFile.setSuiteId("FAIR.suite.1");
         mdFile.setNodeId("urn:node:KNB");
         mdFile.setStorageType(StorageType.TMP.toString());

@@ -1,6 +1,6 @@
 package edu.ucsb.nceas.mdqengine.bookkeeper;
 
-import edu.ucsb.nceas.mdqengine.authentication.BookkeeperClient;
+import edu.ucsb.nceas.mdqengine.authorization.BookkeeperClient;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.dataone.bookkeeper.api.Usage;

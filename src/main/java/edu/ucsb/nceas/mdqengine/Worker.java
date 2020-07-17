@@ -242,7 +242,6 @@ public class Worker {
                 /* Once the quality report has been created and saved to persistent storage,
                    it can be added to the Solr index */
                 if(!failFast) {
-                    MDQStore dbstore = null;
                     log.debug("Indexing report");
                     try {
                         startTimeIndexing = System.currentTimeMillis();

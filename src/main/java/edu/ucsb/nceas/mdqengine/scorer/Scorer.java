@@ -512,6 +512,7 @@ public class Scorer {
         int resultCount = 0;
         startPos = 0;
         countRequested = 1000;
+
         // Now get the pids associated with the collection by sending the collectionQuery to the DataONE CN
         // The collectionQuery is always evaluated on the CN, as portals should have all DataONE data available to them.
         // One query can return many documents, so use the paging mechanism to make sure we retrieve them all.
@@ -530,23 +531,17 @@ public class Scorer {
         // Loop through the Solr result. As the result may be large, page through the results, accumulating
         // the pids returned
 
-        // Determine where the collectionQuery should be evaluated. When the DataONE quata service is ready, query it
-        // for this collection to determine if the collectionQuery should be sent to the CN. Since this service is
-        // not ready, send the query to the same serviceUrl, subjectId, authToken which was used to harvest the
-        // collection document and obtain the collectionQuery string
+        /** The collectionQuery is evaluated on the same node that the portal document was harvested from (via the
+          * DataONE listObjects service. This node could either be an MN or CN.
+         */
 
-        // When the service is available, use the DataONE quota service to set these variable conditionally
-        String evalServiceUrl = serviceUrl;
-        String evalSubjectId = subjectId;
-        String evalAuthToken = authToken;
-
-        log.debug("Sending collectionQuery to Solr using subjectId: " + evalSubjectId + ", servicerUrl: " + evalServiceUrl);
-        log.trace("query string: " + queryStr);
+        log.debug("Sending collectionQuery to Solr using subjectId: " + subjectId + ", servicerUrl: " + serviceUrl);
+        log.debug("query string: " + queryStr);
 
         do {
             //TODO: check that a result was returned
             // Note: the collectionQuery is always evaluated on the CN, so that the entire DataONE network is queried.
-            xmldoc = queryD1Solr(queryStr, evalServiceUrl, startPos, countRequested, evalSubjectId, evalAuthToken);
+            xmldoc = queryD1Solr(queryStr, serviceUrl, startPos, countRequested, subjectId, authToken);
             if(xmldoc == null) {
                 log.info("no values returned from query");
                 break;
@@ -802,12 +797,6 @@ public class Scorer {
         MultipartRestClient mrc = null;
         // Polymorphism doesn't work with D1 node classes, so have to use the derived classes
         MultipartD1Node d1Node = null;
-//
-//        Subject subject = new Subject();
-//        if(subjectId != null && !subjectId.isEmpty()) {
-//            subject.setValue(subjectId);
-//        }
-
         Session session = DataONE.getSession(subjectId, authToken);
 
         // Add the start and count, if pagination is being used
@@ -818,6 +807,7 @@ public class Scorer {
 
         try {
             d1Node = getMultipartD1Node(session, serviceUrl);
+            log.debug("Created MultipartD1Node: " + d1Node.toString());
         } catch (Exception ex) {
             log.error("Unable to create MultipartD1Node for Solr query");
             metadigException = new MetadigProcessException("Unable to create multipart node client to query DataONE solr: " + ex.getMessage());
@@ -1031,11 +1021,6 @@ public class Scorer {
         MetadigProcessException metadigException = null;
 
         SubjectInfo subjectInfo = null;
-        //Subject requestingSubject = new Subject();
-//        if(subjectId != null && ! subjectId.isEmpty()) {
-//            requestingSubject.setValue(subjectId);
-//        }
-
         Session session = DataONE.getSession(subjectId, authToken);
 
         // Identity node as either a CN or MN based on the serviceUrl
@@ -1100,7 +1085,7 @@ public class Scorer {
             log.debug("creating cn MultipartMNode" + ", subjectId: " + session.getSubject().getValue());
             d1Node = new MultipartCNode(mrc, serviceUrl, session);
         } else {
-            log.debug("creating mn MultipartMNode" + " , subjectId: " + session.getSubject().getValue());
+            log.debug("creating mn MultipartMNode" + ", subjectId: " + session.getSubject().getValue());
             d1Node = new MultipartMNode(mrc, serviceUrl, session);
         }
         return d1Node;
