@@ -22,8 +22,7 @@
         <moxy.version>2.6.3</moxy.version>
 		<d1_cn_index_processor_version>2.4.0-SNAPSHOT</d1_cn_index_processor_version>
 		<d1_cn_index_common_version>2.4.0-SNAPSHOT</d1_cn_index_common_version>
-		<!-- Have to use a very old version of Spring in order to stay compatible with
-		    d1_cn_index_processor -->
+		<!-- Have to use a very old version of Spring in order to stay compatible with d1_cn_index_processor -->
 		<!-- <spring.version>4.3.8.RELEASE</spring.version> -->
 		<spring.version>3.1.4.RELEASE</spring.version>
         <!-- <docker.registry>docker.io</docker.registry> -->
@@ -41,10 +40,84 @@
 		<url>http://nceas.ucsb.edu</url>
 	</organization>
 	<dependencies>
+		<!-- https://mvnrepository.com/artifact/commons-logging/commons-logging -->
+		<dependency>
+			<groupId>commons-logging</groupId>
+			<artifactId>commons-logging</artifactId>
+			<version>1.2</version>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/org.apache.logging.log4j/log4j-core -->
+		<dependency>
+			<groupId>org.apache.logging.log4j</groupId>
+			<artifactId>log4j-core</artifactId>
+			<version>2.13.3</version>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/org.apache.logging.log4j/log4j-api -->
+		<dependency>
+			<groupId>org.apache.logging.log4j</groupId>
+			<artifactId>log4j-api</artifactId>
+			<version>2.13.3</version>
+		</dependency>
+		<!--<dependency>-->
+			<!--<groupId>org.apache.logging.log4j</groupId>-->
+			<!--<artifactId>log4j-api</artifactId>-->
+			<!--<version>2.13.3</version>-->
+		<!--</dependency>-->
+		<!--<dependency>-->
+			<!--<groupId>org.apache.logging.log4j</groupId>-->
+			<!--<artifactId>log4j-core</artifactId>-->
+			<!--<version>2.13.3</version>-->
+		<!--</dependency>-->
 		<dependency>
 			<groupId>org.dataone</groupId>
 			<artifactId>bookkeeper-client</artifactId>
 			<version>${bookkeeper.version}</version>
+			<exclusions>
+				<exclusion>
+					<groupId>io.dropwizard</groupId>
+					<artifactId>dropwizard-core</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>io.dropwizard</groupId>
+					<artifactId>dropwizard-json-logging</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>io.dropwizard</groupId>
+					<artifactId>dropwizard-testing</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>io.dropwizard</groupId>
+					<artifactId>dropwizard-jdbi3</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>io.dropwizard</groupId>
+					<artifactId>dropwizard-auth</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.postgresql</groupId>
+					<artifactId>postgresql</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>com.opentable.components</groupId>
+					<artifactId>otj-pg-embedded</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>com.opentable.components</groupId>
+					<artifactId>otj-pg-embedded</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.flywaydb</groupId>
+					<artifactId>flyway-maven-plugin</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.mockito</groupId>
+					<artifactId>mockito-core</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.dataone</groupId>
+					<artifactId>d1_libclient_java</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>
