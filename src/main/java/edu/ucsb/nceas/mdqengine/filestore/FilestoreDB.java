@@ -106,8 +106,7 @@ public class FilestoreDB {
                 stmt.setString(1, storageType);
                 stmt.setString(2, altFilename);
             } else {
-                sql = "select * from filestore where pid = ? and suite_id = ?" +
-                        " and node_id = ? and format_filter = ? and storage_type = ? and media_type = ?";
+                sql = "select * from filestore where pid = ? and storage_type = ? and media_type = ?";
                 stmt = conn.prepareStatement(sql);
                 stmt.setString(1, pid);
                 stmt.setString(2, suiteId);
