@@ -15,6 +15,7 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.dataone.bookkeeper.api.Usage;
 import org.dataone.bookkeeper.api.UsageList;
+import org.dataone.bookkeeper.api.UsageStatus;
 
 import java.io.*;
 import java.io.IOException;
@@ -148,6 +149,80 @@ public class BookkeeperClient {
             }
         } catch (IOException ioe) {
             msg =  "Error getting bookkeeper usage: " + ioe.getMessage();
+            log.error(msg);
+            throw(new MetadigException(msg));
+        } finally {
+            try {
+                httpClient.close();
+            } catch (IOException e) {
+                log.warn("Error closing connection to bookkeeper client: " + e.getMessage());
+            }
+        }
+    }
+    /**
+     * Retrieve a bookkeeper quota usage usage
+     * @param instanceId the usage instance identifier
+     * @param quotaType the usage quota type ("portal" | "storage" | ...)
+     * @return
+     * @throws MetadigException
+     */
+    public UsageStatus getUsageStatus(String instanceId, String quotaType) throws MetadigException {
+        // Check the portal quota with DataONE bookkeeper
+        String serviceURL  = this.bookkeeperURL;
+        ObjectMapper objectMapper = new ObjectMapper();
+        CloseableHttpClient httpClient = HttpClients.createDefault();
+
+        log.debug("Getting bookkeeper portal Usage for quotaType, instanceId: " +
+            quotaType + ", " + instanceId);
+        serviceURL += "/usages/status?quotaType=" + quotaType + "&instanceId=" + String.valueOf(instanceId);
+
+        log.debug("Using serviceURL: " + serviceURL);
+        HttpGet httpGet = new HttpGet(serviceURL);
+
+        String msg = null;
+        // Send a request to the bookkeeper service for the quota related to this portal
+        try {
+            httpGet.addHeader("Accept", "application/json");
+
+            log.debug("Submitting request to DataONE bookkeeper: " + serviceURL);
+            // send the request to bookkeeper
+            CloseableHttpResponse httpResponse = httpClient.execute(httpGet);
+            // Delete the token
+
+            // Read the response from bookkeeper
+            StringBuffer response = new StringBuffer();
+            int statusCode = httpResponse.getStatusLine().getStatusCode();
+
+            // If the HTTP request returned without an error, convert the result to a JSON string,
+            // then deserialize to a Java object so that we can easily inspect it.
+            if(statusCode == HttpStatus.SC_OK) {
+                BufferedReader reader = new BufferedReader(new InputStreamReader(httpResponse.getEntity().getContent()));
+                String inputLine;
+                response = new StringBuffer();
+
+                while ((inputLine = reader.readLine()) != null) {
+                    response.append(inputLine);
+                }
+
+                UsageStatus usageStatus = objectMapper.readValue(response.toString(), UsageStatus.class);
+                if (usageStatus == null) {
+                    msg =  "No usage status returned.";
+                    log.error(msg);
+                    throw(new MetadigException(msg));
+                }
+                log.debug("Bookkeeper Usage status found for portal "  + instanceId + usageStatus.getStatus());
+                return(usageStatus);
+            } else {
+                log.debug("Getting bookkeeper portal usage status for quotaType, instanceId, status: " +
+                        quotaType + ", " + instanceId);
+                msg =  "HTTP error status getting bookkeeper usage status for quotaType, instanceId:"
+                        + quotaType + "," + instanceId;
+                        httpResponse.getStatusLine().getReasonPhrase();
+                log.error(msg);
+                throw(new MetadigException(msg));
+            }
+        } catch (IOException ioe) {
+            msg =  "Error getting bookkeeper usage status: " + ioe.getMessage();
             log.error(msg);
             throw(new MetadigException(msg));
         } finally {

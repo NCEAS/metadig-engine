@@ -8,6 +8,7 @@ import org.apache.commons.configuration2.ex.ConfigurationException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.dataone.bookkeeper.api.Usage;
+import org.dataone.bookkeeper.api.UsageStatus;
 import org.dataone.exceptions.MarshallingException;
 import org.dataone.service.types.v2.SystemMetadata;
 import org.dataone.service.types.v2.TypeFactory;
@@ -18,7 +19,6 @@ import java.io.*;
 import java.lang.reflect.InvocationTargetException;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -72,6 +72,8 @@ public class Controller {
 
     public static void main(String[] argv) throws Exception {
 
+        //System.setProperty("lo4j2.debug", "true");
+        //System.setProperty("log4j.configurationFile", "log4j2.xml");
         Controller metadigCtrl = Controller.getInstance();
         metadigCtrl.start();
         if (metadigCtrl.getIsStarted()) {
@@ -292,25 +294,24 @@ public class Controller {
     // Check the portal quota with DataONE bookkeaper
     public Boolean isPortalActive(String collectionId) throws MetadigException {
         // Check the portal quota with DataONE bookkeeper
-        log.debug("Checking bookkeeper portal Usage for collection: " + collectionId);
+        log.info("Checking bookkeeper portal Usage for collection: " + collectionId);
         String msg = null;
         BookkeeperClient bkClient = BookkeeperClient.getInstance();
         List<Usage> usages = null;
-        Usage usage = null;
-        List<String> subjects = new ArrayList<String>();
+        UsageStatus usageStatus = null;
         try {
             // Set status = null so that any usage will be returned.
             String status = null;
-            usages = bkClient.listUsages(0, collectionId, "portal", status , subjects);
-            usage = usages.get(0);
-            log.debug("Usage for portal " + collectionId + " is " + usage.getStatus());
-            if(usage.getStatus().compareToIgnoreCase("active") == 0) {
+            //usages = bkClient.listUsages(0, collectionId, "portal", status , subjects);
+            usageStatus = bkClient.getUsageStatus(collectionId, "portal");
+            log.info("Usage status for portal " + collectionId + " is " + usageStatus.getStatus());
+            if(usageStatus.getStatus().compareToIgnoreCase("active") == 0) {
                 return true;
             } else {
                 return false;
             }
         } catch (Exception e) {
-            msg = "Unable to get usage from bookkeeper for collection id: " + collectionId;
+            msg = "Unable to get usage status from bookkeeper for collection id: " + collectionId;
             throw(new MetadigException(msg));
         }
     };
