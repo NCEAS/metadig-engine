@@ -8,13 +8,19 @@ debug=1
 # The user managing k8s
 user=metadig
 # k8s namespace that we are managing
-ns=metadig
+#k8sns=metadig
+k8sns=nginx-ingress
 
 # Save current LE cert modified time so we can see if certbot delivers
 # new certs
-host=`hostname -f`
-CA_DIR=/etc/letsencrypt/live/${host}
-certFilename=${CA_DIR}/cert.pem
+domain=`hostname -f`
+damainDir=$domain
+domain=api.test.dataone.org,${domain}
+CA_DIR=/etc/letsencrypt/live/${domainDir}
+# Use fullchain.pem, which includes the intermediate certificate, that will allow TLS
+# client authentication, for those clients that don't know about LE certs
+#certFilename=${CA_DIR}/cert.pem
+certFilename=${CA_DIR}/fullchain.pem
 privkeyFilename=${CA_DIR}/privkey.pem
 certModTime=`stat -c %Y ${certFilename}`
 
@@ -28,7 +34,8 @@ certModTime=`stat -c %Y ${certFilename}`
 # the IP that the certbot request will come from.
 ufw allow 80
 #sudo ufw allow from ${certbotIP} to any port 80
-/usr/bin/certbot renew > /var/log/letsencrypt/letsencrypt-renew.log 2>&1
+#/usr/bin/certbot renew -d ${domain} > /var/log/letsencrypt/letsencrypt-renew.log 2>&1
+/usr/bin/certbot renew -d ${domain} > /var/log/letsencrypt/letsencrypt-renew.log 2>&1
 # Close the port as soon as certbot is done
 ufw delete allow 80
 #sudo ufw delete allow from ${certbotIP} to any port 80
@@ -55,7 +62,8 @@ if (( $certModTimeNew > $certModTime )); then
   su ${user} -c "kubectl get secret ${k8sns}-tls-cert --namespace ${k8sns}"
   su ${user} -c "kubectl delete secret ${k8sns}-tls-cert --namespace ${k8sns}"
   #sudo kubectl create secret tls ${k8sns}-tls-cert --key ${CA_DIR}/privkey.pem --cert ${CA_DIR}/cert.pem --namespace ${k8sns}
-  su ${user} -c "kubectl create secret tls ${k8sns}-tls-cert --key ~${user}/tmp/privkey.pem --cert ~${user}/tmp/cert.pem --namespace ${k8sns}"
+  #su ${user} -c "kubectl create secret tls ${k8sns}-tls-cert --key ~${user}/tmp/privkey.pem --cert ~${user}/tmp/cert.pem --namespace ${k8sns}"
+  su ${user} -c "kubectl create secret tls ${k8sns}-tls-cert --key ~${user}/tmp/privkey.pem --cert ~${user}/tmp/chain.pem --namespace ${k8sns}"
   #su metadig -c "kubectl get secret metadig-tls-cert --namespace metadig"
   rm -f ~${user}/tmp/privkey.pem ~${user}/tmp/cert.pem
 
