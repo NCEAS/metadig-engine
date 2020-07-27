@@ -414,7 +414,7 @@ public class Controller {
      * create the graph from them.
      * </p>
      *
-     * @param collectionId the DataONE collection identifier
+     * @param collectionId the DataONE collection identifier (the portal seriesId)
      * @param nodeId the node identifier the collection resides on
      * @param formatFamily a string representing the DataONE formats to create score for
      * @param qualitySuiteId the quality suite used to create the score graph
@@ -429,7 +429,8 @@ public class Controller {
                                String qualitySuiteId,
                                DateTime requestDateTime) throws java.io.IOException {
 
-        log.info("Processing scorer request, collection: " + collectionId + ", suite: " + qualitySuiteId);
+        log.info("Processing scorer request, collection: " + collectionId + ", suite: " + qualitySuiteId
+                    + "nodeId: " + nodeId + ", formatFamily: " + formatFamily);
         ScorerQueueEntry qEntry = null;
         byte[] message = null;
 
@@ -439,31 +440,34 @@ public class Controller {
          */
         if (bookkeeperEnabled) {
             try {
+                // Bookkeeper creates a portal usage with the portal sid as the 'instanceId', however
                 if (!isPortalActive(collectionId)) {
                     log.info("Skipping Scorer request for inactive portal with pid: '" + collectionId + "'" + ", quality suite " + qualitySuiteId);
                     return;
+                } else {
+                    log.info("Bookkeeper check indicates portal for pid: " + collectionId + " is active.");
+                    log.info("Processing with Scorer request for inactive portal with pid: '" + collectionId + "'" + ", quality suite " + qualitySuiteId);
                 }
             } catch (MetadigException me) {
-                log.error("Unable to contact DataONE bookkeeper: "  + me.getMessage()
+                log.error("Unable to contact DataONE bookkeeper: " + me.getMessage()
                         + "\nSkipping Scorer request for portal with pid: '" + collectionId
                         + "'" + ", quality suite " + qualitySuiteId);
                 return;
             }
-
-            qEntry = new ScorerQueueEntry(collectionId, qualitySuiteId, nodeId, formatFamily, requestDateTime);
-
-            ByteArrayOutputStream bos = new ByteArrayOutputStream();
-            ObjectOutput out = new ObjectOutputStream(bos);
-            out.writeObject(qEntry);
-            message = bos.toByteArray();
-
-            this.writeInProcessChannel(message, SCORER_ROUTING_KEY);
-            log.info(" [x] Queued Scorer request for collectionld: '" + qEntry.getCollectionId() + "'" + ", quality suite " + qualitySuiteId + ", nodeId: " + nodeId + ", formatFamily: " + formatFamily);
         } else {
-            log.info("Skipping Scorer request for portal, collectionld: '" + collectionId
-                    + "'" + ", quality suite " + qualitySuiteId
-            + "\n as DataONE bookkeeper service is disabled via metadig-engine configuration.");
+            log.info("Bookkeeper quota checking is disabled, proceeding with Scorer request for portal, collectionld: '" + collectionId
+                    + "'" + ", quality suite " + qualitySuiteId);
         }
+
+        qEntry = new ScorerQueueEntry(collectionId, qualitySuiteId, nodeId, formatFamily, requestDateTime);
+
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        ObjectOutput out = new ObjectOutputStream(bos);
+        out.writeObject(qEntry);
+        message = bos.toByteArray();
+
+        this.writeInProcessChannel(message, SCORER_ROUTING_KEY);
+        log.info(" [x] Queued Scorer request for pid: '" + qEntry.getCollectionId() + "'" + ", quality suite " + qualitySuiteId + ", nodeId: " + nodeId + ", formatFamily: " + formatFamily);
     }
 
     /**
