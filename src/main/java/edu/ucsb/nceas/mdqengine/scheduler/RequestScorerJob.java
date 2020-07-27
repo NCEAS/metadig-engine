@@ -2,7 +2,7 @@ package edu.ucsb.nceas.mdqengine.scheduler;
 
 import edu.ucsb.nceas.mdqengine.Controller;
 import edu.ucsb.nceas.mdqengine.MDQconfig;
-import edu.ucsb.nceas.mdqengine.authentication.DataONE;
+import edu.ucsb.nceas.mdqengine.DataONE;
 import edu.ucsb.nceas.mdqengine.exception.MetadigStoreException;
 import edu.ucsb.nceas.mdqengine.model.Task;
 import edu.ucsb.nceas.mdqengine.store.DatabaseStore;
@@ -15,11 +15,11 @@ import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
-import org.dataone.client.auth.AuthTokenSession;
 import org.dataone.client.rest.DefaultHttpMultipartRestClient;
 import org.dataone.client.rest.MultipartRestClient;
 import org.dataone.client.v2.impl.MultipartCNode;
 import org.dataone.client.v2.impl.MultipartMNode;
+import org.dataone.service.types.v2.SystemMetadata;
 import org.dataone.service.types.v1.*;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
@@ -346,18 +346,18 @@ public class RequestScorerJob implements Job {
         try {
             // Even though MultipartMNode and MultipartCNode have the same parent class, their interfaces are differnt, so polymorphism
             // isn't happening here.
+            log.debug("session: " + session.getSubject().getValue());
+            log.debug("startDate: " + startDate);
+            log.debug("endDate: " + endDate);
+            log.debug("formatId: " + formatId);
+            log.debug("Identifier: " + identifier);
+            log.debug("startCount: " + startCount);
+            log.debug("countRequested: " + countRequested);
             if(isCN) {
                 log.debug("cnNode: " + cnNode);
-                log.debug("Listing objects for CN");
-                log.debug("session: " + session.getSubject().getValue());
-                log.debug("startDate: " + startDate);
-                log.debug("endDate: " + endDate);
-                log.debug("formatId: " + formatId);
-                log.debug("Identifier: " + identifier);
-                log.debug("startCount: " + startCount);
-                log.debug("countRequested: " + countRequested);
                 objList = cnNode.listObjects(session, startDate, endDate, formatId, nodeRef, identifier, startCount, countRequested);
             } else {
+                log.debug("mnNode: " + mnNode);
                 objList = mnNode.listObjects(session, startDate, endDate, formatId, identifier, replicaStatus, startCount, countRequested);
             }
             log.debug("Retrieved " + objList.getCount() + " pids");
@@ -391,10 +391,27 @@ public class RequestScorerJob implements Job {
                 // been updated (i.e. obsoletedBy, access) and the quality report and index contain
                 // sysmeta fields.
                 if(found) {
+                    // The DataONE listObjects service retuns the pid for each object, but does not return the seriesId,
+                    // so this has to be retrieved now, as Bookkeeper service and MetacatUI (when the graph is requested for
+                    // this portal) uses the sid, not the pid, so create and store the graph based on the sid.
                     //    if (!runExists(thisPid, suiteId, store)) {
+
+                    Identifier thisId = new Identifier();
+                    thisId.setValue(thisPid);
+
+                    org.dataone.service.types.v2.SystemMetadata sysmeta  = null;
+
+                    if(isCN) {
+                        sysmeta = cnNode.getSystemMetadata(session, thisId);
+                    } else {
+                        sysmeta = mnNode.getSystemMetadata(session, thisId);
+                    }
+
+                    String thisSeriesId = sysmeta.getSeriesId().getValue();
+
                     pidCount = pidCount++;
-                    pids.add(thisPid);
-                    log.info("adding pid to process: " + thisPid + ", formatId: " + thisFormatId);
+                    pids.add(thisSeriesId);
+                    log.info("adding seriesId to process: " + thisSeriesId + ", formatId: " + thisFormatId);
                     //    }
                 }
             }
