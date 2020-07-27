@@ -9,7 +9,6 @@ import org.apache.commons.logging.LogFactory;
 
 import edu.ucsb.nceas.mdqengine.model.*;
 import org.joda.time.DateTime;
-import sun.tools.tree.NewArrayExpression;
 
 import java.io.IOException;
 import java.sql.*;

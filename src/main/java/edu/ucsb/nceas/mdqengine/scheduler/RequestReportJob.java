@@ -1,7 +1,7 @@
 package edu.ucsb.nceas.mdqengine.scheduler;
 
 import edu.ucsb.nceas.mdqengine.MDQconfig;
-import edu.ucsb.nceas.mdqengine.authentication.DataONE;
+import edu.ucsb.nceas.mdqengine.DataONE;
 import edu.ucsb.nceas.mdqengine.exception.MetadigStoreException;
 import edu.ucsb.nceas.mdqengine.model.Run;
 import edu.ucsb.nceas.mdqengine.model.Task;
@@ -399,7 +399,6 @@ public class RequestReportJob implements Job {
         ListResult result = new ListResult();
         // Set the count for the number of desired pids filtered from the total result set
         result.setFilteredResultCount(pidCount);
-        // Set the count for the total number of pids returned from DataONE (all formatIds) for this query
         // Set the count for the total number of pids returned from DataONE (all formatIds) for this query
         result.setTotalResultCount(objList.getCount());
         result.setResult(pids);

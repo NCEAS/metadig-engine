@@ -1,7 +1,6 @@
 package edu.ucsb.nceas.mdqengine.authorization;
 
 import edu.ucsb.nceas.mdqengine.MDQconfig;
-import edu.ucsb.nceas.mdqengine.authentication.DataONE;
 import edu.ucsb.nceas.mdqengine.exception.MetadigException;
 import org.apache.commons.configuration2.ex.ConfigurationException;
 import org.apache.commons.logging.Log;
@@ -24,7 +23,7 @@ import java.util.List;
 public class BookkeeperClient {
 
     private static BookkeeperClient instance;
-    public static Log log = LogFactory.getLog(DataONE.class);
+    public static Log log = LogFactory.getLog(BookkeeperClient.class);
     private String bookkeeperURL = null;
     private String bookkeeperAuthToken = null;
 
