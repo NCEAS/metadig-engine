@@ -6,9 +6,7 @@ import edu.ucsb.nceas.mdqengine.exception.MetadigProcessException;
 import org.dataone.client.auth.AuthTokenSession;
 import org.dataone.client.rest.MultipartRestClient;
 import org.dataone.client.v2.impl.MultipartD1Node;
-import org.dataone.service.types.v1.Identifier;
 import org.dataone.service.types.v1.Session;
-import org.dataone.service.types.v1.SystemMetadata;
 import edu.ucsb.nceas.mdqengine.exception.MetadigException;
 import org.dataone.client.rest.DefaultHttpMultipartRestClient;
 import org.dataone.client.v2.impl.MultipartCNode;
@@ -117,18 +115,20 @@ public class DataONE {
      * Send a query to the DataONE Query Service , using the DataONE CN or MN API
      *
      * @param queryStr the query string to pass to the Solr server
-     * @param serviceUrl the service URL for the DataONE CN or MN
      * @param startPos the start of the query result to return, if query pagination is being used
      * @param countRequested the number of results to return
      * @return an XML document containing the query result
      * @throws Exception
      */
-    public static Document querySolr(String queryStr, String serviceUrl, int startPos, int countRequested, String subjectId, String authToken) throws MetadigProcessException {
+    //public static Document querySolr(String queryStr, int startPos, int countRequested, MultipartCNode cnNode,
+    //                                 MultipartMNode mnNode, Boolean isCN,
+    //                                 Session session) throws MetadigProcessException {
+    public static Document querySolr(String queryStr, int startPos, int countRequested, MultipartD1Node d1Node,
+                Session session) throws MetadigProcessException {
 
-        MultipartRestClient mrc = null;
-        // Polymorphism doesn't work with D1 node classes, so have to use the derived classes
-        MultipartD1Node d1Node = null;
-        Session session = DataONE.getSession(subjectId, authToken);
+//        // Polymorphism doesn't work with D1 node classes, so have to use the derived classes
+//        MultipartD1Node d1Node = null;
+//        Session session = DataONE.getSession(subjectId, authToken);
 
         // Add the start and count, if pagination is being used
         queryStr = queryStr + "&start=" + startPos + "&rows=" + countRequested;
@@ -136,19 +136,34 @@ public class DataONE {
         InputStream qis = null;
         MetadigProcessException metadigException = null;
 
-        try {
-            d1Node = getMultipartD1Node(session, serviceUrl);
-            log.debug("Created MultipartD1Node: " + d1Node.toString());
-        } catch (Exception ex) {
-            log.error("Unable to create MultipartD1Node for Solr query");
-            metadigException = new MetadigProcessException("Unable to create multipart node client to query DataONE solr: " + ex.getMessage());
-            metadigException.initCause(ex);
-            throw metadigException;
-        }
+//        try {
+//            d1Node = getMultipartD1Node(session, serviceUrl);
+//            log.debug("Created MultipartD1Node, nodeId: " + d1Node.getNodeId().getValue());
+//        } catch (Exception ex) {
+//            log.error("Unable to create MultipartD1Node for Solr query");
+//            metadigException = new MetadigProcessException("Unable to create multipart node client to query DataONE solr: " + ex.getMessage());
+//            metadigException.initCause(ex);
+//            throw metadigException;
+//        }
 
+        log.debug("Sending query: " + queryStr);
         // Send a query to a CN or MN
+//        try {
+//            if(isCN) {
+//                qis = cnNode.query(session, "solr", queryStr);
+//            } else {
+//                qis = mnNode.query(session, "solr", queryStr);
+//            }
+//            log.debug("Sent query");
+//        } catch (Exception e) {
+//            log.error("Error retrieving pids: " + e.getMessage());
+//            metadigException = new MetadigProcessException("Unable to query dataone node: " + e.getMessage());
+//            metadigException.initCause(e);
+//            throw metadigException;
+//        }
         try {
             qis = d1Node.query(session, "solr", queryStr);
+            log.debug("Sent query");
         } catch (Exception e) {
             log.error("Error retrieving pids: " + e.getMessage());
             metadigException = new MetadigProcessException("Unable to query dataone node: " + e.getMessage());
@@ -156,16 +171,19 @@ public class DataONE {
             throw metadigException;
         }
 
+        log.debug("Creating xml doc with results");
         Document xmldoc = null;
         DocumentBuilder builder = null;
 
         try {
             // If results were returned, create an XML document from them
-            if (qis.available() == 1) {
+            log.debug("qis available: " + qis.available());
+            if (qis.available() > 0) {
                 try {
                     DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
                     builder = factory.newDocumentBuilder();
                     xmldoc = builder.parse(new InputSource(qis));
+                    log.debug("Created xml doc: " + xmldoc.toString());
                 } catch (Exception e) {
                     log.error("Unable to create w3c Document from input stream", e);
                     e.printStackTrace();
@@ -177,10 +195,13 @@ public class DataONE {
                 qis.close();
             }
         } catch (IOException ioe) {
+            log.debug("IO exception: " + ioe.getMessage());
             metadigException = new MetadigProcessException("Unable prepare query result xml document: " + ioe.getMessage());
             metadigException.initCause(ioe);
             throw metadigException;
         }
+
+        log.debug("Created results xml doc");
 
         return xmldoc;
     }
@@ -215,7 +236,7 @@ public class DataONE {
         return session;
     }
 
-    protected static Boolean isCN(String serviceUrl) {
+    public static Boolean isCN(String serviceUrl) {
 
         Boolean isCN = false;
         // Identity node as either a CN or MN based on the serviceUrl
