@@ -416,7 +416,7 @@ public class Controller {
      *
      * @param collectionId the DataONE collection identifier (the portal seriesId)
      * @param nodeId the node identifier the collection resides on
-     * @param formatFamily a string representing the DataONE formats to create score for
+     * @param formatFamily a string representing the DataONE formats to create score for ("eml", "iso"), optional
      * @param qualitySuiteId the quality suite used to create the score graph
      * @param requestDateTime the datetime that the request was made
      *
@@ -425,12 +425,12 @@ public class Controller {
      */
     public void processScorerRequest(String collectionId,
                                String nodeId,
-                               String formatFamily,
+                               String formatFamily, // Optional format filter, if creating a graph for a submit of metadata formats ("eml", "iso")
                                String qualitySuiteId,
                                DateTime requestDateTime) throws java.io.IOException {
 
         log.info("Processing scorer request, collection: " + collectionId + ", suite: " + qualitySuiteId
-                    + "nodeId: " + nodeId + ", formatFamily: " + formatFamily);
+                    + ", nodeId: " + nodeId + ", formatFamily: " + formatFamily);
         ScorerQueueEntry qEntry = null;
         byte[] message = null;
 
@@ -467,7 +467,7 @@ public class Controller {
         message = bos.toByteArray();
 
         this.writeInProcessChannel(message, SCORER_ROUTING_KEY);
-        log.info(" [x] Queued Scorer request for pid: '" + qEntry.getCollectionId() + "'" + ", quality suite " + qualitySuiteId + ", nodeId: " + nodeId + ", formatFamily: " + formatFamily);
+        log.info(" [x] Queued Scorer request for id: '" + qEntry.getCollectionId() + "'" + ", quality suite " + qualitySuiteId + ", nodeId: " + nodeId + ", formatFamily: " + formatFamily);
     }
 
     /**

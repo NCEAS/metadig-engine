@@ -20,8 +20,11 @@ import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.beans.BindingException;
 import org.apache.solr.client.solrj.impl.HttpSolrClient;
 import org.apache.solr.client.solrj.response.QueryResponse;
+import org.dataone.client.rest.DefaultHttpMultipartRestClient;
 import org.dataone.client.rest.MultipartRestClient;
+import org.dataone.client.v2.impl.MultipartCNode;
 import org.dataone.client.v2.impl.MultipartD1Node; // Don't include org.dataone.client.rest.MultipartD1Node (this is what IDEA selects)
+import org.dataone.client.v2.impl.MultipartMNode;
 import org.dataone.service.types.v1.Session;
 import org.dataone.service.types.v1.Subject;
 import org.dataone.service.types.v1.Group;
@@ -29,6 +32,7 @@ import org.dataone.service.types.v1.SubjectInfo;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
+import org.quartz.JobExecutionException;
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
 
@@ -156,6 +160,9 @@ public class Scorer {
                 String nodeServiceUrl = null;
                 String label = null;
                 String title = null;
+                MultipartRestClient mrc = null;
+                MultipartMNode mnNode = null;
+                MultipartCNode cnNode = null;
 
                 //long startTime = System.nanoTime();
                 startTimeProcessing = System.currentTimeMillis();
@@ -199,6 +206,7 @@ public class Scorer {
                 }
                 log.debug("nodeId: " + nodeId);
 
+
                 label: try {
                     MDQconfig cfg = new MDQconfig();
                     // Pids associated with a collection, based on query results using 'collectionQuery' field in solr.
@@ -224,6 +232,43 @@ public class Scorer {
                     // If creating a graph for a collection, get the set of pids associated with the collection.
                     // Only scores for these pids will be included in the graph.
 
+                    try {
+                        mrc = new DefaultHttpMultipartRestClient();
+                    } catch (Exception e) {
+                        log.error("Error creating rest client: " + e.getMessage());
+                        JobExecutionException jee = new JobExecutionException(e);
+                        jee.setRefireImmediately(false);
+                        throw jee;
+                    }
+
+                    Session session = DataONE.getSession(subjectId, authToken);
+
+                    // Don't know node type yet from the id, so have to manually check if it's a CN
+                    Boolean isCN = DataONE.isCN(nodeServiceUrl);
+
+                    MultipartD1Node d1Node = null;
+                    if(isCN) {
+                        //cnNode = new MultipartCNode(mrc, nodeServiceUrl, session);
+                        d1Node = new MultipartCNode(mrc, nodeServiceUrl, session);
+                        log.debug("Created cnNode for serviceUrl: " + nodeServiceUrl);
+                    } else {
+                        //mnNode = new MultipartMNode(mrc, nodeServiceUrl, session);
+                        d1Node = new MultipartMNode(mrc, nodeServiceUrl, session);
+                        log.debug("Created mnNode for serviceUrl: " + nodeServiceUrl);
+                    }
+//
+//                    Session session = DataONE.getSession(subjectId, authToken);
+//
+//                    // Don't know node type yet from the id, so have to manually check if it's a CN
+//                    Boolean isCN = DataONE.isCN(nodeServiceUrl);
+//                    if(isCN) {
+//                        cnNode = new MultipartCNode(mrc, nodeServiceUrl, session);
+//                        log.debug("Created cnNode for serviceUrl: " + nodeServiceUrl);
+//                    } else {
+//                        mnNode = new MultipartMNode(mrc, nodeServiceUrl, session);
+//                        log.debug("Created mnNode for serviceUrl: " + nodeServiceUrl);
+//                    }
+
                     if (collectionId != null && !collectionId.isEmpty()) {
                         // If the nodeId is specified, use if to determine the values for authTokenName and subjectIdName,
                         // if those values are not defined
@@ -235,7 +280,8 @@ public class Scorer {
                         // Always use the CN subject id and authentication token from the configuration file, as
                         // requests that this method uses need CN subject privs
                         ScorerResult result = null;
-                        result = gfr.getCollectionPids(collectionId, nodeServiceUrl, subjectId, authToken);
+                        //result = gfr.getCollectionPids(collectionId, cnNode, mnNode, isCN, session);
+                        result = gfr.getCollectionPids(collectionId, d1Node, session);
                         collectionPids = result.getResult();
                         label = result.getLabel();
                         // Don't continue if no pids (and thus scores) were found for this collection
@@ -346,12 +392,13 @@ public class Scorer {
      * which is usually an MN, but the collectionQuery is always evaluated on the CN</p>
      *
      * @param collectionId a DataONE project id to fetch scores for, e.g. urn:uuid:f137095e-4266-4474-aa5f-1e1fcaa5e2dc
-     * @param serviceUrl the DataONE service URL to obtain the collectionQuery string from
-     * @param subjectId the DataONE subjectId to use for the query, associated with the authentication token
-     * @param authToken the DataONE authentication token
+     * @param d1Node
+     * @param session
      * @return a List of quality scores fetched from Solr
      */
-    private ScorerResult getCollectionPids(String collectionId, String serviceUrl, String subjectId, String authToken) throws MetadigProcessException {
+    //private ScorerResult getCollectionPids(String collectionId, MultipartCNode cnNode, MultipartMNode mnNode,
+    //                                       Boolean isCN, Session session) throws MetadigProcessException {
+    private ScorerResult getCollectionPids(String collectionId, MultipartD1Node d1Node, Session session) throws MetadigProcessException {
 
         Document xmldoc = null;
         String queryStr = null;
@@ -364,7 +411,9 @@ public class Scorer {
            which will be used to query DataONE Solr for all the pids associated with that project (that's 2 queries!)
          */
         ArrayList<String> pids = new ArrayList<>();
-        queryStr = "?q=seriesId:" + escapeSpecialChars(collectionId) + "&fl=collectionQuery,label,rightsHolder&q.op=AND";
+        queryStr = "?q=seriesId:" + escapeSpecialChars(collectionId) + "+-obsoletedBy:*" + "&fl=collectionQuery,label,rightsHolder&q.op=AND";
+        //queryStr = "?q=seriesId:" + encodeValue(collectionId) + "+-obsoletedBy:*" + "&fl=collectionQuery,label,rightsHolder&q.op=AND";
+        //queryStr = "?q=seriesId:" + collectionId + "+-obsoletedBy:*&fl=collectionQuery,label,rightsHolder&q.op=AND";
 
         startPos = 0;
         countRequested = 10000;
@@ -372,7 +421,7 @@ public class Scorer {
         // Get the collectionQuery from Solr
         try {
             log.debug("Getting collectionQuery with query: " + queryStr);
-            xmldoc = DataONE.querySolr(queryStr, serviceUrl, startPos, countRequested, subjectId, authToken);
+            xmldoc = DataONE.querySolr(queryStr, startPos, countRequested, d1Node, session);
         } catch (MetadigProcessException mpe) {
             log.error("Unable to query Solr for collectionQuery field for collection id: " + collectionId);
             throw new MetadigProcessException("Unable to query Solr for collectionQuery field for collection id: " + collectionId);
@@ -530,13 +579,32 @@ public class Scorer {
           * DataONE listObjects service. This node could either be an MN or CN.
          */
 
-        log.debug("Sending collectionQuery to Solr using subjectId: " + subjectId + ", servicerUrl: " + serviceUrl);
+        //log.debug("Sending collectionQuery to Solr using subjectId: " + subjectId + ", servicerUrl: " + serviceUrl);
+        MultipartRestClient mrc = null;
+        MultipartCNode cnNode = null;
+
         log.debug("query string: " + queryStr);
+
+        try {
+            mrc = new DefaultHttpMultipartRestClient();
+        } catch (Exception e) {
+            log.error("Error creating rest client: " + e.getMessage());
+            JobExecutionException jee = new JobExecutionException(e);
+            jee.setRefireImmediately(false);
+            throw new MetadigProcessException("Unable  to create connection to CN ");
+        }
+
+        Session CNsession = DataONE.getSession(CNsubjectId, CNauthToken);
+
+        // Don't know node type yet from the id, so have to manually check if it's a CN
+        Boolean isCN = DataONE.isCN(CNserviceUrl);
+
+        cnNode = new MultipartCNode(mrc, CNserviceUrl, CNsession);
 
         do {
             //TODO: check that a result was returned
             // Note: the collectionQuery is always evaluated on the CN, so that the entire DataONE network is queried.
-            xmldoc = DataONE.querySolr(queryStr, serviceUrl, startPos, countRequested, subjectId, authToken);
+            xmldoc = DataONE.querySolr(queryStr, startPos, countRequested, cnNode, CNsession);
             if(xmldoc == null) {
                 log.info("no values returned from query");
                 break;
@@ -930,20 +998,31 @@ public class Scorer {
      * @return the escaped value
      */
     private String escapeSpecialChars(String value) {
-        // {
-        value = value.replace("%7B", "\\%7B");
-        // }
-        value = value.replace("%7D", "\\%7D");
-        // :
-        //value = value.replace("%3A", "\\%3A");
-        value = value.replace(":", "%5C:");
 
-        //value = value.replace("(", "\\(");
-        //value = value.replace(")", "\\)");
-        //value = value.replace("?", "\\?");
-        //value = value.replace("%3F", "\\%3F");
-        //value = value.replace("\"", "\\\"");
-        //value = value.replace("'", "\\'");
+        // These are reserved characters in Solr
+        // +  -  &&  | |  !  ( )  { }  [ ]  ^  "  ~  *  ?  :  \
+        value = value.replace("%7B", "\\%7B");
+        value = value.replace("%7D", "\\%7D");
+        value = value.replace(":", "%5C:");
+        value = value.replace(",", "%5C,");
+        value = value.replace(")", "%5C)");
+        value = value.replace("+", "%5C+");
+        value = value.replace("-", "%5C-");
+        value = value.replace("&", "%5C&");
+        value = value.replace("|", "%5C|");
+        value = value.replace("!", "%5C!");
+        value = value.replace("(", "%5C(");
+        value = value.replace(")", "%5C)");
+        value = value.replace("{", "%5C{");
+        value = value.replace("}", "%5C}");
+        value = value.replace("[", "%5C[");
+        value = value.replace("]", "%5C]");
+        value = value.replace("^", "%5C^");
+        value = value.replace("\"", "%5C\"");
+        value = value.replace("~", "%5C~");
+        value = value.replace("*", "%5C*");
+        value = value.replace("?", "%5C?");
+        value = value.replace("\\", "%5C\\");
 
         return value;
     }
@@ -955,7 +1034,5 @@ public class Scorer {
             throw new RuntimeException(ex.getCause());
         }
     }
-
-
 }
 
