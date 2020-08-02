@@ -217,7 +217,7 @@ public class RequestReportJob implements Job {
         //node = store.getNode(nodeId, jobName);
 
         Task task;
-        task = store.getTask(taskName);
+        task = store.getTask(taskName, taskType);
         // If a 'task' entry has not been saved for this task name yet, then a 'lastHarvested'
         // DataTime will not be available, in which case the 'startHarvestDataTime' from the
         // config file will be used.

@@ -325,75 +325,6 @@ public class DatabaseStore implements MDQStore {
         }
     }
 
-//    public Node getNode(String nodeId, String jobName) {
-//
-//        //return runs.get(id);
-//        Result result = new Result();
-//        PreparedStatement stmt = null;
-//        String lastDT = null;
-//        Node node = new Node();
-//
-//        // Select records from the 'nodes' table
-//        try {
-//            log.debug("preparing statement for query");
-//            String sql = "select * from nodes where node_id = ? and job_name = ?";
-//            stmt = conn.prepareStatement(sql);
-//            stmt.setString(1, nodeId);
-//            stmt.setString(2, jobName);
-//
-//            log.debug("issuing query: " + sql);
-//            ResultSet rs = stmt.executeQuery();
-//            if(rs.next()) {
-//                node.setNodeId(rs.getString("node_id"));
-//                node.setJobName(rs.getString("job_name"));
-//                node.setLastHarvestDatetime(rs.getString("last_harvest_datetime"));
-//                rs.close();
-//                stmt.close();
-//            } else {
-//                log.debug("No results returned from query");
-//            }
-//        } catch ( Exception e ) {
-//            log.error( e.getClass().getName()+": "+ e.getMessage());
-//        }
-//
-//        return(node);
-//    }
-
-
-//    public void saveNode(Node node) throws MetadigStoreException {
-//
-//        PreparedStatement stmt = null;
-//
-//        // Perform an 'upsert' on the 'nodes' table - if a record exists for the 'metadata_id, suite_id' already,
-//        // then update the record with the incoming data.
-//        try {
-//            String sql = "INSERT INTO nodes (node_id, job_name, last_harvest_datetime) VALUES (?, ?, ?)"
-//                    + " ON CONFLICT ON CONSTRAINT nodes_id_job_name_pk"
-//                    + " DO UPDATE SET (node_id, job_name, last_harvest_datetime) = (?, ?, ?);";
-//
-//            stmt = conn.prepareStatement(sql);
-//            stmt.setString(1, node.getNodeId());
-//            stmt.setString(2, node.getJobName());
-//            stmt.setString(3, node.getLastHarvestDatetime());
-//            stmt.setString(4, node.getNodeId());
-//            stmt.setString(5, node.getJobName());
-//            stmt.setString(6, node.getLastHarvestDatetime());
-//            stmt.executeUpdate();
-//            stmt.close();
-//            conn.commit();
-//            //conn.close();
-//        } catch (SQLException e) {
-//            log.error( e.getClass().getName()+": "+ e.getMessage());
-//            MetadigStoreException me = new MetadigStoreException("Unable save last harvest date to the datdabase.");
-//            me.initCause(e);
-//            throw(me);
-//        }
-//
-//        // Next, insert a record into the child table ('runs')
-//        log.debug("Records created successfully");
-//    }
-
-
     public void saveTask(Task task) throws MetadigStoreException {
 
         PreparedStatement stmt = null;
@@ -427,7 +358,7 @@ public class DatabaseStore implements MDQStore {
         log.debug("Records created successfully");
     }
 
-    public Task getTask(String taskName) {
+    public Task getTask(String taskName, String taskType) {
 
         //return runs.get(id);
         Result result = new Result();
@@ -438,9 +369,10 @@ public class DatabaseStore implements MDQStore {
         // Select records from the 'nodes' table
         try {
             log.debug("preparing statement for query");
-            String sql = "select * from tasks where task_name = ?";
+            String sql = "select * from tasks where task_name = ? and task_type = ?";
             stmt = conn.prepareStatement(sql);
             stmt.setString(1, taskName);
+            stmt.setString(2, taskType);
 
             log.debug("issuing query: " + sql);
             ResultSet rs = stmt.executeQuery();

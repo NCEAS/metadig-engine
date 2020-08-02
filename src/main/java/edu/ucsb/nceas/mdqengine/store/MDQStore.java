@@ -33,7 +33,7 @@ public interface MDQStore {
 //	public Node getNode(String nodeId, String jobName);
 //	public void saveNode(Node node) throws MetadigStoreException;
 
-	public Task getTask(String taskName);
+	public Task getTask(String taskName, String taskType);
 	public void saveTask(Task task) throws MetadigStoreException;
 
 }

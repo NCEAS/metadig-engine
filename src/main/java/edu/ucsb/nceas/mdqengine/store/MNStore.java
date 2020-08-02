@@ -335,7 +335,7 @@ public class MNStore implements MDQStore {
 //	public void saveNode(Node node) throws MetadigStoreException { }
 
 	@Override
-	public Task getTask(String taskName) { return new Task(); }
+	public Task getTask(String taskName, String taskType) { return new Task(); }
 
 	@Override
 	public void saveTask(Task task) throws MetadigStoreException { }
