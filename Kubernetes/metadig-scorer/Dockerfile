@@ -9,7 +9,7 @@ WORKDIR /var/lib/metadig
 # This file was created from the https://github.com/NCEAS/metadig-r repo
 # and contains R functions that assist in writing R based quality checks.
 COPY metadig_0.2.0.tar.gz metadig.tar.gz
-COPY log4j.properties .
+#COPY log4j.properties .
 # The most recently built jar file is copied from the maven build directory to this dir by maven, so that
 # it can be copyied to the image.
 COPY metadig-engine.jar metadig-engine.jar
@@ -40,5 +40,7 @@ RUN Rscript --vanilla -e 'install.packages("metadig.tar.gz", repos=NULL)'
 # Run the Scorer process
 # Note: docker --build-arg only allows one argument (one token only, multiple tokens inside quotes doesn't work, so have
 #   to specify java options directly on command line.
-CMD java -XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap -XX:+UseSerialGC -cp ./metadig-engine.jar:./solr edu.ucsb.nceas.mdqengine.scorer.Scorer
+# Set classpath to include /opt/local/metadig/log4j.properties, if it exists, so that logging can be changed without
+# having to rebuild the container. Note that on k8s, this dir is mapped to the persistent volume, so will be /data/metadig/log4j.properties
+CMD java -XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap -XX:+UseSerialGC -cp /opt/local/metadig/config:./metadig-engine.jar:./solr edu.ucsb.nceas.mdqengine.scorer.Scorer
 
