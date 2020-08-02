@@ -105,14 +105,12 @@ public class FilestoreDB {
                 stmt.setString(1, storageType);
                 stmt.setString(2, altFilename);
             } else {
-                sql = "select * from filestore where pid = ? and storage_type = ? and media_type = ?";
+                sql = "select * from filestore where pid = ? and suite_id = ? and storage_type = ? and media_type = ?";
                 stmt = conn.prepareStatement(sql);
                 stmt.setString(1, pid);
                 stmt.setString(2, suiteId);
-                stmt.setString(3, nodeId);
-                stmt.setString(4, mdFormatFilter);
-                stmt.setString(5, storageType);
-                stmt.setString(6, mediaType);
+                stmt.setString(3, storageType);
+                stmt.setString(4, mediaType);
             }
 
             log.debug("issuing query: " + sql);
