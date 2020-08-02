@@ -27,8 +27,10 @@ RUN mkdir -p /etc/dataone/index && touch /etc/dataone/index/d1client.properties 
 # Add R runtime and install packges required by the quality suites
 COPY r-cmds.txt r-cmds.txt
 RUN apk update
+# bash is needed by the openssl install
+RUN apk add bash
 RUN apk add g++ R R-dev R-doc libc-dev openssl-dev libxml2 libxml2-dev
-RUN echo 'options(repos = c(CRAN = "https://cran.cnr.berkeley.edu/"))' >> /usr/lib/R/etc/Rprofile.site
+RUN echo 'options(repos = c(CRAN = "http://cran.rstudio.com"))' >> /usr/lib/R/etc/Rprofile.site
 RUN Rscript --vanilla r-cmds.txt
 
 # Run the Worker process

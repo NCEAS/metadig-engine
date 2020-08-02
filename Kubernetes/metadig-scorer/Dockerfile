@@ -24,17 +24,10 @@ RUN mkdir -p /etc/dataone/index && touch /etc/dataone/index/d1client.properties 
 
 # Add R runtime and install packges required by the quality suites
 RUN apt update
-RUN apt -y install vim
-RUN apt -y install r-base
-RUN apt -y install r-cran-httr
-RUN apt -y install r-cran-xml2
-RUN apt -y install r-cran-tidyr
-RUN apt -y install r-cran-scales
-RUN apt -y install r-cran-lubridate
-RUN apt -y install r-cran-ggplot2
-RUN apt -y install r-cran-magrittr
+RUN apt -y install vim bash
+RUN apt -y install r-base r-cran-httr r-cran-xml2 r-cran-tidyr r-cran-scales r-cran-lubridate r-cran-ggplot2 r-cran-magrittr
 # Debian stretch doesn't have a pre-cooked package for readr, so install now.
-RUN Rscript --vanilla -e 'install.packages("readr", repos="https://cran.mtu.edu/")'
+RUN Rscript --vanilla -e 'install.packages("readr", repos=c(CRAN = "http://cran.rstudio.com"))'
 RUN Rscript --vanilla -e 'install.packages("metadig.tar.gz", repos=NULL)'
 
 # Run the Scorer process
