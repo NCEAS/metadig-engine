@@ -6,30 +6,27 @@ library(lubridate)
 library(readr)
 library(magrittr)
 
-# Plot cummulative quality scores by month
+# Plot mean quality scores by month
 # This program is dispatched (called) by the MetaDIG Grapher class. Several
 # variables are injected by metadig-engine Dispatcher
-# - title: the graph title
 # - title: the graph title
 # - inFile: the CSV file containing quality scores, which has been prepared by Grapher
 # - outFile: the graphics output file to create
 # Variables read by metadig-engine Dispatcher after execution
-# mdq_result, output, status
+# - mdq_result, output, status
 
-# Define these variable for local testing only
-#inFile <- "dbo.csv"
-#outFile <- "dbo.png"
-#inFile <- "sasap.csv"
-#outFile <- "sasap.png"
-#inFile <- "FAIR-scores-eml.csv"
-#outFile <- "FAIR-scores-eml.png"
-axisTextFontSize <- 6
-legendTextFontSize <- 6
-axisTitleFontSize <- 8
-legendTitleFontSize <- 8
+# Define these variable ("infile", "outFile" for local testing only
+#inFile <- "toolik.csv"
+#outFile <- "toolik-monthly.png"
+
+axisTextFontSize <- 7
+legendTextFontSize <- 8
+axisTitleFontSize <- 9
+legendTitleFontSize <- 9
 
 # Load data
 fsr <- read_csv(inFile)
+#fsr <- read_csv(inFile) %>% filter(grepl("*eml*", formatId))
 
 scores <- mutate(fsr, ym = as.Date(sprintf("%4s-%02d-01", year(dateUploaded), month(dateUploaded)))) %>%
   mutate(scoreF = scoreFindable * 100.0) %>%
@@ -65,8 +62,8 @@ mr <- score_cumulative %>% filter(metric %in% c("Reusable")) %>% extract2("mean"
 
 # See if the 'dateUploaded' dates span multiple years and if not, the x-axis needs to be configured for ggplot so that
 # it will display. If it is configured for years and only a single year exists, the x-axis will not display.
-minYear <- format(with(scores, min(dateUploaded)), "%Y")
-maxYear <- format(with(scores, max(dateUploaded)), "%Y")
+minYear <- format(with(score_monthly, min(ym)), "%Y")
+maxYear <- format(with(score_monthly, max(ym)), "%Y")
 if(minYear == maxYear) {
   xLabel <- "Month"
   dateBreaks <- "months"
@@ -96,16 +93,16 @@ p <- ggplot(data=score_monthly, mapping=aes(x=ym, y=mean, color=metric)) +
   #scale_color_manual(name = "Metric", labels = c("Findable",  "Accessible", "Interoperable", "Reusable"),
   #                   values=d1_colors) +
   scale_color_manual(name = "Metric", labels = c(sprintf("Findable (%.0f%%)", mf),
-                                sprintf("Accessible (%.0f%%)", ma),
-                                sprintf("Interoperable (%.0f%%)", mi),
-                                sprintf("Reusable (%.0f%%)", mr)), values=d1_colors) +
+                                                 sprintf("Accessible (%.0f%%)", ma),
+                                                 sprintf("Interoperable (%.0f%%)", mi),
+                                                 sprintf("Reusable (%.0f%%)", mr)), values=d1_colors) +
   scale_x_date(date_breaks=dateBreaks, date_minor_breaks=dateMinorBreaks, labels=date_format(dateFormat)) +
   xlab(xLabel) +
   scale_y_continuous(limits=c(0,100)) +
   ylab("Average FAIR Score") +
   #ggtitle(paste0("DataONE: FAIR scores for ", format(sum(standards$n), big.mark=","), " EML and ISO metadata records"))
   #scale_fill_discrete(name = "metric", labels = c("Finabl", "Accessibl", "Interoperabl", "Reusabl")) +
-  ggsave(outFile, width = 7.5, height = 2.5)
+  ggsave(outFile, width = 8.0, height = 3.0)
 
 output <- sprintf("Created graphics file %s", outFile)
 status <- "SUCCESS"
