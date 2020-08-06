@@ -126,41 +126,13 @@ public class DataONE {
     public static Document querySolr(String queryStr, int startPos, int countRequested, MultipartD1Node d1Node,
                 Session session) throws MetadigProcessException {
 
-//        // Polymorphism doesn't work with D1 node classes, so have to use the derived classes
-//        MultipartD1Node d1Node = null;
-//        Session session = DataONE.getSession(subjectId, authToken);
-
         // Add the start and count, if pagination is being used
         queryStr = queryStr + "&start=" + startPos + "&rows=" + countRequested;
         // Query the MN or CN Solr engine to get the query associated with this project that will return all project related pids.
         InputStream qis = null;
         MetadigProcessException metadigException = null;
 
-//        try {
-//            d1Node = getMultipartD1Node(session, serviceUrl);
-//            log.debug("Created MultipartD1Node, nodeId: " + d1Node.getNodeId().getValue());
-//        } catch (Exception ex) {
-//            log.error("Unable to create MultipartD1Node for Solr query");
-//            metadigException = new MetadigProcessException("Unable to create multipart node client to query DataONE solr: " + ex.getMessage());
-//            metadigException.initCause(ex);
-//            throw metadigException;
-//        }
-
         log.debug("Sending query: " + queryStr);
-        // Send a query to a CN or MN
-//        try {
-//            if(isCN) {
-//                qis = cnNode.query(session, "solr", queryStr);
-//            } else {
-//                qis = mnNode.query(session, "solr", queryStr);
-//            }
-//            log.debug("Sent query");
-//        } catch (Exception e) {
-//            log.error("Error retrieving pids: " + e.getMessage());
-//            metadigException = new MetadigProcessException("Unable to query dataone node: " + e.getMessage());
-//            metadigException.initCause(e);
-//            throw metadigException;
-//        }
         try {
             qis = d1Node.query(session, "solr", queryStr);
             log.debug("Sent query");

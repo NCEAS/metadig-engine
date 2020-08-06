@@ -20,6 +20,7 @@ import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.beans.BindingException;
 import org.apache.solr.client.solrj.impl.HttpSolrClient;
 import org.apache.solr.client.solrj.response.QueryResponse;
+import org.apache.solr.client.solrj.util.ClientUtils;
 import org.dataone.client.rest.DefaultHttpMultipartRestClient;
 import org.dataone.client.rest.MultipartRestClient;
 import org.dataone.client.v2.impl.MultipartCNode;
@@ -163,6 +164,7 @@ public class Scorer {
                 MultipartRestClient mrc = null;
                 MultipartMNode mnNode = null;
                 MultipartCNode cnNode = null;
+                GraphType graphType = null;
 
                 //long startTime = System.nanoTime();
                 startTimeProcessing = System.currentTimeMillis();
@@ -228,7 +230,6 @@ public class Scorer {
                     // - a graph for specified filters: member node, suite id, metadata format
                     MetadigFile mdFile = new MetadigFile();
                     Graph graph = new Graph();
-                    //Scorer gfr = new Scorer();
                     // If creating a graph for a collection, get the set of pids associated with the collection.
                     // Only scores for these pids will be included in the graph.
 
@@ -256,37 +257,32 @@ public class Scorer {
                         d1Node = new MultipartMNode(mrc, nodeServiceUrl, session);
                         log.debug("Created mnNode for serviceUrl: " + nodeServiceUrl);
                     }
-//
-//                    Session session = DataONE.getSession(subjectId, authToken);
-//
-//                    // Don't know node type yet from the id, so have to manually check if it's a CN
-//                    Boolean isCN = DataONE.isCN(nodeServiceUrl);
-//                    if(isCN) {
-//                        cnNode = new MultipartCNode(mrc, nodeServiceUrl, session);
-//                        log.debug("Created cnNode for serviceUrl: " + nodeServiceUrl);
-//                    } else {
-//                        mnNode = new MultipartMNode(mrc, nodeServiceUrl, session);
-//                        log.debug("Created mnNode for serviceUrl: " + nodeServiceUrl);
-//                    }
 
-                    if (collectionId != null && !collectionId.isEmpty()) {
+                    // Check if this is a "node" collection. For "node" collections, all scores for a member node
+                    // are used to create the assessment graph, so we don't need to get the collection pids as is
+                    // done for portals (by evaluating the Solr collectionQuery). Therefor, getCollectionPids doesn't
+                    // need to be called and we can proceed directly to getting the quality scores from the quality
+                    // Solr server.
+                    if (collectionId.matches("^\\s*urn:node:.*")) {
+                        graphType = GraphType.CUMULATIVE;
+                        log.debug("Processing a member node request, skipping step of getting collection pids (not required).");
+                    } else {
+                        graphType = GraphType.MONTHLY;
                         // If the nodeId is specified, use if to determine the values for authTokenName and subjectIdName,
                         // if those values are not defined
-                        log.debug("collectionId is not null: " + collectionId);
-                            String id = nodeId.replace("urn:node:", "").toUpperCase().trim();
+                        String id = nodeId.replace("urn:node:", "").toUpperCase().trim();
 
                         // The collection query is obtained from the MN and evaluated on the CN
                         log.info("Getting pids for collection " + collectionId);
                         // Always use the CN subject id and authentication token from the configuration file, as
                         // requests that this method uses need CN subject privs
                         ScorerResult result = null;
-                        //result = gfr.getCollectionPids(collectionId, cnNode, mnNode, isCN, session);
                         result = gfr.getCollectionPids(collectionId, d1Node, session);
                         collectionPids = result.getResult();
                         label = result.getLabel();
                         // Don't continue if no pids (and thus scores) were found for this collection
                         // TODO: Save a blank image and csv if no collection pids returned
-                        if(collectionPids.size() == 0) {
+                        if (collectionPids.size() == 0) {
                             log.info("No pids returned for this collection.");
                             break label;
                         } else {
@@ -322,7 +318,7 @@ public class Scorer {
                     // Generate a temporary graph file based on the quality scores
                     log.debug("Creating graph for collection id: " + collectionId);
                     //String filePath = graph.create(GraphType.CUMULATIVE, title, scoreFile.getPath());
-                    String filePath = graph.create(GraphType.MONTHLY, title, scoreFile.getPath());
+                    String filePath = graph.create(graphType, title, scoreFile.getPath());
                     // Now save the graphics file to permanent storage
                     String outfile;
 
@@ -416,7 +412,8 @@ public class Scorer {
         //queryStr = "?q=seriesId:" + collectionId + "+-obsoletedBy:*&fl=collectionQuery,label,rightsHolder&q.op=AND";
 
         startPos = 0;
-        countRequested = 10000;
+        // Just getting 1 row
+        countRequested = 10;
 
         // Get the collectionQuery from Solr
         try {
@@ -430,6 +427,8 @@ public class Scorer {
         if(xmldoc == null) {
             log.error("No document returned from solr with queryStr: " + queryStr);
             throw new MetadigProcessException("No result returned from Solr query: " + queryStr);
+        } else {
+            log.trace("xml: " + xmldoc);
         }
 
         String collectionQuery = null;
@@ -441,7 +440,7 @@ public class Scorer {
         String rightsHolder = null;
 
         try {
-            log.debug("Getting collectionQuery for id: " + collectionId);
+            log.debug("Parsing collectionQuery from resultdoc for id: " + collectionId);
             // Extract the collection query from the Solr result XML
             XPathFactory xPathfactory = XPathFactory.newInstance();
             xpath = xPathfactory.newXPath();
@@ -505,6 +504,7 @@ public class Scorer {
         // Here is an example collectionQuery: (((project:"State of Alaska\'s Salmon and People") AND (-obsoletedBy:* AND formatType:METADATA)))
         // We have to remove the 'AND (-obsoletedBy:* AND formatType:METADATA)' portion
 
+        log.debug("Pre-edited collectionQuery: " + collectionQuery);
         collectionQuery = collectionQuery.replaceAll("\\s*AND\\s*\\(-obsoletedBy:\\*\\s*AND\\s*formatType:METADATA\\)", "");
         log.debug("Edited collectionQuery: " + collectionQuery);
 
@@ -575,15 +575,11 @@ public class Scorer {
         // Loop through the Solr result. As the result may be large, page through the results, accumulating
         // the pids returned
 
-        /** The collectionQuery is evaluated on the same node that the portal document was harvested from (via the
-          * DataONE listObjects service. This node could either be an MN or CN.
-         */
-
         //log.debug("Sending collectionQuery to Solr using subjectId: " + subjectId + ", servicerUrl: " + serviceUrl);
         MultipartRestClient mrc = null;
         MultipartCNode cnNode = null;
 
-        log.debug("query string: " + queryStr);
+        log.debug("collectionQuery query string: " + queryStr);
 
         try {
             mrc = new DefaultHttpMultipartRestClient();
@@ -684,10 +680,38 @@ public class Scorer {
         int startPosInResult = 0;
         int startPosInQuery = 0; // this will always be zero - we are listing the pids to retrieve, so will always want to start at the first result
 
-        log.trace("Getting scores from Solr for " + collectionPids.size() + " pids.");
-        // Now accumulate the Quality Solr document results for the list of pids for the project.
-        if (collectionId != null && ! collectionId.isEmpty()) {
-            log.info("Getting quality scores for collection: " + collectionId);
+        // Now accumulate the Quality Solr document results for all scores for the node
+        if (collectionId.matches("^\\s*urn:node:.*")) {
+            log.info("Getting quality scores for member node with suiteId: " + suiteId + ", datasource: " + collectionId + " formats: " + formatFamily);
+            countRequested = 1000;
+            formatFamilySearchTerm = null;
+            queryStr = "metadataId:*";
+            if(suiteId != null) {
+                //queryStr += " AND suiteId:" + "\"" + suiteId + "\"";
+                queryStr += " AND suiteId:" + ClientUtils.escapeQueryChars(suiteId);
+            }
+
+            // Add this member nodeId as the datasource
+            //queryStr += " AND datasource:" + "\"" + collectionId + "\"";
+            queryStr += " AND datasource:" + ClientUtils.escapeQueryChars(collectionId);
+
+            if (formatFamilySearchTerm != null) {
+                //queryStr += " AND metadataFormatId:" + "\"" + formatFamilySearchTerm + "\"";
+                queryStr += " AND metadataFormatId:" + ClientUtils.escapeQueryChars(formatFamilySearchTerm);
+            }
+            log.trace("query to quality Solr server: " + queryStr);
+            do {
+                resultList = queryQualitySolr(queryStr, startPosInQuery, countRequested);
+                // If no more results, break
+                if(resultList.size() == 0) break;
+                // Add results from this pid range to the accumulator of all results.
+                allResults.addAll(resultList);
+                startPosInQuery += resultList.size();
+                //startPosInQuery += countRequested;
+            } while (resultList.size() > 0);
+        } else {
+            // Now accumulate the Quality Solr document results for the list of pids for the project.
+            log.info("Getting quality scores for collection: " + collectionId + ", for " + collectionPids.size() + " pids." );
             int pidCntToRequest = 25;
             int totalPidCnt = collectionPids.size();
             int pidsLeft = totalPidCnt;
@@ -728,28 +752,6 @@ public class Scorer {
                 }
                 pidsLeft -= pidCntToRequest;
             } while (pidsLeft > 0);
-        } else {
-            log.info("Getting quality scores for suiteId: " + suiteId + ", datasource: " + " formats: " + formatFamily);
-            countRequested = 1000;
-            formatFamilySearchTerm = null;
-            queryStr = "metadataId:*";
-            if(suiteId != null) {
-                queryStr += " AND suiteId:" + "\"" + suiteId + "\"";
-            }
-
-            if (formatFamilySearchTerm != null) {
-                queryStr += " AND metadataFormatId:" + "\"" + formatFamilySearchTerm + "\"";
-            }
-            log.trace("query to quality Solr server: " + queryStr);
-            do {
-                resultList = queryQualitySolr(queryStr, startPosInQuery, countRequested);
-                // If no more results, break
-                if(resultList.size() == 0) break;
-                // Add results from this pid range to the accumulator of all results.
-                allResults.addAll(resultList);
-                //startPosInQuery += resultList.size();
-                startPosInQuery += countRequested;
-            } while (resultList.size() > 0);
         }
         log.debug("Got " + allResults.size() + " scores from Quality Solr server");
         return allResults;

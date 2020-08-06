@@ -127,6 +127,10 @@ public class RequestScorerJob implements Job {
         int harvestDatetimeInc = dataMap.getInt("harvestDatetimeInc");
         // Number of pids to get each query (this number of pids will be fetched each query until all pids are obtained)
         int countRequested = dataMap.getInt("countRequested");
+        String requestType = null;
+        if (taskType.equalsIgnoreCase("score")) {
+            requestType = dataMap.getString("requestType");
+        }
         // TODO: add formatFamily to scheduler request
         String formatFamily = null;
         MultipartRestClient mrc = null;
@@ -255,57 +259,69 @@ public class RequestScorerJob implements Job {
         RequestScorerJob.ListResult result = null;
         Integer resultCount = null;
 
-        log.debug("Getting portal pids to process...");
-        boolean morePids = true;
-        while(morePids) {
-            ArrayList<String> pidsToProcess = null;
-            log.debug("startCount: " + startCount);
-            log.debug("countRequested:" + countRequested);
-
+        if(requestType != null && requestType.equalsIgnoreCase("node")) {
             try {
-                //result = getPidsToProcess(cnNode, mnNode, isCN, session, pidFilter, startDTRstr, endDTRstr, startCount, countRequested);
-                result = getPidsToProcess(d1Node, session, pidFilter, startDTRstr, endDTRstr, startCount, countRequested);
-                pidsToProcess = result.getResult();
-                resultCount = result.getResultCount();
+                // For a 'node' scores request, the 'collection' is the entire node, so specify
+                // the nodeId as the collectionid.
+                submitScorerRequest(qualityServiceUrl, nodeId, suiteId, nodeId, formatFamily);
             } catch (Exception e) {
-                JobExecutionException jee = new JobExecutionException("Unable to get pids to process", e);
+                JobExecutionException jee = new JobExecutionException("Unable to submit request to create new node ("
+                        + nodeId + ")" + " score graph/data file ", e);
                 jee.setRefireImmediately(false);
                 throw jee;
             }
+        } else {
+            log.debug("Getting portal pids to process...");
+            boolean morePids = true;
+            while (morePids) {
+                ArrayList<String> pidsToProcess = null;
+                log.debug("startCount: " + startCount);
+                log.debug("countRequested:" + countRequested);
 
-            log.info("Found " + resultCount + " seriesIds" + " for date: " + startDTRstr +  " at servierUrl: " + nodeServiceUrl);
-            for (String pidStr : pidsToProcess) {
                 try {
-                    submitScorerRequest(qualityServiceUrl, pidStr, suiteId, nodeId, formatFamily);
+                    result = getPidsToProcess(d1Node, session, pidFilter, startDTRstr, endDTRstr, startCount, countRequested);
+                    pidsToProcess = result.getResult();
+                    resultCount = result.getResultCount();
                 } catch (Exception e) {
-                    JobExecutionException jee = new JobExecutionException("Unable to submit request to create new score graph/data file", e);
+                    JobExecutionException jee = new JobExecutionException("Unable to get pids to process", e);
                     jee.setRefireImmediately(false);
                     throw jee;
                 }
-            }
 
-            // Check if DataONE returned the max number of results. If so, we have to request more by paging through
-            // the results.
-            if(resultCount >= countRequested) {
-                morePids = true;
-                startCount = startCount + resultCount;
-                log.info("Paging through more results, current start is " + startCount);
-            } else {
-                morePids = false;
+                log.info("Found " + resultCount + " seriesIds" + " for date: " + startDTRstr + " at servierUrl: " + nodeServiceUrl);
+                for (String pidStr : pidsToProcess) {
+                    try {
+                        submitScorerRequest(qualityServiceUrl, pidStr, suiteId, nodeId, formatFamily);
+                    } catch (Exception e) {
+                        JobExecutionException jee = new JobExecutionException("Unable to submit request to create new score graph/data file", e);
+                        jee.setRefireImmediately(false);
+                        throw jee;
+                    }
+                }
 
-                // Record the new "last harvested" date
-                task.setLastHarvestDatetime(endDTRstr);
-                log.debug("taskName: " + task.getTaskName());
-                log.debug("taskType: " + task.getTaskType());
-                log.debug("lastharvestdate: " + task.getLastHarvestDatetime());
+                // Check if DataONE returned the max number of results. If so, we have to request more by paging through
+                // the results.
+                if (resultCount >= countRequested) {
+                    morePids = true;
+                    startCount = startCount + resultCount;
+                    log.info("Paging through more results, current start is " + startCount);
+                } else {
+                    morePids = false;
 
-                try {
-                    store.saveTask(task);
-                } catch (MetadigStoreException mse) {
-                    log.error("Error saving task: " + task.getTaskName());
-                    JobExecutionException jee = new JobExecutionException("Unable to save new harvest date", mse);
-                    jee.setRefireImmediately(false);
-                    throw jee;
+                    // Record the new "last harvested" date
+                    task.setLastHarvestDatetime(endDTRstr);
+                    log.debug("taskName: " + task.getTaskName());
+                    log.debug("taskType: " + task.getTaskType());
+                    log.debug("lastharvestdate: " + task.getLastHarvestDatetime());
+
+                    try {
+                        store.saveTask(task);
+                    } catch (MetadigStoreException mse) {
+                        log.error("Error saving task: " + task.getTaskName());
+                        JobExecutionException jee = new JobExecutionException("Unable to save new harvest date", mse);
+                        jee.setRefireImmediately(false);
+                        throw jee;
+                    }
                 }
             }
         }

@@ -47,6 +47,7 @@ public class JobScheduler {
         String startHarvestDatetime = null;
         int countRequested = 1000;
         int harvestDatetimeInc = 1;
+        String requestType = null;
 
         // Filestore variables
         String dirIncludeMatch = null;
@@ -144,6 +145,8 @@ public class JobScheduler {
                 harvestDatetimeInc = Integer.parseInt(splitted[++icnt].trim());
                 // The number of results to return from the DataONE 'listObjects' service
                 countRequested = Integer.parseInt(splitted[++icnt].trim());
+                // Is this scores request for a portal or an entire member node?
+                requestType =  splitted[++icnt].trim();
 
                 log.debug("pidFilter: " + pidFilter);
                 log.debug("suiteId: " + suiteId);
@@ -151,6 +154,7 @@ public class JobScheduler {
                 log.debug("startHarvestDatetime: " + startHarvestDatetime);
                 log.debug("harvestDatetimeInc: " + harvestDatetimeInc);
                 log.debug("countRequested: " + countRequested);
+                log.debug("requestType: " + requestType);
             } else if(taskType.equals("filestore")) {
                 // Example taskList.csv entry:
                 // filestore,ingest,metadig,,,0 0/30 * * * ?,"stage;;*.*;README.txt;filestore-ingest.log"
@@ -204,6 +208,7 @@ public class JobScheduler {
                             .usingJobData("startHarvestDatetime", startHarvestDatetime)
                             .usingJobData("harvestDatetimeInc", harvestDatetimeInc)
                             .usingJobData("countRequested", countRequested)
+                            .usingJobData("requestType", requestType)
                             .build();
                 } else if (taskType.equalsIgnoreCase("filestore")) {
                     job = newJob(FilestoreIngestJob.class)
