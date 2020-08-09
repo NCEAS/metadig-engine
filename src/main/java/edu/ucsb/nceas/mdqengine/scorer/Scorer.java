@@ -35,10 +35,7 @@ import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
 import org.quartz.JobExecutionException;
 import org.w3c.dom.Document;
-import org.xml.sax.InputSource;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.xpath.*;
 import java.io.*;
 import java.net.URLEncoder;
@@ -438,8 +435,23 @@ public class Scorer {
         org.w3c.dom.Node node = null;
         String label = null;
         String rightsHolder = null;
+        MultipartRestClient mrc = null;
+        MultipartCNode CNnode = null;
+        Session CNsession = null;
 
         try {
+
+            CNsession = DataONE.getSession(CNsubjectId, CNauthToken);
+            //        // Only CNs can call the 'subjectInfo' service (aka accounts), so we have to use
+            // a MultipartCNode instance here.
+            try {
+                CNnode = (MultipartCNode) DataONE.getMultipartD1Node(CNsession, CNserviceUrl);
+            } catch (Exception ex) {
+                metadigException = new MetadigProcessException("Unable to create multipart D1 node: " + ex.getMessage());
+                metadigException.initCause(ex);
+                throw metadigException;
+            }
+
             log.debug("Parsing collectionQuery from resultdoc for id: " + collectionId);
             // Extract the collection query from the Solr result XML
             XPathFactory xPathfactory = XPathFactory.newInstance();
@@ -521,7 +533,7 @@ public class Scorer {
         subject.setValue(rightsHolder);
         // The subject info can only be obtained from a CN, so use the CN auth info for the current DataONE environment,
         // which should be configured in the metadig.properties file
-        SubjectInfo subjectInfo = DataONE.getSubjectInfo(subject, CNserviceUrl, CNsubjectId, CNauthToken);
+        SubjectInfo subjectInfo = DataONE.getSubjectInfo(subject, CNnode, CNsession);
         String groupStr = null;
 
         groupStr = "(readPermission:" + "\"" + rightsHolder
@@ -581,26 +593,10 @@ public class Scorer {
 
         log.debug("collectionQuery query string: " + queryStr);
 
-        try {
-            mrc = new DefaultHttpMultipartRestClient();
-        } catch (Exception e) {
-            log.error("Error creating rest client: " + e.getMessage());
-            JobExecutionException jee = new JobExecutionException(e);
-            jee.setRefireImmediately(false);
-            throw new MetadigProcessException("Unable  to create connection to CN ");
-        }
-
-        Session CNsession = DataONE.getSession(CNsubjectId, CNauthToken);
-
-        // Don't know node type yet from the id, so have to manually check if it's a CN
-        Boolean isCN = DataONE.isCN(CNserviceUrl);
-
-        cnNode = new MultipartCNode(mrc, CNserviceUrl, CNsession);
-
         do {
             //TODO: check that a result was returned
             // Note: the collectionQuery is always evaluated on the CN, so that the entire DataONE network is queried.
-            xmldoc = DataONE.querySolr(queryStr, startPos, countRequested, cnNode, CNsession);
+            xmldoc = DataONE.querySolr(queryStr, startPos, countRequested, CNnode, CNsession);
             if(xmldoc == null) {
                 log.info("no values returned from query");
                 break;

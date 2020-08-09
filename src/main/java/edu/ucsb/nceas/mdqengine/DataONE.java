@@ -29,42 +29,22 @@ public class DataONE {
 
     /**
      * Get a DataONE subject information object
-     * @param serviceUrl the service URL of the DataONE node to request the subject info from
-     * @param authToken the authorization token to use for the request
+     * @param rightsHolder the DataONE subject to get info for
+     * @param CNnode the DataONE CN to send the request to
+     * @param session the DataONE authenticated session
      * @return a DataONE subject information object
      * @throws MetadigProcessException
      */
-    public static SubjectInfo getSubjectInfo(Subject rightsHolder, String serviceUrl, String subjectId, String authToken) throws MetadigProcessException {
+    public static SubjectInfo getSubjectInfo(Subject rightsHolder, MultipartCNode CNnode,
+                                             Session session) throws MetadigProcessException {
 
         log.debug("Getting subject info for: " + rightsHolder.getValue());
-        MultipartCNode cnNode = null;
+        //MultipartCNode cnNode = null;
         MetadigProcessException metadigException = null;
-
         SubjectInfo subjectInfo = null;
-        Session session = DataONE.getSession(subjectId, authToken);
-
-        // Identity node as either a CN or MN based on the serviceUrl
-        String pattern = "https*://cn.*?\\.dataone\\.org|https*://cn.*?\\.test\\.dataone\\.org";
-        Pattern r = Pattern.compile(pattern);
-        Matcher m = r.matcher(serviceUrl);
-        if (!m.find()) {
-            log.error("Must call a CN to get subject information");
-            metadigException = new MetadigProcessException("Must call a CN to get subject information.");
-            throw metadigException;
-        }
-
-        // Only CNs can call the 'subjectInfo' service (aka accounts), so we have to use
-        // a MultipartCNode instance here.
-        try {
-            cnNode = (MultipartCNode) getMultipartD1Node(session, serviceUrl);
-        } catch (Exception ex) {
-            metadigException = new MetadigProcessException("Unable to create multipart D1 node: " + subjectId + ": " + ex.getMessage());
-            metadigException.initCause(ex);
-            throw metadigException;
-        }
 
         try {
-            subjectInfo = cnNode.getSubjectInfo(session, rightsHolder);
+            subjectInfo = CNnode.getSubjectInfo(session, rightsHolder);
         } catch (Exception ex) {
             metadigException = new MetadigProcessException("Unable to get subject information." + ex.getMessage());
             metadigException.initCause(ex);
