@@ -19,8 +19,6 @@ import org.xml.sax.InputSource;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class DataONE {
 
@@ -188,19 +186,33 @@ public class DataONE {
         return session;
     }
 
-    public static Boolean isCN(String serviceUrl) {
+    /*
+     * Determine if the string represents a DataONE CN.
+     * @param nodeStr either a DataONE node serviceURL (e.g. https://knb.ecoinformatics.org/knb/d1/mn)
+     *      or a DataONE node identifier (e.g. urn:node:CN)
+     */
+    public static Boolean isCN(String nodeStr) {
 
         Boolean isCN = false;
-        // Identity node as either a CN or MN based on the serviceUrl
-        String pattern = "https*://cn.*?\\.dataone\\.org|https*://cn.*?\\.test\\.dataone\\.org";
-        Pattern r = Pattern.compile(pattern);
-        Matcher m = r.matcher(serviceUrl);
-        if (m.find()) {
-            isCN = true;
-            log.debug("service URL is for a CN: " + serviceUrl);
+
+        // match node urn, e.g. "https://cn.dataone.org/cn"
+        if (nodeStr.matches("^\\s*urn:node:.*")) {
+            if (nodeStr.matches("^\\s*urn:node:CN.*$|^\\s*urn:node:cn.*$")) {
+                isCN = true;
+                log.debug("The nodeId is for a CN: " + nodeStr);
+            } else {
+                log.debug("The nodeId is not for a CN: " + nodeStr);
+                isCN = false;
+            }
         } else {
-            log.debug("service URL is not for a CN: " + serviceUrl);
-            isCN = false;
+            // match cn service url e.g. "https://cn.dataone.org/cn"
+            if (nodeStr.matches("^\\s*https*://cn.*?\\.dataone\\.org.*$|https*://cn.*?\\.test\\.dataone\\.org.*$")) {
+                isCN = true;
+                log.debug("The service URL is for a CN: " + nodeStr);
+            } else {
+                log.debug("The service URL is not for a CN: " + nodeStr);
+                isCN = false;
+            }
         }
         return isCN;
     }
