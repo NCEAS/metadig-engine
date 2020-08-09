@@ -43,8 +43,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * The Scorer class contains methods that create graphs of aggregated quality scores.
@@ -588,8 +586,6 @@ public class Scorer {
         // the pids returned
 
         //log.debug("Sending collectionQuery to Solr using subjectId: " + subjectId + ", servicerUrl: " + serviceUrl);
-        MultipartRestClient mrc = null;
-        MultipartCNode cnNode = null;
 
         log.debug("collectionQuery query string: " + queryStr);
 
@@ -653,6 +649,7 @@ public class Scorer {
         String listString;
         ArrayList<String> tmpList;
         String formatFamilySearchTerm = null;
+        String datasource = null;
 
         // The metadata format family can be specified to filter the quality scores that will be included
         // in the graph./
@@ -678,32 +675,36 @@ public class Scorer {
 
         // Now accumulate the Quality Solr document results for all scores for the node
         if (collectionId.matches("^\\s*urn:node:.*")) {
-            log.info("Getting quality scores for member node with suiteId: " + suiteId + ", datasource: " + collectionId + " formats: " + formatFamily);
-            countRequested = 1000;
+            countRequested = 10000;
+            if(DataONE.isCN(collectionId)) {
+                // Don't encode the wildcard, otherwise it will be deactivated in Solr
+                datasource = "*";
+                log.info("Getting quality scores for CN node with suiteId: " + suiteId + ", datasource: " + datasource + " formats: " + formatFamily);
+            } else {
+                datasource = ClientUtils.escapeQueryChars(collectionId);
+                log.info("Getting quality scores for member node with (encoded) suiteId: " + suiteId + ", datasource: " + datasource + " formats: " + formatFamily);
+            }
             formatFamilySearchTerm = null;
             queryStr = "metadataId:*";
             if(suiteId != null) {
-                //queryStr += " AND suiteId:" + "\"" + suiteId + "\"";
                 queryStr += " AND suiteId:" + ClientUtils.escapeQueryChars(suiteId);
             }
 
             // Add this member nodeId as the datasource
-            //queryStr += " AND datasource:" + "\"" + collectionId + "\"";
-            queryStr += " AND datasource:" + ClientUtils.escapeQueryChars(collectionId);
+            queryStr += " AND datasource:" + datasource;
 
             if (formatFamilySearchTerm != null) {
                 //queryStr += " AND metadataFormatId:" + "\"" + formatFamilySearchTerm + "\"";
                 queryStr += " AND metadataFormatId:" + ClientUtils.escapeQueryChars(formatFamilySearchTerm);
             }
-            log.trace("query to quality Solr server: " + queryStr);
             do {
+                log.trace("query to quality Solr server: " + queryStr + ", startPos: " + startPosInQuery + ", countRequested: " + countRequested);
                 resultList = queryQualitySolr(queryStr, startPosInQuery, countRequested);
                 // If no more results, break
                 if(resultList.size() == 0) break;
                 // Add results from this pid range to the accumulator of all results.
                 allResults.addAll(resultList);
                 startPosInQuery += resultList.size();
-                //startPosInQuery += countRequested;
             } while (resultList.size() > 0);
         } else {
             // Now accumulate the Quality Solr document results for the list of pids for the project.
@@ -736,9 +737,9 @@ public class Scorer {
                 if (suiteId != null) {
                     queryStr += " AND suiteId:" + suiteId;
                 }
-                log.debug("query to quality Solr server: " + queryStr);
                 // Send query to Quality Solr Server
                 // Get all the pids in this pid string
+                log.trace("query to quality Solr server: " + queryStr + ", startPos: " + startPosInQuery + ", countRequested: " + pidCntToRequest);
                 resultList = queryQualitySolr(queryStr, startPosInQuery, pidCntToRequest);
                 // It's possible that none of the pids from the collection have quality scores
                 // This should not happen but check just in case.
