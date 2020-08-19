@@ -37,8 +37,6 @@ import java.io.InputStream;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * <p>
@@ -56,37 +54,44 @@ public class RequestReportJob implements Job {
     private Log log = LogFactory.getLog(RequestReportJob.class);
 
     class ListResult {
-        // The total result count returned from DataONE
-        Integer totalResultCount;
+        // The total result count for all object types returned from DataONE. This is the count of all object types
+        // that were retrieved for a given request. The DataONE 'listObjects' service does provide
+        // parameters to filter by formatId wildcard, so we have to retrieve all pids for a time range
+        // and filter the result list.
+        private Integer totalResultCount = 0;
         // The filtered result count returned from DataONE.
         // The DataONE listObjects service returns all new pids for all formatIds
         // but we are typically only interested in a subset of those, i.e. EML metadata pids,
         // so this is the count of pids from the result that we are actually interested in.
-        Integer filteredResultCount;
-        ArrayList<String> result = new ArrayList<>();
+        private Integer filteredResultCount = 0;
+        private ArrayList<String> result = new ArrayList<>();
+
+        // The scheduler keeps track of the sysmeta 'dateSystemMetadataModified' of the last pid harvested,
+        // which will be used as the starting time of the next harvest.
+        private DateTime lastDateModifiedDT = null;
 
         void setResult(ArrayList result) {
             this.result = result;
         }
 
-        ArrayList getResult() {
+        public ArrayList getResult() {
             return this.result;
         }
 
         void setTotalResultCount(Integer count) {
             this.totalResultCount = count;
         }
-        void setFilteredResultCount(Integer count) {
-            this.filteredResultCount = count;
+        void setFilteredResultCount(Integer count) { this.filteredResultCount = count; }
+        void setLastDateModified(DateTime date) {
+            log.debug("Setter last modified date, date: " + date.toString());
+            this.lastDateModifiedDT = date;
         }
 
-        Integer getTotalResultCount() {
-            return this.totalResultCount;
-        }
+        public Integer getTotalResultCount() { return this.totalResultCount; }
 
-        Integer getFilteredResultCount() {
-            return this.filteredResultCount;
-        }
+        public Integer getFilteredResultCount() { return this.filteredResultCount; }
+
+        public DateTime getLastDateModified() { return this.lastDateModifiedDT; }
     }
 
     // Since Quartz will re-instantiate a class every time it
@@ -198,7 +203,7 @@ public class RequestReportJob implements Job {
         // Get current datetime, which may be used for start time range.
         DateTimeZone.setDefault(DateTimeZone.UTC);
         DateTime currentDT = new DateTime(DateTimeZone.UTC);
-        DateTimeFormatter dtfOut = DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ss.SS'Z'");
+        DateTimeFormatter dtfOut = DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
         String currentDatetimeStr = dtfOut.print(currentDT);
         DateTime startDateTimeRange = null;
         DateTime endDateTimeRange = null;
@@ -219,58 +224,63 @@ public class RequestReportJob implements Job {
             lastHarvestDateStr = task.getLastHarvestDatetime();
         }
 
-        DateTime lastHarvestDate = new DateTime(lastHarvestDateStr);
+        DateTime lastHarvestDateDT = new DateTime(lastHarvestDateStr);
         // Set the search start datetime to the last harvest datetime, unless it is in the
         // future. (This can happen when the previous time range end was for the current day,
         // as the end datetime range for the previous task run will have been stored as the
         // new lastharvestDateTime.
-        DateTime startDTR = null;
-        if(lastHarvestDate.isAfter(currentDT.toInstant())) {
-            startDTR = currentDT;
+        DateTime startDT = null;
+        if(lastHarvestDateDT.isAfter(currentDT.toInstant())) {
+            startDT = currentDT;
         } else {
-            startDTR = new DateTime(lastHarvestDate);
+            startDT = new DateTime(lastHarvestDateDT);
         }
 
-        DateTime endDTR = new DateTime(startDTR);
-        endDTR = endDTR.plusDays(harvestDatetimeInc);
-        if(endDTR.isAfter(currentDT.toInstant())) {
-            endDTR = currentDT;
+        DateTime endDT = new DateTime(startDT);
+        endDT = endDT.plusDays(harvestDatetimeInc);
+        if(endDT.isAfter(currentDT.toInstant())) {
+            endDT = currentDT;
         }
 
-        // If the start and end harvest dates are the same (happends for a new node), then
-        // tweek the start so that DataONE listObjects doesn't complain.
-        if(startDTR == endDTR ) {
-            startDTR = startDTR.minusMinutes(1);
+        // If the start and end harvest dates are the same (happens for a new node), then
+        // tweak the start so that DataONE listObjects doesn't complain.
+        if(startDT == endDT ) {
+            startDT = startDT.minusMinutes(1);
+            log.debug("Reset start back 1 minute to: " + startDT);
         }
 
-        String startDTRstr = dtfOut.print(startDTR);
-        String endDTRstr = dtfOut.print(endDTR);
+        // Track the sysmeta dateUploaded of the latest harvested pid. This will become the starting time of
+        // the next harvest.
+        DateTime lastDateModifiedDT = startDT;
+
+        String startDTstr = dtfOut.print(startDT);
+        String endDTstr = dtfOut.print(endDT);
 
         Integer startCount = new Integer(0);
         ListResult result = null;
-        Integer totalResultCount = null;
-        Integer filteredResultCount = null;
+        Integer totalResultCount = 0;
+        Integer filteredResultCount = 0;
+        Integer allPidsCnt = 0;
 
         boolean morePids = true;
         while(morePids) {
             ArrayList<String> pidsToProcess = null;
-            log.info("Getting pids for node: " + nodeId + ", suiteId: " + suiteId + ", harvest start: " + startDTRstr);
-
             try {
-                result = getPidsToProcess(cnNode, mnNode, isCN, session, suiteId, nodeId, pidFilter, startDTRstr, endDTRstr, startCount, countRequested);
+                result = getPidsToProcess(cnNode, mnNode, isCN, session, suiteId, nodeId, pidFilter, startDTstr, endDTstr, startCount, countRequested, lastDateModifiedDT);
                 pidsToProcess = result.getResult();
                 totalResultCount = result.getTotalResultCount();
                 filteredResultCount = result.getFilteredResultCount();
+                lastDateModifiedDT = result.getLastDateModified();
             } catch (Exception e) {
                 JobExecutionException jee = new JobExecutionException("Unable to get pids to process", e);
                 jee.setRefireImmediately(false);
                 throw jee;
             }
 
-            log.info("Found " + filteredResultCount + " pids" + " for node: " + nodeId);
+            allPidsCnt = pidsToProcess.size();
             for (String pidStr : pidsToProcess) {
                 try {
-                    log.info("submitting pid: " + pidStr);
+                    log.debug("submitting pid: " + pidStr);
                     submitReportRequest(cnNode, mnNode, isCN, session, qualityServiceUrl, pidStr, suiteId);
                 } catch (org.dataone.service.exceptions.NotFound nfe) {
                     log.error("Unable to process pid: " + pidStr +  nfe.getMessage());
@@ -278,16 +288,24 @@ public class RequestReportJob implements Job {
                 } catch (Exception e) {
                     log.error("Unable to process pid:  " + pidStr + " - " + e.getMessage());
                     continue;
-                    //JobExecutionException jee = new JobExecutionException("Unable to submit request to create new quality reports", e);
-                    //jee.setRefireImmediately(false);
-                    //throw jee;
                 }
             }
 
-            task.setLastHarvestDatetime(endDTRstr);
-            log.debug("taskName: " + task.getTaskName());
-            log.debug("taskType: " + task.getTaskType());
-            log.debug("lastharvestdate: " + task.getLastHarvestDatetime());
+            // Check if DataONE returned the max number of results. If so, we have to request more by paging through
+            // the results returned pidsToProcess (i.e. DataONE listObjects service). If the returned result is
+            // less than the requested result, then all pids have been retrieved.
+            if(totalResultCount >= countRequested) {
+                morePids = true;
+                startCount = startCount + totalResultCount;
+                log.trace("Paging through more results, current start is " + startCount);
+            } else {
+                morePids = false;
+            }
+        }
+        // Don't update the lastHarvestDateDT if no pids were found.
+        if (allPidsCnt > 0) {
+            task.setLastHarvestDatetime(dtfOut.print(lastDateModifiedDT));
+            log.debug("Saving lastHarvestDate: " + dtfOut.print(lastDateModifiedDT));
             try {
                 store.saveTask(task);
             } catch (MetadigStoreException mse) {
@@ -296,24 +314,15 @@ public class RequestReportJob implements Job {
                 jee.setRefireImmediately(false);
                 throw jee;
             }
-
-            // Check if DataONE returned the max number of results. If so, we have to request more by paging through
-            // the results returned pidsToProcess (i.e. DataONE listObjects service).
-            if(totalResultCount >= countRequested) {
-                morePids = true;
-                startCount = startCount + totalResultCount;
-                log.info("Paging through more results, current start is " + startCount);
-            } else {
-                morePids = false;
-            }
         }
+        log.info(taskName + ": Found " + allPidsCnt + " pids for start: " + startDTstr + ", end: " + endDTstr + " at servierUrl: " + nodeServiceUrl);
         store.shutdown();
     }
 
     public ListResult getPidsToProcess(MultipartCNode cnNode, MultipartMNode mnNode, Boolean isCN, Session session,
                                   String suiteId, String nodeId, String pidFilter, String startHarvestDatetimeStr,
                                   String endHarvestDatetimeStr, int startCount,
-                                  int countRequested) throws Exception {
+                                  int countRequested, DateTime lastDateModifiedDT) throws Exception {
 
         ArrayList<String> pids = new ArrayList<String>();
         InputStream qis = null;
@@ -353,15 +362,16 @@ public class RequestReportJob implements Job {
         String thisFormatId = null;
         String thisPid = null;
         int pidCount = 0;
+        Date thisDateModified;
 
         if (objList.getCount() > 0) {
             for(ObjectInfo oi: objList.getObjectInfoList()) {
                 thisFormatId = oi.getFormatId().getValue();
                 thisPid = oi.getIdentifier().getValue();
-                log.debug("Checking pid: " + thisPid + ", format: " + thisFormatId);
+                log.trace("Checking pid: " + thisPid + ", format: " + thisFormatId);
 
-                // Check all pid filters. There could be multiple wildcard filters, which are separated
-                // by ','.
+                // Check all pid filters to see if this pids's format was found in the list of desired formats.
+                // There could be multiple wildcard filters, which are separated by ','.
                 String [] filters = pidFilter.split("\\|");
                 Boolean found = false;
                 for(String thisFilter:filters) {
@@ -378,7 +388,16 @@ public class RequestReportJob implements Job {
                 //    if (!runExists(thisPid, suiteId, store)) {
                     pidCount = pidCount++;
                     pids.add(thisPid);
-                    log.info("adding pid " + thisPid + ", formatId: " + thisFormatId);
+                    log.trace("adding pid " + thisPid + ", formatId: " + thisFormatId);
+                    // If this pid's modified date is after the stored latest encountered modified date, then update
+                    // the lastModified date
+                    DateTime thisDateModifiedDT = new DateTime(oi.getDateSysMetadataModified());
+                    // Add a millisecond to lastDateModfiedDT so that this pid won't be harvested again (in the event
+                    // that this is the last pid to be harvested in this round.
+                    if (thisDateModifiedDT.isAfter(lastDateModifiedDT)) {
+                        lastDateModifiedDT = thisDateModifiedDT.plusMillis(1) ;
+                        log.debug("Updated lastDateMoidifed: " + lastDateModifiedDT.toString());
+                    }
                 //    }
                 }
             }
@@ -390,6 +409,8 @@ public class RequestReportJob implements Job {
         // Set the count for the total number of pids returned from DataONE (all formatIds) for this query
         result.setTotalResultCount(objList.getCount());
         result.setResult(pids);
+        // Return the sysmeta 'dateSystemMetadataModified' of the last pid harvested.
+        result.setLastDateModified(lastDateModifiedDT);
 
         return result;
     }
@@ -445,45 +466,19 @@ public class RequestReportJob implements Job {
             } else  {
                 objectIS = mnNode.get(session, pid);
             }
-            log.debug("Retrieved metadata object for pid: " + pidStr);
+            log.trace("Retrieved metadata object for pid: " + pidStr);
         } catch (NotAuthorized na) {
-            log.error("Not authorized to read pid: " + pid + ", continuing with next pid...");
+            log.error("Not authorized to read pid: " + pid + ", unable to retrieve metadata, continuing with next pid...");
             return;
-        } catch (Exception e) {
-            throw(e);
         }
 
         // quality suite service url, i.e. "http://docke-ucsb-1.dataone.org:30433/quality/suites/knb.suite.1/run
         qualityServiceUrl = qualityServiceUrl + "/suites/" + suiteId + "/run";
         HttpPost post = new HttpPost(qualityServiceUrl);
 
-        try {
-            // add document
-            SimpleMultipartEntity entity = new SimpleMultipartEntity();
-            entity.addFilePart("document", objectIS);
-
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            TypeMarshaller.marshalTypeToOutputStream(sysmeta, baos);
-            entity.addFilePart("systemMetadata", new ByteArrayInputStream(baos.toByteArray()));
-
-            // make sure we get XML back
-            post.addHeader("Accept", "application/xml");
-
-            // send to service
-            log.trace("submitting: " + qualityServiceUrl);
-            post.setEntity((HttpEntity) entity);
-            CloseableHttpClient client = HttpClients.createDefault();
-            CloseableHttpResponse response = client.execute(post);
-
-            // retrieve results
-            HttpEntity reponseEntity = response.getEntity();
-            if (reponseEntity != null) {
-                runResultIS = reponseEntity.getContent();
-            }
-        } catch (Exception e) {
-            throw(e);
-        }
-    }
+        // add document
+        SimpleMultipartEntity entity = new SimpleMultipartEntity();
+        entity.addFilePart("document", objectIS);
 
     private Boolean isCN(String serviceUrl) {
 
