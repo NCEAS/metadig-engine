@@ -477,19 +477,6 @@ public class Worker {
             } catch (Throwable thrown) {
                 log.error("Error while waiting for group lookup thread completion");
             }
-            // Wait for a few seconds for the 'accounts'
-//            for (int i = 0; i < 5; i++) {
-//                try {
-//                    groups = future.get();
-//                } catch (Throwable thrown) {
-//                    log.error("Error while waiting for thread completion");
-//                }
-//                // Sleep for 1 second
-//
-//                if (groups.size() > 0 ) break;
-//                log.debug("Waiting 1 second for DataONE group lookup");
-//                Thread.sleep(1000);
-//            }
 
             if (groups != null) {
                 smm.setGroups(groups);

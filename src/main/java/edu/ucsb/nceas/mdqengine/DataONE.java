@@ -4,11 +4,12 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import edu.ucsb.nceas.mdqengine.exception.MetadigProcessException;
 import org.dataone.client.auth.AuthTokenSession;
+import org.dataone.client.rest.DefaultHttpMultipartRestClient;
+import org.dataone.client.rest.HttpMultipartRestClient;
 import org.dataone.client.rest.MultipartRestClient;
 import org.dataone.client.v2.impl.MultipartD1Node;
 import org.dataone.service.types.v1.Session;
 import edu.ucsb.nceas.mdqengine.exception.MetadigException;
-import org.dataone.client.rest.DefaultHttpMultipartRestClient;
 import org.dataone.client.v2.impl.MultipartCNode;
 import org.dataone.client.v2.impl.MultipartMNode;
 import org.dataone.service.types.v1.Subject;
@@ -36,7 +37,7 @@ public class DataONE {
     public static SubjectInfo getSubjectInfo(Subject rightsHolder, MultipartCNode CNnode,
                                              Session session) throws MetadigProcessException {
 
-        log.debug("Getting subject info for: " + rightsHolder.getValue());
+        log.trace("Getting subject info for: " + rightsHolder.getValue());
         //MultipartCNode cnNode = null;
         MetadigProcessException metadigException = null;
         SubjectInfo subjectInfo = null;
@@ -68,7 +69,7 @@ public class DataONE {
 
         // First create an HTTP client
         try {
-            mrc = new DefaultHttpMultipartRestClient();
+            mrc = new HttpMultipartRestClient();
         } catch (Exception ex) {
             log.error("Error creating rest client: " + ex.getMessage());
             metadigException = new MetadigProcessException("Unable to get collection pids");
@@ -80,10 +81,10 @@ public class DataONE {
 
         // Now create a DataONE object that uses the rest client
         if (isCN) {
-            log.debug("creating cn MultipartMNode" + ", subjectId: " + session.getSubject().getValue());
+            log.debug("creating cn MultipartMNode");
             d1Node = new MultipartCNode(mrc, serviceUrl, session);
         } else {
-            log.debug("creating mn MultipartMNode" + ", subjectId: " + session.getSubject().getValue());
+            log.debug("creating mn MultipartMNode");
             d1Node = new MultipartMNode(mrc, serviceUrl, session);
         }
         return d1Node;
@@ -98,9 +99,6 @@ public class DataONE {
      * @return an XML document containing the query result
      * @throws Exception
      */
-    //public static Document querySolr(String queryStr, int startPos, int countRequested, MultipartCNode cnNode,
-    //                                 MultipartMNode mnNode, Boolean isCN,
-    //                                 Session session) throws MetadigProcessException {
     public static Document querySolr(String queryStr, int startPos, int countRequested, MultipartD1Node d1Node,
                 Session session) throws MetadigProcessException {
 
@@ -110,10 +108,10 @@ public class DataONE {
         InputStream qis = null;
         MetadigProcessException metadigException = null;
 
-        log.debug("Sending query: " + queryStr);
+        log.trace("Sending query: " + queryStr);
         try {
             qis = d1Node.query(session, "solr", queryStr);
-            log.debug("Sent query");
+            log.trace("Sent query");
         } catch (Exception e) {
             log.error("Error retrieving pids: " + e.getMessage());
             metadigException = new MetadigProcessException("Unable to query dataone node: " + e.getMessage());
@@ -121,19 +119,19 @@ public class DataONE {
             throw metadigException;
         }
 
-        log.debug("Creating xml doc with results");
+        log.trace("Creating xml doc with results");
         Document xmldoc = null;
         DocumentBuilder builder = null;
 
         try {
             // If results were returned, create an XML document from them
-            log.debug("qis available: " + qis.available());
+            log.trace("qis available: " + qis.available());
             if (qis.available() > 0) {
                 try {
                     DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
                     builder = factory.newDocumentBuilder();
                     xmldoc = builder.parse(new InputSource(qis));
-                    log.debug("Created xml doc: " + xmldoc.toString());
+                    log.trace("Created xml doc: " + xmldoc.toString());
                 } catch (Exception e) {
                     log.error("Unable to create w3c Document from input stream", e);
                     e.printStackTrace();
@@ -145,13 +143,13 @@ public class DataONE {
                 qis.close();
             }
         } catch (IOException ioe) {
-            log.debug("IO exception: " + ioe.getMessage());
+            log.trace("IO exception: " + ioe.getMessage());
             metadigException = new MetadigProcessException("Unable prepare query result xml document: " + ioe.getMessage());
             metadigException.initCause(ioe);
             throw metadigException;
         }
 
-        log.debug("Created results xml doc");
+        log.trace("Created results xml doc");
 
         return xmldoc;
     }
@@ -169,10 +167,10 @@ public class DataONE {
 
         // query Solr - either the member node or cn, for the project 'solrquery' field
         if (authToken == null || authToken.isEmpty()) {
-            log.debug("Creating public sessioni");
+            log.trace("Creating public sessioni");
             session = new Session();
         } else {
-            log.debug("Creating authentication session for subjectId: " + subjectId + ", token: " + authToken.substring(0, 5) + "...");
+            log.trace("Creating authentication session for subjectId: " + subjectId + ", token: " + authToken.substring(0, 5) + "...");
             session = new AuthTokenSession(authToken);
         }
 
@@ -180,7 +178,7 @@ public class DataONE {
             Subject subject = new Subject();
             subject.setValue(subjectId);
             session.setSubject(subject);
-            log.debug("Set session subjectId to: " + session.getSubject().getValue());
+            log.trace("Set session subjectId to: " + session.getSubject().getValue());
         }
 
         return session;
@@ -199,18 +197,18 @@ public class DataONE {
         if (nodeStr.matches("^\\s*urn:node:.*")) {
             if (nodeStr.matches("^\\s*urn:node:CN.*$|^\\s*urn:node:cn.*$")) {
                 isCN = true;
-                log.debug("The nodeId is for a CN: " + nodeStr);
+                log.trace("The nodeId is for a CN: " + nodeStr);
             } else {
-                log.debug("The nodeId is not for a CN: " + nodeStr);
+                log.trace("The nodeId is not for a CN: " + nodeStr);
                 isCN = false;
             }
         } else {
             // match cn service url e.g. "https://cn.dataone.org/cn"
             if (nodeStr.matches("^\\s*https*://cn.*?\\.dataone\\.org.*$|https*://cn.*?\\.test\\.dataone\\.org.*$")) {
                 isCN = true;
-                log.debug("The service URL is for a CN: " + nodeStr);
+                log.trace("The service URL is for a CN: " + nodeStr);
             } else {
-                log.debug("The service URL is not for a CN: " + nodeStr);
+                log.trace("The service URL is not for a CN: " + nodeStr);
                 isCN = false;
             }
         }

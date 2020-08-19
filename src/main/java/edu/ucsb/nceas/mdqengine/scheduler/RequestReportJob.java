@@ -124,21 +124,13 @@ public class RequestReportJob implements Job {
         JobDataMap dataMap = context.getJobDetail().getJobDataMap();
 
         String taskName = dataMap.getString("taskName");
-        log.debug("taskName: " + taskName);
         String taskType = dataMap.getString("taskType");
-        log.debug("taskType: " + taskType);
         String pidFilter = dataMap.getString("pidFilter");
-        log.debug("pidFilter: " + pidFilter);
         String suiteId = dataMap.getString("suiteId");
-        log.debug("suiteId: " + suiteId);
         String nodeId = dataMap.getString("nodeId");
-        log.debug("nodeId: " + nodeId);
         String startHarvestDatetimeStr = dataMap.getString("startHarvestDatetime");
-        log.debug("startHavestDatetimeStr: " + startHarvestDatetimeStr);
         int harvestDatetimeInc = dataMap.getInt("harvestDatetimeInc");
-        log.debug("harvestDatetimeInc: " + harvestDatetimeInc);
         int countRequested = dataMap.getInt("countRequested");
-        log.debug("countRequested: " + countRequested);
         MultipartRestClient mrc = null;
         MultipartMNode mnNode = null;
         MultipartCNode cnNode = null;
@@ -162,7 +154,7 @@ public class RequestReportJob implements Job {
             throw jee;
         }
 
-        log.debug("Executing task for node: " + nodeId + ", suiteId: " + suiteId);
+        log.info("Executing task " + taskType + ", " + taskName + " for node: " + nodeId + ", suiteId: " + suiteId);
 
         try {
             mrc = new HttpMultipartRestClient();
@@ -183,7 +175,7 @@ public class RequestReportJob implements Job {
             mnNode = new MultipartMNode(mrc, nodeServiceUrl, session);
         }
 
-        // Don't know node type yet from the id, so have to manually check if it's a CN
+        // Get a connection to the database
         MDQStore store = null;
 
         try {
@@ -208,13 +200,9 @@ public class RequestReportJob implements Job {
         DateTime currentDT = new DateTime(DateTimeZone.UTC);
         DateTimeFormatter dtfOut = DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ss.SS'Z'");
         String currentDatetimeStr = dtfOut.print(currentDT);
-
         DateTime startDateTimeRange = null;
         DateTime endDateTimeRange = null;
-
         String lastHarvestDateStr = null;
-        //edu.ucsb.nceas.mdqengine.model.Node node;
-        //node = store.getNode(nodeId, jobName);
 
         Task task;
         task = store.getTask(taskName, taskType);
@@ -349,8 +337,8 @@ public class RequestReportJob implements Job {
         Date endDate = new Date(msSinceEpoch);
 
         try {
-            // Even though MultipartMNode and MultipartCNode have the same parent class, their interfaces are differnt, so polymorphism
-            // isn't happening here.
+            // Even though MultipartMNode and MultipartCNode have the same parent class D1Node, the interface for D1Node doesn't
+            // include listObjects (it should), so we have to maintain a cnNode and mnNode.
             if(isCN) {
                 objList = cnNode.listObjects(session, startDate, endDate, formatId, nodeRef, identifier, startCount, countRequested);
             } else {

@@ -7,33 +7,30 @@ import java.util.Collection;
 
 public interface MDQStore {
 	
-	public Collection<String> listSuites();
-	public Suite getSuite(String id);
-	public void createSuite(Suite suite);
-	public void updateSuite(Suite suite);
-	public void deleteSuite(Suite suite);
+	Collection<String> listSuites();
+	Suite getSuite(String id);
+	void createSuite(Suite suite);
+	void updateSuite(Suite suite);
+	void deleteSuite(Suite suite);
 
-	public Collection<String> listChecks();
-	public Check getCheck(String id);
-	public void createCheck(Check check);
-	public void updateCheck(Check check);
-	public void deleteCheck(Check check);
+	Collection<String> listChecks();
+	Check getCheck(String id);
+	void createCheck(Check check);
+	void updateCheck(Check check);
+	void deleteCheck(Check check);
 	
-	public Collection<String> listRuns();
-	public Run getRun(String suite, String id ) throws MetadigStoreException;
-	public void saveRun(Run run) throws MetadigStoreException;
-	public void createRun(Run run);
-	public void deleteRun(Run run);
+	Collection<String> listRuns();
+	Run getRun(String suite, String id ) throws MetadigStoreException;
+	void saveRun(Run run) throws MetadigStoreException;
+	void createRun(Run run);
+	void deleteRun(Run run);
 
-	public void shutdown();
+	void shutdown();
 
-	public boolean isAvailable();
-	public void renew() throws MetadigStoreException;
-//
-//	public Node getNode(String nodeId, String jobName);
-//	public void saveNode(Node node) throws MetadigStoreException;
+	boolean isAvailable();
+	void renew() throws MetadigStoreException;
 
-	public Task getTask(String taskName, String taskType);
-	public void saveTask(Task task) throws MetadigStoreException;
+	Task getTask(String taskName, String taskType);
+	void saveTask(Task task) throws MetadigStoreException;
 
 }

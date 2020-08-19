@@ -48,7 +48,7 @@ public class DatabaseStore implements MDQStore {
     private DataSource dataSource = null;
 
     public DatabaseStore () throws MetadigStoreException {
-        log.debug("Initializing a new DatabaseStore to " + dbUrl + ".");
+        log.trace("Initializing a new DatabaseStore to " + dbUrl + ".");
         this.init();
     }
 
@@ -57,7 +57,7 @@ public class DatabaseStore implements MDQStore {
      */
     private void init() throws MetadigStoreException {
 
-        log.debug("initializing connection");
+        log.trace("initializing connection");
         String additionalDir = null;
         try {
             MDQconfig cfg = new MDQconfig();
@@ -90,7 +90,7 @@ public class DatabaseStore implements MDQStore {
             throw(mse);
         }
 
-        log.debug("Connection initialized");
+        log.trace("Connection initialized");
 
         PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
 
@@ -111,7 +111,6 @@ public class DatabaseStore implements MDQStore {
                 Suite suite = null;
                 try {
                     URL url = resource.getURL();
-                    //log.debug("Loading suite found at: " + url.toString());
                     String xml = IOUtils.toString(url.openStream(), "UTF-8");
                     suite = (Suite) XmlMarshaller.fromXml(xml, Suite.class);
                 } catch (JAXBException | IOException | SAXException e) {
@@ -123,7 +122,7 @@ public class DatabaseStore implements MDQStore {
             }
         }
         if(this.isAvailable()) {
-            log.debug("Initialized database store: opened database successfully");
+            log.trace("Initialized database store: opened database successfully");
         } else {
             throw new MetadigStoreException("Error initializing database, connection not available");
         }
@@ -153,13 +152,13 @@ public class DatabaseStore implements MDQStore {
         MetadigStoreException me = new MetadigStoreException("Unable get quality report to the datdabase.");
         // Select records from the 'runs' table
         try {
-            log.debug("preparing statement for query");
+            log.trace("preparing statement for query");
             String sql = "select * from runs where metadata_id = ? and suite_id = ?";
             stmt = conn.prepareStatement(sql);
             stmt.setString(1, metadataId);
             stmt.setString(2, suiteId);
 
-            log.debug("issuing query: " + sql);
+            log.trace("issuing query: " + sql);
             ResultSet rs = stmt.executeQuery();
             if(rs.next()) {
                 mId = rs.getString("metadata_id");
@@ -176,9 +175,9 @@ public class DatabaseStore implements MDQStore {
                 // have to be manually added after the JAXB marshalling has created the run object.
                 run.setSequenceId(seqId);
                 run.setIsLatest(isLatest);
-                log.debug("Retrieved run successfully for metadata id: " + run.getObjectIdentifier());
+                log.trace("Retrieved run successfully for metadata id: " + run.getObjectIdentifier());
             } else {
-                log.debug("Run not found for metadata id: " + metadataId + ", suiteId: " + suiteId);
+                log.trace("Run not found for metadata id: " + metadataId + ", suiteId: " + suiteId);
             }
         } catch ( Exception e ) {
             log.error( e.getClass().getName()+": "+ e.getMessage());
@@ -210,8 +209,6 @@ public class DatabaseStore implements MDQStore {
         String sequenceId = run.getSequenceId();
         Boolean isLatest = run.getIsLatest();
         String resultStr = null;
-        //DateTime now = new DateTime();
-        //OffsetDateTime dateTime = OffsetDateTime.now();
         Timestamp dateTime = Timestamp.from(Instant.now());
         run.setTimestamp(dateTime);
 
@@ -288,7 +285,7 @@ public class DatabaseStore implements MDQStore {
         }
 
         // Next, insert a record into the child table ('runs')
-        log.debug("Records created successfully");
+        log.trace("Records created successfully");
     }
 
     /*
@@ -296,7 +293,7 @@ public class DatabaseStore implements MDQStore {
      */
     public boolean isAvailable() {
         boolean reachable = false;
-        log.debug("Checking if store (i.e. sql connection) is available.");
+        log.trace("Checking if store (i.e. sql connection) is available.");
         try {
             reachable = conn.isValid(10);
         } catch (Exception e ) {
@@ -310,7 +307,7 @@ public class DatabaseStore implements MDQStore {
      */
     public void renew() throws MetadigStoreException {
         if(!this.isAvailable()) {
-            log.debug("Renewing connection to database");
+            log.trace("Renewing connection to database");
             this.init();
         }
     }
@@ -319,7 +316,7 @@ public class DatabaseStore implements MDQStore {
 
         try {
             conn.close();
-            log.debug("Successfully closed database");
+            log.trace("Successfully closed database");
         } catch ( java.sql.SQLException e) {
             log.error("Error closing database: " + e.getMessage());
         }
@@ -355,7 +352,7 @@ public class DatabaseStore implements MDQStore {
         }
 
         // Next, insert a record into the child table ('runs')
-        log.debug("Records created successfully");
+        log.trace("Records created successfully");
     }
 
     public Task getTask(String taskName, String taskType) {
@@ -368,13 +365,13 @@ public class DatabaseStore implements MDQStore {
 
         // Select records from the 'nodes' table
         try {
-            log.debug("preparing statement for query");
+            log.trace("preparing statement for query");
             String sql = "select * from tasks where task_name = ? and task_type = ?";
             stmt = conn.prepareStatement(sql);
             stmt.setString(1, taskName);
             stmt.setString(2, taskType);
 
-            log.debug("issuing query: " + sql);
+            log.trace("issuing query: " + sql);
             ResultSet rs = stmt.executeQuery();
             if(rs.next()) {
                 task.setTaskName(rs.getString("task_name"));
@@ -383,7 +380,7 @@ public class DatabaseStore implements MDQStore {
                 rs.close();
                 stmt.close();
             } else {
-                log.debug("No results returned from query");
+                log.trace("No results returned from query");
             }
         } catch ( Exception e ) {
             log.error( e.getClass().getName()+": "+ e.getMessage());

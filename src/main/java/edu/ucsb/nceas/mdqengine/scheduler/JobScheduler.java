@@ -85,6 +85,7 @@ public class JobScheduler {
             cronSchedule   = record.get("cron-schedule").trim();
             params         = record.get("params").trim();
             log.debug("Task type: " + taskType);
+            log.debug("Task name: " + taskName);
             log.debug("cronSchedule: " + cronSchedule);
             params = params.startsWith("\"") ? params.substring(1) : params;
             params = params.endsWith("\"") ? params.substring(0, params.length()-1) : params;
@@ -182,7 +183,6 @@ public class JobScheduler {
             }
 
             try {
-                log.debug("Setting task");
                 // Currently there is only taskType="quality", but there could be more in the future!
                 JobDetail job = null;
                 if(taskType.equals("quality")) {
@@ -223,13 +223,11 @@ public class JobScheduler {
                             .build();
                 }
 
-                log.debug("Setting trigger");
                 CronTrigger trigger = newTrigger()
                     .withIdentity(taskName + "-trigger", taskGroup)
                     .withSchedule(cronSchedule(cronSchedule))
                     .build();
 
-                log.debug("Scheduling task");
                 scheduler.scheduleJob(job, trigger);
 
             } catch (SchedulerException se) {

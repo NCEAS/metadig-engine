@@ -3,6 +3,7 @@ package edu.ucsb.nceas.mdqengine.scheduler;
 import edu.ucsb.nceas.mdqengine.Controller;
 import edu.ucsb.nceas.mdqengine.MDQconfig;
 import edu.ucsb.nceas.mdqengine.DataONE;
+import edu.ucsb.nceas.mdqengine.exception.MetadigException;
 import edu.ucsb.nceas.mdqengine.exception.MetadigProcessException;
 import edu.ucsb.nceas.mdqengine.exception.MetadigStoreException;
 import edu.ucsb.nceas.mdqengine.model.Task;
@@ -16,11 +17,7 @@ import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
-import org.dataone.client.rest.DefaultHttpMultipartRestClient;
-import org.dataone.client.rest.MultipartRestClient;
-import org.dataone.client.v2.impl.MultipartCNode;
 import org.dataone.client.v2.impl.MultipartD1Node;
-import org.dataone.client.v2.impl.MultipartMNode;
 import org.dataone.service.types.v1.*;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
@@ -33,8 +30,6 @@ import javax.xml.xpath.*;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * <p>
@@ -74,7 +69,7 @@ public class RequestScorerJob implements Job {
     }
 
     // Since Quartz will re-instantiate a class every time it
-    // gets executed, members non-static member variables can
+    // gets executed, non-static member variables can
     // not be used to maintain state!
 
     /**
@@ -146,13 +141,12 @@ public class RequestScorerJob implements Job {
         try {
             cfg = new MDQconfig();
             qualityServiceUrl = cfg.getString("quality.serviceUrl");
-            log.debug("nodeId from request: " + nodeId);
+            log.trace("nodeId from request: " + nodeId);
             String nodeAbbr = nodeId.replace("urn:node:", "");
             authToken = cfg.getString(nodeAbbr + ".authToken");
             subjectId = cfg.getString(nodeAbbr + ".subjectId");
-            // TODO:  Cache the node values from the CN listNode service
             nodeServiceUrl = cfg.getString(nodeAbbr + ".serviceUrl");
-            log.debug("nodeServiceUrl: " + nodeServiceUrl);
+            log.trace("nodeServiceUrl: " + nodeServiceUrl);
         } catch (ConfigurationException | IOException ce) {
             JobExecutionException jee = new JobExecutionException("Error executing task.");
             jee.initCause(ce);
@@ -271,12 +265,11 @@ public class RequestScorerJob implements Job {
                 throw jee;
             }
         } else {
-            log.debug("Getting portal pids to process...");
+            Integer allIds = 0;
             boolean morePids = true;
             while (morePids) {
                 ArrayList<String> pidsToProcess = null;
-                log.debug("startCount: " + startCount);
-                log.debug("countRequested:" + countRequested);
+                log.trace("Getting portal pids to process, startCount: " + startCount + ", countRequested: " + countRequested);
 
                 try {
                     result = getPidsToProcess(d1Node, session, pidFilter, startDTRstr, endDTRstr, startCount, countRequested);
@@ -288,7 +281,7 @@ public class RequestScorerJob implements Job {
                     throw jee;
                 }
 
-                log.info("Found " + resultCount + " seriesIds" + " for date: " + startDTRstr + " at servierUrl: " + nodeServiceUrl);
+                log.trace(taskName + ": found " + resultCount + " seriesIds" + " for date: " + startDTRstr + " at servierUrl: " + nodeServiceUrl);
                 for (String pidStr : pidsToProcess) {
                     try {
                         submitScorerRequest(qualityServiceUrl, pidStr, suiteId, nodeId, formatFamily);
@@ -304,15 +297,12 @@ public class RequestScorerJob implements Job {
                 if (resultCount >= countRequested) {
                     morePids = true;
                     startCount = startCount + resultCount;
-                    log.info("Paging through more results, current start is " + startCount);
+                    log.trace("Paging through more results, current start is " + startCount);
                 } else {
                     morePids = false;
 
                     // Record the new "last harvested" date
                     task.setLastHarvestDatetime(endDTRstr);
-                    log.debug("taskName: " + task.getTaskName());
-                    log.debug("taskType: " + task.getTaskType());
-                    log.debug("lastharvestdate: " + task.getLastHarvestDatetime());
 
                     try {
                         store.saveTask(task);
@@ -360,7 +350,7 @@ public class RequestScorerJob implements Job {
         String queryStr = "?q=formatId:" + pidFilter + "+-obsoletedBy:*" + "+dateUploaded:[" + startHarvestDatetimeStr + "%20TO%20"
                 + endHarvestDatetimeStr + "]"
                 + "&fl=seriesId&q.op=AND";
-        log.debug("query: " + queryStr);
+        log.trace("query: " + queryStr);
 
         // Send the query to DataONE Solr to retrieve portal seriesIds for a given time frame
 
@@ -370,7 +360,7 @@ public class RequestScorerJob implements Job {
         int thisResultLength;
         // Now setup the xpath to retrieve the ids returned from the collection query.
         try {
-            log.debug("Compiling xpath for seriesId");
+            log.trace("Compiling xpath for seriesId");
             // Extract the collection query from the Solr result XML
             XPathFactory xPathfactory = XPathFactory.newInstance();
             xpath = xPathfactory.newXPath();
@@ -384,9 +374,7 @@ public class RequestScorerJob implements Job {
 
         // Loop through the Solr result. As the result may be large, page through the results, accumulating
         // the pids returned into a ListResult object.
-
-        //log.debug("Getting portal seriesIds from Solr using subjectId: " + subjectId + ", servicerUrl: " + serviceUrl);
-        log.debug("Getting portal seriesIds from Solr " );
+        log.trace("Getting portal seriesIds from Solr " );
         int startPos = startCount;
 
         do {
@@ -408,13 +396,13 @@ public class RequestScorerJob implements Job {
             }
             String currentPid = null;
             thisResultLength = xpathResult.getLength();
-            log.debug("Got " + thisResultLength + " pids this query");
+            log.trace("Got " + thisResultLength + " pids this query");
             if(thisResultLength == 0) break;
             for (int index = 0; index < xpathResult.getLength(); index++) {
                 node = xpathResult.item(index);
                 currentPid = node.getTextContent();
                 pids.add(currentPid);
-                log.debug("adding pid: " + currentPid);
+                log.trace("adding pid: " + currentPid);
             }
 
             startPos += thisResultLength;
@@ -453,7 +441,6 @@ public class RequestScorerJob implements Job {
 
             // send to service
             log.debug("submitting scores request : " + scorerServiceUrl);
-            //post.setEntity((HttpEntity) entity);
             CloseableHttpClient client = HttpClients.createDefault();
             CloseableHttpResponse response = client.execute(post);
 

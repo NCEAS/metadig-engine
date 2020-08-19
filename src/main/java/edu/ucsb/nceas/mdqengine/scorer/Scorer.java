@@ -99,14 +99,6 @@ public class Scorer {
         ArrayList getResult() {
             return this.result;
         }
-
-//        void setResultCount(Integer count) {
-//            this.resultCount = count;
-//        }
-//
-//        Integer getResultCount() {
-//            return this.resultCount;
-//        }
     }
 
     public static void main(String[] argv) throws Exception {
