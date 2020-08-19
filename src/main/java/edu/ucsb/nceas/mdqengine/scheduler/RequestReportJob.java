@@ -173,7 +173,7 @@ public class RequestReportJob implements Job {
         Session session = DataONE.getSession(subjectId, authToken);
 
         // Don't know node type yet from the id, so have to manually check if it's a CN
-        Boolean isCN = isCN(nodeServiceUrl);
+        Boolean isCN = DataONE.isCN(nodeServiceUrl);
         if(isCN) {
             cnNode = new MultipartCNode(mrc, nodeServiceUrl, session);
         } else {
@@ -418,6 +418,7 @@ public class RequestReportJob implements Job {
     public boolean runExists(String pid, String suiteId, MDQStore store) throws MetadigStoreException {
 
         boolean found = false;
+        Date runDateSystemMetadataModified = null;
 
         if(!store.isAvailable()) {
             try {
@@ -480,21 +481,23 @@ public class RequestReportJob implements Job {
         SimpleMultipartEntity entity = new SimpleMultipartEntity();
         entity.addFilePart("document", objectIS);
 
-    private Boolean isCN(String serviceUrl) {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        TypeMarshaller.marshalTypeToOutputStream(sysmeta, baos);
+        entity.addFilePart("systemMetadata", new ByteArrayInputStream(baos.toByteArray()));
 
-        Boolean isCN = false;
-        // Identity node as either a CN or MN based on the serviceUrl
-        String pattern = "https*://cn.*?\\.dataone\\.org|https*://cn.*?\\.test\\.dataone\\.org";
-        Pattern r = Pattern.compile(pattern);
-        Matcher m = r.matcher(serviceUrl);
-        if (m.find()) {
-            isCN = true;
-            log.debug("service URL is for a CN: " + serviceUrl);
-        } else {
-            log.debug("service URL is not for a CN: " + serviceUrl);
-            isCN = false;
+        // make sure we get XML back
+        post.addHeader("Accept", "application/xml");
+
+        // send to service
+        log.trace("submitting: " + qualityServiceUrl);
+        post.setEntity((HttpEntity) entity);
+        CloseableHttpClient client = HttpClients.createDefault();
+        CloseableHttpResponse response = client.execute(post);
+
+        // retrieve results
+        HttpEntity reponseEntity = response.getEntity();
+        if (reponseEntity != null) {
+            runResultIS = reponseEntity.getContent();
         }
-
-        return isCN;
     }
 }
