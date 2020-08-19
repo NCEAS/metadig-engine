@@ -21,11 +21,9 @@ import org.apache.solr.client.solrj.beans.BindingException;
 import org.apache.solr.client.solrj.impl.HttpSolrClient;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.client.solrj.util.ClientUtils;
-import org.dataone.client.rest.DefaultHttpMultipartRestClient;
 import org.dataone.client.rest.MultipartRestClient;
 import org.dataone.client.v2.impl.MultipartCNode;
-import org.dataone.client.v2.impl.MultipartD1Node; // Don't include org.dataone.client.rest.MultipartD1Node (this is what IDEA selects)
-import org.dataone.client.v2.impl.MultipartMNode;
+import org.dataone.client.v2.impl.MultipartD1Node;
 import org.dataone.service.types.v1.Session;
 import org.dataone.service.types.v1.Subject;
 import org.dataone.service.types.v1.Group;
@@ -148,9 +146,8 @@ public class Scorer {
                 String nodeServiceUrl = null;
                 String label = null;
                 String title = null;
-                MultipartRestClient mrc = null;
-                MultipartMNode mnNode = null;
-                MultipartCNode cnNode = null;
+                //MultipartRestClient mrc = null;
+                MultipartD1Node d1Node = null;
                 GraphType graphType = null;
 
                 //long startTime = System.nanoTime();
@@ -201,9 +198,6 @@ public class Scorer {
                     // Pids associated with a collection, based on query results using 'collectionQuery' field in solr.
                     ArrayList<String> collectionPids = null;
 
-                    // The harvesting and evaluation of the collectionQuery is based on the nodeId that is passed in, i.e.
-                    // If an MN is specified, then the collection (portal) Solr entry will be obtained from the MN, and the
-                    // collectionQuery string will also be evaluated on that node.
                     String nodeAbbr = nodeId.replace("urn:node:", "");
                     authToken = cfg.getString(nodeAbbr + ".authToken");
                     subjectId = cfg.getString(nodeAbbr + ".subjectId");
@@ -211,45 +205,20 @@ public class Scorer {
                     nodeServiceUrl = cfg.getString(nodeAbbr + ".serviceUrl");
 
                     HashMap<String, Object> variables = new HashMap<>();
-                    // Create the graph.
-                    // Two types of graphs are currently supported:
-                    // - a graph for all pids included in a DataONE collection (portal), and a specified suite id
-                    // - a graph for specified filters: member node, suite id, metadata format
+
                     MetadigFile mdFile = new MetadigFile();
                     Graph graph = new Graph();
-                    // If creating a graph for a collection, get the set of pids associated with the collection.
-                    // Only scores for these pids will be included in the graph.
-
-                    try {
-                        mrc = new DefaultHttpMultipartRestClient();
-                    } catch (Exception e) {
-                        log.error("Error creating rest client: " + e.getMessage());
-                        JobExecutionException jee = new JobExecutionException(e);
-                        jee.setRefireImmediately(false);
-                        throw jee;
-                    }
-
                     Session session = DataONE.getSession(subjectId, authToken);
 
-                    // Don't know node type yet from the id, so have to manually check if it's a CN
-                    Boolean isCN = DataONE.isCN(nodeServiceUrl);
+                    d1Node = DataONE.getMultipartD1Node(session, nodeServiceUrl);
 
-                    MultipartD1Node d1Node = null;
-                    if(isCN) {
-                        //cnNode = new MultipartCNode(mrc, nodeServiceUrl, session);
-                        d1Node = new MultipartCNode(mrc, nodeServiceUrl, session);
-                        log.debug("Created cnNode for serviceUrl: " + nodeServiceUrl);
-                    } else {
-                        //mnNode = new MultipartMNode(mrc, nodeServiceUrl, session);
-                        d1Node = new MultipartMNode(mrc, nodeServiceUrl, session);
-                        log.debug("Created mnNode for serviceUrl: " + nodeServiceUrl);
-                    }
-
-                    // Check if this is a "node" collection. For "node" collections, all scores for a member node
-                    // are used to create the assessment graph, so we don't need to get the collection pids as is
-                    // done for portals (by evaluating the Solr collectionQuery). Therefor, getCollectionPids doesn't
-                    // need to be called and we can proceed directly to getting the quality scores from the quality
-                    // Solr server.
+                    // Quality scores must be retrieved from the quality Solr server from which a graph is created.
+                    // There are two
+                    // Check if this is a "node" collection. For "node" collections, all scores from the quality
+                    // Solr server with 'datasource' = nodeId are used to create the assessment graph, so we don't need
+                    // to get the collection pids. However, this is done for portals (by evaluating the DataONE Solr collectionQuery).
+                    // Therefor, for a "node" collection, getCollectionPids doesn't need to be called and we can proceed directly
+                    // to getting the quality scores from the quality Solr server.
                     if (collectionId.matches("^\\s*urn:node:.*")) {
                         graphType = GraphType.CUMULATIVE;
                         log.debug("Processing a member node request, skipping step of getting collection pids (not required).");
@@ -290,6 +259,7 @@ public class Scorer {
                         log.info("# of quality scores returned: " + scores.size());
                     }
 
+                    // Create the data file used by the graphing method
                     File scoreFile = gfr.createScoreFile(scores);
                     log.debug("Created score file: " + scoreFile.getPath());
 
@@ -304,13 +274,11 @@ public class Scorer {
 
                     // Generate a temporary graph file based on the quality scores
                     log.debug("Creating graph for collection id: " + collectionId);
-                    //String filePath = graph.create(GraphType.CUMULATIVE, title, scoreFile.getPath());
                     String filePath = graph.create(graphType, title, scoreFile.getPath());
+
                     // Now save the graphics file to permanent storage
                     String outfile;
-
                     DateTime createDateTime = DateTime.now();
-
                     mdFile.setCreationDatetime(createDateTime);
                     mdFile.setPid(collectionId);
                     mdFile.setSuiteId(suiteId);
@@ -425,17 +393,17 @@ public class Scorer {
         org.w3c.dom.Node node = null;
         String label = null;
         String rightsHolder = null;
-        MultipartRestClient mrc = null;
-        MultipartCNode CNnode = null;
+        //MultipartRestClient mrc = null;
+        MultipartCNode cnNode = null;
         Session CNsession = null;
 
         try {
 
             CNsession = DataONE.getSession(CNsubjectId, CNauthToken);
-            //        // Only CNs can call the 'subjectInfo' service (aka accounts), so we have to use
+            // Only CNs can call the 'subjectInfo' service (aka accounts), so we have to use
             // a MultipartCNode instance here.
             try {
-                CNnode = (MultipartCNode) DataONE.getMultipartD1Node(CNsession, CNserviceUrl);
+                cnNode = (MultipartCNode) DataONE.getMultipartD1Node(CNsession, CNserviceUrl);
             } catch (Exception ex) {
                 metadigException = new MetadigProcessException("Unable to create multipart D1 node: " + ex.getMessage());
                 metadigException.initCause(ex);
@@ -523,7 +491,7 @@ public class Scorer {
         subject.setValue(rightsHolder);
         // The subject info can only be obtained from a CN, so use the CN auth info for the current DataONE environment,
         // which should be configured in the metadig.properties file
-        SubjectInfo subjectInfo = DataONE.getSubjectInfo(subject, CNnode, CNsession);
+        SubjectInfo subjectInfo = DataONE.getSubjectInfo(subject, cnNode, CNsession);
         String groupStr = null;
 
         groupStr = "(readPermission:" + "\"" + rightsHolder
@@ -584,7 +552,7 @@ public class Scorer {
         do {
             //TODO: check that a result was returned
             // Note: the collectionQuery is always evaluated on the CN, so that the entire DataONE network is queried.
-            xmldoc = DataONE.querySolr(queryStr, startPos, countRequested, CNnode, CNsession);
+            xmldoc = DataONE.querySolr(queryStr, startPos, countRequested, cnNode, CNsession);
             if(xmldoc == null) {
                 log.info("no values returned from query");
                 break;
