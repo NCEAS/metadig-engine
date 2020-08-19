@@ -103,9 +103,6 @@ public class RequestScorerJob implements Job {
             throws JobExecutionException {
 
         String qualityServiceUrl  = null;
-        String CNsubjectId = null;
-        String CNauthToken = null;
-        String CNserviceUrl = null;
         MDQconfig cfg = null;
 
         JobKey key = context.getJobDetail().getKey();
@@ -123,20 +120,17 @@ public class RequestScorerJob implements Job {
         // Number of pids to get each query (this number of pids will be fetched each query until all pids are obtained)
         int countRequested = dataMap.getInt("countRequested");
         String requestType = null;
-        if (taskType.equalsIgnoreCase("score")) {
-            requestType = dataMap.getString("requestType");
-        }
-        // TODO: add formatFamily to scheduler request
         String formatFamily = null;
-        MultipartRestClient mrc = null;
-        MultipartMNode mnNode = null;
-        MultipartCNode cnNode = null;
-
+        MultipartD1Node d1Node = null;
         String authToken = null;
         String subjectId = null;
         String nodeServiceUrl = null;
 
-        log.info("Executing task: " + taskName + ", taskType: " + taskType);
+        if (taskType.equalsIgnoreCase("score")) {
+            requestType = dataMap.getString("requestType");
+        }
+
+        log.info("Executing task " + taskType + ", " + taskName + " for node: " + nodeId + ", suiteId: " + suiteId);
 
         try {
             cfg = new MDQconfig();
@@ -153,33 +147,19 @@ public class RequestScorerJob implements Job {
             throw jee;
         }
 
-        try {
-            mrc = new DefaultHttpMultipartRestClient();
-        } catch (Exception e) {
-            log.error("Error creating rest client: " + e.getMessage());
-            JobExecutionException jee = new JobExecutionException(e);
-            jee.setRefireImmediately(false);
-            throw jee;
-        }
-
         Session session = DataONE.getSession(subjectId, authToken);
 
-        // Don't know node type yet from the id, so have to manually check if it's a CN
-        Boolean isCN = DataONE.isCN(nodeServiceUrl);
-
-        MultipartD1Node d1Node = null;
-        if(isCN) {
-            //cnNode = new MultipartCNode(mrc, nodeServiceUrl, session);
-            d1Node = new MultipartCNode(mrc, nodeServiceUrl, session);
-            log.debug("Created cnNode for serviceUrl: " + nodeServiceUrl);
-        } else {
-            //mnNode = new MultipartMNode(mrc, nodeServiceUrl, session);
-            d1Node = new MultipartMNode(mrc, nodeServiceUrl, session);
-            log.debug("Created mnNode for serviceUrl: " + nodeServiceUrl);
+        // Get a connection to the DataONE node (CN or MN)
+        try {
+            d1Node = DataONE.getMultipartD1Node(session, nodeServiceUrl);
+        } catch (MetadigException mpe) {
+            mpe.printStackTrace();
+            throw new JobExecutionException(taskName + ": unable to create connection to service URL " + nodeServiceUrl , mpe);
         }
 
         MDQStore store = null;
 
+        // Get stored task info from the last task execution
         try {
             store = new DatabaseStore();
         } catch (Exception e) {
