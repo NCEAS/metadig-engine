@@ -83,7 +83,6 @@ public class RequestReportJob implements Job {
         }
         void setFilteredResultCount(Integer count) { this.filteredResultCount = count; }
         void setLastDateModified(DateTime date) {
-            log.debug("Setter last modified date, date: " + date.toString());
             this.lastDateModifiedDT = date;
         }
 
@@ -91,11 +90,13 @@ public class RequestReportJob implements Job {
 
         public Integer getFilteredResultCount() { return this.filteredResultCount; }
 
-        public DateTime getLastDateModified() { return this.lastDateModifiedDT; }
+        public DateTime getLastDateModified() {
+            return this.lastDateModifiedDT;
+        }
     }
 
     // Since Quartz will re-instantiate a class every time it
-    // gets executed, members non-static member variables can
+    // gets executed, non-static member variables can
     // not be used to maintain state!
 
     /**
@@ -236,17 +237,17 @@ public class RequestReportJob implements Job {
             startDT = new DateTime(lastHarvestDateDT);
         }
 
-        DateTime endDT = new DateTime(startDT);
-        endDT = endDT.plusDays(harvestDatetimeInc);
-        if(endDT.isAfter(currentDT.toInstant())) {
-            endDT = currentDT;
-        }
+//        DateTime endDT = new DateTime(startDT);
+//        endDT = endDT.plusDays(harvestDatetimeInc);
+//        if(endDT.isAfter(currentDT.toInstant())) {
+//            endDT = currentDT;
+//        }
+        DateTime endDT = new DateTime(currentDT);
 
         // If the start and end harvest dates are the same (happens for a new node), then
         // tweak the start so that DataONE listObjects doesn't complain.
         if(startDT == endDT ) {
             startDT = startDT.minusMinutes(1);
-            log.debug("Reset start back 1 minute to: " + startDT);
         }
 
         // Track the sysmeta dateUploaded of the latest harvested pid. This will become the starting time of
@@ -266,7 +267,7 @@ public class RequestReportJob implements Job {
         while(morePids) {
             ArrayList<String> pidsToProcess = null;
             try {
-                result = getPidsToProcess(cnNode, mnNode, isCN, session, suiteId, nodeId, pidFilter, startDTstr, endDTstr, startCount, countRequested, lastDateModifiedDT);
+                result = getPidsToProcess(cnNode, mnNode, isCN, session, suiteId, pidFilter, startDTstr, endDTstr, startCount, countRequested, lastDateModifiedDT);
                 pidsToProcess = result.getResult();
                 totalResultCount = result.getTotalResultCount();
                 filteredResultCount = result.getFilteredResultCount();
@@ -280,7 +281,7 @@ public class RequestReportJob implements Job {
             allPidsCnt = pidsToProcess.size();
             for (String pidStr : pidsToProcess) {
                 try {
-                    log.debug("submitting pid: " + pidStr);
+                    log.debug(taskName + ": submitting pid: " + pidStr);
                     submitReportRequest(cnNode, mnNode, isCN, session, qualityServiceUrl, pidStr, suiteId);
                 } catch (org.dataone.service.exceptions.NotFound nfe) {
                     log.error("Unable to process pid: " + pidStr +  nfe.getMessage());
@@ -362,7 +363,7 @@ public class RequestReportJob implements Job {
         String thisFormatId = null;
         String thisPid = null;
         int pidCount = 0;
-        Date thisDateModified;
+        DateTime thisDateModifiedDT;
 
         if (objList.getCount() > 0) {
             for(ObjectInfo oi: objList.getObjectInfoList()) {
@@ -391,11 +392,11 @@ public class RequestReportJob implements Job {
                     log.trace("adding pid " + thisPid + ", formatId: " + thisFormatId);
                     // If this pid's modified date is after the stored latest encountered modified date, then update
                     // the lastModified date
-                    DateTime thisDateModifiedDT = new DateTime(oi.getDateSysMetadataModified());
+                    thisDateModifiedDT = new DateTime(oi.getDateSysMetadataModified());
                     // Add a millisecond to lastDateModfiedDT so that this pid won't be harvested again (in the event
                     // that this is the last pid to be harvested in this round.
                     if (thisDateModifiedDT.isAfter(lastDateModifiedDT)) {
-                        lastDateModifiedDT = thisDateModifiedDT.plusMillis(1) ;
+                        lastDateModifiedDT = thisDateModifiedDT.plusMillis(1);
                         log.debug("Updated lastDateMoidifed: " + lastDateModifiedDT.toString());
                     }
                 //    }

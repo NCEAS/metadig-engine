@@ -51,6 +51,10 @@ public class RequestScorerJob implements Job {
         Integer resultCount;
         ArrayList<String> result = new ArrayList<>();
 
+        // The scheduler keeps track of Solr 'dateModified' of the last pid harvested,
+        // which will be used as the starting time of the next harvest.
+        private DateTime lastDateModifiedDT = null;
+
         void setResult(ArrayList result) {
             this.result = result;
         }
@@ -66,6 +70,12 @@ public class RequestScorerJob implements Job {
         Integer getResultCount() {
             return this.resultCount;
         }
+
+        void setLastDateModified(DateTime date) {
+            this.lastDateModifiedDT = date;
+        }
+
+        public DateTime getLastDateModified() { return this.lastDateModifiedDT; }
     }
 
     // Since Quartz will re-instantiate a class every time it
@@ -180,10 +190,7 @@ public class RequestScorerJob implements Job {
         // Get current datetime, which may be used for start time range.
         DateTimeZone.setDefault(DateTimeZone.UTC);
         DateTime currentDT = new DateTime(DateTimeZone.UTC);
-        DateTimeFormatter dtfOut = DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ss.SS'Z'");
-        String currentDatetimeStr = dtfOut.print(currentDT);
-        DateTime startDateTimeRange = null;
-        DateTime endDateTimeRange = null;
+        DateTimeFormatter dtfOut = DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
         String lastHarvestDateStr = null;
 
         Task task;
@@ -202,41 +209,54 @@ public class RequestScorerJob implements Job {
             lastHarvestDateStr = task.getLastHarvestDatetime();
         }
 
-        DateTime lastHarvestDate = new DateTime(lastHarvestDateStr);
+        DateTime lastHarvestDateDT = new DateTime(lastHarvestDateStr);
         // Set the search start datetime to the last harvest datetime, unless it is in the
         // future. (This can happen when the previous time range end was for the current day,
         // as the end datetime range for the previous task run will have been stored as the
         // new lastharvestDateTime.
-        DateTime startDTR = null;
-        if(lastHarvestDate.isAfter(currentDT.toInstant())) {
-            startDTR = currentDT;
+        DateTime startDT = null;
+        if(lastHarvestDateDT.isAfter(currentDT.toInstant())) {
+            startDT = currentDT;
         } else {
-            startDTR = new DateTime(lastHarvestDate);
+            startDT = new DateTime(lastHarvestDateDT);
         }
 
-        DateTime endDTR = new DateTime(startDTR);
-        endDTR = endDTR.plusDays(harvestDatetimeInc);
-        if(endDTR.isAfter(currentDT.toInstant())) {
-            endDTR = currentDT;
-        }
+//        DateTime endDT = new DateTime(startDT);
+//        endDT = endDT.plusDays(harvestDatetimeInc);
+//        if(endDT.isAfter(currentDT.toInstant())) {
+//            endDT = currentDT;
+//        }
+
+        DateTime endDT = new DateTime(currentDT);
 
         // If the start and end harvest dates are the same (happends for a new node), then
         // tweek the start so that DataONE listObjects doesn't complain.
-        if(startDTR == endDTR ) {
-            startDTR = startDTR.minusMinutes(1);
+        if(startDT == endDT ) {
+            startDT = startDT.minusMinutes(1);
         }
 
-        String startDTRstr = dtfOut.print(startDTR);
-        String endDTRstr = dtfOut.print(endDTR);
+        // Track the sysmeta dateUploaded of the latest harvested pid. This will become the starting time of
+        // the next harvest.
+        DateTime lastDateModifiedDT = startDT;
+
+        String startDTstr = dtfOut.print(startDT);
+        String endDTstr = dtfOut.print(endDT);
 
         int startCount = 0;
         RequestScorerJob.ListResult result = null;
-        Integer resultCount = null;
+        Integer resultCount = 0;
 
+        // Two types of score requests can be processed - a "node" request that will get score info for an
+        // entire repository (e.g. urn:node:ARCTIC) or a "portal" request that will get scores for a
+        // specific portal (from the Solr portal entry collectionQuery).
         if(requestType != null && requestType.equalsIgnoreCase("node")) {
             try {
                 // For a 'node' scores request, the 'collection' is the entire node, so specify
-                // the nodeId as the collectionid.
+                // the nodeId as the collectionid. It is not necessary to retrieve a collectionQuery for this
+                // 'node' portal, as there is no Solr entry for this type collection. All quality scores available
+                // in the quality Solr server will be directly retrieved, filtering on the 'nodeId' (datasource)
+                log.info("TaskName: " + taskName + ", taskType: " + taskType + " submitting node request for nodeId: "
+                        + nodeId + ", suiteId: " + suiteId + "formatFamily: " + formatFamily);
                 submitScorerRequest(qualityServiceUrl, nodeId, suiteId, nodeId, formatFamily);
             } catch (Exception e) {
                 JobExecutionException jee = new JobExecutionException("Unable to submit request to create new node ("
@@ -248,22 +268,26 @@ public class RequestScorerJob implements Job {
             Integer allIds = 0;
             boolean morePids = true;
             while (morePids) {
+                // Get a list of pids selected by a collection (portal) search filter (collectionQuery) and get
+                // the quality scores (from the quality Solr server) for that list of pids.
                 ArrayList<String> pidsToProcess = null;
                 log.trace("Getting portal pids to process, startCount: " + startCount + ", countRequested: " + countRequested);
 
                 try {
-                    result = getPidsToProcess(d1Node, session, pidFilter, startDTRstr, endDTRstr, startCount, countRequested);
+                    result = getPidsToProcess(d1Node, session, pidFilter, startDTstr, endDTstr, startCount, countRequested, lastDateModifiedDT);
                     pidsToProcess = result.getResult();
                     resultCount = result.getResultCount();
+                    lastDateModifiedDT = result.getLastDateModified();
                 } catch (Exception e) {
                     JobExecutionException jee = new JobExecutionException("Unable to get pids to process", e);
                     jee.setRefireImmediately(false);
                     throw jee;
                 }
 
-                log.trace(taskName + ": found " + resultCount + " seriesIds" + " for date: " + startDTRstr + " at servierUrl: " + nodeServiceUrl);
+                log.trace(taskName + ": found " + resultCount + " seriesIds" + " for date: " + startDTstr + " at servierUrl: " + nodeServiceUrl);
                 for (String pidStr : pidsToProcess) {
                     try {
+                        log.debug(taskName + ": submitting seriesId: " + pidStr);
                         submitScorerRequest(qualityServiceUrl, pidStr, suiteId, nodeId, formatFamily);
                     } catch (Exception e) {
                         JobExecutionException jee = new JobExecutionException("Unable to submit request to create new score graph/data file", e);
@@ -274,6 +298,7 @@ public class RequestScorerJob implements Job {
 
                 // Check if DataONE returned the max number of results. If so, we have to request more by paging through
                 // the results.
+                allIds += pidsToProcess.size();
                 if (resultCount >= countRequested) {
                     morePids = true;
                     startCount = startCount + resultCount;
@@ -281,19 +306,23 @@ public class RequestScorerJob implements Job {
                 } else {
                     morePids = false;
 
-                    // Record the new "last harvested" date
-                    task.setLastHarvestDatetime(endDTRstr);
-
-                    try {
-                        store.saveTask(task);
-                    } catch (MetadigStoreException mse) {
-                        log.error("Error saving task: " + task.getTaskName());
-                        JobExecutionException jee = new JobExecutionException("Unable to save new harvest date", mse);
-                        jee.setRefireImmediately(false);
-                        throw jee;
-                    }
                 }
             }
+
+            if (allIds > 0) {
+                // Record the new "last harvested" date
+                task.setLastHarvestDatetime(dtfOut.print(lastDateModifiedDT));
+                log.debug("Saving lastHarvestDate: " + dtfOut.print(lastDateModifiedDT));
+                try {
+                    store.saveTask(task);
+                } catch (MetadigStoreException mse) {
+                    log.error("Error saving task: " + task.getTaskName());
+                    JobExecutionException jee = new JobExecutionException("Unable to save new harvest date", mse);
+                    jee.setRefireImmediately(false);
+                    throw jee;
+                }
+            }
+            log.info(taskName + ": found " + allIds + " seriesIds" + " for start: " + startDTstr + ", end: " + endDTstr + " at servierUrl: " + nodeServiceUrl);
         }
         store.shutdown();
     }
@@ -322,14 +351,15 @@ public class RequestScorerJob implements Job {
 
         org.w3c.dom.NodeList xpathResult = null;
         XPathExpression fieldXpath = null;
+        XPathExpression dateModifiedXpath = null;
         XPath xpath = null;
         org.w3c.dom.Node node = null;
         ArrayList<String> pids = new ArrayList<String>();
         Document xmldoc = null;
 
-        String queryStr = "?q=formatId:" + pidFilter + "+-obsoletedBy:*" + "+dateUploaded:[" + startHarvestDatetimeStr + "%20TO%20"
+        String queryStr = "?q=formatId:" + pidFilter + "+-obsoletedBy:*" + "+dateModified:[" + startHarvestDatetimeStr + "%20TO%20"
                 + endHarvestDatetimeStr + "]"
-                + "&fl=seriesId&q.op=AND";
+                + "&fl=seriesId,dateModified&q.op=AND";
         log.trace("query: " + queryStr);
 
         // Send the query to DataONE Solr to retrieve portal seriesIds for a given time frame
@@ -345,6 +375,7 @@ public class RequestScorerJob implements Job {
             XPathFactory xPathfactory = XPathFactory.newInstance();
             xpath = xPathfactory.newXPath();
             fieldXpath = xpath.compile("//result/doc/str[@name='seriesId']/text()");
+            dateModifiedXpath = xpath.compile("//result/doc/date[@name='dateModified']/text()");
         } catch (XPathExpressionException xpe) {
             log.error("Error extracting id from solr result doc: " + xpe.getMessage());
             metadigException = new MetadigProcessException("Unable to get collection pids: " + xpe.getMessage());
@@ -358,16 +389,13 @@ public class RequestScorerJob implements Job {
         int startPos = startCount;
 
         do {
-            //xmldoc = DataONE.querySolr(queryStr, startPos, countRequested, cnNode, mnNode, isCN, session);
             xmldoc = DataONE.querySolr(queryStr, startPos, countRequested, d1Node, session);
             if(xmldoc == null) {
                 log.info("no values returned from query");
                 break;
             }
             try {
-                log.debug("processing xpathresult...");
                 xpathResult = (org.w3c.dom.NodeList) fieldXpath.evaluate(xmldoc, XPathConstants.NODESET);
-                log.debug("processed xpathResult");
             } catch (XPathExpressionException xpe) {
                 log.error("Error extracting seriesId from solr result doc: " + xpe.getMessage());
                 metadigException = new MetadigProcessException("Unable to get collection pids: " + xpe.getMessage());
@@ -385,12 +413,39 @@ public class RequestScorerJob implements Job {
                 log.trace("adding pid: " + currentPid);
             }
 
+            // Get dateModified for the returned seriesIds
+            try {
+                xpathResult = (org.w3c.dom.NodeList) dateModifiedXpath.evaluate(xmldoc, XPathConstants.NODESET);
+            } catch (XPathExpressionException xpe) {
+                log.error("Error extracting dateModified from solr result doc: " + xpe.getMessage());
+                metadigException = new MetadigProcessException("Unable to get collection pids: " + xpe.getMessage());
+                metadigException.initCause(xpe);
+                throw metadigException;
+            }
+
+            DateTime thisDateModified;
+            thisResultLength = xpathResult.getLength();
+            if(thisResultLength == 0) break;
+            for (int index = 0; index < xpathResult.getLength(); index++) {
+                node = xpathResult.item(index);
+                String dateStr = node.getTextContent();
+                log.debug("Checking date str: " + dateStr);
+                thisDateModified = DateTime.parse(dateStr,
+                        DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"));
+                if(thisDateModified.isAfter(lastDateModifiedDT)) {
+                    lastDateModifiedDT = thisDateModified.plusMillis(1);
+                    log.debug("Updated lastDateModified to " + lastDateModifiedDT);
+                }
+            }
+
             startPos += thisResultLength;
         } while (thisResultLength > 0);
 
         RequestScorerJob.ListResult result = new RequestScorerJob.ListResult();
         result.setResultCount(pids.size());
         result.setResult(pids);
+        // Return the sysmeta 'dateSystemMetadataModified' of the last pid harvested.
+        result.setLastDateModified(lastDateModifiedDT);
 
         return result;
     }
