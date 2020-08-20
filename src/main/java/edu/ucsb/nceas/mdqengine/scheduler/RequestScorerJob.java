@@ -330,22 +330,21 @@ public class RequestScorerJob implements Job {
     /**
      * Query a DataONE CN or MN object store for a list of object that match the time range and formatId filters provided.
      *
-     * //@param cnNode
-     * //@param mnNode
-     * //@param isCN
-     * @param session
-     * @param pidFilter
-     * @param startHarvestDatetimeStr
-     * @param endHarvestDatetimeStr
-     * @param startCount
-     * @param countRequested
+     * @param d1Node a DataONE CN or MN connection client object
+     * @param session a DataONE authentication session
+     * @param pidFilter the DataONE format identifies to filter for
+     * @param startHarvestDatetimeStr the starting date to harvest pids from
+     * @param endHarvestDatetimeStr the ending data to harvest pids from
+     * @param startCount the start count for paging results from DataONE, for large results
+     * @param countRequested the number of items to get from DataONE on each request
+     * @param lastDateModifiedDT the sysmeta 'dateSystemMetadataModified' value of the last harvested pid
+     * @throws Exception if there is an exception while executing the job.
      * @return a ListResult object containing the matching pids
      * @throws Exception
      */
-    //public ListResult getPidsToProcess(MultipartCNode cnNode, MultipartMNode mnNode, Boolean isCN, Session session,
     public ListResult getPidsToProcess(MultipartD1Node d1Node, Session session,
                                        String pidFilter, String startHarvestDatetimeStr, String endHarvestDatetimeStr,
-                                       int startCount, int countRequested) throws Exception {
+                                       int startCount, int countRequested, DateTime lastDateModifiedDT) throws Exception {
 
         MetadigProcessException metadigException = null;
 
@@ -450,6 +449,18 @@ public class RequestScorerJob implements Job {
         return result;
     }
 
+    /**
+     * Submit a requst to the metadig controller to get qualiry score info and create a graph for the specified collection.
+     *
+     * @param qualityServiceUrl
+     * @param collectionId
+     * @param suiteId
+     * @param nodeId
+     * @param formatFamily
+     *
+     * @throws Exception
+     *
+     */
     public void submitScorerRequest(String qualityServiceUrl, String collectionId, String suiteId, String nodeId, String formatFamily) throws  Exception {
 
         InputStream runResultIS = null;
@@ -475,7 +486,7 @@ public class RequestScorerJob implements Job {
             post.addHeader("Accept", "application/xml");
 
             // send to service
-            log.debug("submitting scores request : " + scorerServiceUrl);
+            log.trace("submitting scores request : " + scorerServiceUrl);
             CloseableHttpClient client = HttpClients.createDefault();
             CloseableHttpResponse response = client.execute(post);
 

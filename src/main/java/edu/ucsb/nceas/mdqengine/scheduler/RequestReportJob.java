@@ -320,8 +320,25 @@ public class RequestReportJob implements Job {
         store.shutdown();
     }
 
+    /**
+     * Query a DataONE CN or MN to obtain a list of persistent identifiers (pids) for metadata objects have been
+     * added to the system during a specific time period.
+     * @param cnNode a DataONE CN connection client object
+     * @param mnNode a DataONE MN connection client object
+     * @param isCN a logical indicating whether a CN of MN object is being used
+     * @param session a DataONE authentication session
+     * @param suiteId the quality suite to check (if this pids has already been processed)
+     * @param pidFilter the DataONE format identifies to filter for
+     * @param startHarvestDatetimeStr the starting date to harvest pids from
+     * @param endHarvestDatetimeStr the ending data to harvest pids from
+     * @param startCount the start count for paging results from DataONE, for large results
+     * @param countRequested the number of items to get from DataONE on each request
+     * @param lastDateModifiedDT the sysmeta 'dateSystemMetadataModified' value of the last harvested pid
+     * @throws Exception if there is an exception while executing the job.
+     * @return a ListResult object containing the matching pids
+     */
     public ListResult getPidsToProcess(MultipartCNode cnNode, MultipartMNode mnNode, Boolean isCN, Session session,
-                                  String suiteId, String nodeId, String pidFilter, String startHarvestDatetimeStr,
+                                  String suiteId, String pidFilter, String startHarvestDatetimeStr,
                                   String endHarvestDatetimeStr, int startCount,
                                   int countRequested, DateTime lastDateModifiedDT) throws Exception {
 
@@ -331,7 +348,6 @@ public class RequestReportJob implements Job {
 
         ObjectFormatIdentifier formatId = null;
         NodeReference nodeRef = null;
-        //nodeRef.setValue(nodeId);
         Identifier identifier = null;
         Boolean replicaStatus = false;
 
@@ -356,7 +372,7 @@ public class RequestReportJob implements Job {
             }
             //log.info("Got " + objList.getCount() + " pids for format: " + formatId.getValue() + " pids.");
         } catch (Exception e) {
-            log.error("Error retrieving pids for node " + nodeId + ": " + e.getMessage());
+            log.error("Error retrieving pids: " + e.getMessage());
             throw e;
         }
 
@@ -416,7 +432,24 @@ public class RequestReportJob implements Job {
         return result;
     }
 
-    public boolean runExists(String pid, String suiteId, MDQStore store) throws MetadigStoreException {
+
+    /**
+     * Check if the specified quality suite has already been run for a pid.
+     * <p>
+     * An additional check is made to see if the system metadata in the
+     * run is older than the passed in date. Because the quality engine
+     * uses fields from sysmeta (obsoletes, obsoletedBy), a run may need
+     * to be performed on an existing run in order to update the sysmeta, as
+     * the system is stored in the run object, and this run object is
+     * parsed when the run is inserted into the Solr index.
+     * </p>
+     * @param pid the pid to check
+     * @param suiteId the suite identifier to check (e.g. "FAIR-suite-0.3.1")
+     * @param store the DataStore object to send the check request to.
+     * @throws MetadigStoreException
+     *
+     */
+    public boolean runExists(String pid, String suiteId, MDQStore store, Date dateSystemMetadataModified) throws MetadigStoreException {
 
         boolean found = false;
         Date runDateSystemMetadataModified = null;
@@ -440,6 +473,22 @@ public class RequestReportJob implements Job {
         return found;
     }
 
+    /**
+     * Submit a request to the metadig controller to run a quality suite for the specified pid.
+     * <p>
+     *     The system metadata for a pid is also obtained and sent with the request
+     * </p>
+     *
+     * @param cnNode a DataONE CN connection client object
+     * @param mnNode a DataONE MN connection client object
+     * @param isCN a logical indicating whether a CN of MN object
+     * @param session a DataONE authentication session
+     * @param qualityServiceUrl the URL of the MetaDIG quality service
+     * @param pidStr the pid to submit the request for
+     * @param suiteId the suite identifier to submit the request for
+     *
+     * @throws Exception
+     */
     public void submitReportRequest(MultipartCNode cnNode, MultipartMNode mnNode, Boolean isCN,  Session session, String qualityServiceUrl, String pidStr, String suiteId) throws Exception {
 
         SystemMetadata sysmeta = null;

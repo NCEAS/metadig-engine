@@ -241,12 +241,18 @@ public class JobScheduler {
     public JobScheduler () {
     }
 
+    /**
+     * Read a single parameter from the quality engine parameter file
+     * @param paramName the parameter to read from the config file
+     * @throws ConfigurationException if there is an exception while reading the config file
+     * @throws IOException if there is an exception while reading the config file
+     */
     public String readConfig (String paramName) throws ConfigurationException, IOException {
         String paramValue = null;
         try {
             MDQconfig cfg = new MDQconfig();
             paramValue = cfg.getString(paramName);
-        } catch (Exception e) {
+        } catch (ConfigurationException | IOException e) {
             log.error("Could not read configuration for param: " + paramName + ": " + e.getMessage());
             throw e;
         }

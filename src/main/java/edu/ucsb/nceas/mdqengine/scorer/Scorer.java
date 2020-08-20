@@ -129,6 +129,7 @@ public class Scorer {
          *     A set of quality scores are retrieved from the Quality Solr Server and a quality graph and csv file are created from
          *     them. For DataONE collections, the 'collectionQuery' is retrieved from Solr to determine the set of pids to be
          *     included.
+         * </p>
          *
          */
         final Consumer consumer = new DefaultConsumer(inProcessChannel) {
@@ -330,6 +331,7 @@ public class Scorer {
             }
         };
 
+        // Initialize the RabbitMQ queue for scorer requests send by the controller
         inProcessChannel.basicConsume(SCORER_QUEUE_NAME, false, consumer);
     }
 
@@ -337,18 +339,16 @@ public class Scorer {
      * Retrieve pids associated with a DataONE collection.
      *
      * <p>First the 'collectionQuery' field is retrieved from DataONE Solr for the collection</p>
-     * <p>Next, a query is issued with the query from collectionQuery field, to retrieve all Solr docs for the collection ids./p>
+     * <p>Next, a query is issued with the query from the collectionQuery field, to retrieve all Solr docs for the collection ids./p>
      *
      * <p>Note that in the current design, the collection query is always obtained by querying the node specified in the taskList.csv file,
      * which is usually an MN, but the collectionQuery is always evaluated on the CN</p>
      *
      * @param collectionId a DataONE project id to fetch scores for, e.g. urn:uuid:f137095e-4266-4474-aa5f-1e1fcaa5e2dc
-     * @param d1Node
-     * @param session
+     * @param d1Node the DataONE connection object for a node
+     * @param session the DataONE authentication session
      * @return a List of quality scores fetched from Solr
      */
-    //private ScorerResult getCollectionPids(String collectionId, MultipartCNode cnNode, MultipartMNode mnNode,
-    //                                       Boolean isCN, Session session) throws MetadigProcessException {
     private ScorerResult getCollectionPids(String collectionId, MultipartD1Node d1Node, Session session) throws MetadigProcessException {
 
         Document xmldoc = null;
@@ -363,11 +363,9 @@ public class Scorer {
          */
         ArrayList<String> pids = new ArrayList<>();
         queryStr = "?q=seriesId:" + escapeSpecialChars(collectionId) + "+-obsoletedBy:*" + "&fl=collectionQuery,label,rightsHolder&q.op=AND";
-        //queryStr = "?q=seriesId:" + encodeValue(collectionId) + "+-obsoletedBy:*" + "&fl=collectionQuery,label,rightsHolder&q.op=AND";
-        //queryStr = "?q=seriesId:" + collectionId + "+-obsoletedBy:*&fl=collectionQuery,label,rightsHolder&q.op=AND";
 
         startPos = 0;
-        // Just getting 1 row
+        // Just getting 1 row (for the collectionQuery field)
         countRequested = 10;
 
         // Get the collectionQuery from Solr
