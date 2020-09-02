@@ -140,7 +140,7 @@ public class RequestScorerJob implements Job {
             requestType = dataMap.getString("requestType");
         }
 
-        log.info("Executing task " + taskType + ", " + taskName + " for node: " + nodeId + ", suiteId: " + suiteId);
+        log.debug("Executing task " + taskType + ", " + taskName + " for node: " + nodeId + ", suiteId: " + suiteId);
 
         try {
             cfg = new MDQconfig();
@@ -152,9 +152,14 @@ public class RequestScorerJob implements Job {
             nodeServiceUrl = cfg.getString(nodeAbbr + ".serviceUrl");
             log.trace("nodeServiceUrl: " + nodeServiceUrl);
         } catch (ConfigurationException | IOException ce) {
-            JobExecutionException jee = new JobExecutionException("Error executing task.");
+            JobExecutionException jee = new JobExecutionException(taskName + ": Error executing task: " + ce.getMessage());
             jee.initCause(ce);
             throw jee;
+        }
+
+        if(nodeServiceUrl == null) {
+            String msg = taskName + "Unable to read serviceUrl from config file for: " + nodeId;
+            throw new JobExecutionException(msg);
         }
 
         Session session = DataONE.getSession(subjectId, authToken);
@@ -194,19 +199,19 @@ public class RequestScorerJob implements Job {
         String lastHarvestDateStr = null;
 
         Task task;
-        task = store.getTask(taskName, taskType);
+        task = store.getTask(taskName, taskType, nodeId);
 
         // If a 'task' entry has not been saved for this task name yet, then a 'lastHarvested'
         // DataTime will not be available, in which case the 'startHarvestDataTime' from the
         // config file will be used.
-        if(task.getLastHarvestDatetime() == null) {
+        if(task.getLastHarvestDatetime(nodeId) == null) {
             task = new Task();
             task.setTaskName(taskName);
             task.setTaskType(taskType);
             lastHarvestDateStr = startHarvestDatetimeStr;
-            task.setLastHarvestDatetime(lastHarvestDateStr);
+            task.setLastHarvestDatetime(lastHarvestDateStr, nodeId);
         } else {
-            lastHarvestDateStr = task.getLastHarvestDatetime();
+            lastHarvestDateStr = task.getLastHarvestDatetime(nodeId);
         }
 
         DateTime lastHarvestDateDT = new DateTime(lastHarvestDateStr);
@@ -220,12 +225,6 @@ public class RequestScorerJob implements Job {
         } else {
             startDT = new DateTime(lastHarvestDateDT);
         }
-
-//        DateTime endDT = new DateTime(startDT);
-//        endDT = endDT.plusDays(harvestDatetimeInc);
-//        if(endDT.isAfter(currentDT.toInstant())) {
-//            endDT = currentDT;
-//        }
 
         DateTime endDT = new DateTime(currentDT);
 
@@ -274,7 +273,7 @@ public class RequestScorerJob implements Job {
                 log.trace("Getting portal pids to process, startCount: " + startCount + ", countRequested: " + countRequested);
 
                 try {
-                    result = getPidsToProcess(d1Node, session, pidFilter, startDTstr, endDTstr, startCount, countRequested, lastDateModifiedDT);
+                    result = getPidsToProcess(d1Node, session, pidFilter, startDTstr, endDTstr, startCount, countRequested, lastDateModifiedDT, taskName);
                     pidsToProcess = result.getResult();
                     resultCount = result.getResultCount();
                     lastDateModifiedDT = result.getLastDateModified();
@@ -311,18 +310,18 @@ public class RequestScorerJob implements Job {
 
             if (allIds > 0) {
                 // Record the new "last harvested" date
-                task.setLastHarvestDatetime(dtfOut.print(lastDateModifiedDT));
+                task.setLastHarvestDatetime(dtfOut.print(lastDateModifiedDT), nodeId);
                 log.debug("Saving lastHarvestDate: " + dtfOut.print(lastDateModifiedDT));
                 try {
-                    store.saveTask(task);
+                    store.saveTask(task, nodeId);
                 } catch (MetadigStoreException mse) {
                     log.error("Error saving task: " + task.getTaskName());
                     JobExecutionException jee = new JobExecutionException("Unable to save new harvest date", mse);
                     jee.setRefireImmediately(false);
                     throw jee;
                 }
+                log.info(taskName + ": found " + allIds + " seriesIds" + " for start: " + startDTstr + ", end: " + endDTstr + " at servierUrl: " + nodeServiceUrl);
             }
-            log.info(taskName + ": found " + allIds + " seriesIds" + " for start: " + startDTstr + ", end: " + endDTstr + " at servierUrl: " + nodeServiceUrl);
         }
         store.shutdown();
     }
@@ -344,7 +343,7 @@ public class RequestScorerJob implements Job {
      */
     public ListResult getPidsToProcess(MultipartD1Node d1Node, Session session,
                                        String pidFilter, String startHarvestDatetimeStr, String endHarvestDatetimeStr,
-                                       int startCount, int countRequested, DateTime lastDateModifiedDT) throws Exception {
+                                       int startCount, int countRequested, DateTime lastDateModifiedDT, String taskName) throws Exception {
 
         MetadigProcessException metadigException = null;
 
@@ -376,7 +375,7 @@ public class RequestScorerJob implements Job {
             fieldXpath = xpath.compile("//result/doc/str[@name='seriesId']/text()");
             dateModifiedXpath = xpath.compile("//result/doc/date[@name='dateModified']/text()");
         } catch (XPathExpressionException xpe) {
-            log.error("Error extracting id from solr result doc: " + xpe.getMessage());
+            log.error(taskName + ": error extracting id from solr result doc: " + xpe.getMessage());
             metadigException = new MetadigProcessException("Unable to get collection pids: " + xpe.getMessage());
             metadigException.initCause(xpe);
             throw metadigException;
@@ -396,7 +395,7 @@ public class RequestScorerJob implements Job {
             try {
                 xpathResult = (org.w3c.dom.NodeList) fieldXpath.evaluate(xmldoc, XPathConstants.NODESET);
             } catch (XPathExpressionException xpe) {
-                log.error("Error extracting seriesId from solr result doc: " + xpe.getMessage());
+                log.error(taskName + ": error extracting seriesId from solr result doc: " + xpe.getMessage());
                 metadigException = new MetadigProcessException("Unable to get collection pids: " + xpe.getMessage());
                 metadigException.initCause(xpe);
                 throw metadigException;
@@ -416,7 +415,7 @@ public class RequestScorerJob implements Job {
             try {
                 xpathResult = (org.w3c.dom.NodeList) dateModifiedXpath.evaluate(xmldoc, XPathConstants.NODESET);
             } catch (XPathExpressionException xpe) {
-                log.error("Error extracting dateModified from solr result doc: " + xpe.getMessage());
+                log.error(taskName + ": error extracting dateModified from solr result doc: " + xpe.getMessage());
                 metadigException = new MetadigProcessException("Unable to get collection pids: " + xpe.getMessage());
                 metadigException.initCause(xpe);
                 throw metadigException;
@@ -450,13 +449,13 @@ public class RequestScorerJob implements Job {
     }
 
     /**
-     * Submit a requst to the metadig controller to get qualiry score info and create a graph for the specified collection.
+     * Submit a requst to the metadig controller to get quality score info and create a graph for the specified collection.
      *
-     * @param qualityServiceUrl
-     * @param collectionId
-     * @param suiteId
-     * @param nodeId
-     * @param formatFamily
+     * @param qualityServiceUrl the URL of the MetaDIG quality service
+     * @param collectionId the DataONE collection (portal) seriesId
+     * @param suiteId the quality suite to run for the collection
+     * @param nodeId the DataONE node identifier that the collection is hosted on
+     * @param formatFamily the format identifier family (e.g. "eml" for all EML format identifier versions)
      *
      * @throws Exception
      *

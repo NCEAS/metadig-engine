@@ -2,8 +2,11 @@ package edu.ucsb.nceas.mdqengine.store;
 
 import edu.ucsb.nceas.mdqengine.exception.MetadigStoreException;
 import edu.ucsb.nceas.mdqengine.model.*;
+import org.dataone.service.types.v2.Node;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 public interface MDQStore {
 	
@@ -30,7 +33,12 @@ public interface MDQStore {
 	boolean isAvailable();
 	void renew() throws MetadigStoreException;
 
-	Task getTask(String taskName, String taskType);
-	void saveTask(Task task) throws MetadigStoreException;
+	Task getTask(String taskName, String taskType, String nodeId);
+	void saveTask(Task task, String nodeId) throws MetadigStoreException;
+
+	Node getNode (String nodeId);
+	void saveNode(Node node) throws MetadigStoreException;
+
+	ArrayList<Node> getNodes();
 
 }

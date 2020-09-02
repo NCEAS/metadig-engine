@@ -9,6 +9,8 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.dataone.service.types.v1.*;
+import org.dataone.service.types.v2.Node;
 import org.dataone.service.util.TypeMarshaller;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
@@ -22,11 +24,11 @@ import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.sql.*;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.time.Instant;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Properties;
+import java.util.*;
+import java.util.Date;
 
 /**
  * Persistent storage for quality runs.
@@ -322,27 +324,24 @@ public class DatabaseStore implements MDQStore {
         }
     }
 
-    public void saveTask(Task task) throws MetadigStoreException {
+    public void saveTask(Task task, String nodeId) throws MetadigStoreException {
 
         PreparedStatement stmt = null;
 
         // Perform an 'upsert' on the 'nodes' table - if a record exists for the 'metadata_id, suite_id' already,
         // then update the record with the incoming data.
         try {
-            String sql = "INSERT INTO tasks (task_name, task_type, last_harvest_datetime) VALUES (?, ?, ?)"
+            String sql = "INSERT INTO tasks (task_name, task_type) VALUES (?, ?)"
                     + " ON CONFLICT ON CONSTRAINT task_name_task_type"
-                    + " DO UPDATE SET (task_name, task_type, last_harvest_datetime) = (?, ?, ?);";
+                    + " DO NOTHING";
 
             stmt = conn.prepareStatement(sql);
             stmt.setString(1, task.getTaskName());
             stmt.setString(2, task.getTaskType());
-            stmt.setString(3, task.getLastHarvestDatetime());
-            stmt.setString(4, task.getTaskName());
-            stmt.setString(5, task.getTaskType());
-            stmt.setString(6, task.getLastHarvestDatetime());
             stmt.executeUpdate();
             stmt.close();
             conn.commit();
+            saveNodeHarvest(task, nodeId);
             //conn.close();
         } catch (SQLException e) {
             log.error( e.getClass().getName()+": "+ e.getMessage());
@@ -355,7 +354,7 @@ public class DatabaseStore implements MDQStore {
         log.trace("Records created successfully");
     }
 
-    public Task getTask(String taskName, String taskType) {
+    public Task getTask(String taskName, String taskType, String nodeId) {
 
         //return runs.get(id);
         Result result = new Result();
@@ -376,17 +375,244 @@ public class DatabaseStore implements MDQStore {
             if(rs.next()) {
                 task.setTaskName(rs.getString("task_name"));
                 task.setTaskType(rs.getString("task_type"));
-                task.setLastHarvestDatetime(rs.getString("last_harvest_datetime"));
                 rs.close();
                 stmt.close();
             } else {
                 log.trace("No results returned from query");
             }
+
+            task.setLastHarvestDatetimes(getNodeHarvestDatetimes(task.getTaskName(), task.getTaskType(), nodeId));
         } catch ( Exception e ) {
             log.error( e.getClass().getName()+": "+ e.getMessage());
         }
 
         return(task);
+    }
+
+    public HashMap<String,String> getNodeHarvestDatetimes(String taskName, String taskType, String nodeId) {
+
+        //return runs.get(id);
+        Result result = new Result();
+        PreparedStatement stmt = null;
+        String lastDT = null;
+        Task task = new Task();
+
+        HashMap<String, String> nodeHarvestDates  = new HashMap<>();
+        // Select records from the 'nodes' table
+        try {
+            String sql = "select * from node_harvest where task_name = ? and task_type = ? and node_id = ?";
+            stmt = conn.prepareStatement(sql);
+            stmt.setString(1, taskName);
+            stmt.setString(2, taskType);
+            stmt.setString(3, nodeId);
+
+            log.trace("issuing query: " + sql);
+            ResultSet rs = stmt.executeQuery();
+            while (rs.next()) {
+                nodeHarvestDates.put(nodeId, rs.getString("last_harvest_datetime"));
+            }
+            rs.close();
+            stmt.close();
+        } catch ( Exception e ) {
+            log.error( e.getClass().getName()+": "+ e.getMessage());
+        }
+
+        return(nodeHarvestDates);
+    }
+
+
+    public void saveNodeHarvest(Task task, String nodeId) throws MetadigStoreException {
+
+        PreparedStatement stmt = null;
+
+        // Perform an 'upsert' on the 'nodes' table - if a record exists for the 'metadata_id, suite_id' already,
+        // then update the record with the incoming data.
+        try {
+            String sql = "INSERT INTO node_harvest (task_name, task_type, node_id, last_harvest_datetime) VALUES (?, ?, ?, ?)"
+                    + " ON CONFLICT ON CONSTRAINT node_harvest_task_name_task_type_node_id_uc"
+                    + " DO UPDATE SET (task_name, task_type, node_id, last_harvest_datetime) = (?, ?, ?, ?);";
+
+            stmt = conn.prepareStatement(sql);
+            stmt.setString(1, task.getTaskName());
+            stmt.setString(2, task.getTaskType());
+            stmt.setString(3, nodeId);
+            stmt.setString(4, task.getLastHarvestDatetime(nodeId));
+            stmt.setString(5, task.getTaskName());
+            stmt.setString(6, task.getTaskType());
+            stmt.setString(7, nodeId);
+            stmt.setString(8, task.getLastHarvestDatetime(nodeId));
+            stmt.executeUpdate();
+            stmt.close();
+            conn.commit();
+            //conn.close();
+        } catch (SQLException e) {
+            log.error( e.getClass().getName()+": "+ e.getMessage());
+            MetadigStoreException me = new MetadigStoreException("Unable save last harvest date to the datdabase.");
+            me.initCause(e);
+            throw(me);
+        }
+
+        // Next, insert a record into the child table ('runs')
+        log.trace("Records created successfully");
+    }
+
+    public void saveNode(Node node) throws MetadigStoreException {
+
+        PreparedStatement stmt = null;
+
+        // Perform an 'upsert' on the 'nodes' table - if a record exists for the 'metadata_id, suite_id' already,
+        // then update the record with the incoming data.
+        try {
+            String sql = "INSERT INTO nodes " +
+                    " (identifier, name, type, state, synchronize, last_harvest, baseURL) VALUES (?, ?, ?, ?, ?, ?, ?) " +
+                    " ON CONFLICT ON CONSTRAINT node_id_pk DO UPDATE SET " +
+                    " (identifier, name, type, state, synchronize, last_harvest, baseURL) = (?, ?, ?, ?, ?, ?, ?);";
+
+            DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+            dateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
+            String lastHarvestDatetimeStr = dateFormat.format(node.getSynchronization().getLastHarvested());
+
+            stmt = conn.prepareStatement(sql);
+            stmt.setString(1, node.getIdentifier().getValue());
+            stmt.setString(2, node.getName());
+            stmt.setString(3, node.getType().toString());
+            stmt.setString(4, node.getState().toString());
+            stmt.setBoolean(5, node.isSynchronize());
+            stmt.setString(6, lastHarvestDatetimeStr);
+            stmt.setString(7, node.getBaseURL());
+            stmt.setString(8, node.getIdentifier().getValue());
+            stmt.setString(9, node.getName());
+            stmt.setString(10, node.getType().toString());
+            stmt.setString(11, node.getState().toString());
+            stmt.setBoolean(12, node.isSynchronize());
+            stmt.setString(13, lastHarvestDatetimeStr);
+            stmt.setString(14, node.getBaseURL());
+            stmt.executeUpdate();
+            stmt.close();
+            conn.commit();
+        } catch (SQLException e) {
+            log.error( e.getClass().getName()+": "+ e.getMessage());
+            MetadigStoreException me = new MetadigStoreException("Unable to save node " + node.getIdentifier().getValue() + " to database.");
+            me.initCause(e);
+            throw(me);
+        }
+
+        // Next, insert a record into the child table ('runs')
+        log.trace("Records created successfully");
+    }
+
+      public Node getNode(String nodeId) {
+
+        Result result = new Result();
+        PreparedStatement stmt = null;
+        Node node = new Node();
+
+        // Select records from the 'nodes' table
+        try {
+            log.trace("preparing statement for query");
+            String sql = "select * from nodes where identifier = ? ";
+            stmt = conn.prepareStatement(sql);
+            stmt.setString(1, nodeId);
+
+            log.trace("issuing query: " + sql);
+            ResultSet rs = stmt.executeQuery();
+            if(rs.next()) {
+                node = extractNodeFields(rs);
+                rs.close();
+                stmt.close();
+            } else {
+                log.trace("No results returned for nodeId: " + nodeId);
+            }
+        } catch ( Exception e ) {
+            log.error( e.getClass().getName()+": "+ e.getMessage());
+        }
+
+        return(node);
+    }
+
+    public ArrayList<Node> getNodes() {
+
+        Result result = new Result();
+        PreparedStatement stmt = null;
+
+        ArrayList<Node> nodes = new ArrayList<> ();
+        ResultSet rs = null;
+        Node node;
+        // Select records from the 'nodes' table
+        try {
+            log.trace("preparing statement for query");
+            String sql = "select * from nodes; ";
+            stmt = conn.prepareStatement(sql);
+
+            log.trace("issuing query: " + sql);
+            rs = stmt.executeQuery();
+            while(rs.next()) {
+                node = extractNodeFields(rs);
+                nodes.add(node);
+            }
+        } catch ( Exception e ) {
+            log.error(e.getClass().getName() + ": " + e.getMessage());
+        }
+
+        try {
+            rs.close();
+            stmt.close();
+        } catch (Exception e) {
+            log.error("Error closing node database: " +  e.getMessage());
+        }
+
+        log.trace(nodes.size() + " nodes found in node table.");
+
+        return(nodes);
+    }
+
+    public Node extractNodeFields (ResultSet resultSet) {
+
+        Node node = new Node();
+        try {
+            NodeReference nodeReference = new NodeReference();
+            nodeReference.setValue(resultSet.getString("identifier"));
+            node.setIdentifier(nodeReference);
+            node.setName(resultSet.getString("name"));
+            switch (resultSet.getString("type")) {
+                case "CN":
+                    node.setType(NodeType.CN);
+                    break;
+                case "MN":
+                    node.setType(NodeType.MN);
+                    break;
+                case "MONITOR":
+                    node.setType(NodeType.MONITOR);
+                    break;
+            }
+
+            switch (resultSet.getString("state")) {
+                case "UP":
+                    node.setState(NodeState.UP);
+                    break;
+                case "DOWN":
+                    node.setState(NodeState.DOWN);
+                    break;
+                default:
+                    node.setState(NodeState.UNKNOWN);
+                    break;
+            }
+
+            node.setSynchronize(resultSet.getBoolean("synchronize"));
+
+            Synchronization synchronization = new Synchronization();
+            SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+            formatter.setTimeZone(TimeZone.getTimeZone("GMT"));
+            Date lastHarvestDate = formatter.parse(resultSet.getString("last_harvest"));
+            synchronization.setLastHarvested(lastHarvestDate);
+            node.setSynchronization(synchronization);
+
+            node.setBaseURL(resultSet.getString("baseURL"));
+        } catch (java.sql.SQLException | java.text.ParseException e) {
+            log.error("Error retrieving node from database: " + e);
+        }
+
+        return node;
     }
 
     @Override

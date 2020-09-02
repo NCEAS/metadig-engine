@@ -180,6 +180,16 @@ public class JobScheduler {
                 log.debug("fileExcludeMatch: " + fileExcludeMatch);
                 logFile = splitted[++icnt].trim();
                 log.debug("log file: " + logFile);
+            } else if (taskType.equals("nodelist")) {
+                log.debug("Scheduling nodelist update from DataONE, task name: " + taskName + ", task group: " + taskGroup);
+                String[] splitted = Arrays.stream(params.split(";"))
+                        .map(String::trim)
+                        .toArray(String[]::new);
+
+                int icnt = -1;
+                log.debug("Split length: " + splitted.length);
+                nodeId = splitted[++icnt].trim();
+                log.debug("nodeId: " + nodeId);
             }
 
             try {
@@ -220,6 +230,13 @@ public class JobScheduler {
                             .usingJobData("fileIncludeMatch", fileIncludeMatch)
                             .usingJobData("fileExcludeMatch", fileExcludeMatch)
                             .usingJobData("logFile", logFile)
+                            .build();
+                } else if (taskType.equalsIgnoreCase("nodelist")) {
+                    job = newJob(NodeList.class)
+                            .withIdentity(taskName, taskGroup)
+                            .usingJobData("taskName", taskName)
+                            .usingJobData("taskType", taskType)
+                            .usingJobData("nodeId", nodeId)
                             .build();
                 }
 
