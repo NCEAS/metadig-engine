@@ -1,12 +1,14 @@
 package edu.ucsb.nceas.mdqengine;
 
 import com.rabbitmq.client.*;
-import edu.ucsb.nceas.mdqengine.exception.MetadigProcessException;
+import edu.ucsb.nceas.mdqengine.authorization.BookkeeperClient;
 import edu.ucsb.nceas.mdqengine.scorer.ScorerQueueEntry;
 import edu.ucsb.nceas.mdqengine.exception.MetadigException;
 import org.apache.commons.configuration2.ex.ConfigurationException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.dataone.bookkeeper.api.Usage;
+import org.dataone.bookkeeper.api.UsageStatus;
 import org.dataone.exceptions.MarshallingException;
 import org.dataone.service.types.v2.SystemMetadata;
 import org.dataone.service.types.v2.TypeFactory;
@@ -17,6 +19,7 @@ import java.io.*;
 import java.lang.reflect.InvocationTargetException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
@@ -53,6 +56,7 @@ public class Controller {
     // where metadig-controller and the RabbitMQ server are running in containers that belong
     // to the same Pod. These defaults will be used if the properties file cannot be read.
     // These values are read from a config file, see class 'MDQconfig'
+    private static Boolean bookkeeperEnabled = false;
     private static String RabbitMQhost = null;
     private static int RabbitMQport = 0;
     private static String RabbitMQpassword = null;
@@ -68,6 +72,8 @@ public class Controller {
 
     public static void main(String[] argv) throws Exception {
 
+        //System.setProperty("lo4j2.debug", "true");
+        //System.setProperty("log4j.configurationFile", "log4j2.xml");
         Controller metadigCtrl = Controller.getInstance();
         metadigCtrl.start();
         if (metadigCtrl.getIsStarted()) {
@@ -133,25 +139,20 @@ public class Controller {
                     }
                     String delims = "[,]";
                     String[] tokens = request.split(delims);
+                    String nodeId = null;
 
                     switch(requestType) {
                         case "score":
                             log.debug("Processing score request");
                             String collectionId = tokens[0];
-                            String projectName = tokens[1];
-                            String authTokenName = tokens[2];
-                            String subjectIdName = tokens[3];
-                            String memberNode = tokens[4];
-                            String serviceUrl = tokens[5];
-                            String formatFamily = tokens[6];
-                            String qualitySuiteId = tokens[7];
+                            nodeId = tokens[1];
+                            String formatFamily = tokens[2];
+                            String qualitySuiteId = tokens[3];
 
                             requestDateTime = new DateTime();
-                            log.info("Request queuing of: " + tokens[0] + ", " + tokens[1] + ", " + tokens[2] + ", " + tokens[3] + ", " + tokens[4]
-                                    + ", " + tokens[5] + "," + tokens[6]);
+                            log.info("Request queuing of: " + tokens[0] + ", " + tokens[1] + ", " + tokens[2] + ", " + tokens[3]);
 
-                            metadigCtrl.processScorerRequest(collectionId, projectName, authTokenName,  subjectIdName, memberNode, serviceUrl,
-                                    formatFamily, qualitySuiteId, requestDateTime);
+                            metadigCtrl.processScorerRequest(collectionId, nodeId, formatFamily, qualitySuiteId, requestDateTime);
                             break;
                         case "quality":
                             log.debug("Processing quality request");
@@ -165,7 +166,7 @@ public class Controller {
 
                             String suiteId = tokens[3];
                             requestDateTime = new DateTime();
-                            String nodeId = tokens[4];
+                            nodeId = tokens[4];
                             log.info("Request queuing of: " + tokens[0] + ", " + tokens[3] + ", " + tokens[4]);
                             metadigCtrl.processQualityRequest(nodeId, metadataPid, metadata, suiteId, "/tmp", requestDateTime, sysmeta);
                             break;
@@ -248,6 +249,7 @@ public class Controller {
         RabbitMQusername = cfg.getString("RabbitMQ.username");
         RabbitMQhost = cfg.getString("RabbitMQ.host");
         RabbitMQport = cfg.getInt("RabbitMQ.port");
+        bookkeeperEnabled = new Boolean(cfg.getString("bookkeeper.enabled"));
     }
 
 
@@ -275,6 +277,44 @@ public class Controller {
         this.runCount = 0;
         this.totalElapsedSeconds = 0;
     }
+
+    /**
+     * Query DataONE bookkeeper service to determine if a portal is active
+     *
+     * <p>
+     *     Before generating a metadata assessment graph for a portal, check
+     *     if the portal is active. A portal can be marked to inactive by
+     *     the portal owner, or by the bookkeeper admin if usage fees are
+     *     delinquent.
+     * </p>
+     * @param collectionId The DataONE collection identifier
+     * @return
+     * @throws MetadigException
+     */
+    // Check the portal quota with DataONE bookkeaper
+    public Boolean isPortalActive(String collectionId) throws MetadigException {
+        // Check the portal quota with DataONE bookkeeper
+        log.info("Checking bookkeeper portal Usage for collection: " + collectionId);
+        String msg = null;
+        BookkeeperClient bkClient = BookkeeperClient.getInstance();
+        List<Usage> usages = null;
+        UsageStatus usageStatus = null;
+        try {
+            // Set status = null so that any usage will be returned.
+            String status = null;
+            //usages = bkClient.listUsages(0, collectionId, "portal", status , subjects);
+            usageStatus = bkClient.getUsageStatus(collectionId, "portal");
+            log.info("Usage status for portal " + collectionId + " is " + usageStatus.getStatus());
+            if(usageStatus.getStatus().compareToIgnoreCase("active") == 0) {
+                return true;
+            } else {
+                return false;
+            }
+        } catch (Exception e) {
+            msg = "Unable to get usage status from bookkeeper for collection id: " + collectionId;
+            throw(new MetadigException(msg));
+        }
+    };
 
     /**
      * Forward a request to the "InProcess" queue.
@@ -374,43 +414,52 @@ public class Controller {
      * create the graph from them.
      * </p>
      *
-     * @param collectionId
-     * @param projectName
-     * @param memberNode
-     * @param formatFamily
-     * @param qualitySuiteId
-     * @param requestDateTime
+     * @param collectionId the DataONE collection identifier (the portal seriesId)
+     * @param nodeId the node identifier the collection resides on
+     * @param formatFamily a string representing the DataONE formats to create score for ("eml", "iso"), optional
+     * @param qualitySuiteId the quality suite used to create the score graph
+     * @param requestDateTime the datetime that the request was made
      *
      * @return
      * @throws java.io.IOException
      */
     public void processScorerRequest(String collectionId,
-                               String projectName,
-                               String authTokenName,
-                               String subjectIdName,
-                               String memberNode,
-                               String serviceUrl,
-                               String formatFamily,
+                               String nodeId,
+                               String formatFamily, // Optional format filter, if creating a graph for a submit of metadata formats ("eml", "iso")
                                String qualitySuiteId,
-                               DateTime requestDateTime) throws java.io.IOException, MetadigException {
+                               DateTime requestDateTime) throws java.io.IOException {
 
-        log.info("Processing scorer request, collection: " + collectionId + ", suite: " + qualitySuiteId);
+        log.info("Processing scorer request, collection: " + collectionId + ", suite: " + qualitySuiteId
+                    + ", nodeId: " + nodeId + ", formatFamily: " + formatFamily);
         ScorerQueueEntry qEntry = null;
         byte[] message = null;
-        String authToken = null;
 
-        if(authTokenName != null) {
+        /**
+         * Bookkeeper checking can be disabled via a metadig-engine configuration parameter. The primary use case for
+         * doing this is for testing purposes, otherwise checking should always be enabled.
+         */
+        if (bookkeeperEnabled) {
             try {
-                authToken = readConfigParam(authTokenName);
-            } catch (ConfigurationException ce) {
-                log.error("Error reading configuration for param " + "\"" + authTokenName + "\"" + ": " + ce.getMessage());
-                MetadigException metadigException = new MetadigProcessException("Error reading configuration for param " + authTokenName + ": " + ce.getMessage());
-                metadigException.initCause(ce);
-                throw metadigException;
+                // Bookkeeper creates a portal usage with the portal sid as the 'instanceId', however
+                if (!isPortalActive(collectionId)) {
+                    log.info("Skipping Scorer request for inactive portal with pid: '" + collectionId + "'" + ", quality suite " + qualitySuiteId);
+                    return;
+                } else {
+                    log.info("Bookkeeper check indicates portal for pid: " + collectionId + " is active.");
+                    log.info("Processing with Scorer request for inactive portal with pid: '" + collectionId + "'" + ", quality suite " + qualitySuiteId);
+                }
+            } catch (MetadigException me) {
+                log.error("Unable to contact DataONE bookkeeper: " + me.getMessage()
+                        + "\nSkipping Scorer request for portal with pid: '" + collectionId
+                        + "'" + ", quality suite " + qualitySuiteId);
+                return;
             }
+        } else {
+            log.info("Bookkeeper quota checking is disabled, proceeding with Scorer request for portal, collectionld: '" + collectionId
+                    + "'" + ", quality suite " + qualitySuiteId);
         }
 
-        qEntry = new ScorerQueueEntry(collectionId, projectName, authTokenName, subjectIdName, qualitySuiteId, memberNode, serviceUrl, formatFamily, requestDateTime);
+        qEntry = new ScorerQueueEntry(collectionId, qualitySuiteId, nodeId, formatFamily, requestDateTime);
 
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         ObjectOutput out = new ObjectOutputStream(bos);
@@ -418,7 +467,7 @@ public class Controller {
         message = bos.toByteArray();
 
         this.writeInProcessChannel(message, SCORER_ROUTING_KEY);
-        log.info(" [x] Queued Scorer request for collectionld: '" + qEntry.getProjectId() + "'" + " quality suite " + qualitySuiteId);
+        log.info(" [x] Queued Scorer request for id: '" + qEntry.getCollectionId() + "'" + ", quality suite " + qualitySuiteId + ", nodeId: " + nodeId + ", formatFamily: " + formatFamily);
     }
 
     /**
@@ -536,16 +585,16 @@ public class Controller {
                         completedChannel.basicAck(envelope.getDeliveryTag(), false);
                     }
 
-                    log.info(" [x] Controller received notification of completed score for: '" + qEntry.getProjectId() + "'" + ", " +
+                    log.info(" [x] Controller received notification of completed score for: '" + qEntry.getCollectionId() + "'" + ", " +
                             "hostsname: " + qEntry.getHostname());
-                    log.info("Total processing time for worker " + qEntry.getHostname() + " for PID " + qEntry.getProjectId() + ": " + qEntry.getProcessingElapsedTimeSeconds());
+                    log.info("Total processing time for worker " + qEntry.getHostname() + " for PID " + qEntry.getCollectionId() + ": " + qEntry.getProcessingElapsedTimeSeconds());
 
                     /* An exception caught by the worker will be passed back to the controller via the queue entry
                      * 'exception' field. Check this now and take the appropriate action.
                      */
                     Exception me = qEntry.getException();
                     if (me instanceof MetadigException) {
-                        log.error("Error running suite: " + qEntry.getQualitySuiteId() + ", pid: " + qEntry.getProjectId() + ", error msg: ");
+                        log.error("Error running suite: " + qEntry.getQualitySuiteId() + ", pid: " + qEntry.getCollectionId() + ", error msg: ");
                         log.error("\t" + me.getMessage());
                         Throwable thisCause = me.getCause();
                         if (thisCause != null) {

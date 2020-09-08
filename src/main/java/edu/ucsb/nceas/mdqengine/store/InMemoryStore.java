@@ -1,6 +1,5 @@
 package edu.ucsb.nceas.mdqengine.store;
 
-import com.sun.javafx.scene.control.skin.TableCellSkin;
 import edu.ucsb.nceas.mdqengine.MDQconfig;
 import edu.ucsb.nceas.mdqengine.exception.MetadigStoreException;
 import edu.ucsb.nceas.mdqengine.model.*;
@@ -10,6 +9,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.dataone.service.types.v2.Node;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.xml.sax.SAXException;
@@ -17,6 +17,7 @@ import org.xml.sax.SAXException;
 import javax.xml.bind.JAXBException;
 import java.io.IOException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -211,13 +212,22 @@ public class InMemoryStore implements MDQStore{
 //	public void saveNode(Node node) throws MetadigStoreException { }
 
 	@Override
-	public Task getTask(String taskName) { return new Task(); }
+	public Task getTask(String taskName, String taskType, String nodeId) { return new Task(); }
 
 	@Override
-	public void saveTask(Task task) throws MetadigStoreException { }
+	public void saveTask(Task task, String nodeId) throws MetadigStoreException { }
 
 	@Override
 	public void shutdown() {};
 
+
+	@Override
+	public Node getNode (String nodeId) { return new Node(); };
+
+	@Override
+	public void saveNode(Node node) throws MetadigStoreException {};
+
+	@Override
+	public ArrayList<Node> getNodes() { return new ArrayList<> (); };
 
 }

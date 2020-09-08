@@ -24,11 +24,21 @@ alter table identifiers owner to metadig;
 create table tasks (
   task_name TEXT not null,
   task_type TEXT not null,
-  last_harvest_datetime TEXT not null,
   CONSTRAINT task_name_task_type PRIMARY KEY (task_name, task_type)
 );
 
 alter table tasks owner to metadig;
+
+create table node_harvest (
+  task_name TEXT not null,
+  task_type TEXT not null,
+  node_id TEXT not null,
+  last_harvest_datetime TEXT not null,
+  CONSTRAINT node_harvest_task_name_task_type_fk FOREIGN KEY (task_name, task_type) REFERENCES tasks (task_name, task_type),
+  CONSTRAINT node_harvest_task_name_task_type_node_id_uc UNIQUE (task_name, task_type, node_id)
+);
+
+alter table node_harvest owner to metadig;
 
 create TABLE runs (
   metadata_id TEXT not null,
@@ -56,8 +66,23 @@ create TABLE filestore (
   media_type TEXT not NULL,
   alt_filename TEXT not NULL,
   CONSTRAINT file_id_pk PRIMARY KEY (file_id),
-  CONSTRAINT all_properties_fk UNIQUE (pid, suite_id, node_id, format_filter, storage_type, media_type, alt_filename)
+  -- CONSTRAINT all_properties_fk UNIQUE (pid, suite_id, node_id, format_filter, storage_type, media_type, alt_filename)
+  CONSTRAINT all_properties_fk UNIQUE (pid, storage_type, media_type, alt_filename)
 );
 
 alter table filestore owner to metadig;
+
+create TABLE nodes (
+  identifier TEXT not null,
+  name TEXT not null,
+  type TEXT not NULL,
+  state TEXT not NULL,
+  synchronize boolean not null,
+  last_harvest TEXT not null,
+  baseURL TEXT not null,
+  CONSTRAINT node_id_pk PRIMARY KEY (identifier)
+);
+
+alter table nodes owner to metadig;
+
 

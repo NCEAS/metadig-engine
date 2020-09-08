@@ -93,7 +93,6 @@ public class Graph {
         File codeFile = null;
         String dispatcherType = null;
 
-
         MetadigFile mdFile = new MetadigFile();
         mdFile.setCreationDatetime(DateTime.now());
         mdFile.setStorageType(StorageType.CODE.toString());
@@ -102,6 +101,7 @@ public class Graph {
             case CUMULATIVE:
                 mdFile.setMediaType("text/x-rsrc");
                 mdFile.setAltFilename("graph_" + GraphType.CUMULATIVE.toString().toLowerCase() + "_quality_scores.R");
+                log.debug("Creating a " + GraphType.CUMULATIVE.toString().toLowerCase() + " graph with " + mdFile.getAltFilename());
 
                 codeFile = fileStore.getFile(mdFile);
                 dispatcherType = "r";
@@ -109,11 +109,14 @@ public class Graph {
             case MONTHLY:
                 mdFile.setMediaType("text/x-rsrc");
                 mdFile.setAltFilename("graph_" + GraphType.MONTHLY.toString().toLowerCase() + "_quality_scores.R");
+                log.debug("Creating a " + GraphType.MONTHLY.toString().toLowerCase() + " graph with " + mdFile.getAltFilename());
 
                 codeFile = fileStore.getFile(mdFile);
                 dispatcherType = "r";
                 break;
         }
+
+        log.debug("Graph program length: " + codeFile.length());
 
         // The the graph program the title of the graph
         // Currently we aren't putting titles on the graphs
@@ -130,7 +133,7 @@ public class Graph {
         Result result = null;
 
         try {
-            log.debug("dispatching graph program ");
+            log.debug("dispatching graph program " + codeFile.toPath());
             result = dispatcher.dispatch(variables, code);
         } catch (ScriptException e) {
             log.error("Error executing script");

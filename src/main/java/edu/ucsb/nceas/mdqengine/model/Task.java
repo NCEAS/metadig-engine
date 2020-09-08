@@ -1,10 +1,12 @@
 package edu.ucsb.nceas.mdqengine.model;
 
+import java.util.HashMap;
+
 public class Task {
 
     private String taskName;
     private String taskType;
-    private String lastHarvestDatetime;
+    private HashMap<String, String> lastHarvestDatetimes = new HashMap<>();
 
     public void setTaskName(String name) {
         this.taskName = name;
@@ -18,10 +20,16 @@ public class Task {
 
     public String getTaskType() { return taskType; }
 
-    public void setLastHarvestDatetime(String lastHarvestDatetime) {
-        this.lastHarvestDatetime = lastHarvestDatetime;
+    public void setLastHarvestDatetimes(HashMap<String, String> lastHarvestDatetimes) {
+        this.lastHarvestDatetimes = lastHarvestDatetimes;
     }
 
-    public String getLastHarvestDatetime() { return lastHarvestDatetime; }
+    public void setLastHarvestDatetime(String lastHarvestDatetime, String nodeId) {
+        this.lastHarvestDatetimes.put(nodeId, lastHarvestDatetime);
+    }
+
+    public String getLastHarvestDatetime(String nodeId) {
+        return this.lastHarvestDatetimes.get(nodeId);
+    }
 
 }

@@ -1,6 +1,5 @@
 package edu.ucsb.nceas.mdqengine.store;
 
-import com.sun.javafx.scene.control.skin.TableCellSkin;
 import edu.ucsb.nceas.mdqengine.exception.MetadigStoreException;
 import edu.ucsb.nceas.mdqengine.model.*;
 import edu.ucsb.nceas.mdqengine.serialize.XmlMarshaller;
@@ -20,6 +19,7 @@ import org.dataone.service.types.v1.ObjectFormatIdentifier;
 import org.dataone.service.types.v1.Session;
 import org.dataone.service.types.v1.Subject;
 import org.dataone.service.types.v1.util.ChecksumUtil;
+import org.dataone.service.types.v2.Node;
 import org.dataone.service.types.v2.SystemMetadata;
 
 import javax.xml.bind.JAXBException;
@@ -329,22 +329,26 @@ public class MNStore implements MDQStore {
 	@Override
 	public void renew() {}
 
-//	@Override
-//	public Node getNode(String nodeId, String jobName) { return new Node(); }
-//
-//	@Override
-//	public void saveNode(Node node) throws MetadigStoreException { }
+	@Override
+	public Task getTask(String taskName, String taskType, String nodeId) { return new Task(); }
 
 	@Override
-	public Task getTask(String taskName) { return new Task(); }
-
-	@Override
-	public void saveTask(Task task) throws MetadigStoreException { }
+	public void saveTask(Task task, String nodeId) throws MetadigStoreException { }
 
 	@Override
 	public void shutdown() {};
 
 	@Override
 	public void saveRun(Run run) {}
+
+	@Override
+	public Node getNode (String nodeId) { return new Node(); };
+
+	@Override
+	public void saveNode(Node node) throws MetadigStoreException {};
+
+	@Override
+	public ArrayList<Node> getNodes() { return new ArrayList<> (); };
+
 
 }

@@ -47,6 +47,7 @@ public class JobScheduler {
         String startHarvestDatetime = null;
         int countRequested = 1000;
         int harvestDatetimeInc = 1;
+        String requestType = null;
 
         // Filestore variables
         String dirIncludeMatch = null;
@@ -84,6 +85,7 @@ public class JobScheduler {
             cronSchedule   = record.get("cron-schedule").trim();
             params         = record.get("params").trim();
             log.debug("Task type: " + taskType);
+            log.debug("Task name: " + taskName);
             log.debug("cronSchedule: " + cronSchedule);
             params = params.startsWith("\"") ? params.substring(1) : params;
             params = params.endsWith("\"") ? params.substring(0, params.length()-1) : params;
@@ -144,6 +146,8 @@ public class JobScheduler {
                 harvestDatetimeInc = Integer.parseInt(splitted[++icnt].trim());
                 // The number of results to return from the DataONE 'listObjects' service
                 countRequested = Integer.parseInt(splitted[++icnt].trim());
+                // Is this scores request for a portal or an entire member node?
+                requestType =  splitted[++icnt].trim();
 
                 log.debug("pidFilter: " + pidFilter);
                 log.debug("suiteId: " + suiteId);
@@ -151,6 +155,7 @@ public class JobScheduler {
                 log.debug("startHarvestDatetime: " + startHarvestDatetime);
                 log.debug("harvestDatetimeInc: " + harvestDatetimeInc);
                 log.debug("countRequested: " + countRequested);
+                log.debug("requestType: " + requestType);
             } else if(taskType.equals("filestore")) {
                 // Example taskList.csv entry:
                 // filestore,ingest,metadig,,,0 0/30 * * * ?,"stage;;*.*;README.txt;filestore-ingest.log"
@@ -175,10 +180,19 @@ public class JobScheduler {
                 log.debug("fileExcludeMatch: " + fileExcludeMatch);
                 logFile = splitted[++icnt].trim();
                 log.debug("log file: " + logFile);
+            } else if (taskType.equals("nodelist")) {
+                log.debug("Scheduling nodelist update from DataONE, task name: " + taskName + ", task group: " + taskGroup);
+                String[] splitted = Arrays.stream(params.split(";"))
+                        .map(String::trim)
+                        .toArray(String[]::new);
+
+                int icnt = -1;
+                log.debug("Split length: " + splitted.length);
+                nodeId = splitted[++icnt].trim();
+                log.debug("nodeId: " + nodeId);
             }
 
             try {
-                log.debug("Setting task");
                 // Currently there is only taskType="quality", but there could be more in the future!
                 JobDetail job = null;
                 if(taskType.equals("quality")) {
@@ -204,6 +218,7 @@ public class JobScheduler {
                             .usingJobData("startHarvestDatetime", startHarvestDatetime)
                             .usingJobData("harvestDatetimeInc", harvestDatetimeInc)
                             .usingJobData("countRequested", countRequested)
+                            .usingJobData("requestType", requestType)
                             .build();
                 } else if (taskType.equalsIgnoreCase("filestore")) {
                     job = newJob(FilestoreIngestJob.class)
@@ -216,15 +231,20 @@ public class JobScheduler {
                             .usingJobData("fileExcludeMatch", fileExcludeMatch)
                             .usingJobData("logFile", logFile)
                             .build();
+                } else if (taskType.equalsIgnoreCase("nodelist")) {
+                    job = newJob(NodeList.class)
+                            .withIdentity(taskName, taskGroup)
+                            .usingJobData("taskName", taskName)
+                            .usingJobData("taskType", taskType)
+                            .usingJobData("nodeId", nodeId)
+                            .build();
                 }
 
-                log.debug("Setting trigger");
                 CronTrigger trigger = newTrigger()
                     .withIdentity(taskName + "-trigger", taskGroup)
                     .withSchedule(cronSchedule(cronSchedule))
                     .build();
 
-                log.debug("Scheduling task");
                 scheduler.scheduleJob(job, trigger);
 
             } catch (SchedulerException se) {
@@ -238,12 +258,18 @@ public class JobScheduler {
     public JobScheduler () {
     }
 
+    /**
+     * Read a single parameter from the quality engine parameter file
+     * @param paramName the parameter to read from the config file
+     * @throws ConfigurationException if there is an exception while reading the config file
+     * @throws IOException if there is an exception while reading the config file
+     */
     public String readConfig (String paramName) throws ConfigurationException, IOException {
         String paramValue = null;
         try {
             MDQconfig cfg = new MDQconfig();
             paramValue = cfg.getString(paramName);
-        } catch (Exception e) {
+        } catch (ConfigurationException | IOException e) {
             log.error("Could not read configuration for param: " + paramName + ": " + e.getMessage());
             throw e;
         }

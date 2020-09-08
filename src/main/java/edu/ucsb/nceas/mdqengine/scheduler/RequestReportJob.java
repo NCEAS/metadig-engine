@@ -1,7 +1,7 @@
 package edu.ucsb.nceas.mdqengine.scheduler;
 
 import edu.ucsb.nceas.mdqengine.MDQconfig;
-import edu.ucsb.nceas.mdqengine.authentication.DataONE;
+import edu.ucsb.nceas.mdqengine.DataONE;
 import edu.ucsb.nceas.mdqengine.exception.MetadigStoreException;
 import edu.ucsb.nceas.mdqengine.model.Run;
 import edu.ucsb.nceas.mdqengine.model.Task;
@@ -19,6 +19,7 @@ import org.dataone.client.rest.HttpMultipartRestClient;
 import org.dataone.client.rest.MultipartRestClient;
 import org.dataone.client.v2.impl.MultipartCNode;
 import org.dataone.client.v2.impl.MultipartMNode;
+import org.dataone.service.types.v2.Node;
 import org.dataone.mimemultipart.SimpleMultipartEntity;
 import org.dataone.service.exceptions.NotAuthorized;
 import org.dataone.service.types.v1.*;
@@ -37,8 +38,6 @@ import java.io.InputStream;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * <p>
@@ -56,28 +55,49 @@ public class RequestReportJob implements Job {
     private Log log = LogFactory.getLog(RequestReportJob.class);
 
     class ListResult {
-        Integer resultCount;
-        ArrayList<String> result = new ArrayList<>();
+        // The total result count for all object types returned from DataONE. This is the count of all object types
+        // that were retrieved for a given request. The DataONE 'listObjects' service does provide
+        // parameters to filter by formatId wildcard, so we have to retrieve all pids for a time range
+        // and filter the result list.
+        private Integer totalResultCount = 0;
+        // The filtered result count returned from DataONE.
+        // The DataONE listObjects service returns all new pids for all formatIds
+        // but we are typically only interested in a subset of those, i.e. EML metadata pids,
+        // so this is the count of pids from the result that we are actually interested in.
+        private Integer filteredResultCount = 0;
+        private ArrayList<String> result = new ArrayList<>();
+
+        // The scheduler keeps track of the sysmeta 'dateSystemMetadataModified' of the last pid harvested,
+        // which will be used as the starting time of the next harvest.
+        private DateTime lastDateModifiedDT = null;
 
         void setResult(ArrayList result) {
             this.result = result;
         }
 
-        ArrayList getResult() {
+        public ArrayList getResult() {
             return this.result;
         }
 
-        void setResultCount(Integer count) {
-            this.resultCount = count;
+        void setTotalResultCount(Integer count) {
+            this.totalResultCount = count;
+        }
+        void setFilteredResultCount(Integer count) { this.filteredResultCount = count; }
+        void setLastDateModified(DateTime date) {
+            this.lastDateModifiedDT = date;
         }
 
-        Integer getResultCount() {
-            return this.resultCount;
+        public Integer getTotalResultCount() { return this.totalResultCount; }
+
+        public Integer getFilteredResultCount() { return this.filteredResultCount; }
+
+        public DateTime getLastDateModified() {
+            return this.lastDateModifiedDT;
         }
     }
 
     // Since Quartz will re-instantiate a class every time it
-    // gets executed, members non-static member variables can
+    // gets executed, non-static member variables can
     // not be used to maintain state!
 
     /**
@@ -111,21 +131,13 @@ public class RequestReportJob implements Job {
         JobDataMap dataMap = context.getJobDetail().getJobDataMap();
 
         String taskName = dataMap.getString("taskName");
-        log.debug("taskName: " + taskName);
         String taskType = dataMap.getString("taskType");
-        log.debug("taskType: " + taskType);
         String pidFilter = dataMap.getString("pidFilter");
-        log.debug("pidFilter: " + pidFilter);
         String suiteId = dataMap.getString("suiteId");
-        log.debug("suiteId: " + suiteId);
         String nodeId = dataMap.getString("nodeId");
-        log.debug("nodeId: " + nodeId);
         String startHarvestDatetimeStr = dataMap.getString("startHarvestDatetime");
-        log.debug("startHavestDatetimeStr: " + startHarvestDatetimeStr);
         int harvestDatetimeInc = dataMap.getInt("harvestDatetimeInc");
-        log.debug("harvestDatetimeInc: " + harvestDatetimeInc);
         int countRequested = dataMap.getInt("countRequested");
-        log.debug("countRequested: " + countRequested);
         MultipartRestClient mrc = null;
         MultipartMNode mnNode = null;
         MultipartCNode cnNode = null;
@@ -144,17 +156,17 @@ public class RequestReportJob implements Job {
             // TODO:  Cache the node values from the CN listNode service
             nodeServiceUrl = cfg.getString(nodeAbbr + ".serviceUrl");
         } catch (ConfigurationException | IOException ce) {
-            JobExecutionException jee = new JobExecutionException("Error executing task.");
+            JobExecutionException jee = new JobExecutionException(taskName + ": error executing task.");
             jee.initCause(ce);
             throw jee;
         }
 
-        log.debug("Executing task for node: " + nodeId + ", suiteId: " + suiteId);
+        log.debug("Executing task " + taskType + ", " + taskName + " for node: " + nodeId + ", suiteId: " + suiteId);
 
         try {
             mrc = new HttpMultipartRestClient();
         } catch (Exception e) {
-            log.error("Error creating rest client: " + e.getMessage());
+            log.error(taskName + ": error creating rest client: " + e.getMessage());
             JobExecutionException jee = new JobExecutionException(e);
             jee.setRefireImmediately(false);
             throw jee;
@@ -163,14 +175,14 @@ public class RequestReportJob implements Job {
         Session session = DataONE.getSession(subjectId, authToken);
 
         // Don't know node type yet from the id, so have to manually check if it's a CN
-        Boolean isCN = isCN(nodeServiceUrl);
+        Boolean isCN = DataONE.isCN(nodeServiceUrl);
         if(isCN) {
             cnNode = new MultipartCNode(mrc, nodeServiceUrl, session);
         } else {
             mnNode = new MultipartMNode(mrc, nodeServiceUrl, session);
         }
 
-        // Don't know node type yet from the id, so have to manually check if it's a CN
+        // Get a connection to the database
         MDQStore store = null;
 
         try {
@@ -189,128 +201,195 @@ public class RequestReportJob implements Job {
             }
         }
 
-        // Set UTC as the default time zone for all DateTime operations.
-        // Get current datetime, which may be used for start time range.
-        DateTimeZone.setDefault(DateTimeZone.UTC);
-        DateTime currentDT = new DateTime(DateTimeZone.UTC);
-        DateTimeFormatter dtfOut = DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ss.SS'Z'");
-        String currentDatetimeStr = dtfOut.print(currentDT);
+        ArrayList<Node> nodes = new ArrayList<>();
 
-        DateTime startDateTimeRange = null;
-        DateTime endDateTimeRange = null;
-
-        String lastHarvestDateStr = null;
-        //edu.ucsb.nceas.mdqengine.model.Node node;
-        //node = store.getNode(nodeId, jobName);
-
-        Task task;
-        task = store.getTask(taskName);
-        // If a 'task' entry has not been saved for this task name yet, then a 'lastHarvested'
-        // DataTime will not be available, in which case the 'startHarvestDataTime' from the
-        // config file will be used.
-        if(task.getLastHarvestDatetime() == null) {
-            task = new Task();
-            task.setTaskName(taskName);
-            task.setTaskType(taskType);
-            lastHarvestDateStr = startHarvestDatetimeStr;
-            task.setLastHarvestDatetime(lastHarvestDateStr);
+        if (isCN) {
+            nodes = store.getNodes();
         } else {
-            lastHarvestDateStr = task.getLastHarvestDatetime();
-        }
-
-        DateTime lastHarvestDate = new DateTime(lastHarvestDateStr);
-        // Set the search start datetime to the last harvest datetime, unless it is in the
-        // future. (This can happen when the previous time range end was for the current day,
-        // as the end datetime range for the previous task run will have been stored as the
-        // new lastharvestDateTime.
-        DateTime startDTR = null;
-        if(lastHarvestDate.isAfter(currentDT.toInstant())) {
-            startDTR = currentDT;
-        } else {
-            startDTR = new DateTime(lastHarvestDate);
-        }
-
-        DateTime endDTR = new DateTime(startDTR);
-        endDTR = endDTR.plusDays(harvestDatetimeInc);
-        if(endDTR.isAfter(currentDT.toInstant())) {
-            endDTR = currentDT;
-        }
-
-        // If the start and end harvest dates are the same (happends for a new node), then
-        // tweek the start so that DataONE listObjects doesn't complain.
-        if(startDTR == endDTR ) {
-            startDTR = startDTR.minusMinutes(1);
-        }
-
-        String startDTRstr = dtfOut.print(startDTR);
-        String endDTRstr = dtfOut.print(endDTR);
-
-        Integer startCount = new Integer(0);
-        ListResult result = null;
-        Integer resultCount = null;
-
-        boolean morePids = true;
-        while(morePids) {
-            ArrayList<String> pidsToProcess = null;
-            log.info("Getting pids for node: " + nodeId + ", suiteId: " + suiteId + ", harvest start: " + startDTRstr);
-
-            try {
-                result = getPidsToProcess(cnNode, mnNode, isCN, session, suiteId, nodeId, pidFilter, startDTRstr, endDTRstr, startCount, countRequested);
-                pidsToProcess = result.getResult();
-                resultCount = result.getResultCount();
-            } catch (Exception e) {
-                JobExecutionException jee = new JobExecutionException("Unable to get pids to process", e);
+            Node node = store.getNode(nodeId);
+            if (node.getIdentifier().getValue() == null) {
+                String msg = ("Node entry not found for node: " + nodeId);
+                log.error(msg);
+                JobExecutionException jee = new JobExecutionException(msg);
                 jee.setRefireImmediately(false);
                 throw jee;
+            } else {
+                log.trace("Got node " + node.getIdentifier().getValue());
+                nodes.add(node);
             }
+        }
 
-            log.info("Found " + resultCount + " pids" + " for node: " + nodeId);
-            for (String pidStr : pidsToProcess) {
-                try {
-                    log.info("submitting pid: " + pidStr);
-                    submitReportRequest(cnNode, mnNode, isCN, session, qualityServiceUrl, pidStr, suiteId);
-                } catch (org.dataone.service.exceptions.NotFound nfe) {
-                    log.error("Unable to process pid: " + pidStr +  nfe.getMessage());
+        String harvestNodeId = null;
+        for (Node node : nodes) {
+
+            harvestNodeId = node.getIdentifier().getValue();
+            // If processing a CN, check each MN to see if it is being synchronized and if it
+            // is up.
+            if (isCN) {
+
+                // The NodeList task doesn't save CN entries from the DataONE 'listNodes()' service, but check
+                // just in case.
+                if (node.getType().equals(NodeType.CN)) {
+                    log.debug("Harvesting from CN, skipping CN entry from node list for " + node.getIdentifier().getValue());
                     continue;
-                } catch (Exception e) {
-                    log.error("Unable to process pid:  " + pidStr + " - " + e.getMessage());
+                }
+
+                if (! node.isSynchronize() || ! node.getState().equals(NodeState.UP)) {
+                    log.trace("Skipping disabled node: " + node.getIdentifier().getValue() + ", sync: " + node.isSynchronize()
+                            + ", status: " + node.getState().toString());
                     continue;
-                    //JobExecutionException jee = new JobExecutionException("Unable to submit request to create new quality reports", e);
-                    //jee.setRefireImmediately(false);
-                    //throw jee;
+                }
+
+                DateTime mnLastHarvestDT = new DateTime(node.getSynchronization().getLastHarvested(), DateTimeZone.UTC);
+                DateTime oneMonthAgoDT = new DateTime(DateTimeZone.UTC).minusMonths(1);
+
+                if (mnLastHarvestDT.isBefore(oneMonthAgoDT.toInstant())) {
+                    DateTimeZone.setDefault(DateTimeZone.UTC);
+                    DateTimeFormatter dtfOut = DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+                    log.trace("Skipping node " + node.getIdentifier().getValue() + " that hasn't been sync'd since " + dtfOut.print(mnLastHarvestDT));
+                    continue;
                 }
             }
 
-            task.setLastHarvestDatetime(endDTRstr);
-            log.debug("taskName: " + task.getTaskName());
-            log.debug("taskType: " + task.getTaskType());
-            log.debug("lastharvestdate: " + task.getLastHarvestDatetime());
-            try {
-                store.saveTask(task);
-            } catch (MetadigStoreException mse) {
-                log.error("Error saving task: " + task.getTaskName());
-                JobExecutionException jee = new JobExecutionException("Unable to save new harvest date", mse);
-                jee.setRefireImmediately(false);
-                throw jee;
+            log.trace("Harvesting node: " + node.getIdentifier().getValue());
+
+            // Set UTC as the default time zone for all DateTime operations.
+            // Get current datetime, which may be used for start time range.
+            DateTimeZone.setDefault(DateTimeZone.UTC);
+            DateTime currentDT = new DateTime(DateTimeZone.UTC);
+            DateTimeFormatter dtfOut = DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+            String lastHarvestDateStr = null;
+
+            Task task;
+            task = store.getTask(taskName, taskType, harvestNodeId);
+            // If a 'task' entry has not been saved for this task name yet, then a 'lastHarvested'
+            // DataTime will not be available, in which case the 'startHarvestDataTime' from the
+            // config file will be used.
+            if (task.getLastHarvestDatetime(harvestNodeId) == null) {
+                task.setTaskName(taskName);
+                task.setTaskType(taskType);
+                lastHarvestDateStr = startHarvestDatetimeStr;
+                task.setLastHarvestDatetime(lastHarvestDateStr, harvestNodeId);
+            } else {
+                lastHarvestDateStr = task.getLastHarvestDatetime(harvestNodeId);
             }
 
-            // Check if DataONE returned the max number of results. If so, we have to request more by paging through
-            // the results.
-            if(resultCount >= countRequested) {
-                morePids = true;
-                startCount = startCount + resultCount;
-                log.info("Paging through more results, current start is " + startCount);
+            DateTime lastHarvestDateDT = new DateTime(lastHarvestDateStr);
+            // Set the search start datetime to the last harvest datetime, unless it is in the
+            // future. (This can happen when the previous time range end was for the current day,
+            // as the end datetime range for the previous task run will have been stored as the
+            // new lastharvestDateTime.
+            DateTime startDT = null;
+            if (lastHarvestDateDT.isAfter(currentDT.toInstant())) {
+                startDT = currentDT;
             } else {
-                morePids = false;
+                startDT = new DateTime(lastHarvestDateDT);
+            }
+
+            DateTime endDT = new DateTime(currentDT);
+
+            // If the start and end harvest dates are the same (happens for a new node), then
+            // tweak the start so that DataONE listObjects doesn't complain.
+            if (startDT == endDT) {
+                startDT = startDT.minusMinutes(1);
+            }
+
+            // Track the sysmeta dateUploaded of the latest harvested pid. This will become the starting time of
+            // the next harvest.
+            DateTime lastDateModifiedDT = startDT;
+
+            String startDTstr = dtfOut.print(startDT);
+            String endDTstr = dtfOut.print(endDT);
+
+            log.trace("start time: " + startDTstr);
+
+            Integer startCount = new Integer(0);
+            ListResult result = null;
+            Integer totalResultCount = 0;
+            Integer filteredResultCount = 0;
+            Integer allPidsCnt = 0;
+
+            log.trace("Getting pids for nodeId: " + harvestNodeId);
+            boolean morePids = true;
+            while (morePids) {
+                ArrayList<String> pidsToProcess = null;
+                try {
+                    result = getPidsToProcess(cnNode, mnNode, isCN, session, suiteId, pidFilter, startDTstr, endDTstr, startCount, countRequested, lastDateModifiedDT, harvestNodeId, taskName);
+                    pidsToProcess = result.getResult();
+                    totalResultCount = result.getTotalResultCount();
+                    filteredResultCount = result.getFilteredResultCount();
+                    lastDateModifiedDT = result.getLastDateModified();
+                } catch (Exception e) {
+                    JobExecutionException jee = new JobExecutionException("Unable to get pids to process", e);
+                    jee.setRefireImmediately(false);
+                    throw jee;
+                }
+
+                allPidsCnt = pidsToProcess.size();
+                for (String pidStr : pidsToProcess) {
+                    try {
+                        log.debug(taskName + ": submitting pid: " + pidStr);
+                        submitReportRequest(cnNode, mnNode, isCN, session, qualityServiceUrl, pidStr, suiteId);
+                    } catch (org.dataone.service.exceptions.NotFound nfe) {
+                        log.error("Unable to process pid: " + pidStr + nfe.getMessage());
+                        continue;
+                    } catch (Exception e) {
+                        log.error("Unable to process pid:  " + pidStr + " - " + e.getMessage());
+                        continue;
+                    }
+                }
+
+                // Check if DataONE returned the max number of results. If so, we have to request more by paging through
+                // the results returned pidsToProcess (i.e. DataONE listObjects service). If the returned result is
+                // less than the requested result, then all pids have been retrieved.
+                if (totalResultCount >= countRequested) {
+                    morePids = true;
+                    startCount = startCount + totalResultCount;
+                    log.trace("Paging through more results, current start is " + startCount);
+                } else {
+                    morePids = false;
+                }
+            }
+            // Don't update the lastHarvestDateDT if no pids were found.
+            if (allPidsCnt > 0) {
+                task.setLastHarvestDatetime(dtfOut.print(lastDateModifiedDT), harvestNodeId);
+                log.trace("Saving lastHarvestDate: " + dtfOut.print(lastDateModifiedDT) + " for node: " + harvestNodeId);
+                try {
+                    store.saveTask(task, harvestNodeId);
+                } catch (MetadigStoreException mse) {
+                    log.error("Error saving task: " + task.getTaskName());
+                    JobExecutionException jee = new JobExecutionException("Unable to save new harvest date", mse);
+                    jee.setRefireImmediately(false);
+                    throw jee;
+                }
+                log.info(taskName + ": found " + allPidsCnt + " pids for nodeId: " + harvestNodeId + ", start: " + startDTstr + ", end: " + endDTstr + ", servierUrl: " + nodeServiceUrl);
             }
         }
         store.shutdown();
     }
 
+    /**
+     * Query a DataONE CN or MN to obtain a list of persistent identifiers (pids) for metadata objects have been
+     * added to the system during a specific time period.
+     * @param cnNode a DataONE CN connection client object
+     * @param mnNode a DataONE MN connection client object
+     * @param isCN a logical indicating whether a CN of MN object is being used
+     * @param session a DataONE authentication session
+     * @param suiteId the quality suite to check (if this pids has already been processed)
+     * @param pidFilter the DataONE format identifies to filter for
+     * @param startHarvestDatetimeStr the starting date to harvest pids from
+     * @param endHarvestDatetimeStr the ending data to harvest pids from
+     * @param startCount the start count for paging results from DataONE, for large results
+     * @param countRequested the number of items to get from DataONE on each request
+     * @param lastDateModifiedDT the sysmeta 'dateSystemMetadataModified' value of the last harvested pid
+     * @param nodeIdFilter filter results for this nodeId (applies only to CN)
+     * @throws Exception if there is an exception while executing the job.
+     * @return a ListResult object containing the matching pids
+     */
     public ListResult getPidsToProcess(MultipartCNode cnNode, MultipartMNode mnNode, Boolean isCN, Session session,
-                                  String suiteId, String nodeId, String pidFilter, String startHarvestDatetimeStr,
+                                  String suiteId, String pidFilter, String startHarvestDatetimeStr,
                                   String endHarvestDatetimeStr, int startCount,
-                                  int countRequested) throws Exception {
+                                  int countRequested, DateTime lastDateModifiedDT, String nodeIdFilter, String taskName) throws Exception {
 
         ArrayList<String> pids = new ArrayList<String>();
         InputStream qis = null;
@@ -318,7 +397,6 @@ public class RequestReportJob implements Job {
 
         ObjectFormatIdentifier formatId = null;
         NodeReference nodeRef = null;
-        //nodeRef.setValue(nodeId);
         Identifier identifier = null;
         Boolean replicaStatus = false;
 
@@ -334,30 +412,36 @@ public class RequestReportJob implements Job {
         Date endDate = new Date(msSinceEpoch);
 
         try {
-            // Even though MultipartMNode and MultipartCNode have the same parent class, their interfaces are differnt, so polymorphism
-            // isn't happening here.
+            // Even though MultipartMNode and MultipartCNode have the same parent class D1Node, the interface for D1Node doesn't
+            // include listObjects, as the parameters differ from CN to MN, so we have to use a different object for each.
             if(isCN) {
+                log.trace("Getting pids for cn, for nodeid: " + nodeIdFilter);
+                nodeRef = new NodeReference();
+                nodeRef.setValue(nodeIdFilter);
                 objList = cnNode.listObjects(session, startDate, endDate, formatId, nodeRef, identifier, startCount, countRequested);
             } else {
+                log.trace("Getting pids for mn");
                 objList = mnNode.listObjects(session, startDate, endDate, formatId, identifier, replicaStatus, startCount, countRequested);
             }
             //log.info("Got " + objList.getCount() + " pids for format: " + formatId.getValue() + " pids.");
         } catch (Exception e) {
-            log.error("Error retrieving pids for node " + nodeId + ": " + e.getMessage());
+            log.error(taskName + ": error retrieving pids: " + e.getMessage());
             throw e;
         }
 
         String thisFormatId = null;
         String thisPid = null;
         int pidCount = 0;
+        DateTime thisDateModifiedDT;
 
         if (objList.getCount() > 0) {
             for(ObjectInfo oi: objList.getObjectInfoList()) {
                 thisFormatId = oi.getFormatId().getValue();
                 thisPid = oi.getIdentifier().getValue();
+                log.trace("Checking pid: " + thisPid + ", format: " + thisFormatId);
 
-                // Check all pid filters. There could be multiple wildcard filters, which are separated
-                // by ','.
+                // Check all pid filters to see if this pids's format was found in the list of desired formats.
+                // There could be multiple wildcard filters, which are separated by ','.
                 String [] filters = pidFilter.split("\\|");
                 Boolean found = false;
                 for(String thisFilter:filters) {
@@ -374,22 +458,54 @@ public class RequestReportJob implements Job {
                 //    if (!runExists(thisPid, suiteId, store)) {
                     pidCount = pidCount++;
                     pids.add(thisPid);
-                    log.info("adding pid " + thisPid + ", formatId: " + thisFormatId);
+                    log.trace("adding pid " + thisPid + ", formatId: " + thisFormatId);
+                    // If this pid's modified date is after the stored latest encountered modified date, then update
+                    // the lastModified date
+                    thisDateModifiedDT = new DateTime(oi.getDateSysMetadataModified());
+                    // Add a millisecond to lastDateModfiedDT so that this pid won't be harvested again (in the event
+                    // that this is the last pid to be harvested in this round.
+                    if (thisDateModifiedDT.isAfter(lastDateModifiedDT)) {
+                        lastDateModifiedDT = thisDateModifiedDT.plusMillis(1);
+                        log.debug("New value for lastDateMoidifed: " + lastDateModifiedDT.toString());
+                    }
                 //    }
                 }
             }
         }
 
         ListResult result = new ListResult();
-        result.setResultCount(pidCount);
+        // Set the count for the number of desired pids filtered from the total result set
+        result.setFilteredResultCount(pidCount);
+        // Set the count for the total number of pids returned from DataONE (all formatIds) for this query
+        result.setTotalResultCount(objList.getCount());
         result.setResult(pids);
+        // Return the sysmeta 'dateSystemMetadataModified' of the last pid harvested.
+        result.setLastDateModified(lastDateModifiedDT);
 
         return result;
     }
 
-    public boolean runExists(String pid, String suiteId, MDQStore store) throws MetadigStoreException {
+
+    /**
+     * Check if the specified quality suite has already been run for a pid.
+     * <p>
+     * An additional check is made to see if the system metadata in the
+     * run is older than the passed in date. Because the quality engine
+     * uses fields from sysmeta (obsoletes, obsoletedBy), a run may need
+     * to be performed on an existing run in order to update the sysmeta, as
+     * the system is stored in the run object, and this run object is
+     * parsed when the run is inserted into the Solr index.
+     * </p>
+     * @param pid the pid to check
+     * @param suiteId the suite identifier to check (e.g. "FAIR-suite-0.3.1")
+     * @param store the DataStore object to send the check request to.
+     * @throws MetadigStoreException
+     *
+     */
+    public boolean runExists(String pid, String suiteId, MDQStore store, Date dateSystemMetadataModified) throws MetadigStoreException {
 
         boolean found = false;
+        Date runDateSystemMetadataModified = null;
 
         if(!store.isAvailable()) {
             try {
@@ -410,6 +526,22 @@ public class RequestReportJob implements Job {
         return found;
     }
 
+    /**
+     * Submit a request to the metadig controller to run a quality suite for the specified pid.
+     * <p>
+     *     The system metadata for a pid is also obtained and sent with the request
+     * </p>
+     *
+     * @param cnNode a DataONE CN connection client object
+     * @param mnNode a DataONE MN connection client object
+     * @param isCN a logical indicating whether a CN of MN object
+     * @param session a DataONE authentication session
+     * @param qualityServiceUrl the URL of the MetaDIG quality service
+     * @param pidStr the pid to submit the request for
+     * @param suiteId the suite identifier to submit the request for
+     *
+     * @throws Exception
+     */
     public void submitReportRequest(MultipartCNode cnNode, MultipartMNode mnNode, Boolean isCN,  Session session, String qualityServiceUrl, String pidStr, String suiteId) throws Exception {
 
         SystemMetadata sysmeta = null;
@@ -438,61 +570,37 @@ public class RequestReportJob implements Job {
             } else  {
                 objectIS = mnNode.get(session, pid);
             }
-            log.debug("Retrieved metadata object for pid: " + pidStr);
+            log.trace("Retrieved metadata object for pid: " + pidStr);
         } catch (NotAuthorized na) {
-            log.error("Not authorized to read pid: " + pid + ", continuing with next pid...");
+            log.error("Not authorized to read pid: " + pid + ", unable to retrieve metadata, continuing with next pid...");
             return;
-        } catch (Exception e) {
-            throw(e);
         }
 
         // quality suite service url, i.e. "http://docke-ucsb-1.dataone.org:30433/quality/suites/knb.suite.1/run
         qualityServiceUrl = qualityServiceUrl + "/suites/" + suiteId + "/run";
         HttpPost post = new HttpPost(qualityServiceUrl);
 
-        try {
-            // add document
-            SimpleMultipartEntity entity = new SimpleMultipartEntity();
-            entity.addFilePart("document", objectIS);
+        // add document
+        SimpleMultipartEntity entity = new SimpleMultipartEntity();
+        entity.addFilePart("document", objectIS);
 
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            TypeMarshaller.marshalTypeToOutputStream(sysmeta, baos);
-            entity.addFilePart("systemMetadata", new ByteArrayInputStream(baos.toByteArray()));
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        TypeMarshaller.marshalTypeToOutputStream(sysmeta, baos);
+        entity.addFilePart("systemMetadata", new ByteArrayInputStream(baos.toByteArray()));
 
-            // make sure we get XML back
-            post.addHeader("Accept", "application/xml");
+        // make sure we get XML back
+        post.addHeader("Accept", "application/xml");
 
-            // send to service
-            log.trace("submitting: " + qualityServiceUrl);
-            post.setEntity((HttpEntity) entity);
-            CloseableHttpClient client = HttpClients.createDefault();
-            CloseableHttpResponse response = client.execute(post);
+        // send to service
+        log.trace("submitting: " + qualityServiceUrl);
+        post.setEntity((HttpEntity) entity);
+        CloseableHttpClient client = HttpClients.createDefault();
+        CloseableHttpResponse response = client.execute(post);
 
-            // retrieve results
-            HttpEntity reponseEntity = response.getEntity();
-            if (reponseEntity != null) {
-                runResultIS = reponseEntity.getContent();
-            }
-        } catch (Exception e) {
-            throw(e);
+        // retrieve results
+        HttpEntity reponseEntity = response.getEntity();
+        if (reponseEntity != null) {
+            runResultIS = reponseEntity.getContent();
         }
-    }
-
-    private Boolean isCN(String serviceUrl) {
-
-        Boolean isCN = false;
-        // Identity node as either a CN or MN based on the serviceUrl
-        String pattern = "https*://cn.*?\\.dataone\\.org|https*://cn.*?\\.test\\.dataone\\.org";
-        Pattern r = Pattern.compile(pattern);
-        Matcher m = r.matcher(serviceUrl);
-        if (m.find()) {
-            isCN = true;
-            log.debug("service URL is for a CN: " + serviceUrl);
-        } else {
-            log.debug("service URL is not for a CN: " + serviceUrl);
-            isCN = false;
-        }
-
-        return isCN;
     }
 }
