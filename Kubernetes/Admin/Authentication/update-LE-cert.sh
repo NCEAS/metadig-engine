@@ -1,28 +1,40 @@
-#!/bin/bash -x
+#!/bin/bash
 
 # Call the Let's Encrypt certbot which will update our LE certs used by
 # k8s, if it determines they need to be updated.
+# Note: this script is intended to be run as a root cron job
+# Note: this certificate can be checked with the following command:
+#     openssl s_client -showcerts -servername api.test.dataone.org -connect api.test.dataone.org:30443
+#     - this output should show both the LE cert and the intermediate cert:
+#        - 1 s:/C=US/O=Let's Encrypt/CN=Let's Encrypt Authority X3
+#        - i:/O=Digital Signature Trust Co./CN=DST Root CA X3
+
+# Note: the user needs to have sudo access to run this script
 
 debug=1
 
 # The user managing k8s
 user=metadig
+userHome=~metadig
 # k8s namespace that we are managing
 #k8sns=metadig
 k8sns=nginx-ingress
 
 # Save current LE cert modified time so we can see if certbot delivers
 # new certs
-domain=`hostname -f`
-damainDir=$domain
-domain=api.test.dataone.org,${domain}
+#domain=`hostname -f`
+#domain=api.test.dataone.org
+domain=docker-ucsb-4.dataone.org
+domainDir=$domain
 CA_DIR=/etc/letsencrypt/live/${domainDir}
 # Use fullchain.pem, which includes the intermediate certificate, that will allow TLS
 # client authentication, for those clients that don't know about LE certs
-#certFilename=${CA_DIR}/cert.pem
-certFilename=${CA_DIR}/fullchain.pem
-privkeyFilename=${CA_DIR}/privkey.pem
-certModTime=`stat -c %Y ${certFilename}`
+certFilename=fullchain.pem
+certFilepath=${CA_DIR}/$certFilename
+
+privkeyFilename=privkey.pem
+privkeyFilepath=${CA_DIR}/$privkeyFilename
+certModTime=`sudo stat -c %Y ${certFilepath}`
 
 # Open port 80 so that the certbot can send a challenge which will verify
 # that we have control of the IP that it will create the cert for
@@ -32,16 +44,17 @@ certModTime=`stat -c %Y ${certFilename}`
 # Since 2019, certbot uses 'multi-perspective validation', so that they check from
 # multiple systems, so open up port 80 to any - we are not able to determine the
 # the IP that the certbot request will come from.
-ufw allow 80
+sudo ufw allow 80
 #sudo ufw allow from ${certbotIP} to any port 80
 #/usr/bin/certbot renew -d ${domain} > /var/log/letsencrypt/letsencrypt-renew.log 2>&1
-/usr/bin/certbot renew -d ${domain} > /var/log/letsencrypt/letsencrypt-renew.log 2>&1
-# Close the port as soon as certbot is done
-ufw delete allow 80
-#sudo ufw delete allow from ${certbotIP} to any port 80
-ufw status
+sudo /usr/bin/certbot certonly --standalone -d ${domain} | sudo tee -a /var/log/letsencrypt/letsencrypt-renew.log >/dev/null
 
-certModTimeNew=`stat -c %Y ${certFilename}`
+# Close the port as soon as certbot is done
+sudo ufw delete allow 80
+#sudo ufw delete allow from ${certbotIP} to any port 80
+sudo ufw status
+
+certModTimeNew=`sudo stat -c %Y ${certFilepath}`
 
 if (( $certModTimeNew > $certModTime )); then
   if (( $debug )); then
@@ -51,21 +64,24 @@ if (( $certModTimeNew > $certModTime )); then
   # with any new certs obtained from certbot
   # see https://docs.bitnami.com/kubernetes/how-to/secure-kubernetes-services-with-ingress-tls-letsencrypt/
 
-  #kubectl describe secret metadig-tls-cert --namespace metadig
-  if [ ! -d ~${user}/tmp ]; then
-    mkdir ~${user}/tmp
+  if [ ! -d ${userHome}/tmp ]; then
+    mkdir ${userHome}/tmp
   fi
-  cp ${certFilename} ~${user}/tmp
-  cp ${privkeyFilename} ~${user}/tmp
-  chown ${user}.${user} ~${user}/tmp/*.pem
 
-  su ${user} -c "kubectl get secret ${k8sns}-tls-cert --namespace ${k8sns}"
-  su ${user} -c "kubectl delete secret ${k8sns}-tls-cert --namespace ${k8sns}"
-  #sudo kubectl create secret tls ${k8sns}-tls-cert --key ${CA_DIR}/privkey.pem --cert ${CA_DIR}/cert.pem --namespace ${k8sns}
-  #su ${user} -c "kubectl create secret tls ${k8sns}-tls-cert --key ~${user}/tmp/privkey.pem --cert ~${user}/tmp/cert.pem --namespace ${k8sns}"
-  su ${user} -c "kubectl create secret tls ${k8sns}-tls-cert --key ~${user}/tmp/privkey.pem --cert ~${user}/tmp/chain.pem --namespace ${k8sns}"
-  #su metadig -c "kubectl get secret metadig-tls-cert --namespace metadig"
-  rm -f ~${user}/tmp/privkey.pem ~${user}/tmp/cert.pem
+  # Copy files so that metadig user can read them
+  sudo cp ${certFilepath} ${userHome}/tmp
+  sudo cp ${privkeyFilepath} ${userHome}/tmp
+  sudo chown ${user}.${user} ${userHome}/tmp/*.pem
+
+  tmpPrivkeyPath=${userHome}/tmp/$privkeyFilename
+  tmpCertpath=${userHome}/tmp/$certFilename
+  # These commands have to run as the metadig user, so that the ~metadig/kube/config can be read, which is needed
+  # for k8s authorization
+  kubectl get secret ${k8sns}-tls-cert --namespace ${k8sns}
+  kubectl delete secret ${k8sns}-tls-cert --namespace ${k8sns}
+  kubectl create secret tls ${k8sns}-tls-cert --key $tmpPrivkeyPath --cert $tmpCertpath --namespace ${k8sns}
+  rm -f $tmpPrivkeyPath
+  rm -f $tmpCertpath
 
   # Note: it is not necessary to restart any k8s services, the TLS certificate will now be used
   # by any services that require it.
