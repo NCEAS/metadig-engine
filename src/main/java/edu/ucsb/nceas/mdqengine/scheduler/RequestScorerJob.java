@@ -33,9 +33,20 @@ import java.util.ArrayList;
 
 /**
  * <p>
- * Run a MetaDIG Quality Engine Scheduler task, for example,
- * query a member node for new pids and request that an aggregated quality
- * graphic is created for each one.
+ *  Run a MetaDIG Quality Engine Scheduler task to accumulate quality scores
+ *  and create a graphic and data file containing the scores. The 'scores' task
+ *  creates these graphs and data files based on scores for a collection. Currently
+ *  collections can be for a DataONE portal, or for a DataONE member node or
+ *  coordinating node.
+ * </p>
+ * <p>
+ *  Note that the DataONE Solr index is currently used to retrieve collection
+ *  information (e.g. "collectionQuery" field for portasl), as this info is
+ *  only contained in the Solr index and not in the DataONE object store.
+ *  Also note that collections for nodes do not require the retrieval of a 'collectionQuery'
+ *  field, as the nodeId can be used to select scores directly from the quality
+ *  engine store, and the evaluation of the collectionQuery field is not needed to
+ *  determine the list of pids (and socres) for a collection.
  * </p>
  *
  * @author Peter Slaughter
@@ -46,6 +57,10 @@ public class RequestScorerJob implements Job {
 
     private Log log = LogFactory.getLog(RequestScorerJob.class);
     private static Controller metadigCtrl = null;
+    // This date is before any DataONE processing was done. It will be used to retrieve
+    // pids from the start of DataONE, e.g. in order to get all portal pids (unobsoleted)
+    // so that all portal graphics can be recreated, based on the most recent DataONE content.
+    private static String REFERENCE_DATE_STR = "2000-01-01T00:00:00.00Z";
 
     class ListResult {
         Integer resultCount;
@@ -122,8 +137,7 @@ public class RequestScorerJob implements Job {
         String taskType = dataMap.getString("taskType");
         String pidFilter = dataMap.getString("pidFilter");
         String suiteId = dataMap.getString("suiteId");
-        // The nodeId is used for filterine queries based on DataONE sysmeta 'datasource'.
-        // For example, if one wished to get scores for Arctic Data Center, the urn:node:ARCTIC would be specified.
+        // The nodeId is used to determine where the 'collectionQuery' Solr field value is obtained from.
         String nodeId = dataMap.getString("nodeId");
         String startHarvestDatetimeStr = dataMap.getString("startHarvestDatetime");
         int harvestDatetimeInc = dataMap.getInt("harvestDatetimeInc");
@@ -135,9 +149,19 @@ public class RequestScorerJob implements Job {
         String authToken = null;
         String subjectId = null;
         String nodeServiceUrl = null;
+        // If processing all pids, disregard the harvest start date if specified, and don't store a new
+        // harvest start date. This essentiall causes all pids to be re-processed.
+        Boolean useLastHarvestDate = true;
 
         if (taskType.equalsIgnoreCase("score")) {
             requestType = dataMap.getString("requestType");
+        }
+
+        // All pids will be processed (re-processed), so the last harvest date isn't being
+        // retrieved and used, and won't be updated.
+        if(startHarvestDatetimeStr.equals("*")) {
+            useLastHarvestDate = false;
+            startHarvestDatetimeStr = REFERENCE_DATE_STR;
         }
 
         log.debug("Executing task " + taskType + ", " + taskName + " for node: " + nodeId + ", suiteId: " + suiteId);
@@ -201,20 +225,32 @@ public class RequestScorerJob implements Job {
         Task task;
         task = store.getTask(taskName, taskType, nodeId);
 
-        // If a 'task' entry has not been saved for this task name yet, then a 'lastHarvested'
-        // DataTime will not be available, in which case the 'startHarvestDataTime' from the
-        // config file will be used.
-        if(task.getLastHarvestDatetime(nodeId) == null) {
-            task = new Task();
-            task.setTaskName(taskName);
-            task.setTaskType(taskType);
-            lastHarvestDateStr = startHarvestDatetimeStr;
-            task.setLastHarvestDatetime(lastHarvestDateStr, nodeId);
+        DateTime lastHarvestDateDT = null;
+
+        // If all pids are being harvested, regardless of when they were uploaded, then ignore the
+        // 'lastHarvestDate' and don't update it after the run.
+        // If only pids for a certain collection are being harvested, then only the most recent
+        // version of that collection will be fetched, and so normal processing of
+        // 'lastHarvestDate' will be performed.
+        if (useLastHarvestDate) {
+            // If a 'task' entry has not been saved for this task name yet, then a 'lastHarvested'
+            // DataTime will not be available, in which case the 'startHarvestDataTime' from the
+            // config file will be used.
+            if (task.getLastHarvestDatetime(nodeId) == null) {
+                task = new Task();
+                task.setTaskName(taskName);
+                task.setTaskType(taskType);
+                lastHarvestDateStr = startHarvestDatetimeStr;
+                task.setLastHarvestDatetime(lastHarvestDateStr, nodeId);
+            } else {
+                lastHarvestDateStr = task.getLastHarvestDatetime(nodeId);
+            }
+            lastHarvestDateDT = new DateTime(lastHarvestDateStr);
         } else {
-            lastHarvestDateStr = task.getLastHarvestDatetime(nodeId);
+            lastHarvestDateStr = startHarvestDatetimeStr;
+            lastHarvestDateDT = new DateTime(lastHarvestDateStr);
         }
 
-        DateTime lastHarvestDateDT = new DateTime(lastHarvestDateStr);
         // Set the search start datetime to the last harvest datetime, unless it is in the
         // future. (This can happen when the previous time range end was for the current day,
         // as the end datetime range for the previous task run will have been stored as the
@@ -304,11 +340,13 @@ public class RequestScorerJob implements Job {
                     log.trace("Paging through more results, current start is " + startCount);
                 } else {
                     morePids = false;
-
                 }
             }
 
-            if (allIds > 0) {
+            // Record the new 'last harvested date' if any pids have been processed and
+            // the harvest request did not specify that all pids were to be processed,
+            // regardless of when the last harvest was.
+            if (allIds > 0 && useLastHarvestDate) {
                 // Record the new "last harvested" date
                 task.setLastHarvestDatetime(dtfOut.print(lastDateModifiedDT), nodeId);
                 log.debug("Saving lastHarvestDate: " + dtfOut.print(lastDateModifiedDT));
@@ -327,7 +365,7 @@ public class RequestScorerJob implements Job {
     }
 
     /**
-     * Query a DataONE CN or MN object store for a list of object that match the time range and formatId filters provided.
+     * Query a DataONE CN or MN Solr index for a list of object that match the time range and formatId filters provided.
      *
      * @param d1Node a DataONE CN or MN connection client object
      * @param session a DataONE authentication session

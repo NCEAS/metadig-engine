@@ -214,7 +214,6 @@ public class Scorer {
                     d1Node = DataONE.getMultipartD1Node(session, nodeServiceUrl);
 
                     // Quality scores must be retrieved from the quality Solr server from which a graph is created.
-                    // There are two
                     // Check if this is a "node" collection. For "node" collections, all scores from the quality
                     // Solr server with 'datasource' = nodeId are used to create the assessment graph, so we don't need
                     // to get the collection pids. However, this is done for portals (by evaluating the DataONE Solr collectionQuery).
@@ -342,7 +341,7 @@ public class Scorer {
      * <p>Next, a query is issued with the query from the collectionQuery field, to retrieve all Solr docs for the collection ids./p>
      *
      * <p>Note that in the current design, the collection query is always obtained by querying the node specified in the taskList.csv file,
-     * which is usually an MN, but the collectionQuery is always evaluated on the CN</p>
+     * which is usually an MN, but the collectionQuery is always *evaluated* on the CN</p>
      *
      * @param collectionId a DataONE project id to fetch scores for, e.g. urn:uuid:f137095e-4266-4474-aa5f-1e1fcaa5e2dc
      * @param d1Node the DataONE connection object for a node
