@@ -8,7 +8,11 @@ task-type,task-name,task-group,cron-schedule,params
 # - params
 #   - formatId filter (regex): This is a list of wildcards that will match records with these formatIds to harvest, delimeted by '|
 #   - suite id: the metadig suite id
-#   - node id: a DataONE node URN - data will be filtered using this (DataONE sysmeta "datasource")
+#   - node id: a DataONE node id. This string is used to identify and read config parameters from the metadig properties file associated
+#     with this node, for example:
+#     - <nodeId>.token
+#     - <nodeId>.subjectId
+#     - <nodeId>.serviceUrl
 #   - D1 node base url: the base service URL for an MN or CN that will be used to query for pids to be processed
 #   - harvest begin date: begin date: the first date to use for the DataONE 'listObjects' service
 #   - harvest increment (days): increment (days): the time span for each search
@@ -21,10 +25,18 @@ quality,quality-arctic,metadig,5 0/1 * * * ?,"^eml.*|^http.*eml.*;arctic.data.ce
 quality,quality-dataone-fair,metadig,10 0/1 * * * ?,"^eml.*|^http.*eml.*|.*www.isotc211.org.*;FAIR-suite-0.3.1;urn:node:CN;2020-08-28T00:00:00.000Z;1;1000"
 quality,quality-ess-dive,metadig,15 0/1 * * * ?,"^eml.*|^http.*eml.*;ess-dive.data.center.suite.1;urn:node:ESS_DIVE;2020-08-27T20:38:19.953Z;1;1000;"
 #
-# Portal scoring tasks
+# Portal scoring tasks for new portals
 score,portal-KNB-FAIR,metadig,5 0/1 * * * ?,"*portals*;FAIR-suite-0.3.1;urn:node:KNB;2020-08-28T00:00:00.00Z;1;100;portal"
 score,portal-ARCTIC-FAIR,metadig,10 0/1 * * * ?,"*portals*;FAIR-suite-0.3.1;urn:node:ARCTIC;2020-08-28T00:00:00.00Z;1;100;portal"
 score,portal-mnUCSB1-FAIR,metadig,15 0/1 * * * ?,"*portals*;FAIR-suite-0.3.1;urn:node:mnUCSB1;2020-08-28T00:00:00.00Z;1;100;portal"
+
+# Portal scoring tasks to recreate (refresh) graphics for all unobsoleted portals
+# Note: the '*' in place of the harvest start time indicates that this task will process pids for all portals for the specified node,
+#   regardless of the sysmetaModifiedDate of the pid..
+score,portal-refresh-KNB-FAIR,metadig,5 1 * * * ?,"*portals*;FAIR-suite-0.3.1;urn:node:KNB;*;1;100;portal"
+score,portal-refresh-ARCTIC-FAIR,metadig,10 2 * * * ?,"*portals*;FAIR-suite-0.3.1;urn:node:ARCTIC;*;1;100;portal"
+score,portal-refresh-mnUCSB1-FAIR,metadig,15 3 * * * ?,"*portals*;FAIR-suite-0.3.1;urn:node:mnUCSB1;*;1;100;portal"
+
 #
 # Note: Portal harvesting for DataONE portals created on search.dataone.org will be performed on mnUCSB1, as MetacatUI sends create and
 #       update requests performed on search.dataone.org to this host. We want to harvest them as soon as they are created, and not have to wait for mnUCSB1 to
