@@ -1,5 +1,10 @@
 dist: bionic
 language: java
+# safelist
+branches:
+  only:
+    - main
+    - develop
 notifications:
   email: false
 jdk:
