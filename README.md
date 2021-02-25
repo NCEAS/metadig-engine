@@ -1,7 +1,7 @@
 # metadig-engine
 The Java project for MetaDig
 
-[![](https://travis-ci.org/NCEAS/metadig-engine.svg?branch=master)](https://travis-ci.org/NCEAS/metadig-engine)
+[![](https://travis-ci.com/NCEAS/metadig-engine.svg?branch=main)](https://travis-ci.com/NCEAS/metadig-engine)
 
 The Metadata Quality Engine is a flexible engine for managing and executing metadata quality checks on a wide variety of metadata documents.
 Quality Checks are organized into Suites that can be stored and managed by the engine before ultimately being run against input metadata documents.
