@@ -1,15 +1,7 @@
-language: java
 dist: bionic
+language: java
 notifications:
   email: false
-branches:
-  # blocklist
-  except:
-  - /feature.*/
-  # safelist
-  only:
-  - main
-  - stable
 jdk:
   - openjdk8
 before_install:
