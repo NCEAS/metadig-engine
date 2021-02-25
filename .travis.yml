@@ -8,7 +8,7 @@ branches:
   - /feature.*/
   # safelist
   only:
-  - master
+  - main
   - stable
 jdk:
   - openjdk8
