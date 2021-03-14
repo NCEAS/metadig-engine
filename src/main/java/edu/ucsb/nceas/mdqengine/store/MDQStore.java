@@ -6,7 +6,6 @@ import org.dataone.service.types.v2.Node;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 
 public interface MDQStore {
 	
@@ -38,6 +37,9 @@ public interface MDQStore {
 
 	Node getNode (String nodeId);
 	void saveNode(Node node) throws MetadigStoreException;
+
+	Identifier getIdentifier(String metadataId) throws MetadigStoreException;
+	Integer saveIdentifier(Identifier identifier) throws MetadigStoreException;
 
 	ArrayList<Node> getNodes();
 

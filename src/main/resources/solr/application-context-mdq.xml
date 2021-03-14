@@ -18,10 +18,10 @@
 				<ref bean="mdq.datasource"/>
 				<ref bean="mdq.metadata.formatId"/>
 				<ref bean="mdq.dateUploaded"/>
-				<ref bean="mdq.obsoletes"/>
-				<ref bean="mdq.obsoletedBy"/>
-				<ref bean="mdq.sequenceId"/>
-				<ref bean="mdq.seriesId"/>
+<!--				<ref bean="mdq.obsoletes"/>-->
+<!--				<ref bean="mdq.obsoletedBy"/>-->
+<!--				<ref bean="mdq.sequenceId"/>-->
+<!--				<ref bean="mdq.seriesId"/>-->
 				<ref bean="mdq.funder"/>
 				<ref bean="mdq.funder.lookup"/>
 				<ref bean="mdq.rightsHolder"/>
@@ -73,26 +73,26 @@
 		<property name="multivalue" value="false"/>
 	</bean>
 
-	<bean id="mdq.obsoletes" class="org.dataone.cn.indexer.parser.SolrField">
-		<constructor-arg name="name" value="obsoletes"/>
-		<constructor-arg name="xpath"
-						 value="normalize-space(/*/sysmeta/obsoletes)"/>
-		<property name="multivalue" value="false"/>
-	</bean>
+<!--	<bean id="mdq.obsoletes" class="org.dataone.cn.indexer.parser.SolrField">-->
+<!--		<constructor-arg name="name" value="obsoletes"/>-->
+<!--		<constructor-arg name="xpath"-->
+<!--						 value="normalize-space(/*/sysmeta/obsoletes)"/>-->
+<!--		<property name="multivalue" value="false"/>-->
+<!--	</bean>-->
 
-	<bean id="mdq.obsoletedBy" class="org.dataone.cn.indexer.parser.SolrField">
-		<constructor-arg name="name" value="obsoletedBy"/>
-		<constructor-arg name="xpath"
-						 value="normalize-space(/*/sysmeta/obsoletedBy)"/>
-		<property name="multivalue" value="false"/>
-	</bean>
+<!--	<bean id="mdq.obsoletedBy" class="org.dataone.cn.indexer.parser.SolrField">-->
+<!--		<constructor-arg name="name" value="obsoletedBy"/>-->
+<!--		<constructor-arg name="xpath"-->
+<!--						 value="normalize-space(/*/sysmeta/obsoletedBy)"/>-->
+<!--		<property name="multivalue" value="false"/>-->
+<!--	</bean>-->
 
-	<bean id="mdq.seriesId" class="org.dataone.cn.indexer.parser.SolrField">
-		<constructor-arg name="name" value="seriesId"/>
-		<constructor-arg name="xpath"
-						 value="normalize-space(/*/sysmeta/seriesId)"/>
-		<property name="multivalue" value="false"/>
-	</bean>
+<!--	<bean id="mdq.seriesId" class="org.dataone.cn.indexer.parser.SolrField">-->
+<!--		<constructor-arg name="name" value="seriesId"/>-->
+<!--		<constructor-arg name="xpath"-->
+<!--						 value="normalize-space(/*/sysmeta/seriesId)"/>-->
+<!--		<property name="multivalue" value="false"/>-->
+<!--	</bean>-->
 
 	<bean id="mdq.datasource" class="org.dataone.cn.indexer.parser.SolrField">
 		<constructor-arg name="name" value="datasource"/>

@@ -1,12 +1,14 @@
 package edu.ucsb.nceas.mdqengine.model;
 
 import javax.xml.bind.annotation.*;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(propOrder = {"originMemberNode", "rightsHolder", "groups", "dateUploaded", "formatId", "obsoletes", "obsoletedBy", "seriesId"})
+@XmlType(propOrder = {"originMemberNode", "rightsHolder", "groups", "dateUploaded", "formatId", "seriesId"})
 public class SysmetaModel {
 
     /**
@@ -34,7 +36,7 @@ public class SysmetaModel {
     * user interfaces and reports.
     */
     @XmlElement(required = true)
-    private Date dateUploaded;
+    private String dateUploaded;
 
     /**
     * The DataONE format for the metadata document, e.g. "eml://ecoinformatics.org/eml-2.1.1"
@@ -45,14 +47,14 @@ public class SysmetaModel {
     /**
     * A DataONE Persistent Identifier of the document that this document obsoletes, if set.
     */
-    @XmlElement(required = false)
-    private String obsoletes;
+//    @XmlElement(required = false)
+//    private String obsoletes;
 
     /**
     * The DataONE Persistent Identifier of the document that the documents obsoletes, if set.
     */
-    @XmlElement(required = false)
-    private String obsoletedBy;
+//    @XmlElement(required = false)
+//    private String obsoletedBy;
 
     /**
     * An identifier that always points to the most recent PID in the obsolecense chain.
@@ -80,15 +82,22 @@ public class SysmetaModel {
         return groups;
     }
 
-    public void setGroups(List<String> groups) {
-        this.groups = groups;
-    }
+    public void setGroups(List<String> groups) { this.groups = groups; }
 
-    public Date getDateUploaded() {
+    public String getDateUploaded() {
         return dateUploaded;
     }
 
+    /* Convert a DataONE sysmeta dateUploaded value stored in the
+      ISO 8601 format to a string.
+     */
     public void setDateUploaded(Date dateUploaded) {
+        // Example DataONE 'dateUploaded': 2017-04-13T20:09:08.131+00:00
+        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
+        this.dateUploaded = dateFormat.format(dateUploaded);
+    }
+
+    public void setDateUploaded(String dateUploaded) {
         this.dateUploaded = dateUploaded;
     }
 
@@ -99,28 +108,28 @@ public class SysmetaModel {
     public void setFormatId(String formatId) {
         this.formatId = formatId;
     }
-
-    public String getObsoletes() {
-        return obsoletes;
-    }
-
-    public void setObsoletes(String obsoletes) {
-        this.obsoletes = obsoletes;
-    }
-
-    public String getObsoletedBy() {
-        return obsoletedBy;
-    }
-
-    public void setObsoletedBy(String obsoletedBy) {
-        this.obsoletedBy = obsoletedBy;
-    }
-
-    public String getSeriesId(String seriesId) {
-        return seriesId;
-    }
-
-    public void setSeriesId(String seriesId) {
-        this.seriesId = seriesId;
-    }
+//
+//    public String getObsoletes() {
+//        return obsoletes;
+//    }
+//
+//    public void setObsoletes(String obsoletes) {
+//        this.obsoletes = obsoletes;
+//    }
+//
+//    public String getObsoletedBy() {
+//        return obsoletedBy;
+//    }
+//
+//    public void setObsoletedBy(String obsoletedBy) {
+//        this.obsoletedBy = obsoletedBy;
+//    }
+//
+//    public String getSeriesId(String seriesId) {
+//        return seriesId;
+//    }
+//
+//    public void setSeriesId(String seriesId) {
+//        this.seriesId = seriesId;
+//    }
 }

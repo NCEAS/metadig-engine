@@ -225,7 +225,17 @@ public class InMemoryStore implements MDQStore{
 	public Node getNode (String nodeId) { return new Node(); };
 
 	@Override
-	public void saveNode(Node node) throws MetadigStoreException {};
+	public void saveNode(Node node) throws MetadigStoreException {}
+
+	@Override
+	public Identifier getIdentifier(String metadataId) throws MetadigStoreException {
+		return null;
+	}
+
+	@Override
+	public Integer saveIdentifier(Identifier identifier) throws MetadigStoreException {
+	    return 0;
+	}
 
 	@Override
 	public ArrayList<Node> getNodes() { return new ArrayList<> (); };

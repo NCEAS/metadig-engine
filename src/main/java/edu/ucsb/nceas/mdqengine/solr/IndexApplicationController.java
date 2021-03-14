@@ -4,7 +4,6 @@ import edu.ucsb.nceas.mdqengine.MDQconfig;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.solr.client.solrj.impl.HttpSolrClient;
-import org.dataone.service.types.v1.Identifier;
 import org.dataone.service.types.v2.SystemMetadata;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
@@ -13,10 +12,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
-
-//import org.apache.solr.client.solrj.impl.HttpSolrClient;
-
-//import org.springframework.context.ApplicationContext;
 
 public class IndexApplicationController {
 
@@ -106,7 +101,7 @@ public class IndexApplicationController {
      *
      */
 
-    public void insertSolrDoc(Identifier pid, SystemMetadata sysmeta, InputStream is) throws IOException, Exception {
+    public void insertSolrDoc(String pid, SystemMetadata sysmeta, InputStream is) throws IOException, Exception {
 
         /* The DataONE indexer reads the input doc as a disk file, so write out the
            data file contents to disk.
@@ -131,7 +126,7 @@ public class IndexApplicationController {
                     solrIndex.insert(pid, sysmeta, tFile.getAbsolutePath());
                 }
             } catch (Exception e) {
-                log.error("Unable to insert Solr document for PID: " + pid.getValue());
+                log.error("Unable to insert Solr document for PID: " + pid);
                 throw e;
             }
         }
@@ -142,7 +137,7 @@ public class IndexApplicationController {
      *
      */
 
-    public void updateSolrDoc(Identifier pid, String suiteId, HashMap<String, Object> fields, String updateFieldModifier) throws IOException, Exception {
+    public void updateSolrDoc(String pid, String suiteId, HashMap<String, Object> fields, String updateFieldModifier) throws IOException, Exception {
 
         String metadataId = null;
         Boolean done = false;
@@ -154,7 +149,7 @@ public class IndexApplicationController {
             try {
                 log.debug("calling solrIndex.update()...");
                 for (SolrIndex solrIndex : solrIndexes) {
-                    metadataId = pid.getValue();
+                    metadataId = pid;
                     solrIndex.update(metadataId, suiteId, fields, updateFieldModifier);
                 }
                 done = true;

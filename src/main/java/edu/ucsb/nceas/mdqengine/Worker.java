@@ -1,36 +1,24 @@
 package edu.ucsb.nceas.mdqengine;
 
 import com.rabbitmq.client.*;
-import edu.ucsb.nceas.mdqengine.collections.Runs;
+import edu.ucsb.nceas.mdqengine.collections.Identifiers;
 import edu.ucsb.nceas.mdqengine.exception.MetadigException;
 import edu.ucsb.nceas.mdqengine.exception.MetadigIndexException;
 import edu.ucsb.nceas.mdqengine.exception.MetadigProcessException;
-import edu.ucsb.nceas.mdqengine.model.Result;
-import edu.ucsb.nceas.mdqengine.model.Run;
-import edu.ucsb.nceas.mdqengine.model.Suite;
-import edu.ucsb.nceas.mdqengine.model.SysmetaModel;
+import edu.ucsb.nceas.mdqengine.model.*;
 import edu.ucsb.nceas.mdqengine.processor.GroupLookupCheck;
 import edu.ucsb.nceas.mdqengine.serialize.XmlMarshaller;
 import edu.ucsb.nceas.mdqengine.solr.IndexApplicationController;
 import edu.ucsb.nceas.mdqengine.store.InMemoryStore;
 import edu.ucsb.nceas.mdqengine.store.MDQStore;
-import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.configuration2.ex.ConfigurationException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.solr.client.solrj.SolrClient;
-import org.dataone.client.auth.AuthTokenSession;
-import org.dataone.client.v2.MNode;
-import org.dataone.client.v2.itk.D1Client;
-import org.dataone.service.exceptions.*;
-import org.dataone.service.types.v1.Checksum;
-import org.dataone.service.types.v1.Identifier;
 import org.dataone.service.types.v1.ObjectFormatIdentifier;
-import org.dataone.service.types.v1.Session;
 import org.dataone.service.types.v2.SystemMetadata;
 
 import java.io.*;
-import java.math.BigInteger;
 import java.net.InetAddress;
 import java.util.*;
 import java.util.concurrent.*;
@@ -70,7 +58,6 @@ public class Worker {
     private static String RabbitMQusername = null;
     private static String authToken = null;
     private static SolrClient client = null;
-    private static Boolean indexLatest = false; // Determine the latest report in the month and record in the index
     // create a sequenceId based on obsolesence chain. Currently this item is always performed, but it could be
     // controlled by a metadig.properties config item in the future if desired.
     private static Boolean indexSequenceId = true;
@@ -91,7 +78,6 @@ public class Worker {
             RabbitMQusername = cfg.getString("RabbitMQ.username");
             RabbitMQhost = cfg.getString("RabbitMQ.host");
             RabbitMQport = cfg.getInt("RabbitMQ.port");
-            indexLatest = Boolean.parseBoolean(cfg.getString("index.latest"));
         } catch (ConfigurationException cex) {
             log.error("Unable to read configuration");
             MetadigException me = new MetadigException("Unable to read config properties");
@@ -110,7 +96,7 @@ public class Worker {
             public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties, byte[] body) throws IOException {
 
                 Run run = null;
-                Runs runsInSequence = new Runs();
+                Identifiers identifiersInSequence = new Identifiers();
                 ByteArrayInputStream bis = new ByteArrayInputStream(body);
                 ObjectInput in = new ObjectInputStream(bis);
                 QueueEntry qEntry = null;
@@ -133,12 +119,15 @@ public class Worker {
                 String metadataPid = qEntry.getMetadataPid();
                 String suiteId = qEntry.getQualitySuiteId();
                 SystemMetadata sysmeta = qEntry.getSystemMetadata();
+                Identifier meIdentifier = new Identifier();
+                org.dataone.service.types.v1.Identifier d1Identifier = null;
                 long difference;
 
                 // Fail fast for each of these tasks: create run, save run, index run
                 // If any one of these fails, send an 'ack' back to the controller, try to
                 // return a report query entry (that also contains the exception) and return
                 boolean failFast = false;
+                Integer meUpdateCount = 0;
 
                 // Create the quality report
                 try {
@@ -149,6 +138,45 @@ public class Worker {
                     if(run.getObjectIdentifier() == null) {
                         run.setObjectIdentifier(metadataPid);
                     }
+
+                    meIdentifier.setMetadataId(metadataPid);
+                    d1Identifier = sysmeta.getObsoletes();
+                    if(d1Identifier != null) meIdentifier.setObsoletes(d1Identifier.getValue());
+                    d1Identifier = sysmeta.getObsoletedBy();
+                    if (d1Identifier != null) meIdentifier.setObsoletedBy(d1Identifier.getValue());
+                    meIdentifier.setDataSource(sysmeta.getOriginMemberNode().getValue());
+                    meIdentifier.setDateUploaded(sysmeta.getDateUploaded());
+                    meIdentifier.setDateSysMetaModified(sysmeta.getDateSysMetadataModified());
+                    meIdentifier.setFormatId(sysmeta.getFormatId().getValue());
+                    meIdentifier.setRightsHolder(sysmeta.getRightsHolder().getValue());
+
+                    // Add DataONE sysmeta, if it was provided.
+                    if(sysmeta != null) {
+
+                        // Now make the call to DataONE to get the group information for this rightsHolder.
+                        // Only wait for a certain amount of time before we will give up.
+                        ExecutorService executorService = Executors.newSingleThreadExecutor();
+
+                        // Provide the rightsHolder to the DataONE group lookup.
+                        GroupLookupCheck glc = new GroupLookupCheck();
+                        glc.setRightsHolder(sysmeta.getRightsHolder().getValue());
+                        Future<List<String>> future = executorService.submit(glc);
+
+                        List<String> groups = new ArrayList<String>();
+                        try {
+                            groups = future.get();
+                        } catch (Throwable thrown) {
+                            log.error("Error while waiting for group lookup thread completion");
+                        }
+
+                        if (groups != null) {
+                            meIdentifier.setGroups(groups);
+                        } else {
+                            log.debug("No groups to set");
+                        }
+                        executorService.shutdown();
+                    }
+
                     runXML = XmlMarshaller.toXml(run, true);
                     qEntry.setRunXML(runXML);
                     difference = System.currentTimeMillis() - startTimeProcessing;
@@ -192,46 +220,60 @@ public class Worker {
                     // Determine the sequence identifier for the metadata pids DataONE obsolescence chain. This is
                     // not the DataONE seriesId, which may not exist for a pid, but instead is a quality engine maintained
                     // sequence id, that is needed to determine the highest score for a obs. chain for each month.
-                    log.debug("*****");
                     log.debug("Searching for sequence id for pid: " + run.getObjectIdentifier());
-                    // Add current run to collection, it will be saved during the run.update
                     run.setObjectIdentifier(metadataPid);
                     run.setRunStatus(Run.SUCCESS);
                     run.setErrorDescription("");
-                    // Should a 'sequenceId' and 'isLatest' be added to the Solr index?
+                    // Should a 'sequenceId' be added to the Solr index?
                     if(indexSequenceId) {
                         // Add the current run to the collection, as a starting point for the sequence id search
-                        runsInSequence.addRun(run.getObjectIdentifier(), run);
+                        log.debug("Adding run id to identifier list: " + meIdentifier.getMetadataId());
+                        meIdentifier.setModified(true);
+                        identifiersInSequence.addIdentifier(metadataPid, meIdentifier);
 
                         // Traverse through the collection, stopping if the sequenceId is found. If the sequenceId
                         // is already found, then all pids in the chain that are stored should already have this
                         // sequenceId
                         //Boolean stopWhenSIfound = true;
                         Boolean stopWhenSIfound = false;
-                        runsInSequence.getRunSequence(run, suiteId, stopWhenSIfound);
-                        sequenceId = runsInSequence.getSequenceId();
-                        // Ok, a sequence id wasn't set for these runs (if any), so generate a new one
-                        // Only assign a new pid if the first pid in the sequence is found, so that we don't
+                        identifiersInSequence.getIdentifierSequence(meIdentifier, stopWhenSIfound);
+                        sequenceId = identifiersInSequence.getSequenceId();
+                        // Ok, a sequenceId wasn't set for this identifier, so generate a new one
+                        // Only assign a new sequenceId if the first pid in the sequence is found, so that we don't
                         // have multiple segments of a chain with different sequenceIds.
-                        if (sequenceId == null && runsInSequence.getFoundFirstPid()) {
-                            sequenceId = runsInSequence.getFirstPidInSequence();
-                            runsInSequence.setSequenceId(sequenceId);
+                        if (sequenceId == null && identifiersInSequence.getFoundFirstPid()) {
+                            sequenceId = identifiersInSequence.getFirstPidInSequence();
+                            identifiersInSequence.setSequenceId(sequenceId);
                             log.debug("Setting sequenceId to first pid in sequence: " + sequenceId);
                         } else {
                             log.debug("Using found sequenceId: " + sequenceId);
                         }
 
-                        run.setSequenceId(sequenceId);
+                        meIdentifier.setSequenceId(sequenceId);
+                        //run.setSequenceId(sequenceId);
                     }
 
+                    // Track the count of identifies that are inserted or updated. The count should
+                    // be 0 if no identifier was inserted or updated, or 1 if an identifier was inserted
+                    // or updated.
+                    // Note that an existing identifier will be updated if the new id systemMetadataModified time
+                    // is greater than the existing identifier (in the database). The systemMetadataModified time
+                    // could be newer if the 'rightsHolder' or 'obsoletedBy' sysmeta elements have been updated,
+                    // for example.
+                    // Note also that if the identifier isn't updated, then the identifier fields in the Solr
+                    // document should not be updated.
+                    meUpdateCount = meIdentifier.save();
+                    log.info("Identifier table update count: " + meUpdateCount);
                     run.save();
 
                     // Update runs in persist storage with sequenceId for this obsolesence chain
-                    if(indexSequenceId && sequenceId != null) {
+                    if(indexSequenceId && sequenceId != null && meUpdateCount > 0) {
                         log.debug("Updating sequenceId to " + sequenceId);
                         //sequenceId = runsInSequence.getSequenceId();
-                        runsInSequence.updateSequenceId(sequenceId);
-                        runsInSequence.update();
+                        identifiersInSequence.updateSequenceId(sequenceId);
+                        identifiersInSequence.update();
+                    } else {
+                        log.error("Not updating null sequenceId");
                     }
                 } catch (MetadigException me) {
                     failFast = true;
@@ -250,40 +292,46 @@ public class Worker {
                         // For now, use fallback solr location, which will be selected by the indexer
                         // if null is passed in.
                         String solrLocation = null;
-                        log.debug("calling indexReport");
+                        log.debug("Calling indexReport for id: " + metadataPid);
                         wkr.indexReport(metadataPid, runXML, suiteId, sysmeta, solrLocation);
 
-                        // Update any runs in this sequence that have been modified, either set as latest in sequence
-                        // or unset as latest in sequence.
-                        if(indexLatest) {
+                        // Update any identifier entries in this sequence that have been modified, updating the sequence
+                        // id, obsoletes or obsoletedBy, dateUploaded fields in the index
+                        if(indexSequenceId) {
+                            log.debug("Updating Solr index with " + identifiersInSequence.getModifiedIdentifiers().size() +
+                                    " modified identifier entries...");
                             // Put files to be updated in a HashMap (can update multiple fields)
-                            HashMap<String, Object> fields = new HashMap<>();
-                            for (Run r : runsInSequence.getModifiedRuns()) {
-                                log.info("Updating Solr index with modified run with pid: " + r.getObjectIdentifier() + ", isLatest: " + r.getIsLatest().toString() + ", dateUploaded: " + r.getDateUploaded());
-                                fields.put("isLatest", r.getIsLatest());
-                                try {
-                                    wkr.updateIndex(r.getObjectIdentifier(), r.getSuiteId(), fields, solrLocation);
-                                } catch (MetadigIndexException mie) {
-                                    // Retry the update if the first attemp fails
-                                    log.info("Retrying updating Solr index with modified run with pid: " + r.getObjectIdentifier() + ", isLatest: " + r.getIsLatest().toString() + ", dateUploaded: " + r.getDateUploaded());
+                            for (Identifier ident: identifiersInSequence.getModifiedIdentifiers()) {
+                                HashMap<String, Object> fields = new HashMap<>();
+                                log.debug("Updating Solr index for pid: " + ident.getMetadataId() +
+                                        " dateUploaded: " + ident.getDateUploaded() +
+                                        "," + "obsoletedBy: " + ident.getObsoletedBy() +
+                                        "," + "obsoletes: " + ident.getObsoletes() +
+                                        "," + "sequenceId: " + sequenceId +
+                                        "," + "formatId: " + ident.getFormatId() +
+                                        "," + "formatId: " + ident.getRightsHolder());
+                                if (ident.getObsoletes() != null) fields.put("obsoletes", ident.getObsoletes());
+                                if (ident.getObsoletedBy() != null) fields.put("obsoletedBy", ident.getObsoletedBy());
+                                if (ident.getSequenceId() != null) fields.put("sequenceId", ident.getSequenceId());
+                                if (ident.getDateUploaded() != null) fields.put("dateUploaded", ident.getDateUploaded());
+                                if (ident.getFormatId() != null) fields.put("metadataFormatId", ident.getFormatId());
+                                if (ident.getRightsHolder() != null) fields.put("rightsHolder", ident.getRightsHolder());
+                                if (ident.getGroups() != null) fields.put("group", ident.getGroups());
+
+                                if (fields.size() > 0) {
                                     try {
-                                        wkr.updateIndex(r.getObjectIdentifier(), r.getSuiteId(), fields, solrLocation);
-                                        log.info("Sucessfully updated Solr index with modified run with pid: " + r.getObjectIdentifier() + ", isLatest: " + r.getIsLatest().toString() + ", dateUploaded: " + r.getDateUploaded());
-                                    } catch (Exception mie2) {
-                                        log.error("Failed 2nd attempt to update Solr index with modified run with pid: " + r.getObjectIdentifier() + ", isLatest: " + r.getIsLatest().toString() + ", dateUploaded: " + r.getDateUploaded()) ;
+                                        wkr.updateIndex(ident.getMetadataId(), run.getSuiteId(), fields, solrLocation);
+                                    } catch (MetadigIndexException mie) {
+                                        // Retry the update if the first attemp fails
+                                        log.info("Retrying updating Solr index with modified identifier entry for pid: " + run.getObjectIdentifier() + ", dateUploaded: " + ident.getDateUploaded());
+                                        try {
+                                            wkr.updateIndex(ident.getMetadataId(), run.getSuiteId(), fields, solrLocation);
+                                            log.info("Sucessfully updated Solr index with modified identifier entry for pid: " + run.getObjectIdentifier() + ", dateUploaded: " + ident.getDateUploaded());
+                                        } catch (Exception mie2) {
+                                            log.error("Failed 2nd attempt to update Solr index with modified identifier entry for pid: " + run.getObjectIdentifier() + ", dateUploaded: " + ident.getDateUploaded());
+                                        }
                                     }
                                 }
-                            }
-                        }
-
-                        // Now update one or more runs in the Solr index with the sequenceId
-                        if (indexSequenceId && sequenceId != null) {
-                            // Put files to be updated in a HashMap (can update multiple fields)
-                            HashMap<String, Object> fields = new HashMap<>();
-                            fields.put("sequenceId", sequenceId);
-                            for (Run r : runsInSequence.getModifiedRuns()) {
-                                log.info("Updating Solr index with sequenceId: " + sequenceId + " for pid: " + r.getObjectIdentifier());
-                                wkr.updateIndex(r.getObjectIdentifier(), r.getSuiteId(), fields, solrLocation);
                             }
                         }
 
@@ -449,44 +497,44 @@ public class Worker {
                     + suiteId + e.getMessage(), e);
         }
 
-        // Add DataONE sysmeta, if it was provided.
-        if(sysmeta != null) {
-            SysmetaModel smm = new SysmetaModel();
-            // These sysmeta fields are always provided
-            smm.setOriginMemberNode(sysmeta.getOriginMemberNode().getValue());
-            smm.setRightsHolder(sysmeta.getRightsHolder().getValue());
-            smm.setDateUploaded(sysmeta.getDateUploaded());
-            smm.setFormatId(sysmeta.getFormatId().getValue());
-            // These fields aren't required.
-            if (sysmeta.getObsoletes() != null) smm.setObsoletes(sysmeta.getObsoletes().getValue());
-            if (sysmeta.getObsoletedBy() != null) smm.setObsoletedBy(sysmeta.getObsoletedBy().getValue());
-            if (sysmeta.getSeriesId() != null) smm.setSeriesId(sysmeta.getSeriesId().getValue());
-
-            // Now make the call to DataONE to get the group information for this rightsHolder.
-            // Only wait for a certain amount of time before we will give up.
-            ExecutorService executorService = Executors.newSingleThreadExecutor();
-
-            // Provide the rightsHolder to the DataONE group lookup.
-            GroupLookupCheck glc = new GroupLookupCheck();
-            glc.setRightsHolder(sysmeta.getRightsHolder().getValue());
-            Future<List<String>> future = executorService.submit(glc);
-
-            List<String> groups = new ArrayList<String>();
-            try {
-                groups = future.get();
-            } catch (Throwable thrown) {
-                log.error("Error while waiting for group lookup thread completion");
-            }
-
-            if (groups != null) {
-                smm.setGroups(groups);
-            } else {
-                log.debug("No groups to set");
-            }
-            executorService.shutdown();
-
-            run.setSysmeta(smm);
-        }
+//        // Add DataONE sysmeta, if it was provided.
+//        if(sysmeta != null) {
+//            //SysmetaModel smm = new SysmetaModel();
+//            // These sysmeta fields are always provided
+//            //smm.setOriginMemberNode(sysmeta.getOriginMemberNode().getValue());
+//            //smm.setRightsHolder(sysmeta.getRightsHolder().getValue());
+//            //smm.setDateUploaded(sysmeta.getDateUploaded());
+//            //smm.setFormatId(sysmeta.getFormatId().getValue());
+//            // These fields aren't required.
+//            //if (sysmeta.getObsoletes() != null) smm.setObsoletes(sysmeta.getObsoletes().getValue());
+//            //if (sysmeta.getObsoletedBy() != null) smm.setObsoletedBy(sysmeta.getObsoletedBy().getValue());
+//            //if (sysmeta.getSeriesId() != null) smm.setSeriesId(sysmeta.getSeriesId().getValue());
+//
+//            // Now make the call to DataONE to get the group information for this rightsHolder.
+//            // Only wait for a certain amount of time before we will give up.
+//            ExecutorService executorService = Executors.newSingleThreadExecutor();
+//
+//            // Provide the rightsHolder to the DataONE group lookup.
+//            GroupLookupCheck glc = new GroupLookupCheck();
+//            glc.setRightsHolder(sysmeta.getRightsHolder().getValue());
+//            Future<List<String>> future = executorService.submit(glc);
+//
+//            List<String> groups = new ArrayList<String>();
+//            try {
+//                groups = future.get();
+//            } catch (Throwable thrown) {
+//                log.error("Error while waiting for group lookup thread completion");
+//            }
+//
+//            if (groups != null) {
+//                smm.setGroups(groups);
+//            } else {
+//                log.debug("No groups to set");
+//            }
+//            executorService.shutdown();
+//
+//           //run.setSysmeta(smm);
+//        }
 
         return(run);
     }
@@ -506,7 +554,7 @@ public class Worker {
      */
     public void indexReport(String metadataId, String runXML, String suiteId, SystemMetadata sysmeta, String solrLocation) throws MetadigIndexException {
 
-        log.info(" [x] Indexing metadata PID: " + metadataId + ", suite id: " + suiteId);
+        log.info(" [x] Indexing report for metadata PID: " + metadataId + ", suite id: " + suiteId);
 
         // If no Solr server is specified then use the 'fallback' server from the configuration
         // file.
@@ -514,13 +562,11 @@ public class Worker {
             IndexApplicationController iac = new IndexApplicationController();
             iac.initialize(this.springConfigFileURL, solrLocation);
             InputStream runIS = new ByteArrayInputStream(runXML.getBytes());
-            Identifier pid = new Identifier();
-            pid.setValue(metadataId);
             ObjectFormatIdentifier objFormatId = new ObjectFormatIdentifier();
             // Update the sysmeta, setting the correct type for a metadig quality report
             objFormatId.setValue(qualityReportObjectType);
             sysmeta.setFormatId(objFormatId);
-            iac.insertSolrDoc(pid, sysmeta, runIS);
+            iac.insertSolrDoc(metadataId, sysmeta, runIS);
             log.info(" [x] Done indexing metadata PID: " + metadataId + ", suite id: " + suiteId);
             iac.shutdown();
         } catch (Exception e) {
@@ -545,99 +591,14 @@ public class Worker {
         try {
             IndexApplicationController iac = new IndexApplicationController();
             iac.initialize(this.springConfigFileURL, solrLocation);
-            Identifier pid = new Identifier();
-            pid.setValue(metadataId);
             // Update the solr doc fields, replacing the current value (other types of updates are available)
             String updateFieldModifier = "set";
-            iac.updateSolrDoc(pid, suiteId, fields, updateFieldModifier);
+            iac.updateSolrDoc(metadataId, suiteId, fields, updateFieldModifier);
             iac.shutdown();
         } catch (Exception e) {
             throw new MetadigIndexException("Error during index updating", e);
         }
         log.debug("Done updating entry for pid: " + metadataId + ", suite id: " + suiteId);
-    }
-
-    /**
-     * Submit (upload) the newly generated quality report to a member node
-     * <p>>
-     * The quality report is submitted to the authoritative member node of the source
-     * metadata document, if the member node name/location was provided.
-     * </p>
-     *
-     * @param message containing the metadata document and generated quality report.
-     * @return The identifier of the uploaded qualtiy report, as a String.
-     */
-    public String submitReport(QueueEntry message) {
-
-        Integer rptLength = 0;
-        String qualityXML = null;
-        InputStream qualityReport;
-        String memberNodeServiceUrl = null;
-
-        try {
-            qualityXML = message.getRunXML();
-            qualityReport = new ByteArrayInputStream(qualityXML.getBytes("UTF-8"));
-            rptLength = qualityXML.getBytes("UTF-8").length;
-        } catch (UnsupportedEncodingException ex) {
-            log.error("Unable to read quality report for metadata pid: " + message.getMetadataPid());
-            log.error(ex);
-            return null;
-        }
-
-        /* Read the sysmeta for the metadata pid and use appropriate values from it for the
-           quality report sysmeta.
-         */
-        SystemMetadata sysmeta = message.getSystemMetadata();
-
-        Identifier newId = new Identifier();
-        UUID uuid = UUID.randomUUID();
-        newId.setValue("urn:uuid" + uuid.toString());
-
-        SystemMetadata sm = new SystemMetadata();
-        sm.setIdentifier(newId);
-        ObjectFormatIdentifier fmtid = new ObjectFormatIdentifier();
-        fmtid.setValue("https://nceas.ucsb.edu/mdqe/v1");
-        sm.setFormatId(fmtid);
-
-        sm.setSize(BigInteger.valueOf(rptLength));
-        Checksum cs = new Checksum();
-        cs.setAlgorithm("SHA-1");
-        cs.setValue(DigestUtils.shaHex(qualityXML));
-        sm.setChecksum(cs);
-
-        sm.setRightsHolder(sysmeta.getRightsHolder());
-        sm.setSubmitter(sysmeta.getRightsHolder());
-        sm.setAccessPolicy(sysmeta.getAccessPolicy());
-
-        /* The auth token is read from the config file. */
-        Session session = new AuthTokenSession(authToken);
-        log.debug(" Created session for subject: " + session.getSubject());
-
-        memberNodeServiceUrl = message.getMemberNode();
-
-        /* Upload the quality report to the source member node */
-        MNode mn = null;
-        try {
-            mn = D1Client.getMN(memberNodeServiceUrl);
-        } catch (ServiceFailure ex) {
-            ex.printStackTrace();
-            log.error("Error connecting to DataONE client at URL: " + memberNodeServiceUrl);
-        }
-
-        log.info(" Uploading quality report with pid: " + newId.getValue() + ", rightsHolder: " + sm.getRightsHolder().getValue());
-
-        Identifier returnPid = null;
-        try {
-            returnPid = mn.create(session, newId, qualityReport, sm);
-        } catch (InvalidRequest | NotAuthorized | InvalidToken | InvalidSystemMetadata | UnsupportedType | IdentifierNotUnique | InsufficientResources
-                | NotImplemented | ServiceFailure ex) {
-            log.error(ex);
-            log.error("Error uploading object with PID: " + returnPid.getValue());
-        }
-
-        log.info("Uploaded pid " + returnPid.getValue() + " to member node " + mn.getNodeId().getValue());
-
-        return (returnPid.getValue());
     }
 
     /**

@@ -249,16 +249,16 @@ public class MDQEngine {
 
 			// Add DataONE sysmeta, if it was provided.
 			if(sysmeta != null) {
-				SysmetaModel smm = new SysmetaModel();
+				//SysmetaModel smm = new SysmetaModel();
 				// These sysmeta fields are always provided
-				smm.setOriginMemberNode(sysmeta.getOriginMemberNode().getValue());
-				smm.setRightsHolder(sysmeta.getRightsHolder().getValue());
-				smm.setDateUploaded(sysmeta.getDateUploaded());
-				smm.setFormatId(sysmeta.getFormatId().getValue());
+				//smm.setOriginMemberNode(sysmeta.getOriginMemberNode().getValue());
+				//smm.setRightsHolder(sysmeta.getRightsHolder().getValue());
+				//smm.setDateUploaded(sysmeta.getDateUploaded());
+				//smm.setFormatId(sysmeta.getFormatId().getValue());
 				// These fields aren't required.
-				if (sysmeta.getObsoletes() != null) smm.setObsoletes(sysmeta.getObsoletes().getValue());
-				if (sysmeta.getObsoletedBy() != null) smm.setObsoletedBy(sysmeta.getObsoletedBy().getValue());
-				if (sysmeta.getSeriesId() != null) smm.setSeriesId(sysmeta.getSeriesId().getValue());
+				//if (sysmeta.getObsoletes() != null) smm.setObsoletes(sysmeta.getObsoletes().getValue());
+				//if (sysmeta.getObsoletedBy() != null) smm.setObsoletedBy(sysmeta.getObsoletedBy().getValue());
+				//if (sysmeta.getSeriesId() != null) smm.setSeriesId(sysmeta.getSeriesId().getValue());
 
 				// Now make the call to DataONE to get the group information for this rightsHolder.
 				// Only wait for a certain amount of time before we will give up.
@@ -283,14 +283,14 @@ public class MDQEngine {
 					Thread.sleep(1000);
 				}
 
-				if(groups != null) {
-					System.out.println("Setting groups");
-					smm.setGroups(groups);
-				} else {
-					System.out.println("No groups to set");
-				}
+//				if(groups != null) {
+//					System.out.println("Setting groups");
+//					smm.setGroups(groups);
+//				} else {
+//					System.out.println("No groups to set");
+//				}
 				executorService.shutdown();
-				run.setSysmeta(smm);
+				//run.setSysmeta(smm);
 			}
 
 			System.out.println(XmlMarshaller.toXml(run, true));

@@ -3,6 +3,7 @@ package edu.ucsb.nceas.mdqengine.store;
 import edu.ucsb.nceas.mdqengine.MDQconfig;
 import edu.ucsb.nceas.mdqengine.exception.MetadigStoreException;
 import edu.ucsb.nceas.mdqengine.model.*;
+import edu.ucsb.nceas.mdqengine.model.Identifier;
 import edu.ucsb.nceas.mdqengine.serialize.XmlMarshaller;
 import org.apache.commons.configuration2.ex.ConfigurationException;
 import org.apache.commons.io.IOUtils;
@@ -130,6 +131,126 @@ public class DatabaseStore implements MDQStore {
         }
     }
 
+    /*
+     * Get a single run from the 'runs' table.
+     */
+    @Override
+    public Identifier getIdentifier(String metadataId) throws MetadigStoreException  {
+
+        PreparedStatement stmt = null;
+
+        Identifier identifier = new Identifier();
+
+        // Hope for the best, prepare for the worst!
+        MetadigStoreException me = new MetadigStoreException("Unable get identifier " + metadataId + " from the datdabase.");
+        // Select records from the 'runs' table
+        try {
+            log.trace("preparing statement for query");
+            String sql = "select * from identifiers where metadata_id = ? ";
+            stmt = conn.prepareStatement(sql);
+            stmt.setString(1, metadataId);
+
+            Array arr = null;
+            log.trace("issuing query: " + sql);
+            ResultSet rs = stmt.executeQuery();
+            if(rs.next()) {
+                identifier.setMetadataId(rs.getString("metadata_id"));
+                identifier.setDataSource(rs.getString("data_source"));
+                identifier.setObsoletes(rs.getString("obsoletes"));
+                identifier.setObsoletedBy(rs.getString("obsoleted_by"));
+                identifier.setDateUploaded(rs.getTimestamp("date_uploaded"));
+                identifier.setDateSysMetaModified(rs.getTimestamp("date_sysmeta_modified"));
+                identifier.setSequenceId(rs.getString("sequence_id"));
+                identifier.setFormatId(rs.getString("format_id"));
+                identifier.setRightsHolder(rs.getString("rights_holder"));
+                arr = rs.getArray("groups");
+                String[] groups = (String[])arr.getArray();
+                identifier.setGroups(Arrays.asList(groups));
+                rs.close();
+                stmt.close();
+                log.trace("Retrieved identifier successfully for metadata id: " + identifier.getMetadataId());
+            } else {
+                log.trace("Identifier not found: " + metadataId);
+                return null;
+            }
+        } catch ( Exception e ) {
+            log.error( e.getClass().getName()+": "+ e.getMessage());
+            e.printStackTrace();
+            me.initCause(e);
+            throw(me);
+        }
+
+        return(identifier);
+    }
+
+    /*
+     * Save a single run, first populating the 'pids' table, then the 'runs' table.
+     */
+    public Integer saveIdentifier(Identifier identifier) throws MetadigStoreException {
+
+        log.debug("Saving identifier to db for pid: " + identifier.getMetadataId());
+        PreparedStatement stmt = null;
+
+        String metadataId = identifier.getMetadataId();
+        String dataSource = identifier.getDataSource();
+        String obsoletes = identifier.getObsoletes();
+        String obsoletedBy = identifier.getObsoletedBy();
+        Timestamp dateUploaded = new Timestamp(identifier.getDateUploadedAsDateTime().getMillis());
+        Timestamp dateSysMetaModified = new Timestamp(identifier.getDateSysMetaModifiedAsDateTime().getMillis());
+
+        String sequenceId = identifier.getSequenceId();
+        String formatId = identifier.getFormatId();
+        String rightsHolder = identifier.getRightsHolder();
+        List<String> groups = identifier.getGroups();
+        Integer updateCount = 0;
+
+        MetadigStoreException me = new MetadigStoreException("Unable save identifier " + metadataId + " to the datdabase.");
+
+        // First, insert a record into the main table ('pids')
+        try {
+            String[] groupsList = groups.toArray(new String[0]);
+            Array groupsArray = conn.createArrayOf("text", groupsList);
+            // Insert a pid into the 'identifiers' table and if it is already their, update it
+            // with any new info, e.g. the 'datasource' may have changed.
+            String sql = "INSERT INTO identifiers AS i (metadata_id, data_source, obsoletes, obsoleted_by, "
+                    + "date_uploaded, date_sysmeta_modified, sequence_id, format_id, rights_holder, groups) "
+                    + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?) "
+                    + "ON CONFLICT (metadata_id) DO UPDATE SET (data_source, obsoletes, obsoleted_by, "
+                    + "date_uploaded, date_sysmeta_modified, sequence_id, format_id, rights_holder, groups) "
+                    + " = (?, ?, ?, ?, ?, ?, ?, ?, ?) "
+                    + "WHERE EXCLUDED.date_sysmeta_modified > i.date_sysmeta_modified;";
+
+            stmt = conn.prepareStatement(sql);
+            stmt.setString(1, metadataId);
+            stmt.setString(2, dataSource);
+            stmt.setString(3, obsoletes);
+            stmt.setString(4, obsoletedBy);
+            stmt.setTimestamp(5, dateUploaded);
+            stmt.setTimestamp(6, dateSysMetaModified);
+            stmt.setString(7, sequenceId);
+            stmt.setString(8, formatId);
+            stmt.setString(9, rightsHolder);
+            stmt.setArray(10, groupsArray);
+            stmt.setString(11, dataSource);
+            stmt.setString(12, obsoletes);
+            stmt.setString(13, obsoletedBy);
+            stmt.setTimestamp(14, dateUploaded);
+            stmt.setTimestamp(15, dateSysMetaModified);
+            stmt.setString(16, sequenceId);
+            stmt.setString(17, formatId);
+            stmt.setString(18, rightsHolder);
+            stmt.setArray(19, groupsArray);
+            updateCount = stmt.executeUpdate();
+            stmt.close();
+            conn.commit();
+        } catch (SQLException e) {
+            log.error( e.getClass().getName()+": "+ e.getMessage());
+            me.initCause(e);
+            throw(me);
+        }
+        return updateCount;
+    }
+
     @Override
     public Collection<String> listRuns() {
         return runs.keySet();
@@ -165,8 +286,8 @@ public class DatabaseStore implements MDQStore {
             if(rs.next()) {
                 mId = rs.getString("metadata_id");
                 sId = rs.getString("suite_id");
-                seqId = rs.getString("sequence_id");
-                isLatest = rs.getBoolean("is_latest");
+                //seqId = rs.getString("sequence_id");
+                //isLatest = rs.getBoolean("is_latest");
                 resultStr = rs.getString("results");
                 rs.close();
                 stmt.close();
@@ -175,8 +296,8 @@ public class DatabaseStore implements MDQStore {
                 run = TypeMarshaller.unmarshalTypeFromStream(Run.class, is);
                 // Note: These fields are in the Solr index, but don't need to be in the run XML, so
                 // have to be manually added after the JAXB marshalling has created the run object.
-                run.setSequenceId(seqId);
-                run.setIsLatest(isLatest);
+                //run.setSequenceId(seqId);
+                //run.setIsLatest(isLatest);
                 log.trace("Retrieved run successfully for metadata id: " + run.getObjectIdentifier());
             } else {
                 log.trace("Run not found for metadata id: " + metadataId + ", suiteId: " + suiteId);
@@ -188,7 +309,6 @@ public class DatabaseStore implements MDQStore {
             throw(me);
         }
 
-
         return(run);
     }
 
@@ -198,18 +318,19 @@ public class DatabaseStore implements MDQStore {
     public void saveRun(Run run) throws MetadigStoreException {
         //runs.put(run.getId(), run);
 
-        PreparedStatement stmt = null;
+        log.debug("Saving run to db for pid: " + run.getObjectIdentifier());
         String datasource = null;
-        SysmetaModel sysmeta = run.getSysmeta();
-        if(sysmeta != null) {
-            datasource = sysmeta.getOriginMemberNode();
-        }
+        PreparedStatement stmt = null;
+        //SysmetaModel sysmeta = run.getSysmeta();
+        //if(sysmeta != null) {
+        //    datasource = sysmeta.getOriginMemberNode();
+        //}
         String metadataId = run.getObjectIdentifier();
         String suiteId = run.getSuiteId();
         String status = run.getRunStatus();
         String error = run.getErrorDescription();
-        String sequenceId = run.getSequenceId();
-        Boolean isLatest = run.getIsLatest();
+        //String sequenceId = run.getSequenceId();
+        //Boolean isLatest = run.getIsLatest();
         String resultStr = null;
         Timestamp dateTime = Timestamp.from(Instant.now());
         run.setTimestamp(dateTime);
@@ -222,6 +343,7 @@ public class DatabaseStore implements MDQStore {
             // XML special character encoding (i.e. '"' to '&quot', so we have to unescape
             // these character for the entire report here.
             runStr = XmlMarshaller.toXml(run, true);
+            log.debug("run marshalled to xml");
         } catch (JAXBException e) {
             e.printStackTrace();
             me.initCause(e);
@@ -236,17 +358,15 @@ public class DatabaseStore implements MDQStore {
         try {
             // Insert a pid into the 'identifiers' table and if it is already their, update it
             // with any new info, e.g. the 'datasource' may have changed.
-            String sql = "INSERT INTO identifiers (metadata_id, data_source) VALUES (?, ?)"
-                + " ON CONFLICT (metadata_id) DO UPDATE SET data_source = ?";
+            String sql = "INSERT INTO identifiers (metadata_id) VALUES (?)"
+                + " ON CONFLICT (metadata_id) DO NOTHING";
             stmt = conn.prepareStatement(sql);
             stmt.setString(1, metadataId);
-            stmt.setString(2, datasource);
-            // For the 'conflict' clause
-            stmt.setString(3, datasource);
             stmt.executeUpdate();
             stmt.close();
             conn.commit();
             //conn.close();
+            log.debug("identifier for run committed to db");
         } catch (SQLException e) {
             log.error( e.getClass().getName()+": "+ e.getMessage());
             me.initCause(e);
@@ -256,9 +376,9 @@ public class DatabaseStore implements MDQStore {
         // Perform an 'upsert' on the 'runs' table - if a record exists for the 'metadata_id, suite_id' already,
         // then update the record with the incoming data.
         try {
-            String sql = "INSERT INTO runs (metadata_id, suite_id, timestamp, results, status, error, sequence_id, is_latest) VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
+            String sql = "INSERT INTO runs (metadata_id, suite_id, timestamp, results, status, error) VALUES (?, ?, ?, ?, ?, ?)"
                     + " ON CONFLICT ON CONSTRAINT metadata_id_suite_id_fk "
-                    + " DO UPDATE SET (timestamp, results, status, error, sequence_id, is_latest) = (?, ?, ?, ?, ?, ?);";
+                    + " DO UPDATE SET (timestamp, results, status, error) = (?, ?, ?, ?);";
 
             stmt = conn.prepareStatement(sql);
             stmt.setString(1, metadataId);
@@ -267,19 +387,20 @@ public class DatabaseStore implements MDQStore {
             stmt.setString(4, runStr);
             stmt.setString(5, status);
             stmt.setString(6, error);
-            stmt.setString(7, sequenceId);
-            stmt.setBoolean(8, isLatest);
+            //stmt.setString(7, sequenceId);
+            //stmt.setBoolean(8, isLatest);
             // For 'on conflict'
-            stmt.setTimestamp(9, dateTime);
-            stmt.setString(10, runStr);
-            stmt.setString(11, status);
-            stmt.setString(12, error);
-            stmt.setString(13, sequenceId);
-            stmt.setBoolean(14, isLatest);
+            stmt.setTimestamp(7, dateTime);
+            stmt.setString(8, runStr);
+            stmt.setString(9, status);
+            stmt.setString(10, error);
+            //stmt.setString(11, sequenceId);
+            //stmt.setBoolean(14, isLatest);
             stmt.executeUpdate();
             stmt.close();
             conn.commit();
             //conn.close();
+            log.debug("run committed to db");
         } catch (SQLException e) {
             log.error( e.getClass().getName()+": "+ e.getMessage());
             me.initCause(e);
@@ -287,7 +408,7 @@ public class DatabaseStore implements MDQStore {
         }
 
         // Next, insert a record into the child table ('runs')
-        log.trace("Records created successfully");
+        log.debug("Records created successfully");
     }
 
     /*

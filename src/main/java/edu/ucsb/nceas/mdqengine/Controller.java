@@ -72,8 +72,6 @@ public class Controller {
 
     public static void main(String[] argv) throws Exception {
 
-        //System.setProperty("lo4j2.debug", "true");
-        //System.setProperty("log4j.configurationFile", "log4j2.xml");
         Controller metadigCtrl = Controller.getInstance();
         metadigCtrl.start();
         if (metadigCtrl.getIsStarted()) {

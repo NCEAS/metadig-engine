@@ -41,7 +41,6 @@ import org.dataone.exceptions.MarshallingException;
 import org.dataone.service.exceptions.NotFound;
 import org.dataone.service.exceptions.NotImplemented;
 import org.dataone.service.exceptions.UnsupportedType;
-import org.dataone.service.types.v1.Identifier;
 import org.dataone.service.types.v2.SystemMetadata;
 import org.dataone.service.util.TypeMarshaller;
 import org.python.core.buffer.Strided1DBuffer;
@@ -251,15 +250,15 @@ public class SolrIndex {
      * @param objectPath
      * @throws SolrServerException
      */
-    private void checkParams(Identifier pid, SystemMetadata systemMetadata, String objectPath) throws SolrServerException {
-        if(pid == null || pid.getValue() == null || pid.getValue().trim().equals("")) {
+    private void checkParams(String pid, SystemMetadata systemMetadata, String objectPath) throws SolrServerException {
+        if(pid == null || pid == null || pid.trim().equals("")) {
             throw new SolrServerException("The identifier of the indexed document should not be null or blank.");
         }
         if(systemMetadata == null) {
-            throw new SolrServerException("The system metadata of the indexed document "+pid.getValue()+ " should not be null.");
+            throw new SolrServerException("The system metadata of the indexed document "+pid+ " should not be null.");
         }
         if(objectPath == null) {
-            throw new SolrServerException("The indexed document itself for pid "+pid.getValue()+" should not be null.");
+            throw new SolrServerException("The indexed document itself for pid "+pid+" should not be null.");
         }
     }
 
@@ -275,15 +274,15 @@ public class SolrIndex {
      * @throws NotFound
      * @throws NotImplemented
      */
-    public synchronized void insert(Identifier pid, SystemMetadata systemMetadata, String objectPath)
+    public synchronized void insert(String pid, SystemMetadata systemMetadata, String objectPath)
             throws IOException, SAXException, ParserConfigurationException,
             XPathExpressionException, SolrServerException, MarshallingException, EncoderException, NotImplemented, NotFound, UnsupportedType {
-        log.trace("Identifier: " + pid.getValue());
+        log.trace("Identifier: " + pid);
         log.trace("sysmeta pid" + systemMetadata.getIdentifier().getValue());
         log.trace("objectPath: " + objectPath);
 
         checkParams(pid, systemMetadata, objectPath);
-        Map<String, SolrDoc> docs = process(pid.getValue(), systemMetadata, objectPath);
+        Map<String, SolrDoc> docs = process(pid, systemMetadata, objectPath);
 
         //transform the Map to the SolrInputDocument which can be used by the solr server
         if(docs != null) {
@@ -292,12 +291,12 @@ public class SolrIndex {
                 if(id != null) {
                     SolrDoc doc = docs.get(id);
                     insertToIndex(doc);
-                    log.debug("SolrIndex.insert - inserted the solr document object for pid "+id+", which relates to object "+pid.getValue()+", into the solr server.");
+                    log.debug("SolrIndex.insert - inserted the solr document object for pid "+id+", which relates to object "+pid+", into the solr server.");
                 }
             }
-            log.debug("SolrIndex.insert - finished to insert the solrDoc for object "+pid.getValue());
+            log.debug("SolrIndex.insert - finished to insert the solrDoc for object "+pid);
         } else {
-            log.debug("SolrIndex.insert - the generated solrDoc is null. So we will not index the object "+pid.getValue());
+            log.debug("SolrIndex.insert - the generated solrDoc is null. So we will not index the object "+pid);
         }
     }
 
@@ -388,7 +387,7 @@ public class SolrIndex {
         String runId = null;
         SolrDocument resultDoc = null;
         if(docs != null) {
-            log.info("Updating Solr index for entry for metadataId: " + metadataId + ", suiteId: " + suiteId + ", updating...");
+            log.info("Updating Solr index entry for metadataId: " + metadataId + ", suiteId: " + suiteId + ", updating...");
             resultDoc = docs.get(0);
             SolrInputDocument solrDoc = new SolrInputDocument();
 
@@ -435,7 +434,7 @@ public class SolrIndex {
             if(updateNeeded) {
                 // Set the fields to be updated
                 for (Map.Entry<String, Object> entry : fields.entrySet()) {
-                    log.info("Setting field: " + entry.getKey());
+                    log.debug("Setting field: " + entry.getKey());
                     solrDoc.setField(entry.getKey(), entry.getValue());
                 }
             } else {
@@ -458,7 +457,7 @@ public class SolrIndex {
                 //UpdateResponse rsp = updateRequest.process(solrClient);
                 log.debug("* Commiting updating to Solr doc with version: " + version);
                 rsp = updateRequest.commit(solrClient, SOLR_COLLECTION);
-                log.info("Update response: " + rsp.getStatus());
+                log.debug("Update response: " + rsp.getStatus());
                 //solrClient.commit();
             } catch (SolrServerException e) {
                 log.error("Unable to update Solr document for metadataId: " + metadataId + ": " + e.getMessage());

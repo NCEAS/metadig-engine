@@ -15,7 +15,7 @@ import java.util.List;
 
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(propOrder = {"id", "timestamp", "objectIdentifier", "suiteId", "status", "runStatus", "errorDescription", "sysmeta", "result", "sequenceId"})
+@XmlType(propOrder = {"id", "timestamp", "objectIdentifier", "suiteId", "status", "runStatus", "errorDescription", "result"})
 public class Run {
 
 	public static final String SUCCESS = "success";
@@ -81,22 +81,22 @@ public class Run {
 	/**
 	 * SystemMetadata from DataONE
 	 */
-	@XmlElement(required = false)
-	private SysmetaModel sysmeta;
+	//@XmlElement(required = false)
+	//private SysmetaModel sysmeta;
 
-	/**
-	 * A series identifier maintained by the Quality Engine
-	 * This is not the DataONE seriesId
-	 */
-	@XmlElement(required = false)
-	private String sequenceId;
-
-	/**
-	 * Has this run been modified since being retrieved from the data store?
-     * This field is not included in the Solr index.
-	 */
-	@XmlTransient
-	private Boolean modified = false;
+//	/**
+//	 * A series identifier maintained by the Quality Engine
+//	 * This is not the DataONE seriesId
+//	 */
+//	@XmlElement(required = false)
+//	private String sequenceId;
+//
+//	/**
+//	 * Has this run been modified since being retrieved from the data store?
+//     * This field is not included in the Solr index.
+//	 */
+//	@XmlTransient
+//	private Boolean modified = false;
 
 	/**
 	 * For internal use by the 'Runs' collection. Is this the latest run in a series
@@ -104,8 +104,8 @@ public class Run {
 	 * Note that this field is maintained in the Solr index separately from the DataONE
 	 * indexing.
 	 */
-	@XmlTransient
-	private Boolean isLatest = false;
+	//@XmlTransient
+	//private Boolean isLatest = false;
 
 	public String getId() {
 		return id;
@@ -123,13 +123,9 @@ public class Run {
 		this.timestamp = timestamp;
 	}
 
-	public SysmetaModel getSysmeta() {
-		return sysmeta;
-	}
+	//public SysmetaModel getSysmeta() { return sysmeta; }
 
-	public void setSysmeta(SysmetaModel sysmeta) {
-		this.sysmeta = sysmeta;
-	}
+	//public void setSysmeta(SysmetaModel sysmeta) { this.sysmeta = sysmeta; }
 
 	public List<Result> getResult() {
 		return result;
@@ -165,42 +161,42 @@ public class Run {
 
 	public void setErrorDescription(String errorDescription) { this.errorDescription = errorDescription; }
 
-	public String getSequenceId() { return sequenceId; }
-
-	public void setSequenceId(String sequenceId) { this.sequenceId = sequenceId; }
-
-	public String getObsoletes() {
-		return sysmeta.getObsoletes();
-	}
-
-	public String getObsoletedBy() {
-		return sysmeta.getObsoletedBy();
-	}
-
-	public void setModified(Boolean modified) {
-		this.modified = modified;
-	}
-
-	public Boolean getModified() {
-		return this.modified;
-	}
-
-	public void setIsLatest(Boolean isLatest) {
-		this.isLatest = isLatest;
-	}
-
-	public Boolean getIsLatest() {
-		return this.isLatest;
-	}
-
-	// Passthru to nested sysmeta
-	public Date getDateUploaded() {
-		if(sysmeta != null) {
-			return sysmeta.getDateUploaded();
-		} else {
-			return null;
-		}
-	}
+//	public String getSequenceId() { return sequenceId; }
+//
+//	public void setSequenceId(String sequenceId) { this.sequenceId = sequenceId; }
+//
+//	public String getObsoletes() {
+//		return sysmeta.getObsoletes();
+//	}
+//
+//	public String getObsoletedBy() {
+//		return sysmeta.getObsoletedBy();
+//	}
+//
+//	public void setModified(Boolean modified) {
+//		this.modified = modified;
+//	}
+//
+//	public Boolean getModified() {
+//		return this.modified;
+//	}
+//
+//	public void setIsLatest(Boolean isLatest) {
+//		this.isLatest = isLatest;
+//	}
+//
+//	public Boolean getIsLatest() {
+//		return this.isLatest;
+//	}
+//
+//	// Passthru to nested sysmeta
+//	public String getDateUploaded() {
+//		if(sysmeta != null) {
+//			return sysmeta.getDateUploaded();
+//		} else {
+//			return null;
+//		}
+//	}
 
 	/**
 	 * Save a quality report to a DatabaseStore.
@@ -215,7 +211,8 @@ public class Run {
 	    boolean persist = true;
 		MDQStore store = StoreFactory.getStore(persist);
 
-		log.debug("Saving to persistent storage: metadata PID: " + this.getObjectIdentifier()  + ", suite id: " + this.getSuiteId());
+		log.debug("Saving to persistent storage: metadata PID: " + this.getObjectIdentifier()
+				+ ", suite id: " + this.getSuiteId());
 
 		try {
 			store.saveRun(this);
