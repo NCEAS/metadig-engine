@@ -127,7 +127,7 @@ public class Worker {
                 // If any one of these fails, send an 'ack' back to the controller, try to
                 // return a report query entry (that also contains the exception) and return
                 boolean failFast = false;
-                Integer meUpdateCount = 0;
+                Integer identifierUpdateCount = 0;
 
                 // Create the quality report
                 try {
@@ -177,12 +177,26 @@ public class Worker {
                         executorService.shutdown();
                     }
 
+                    // We have all base info for this identifier, so save it now. Not that the 'obsoletes', 'obsoletedBy'
+                    // and 'sequenceId' might be updated later.
+                    // Track the count of identifies that are inserted or updated. The count should
+                    // be 0 if no identifier was inserted or updated, or 1 if an identifier was inserted
+                    // or updated.
+                    // Note that an existing identifier will be updated if the new id systemMetadataModified time
+                    // is greater than the existing identifier (in the database). The systemMetadataModified time
+                    // could be newer if the 'rightsHolder' or 'obsoletedBy' sysmeta elements have been updated,
+                    // for example.
+                    // Note also that if the identifier isn't updated, then the identifier fields in the Solr
+                    // document should not be updated.
+                    identifierUpdateCount = meIdentifier.save();
+                    log.info("Identifier table update count: " + identifierUpdateCount);
+
                     runXML = XmlMarshaller.toXml(run, true);
                     qEntry.setRunXML(runXML);
                     difference = System.currentTimeMillis() - startTimeProcessing;
                     elapsedTimeSecondsProcessing = TimeUnit.MILLISECONDS.toSeconds(difference);
                     qEntry.setProcessingElapsedTimeSeconds(elapsedTimeSecondsProcessing);
-                    log.debug("Completed running quality suite.");
+                    log.info("Completed running quality suite.");
                 } catch (java.lang.Exception e) {
                     failFast = true;
                     log.error("Unable to run quality suite.");
@@ -224,11 +238,12 @@ public class Worker {
                     run.setObjectIdentifier(metadataPid);
                     run.setRunStatus(Run.SUCCESS);
                     run.setErrorDescription("");
+                    run.save();
+
                     // Should a 'sequenceId' be added to the Solr index?
                     if(indexSequenceId) {
                         // Add the current run to the collection, as a starting point for the sequence id search
                         log.debug("Adding run id to identifier list: " + meIdentifier.getMetadataId());
-                        meIdentifier.setModified(true);
                         identifiersInSequence.addIdentifier(metadataPid, meIdentifier);
 
                         // Traverse through the collection, stopping if the sequenceId is found. If the sequenceId
@@ -248,26 +263,10 @@ public class Worker {
                         } else {
                             log.debug("Using found sequenceId: " + sequenceId);
                         }
-
-                        meIdentifier.setSequenceId(sequenceId);
-                        //run.setSequenceId(sequenceId);
                     }
 
-                    // Track the count of identifies that are inserted or updated. The count should
-                    // be 0 if no identifier was inserted or updated, or 1 if an identifier was inserted
-                    // or updated.
-                    // Note that an existing identifier will be updated if the new id systemMetadataModified time
-                    // is greater than the existing identifier (in the database). The systemMetadataModified time
-                    // could be newer if the 'rightsHolder' or 'obsoletedBy' sysmeta elements have been updated,
-                    // for example.
-                    // Note also that if the identifier isn't updated, then the identifier fields in the Solr
-                    // document should not be updated.
-                    meUpdateCount = meIdentifier.save();
-                    log.info("Identifier table update count: " + meUpdateCount);
-                    run.save();
-
                     // Update runs in persist storage with sequenceId for this obsolesence chain
-                    if(indexSequenceId && sequenceId != null && meUpdateCount > 0) {
+                    if(indexSequenceId && sequenceId != null) {
                         log.debug("Updating sequenceId to " + sequenceId);
                         //sequenceId = runsInSequence.getSequenceId();
                         identifiersInSequence.updateSequenceId(sequenceId);
@@ -294,6 +293,23 @@ public class Worker {
                         String solrLocation = null;
                         log.debug("Calling indexReport for id: " + metadataPid);
                         wkr.indexReport(metadataPid, runXML, suiteId, sysmeta, solrLocation);
+                        // Now add identifier (from the metadata sysmeta) to the index report. These are
+                        HashMap<String, Object> fields = new HashMap<>();
+
+                        log.debug("Updating Solr index for pid: " + meIdentifier.getMetadataId() +
+                                " dateUploaded: " + meIdentifier.getDateUploaded() +
+                                "," + "obsoletedBy: " + meIdentifier.getObsoletedBy() +
+                                "," + "obsoletes: " + meIdentifier.getObsoletes() +
+                                "," + "formatId: " + meIdentifier.getFormatId() +
+                                "," + "rightsHolder: " + meIdentifier.getRightsHolder() +
+                                "," + "groups: " + meIdentifier.getGroups());
+                        if (meIdentifier.getObsoletes() != null) fields.put("obsoletes", meIdentifier.getObsoletes());
+                        if (meIdentifier.getObsoletedBy() != null) fields.put("obsoletedBy", meIdentifier.getObsoletedBy());
+                        if (meIdentifier.getDateUploaded() != null) fields.put("dateUploaded", meIdentifier.getDateUploaded());
+                        if (meIdentifier.getFormatId() != null) fields.put("metadataFormatId", meIdentifier.getFormatId());
+                        if (meIdentifier.getRightsHolder() != null) fields.put("rightsHolder", meIdentifier.getRightsHolder());
+                        if (meIdentifier.getGroups() != null) fields.put("group", meIdentifier.getGroups());
+                        wkr.updateIndex(meIdentifier.getMetadataId(), run.getSuiteId(), fields, solrLocation);
 
                         // Update any identifier entries in this sequence that have been modified, updating the sequence
                         // id, obsoletes or obsoletedBy, dateUploaded fields in the index
@@ -302,21 +318,10 @@ public class Worker {
                                     " modified identifier entries...");
                             // Put files to be updated in a HashMap (can update multiple fields)
                             for (Identifier ident: identifiersInSequence.getModifiedIdentifiers()) {
-                                HashMap<String, Object> fields = new HashMap<>();
+                                fields = new HashMap<>();
                                 log.debug("Updating Solr index for pid: " + ident.getMetadataId() +
-                                        " dateUploaded: " + ident.getDateUploaded() +
-                                        "," + "obsoletedBy: " + ident.getObsoletedBy() +
-                                        "," + "obsoletes: " + ident.getObsoletes() +
-                                        "," + "sequenceId: " + sequenceId +
-                                        "," + "formatId: " + ident.getFormatId() +
-                                        "," + "formatId: " + ident.getRightsHolder());
-                                if (ident.getObsoletes() != null) fields.put("obsoletes", ident.getObsoletes());
-                                if (ident.getObsoletedBy() != null) fields.put("obsoletedBy", ident.getObsoletedBy());
+                                        "," + "sequenceId: " + sequenceId);
                                 if (ident.getSequenceId() != null) fields.put("sequenceId", ident.getSequenceId());
-                                if (ident.getDateUploaded() != null) fields.put("dateUploaded", ident.getDateUploaded());
-                                if (ident.getFormatId() != null) fields.put("metadataFormatId", ident.getFormatId());
-                                if (ident.getRightsHolder() != null) fields.put("rightsHolder", ident.getRightsHolder());
-                                if (ident.getGroups() != null) fields.put("group", ident.getGroups());
 
                                 if (fields.size() > 0) {
                                     try {
@@ -428,8 +433,8 @@ public class Worker {
         factory.setPort(RabbitMQport);
         factory.setPassword(RabbitMQpassword);
         factory.setUsername(RabbitMQusername);
-        log.info("Set RabbitMQ host to: " + RabbitMQhost);
-        log.info("Set RabbitMQ port to: " + RabbitMQport);
+        log.debug("Set RabbitMQ host to: " + RabbitMQhost);
+        log.debug("Set RabbitMQ port to: " + RabbitMQport);
 
 
         try {
@@ -631,7 +636,7 @@ public class Worker {
         //Get file from resources folder
         ClassLoader classLoader = getClass().getClassLoader();
         File file = new File(classLoader.getResource(fileName).getFile());
-        log.info(file.getAbsolutePath());
+        log.debug(file.getAbsolutePath());
 
         InputStream is = classLoader.getResourceAsStream(fileName);
 

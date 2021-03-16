@@ -236,17 +236,19 @@ public class Identifiers {
             pid = (String) entry.getKey();
             identifier = (Identifier) entry.getValue();
             thisSeqId = identifier.getSequenceId();
-//            if(thisSeqId != null && thisSeqId.equals(sequenceId)) {
-//                log.error("Will not update sequence id for pid: " + identifier.getMetadataId() + " to id: " + sequenceId);
-//                continue;
-//            }
 
-            if(thisSeqId != null && ! thisSeqId.equals(sequenceId)) {
-                log.error("Multiple sequence ids found in one sequence chain for pid: " + identifier.getMetadataId());
+            log.debug("Pid: " + identifier.getMetadataId() + ", sequenceId: " + thisSeqId);
+            // If the sequenceId was not already set for this identifier, then set it now, and mark
+            // this identifier as modified.
+            if(thisSeqId == null || thisSeqId.isEmpty()) {
+                log.debug("Setting sequence id for pid: " + identifier.getMetadataId() + " to id: " + sequenceId);
+                identifier.setSequenceId(sequenceId);
+                identifier.setModified(true);
+            } else{
+                if (!thisSeqId.equals(sequenceId)) {
+                    log.error("Multiple sequence ids found in one sequence chain for pid: " + identifier.getMetadataId());
+                }
             }
-            log.debug("Updating sequence id for pid: " + identifier.getMetadataId() + " to id: " + sequenceId);
-            identifier.setSequenceId(sequenceId);
-            identifier.setModified(true);
         }
     }
 
@@ -323,12 +325,10 @@ public class Identifiers {
             modified = identifier.getModified();
             if(modified) {
                 try {
-                    log.debug("Updating modified identifier entry for pid: " + identifier.getMetadataId()
+                    log.debug("Updating modified identifiers entry for pid: " + identifier.getMetadataId()
                             + ", dateUploaded: " + identifier.getDateUploaded() + ", sequenceId: "
                             + identifier.getSequenceId());
                     identifier.save();
-                    // Keep modified setting for modified identifier entries in case we need to do other operations on the run entry (e.g. indexing)
-                    //this.runs.replace(thisPid, run);
                 } catch (Exception ex) {
                     log.error("Unable to save the quality report to database:" + ex.getMessage());
                 }

@@ -188,7 +188,6 @@ public class DatabaseStore implements MDQStore {
      */
     public Integer saveIdentifier(Identifier identifier) throws MetadigStoreException {
 
-        log.debug("Saving identifier to db for pid: " + identifier.getMetadataId());
         PreparedStatement stmt = null;
 
         String metadataId = identifier.getMetadataId();
@@ -211,14 +210,17 @@ public class DatabaseStore implements MDQStore {
             String[] groupsList = groups.toArray(new String[0]);
             Array groupsArray = conn.createArrayOf("text", groupsList);
             // Insert a pid into the 'identifiers' table and if it is already their, update it
-            // with any new info, e.g. the 'datasource' may have changed.
+            // with any new info, e.g. the 'datasource' may have changed. There are two cases where
+            // an update an occur - if new system metadata is being updated, or if the sequenceId is
+            // being assigned for this pid.
             String sql = "INSERT INTO identifiers AS i (metadata_id, data_source, obsoletes, obsoleted_by, "
                     + "date_uploaded, date_sysmeta_modified, sequence_id, format_id, rights_holder, groups) "
                     + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?) "
                     + "ON CONFLICT (metadata_id) DO UPDATE SET (data_source, obsoletes, obsoleted_by, "
                     + "date_uploaded, date_sysmeta_modified, sequence_id, format_id, rights_holder, groups) "
                     + " = (?, ?, ?, ?, ?, ?, ?, ?, ?) "
-                    + "WHERE EXCLUDED.date_sysmeta_modified > i.date_sysmeta_modified;";
+                    + "WHERE EXCLUDED.date_sysmeta_modified > i.date_sysmeta_modified "
+                    + " OR (EXCLUDED.sequence_id IS NOT NULL AND i.sequence_id IS NULL);";
 
             stmt = conn.prepareStatement(sql);
             stmt.setString(1, metadataId);
@@ -248,6 +250,7 @@ public class DatabaseStore implements MDQStore {
             me.initCause(e);
             throw(me);
         }
+
         return updateCount;
     }
 
@@ -350,25 +353,6 @@ public class DatabaseStore implements MDQStore {
             throw(me);
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
-            me.initCause(e);
-            throw(me);
-        }
-
-        // First, insert a record into the main table ('pids')
-        try {
-            // Insert a pid into the 'identifiers' table and if it is already their, update it
-            // with any new info, e.g. the 'datasource' may have changed.
-            String sql = "INSERT INTO identifiers (metadata_id) VALUES (?)"
-                + " ON CONFLICT (metadata_id) DO NOTHING";
-            stmt = conn.prepareStatement(sql);
-            stmt.setString(1, metadataId);
-            stmt.executeUpdate();
-            stmt.close();
-            conn.commit();
-            //conn.close();
-            log.debug("identifier for run committed to db");
-        } catch (SQLException e) {
-            log.error( e.getClass().getName()+": "+ e.getMessage());
             me.initCause(e);
             throw(me);
         }

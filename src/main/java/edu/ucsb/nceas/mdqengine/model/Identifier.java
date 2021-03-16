@@ -131,14 +131,14 @@ public class Identifier {
         MDQStore store = StoreFactory.getStore(persist);
 
         Integer updateCount = 0;
-        log.debug("Saving to persistent storage: metadata PID: " + this.getMetadataId());
+        log.debug("Saving to persistent storage: metadata PID: " + this.getMetadataId() + ", sequenceId: " + this.getSequenceId());
 
         try {
             updateCount = store.saveIdentifier(this);
         } catch (MetadigException me) {
-            log.debug("Error saving run: " + me.getCause());
+            log.error("Error saving identifier: " + me.getCause());
             if(me.getCause() instanceof SQLException) {
-                log.debug("Retrying saveRun() due to error");
+                log.debug("Retrying identifier.save() due to error");
                 store.renew();
                 updateCount = store.saveIdentifier(this);
             } else {
