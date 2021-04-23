@@ -51,6 +51,7 @@ public class GroupLookupCheck implements Callable<List<String>> {
 				log.debug("Looking up SubjectInfo for: " + subject.getValue());
                 try {
 					subjectInfo = D1Client.getCN().getSubjectInfo(null, subject);
+					log.debug("subjectInfo: " + subjectInfo.getPersonList().toString());
 				} catch (org.dataone.service.exceptions.NotFound fn ){
                 	log.debug("Subject: " + subject.getValue() + "not found");
                 	return(groups);
@@ -73,7 +74,7 @@ public class GroupLookupCheck implements Callable<List<String>> {
 						groups.add(subject.getValue());
 					}
 				} else {
-					log.debug("Didn't find subject info or personList");
+					log.error("Didn't find subject info or personList for subject: " + subject);
 				}
 
 			} catch (Exception e) {

@@ -14,15 +14,16 @@ CREATE DATABASE metadig OWNER metadig;
 \connect metadig
 
 CREATE TABLE identifiers (
-  metadata_id TEXT not null,
-  data_source TEXT not null,
+  metadata_id TEXT NOT NULL,
+  data_source TEXT NOT NULL,
   obsoletes TEXT,
   obsoleted_by TEXT,
   sequence_id TEXT,
-  format_id TEXT,
-  rights_holder TEXT,
-  date_uploaded TIMESTAMP WITH TIME ZONE,
-  date_sysmeta_modified TIMESTAMP WITH TIME ZONE,
+  format_id TEXT NOT NULL,
+  rights_holder TEXT NOT NULL,
+  groups TEXT[],
+  date_uploaded TIMESTAMP WITH TIME ZONE NOT NULL,
+  date_sysmeta_modified TIMESTAMP WITH TIME ZONE NOT NULL,
   CONSTRAINT metadata_id_pk PRIMARY KEY (metadata_id)
 );
 

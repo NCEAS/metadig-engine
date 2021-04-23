@@ -189,14 +189,14 @@ public class Worker {
                     // Note also that if the identifier isn't updated, then the identifier fields in the Solr
                     // document should not be updated.
                     identifierUpdateCount = meIdentifier.save();
-                    log.info("Identifier table update count: " + identifierUpdateCount);
+                    log.debug("Identifier table update count: " + identifierUpdateCount);
 
                     runXML = XmlMarshaller.toXml(run, true);
                     qEntry.setRunXML(runXML);
                     difference = System.currentTimeMillis() - startTimeProcessing;
                     elapsedTimeSecondsProcessing = TimeUnit.MILLISECONDS.toSeconds(difference);
                     qEntry.setProcessingElapsedTimeSeconds(elapsedTimeSecondsProcessing);
-                    log.info("Completed running quality suite.");
+                    log.debug("Completed running quality suite.");
                 } catch (java.lang.Exception e) {
                     failFast = true;
                     log.error("Unable to run quality suite.");
@@ -234,7 +234,6 @@ public class Worker {
                     // Determine the sequence identifier for the metadata pids DataONE obsolescence chain. This is
                     // not the DataONE seriesId, which may not exist for a pid, but instead is a quality engine maintained
                     // sequence id, that is needed to determine the highest score for a obs. chain for each month.
-                    log.debug("Searching for sequence id for pid: " + run.getObjectIdentifier());
                     run.setObjectIdentifier(metadataPid);
                     run.setRunStatus(Run.SUCCESS);
                     run.setErrorDescription("");
@@ -296,17 +295,21 @@ public class Worker {
                         // Now add identifier (from the metadata sysmeta) to the index report. These are
                         HashMap<String, Object> fields = new HashMap<>();
 
+                        // These items from the metadataid sysmeta are not indexed when the run report is indexed,
+                        // so add them to the index now.
                         log.debug("Updating Solr index for pid: " + meIdentifier.getMetadataId() +
                                 " dateUploaded: " + meIdentifier.getDateUploaded() +
                                 "," + "obsoletedBy: " + meIdentifier.getObsoletedBy() +
                                 "," + "obsoletes: " + meIdentifier.getObsoletes() +
                                 "," + "formatId: " + meIdentifier.getFormatId() +
+                                "," + "datasource: " + meIdentifier.getDataSource() +
                                 "," + "rightsHolder: " + meIdentifier.getRightsHolder() +
                                 "," + "groups: " + meIdentifier.getGroups());
                         if (meIdentifier.getObsoletes() != null) fields.put("obsoletes", meIdentifier.getObsoletes());
                         if (meIdentifier.getObsoletedBy() != null) fields.put("obsoletedBy", meIdentifier.getObsoletedBy());
                         if (meIdentifier.getDateUploaded() != null) fields.put("dateUploaded", meIdentifier.getDateUploaded());
                         if (meIdentifier.getFormatId() != null) fields.put("metadataFormatId", meIdentifier.getFormatId());
+                        if (meIdentifier.getDataSource() != null) fields.put("datasource", meIdentifier.getDataSource());
                         if (meIdentifier.getRightsHolder() != null) fields.put("rightsHolder", meIdentifier.getRightsHolder());
                         if (meIdentifier.getGroups() != null) fields.put("group", meIdentifier.getGroups());
                         wkr.updateIndex(meIdentifier.getMetadataId(), run.getSuiteId(), fields, solrLocation);

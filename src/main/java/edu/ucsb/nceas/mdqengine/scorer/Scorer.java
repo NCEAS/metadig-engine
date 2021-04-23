@@ -193,7 +193,6 @@ public class Scorer {
                 }
                 log.debug("nodeId: " + nodeId);
 
-
                 label: try {
                     MDQconfig cfg = new MDQconfig();
                     // Pids associated with a collection, based on query results using 'collectionQuery' field in solr.
@@ -217,17 +216,13 @@ public class Scorer {
                     // Check if this is a "node" collection. For "node" collections, all scores from the quality
                     // Solr server with 'datasource' = nodeId are used to create the assessment graph, so we don't need
                     // to get the collection pids. However, this is done for portals (by evaluating the DataONE Solr collectionQuery).
-                    // Therefor, for a "node" collection, getCollectionPids doesn't need to be called and we can proceed directly
+                    // Therefore, for a "node" collection, getCollectionPids doesn't need to be called and we can proceed directly
                     // to getting the quality scores from the quality Solr server.
                     if (collectionId.matches("^\\s*urn:node:.*")) {
                         graphType = GraphType.CUMULATIVE;
                         log.debug("Processing a member node request, skipping step of getting collection pids (not required).");
                     } else {
                         graphType = GraphType.MONTHLY;
-                        // If the nodeId is specified, use if to determine the values for authTokenName and subjectIdName,
-                        // if those values are not defined
-                        String id = nodeId.replace("urn:node:", "").toUpperCase().trim();
-
                         // The collection query is obtained from the MN and evaluated on the CN
                         log.info("Getting pids for collection " + collectionId);
                         // Always use the CN subject id and authentication token from the configuration file, as
@@ -341,7 +336,10 @@ public class Scorer {
      * <p>Next, a query is issued with the query from the collectionQuery field, to retrieve all Solr docs for the collection ids./p>
      *
      * <p>Note that in the current design, the collection query is always obtained by querying the node specified in the taskList.csv file,
-     * which is usually an MN, but the collectionQuery is always *evaluated* on the CN</p>
+     * which is usually an MN, but the collectionQuery is always *evaluated* on the CN</p>. This is partial due to the lag time between
+     * when a collection document is created/updated on the MN, and when it is synced and indexed on the CN. The Solr field 'collectionQuery'
+     * may not be available on the CN in time, but should always be available on the MN, so retrieve this Solr field from the MN to be
+     * safe.
      *
      * @param collectionId a DataONE project id to fetch scores for, e.g. urn:uuid:f137095e-4266-4474-aa5f-1e1fcaa5e2dc
      * @param d1Node the DataONE connection object for a node
@@ -395,7 +393,6 @@ public class Scorer {
         Session CNsession = null;
 
         try {
-
             CNsession = DataONE.getSession(CNsubjectId, CNauthToken);
             // Only CNs can call the 'subjectInfo' service (aka accounts), so we have to use
             // a MultipartCNode instance here.

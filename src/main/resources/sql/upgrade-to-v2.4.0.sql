@@ -8,10 +8,10 @@
 ALTER TABLE identifiers ADD COLUMN obsoletes TEXT;
 ALTER TABLE identifiers ADD COLUMN obsoleted_by TEXT;
 ALTER TABLE identifiers ADD COLUMN sequence_id TEXT;
-ALTER TABLE identifiers ADD COLUMN format_id TEXT;
-ALTER TABLE identifiers ADD COLUMN rights_holder TEXT;
-ALTER TABLE identifiers ADD COLUMN date_uploaded TIMESTAMP WITH TIME ZONE;
-ALTER TABLE identifiers ADD COLUMN date_sysmeta_modified TIMESTAMP WITH TIME ZONE;
+ALTER TABLE identifiers ADD COLUMN format_id TEXT NOT NULL;
+ALTER TABLE identifiers ADD COLUMN rights_holder TEXT NOT NULL;
+ALTER TABLE identifiers ADD COLUMN date_uploaded TIMESTAMP WITH TIME ZONE NOT NULL;
+ALTER TABLE identifiers ADD COLUMN date_sysmeta_modified TIMESTAMP WITH TIME ZONE NOT NULL;
 ALTER TABLE identifiers ADD COLUMN groups TEXT[];
 ALTER TABLE identifiers owner to metadig;
 
