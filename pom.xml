@@ -4,7 +4,7 @@
 
 	<groupId>edu.ucsb.nceas</groupId>
 	<artifactId>metadig-engine</artifactId>
-	<version>2.3.0</version>
+	<version>2.4.0</version>
 	<packaging>jar</packaging>
 
 	<name>metadig-engine</name>
@@ -27,7 +27,7 @@
 		<spring.version>3.1.4.RELEASE</spring.version>
         <!-- <docker.registry>docker.io</docker.registry> -->
         <docker.repo>metadig</docker.repo>
-        <docker.tag>2.3.0</docker.tag>
+        <docker.tag>2.4.0dev</docker.tag>
 		<modules.test.includes>**/*Test.java</modules.test.includes>
 		<modules.test.excludes>**/LTERSuiteTest.java</modules.test.excludes>
 	</properties>
@@ -277,9 +277,19 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
-	</dependencies>
+<!--        <dependency>-->
+<!--            <groupId>edu.ucsb.nceas</groupId>-->
+<!--            <artifactId>metadig-engine</artifactId>-->
+<!--            <version>2.4.0</version>-->
+<!--        </dependency>-->
+        <dependency>
+            <groupId>commons-lang</groupId>
+            <artifactId>commons-lang</artifactId>
+            <version>2.4</version>
+        </dependency>
+    </dependencies>
 	<repositories>
-		<repository>
+        <repository>
 			<id>bedatadriven</id>
 			<name>bedatadriven public repo</name>
 			<url>https://nexus.bedatadriven.com/content/groups/public/</url>
@@ -309,7 +319,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-shade-plugin</artifactId>
-				<version>3.1.0</version>
+				<version>3.2.1</version>
 				<executions>
 					<execution>
 						<phase>package</phase>
