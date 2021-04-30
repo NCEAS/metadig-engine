@@ -78,35 +78,6 @@ public class Run {
 	@XmlElement(required = false)
 	private String errorDescription;
 
-	/**
-	 * SystemMetadata from DataONE
-	 */
-	//@XmlElement(required = false)
-	//private SysmetaModel sysmeta;
-
-//	/**
-//	 * A series identifier maintained by the Quality Engine
-//	 * This is not the DataONE seriesId
-//	 */
-//	@XmlElement(required = false)
-//	private String sequenceId;
-//
-//	/**
-//	 * Has this run been modified since being retrieved from the data store?
-//     * This field is not included in the Solr index.
-//	 */
-//	@XmlTransient
-//	private Boolean modified = false;
-
-	/**
-	 * For internal use by the 'Runs' collection. Is this the latest run in a series
-	 * for a specified time period.
-	 * Note that this field is maintained in the Solr index separately from the DataONE
-	 * indexing.
-	 */
-	//@XmlTransient
-	//private Boolean isLatest = false;
-
 	public String getId() {
 		return id;
 	}
@@ -122,10 +93,6 @@ public class Run {
 	public void setTimestamp(Date timestamp) {
 		this.timestamp = timestamp;
 	}
-
-	//public SysmetaModel getSysmeta() { return sysmeta; }
-
-	//public void setSysmeta(SysmetaModel sysmeta) { this.sysmeta = sysmeta; }
 
 	public List<Result> getResult() {
 		return result;
@@ -161,43 +128,6 @@ public class Run {
 
 	public void setErrorDescription(String errorDescription) { this.errorDescription = errorDescription; }
 
-//	public String getSequenceId() { return sequenceId; }
-//
-//	public void setSequenceId(String sequenceId) { this.sequenceId = sequenceId; }
-//
-//	public String getObsoletes() {
-//		return sysmeta.getObsoletes();
-//	}
-//
-//	public String getObsoletedBy() {
-//		return sysmeta.getObsoletedBy();
-//	}
-//
-//	public void setModified(Boolean modified) {
-//		this.modified = modified;
-//	}
-//
-//	public Boolean getModified() {
-//		return this.modified;
-//	}
-//
-//	public void setIsLatest(Boolean isLatest) {
-//		this.isLatest = isLatest;
-//	}
-//
-//	public Boolean getIsLatest() {
-//		return this.isLatest;
-//	}
-//
-//	// Passthru to nested sysmeta
-//	public String getDateUploaded() {
-//		if(sysmeta != null) {
-//			return sysmeta.getDateUploaded();
-//		} else {
-//			return null;
-//		}
-//	}
-
 	/**
 	 * Save a quality report to a DatabaseStore.
 	 * <p>
@@ -211,7 +141,7 @@ public class Run {
 	    boolean persist = true;
 		MDQStore store = StoreFactory.getStore(persist);
 
-		log.debug("Saving to persistent storage: metadata PID: " + this.getObjectIdentifier()
+		log.debug("Saving run to persistent storage: metadata PID: " + this.getObjectIdentifier()
 				+ ", suite id: " + this.getSuiteId());
 
 		try {
@@ -227,11 +157,21 @@ public class Run {
 			}
 		}
 
+		/* Save the results list into a separate table, such that each check result is saved to a row */
+        try {
+			for (Result r : this.result) {
+				r.save(this.getObjectIdentifier(), this.getSuiteId());
+			}
+		} catch (MetadigException me) {
+			log.debug("Error saving check result: " + me.getCause());
+			throw(me);
+		}
+
 		// Note that when the connection pooler 'pgbouncer' is used, closing the connection actually just returns
 		// the connection to the pool that pgbouncer maintains.
         log.debug("Shutting down store");
 		store.shutdown();
-		log.debug("Done saving to persistent storage: metadata PID: " + this.getObjectIdentifier() + ", suite id: " + this.getSuiteId());
+		log.debug("Done saving run to persistent storage: metadata PID: " + this.getObjectIdentifier() + ", suite id: " + this.getSuiteId());
 	}
 
 	/**

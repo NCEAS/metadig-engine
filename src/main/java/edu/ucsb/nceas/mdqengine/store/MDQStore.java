@@ -41,6 +41,10 @@ public interface MDQStore {
 	Identifier getIdentifier(String metadataId) throws MetadigStoreException;
 	Integer saveIdentifier(Identifier identifier) throws MetadigStoreException;
 
+	Result getResult(String metadataId, String suiteId, String checkId) throws MetadigStoreException;
+	void saveResult(Result result, String metadataId, String suiteId) throws MetadigStoreException;
+
+
 	ArrayList<Node> getNodes();
 
 }
