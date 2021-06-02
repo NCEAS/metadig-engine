@@ -71,7 +71,7 @@ create TABLE runs (
   status TEXT not null DEFAULT 'success'::text,
   error TEXT not null,
   CONSTRAINT runs_metadata_id_fk FOREIGN KEY (metadata_id) REFERENCES identifiers,
-  CONSTRAINT metadata_id_suite_id_fk UNIQUE (metadata_id, suite_id)
+  CONSTRAINT runs_metadata_id_suite_id_pk PRIMARY KEY (metadata_id, suite_id)
 );
 
 alter table runs owner to metadig;
@@ -109,17 +109,17 @@ alter table nodes owner to metadig;
 create TABLE check_results (
   metadata_id TEXT not NULL,
   suite_id TEXT NOT null,
-  id TEXT NOT NULL,
-  name TEXT NOT NULL,
-  type TEXT NOT NULL,
-  level TEXT NOT null,
+  check_id TEXT NOT NULL,
+  check_name TEXT NOT NULL,
+  check_type TEXT NOT NULL,
+  check_level TEXT NOT null,
   status TEXT NOT null,
-  output TEXT NOT null,
-  CONSTRAINT checks_metadata_id_suite_id_fk FOREIGN KEY (metadata_id, suite_id) REFERENCES runs,
-  CONSTRAINT checks_metadata_id_suite_id_uk UNIQUE (metadata_id, suite_id, id)
+  output TEXT[],
+  CONSTRAINT checks_metadata_id_suite_id_check_id_pk PRIMARY KEY (metadata_id, suite_id, check_id),
+  CONSTRAINT checks_metadata_id_suite_id_fk FOREIGN KEY (metadata_id, suite_id) REFERENCES runs
 );
 
-create index concurrently "checks_metadata_id_suite_id_idx" on checks using btree (metadata_id, suite_id);
+create index concurrently "checks_metadata_id_suite_id_idx" on check_results using btree (metadata_id, suite_id);
 
-alter table nodes owner to metadig;
+alter table check_results owner to metadig;
 

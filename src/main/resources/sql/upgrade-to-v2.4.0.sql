@@ -17,3 +17,21 @@ ALTER TABLE identifiers owner to metadig;
 
 ALTER TABLE runs drop column sequence_id;
 ALTER TABLE runs drop column is_latest;
+
+ALTER TABLE runs ADD CONSTRAINT runs_metadata_id_suite_id_pk PRIMARY KEY (metadata_id, suite_id);
+ALTER TABLE runs DROP CONSTRAINT metadata_id_suite_id_fk;
+
+create TABLE check_results (
+  metadata_id TEXT not NULL,
+  suite_id TEXT NOT null,
+  check_id TEXT NOT NULL,
+  name TEXT NOT NULL,
+  type TEXT NOT NULL,
+  level TEXT NOT null,
+  status TEXT NOT null,
+  output TEXT[],
+  CONSTRAINT checks_metadata_id_suite_id_check_id_pk PRIMARY KEY (metadata_id, suite_id, check_id),
+  CONSTRAINT checks_metadata_id_suite_id_fk FOREIGN KEY (metadata_id, suite_id) REFERENCES runs
+);
+
+create index concurrently "checks_metadata_id_suite_id_idx" on check_results using btree (metadata_id, suite_id);
