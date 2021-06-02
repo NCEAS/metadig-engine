@@ -211,7 +211,7 @@ public class Run {
 	    boolean persist = true;
 		MDQStore store = StoreFactory.getStore(persist);
 
-		log.debug("Saving to persistent storage: metadata PID: " + this.getObjectIdentifier()
+		log.debug("Saving run to persistent storage: metadata PID: " + this.getObjectIdentifier()
 				+ ", suite id: " + this.getSuiteId());
 
 		try {
@@ -227,11 +227,21 @@ public class Run {
 			}
 		}
 
+		/* Save the results list into a separate table, such that each check result is saved to a row */
+        try {
+			for (Result r : this.result) {
+				r.save(this.getObjectIdentifier(), this.getSuiteId());
+			}
+		} catch (MetadigException me) {
+			log.debug("Error saving check result: " + me.getCause());
+			throw(me);
+		}
+
 		// Note that when the connection pooler 'pgbouncer' is used, closing the connection actually just returns
 		// the connection to the pool that pgbouncer maintains.
         log.debug("Shutting down store");
 		store.shutdown();
-		log.debug("Done saving to persistent storage: metadata PID: " + this.getObjectIdentifier() + ", suite id: " + this.getSuiteId());
+		log.debug("Done saving run to persistent storage: metadata PID: " + this.getObjectIdentifier() + ", suite id: " + this.getSuiteId());
 	}
 
 	/**

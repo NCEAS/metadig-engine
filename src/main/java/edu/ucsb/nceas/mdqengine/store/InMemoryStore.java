@@ -240,4 +240,12 @@ public class InMemoryStore implements MDQStore{
 	@Override
 	public ArrayList<Node> getNodes() { return new ArrayList<> (); };
 
+	@Override
+	public Result getResult(String metadataId, String suiteId, String checkId) throws MetadigStoreException {
+		return null;
+	};
+
+	@Override
+	public void saveResult(Result result, String metadataId, String suiteId) throws MetadigStoreException {};
+
 }

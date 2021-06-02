@@ -196,7 +196,6 @@ public class DatabaseStore implements MDQStore {
         String obsoletedBy = identifier.getObsoletedBy();
         Timestamp dateUploaded = new Timestamp(identifier.getDateUploadedAsDateTime().getMillis());
         Timestamp dateSysMetaModified = new Timestamp(identifier.getDateSysMetaModifiedAsDateTime().getMillis());
-
         String sequenceId = identifier.getSequenceId();
         String formatId = identifier.getFormatId();
         String rightsHolder = identifier.getRightsHolder();
@@ -204,7 +203,6 @@ public class DatabaseStore implements MDQStore {
         Integer updateCount = 0;
 
         MetadigStoreException me = new MetadigStoreException("Unable save identifier " + metadataId + " to the datdabase.");
-
         // First, insert a record into the main table ('pids')
         try {
             String[] groupsList = groups.toArray(new String[0]);
@@ -212,7 +210,7 @@ public class DatabaseStore implements MDQStore {
             // Insert a pid into the 'identifiers' table and if it is already their, update it
             // with any new info, e.g. the 'datasource' may have changed. There are two cases where
             // an update an occur - if new system metadata is being updated, or if the sequenceId is
-            // being assigned for this pid.
+            // being assigned for this pid. Avoid updating an identifier entry with older sysmeta info.
             String sql = "INSERT INTO identifiers AS i (metadata_id, data_source, obsoletes, obsoleted_by, "
                     + "date_uploaded, date_sysmeta_modified, sequence_id, format_id, rights_holder, groups) "
                     + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?) "
@@ -257,6 +255,120 @@ public class DatabaseStore implements MDQStore {
     @Override
     public Collection<String> listRuns() {
         return runs.keySet();
+    }
+
+    /*
+     * Get a single result from the 'check_results' table.
+     */
+    @Override
+    public Result getResult(String metadataId, String suiteId, String checkId) throws MetadigStoreException  {
+
+        Result result = new Result();
+        Check check = new Check();
+        List<Output> outputList = null;
+        Array arr = null;
+        PreparedStatement stmt = null;
+
+        // Hope for the best, prepare for the worst!
+        MetadigStoreException me = new MetadigStoreException("Unable to get check result from the datdabase.");
+        // Select records from the 'runs' table
+        try {
+            log.trace("preparing statement for query");
+            String sql = "select * check_results where metadata_id = ? and suite_id = ? and check_id = ?";
+            stmt = conn.prepareStatement(sql);
+            stmt.setString(1, metadataId);
+            stmt.setString(2, suiteId);
+            stmt.setString(3, checkId);
+            log.trace("issuing query: " + sql);
+            ResultSet rs = stmt.executeQuery();
+
+            if(rs.next()) {
+                check.setId(rs.getString("check_id"));
+                check.setName(rs.getString("check_name"));
+                check.setLevel(Level.valueOf(rs.getString("check_level")));
+                check.setType(rs.getString("check_type"));
+                result.setStatus(Status.valueOf(rs.getString("status")));
+                arr = rs.getArray("output");
+                String[] output = (String[])arr.getArray();
+                result.setOutput((Output) Arrays.asList(output));
+                rs.close();
+                stmt.close();
+                result.setCheck(check);
+                log.trace("Retrieved check result successfully for metadata id: " + metadataId
+                    + ", suiteId: " + suiteId + ", checkId: " + checkId);
+            } else {
+                log.trace("Check result not found for metadata id: " + metadataId + ", suiteId: " + suiteId
+                    + ", checkId: " + checkId);
+            }
+        } catch ( Exception e ) {
+            log.error( e.getClass().getName()+": "+ e.getMessage());
+            e.printStackTrace();
+            me.initCause(e);
+            throw(me);
+        }
+        return(result);
+    }
+
+    /*
+     * Save a single check result. Note that a run must first be saved before saving the associated
+     * check results for that run (due to foreign key constraint).
+     */
+    public void saveResult(Result result, String metadataId, String suiteId) throws MetadigStoreException {
+
+        PreparedStatement stmt = null;
+        Check check = result.getCheck();
+        String checkId = check.getId();
+        String checkName = check.getName();
+        String checkType = check.getType();
+        String checkLevel = check.getLevel().toString();
+        String status = result.getStatus().toString();
+        List<String> output = new ArrayList<>();
+        // Convert the result 'output' values to a list of strings
+        for(Output o: result.getOutput()) {
+           output.add(o.getValue());
+        }
+
+        MetadigStoreException me = new MetadigStoreException("Unable save run result to the datdabase.");
+        try {
+            // Insert a result into the 'check_results' table and if it is already their, update it
+            // with any new info, e.g. such as the 'status' that may have changed.
+
+            String[] outputList = output.toArray(new String[0]);
+            Array outputArray = conn.createArrayOf("text", outputList);
+
+            String sql = "INSERT INTO check_results (metadata_id, suite_id, check_id,"
+                    + " check_name, check_type, check_level, status, output) "
+                    + " VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
+                    + " ON CONFLICT ON CONSTRAINT checks_metadata_id_suite_id_check_id_pk "
+                    + " DO UPDATE SET (check_name, check_type, check_level, status, output)"
+                    + " = (?, ?, ?, ?, ?);";
+
+            stmt = conn.prepareStatement(sql);
+            stmt.setString(1, metadataId);
+            stmt.setString(2, suiteId);
+            stmt.setString(3, checkId);
+            stmt.setString(4, checkName);
+            stmt.setString(5, checkType);
+            stmt.setString(6, checkLevel);
+            stmt.setString(7, status);
+            stmt.setArray(8, outputArray);
+            // For the 'conflict' clause
+            stmt.setString(9, checkName);
+            stmt.setString(10, checkType);
+            stmt.setString(11, checkLevel);
+            stmt.setString(12, status);
+            stmt.setArray(13, outputArray);
+            stmt.executeUpdate();
+            stmt.close();
+            conn.commit();
+            //conn.close();
+        } catch (SQLException e) {
+            log.error( e.getClass().getName()+": "+ e.getMessage());
+            me.initCause(e);
+            throw(me);
+        }
+
+        log.trace("Check result saved successfully");
     }
 
     /*
@@ -361,7 +473,7 @@ public class DatabaseStore implements MDQStore {
         // then update the record with the incoming data.
         try {
             String sql = "INSERT INTO runs (metadata_id, suite_id, timestamp, results, status, error) VALUES (?, ?, ?, ?, ?, ?)"
-                    + " ON CONFLICT ON CONSTRAINT metadata_id_suite_id_fk "
+                    + " ON CONFLICT ON CONSTRAINT runs_metadata_id_suite_id_pk "
                     + " DO UPDATE SET (timestamp, results, status, error) = (?, ?, ?, ?);";
 
             stmt = conn.prepareStatement(sql);
