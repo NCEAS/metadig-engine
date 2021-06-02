@@ -203,6 +203,8 @@ public class RequestReportJob implements Job {
 
         ArrayList<Node> nodes = new ArrayList<>();
 
+        // The node store contains all nodes that the CN reported on. If the CN
+        // CN doesn't know about this node, then it can't be processed.
         if (isCN) {
             nodes = store.getNodes();
         } else {
