@@ -4,6 +4,7 @@ import edu.ucsb.nceas.mdqengine.dispatch.MDQCache;
 import edu.ucsb.nceas.mdqengine.exception.MetadigException;
 import edu.ucsb.nceas.mdqengine.model.*;
 import edu.ucsb.nceas.mdqengine.processor.GroupLookupCheck;
+import edu.ucsb.nceas.mdqengine.processor.JSONDialect;
 import edu.ucsb.nceas.mdqengine.processor.XMLDialect;
 import edu.ucsb.nceas.mdqengine.serialize.JsonMarshaller;
 import edu.ucsb.nceas.mdqengine.serialize.XmlMarshaller;
@@ -43,7 +44,7 @@ public class MDQEngine {
 
 	private MDQStore store = null;
 
-	protected Log log = LogFactory.getLog(this.getClass());
+	protected static Log log = LogFactory.getLog(MDQEngine.class);
 	private static String metadigDataDir = null;
 	
 	public MDQEngine() throws MetadigException, IOException, ConfigurationException {
@@ -82,14 +83,32 @@ public class MDQEngine {
 
 		String content = IOUtils.toString(input, "UTF-8");
 		String metadataContent = content;
-		
-		XMLDialect xml = new XMLDialect(IOUtils.toInputStream(metadataContent, "UTF-8"));
-		xml.setParams(params);
-		xml.setSystemMetadata(sysMeta);
-		Path tempDir = Files.createTempDirectory("mdq_run");
-		xml.setDirectory(tempDir.toFile().getAbsolutePath());
-		// include the default namespaces from the suite
-		xml.mergeNamespaces(suite.getNamespace());
+
+		XMLDialect xml = null;
+		JSONDialect json = null;
+		Path tempDir = null;
+		// Check the Media Type of the metadata document to be assessed to determine if it is XML
+		// or JSON, and use the appropriate dialect handler.
+		String formatId = sysMeta.getFormatId().getValue();
+		String mediaType = sysMeta.getMediaType().getName();
+		//if(formatId.matches("science\\-on\\-schema\\.org/Dataset;ld\\+json") && mediaType.matches("application/ld\\+json") ) {
+		if(mediaType.matches("application/ld\\+json")) {
+			log.trace("Processing SOSO Dataset description (JSON+ld) document");
+			json = new JSONDialect(IOUtils.toInputStream(metadataContent, "UTF-8"));
+			json.setParams(params);
+			json.setSystemMetadata(sysMeta);
+			tempDir = Files.createTempDirectory("mdq_run");
+			json.setDirectory(tempDir.toFile().getAbsolutePath());
+        } else {
+			log.trace("Processing XML document");
+			xml = new XMLDialect(IOUtils.toInputStream(metadataContent, "UTF-8"));
+			xml.setParams(params);
+			xml.setSystemMetadata(sysMeta);
+			tempDir = Files.createTempDirectory("mdq_run");
+			xml.setDirectory(tempDir.toFile().getAbsolutePath());
+			// include the default namespaces from the suite
+			xml.mergeNamespaces(suite.getNamespace());
+		}
 		
 		// make a run to capture results
 		Run run = new Run();
@@ -97,12 +116,16 @@ public class MDQEngine {
 		run.setId(UUID.randomUUID().toString());
 		run.setTimestamp(Calendar.getInstance().getTime());
 		List<Result> results = new ArrayList<Result>();
+		log.debug("Running suite: " + suite.getName());
+		log.trace("# of checks: " + suite.getCheck().size());
 
 		// run the checks in the suite to get results
 		for (Check check: suite.getCheck()) {
+			log.trace("Evaluating running of check: " + check.getId());
 			// is this a reference to existing check?
 			if (check.getCode() == null && check.getId() != null) {
 				// then load it
+				log.trace("Getting check with id: " + check.getId());
 				Check origCheck = check;
 				check = store.getCheck(origCheck.getId());
 
@@ -123,7 +146,15 @@ public class MDQEngine {
 				if(origCheck.getLevel() != null) check.setLevel(origCheck.getLevel());
                 if(origCheck.getType() != null) check.setType(origCheck.getType());
 			}
-			Result result = xml.runCheck(check);
+
+			Result result = null;
+			if(xml != null) {
+				log.trace("Running XML check");
+				result = xml.runCheck(check);
+			} else {
+				log.trace("Running JSON check");
+				result = json.runCheck(check);
+			}
 			results.add(result);
 		}
 		run.setResult(results);
@@ -283,17 +314,10 @@ public class MDQEngine {
 					Thread.sleep(1000);
 				}
 
-//				if(groups != null) {
-//					System.out.println("Setting groups");
-//					smm.setGroups(groups);
-//				} else {
-//					System.out.println("No groups to set");
-//				}
 				executorService.shutdown();
-				//run.setSysmeta(smm);
 			}
 
-			System.out.println(XmlMarshaller.toXml(run, true));
+			log.trace(XmlMarshaller.toXml(run, true));
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			// Store the error in the 'Run' object so it can be saved to the run store.

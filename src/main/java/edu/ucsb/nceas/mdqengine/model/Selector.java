@@ -15,7 +15,7 @@ import javax.xml.bind.annotation.XmlType;
  *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(propOrder = {"name", "xpath", "subSelector", "namespace"})
+@XmlType(propOrder = {"name", "xpath", "jsonpath", "subSelector", "namespace"})
 public class Selector {
 	
 	/**
@@ -34,8 +34,16 @@ public class Selector {
 	 * on the metadata standard used, but conceptually the value can be checked exactly the same
 	 * no matter where or how it is serialized in metadata.
 	 */
-	@XmlElement(required = true)
+	@XmlElement(required = false)
 	private String xpath;
+
+	/**
+	 * The jsonpath expression is used to extract value[s] from the document for this named
+	 * selector.
+	 * The jsonpath is used for JSON based metadata dialects.
+	 */
+	@XmlElement(required = false)
+	private String jsonpath;
 	
 	/**
 	 * Specifies whether or not this selector should be namespace aware or not.
@@ -73,6 +81,10 @@ public class Selector {
 	public void setXpath(String xpath) {
 		this.xpath = xpath;
 	}
+
+	public String getJSONpath() { return jsonpath; }
+
+	public void setJSONpath(String jsonpath) { this.jsonpath = jsonpath; }
 
 	public Selector getSubSelector() {
 		return subSelector;
