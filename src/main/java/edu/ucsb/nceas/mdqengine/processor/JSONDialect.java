@@ -240,30 +240,33 @@ public class JSONDialect {
     public boolean isCheckValid(Check check) {
 
         if (check.getDialect() == null) {
-            log.debug("No dialects have been specified for check, assuming it is valid for this document");
+            log.error("No dialects have been specified for check, assuming it is valid for this document");
             return true;
         }
 
         for (Dialect dialect: check.getDialect()) {
             String name = dialect.getName();
-            String expression = dialect.getJSONPath();
-            log.trace("Dialect name: " + name + ", expression: " + expression);
+            String expression = dialect.getJsonpath();
+            log.debug("Dialect name: " + name + ", expression: " + expression);
 
             if(expression == null) {
-                log.trace("Skipping dialect name");
+                log.trace("Skipping dialect named: " + name);
                 continue;
             }
             String value = jsonContext.read(expression);
+            log.trace("json value: " + value);
+            String matchRegex = dialect.getMatch();
+            log.trace("match: " + matchRegex);
 
-            if(value.matches(".*http.*://schema.org.*")) {
-                log.trace("Dialect " + name + " is valid for document ");
+            if(matchRegex != null && value.matches(matchRegex)) {
+                log.debug("Dialect " + name + " is valid for document ");
                 return true;
             } else {
-                log.trace("Dialect " + name + " is NOT valid for document");
+                log.debug("Dialect " + name + " is NOT valid for document");
             }
         }
 
-        log.info("No supported check dialects found for this document");
+        log.warn("No supported check dialects found for this document");
 
         return false;
     }
