@@ -467,9 +467,7 @@ public class XMLDialect {
 		this.params = params;
 	}
 	
-	public void setDirectory(String dir) {
-		this .directory = dir;
-	}
+	public void setDirectory(String dir) { this.directory = dir; }
 	
 	public SystemMetadata getSystemMetadata() {
 		return systemMetadata;
