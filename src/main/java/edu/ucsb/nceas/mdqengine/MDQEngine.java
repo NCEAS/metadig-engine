@@ -160,7 +160,7 @@ public class MDQEngine {
 		run.setResult(results);
 
 		log.trace("Run results: " + JsonMarshaller.toJson(run));
-		
+
 		// clean up
 		tempDir.toFile().delete();
 		
@@ -169,53 +169,6 @@ public class MDQEngine {
 	}
 	
 	/**
-	 * Executes the given check for a given object
-	 * @param check
-	 * @param input the InputStream for the object to QC
-	 * @param params optional additional parameters to make available for the check
-	 * @return the Run results for this execution
-	 * @throws MalformedURLException
-	 * @throws IOException
-	 * @throws SAXException
-	 * @throws ParserConfigurationException
-	 * @throws XPathExpressionException
-	 * @throws ScriptException
-	 */
-	public Run runCheck(Check check, InputStream input, Map<String, Object> params, SystemMetadata sysMeta) 
-			throws MalformedURLException, IOException, SAXException, 
-			ParserConfigurationException, XPathExpressionException, ScriptException {
-			
-
-		String content = IOUtils.toString(input, "UTF-8");
-		String metadataContent = content;
-		
-		XMLDialect xml = new XMLDialect(IOUtils.toInputStream(metadataContent, "UTF-8"));
-		xml.setParams(params);
-		xml.setSystemMetadata(sysMeta);
-		Path tempDir = Files.createTempDirectory("mdq_run");
-		xml.setDirectory(tempDir.toFile().getAbsolutePath());
-		
-		// make a run to capture results
-		Run run = new Run();
-		run.setId(UUID.randomUUID().toString());
-		run.setTimestamp(Calendar.getInstance().getTime());
-		List<Result> results = new ArrayList<Result>();
-
-		// run the check to get results
-		Result result = xml.runCheck(check);
-		results.add(result);
-		run.setResult(results);
-		
-		log.trace("Run results: " + JsonMarshaller.toJson(run));
-		
-		// clean up
-		tempDir.toFile().delete();
-		
-		return run;
-		
-	}
-	
-	/** 
 	 * To enable checks-by-id-reference, set the store so that checks can be retrieved
 	 * if not specified inline
 	 * @param store The storage implementation to use for retrieving existing checks
