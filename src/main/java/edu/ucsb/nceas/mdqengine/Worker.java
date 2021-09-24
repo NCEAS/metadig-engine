@@ -129,6 +129,7 @@ public class Worker {
                 boolean failFast = false;
                 Integer identifierUpdateCount = 0;
 
+		log.debug("Creating report for pid: " + metadataPid + ", suite: " + suiteId);
                 // Create the quality report
                 try {
                     // Set host name so controller can print stats info, referring to this
@@ -172,7 +173,7 @@ public class Worker {
                         if (groups != null) {
                             meIdentifier.setGroups(groups);
                         } else {
-                            log.debug("No groups to set");
+                            log.trace("No groups to set");
                         }
                         executorService.shutdown();
                     }
@@ -189,14 +190,14 @@ public class Worker {
                     // Note also that if the identifier isn't updated, then the identifier fields in the Solr
                     // document should not be updated.
                     identifierUpdateCount = meIdentifier.save();
-                    log.debug("Identifier table update count: " + identifierUpdateCount);
+                    log.trace("Identifier table update count: " + identifierUpdateCount);
 
                     runXML = XmlMarshaller.toXml(run, true);
                     qEntry.setRunXML(runXML);
                     difference = System.currentTimeMillis() - startTimeProcessing;
                     elapsedTimeSecondsProcessing = TimeUnit.MILLISECONDS.toSeconds(difference);
                     qEntry.setProcessingElapsedTimeSeconds(elapsedTimeSecondsProcessing);
-                    log.debug("Completed running quality suite.");
+                    log.trace("Completed running quality suite.");
                 } catch (java.lang.Exception e) {
                     failFast = true;
                     log.error("Unable to run quality suite.");
@@ -213,7 +214,7 @@ public class Worker {
                     // Even though the run didn't complete, save the processing report to
                     // persistent storage, so that we can save the error and status of the run.
                     try {
-                        log.debug("Saving quality run status after error");
+                        log.trace("Saving quality run status after error");
                         // convert String into InputStream
                         if(run == null) run = new Run();
                         run.setObjectIdentifier(metadataPid);
@@ -222,7 +223,7 @@ public class Worker {
                         run.setRunStatus(Run.FAILURE);
                         run.setErrorDescription(e.getMessage());
                         run.save();
-                        log.debug("Saved quality run status after error");
+                        log.trace("Saved quality run status after error");
                     } catch (Exception ex) {
                         log.error("Processing failed, then unable to save the quality report to database:" + ex.getMessage());
                     }
@@ -242,7 +243,7 @@ public class Worker {
                     // Should a 'sequenceId' be added to the Solr index?
                     if(indexSequenceId) {
                         // Add the current run to the collection, as a starting point for the sequence id search
-                        log.debug("Adding run id to identifier list: " + meIdentifier.getMetadataId());
+                        log.trace("Adding run id to identifier list: " + meIdentifier.getMetadataId());
                         identifiersInSequence.addIdentifier(metadataPid, meIdentifier);
 
                         // Traverse through the collection, stopping if the sequenceId is found. If the sequenceId
@@ -258,15 +259,15 @@ public class Worker {
                         if (sequenceId == null && identifiersInSequence.getFoundFirstPid()) {
                             sequenceId = identifiersInSequence.getFirstPidInSequence();
                             identifiersInSequence.setSequenceId(sequenceId);
-                            log.debug("Setting sequenceId to first pid in sequence: " + sequenceId);
+                            log.trace("Setting sequenceId to first pid in sequence: " + sequenceId);
                         } else {
-                            log.debug("Using found sequenceId: " + sequenceId);
+                            log.trace("Using found sequenceId: " + sequenceId);
                         }
                     }
 
                     // Update runs in persist storage with sequenceId for this obsolesence chain
                     if(indexSequenceId && sequenceId != null) {
-                        log.debug("Updating sequenceId to " + sequenceId);
+                        log.trace("Updating sequenceId to " + sequenceId);
                         //sequenceId = runsInSequence.getSequenceId();
                         identifiersInSequence.updateSequenceId(sequenceId);
                         identifiersInSequence.update();
@@ -290,14 +291,14 @@ public class Worker {
                         // For now, use fallback solr location, which will be selected by the indexer
                         // if null is passed in.
                         String solrLocation = null;
-                        log.debug("Calling indexReport for id: " + metadataPid);
+                        log.trace("Calling indexReport for id: " + metadataPid);
                         wkr.indexReport(metadataPid, runXML, suiteId, sysmeta, solrLocation);
                         // Now add identifier (from the metadata sysmeta) to the index report. These are
                         HashMap<String, Object> fields = new HashMap<>();
 
                         // These items from the metadataid sysmeta are not indexed when the run report is indexed,
                         // so add them to the index now.
-                        log.debug("Updating Solr index for pid: " + meIdentifier.getMetadataId() +
+                        log.trace("Updating Solr index for pid: " + meIdentifier.getMetadataId() +
                                 " dateUploaded: " + meIdentifier.getDateUploaded() +
                                 "," + "obsoletedBy: " + meIdentifier.getObsoletedBy() +
                                 "," + "obsoletes: " + meIdentifier.getObsoletes() +
@@ -317,12 +318,12 @@ public class Worker {
                         // Update any identifier entries in this sequence that have been modified, updating the sequence
                         // id, obsoletes or obsoletedBy, dateUploaded fields in the index
                         if(indexSequenceId) {
-                            log.debug("Updating Solr index with " + identifiersInSequence.getModifiedIdentifiers().size() +
+                            log.trace("Updating Solr index with " + identifiersInSequence.getModifiedIdentifiers().size() +
                                     " modified identifier entries...");
                             // Put files to be updated in a HashMap (can update multiple fields)
                             for (Identifier ident: identifiersInSequence.getModifiedIdentifiers()) {
                                 fields = new HashMap<>();
-                                log.debug("Updating Solr index for pid: " + ident.getMetadataId() +
+                                log.trace("Updating Solr index for pid: " + ident.getMetadataId() +
                                         "," + "sequenceId: " + sequenceId);
                                 if (ident.getSequenceId() != null) fields.put("sequenceId", ident.getSequenceId());
 
@@ -357,24 +358,20 @@ public class Worker {
 
                 // Send the report (completed or not) to the controller, with errors that were encountered.
                 try {
-                    log.debug("Sending report info back to controller...");
+                    log.trace("Sending report info back to controller...");
                     totalElapsedTimeSeconds = elapsedTimeSecondsProcessing + elapsedTimeSecondsIndexing;
                     qEntry.setTotalElapsedTimeSeconds(totalElapsedTimeSeconds);
-                    wkr.returnReport(metadataPid, suiteId, qEntry);
+                    wkr.returnReport(metadataPid, suiteId, qEntry, envelope, this);
                     log.debug("Sent report info back to controller...");
                 } catch (IOException ioe) {
                     log.error("Unable to return quality report to controller.");
                     ioe.printStackTrace();
                 }
-
-                // Inform RabbitMQ that we are done with this task, and am ready for another.
-                inProcessChannel.basicAck(envelope.getDeliveryTag(), false);
-                log.info("Worker completed task");
             }
         };
 
         log.debug("Calling basicConsume");
-    inProcessChannel.basicConsume(QUALITY_QUEUE_NAME, false, consumer);
+        inProcessChannel.basicConsume(QUALITY_QUEUE_NAME, false, consumer);
     }
 
     /**
@@ -384,7 +381,7 @@ public class Worker {
      * @param suiteId The identifier for the suite used to score the metadata
      * @param qEntry The message passed via RabbitMQ back to metadig-controller
      */
-    private void returnReport(String metadataPid, String suiteId, QueueEntry qEntry) throws IOException {
+    private void returnReport(String metadataPid, String suiteId, QueueEntry qEntry, Envelope envelope, Consumer consumer) throws IOException {
         byte[] message = null;
         try {
             log.info("Elapsed time processing (seconds): "
@@ -410,8 +407,25 @@ public class Worker {
             message = bos.toByteArray();
 
             log.info(" [x] Done");
-            this.writeCompletedQueue(message);
-            log.info(" [x] Sent completed report for pid: '" + qEntry.getMetadataPid() + "'");
+            try {
+                this.writeCompletedQueue(message);
+                log.info(" [x] Sent completed report for pid: '" + qEntry.getMetadataPid() + "'");
+                inProcessChannel.basicAck(envelope.getDeliveryTag(), false);
+            } catch (AlreadyClosedException rmqe) {
+                log.error("RabbitMQ connection error: " + rmqe.getMessage());
+                try {
+                    log.error("Resetting RabbitMQ queues and resending completed report...");
+                    this.setupQueues();
+                    this.writeCompletedQueue(message);
+                    log.info(" [x] Sent completed report for pid: '" + qEntry.getMetadataPid() + "'");
+                    // Tell RabbitMQ this worker is ready for tasks
+                    log.debug("Calling basicConsume");
+                    inProcessChannel.basicConsume(QUALITY_QUEUE_NAME, false, consumer);
+                } catch (Exception e) {
+                    log.error("Error re-establishing connection to RabbitMQ server: " + e.getMessage());
+                    log.error("Unable to resend report back to controller.");
+                }
+            }
         } catch (Exception e) {
             // If we couldn't prepare the message, then there is nothing left to do
             log.error(" Unable to return report to controller");
@@ -436,8 +450,13 @@ public class Worker {
         factory.setPort(RabbitMQport);
         factory.setPassword(RabbitMQpassword);
         factory.setUsername(RabbitMQusername);
-        log.debug("Set RabbitMQ host to: " + RabbitMQhost);
-        log.debug("Set RabbitMQ port to: " + RabbitMQport);
+        factory.setRequestedHeartbeat(60);
+        // connection that will recover automatically
+        factory.setAutomaticRecoveryEnabled(false);
+        // attempt recovery every 10 seconds after a failure
+        factory.setNetworkRecoveryInterval(10000);
+        log.trace("Set RabbitMQ host to: " + RabbitMQhost);
+        log.trace("Set RabbitMQ port to: " + RabbitMQport);
 
 
         try {
@@ -504,46 +523,6 @@ public class Worker {
             throw new MetadigException("Unable to run quality suite for pid " + message.getMetadataPid() + ", suite "
                     + suiteId + e.getMessage(), e);
         }
-
-//        // Add DataONE sysmeta, if it was provided.
-//        if(sysmeta != null) {
-//            //SysmetaModel smm = new SysmetaModel();
-//            // These sysmeta fields are always provided
-//            //smm.setOriginMemberNode(sysmeta.getOriginMemberNode().getValue());
-//            //smm.setRightsHolder(sysmeta.getRightsHolder().getValue());
-//            //smm.setDateUploaded(sysmeta.getDateUploaded());
-//            //smm.setFormatId(sysmeta.getFormatId().getValue());
-//            // These fields aren't required.
-//            //if (sysmeta.getObsoletes() != null) smm.setObsoletes(sysmeta.getObsoletes().getValue());
-//            //if (sysmeta.getObsoletedBy() != null) smm.setObsoletedBy(sysmeta.getObsoletedBy().getValue());
-//            //if (sysmeta.getSeriesId() != null) smm.setSeriesId(sysmeta.getSeriesId().getValue());
-//
-//            // Now make the call to DataONE to get the group information for this rightsHolder.
-//            // Only wait for a certain amount of time before we will give up.
-//            ExecutorService executorService = Executors.newSingleThreadExecutor();
-//
-//            // Provide the rightsHolder to the DataONE group lookup.
-//            GroupLookupCheck glc = new GroupLookupCheck();
-//            glc.setRightsHolder(sysmeta.getRightsHolder().getValue());
-//            Future<List<String>> future = executorService.submit(glc);
-//
-//            List<String> groups = new ArrayList<String>();
-//            try {
-//                groups = future.get();
-//            } catch (Throwable thrown) {
-//                log.error("Error while waiting for group lookup thread completion");
-//            }
-//
-//            if (groups != null) {
-//                smm.setGroups(groups);
-//            } else {
-//                log.debug("No groups to set");
-//            }
-//            executorService.shutdown();
-//
-//           //run.setSysmeta(smm);
-//        }
-
         return(run);
     }
 
@@ -606,7 +585,7 @@ public class Worker {
         } catch (Exception e) {
             throw new MetadigIndexException("Error during index updating", e);
         }
-        log.debug("Done updating entry for pid: " + metadataId + ", suite id: " + suiteId);
+        log.trace("Done updating entry for pid: " + metadataId + ", suite id: " + suiteId);
     }
 
     /**
@@ -615,7 +594,7 @@ public class Worker {
      * @param message The message to send to the controller
      * @throws IOException
      */
-    public void writeCompletedQueue (byte[] message) throws IOException {
+    public void writeCompletedQueue (byte[] message) throws IOException, AlreadyClosedException {
         // Include the message type in this queue entry sent back to the controller. The controller gets messages
         // to the "Completed" queue from different clients (aggregator, quality worker) which each have different
         // messages types and formsts, so the controller needs to know what type of message it is getting.
@@ -639,7 +618,7 @@ public class Worker {
         //Get file from resources folder
         ClassLoader classLoader = getClass().getClassLoader();
         File file = new File(classLoader.getResource(fileName).getFile());
-        log.debug(file.getAbsolutePath());
+        log.trace(file.getAbsolutePath());
 
         InputStream is = classLoader.getResourceAsStream(fileName);
 
