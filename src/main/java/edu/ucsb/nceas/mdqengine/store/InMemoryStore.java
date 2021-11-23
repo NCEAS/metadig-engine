@@ -70,7 +70,7 @@ public class InMemoryStore implements MDQStore{
 			suiteResources  = resolver.getResources("classpath*:/suites/*.xml");
 			// do we have an additional location for these?
 			if (storeDirectory != null) {
-				log.info("Reading suites from: file://" + storeDirectory + "/suites");
+				log.debug("Reading suites from: file://" + storeDirectory + "/suites");
 				Resource[] additionalSuiteResources = resolver.getResources("file://" + storeDirectory + "/suites/*.xml");
 				log.debug("Adding " + additionalSuiteResources.length + " additional suites");
 				suiteResources = (Resource[]) ArrayUtils.addAll(suiteResources, additionalSuiteResources);
@@ -83,7 +83,7 @@ public class InMemoryStore implements MDQStore{
 				Suite suite = null;
 				try {
 					URL url = resource.getURL();
-					log.debug("Loading suite found at: " + url.toString());
+					log.trace("Loading suite found at: " + url.toString());
 					String xml = IOUtils.toString(url.openStream(), "UTF-8");
 					suite = (Suite) XmlMarshaller.fromXml(xml, Suite.class);
 				} catch (JAXBException | IOException | SAXException e) {
@@ -102,10 +102,10 @@ public class InMemoryStore implements MDQStore{
 			checkResources  = resolver.getResources("classpath*:/checks/*.xml");
 			// do we have an additional location for these?
 			if (storeDirectory != null) {
-				log.debug("Reading checks from: file://" + storeDirectory + "/checks");
+				log.trace("Reading checks from: file://" + storeDirectory + "/checks");
 				Resource[] additionalCheckResources = resolver.getResources("file://" + storeDirectory + "/checks/*.xml");
 				checkResources = (Resource[]) ArrayUtils.addAll(checkResources, additionalCheckResources);
-				log.debug("Adding " + additionalCheckResources.length + " additional checks");
+				log.trace("Adding " + additionalCheckResources.length + " additional checks");
 			}
 		} catch (IOException e) {
 			log.error("Could not read local check resources: " + e.getMessage(), e);
