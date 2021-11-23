@@ -406,18 +406,19 @@ public class Worker {
             out.writeObject(qEntry);
             message = bos.toByteArray();
 
-            log.info(" [x] Done");
             try {
                 this.writeCompletedQueue(message);
-                log.info(" [x] Sent completed report for pid: '" + qEntry.getMetadataPid() + "'");
+                log.info("Sent completed report to metadig controller for pid: '" + qEntry.getMetadataPid() + "'");
                 inProcessChannel.basicAck(envelope.getDeliveryTag(), false);
+                log.debug("Sent task completed acknowledgement to RabbitMQ");
+                log.info("metadig-worker done");
             } catch (AlreadyClosedException rmqe) {
                 log.error("RabbitMQ connection error: " + rmqe.getMessage());
                 try {
                     log.error("Resetting RabbitMQ queues and resending completed report...");
                     this.setupQueues();
                     this.writeCompletedQueue(message);
-                    log.info(" [x] Sent completed report for pid: '" + qEntry.getMetadataPid() + "'");
+                    log.info("x] Sent completed report for pid: '" + qEntry.getMetadataPid() + "'");
                     // Tell RabbitMQ this worker is ready for tasks
                     log.debug("Calling basicConsume");
                     inProcessChannel.basicConsume(QUALITY_QUEUE_NAME, false, consumer);
@@ -452,7 +453,7 @@ public class Worker {
         factory.setUsername(RabbitMQusername);
         factory.setRequestedHeartbeat(60);
         // connection that will recover automatically
-        factory.setAutomaticRecoveryEnabled(false);
+        factory.setAutomaticRecoveryEnabled(true);
         // attempt recovery every 10 seconds after a failure
         factory.setNetworkRecoveryInterval(10000);
         log.trace("Set RabbitMQ host to: " + RabbitMQhost);
