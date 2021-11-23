@@ -20,10 +20,15 @@ import java.util.HashSet;
 import java.util.List;
 
 /**
+ * Ingest files that have been placed in the staging area into the MetaDIG filestore.
  * <p>
- * Run a MetaDIG Quality Engine Scheduler task, for example,
- * query a member node for new pids and request that a quality
- * report is created for each one.
+ * A scheduler task is run so that periodically the FilestoreIngestJob will be
+ * executed. This program looks in the staging area (e.g. /opt/local/metadig/store)
+ * and first copies them to their permanent location in the store, i.e.
+ *     ./store/staging/code/somefile.R -> ./store/code/somefile.R
+ * and then creates an entry in the MetaDIG 'filestore' database, so that the
+ * file can be quickly located and accessed when needed.
+ * Typically files such as R code (for creating graphis) will be ingested this way.
  * </p>
  *
  * @author Peter Slaughter
