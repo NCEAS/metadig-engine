@@ -5,7 +5,10 @@ import edu.ucsb.nceas.mdqengine.exception.MetadigStoreException;
 import edu.ucsb.nceas.mdqengine.model.*;
 import edu.ucsb.nceas.mdqengine.model.Identifier;
 import edu.ucsb.nceas.mdqengine.serialize.XmlMarshaller;
+import edu.ucsb.nceas.mdqengine.solr.QualityScore;
 import org.apache.commons.configuration2.ex.ConfigurationException;
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVPrinter;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.logging.Log;
@@ -13,16 +16,16 @@ import org.apache.commons.logging.LogFactory;
 import org.dataone.service.types.v1.*;
 import org.dataone.service.types.v2.Node;
 import org.dataone.service.util.TypeMarshaller;
+import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormatter;
+import org.joda.time.format.ISODateTimeFormat;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.xml.sax.SAXException;
 
 import javax.sql.DataSource;
 import javax.xml.bind.JAXBException;
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
+import java.io.*;
 import java.net.URL;
 import java.sql.*;
 import java.text.DateFormat;
@@ -781,6 +784,57 @@ public class DatabaseStore implements MDQStore {
         log.trace(nodes.size() + " nodes found in node table.");
 
         return(nodes);
+    }
+
+    /**
+     * Export a suite run result to an external file
+     * @param args  arguments for the app
+     * @throws Exception  all application exceptions
+     */
+    public ArrayList<String> exportResults (String suiteId, String nodeId, String formats, String outputFilePath) {
+        File tmpfile = File.createTempFile("scorefile-", ".csv");
+        log.debug("Creating score file: " + tmpfile);
+        Boolean append = true;
+        PreparedStatement stmt = null;
+        FileWriter fileWriter = new FileWriter(tmpfile, append);
+        // TODO: Pass param or detect suite, so we know what 'scoreByType' fields to create header columns for
+        CSVPrinter csvPrinter = new CSVPrinter(fileWriter, CSVFormat.RFC4180.withHeader(
+                "pid", "formatId", "dateUploaded", "datasource", "scoreOverall",
+                "scoreFindable", "scoreAccessible", "scoreInteroperable", "scoreReusable",
+                "obsoletes", "obsoletedBy", "sequenceId"));
+
+        String query = "select c.check_id,c.check_name,c.check_type,c.check_level,c.status," +
+                "i.data_source,i.metadata_id,i.obsoleted_by from identifiers i left " +
+                "join check_results c on i.metadata_id = c.metadata_id AND c.suite_id=? AND data_source=?";
+
+        // Select records from the 'nodes' table
+        try {
+            stmt = conn.prepareStatement(query);
+            stmt.setString(1, suiteId);
+            stmt.setString(2, nodeId);
+
+            // Set number of result rows to return per fetch.
+            stmt.setFetchSize(50000);
+
+            log.trace("issuing query: " + query);
+            ResultSet rs = stmt.executeQuery();
+
+            while (rs.next()) {
+                csvPrinter.printRecord(
+                    rs.getString("c.check_id");
+                    rs.getString("c.check_name");
+                    rs.getString("c.check_type");
+                    rs.getString("c.check_level");
+                    rs.getString("c.status");
+                    rs.getString("i.data_source");
+                    rs.getString("i.metadata_id");
+                    rs.getString("i.obsoleted_by"));
+            }
+            rs.close();
+            stmt.close();
+        } catch ( Exception e ) {
+            log.error( e.getClass().getName()+": "+ e.getMessage());
+        }
     }
 
     public Node extractNodeFields (ResultSet resultSet) {
