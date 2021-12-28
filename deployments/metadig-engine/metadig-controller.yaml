@@ -1,4 +1,4 @@
-apiVersion: apps/v1beta1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: metadig-controller
@@ -13,21 +13,25 @@ spec:
       labels:
         app: metadig-controller
     spec:
+      #serviceAccountName: metadig-serviceaccount
       containers:
       - name: metadig-controller
-        image: docker.io/metadig/metadig-controller:2.2.0
+        image: docker.io/metadig/metadig-controller:2.3.1
+        env:
+        - name: JAVA_OPTS
+          value: "-Dlog4j2.formatMsgNoLookups=true"
         ports:
         - name: metadig-tomcat
           containerPort: 8080
         imagePullPolicy: Always
         volumeMounts:
-        - name: nfs-pv
+        - name: metadig-pv
           mountPath: "/opt/local"
           readOnly: true
       volumes:
-      - name: nfs-pv
+      - name: metadig-pv
         persistentVolumeClaim:
-          claimName: nfs-pvc
+          claimName: cephfs-metadig-pvc
       restartPolicy: Always
 
 ---
@@ -41,6 +45,10 @@ spec:
   selector:
     app: metadig-controller
   ports:
+  #- name: metadig-httpd
+  #  port: 80
+  #  protocol: TCP
+  #  targetPort: metadig-httpd
   - name: metadig-controller
     port: 8080
     protocol: TCP

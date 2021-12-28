@@ -1,4 +1,4 @@
-apiVersion: apps/v1beta1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: metadig-worker
@@ -8,7 +8,7 @@ spec:
     matchLabels:
       app: metadig-worker
       tier: backend
-  replicas: 75
+  replicas: 10
   template:
     metadata:
       labels:
@@ -18,19 +18,17 @@ spec:
       #serviceAccountName: metadig-serviceaccount
       containers:
       - name: metadig-worker
-        #image: docker.io/metadig/metadig-worker:2.0.2
-        image: docker.io/metadig/metadig-worker:2.2.0dev
-        imagePullPolicy: Always
+        image: docker.io/metadig/metadig-worker:2.3.1
+        #imagePullPolicy: Always
+        imagePullPolicy: IfNotPresent
         env:
         - name: JYTHONPATH
           value: "/opt/local/metadig/metadig-py"
-        #imagePullPolicy: IfNotPresent
         volumeMounts:
-        - name: nfs-pv
-          #mountPath: "/etc/metadig"
+        - name: metadig-pv
           mountPath: "/opt/local"
           readOnly: false
       volumes:
-      - name: nfs-pv
+      - name: metadig-pv
         persistentVolumeClaim:
-          claimName: nfs-pvc
+          claimName: cephfs-metadig-pvc

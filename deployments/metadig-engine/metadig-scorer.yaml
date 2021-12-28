@@ -1,4 +1,4 @@
-apiVersion: apps/v1beta1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: metadig-scorer
@@ -8,7 +8,7 @@ spec:
     matchLabels:
       app: metadig-scorer
       tier: backend
-  replicas: 5
+  replicas: 1
   template:
     metadata:
       labels:
@@ -17,14 +17,14 @@ spec:
     spec:
       containers:
       - name: metadig-scorer
-        image: docker.io/metadig/metadig-scorer:2.2.0dev
-        #imagePullPolicy: IfNotPresent
-        imagePullPolicy: Always
+        image: docker.io/metadig/metadig-scorer:2.3.1
+        imagePullPolicy: IfNotPresent
+        #imagePullPolicy: Always
         volumeMounts:
-        - name: nfs-pv
+        - name: metadig-pv
           mountPath: "/opt/local"
           readOnly: false
       volumes:
-      - name: nfs-pv
+      - name: metadig-pv
         persistentVolumeClaim:
-          claimName: nfs-pvc
+          claimName: cephfs-metadig-pvc

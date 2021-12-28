@@ -1,4 +1,4 @@
-apiVersion: apps/v1beta1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: metadig-scheduler
@@ -17,16 +17,17 @@ spec:
     spec:
       #serviceAccountName: metadig-serviceaccount
       containers:
-      - name: metadig-scheduler
-        #image: docker.io/metadig/metadig-scheduler:2.0.2
-        image: docker.io/metadig/metadig-scheduler:2.2.0dev
-        imagePullPolicy: Always
-        volumeMounts:
-        - name: nfs-pv
-          mountPath: /opt/local
-          readOnly: true
+        - name: metadig-scheduler
+          image: docker.io/metadig/metadig-scheduler:2.3.1
+          #imagePullPolicy: Always
+          imagePullPolicy: IfNotPresent
+          volumeMounts:
+          - name: metadig-pv
+            mountPath: /opt/local
+            # Change this to false so filestore ingest can save files from stage to the filestore
+            readOnly: false
       restartPolicy: Always
       volumes:
-      - name: nfs-pv
+      - name: metadig-pv
         persistentVolumeClaim:
-          claimName: nfs-pvc
+          claimName: cephfs-metadig-pvc
