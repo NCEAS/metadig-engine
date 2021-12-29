@@ -179,7 +179,7 @@ public class SolrIndex {
             for (IDocumentSubprocessor subprocessor : subprocessors) {
                 // Does this subprocessor apply?
                 if (subprocessor.canProcess(formatId)) {
-                    log.debug("SolrIndex.process - using subprocessor "+ subprocessor.getClass().getName());
+                    log.trace("SolrIndex.process - using subprocessor "+ subprocessor.getClass().getName());
                     // if so, then extract the additional information from the
                     // document.
                     try {
@@ -188,9 +188,9 @@ public class SolrIndex {
                             log.error("SolrIndex.process - subprocessor "+ subprocessor.getClass().getName() +" couldn't process since it could not load OBJECT file for ID,Path=" + id + ", "
                                     + objectPath);
                         } else {
-                            log.debug("SolrIndex.process - subprocessor "+ subprocessor.getClass().getName() +" generating solr doc for id "+id);
+                            log.trace("SolrIndex.process - subprocessor "+ subprocessor.getClass().getName() +" generating solr doc for id "+id);
                             docs = subprocessor.processDocument(id, docs, dataStream);
-                            log.debug("SolrIndex.process - subprocessor "+ subprocessor.getClass().getName() +" generated solr doc for id "+id);
+                            log.trace("SolrIndex.process - subprocessor "+ subprocessor.getClass().getName() +" generated solr doc for id "+id);
                         }
                     } catch (Exception e) {
                         e.printStackTrace();
@@ -200,10 +200,10 @@ public class SolrIndex {
                 }
             }
         } else {
-            log.debug("Subproccor list is null");
+            log.trace("Subproccor list is null");
         }
 
-        log.debug("Subprocessor returning " + docs.size() + " docs");
+        log.trace("Subprocessor returning " + docs.size() + " docs");
         return docs;
     }
 
@@ -291,12 +291,12 @@ public class SolrIndex {
                 if(id != null) {
                     SolrDoc doc = docs.get(id);
                     insertToIndex(doc);
-                    log.debug("SolrIndex.insert - inserted the solr document object for pid "+id+", which relates to object "+pid+", into the solr server.");
+                    log.trace("SolrIndex.insert - inserted the solr document object for pid "+id+", which relates to object "+pid+", into the solr server.");
                 }
             }
-            log.debug("SolrIndex.insert - finished to insert the solrDoc for object "+pid);
+            log.trace("SolrIndex.insert - finished to insert the solrDoc for object "+pid);
         } else {
-            log.debug("SolrIndex.insert - the generated solrDoc is null. So we will not index the object "+pid);
+            log.trace("SolrIndex.insert - the generated solrDoc is null. So we will not index the object "+pid);
         }
     }
 
@@ -304,7 +304,7 @@ public class SolrIndex {
      * Insert a SolrDoc to the solr server.
      */
     private synchronized void insertToIndex(SolrDoc doc) throws SolrServerException, IOException {
-        log.debug("insertToIndex");
+        log.trace("insertToIndex");
         if(doc != null ) {
             SolrInputDocument solrDoc = new SolrInputDocument();
             List<SolrElementField> list = doc.getFieldList();
@@ -321,7 +321,7 @@ public class SolrIndex {
             }
             if(!solrDoc.isEmpty()) {
                 try {
-                    log.debug("Updating collection: " + SOLR_COLLECTION);
+                    log.trace("Updating collection: " + SOLR_COLLECTION);
                     UpdateResponse response = solrClient.add(SOLR_COLLECTION, solrDoc);
                     solrClient.commit(SOLR_COLLECTION);
                 } catch (SolrServerException e) {
@@ -405,7 +405,7 @@ public class SolrIndex {
             for (String n : resultDoc.getFieldNames()) {
                 // Don't add fields twice, i.e. from updated filds and from existing Solr doc
                 if(fields.containsKey(n)) continue;
-                log.debug("Adding existing field: " + n);
+                log.trace("Adding existing field: " + n);
                 solrDoc.addField(n, resultDoc.getFieldValue(n));
             }
 
@@ -434,11 +434,11 @@ public class SolrIndex {
             if(updateNeeded) {
                 // Set the fields to be updated
                 for (Map.Entry<String, Object> entry : fields.entrySet()) {
-                    log.debug("Setting field: " + entry.getKey());
+                    log.trace("Setting field: " + entry.getKey());
                     solrDoc.setField(entry.getKey(), entry.getValue());
                 }
             } else {
-                log.debug("Update not needed, fields already updated for metadataId: " + metadataId + ", suiteId: " + suiteId + ", ");
+                log.trace("Update not needed, fields already updated for metadataId: " + metadataId + ", suiteId: " + suiteId + ", ");
                 return;
             }
 
@@ -447,7 +447,7 @@ public class SolrIndex {
 
             UpdateResponse rsp = null;
             try {
-                log.debug("Processing update request to collection: " + SOLR_COLLECTION);
+                log.trace("Processing update request to collection: " + SOLR_COLLECTION);
                 updateRequest.add(solrDoc);
                 //updateRequest.add(resultDoc);
                 String version = resultDoc.getFieldValue("_version_").toString();
@@ -455,9 +455,9 @@ public class SolrIndex {
                 updateRequest.setParam("version", version);
                 updateRequest.setParam("collection", SOLR_COLLECTION);
                 //UpdateResponse rsp = updateRequest.process(solrClient);
-                log.debug("* Commiting updating to Solr doc with version: " + version);
+                log.trace("* Commiting updating to Solr doc with version: " + version);
                 rsp = updateRequest.commit(solrClient, SOLR_COLLECTION);
-                log.debug("Update response: " + rsp.getStatus());
+                log.trace("Update response: " + rsp.getStatus());
                 //solrClient.commit();
             } catch (SolrServerException e) {
                 log.error("Unable to update Solr document for metadataId: " + metadataId + ": " + e.getMessage());

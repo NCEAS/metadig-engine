@@ -47,9 +47,9 @@ public class RDispatcher extends Dispatcher {
 			input = File.createTempFile("mdqe_input", ".json");
 			output = File.createTempFile("mdqe_output", ".json");
 			
-			log.debug("script: \n" + script.getAbsolutePath());
-			log.debug("input: \n" + input.getAbsolutePath());
-			log.debug("output: \n" + output.getAbsolutePath());
+			log.trace("script: \n" + script.getAbsolutePath());
+			log.trace("input: \n" + input.getAbsolutePath());
+			log.trace("output: \n" + output.getAbsolutePath());
 			
 			String combinedCode = preCode + code + postCode;
 			
@@ -97,8 +97,8 @@ public class RDispatcher extends Dispatcher {
 		
 		result.setTimestamp(Calendar.getInstance().getTime());
 		
-		log.debug("Result status: " + result.getStatus());
-		log.debug("Result output: " + result.getOutput());
+		log.trace("Result status: " + result.getStatus());
+		log.trace("Result output: " + result.getOutput());
 
 		return result;
 	}

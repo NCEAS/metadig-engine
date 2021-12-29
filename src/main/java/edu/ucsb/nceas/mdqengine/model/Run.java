@@ -161,43 +161,6 @@ public class Run {
 
 	public void setErrorDescription(String errorDescription) { this.errorDescription = errorDescription; }
 
-//	public String getSequenceId() { return sequenceId; }
-//
-//	public void setSequenceId(String sequenceId) { this.sequenceId = sequenceId; }
-//
-//	public String getObsoletes() {
-//		return sysmeta.getObsoletes();
-//	}
-//
-//	public String getObsoletedBy() {
-//		return sysmeta.getObsoletedBy();
-//	}
-//
-//	public void setModified(Boolean modified) {
-//		this.modified = modified;
-//	}
-//
-//	public Boolean getModified() {
-//		return this.modified;
-//	}
-//
-//	public void setIsLatest(Boolean isLatest) {
-//		this.isLatest = isLatest;
-//	}
-//
-//	public Boolean getIsLatest() {
-//		return this.isLatest;
-//	}
-//
-//	// Passthru to nested sysmeta
-//	public String getDateUploaded() {
-//		if(sysmeta != null) {
-//			return sysmeta.getDateUploaded();
-//		} else {
-//			return null;
-//		}
-//	}
-
 	/**
 	 * Save a quality report to a DatabaseStore.
 	 * <p>
@@ -211,15 +174,15 @@ public class Run {
 	    boolean persist = true;
 		MDQStore store = StoreFactory.getStore(persist);
 
-		log.debug("Saving run to persistent storage: metadata PID: " + this.getObjectIdentifier()
+		log.trace("Saving run to persistent storage: metadata PID: " + this.getObjectIdentifier()
 				+ ", suite id: " + this.getSuiteId());
 
 		try {
 			store.saveRun(this);
 		} catch (MetadigException me) {
-			log.debug("Error saving run: " + me.getCause());
+			log.trace("Error saving run: " + me.getCause());
 			if(me.getCause() instanceof SQLException) {
-				log.debug("Retrying saveRun() due to error");
+				log.trace("Retrying saveRun() due to error");
 				store.renew();
 				store.saveRun(this);
 			} else {
@@ -233,15 +196,15 @@ public class Run {
 				r.save(this.getObjectIdentifier(), this.getSuiteId());
 			}
 		} catch (MetadigException me) {
-			log.debug("Error saving check result: " + me.getCause());
+			log.trace("Error saving check result: " + me.getCause());
 			throw(me);
 		}
 
 		// Note that when the connection pooler 'pgbouncer' is used, closing the connection actually just returns
 		// the connection to the pool that pgbouncer maintains.
-        log.debug("Shutting down store");
+        log.trace("Shutting down store");
 		store.shutdown();
-		log.debug("Done saving run to persistent storage: metadata PID: " + this.getObjectIdentifier() + ", suite id: " + this.getSuiteId());
+		log.trace("Done saving run to persistent storage: metadata PID: " + this.getObjectIdentifier() + ", suite id: " + this.getSuiteId());
 	}
 
 	/**
@@ -258,24 +221,24 @@ public class Run {
 		boolean persist = true;
 		MDQStore store = StoreFactory.getStore(persist);
 
-		log.debug("Getting run for suiteId: " + suiteId + ", metadataId: " + metadataId);
+		log.trace("Getting run for suiteId: " + suiteId + ", metadataId: " + metadataId);
 
 		Run run = null;
 		try {
 			run = store.getRun(metadataId, suiteId);
 		} catch (MetadigException me) {
-			log.debug("Error getting run: " + me.getCause());
+			log.trace("Error getting run: " + me.getCause());
 			if(me.getCause() instanceof SQLException) {
-				log.debug("Retrying getRun() due to error");
+				log.trace("Retrying getRun() due to error");
 				store.renew();
 				store.getRun(metadataId, suiteId);
 			} else {
 				throw(me);
 			}
 		}
-		log.debug("Shutting down store");
+		log.trace("Shutting down store");
 		store.shutdown();
-		log.debug("Done getting from persistent storage: metadata PID: " + metadataId  + ", suite id: " + suiteId);
+		log.trace("Done getting from persistent storage: metadata PID: " + metadataId  + ", suite id: " + suiteId);
 		return run;
 	}
 }

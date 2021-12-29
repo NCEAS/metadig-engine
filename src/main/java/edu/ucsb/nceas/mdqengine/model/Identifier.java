@@ -15,6 +15,7 @@ import java.sql.SQLException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.TimeZone;
 
@@ -31,7 +32,7 @@ public class Identifier {
     private String dateSysMetaModified;
     private String formatId;
     private String rightsHolder;
-    private List<String> groups;
+    private List<String> groups = new ArrayList<String>();
 
     private Boolean modified = false;
 
@@ -131,14 +132,14 @@ public class Identifier {
         MDQStore store = StoreFactory.getStore(persist);
 
         Integer updateCount = 0;
-        log.debug("Saving to persistent storage: metadata PID: " + this.getMetadataId() + ", sequenceId: " + this.getSequenceId());
+        log.trace("Saving to persistent storage: metadata PID: " + this.getMetadataId() + ", sequenceId: " + this.getSequenceId());
 
         try {
             updateCount = store.saveIdentifier(this);
         } catch (MetadigException me) {
             log.error("Error saving identifier: " + me.getCause());
             if(me.getCause() instanceof SQLException) {
-                log.debug("Retrying identifier.save() due to error");
+                log.trace("Retrying identifier.save() due to error");
                 store.renew();
                 updateCount = store.saveIdentifier(this);
             } else {
@@ -148,9 +149,9 @@ public class Identifier {
 
         // Note that when the connection pooler 'pgbouncer' is used, closing the connection actually just returns
         // the connection to the pool that pgbouncer maintains.
-        log.debug("Shutting down store");
+        log.trace("Shutting down store");
         store.shutdown();
-        log.debug("Done saving identifier to persistent storage: " + this.getMetadataId());
+        log.trace("Done saving identifier to persistent storage: " + this.getMetadataId());
         return updateCount;
     }
     /**
@@ -167,25 +168,24 @@ public class Identifier {
         boolean persist = true;
         MDQStore store = StoreFactory.getStore(persist);
 
-        log.debug("Getting run for suiteId: " + suiteId + ", metadataId: " + metadataId);
+        log.trace("Getting run for suiteId: " + suiteId + ", metadataId: " + metadataId);
 
         Identifier meIdentifier = null;
 
         try {
             meIdentifier = Identifier.getIdentifier(metadataId, suiteId);
         } catch (MetadigException me) {
-            log.debug("Error getting run: " + me.getCause());
+            log.trace("Error getting run: " + me.getCause());
             if(me.getCause() instanceof SQLException) {
-                log.debug("Retrying getRun() due to error");
+                log.trace("Retrying getRun() due to error");
                 store.renew();
                 Identifier.getIdentifier(metadataId, suiteId);
             } else {
                 throw(me);
             }
         }
-        log.debug("Shutting down store");
         store.shutdown();
-        log.debug("Done getting from persistent storage: metadata PID: " + metadataId  + ", suite id: " + suiteId);
+        log.trace("Done getting from persistent storage: metadata PID: " + metadataId  + ", suite id: " + suiteId);
         return meIdentifier ;
     }
 }

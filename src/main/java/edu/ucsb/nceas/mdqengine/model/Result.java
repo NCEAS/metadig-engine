@@ -18,7 +18,7 @@ import java.util.List;
 @XmlAccessorType(XmlAccessType.FIELD)
 public class Result {
 	
-	public static Log log = LogFactory.getLog(Run.class);
+	public static Log log = LogFactory.getLog(Result.class);
 
 	/* The metadata id the check was run for */
 	private String metadataId;
@@ -95,14 +95,14 @@ public class Result {
 		boolean persist = true;
 		MDQStore store = StoreFactory.getStore(persist);
 
-		log.debug("Saving check result to persistent storage: metadata PID: " + metadataId  + ", suite id: " + suiteId);
+		log.trace("Saving check result to persistent storage: metadata PID: " + metadataId  + ", suite id: " + suiteId);
 
 		try {
 			store.saveResult(this, metadataId, suiteId);
 		} catch (MetadigException me) {
-			log.debug("Error saving result: " + me.getCause());
+			log.trace("Error saving result: " + me.getCause());
 			if(me.getCause() instanceof SQLException) {
-				log.debug("Retrying saveResult() due to error");
+				log.trace("Retrying saveResult() due to error");
 				store.renew();
 				store.saveResult(this, metadataId, suiteId);
 			} else {
@@ -112,9 +112,9 @@ public class Result {
 
 		// Note that when the connection pooler 'pgbouncer' is used, closing the connection actually just returns
 		// the connection to the pool that pgbouncer maintains.
-		log.debug("Shutting down store");
+		log.trace("Shutting down store");
 		store.shutdown();
-		log.debug("Done saving result to persistent storage: metadata PID: " + metadataId + ", suite id: " + suiteId);
+		log.trace("Done saving result to persistent storage: metadata PID: " + metadataId + ", suite id: " + suiteId);
 	}
 
 	/**
@@ -132,23 +132,23 @@ public class Result {
 		Result result = null;
 		MDQStore store = StoreFactory.getStore(persist);
 
-		log.debug("Getting run result for suiteId: " + suiteId + ", metadataId: " + metadataId);
+		log.trace("Getting run result for suiteId: " + suiteId + ", metadataId: " + metadataId);
 
 		try {
 			result = store.getResult(metadataId, suiteId, checkId);
 		} catch (MetadigException me) {
-			log.debug("Error getting run: " + me.getCause());
+			log.trace("Error getting run: " + me.getCause());
 			if(me.getCause() instanceof SQLException) {
-				log.debug("Retrying getRun() due to error");
+				log.trace("Retrying getRun() due to error");
 				store.renew();
 				store.getRun(metadataId, suiteId);
 			} else {
 				throw(me);
 			}
 		}
-		log.debug("Shutting down store");
+		log.trace("Shutting down store");
 		store.shutdown();
-		log.debug("Done getting from persistent storage: metadata PID: " + metadataId  + ", suite id: " + suiteId);
+		log.trace("Done getting from persistent storage: metadata PID: " + metadataId  + ", suite id: " + suiteId);
 		return result;
 	}
 }

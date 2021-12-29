@@ -121,7 +121,7 @@ public class XMLDialect {
 		
 		Result result = null;
 		
-		log.debug("Running Check: " + check.getId());
+		log.trace("Running Check: " + check.getId());
 		
 		// only bother dispatching if check can be applied to this document
 		if (this.isCheckValid(check)) {
@@ -182,7 +182,7 @@ public class XMLDialect {
 			if (!check.isInheritState() || dispatcher == null) {
 				// create a fresh dispatcher 
 				dispatcher = Dispatcher.getDispatcher(check.getEnvironment());
-				log.debug("Creating initial check dispatcher for " + check.getEnvironment());
+				log.trace("Creating initial check dispatcher for " + check.getEnvironment());
 			} else {
 
 				// ensure that we can reuse the dispatcher to inherit previous state
@@ -205,14 +205,14 @@ public class XMLDialect {
 							log.trace("binding: " + key + "=" + value);
 							variables.put(key, value);
 						}
-						log.debug("Binding existing variables for new dispatcher");
+						log.trace("Binding existing variables for new dispatcher");
 
 						// and a fresh dispatcher
 						dispatcher = Dispatcher.getDispatcher(check.getEnvironment());
-						log.debug("Creating new check dispatcher for " + check.getEnvironment());
+						log.trace("Creating new check dispatcher for " + check.getEnvironment());
 					}
 				} else {
-					log.debug("Reusing dispatcher for persistent state check");
+					log.trace("Reusing dispatcher for persistent state check");
 
 				}
 			}
@@ -226,7 +226,7 @@ public class XMLDialect {
 				String libraryContent = "";
 				for (URL library: libraries) {
 					// TODO: loading random code from a URL is very risky!
-					log.debug("Loading library code from URL: " + library);
+					log.trace("Loading library code from URL: " + library);
 					// read the library from given URL
 					try {
 						libraryContent += IOUtils.toString(library.openStream(), "UTF-8");
@@ -271,14 +271,14 @@ public class XMLDialect {
 	private Result postProcess(Result result) {
 		// Return the result as-is if there are no outputs to post-process
 		if (result.getOutput() == null) {
-			log.debug("Skipping postProcess step because this result's output is null.");
+			log.trace("Skipping postProcess step because this result's output is null.");
 			return(result);
 		}
 
 		// Post-process each output (if needed)
 		for (Output output: result.getOutput()) {
 			if (output == null) {
-				log.debug("Output was null.");
+				log.trace("Output was null.");
 				continue;
 			}
 
@@ -318,7 +318,7 @@ public class XMLDialect {
 	public boolean isCheckValid(Check check) throws XPathExpressionException {
 
 		if (check.getDialect() == null) {
-			log.debug("No dialects have been specified for check, assuming it is valid for this document");
+			log.trace("No dialects have been specified for check, assuming it is valid for this document");
 			return true;
 		}
 		
@@ -328,14 +328,14 @@ public class XMLDialect {
 			
 			String name = dialect.getName();
 			String expression = dialect.getXpath();
-			log.debug("Dialect name: " + name + ", expression: " + expression);
+			log.trace("Dialect name: " + name + ", expression: " + expression);
 			String value = xpath.evaluate(expression, document);
 			
 			if (Boolean.valueOf(value)) {
-				log.debug("Dialect " + name + " is valid for document ");
+				log.trace("Dialect " + name + " is valid for document ");
 				return true;
 			} else {
-				log.debug("Dialect " + name + " is NOT valid for document");
+				log.trace("Dialect " + name + " is NOT valid for document");
 			}
 		}
 		
@@ -422,7 +422,7 @@ public class XMLDialect {
 				value = values;
 			}  
 		} catch (XPathExpressionException xpee) {
-			log.debug("Defaulting to single value selection: " + xpee.getCause().getMessage());
+			log.trace("Defaulting to single value selection: " + xpee.getCause().getMessage());
 			
 			// try just a single value
 			try {

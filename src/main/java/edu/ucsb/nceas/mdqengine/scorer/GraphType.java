@@ -10,7 +10,7 @@ public enum GraphType {
         this.type = type;
     }
 
-    public String getTyp() {
+    public String getType() {
         return this.type.toLowerCase();
     }
 }

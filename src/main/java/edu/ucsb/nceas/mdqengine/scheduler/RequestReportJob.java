@@ -161,7 +161,7 @@ public class RequestReportJob implements Job {
             throw jee;
         }
 
-        log.debug("Executing task " + taskType + ", " + taskName + " for node: " + nodeId + ", suiteId: " + suiteId);
+        log.debug("Executing task type: " + taskType + ", name: " + taskName + " for node: " + nodeId + ", suiteId: " + suiteId);
 
         try {
             mrc = new HttpMultipartRestClient();
@@ -243,7 +243,7 @@ public class RequestReportJob implements Job {
                 }
 
                 DateTime mnLastHarvestDT = new DateTime(node.getSynchronization().getLastHarvested(), DateTimeZone.UTC);
-                DateTime oneMonthAgoDT = new DateTime(DateTimeZone.UTC).minusMonths(1);
+                DateTime oneMonthAgoDT = new DateTime(DateTimeZone.UTC).minusMonths(3);
 
                 if (mnLastHarvestDT.isBefore(oneMonthAgoDT.toInstant())) {
                     DateTimeZone.setDefault(DateTimeZone.UTC);
@@ -253,7 +253,7 @@ public class RequestReportJob implements Job {
                 }
             }
 
-            log.trace("Harvesting node: " + node.getIdentifier().getValue());
+            log.debug("Harvesting node: " + node.getIdentifier().getValue());
 
             // Set UTC as the default time zone for all DateTime operations.
             // Get current datetime, which may be used for start time range.
@@ -272,8 +272,10 @@ public class RequestReportJob implements Job {
                 task.setTaskType(taskType);
                 lastHarvestDateStr = startHarvestDatetimeStr;
                 task.setLastHarvestDatetime(lastHarvestDateStr, harvestNodeId);
+                log.trace("Using lastHarvestDate from task config file: " + lastHarvestDateStr);
             } else {
                 lastHarvestDateStr = task.getLastHarvestDatetime(harvestNodeId);
+                log.trace("Using lastHarvestDate from database: " + lastHarvestDateStr);
             }
 
             DateTime lastHarvestDateDT = new DateTime(lastHarvestDateStr);
@@ -327,7 +329,7 @@ public class RequestReportJob implements Job {
                     throw jee;
                 }
 
-                allPidsCnt = pidsToProcess.size();
+                allPidsCnt += pidsToProcess.size();
                 for (String pidStr : pidsToProcess) {
                     try {
                         log.debug(taskName + ": submitting pid: " + pidStr);
@@ -352,10 +354,10 @@ public class RequestReportJob implements Job {
                     morePids = false;
                 }
             }
-            // Don't update the lastHarvestDateDT if no pids were found.
+            // Don't update the lastHarvestDateDT if no pids were found, and only print pids processed if non-zero, unless debug is on.
             if (allPidsCnt > 0) {
                 task.setLastHarvestDatetime(dtfOut.print(lastDateModifiedDT), harvestNodeId);
-                log.trace("Saving lastHarvestDate: " + dtfOut.print(lastDateModifiedDT) + " for node: " + harvestNodeId);
+                log.debug("Saving most recent pid dateSysMetadataModified as lastHarvestDate: " + dtfOut.print(lastDateModifiedDT) + " for node: " + harvestNodeId);
                 try {
                     store.saveTask(task, harvestNodeId);
                 } catch (MetadigStoreException mse) {
@@ -365,9 +367,12 @@ public class RequestReportJob implements Job {
                     throw jee;
                 }
                 log.info(taskName + ": found " + allPidsCnt + " pids for nodeId: " + harvestNodeId + ", start: " + startDTstr + ", end: " + endDTstr + ", servierUrl: " + nodeServiceUrl);
+            } else {
+                log.debug(taskName + ": found " + allPidsCnt + " pids for nodeId: " + harvestNodeId + ", start: " + startDTstr + ", end: " + endDTstr + ", servierUrl: " + nodeServiceUrl);
             }
         }
         store.shutdown();
+        log.debug("Completed Executing task type: " + taskType + ", name: " + taskName + " for node: " + nodeId + ", suiteId: " + suiteId);
     }
 
     /**
@@ -417,15 +422,15 @@ public class RequestReportJob implements Job {
             // Even though MultipartMNode and MultipartCNode have the same parent class D1Node, the interface for D1Node doesn't
             // include listObjects, as the parameters differ from CN to MN, so we have to use a different object for each.
             if(isCN) {
-                log.trace("Getting pids for cn, for nodeid: " + nodeIdFilter);
+                log.debug("Getting pids for cn, for nodeid: " + nodeIdFilter + "start: " + startHarvestDatetimeStr +
+                        ", end: " + endHarvestDatetimeStr);
                 nodeRef = new NodeReference();
                 nodeRef.setValue(nodeIdFilter);
                 objList = cnNode.listObjects(session, startDate, endDate, formatId, nodeRef, identifier, startCount, countRequested);
             } else {
-                log.trace("Getting pids for mn");
+                log.debug("Getting pids for mn, start: " + startHarvestDatetimeStr + ", end: " + endHarvestDatetimeStr);
                 objList = mnNode.listObjects(session, startDate, endDate, formatId, identifier, replicaStatus, startCount, countRequested);
             }
-            //log.info("Got " + objList.getCount() + " pids for format: " + formatId.getValue() + " pids.");
         } catch (Exception e) {
             log.error(taskName + ": error retrieving pids: " + e.getMessage());
             throw e;
@@ -473,6 +478,8 @@ public class RequestReportJob implements Job {
                 //    }
                 }
             }
+        } else {
+            log.trace("No object entries found for suiteId " + suiteId + ", start: " + startHarvestDatetimeStr + ", end: " + endHarvestDatetimeStr);
         }
 
         ListResult result = new ListResult();

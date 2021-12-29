@@ -45,18 +45,6 @@ public class SysmetaModel {
     private String formatId;
 
     /**
-    * A DataONE Persistent Identifier of the document that this document obsoletes, if set.
-    */
-//    @XmlElement(required = false)
-//    private String obsoletes;
-
-    /**
-    * The DataONE Persistent Identifier of the document that the documents obsoletes, if set.
-    */
-//    @XmlElement(required = false)
-//    private String obsoletedBy;
-
-    /**
     * An identifier that always points to the most recent PID in the obsolecense chain.
     */
     @XmlElement(required = false)
@@ -108,28 +96,4 @@ public class SysmetaModel {
     public void setFormatId(String formatId) {
         this.formatId = formatId;
     }
-//
-//    public String getObsoletes() {
-//        return obsoletes;
-//    }
-//
-//    public void setObsoletes(String obsoletes) {
-//        this.obsoletes = obsoletes;
-//    }
-//
-//    public String getObsoletedBy() {
-//        return obsoletedBy;
-//    }
-//
-//    public void setObsoletedBy(String obsoletedBy) {
-//        this.obsoletedBy = obsoletedBy;
-//    }
-//
-//    public String getSeriesId(String seriesId) {
-//        return seriesId;
-//    }
-//
-//    public void setSeriesId(String seriesId) {
-//        this.seriesId = seriesId;
-//    }
 }

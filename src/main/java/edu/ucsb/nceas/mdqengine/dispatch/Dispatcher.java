@@ -46,7 +46,7 @@ public class Dispatcher {
 			log.trace("Setting variable: " + entry.getKey() + "=" + entry.getValue());
 			engine.put(entry.getKey(), entry.getValue());
 		}
-		log.debug("Evaluating code: " + code);
+		log.trace("Evaluating code: " + code);
 		
 		Object res = null;
 		try {
@@ -88,7 +88,7 @@ public class Dispatcher {
 			Object var = engine.get("mdq_result");
 			if (var != null && !var.toString().equals("<unbound>")) {
 				log.trace("result is: " + var);
-				log.debug("result is class: " + var.getClass());
+				log.trace("result is class: " + var.getClass());
 	
 				dr = (Result) var;
 			} else {
@@ -129,7 +129,7 @@ public class Dispatcher {
 	
 	public boolean isEnvSupported(String env) {
 		String currentEnv = engine.getFactory().getLanguageName();
-		log.debug("currentEnv=" + currentEnv);
+		log.trace("currentEnv=" + currentEnv);
 		return env.equalsIgnoreCase(currentEnv);
 	}
 	

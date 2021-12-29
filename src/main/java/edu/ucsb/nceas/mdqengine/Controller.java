@@ -96,7 +96,7 @@ public class Controller {
             while(true) {
                 int portNumber = Integer.parseInt(argv[0]);
                 log.info("Controller test mode is enabled.");
-                log.info("Controller listening on port " + portNumber + "for filenames to submit");
+                log.info("Controller listening on port: " + portNumber + ", for filenames to submit");
                 DateTime requestDateTime = new DateTime();
                 ServerSocket serverSocket = new ServerSocket(portNumber);
                 log.info("Waiting to establish connection to test client:");
@@ -192,7 +192,7 @@ public class Controller {
         if (instance == null) {
             synchronized (Controller.class) {
                 if (instance == null) {
-                    log.debug("Creating new controller instance");
+                    log.trace("Creating new controller instance");
                     instance = new Controller();
                 }
             }
@@ -357,12 +357,6 @@ public class Controller {
         // StandardCharsets.UTF_8.name() > JDK 7
         String metadataDoc = buf.toString("UTF-8");
 
-        //try {
-        //    sysmeta = TypeMarshaller.unmarshalTypeFromStream(SystemMetadata.class, systemMetadata);
-        //} catch (InstantiationException | IllegalAccessException | IOException | MarshallingException fis) {
-        //    fis.printStackTrace();
-        //}
-
         InputStream sysmetaInputStream = null;
         Object tmpSysmeta = null;
 
@@ -480,8 +474,8 @@ public class Controller {
         factory.setPort(RabbitMQport);
         factory.setPassword(RabbitMQpassword);
         factory.setUsername(RabbitMQusername);
-        log.debug("Set RabbitMQ host to: " + RabbitMQhost);
-        log.debug("Set RabbitMQ port to: " + RabbitMQport);
+        log.trace("Set RabbitMQ host to: " + RabbitMQhost);
+        log.trace("Set RabbitMQ port to: " + RabbitMQport);
 
         // Setup the 'InProcess' queue with a routing key - messages consumed by this queue require that
         // this routine key be used. The routine key QUALITY_ROUTING_KEY sends messages to the quality report worker,

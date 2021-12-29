@@ -59,8 +59,8 @@ public class Identifiers {
         Boolean SIfound = false;
 
         level += 1;
-        log.debug("Getting next identifier: metadataId: " + metadataId);
-        log.debug("Recursion level: " + level);
+        log.trace("Getting next identifier: metadataId: " + metadataId);
+        log.trace("Recursion level: " + level);
 
         // First see if we have this run in the collection
         identifier = identifiers.get(metadataId);
@@ -68,12 +68,12 @@ public class Identifiers {
         // If not in the collection, see if it is in the store
         if(identifier == null) {
             try {
-                log.debug("Run for pid: " + metadataId + " not in collection, getting from store.");
+                log.trace("Run for pid: " + metadataId + " not in collection, getting from store.");
                 // the 'store.getRun' returns null if the run isn't found in the store. This will typically happen
                 // if the next pid in the chain hasn't been cataloged.
                 identifier = store.getIdentifier(metadataId);
             } catch (MetadigException me) {
-                log.error("Error getting run: " + me.getCause());
+                log.error("Error getting identifier " + metadataId + ": " + me.getCause());
                 // Terminate recursion in the current direction
                 return;
             }
@@ -90,12 +90,12 @@ public class Identifiers {
                 // Has the sequence id for the collection been defined yet?
                 if(this.sequenceId != null) {
                     if(! this.sequenceId.equals(sequenceId)) {
-                        log.error("Warning, new sequenceId found for chain: " + sequenceId + " found at pid: " + metadataId);
+                        log.error("Warning, new sequenceId found for chain: " + sequenceId + " found at pid: " + metadataId + ", existing sequenceId: " + this.sequenceId);
                     }
                 } else {
                     // We got the right sequence id for this chain
                     this.sequenceId = sequenceId;
-                    log.debug("Found sequence id: " + sequenceId + " at pid: " + metadataId);
+                    log.trace("Found sequence id: " + sequenceId + " at pid: " + metadataId);
                 }
             }
 
@@ -107,44 +107,44 @@ public class Identifiers {
 
             // Moving in the forward direction, get the next pid in the chain
             if (forward) {
-                log.debug("Checking for next forward pid (obsoletedBy)");
+                log.trace("Checking for next forward pid (obsoletedBy)");
                 obsoletedBy = identifier.getObsoletedBy();
                 if(obsoletedBy != null) {
                     // Check for an invalid obsoletedBy - pid links to itself
                     if(obsoletedBy.compareToIgnoreCase(metadataId) == 0) {
-                        log.debug("Stopping traversal at invalid obsoletedBy, pid " + metadataId + " obsoletes itself");
+                        log.trace("Stopping traversal at invalid obsoletedBy, pid " + metadataId + " obsoletes itself");
                         return;
                     }
-                    log.debug("traversing forward to obsoletedBy: " + obsoletedBy);
+                    log.trace("traversing forward to obsoletedBy: " + obsoletedBy);
                     getNextIdentifier(obsoletedBy, stopWhenSIfound, store, forward, level);
                 } else {
-                    log.debug("Reached end of forward (obsoletedBy) chain at pid: " + metadataId);
+                    log.trace("Reached end of forward (obsoletedBy) chain at pid: " + metadataId);
                 }
             } else {
                 // Moving in the backward direction, get the next pid in the chain
-                log.debug("Checking for next backward pid (obsoletes)");
+                log.trace("Checking for next backward pid (obsoletes)");
                 obsoletes = identifier.getObsoletes();
                 if(obsoletes != null) {
                     // Check for an invalid obsoletedBy - pid links to itself
                     if(obsoletes.compareToIgnoreCase(metadataId) == 0) {
-                        log.debug("Stopping traversal at invalid obsoletes, pid " + metadataId + " is obsoleted by itself");
+                        log.trace("Stopping traversal at invalid obsoletes, pid " + metadataId + " is obsoleted by itself");
                         return;
                     }
-                    log.debug("traversing backward to obsoletes: " + obsoletes);
+                    log.trace("traversing backward to obsoletes: " + obsoletes);
                     getNextIdentifier(obsoletes, stopWhenSIfound, store, forward, level);
                 } else {
                     // Have we reached the first run in the sequence (not obsoleted by any pid)?
                     if(identifier.getObsoletes() == null) {
                         this.foundFirstPid = true;
-                        log.debug("Found first pid in sequence: " + identifier.getMetadataId());
+                        log.trace("Found first pid in sequence: " + identifier.getMetadataId());
                         firstPidInSequence = identifier.getMetadataId();
                     }
-                    log.debug("Reached beginning of obsoletes chain at pid: " + metadataId);
+                    log.trace("Reached beginning of obsoletes chain at pid: " + metadataId);
                 }
             }
         } else {
             // The run was null, recursion in the current direction ends.
-            log.debug("Identifier not found in store: " + metadataId + ", terminating search in current direction.");
+            log.trace("Identifier not found in store: " + metadataId + ", terminating search in current direction.");
         }
 
         return;
@@ -189,7 +189,7 @@ public class Identifiers {
         DateTime maxDate = targetDate.plusMonths(1).withDayOfMonth(1).minusDays(1);
 
         // Start the traversal in the backward direction
-        log.debug("Getting all identifier entries (backward) for metadataId: " + metadataId + ", minDate: " + minDate + ", " + maxDate);
+        log.trace("Getting all identifier entries (backward) for metadataId: " + metadataId + ", minDate: " + minDate + ", " + maxDate);
         forward = false;
         getNextIdentifier(metadataId, stopWhenSIfound, store, forward, level);
 
@@ -197,17 +197,17 @@ public class Identifiers {
         // is no reason to search forward, as this means that the first pid in the series has not been found,
         // it will not be found searching forward.
         if(getSequenceId() == null && !foundFirstPid) {
-            log.debug("Unable to find sequenceId for this sequence, will not search in forward direction.");
+            log.trace("Unable to find sequenceId for this sequence, will not search in forward direction.");
             return;
         }
         // Continue traversal in the forward direction, if necessary
-        log.debug("Getting all identifier entries (forward) for metadataId: " + metadataId);
+        log.trace("Getting all identifier entries (forward) for metadataId: " + metadataId);
         forward = true;
         getNextIdentifier(metadataId, stopWhenSIfound, store, forward, level);
 
-        log.debug("Shutting down store");
+        log.trace("Shutting down store");
         store.shutdown();
-        log.debug("Done getting all identifier entries (in DataONE obsolescence chain) for : metadata PID: " + metadataId);
+        log.trace("Done getting all identifier entries (in DataONE obsolescence chain) for : metadata PID: " + metadataId);
     }
 
     /**
@@ -237,11 +237,11 @@ public class Identifiers {
             identifier = (Identifier) entry.getValue();
             thisSeqId = identifier.getSequenceId();
 
-            log.debug("Pid: " + identifier.getMetadataId() + ", sequenceId: " + thisSeqId);
+            log.trace("Pid: " + identifier.getMetadataId() + ", sequenceId: " + thisSeqId);
             // If the sequenceId was not already set for this identifier, then set it now, and mark
             // this identifier as modified.
             if(thisSeqId == null || thisSeqId.isEmpty()) {
-                log.debug("Setting sequence id for pid: " + identifier.getMetadataId() + " to id: " + sequenceId);
+                log.trace("Setting sequence id for pid: " + identifier.getMetadataId() + " to id: " + sequenceId);
                 identifier.setSequenceId(sequenceId);
                 identifier.setModified(true);
             } else{

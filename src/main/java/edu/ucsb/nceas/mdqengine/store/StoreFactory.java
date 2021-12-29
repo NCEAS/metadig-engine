@@ -11,7 +11,7 @@ public class StoreFactory {
     public static MDQStore getStore(boolean persist) throws MetadigStoreException {
         MDQStore store = null;
         if (persist) {
-            log.debug("Creating new MDQ persistent store");
+            log.trace("Creating new MDQ persistent store");
             try {
                 store = new DatabaseStore();
             } catch (MetadigStoreException e) {
@@ -19,7 +19,7 @@ public class StoreFactory {
                 throw(e);
             }
         } else {
-            log.debug("Creating new MDQ store");
+            log.trace("Creating new MDQ store");
             try {
                 store = new InMemoryStore();
             } catch (MetadigStoreException mse) {
