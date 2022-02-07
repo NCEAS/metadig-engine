@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: cephfs-metadig-pvc
+  namespace: metadig
+spec:
+  accessModes:
+  - ReadWriteMany
+  resources:
+    requests:
+      storage: 500Gi
+  volumeMode: Filesystem
+  # volumeName should be same as PV name
+  volumeName: cephfs-metadig-pv
