@@ -325,7 +325,7 @@ public class RequestReportJob implements Job {
                     throw jee;
                 }
 
-                allPidsCnt = pidsToProcess.size();
+                allPidsCnt += pidsToProcess.size();
                 for (String pidStr : pidsToProcess) {
                     try {
                         log.debug(taskName + ": submitting pid: " + pidStr);
@@ -352,8 +352,11 @@ public class RequestReportJob implements Job {
             }
             // Don't update the lastHarvestDateDT if no pids were found.
             if (allPidsCnt > 0) {
-                task.setLastHarvestDatetime(dtfOut.print(lastDateModifiedDT), harvestNodeId);
-                log.trace("Saving lastHarvestDate: " + dtfOut.print(lastDateModifiedDT) + " for node: " + harvestNodeId);
+                // Add a millisecond to the last modified datetime, as this date will be used for the next scheduled
+                // harvest, and we don't want to re-harvest this same pid again. Note that the DataONE object service
+                // (get) does harvest based on requested milliseonds.
+                task.setLastHarvestDatetime(dtfOut.print(lastDateModifiedDT.plusMillis(1)), harvestNodeId);
+                log.trace("Saving lastHarvestDate: " + dtfOut.print(lastDateModifiedDT.plusMillis(1)) + " for node: " + harvestNodeId);
                 try {
                     store.saveTask(task, harvestNodeId);
                 } catch (MetadigStoreException mse) {

@@ -482,6 +482,10 @@ public class Controller {
         factory.setPort(RabbitMQport);
         factory.setPassword(RabbitMQpassword);
         factory.setUsername(RabbitMQusername);
+        // connection that will recover automatically
+        factory.setAutomaticRecoveryEnabled(true);
+        // attempt recovery every 10 seconds after a failure
+        factory.setNetworkRecoveryInterval(10000);
         log.debug("Set RabbitMQ host to: " + RabbitMQhost);
         log.debug("Set RabbitMQ port to: " + RabbitMQport);
 

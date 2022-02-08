@@ -2,6 +2,7 @@ package edu.ucsb.nceas.mdqengine;
 
 import com.rabbitmq.client.*;
 import edu.ucsb.nceas.mdqengine.collections.Runs;
+import edu.ucsb.nceas.mdqengine.collections.Runs;
 import edu.ucsb.nceas.mdqengine.exception.MetadigException;
 import edu.ucsb.nceas.mdqengine.exception.MetadigIndexException;
 import edu.ucsb.nceas.mdqengine.exception.MetadigProcessException;
@@ -192,7 +193,6 @@ public class Worker {
                     // Determine the sequence identifier for the metadata pids DataONE obsolescence chain. This is
                     // not the DataONE seriesId, which may not exist for a pid, but instead is a quality engine maintained
                     // sequence id, that is needed to determine the highest score for a obs. chain for each month.
-                    log.debug("*****");
                     log.debug("Searching for sequence id for pid: " + run.getObjectIdentifier());
                     // Add current run to collection, it will be saved during the run.update
                     run.setObjectIdentifier(metadataPid);
@@ -259,16 +259,16 @@ public class Worker {
                             // Put files to be updated in a HashMap (can update multiple fields)
                             HashMap<String, Object> fields = new HashMap<>();
                             for (Run r : runsInSequence.getModifiedRuns()) {
-                                log.info("Updating Solr index with modified run with pid: " + r.getObjectIdentifier() + ", isLatest: " + r.getIsLatest().toString() + ", dateUploaded: " + r.getDateUploaded());
+                                log.debug("Updating Solr index with modified run with pid: " + r.getObjectIdentifier() + ", isLatest: " + r.getIsLatest().toString() + ", dateUploaded: " + r.getDateUploaded());
                                 fields.put("isLatest", r.getIsLatest());
                                 try {
                                     wkr.updateIndex(r.getObjectIdentifier(), r.getSuiteId(), fields, solrLocation);
                                 } catch (MetadigIndexException mie) {
                                     // Retry the update if the first attemp fails
-                                    log.info("Retrying updating Solr index with modified run with pid: " + r.getObjectIdentifier() + ", isLatest: " + r.getIsLatest().toString() + ", dateUploaded: " + r.getDateUploaded());
+                                    log.debug("Retrying updating Solr index with modified run with pid: " + r.getObjectIdentifier() + ", isLatest: " + r.getIsLatest().toString() + ", dateUploaded: " + r.getDateUploaded());
                                     try {
                                         wkr.updateIndex(r.getObjectIdentifier(), r.getSuiteId(), fields, solrLocation);
-                                        log.info("Sucessfully updated Solr index with modified run with pid: " + r.getObjectIdentifier() + ", isLatest: " + r.getIsLatest().toString() + ", dateUploaded: " + r.getDateUploaded());
+                                        log.debug("Sucessfully updated Solr index with modified run with pid: " + r.getObjectIdentifier() + ", isLatest: " + r.getIsLatest().toString() + ", dateUploaded: " + r.getDateUploaded());
                                     } catch (Exception mie2) {
                                         log.error("Failed 2nd attempt to update Solr index with modified run with pid: " + r.getObjectIdentifier() + ", isLatest: " + r.getIsLatest().toString() + ", dateUploaded: " + r.getDateUploaded()) ;
                                     }
@@ -282,7 +282,7 @@ public class Worker {
                             HashMap<String, Object> fields = new HashMap<>();
                             fields.put("sequenceId", sequenceId);
                             for (Run r : runsInSequence.getModifiedRuns()) {
-                                log.info("Updating Solr index with sequenceId: " + sequenceId + " for pid: " + r.getObjectIdentifier());
+                                log.debug("Updating Solr index with sequenceId: " + sequenceId + " for pid: " + r.getObjectIdentifier());
                                 wkr.updateIndex(r.getObjectIdentifier(), r.getSuiteId(), fields, solrLocation);
                             }
                         }
@@ -304,20 +304,18 @@ public class Worker {
                     log.debug("Sending report info back to controller...");
                     totalElapsedTimeSeconds = elapsedTimeSecondsProcessing + elapsedTimeSecondsIndexing;
                     qEntry.setTotalElapsedTimeSeconds(totalElapsedTimeSeconds);
-                    wkr.returnReport(metadataPid, suiteId, qEntry);
+                    wkr.returnReport(metadataPid, suiteId, qEntry, envelope,this);
                     log.debug("Sent report info back to controller...");
                 } catch (IOException ioe) {
                     log.error("Unable to return quality report to controller.");
                     ioe.printStackTrace();
                 }
 
-                // Inform RabbitMQ that we are done with this task, and am ready for another.
-                inProcessChannel.basicAck(envelope.getDeliveryTag(), false);
-                log.info("Worker completed task");
+                log.debug("Worker completed task");
             }
         };
 
-        log.debug("Calling basicConsume");
+        log.info("Calling basicConsume");
     inProcessChannel.basicConsume(QUALITY_QUEUE_NAME, false, consumer);
     }
 
@@ -328,7 +326,8 @@ public class Worker {
      * @param suiteId The identifier for the suite used to score the metadata
      * @param qEntry The message passed via RabbitMQ back to metadig-controller
      */
-    private void returnReport(String metadataPid, String suiteId, QueueEntry qEntry) throws IOException {
+    private void returnReport(String metadataPid, String suiteId, QueueEntry qEntry, Envelope envelope, Consumer consumer) throws IOException {
+
         byte[] message = null;
         try {
             log.info("Elapsed time processing (seconds): "
@@ -354,8 +353,26 @@ public class Worker {
             message = bos.toByteArray();
 
             log.info(" [x] Done");
+            try {
+                this.writeCompletedQueue(message);
+                log.info("Sent completed report for pid: '" + qEntry.getMetadataPid() + "'");
+                inProcessChannel.basicAck(envelope.getDeliveryTag(), false);
+                log.debug("Sent task completed acknowledgement to RabbitMQ");
+            } catch (AlreadyClosedException rmqe) {
+                log.error("RabbitMQ connection error: " + rmqe.getMessage());
+                try {
+                    log.info("Resetting RabbitMQ queues and resending completed report...");
+                    this.setupQueues();
             this.writeCompletedQueue(message);
             log.info(" [x] Sent completed report for pid: '" + qEntry.getMetadataPid() + "'");
+                    // Tell RabbitMQ this worker is ready for tasks
+                    log.info("Calling basicConsume");
+                    inProcessChannel.basicConsume(QUALITY_QUEUE_NAME, false, consumer);
+                } catch (Exception e) {
+                    log.error("Error re-establishing connection to RabbitMQ server: " + e.getMessage());
+                    log.error("Unable to resend report back to controller.");
+                }
+            }
         } catch (Exception e) {
             // If we couldn't prepare the message, then there is nothing left to do
             log.error(" Unable to return report to controller");
@@ -380,6 +397,11 @@ public class Worker {
         factory.setPort(RabbitMQport);
         factory.setPassword(RabbitMQpassword);
         factory.setUsername(RabbitMQusername);
+        //factory.setRequestedHeartbeat(60);
+        // connection that will recover automatically
+        //factory.setAutomaticRecoveryEnabled(true);
+        // attempt recovery every 10 seconds after a failure
+        //factory.setNetworkRecoveryInterval(10000);
         log.info("Set RabbitMQ host to: " + RabbitMQhost);
         log.info("Set RabbitMQ port to: " + RabbitMQport);
 
@@ -393,7 +415,7 @@ public class Worker {
             // Channel will only send one request for each worker at a time.
             inProcessChannel.basicQos(1);
             log.info("Connected to RabbitMQ queue " + QUALITY_QUEUE_NAME);
-            log.info(" [*] Waiting for messages. To exit press CTRL+C");
+            log.info("Waiting for messages. To exit press CTRL+C");
         } catch (Exception e) {
             log.error("Error connecting to RabbitMQ queue " + QUALITY_QUEUE_NAME);
             log.error(e.getMessage());
@@ -431,7 +453,7 @@ public class Worker {
         InputStream input = new ByteArrayInputStream(metadataDoc.getBytes("UTF-8"));
         SystemMetadata sysmeta = message.getSystemMetadata();
 
-        log.info(" [x] Running suite '" + message.getQualitySuiteId() + "'" + " for metadata pid " + message.getMetadataPid());
+        log.info("Running suite '" + message.getQualitySuiteId() + "'" + " for metadata pid " + message.getMetadataPid());
         // Run the Metadata Quality Engine for the specified metadata object.
         // TODO: set suite params correctly
         Map<String, Object> params = new HashMap<String, Object>();
@@ -506,7 +528,7 @@ public class Worker {
      */
     public void indexReport(String metadataId, String runXML, String suiteId, SystemMetadata sysmeta, String solrLocation) throws MetadigIndexException {
 
-        log.info(" [x] Indexing metadata PID: " + metadataId + ", suite id: " + suiteId);
+        log.info("Indexing metadata PID: " + metadataId + ", suite id: " + suiteId);
 
         // If no Solr server is specified then use the 'fallback' server from the configuration
         // file.
@@ -521,7 +543,7 @@ public class Worker {
             objFormatId.setValue(qualityReportObjectType);
             sysmeta.setFormatId(objFormatId);
             iac.insertSolrDoc(pid, sysmeta, runIS);
-            log.info(" [x] Done indexing metadata PID: " + metadataId + ", suite id: " + suiteId);
+            log.info("Done indexing metadata PID: " + metadataId + ", suite id: " + suiteId);
             iac.shutdown();
         } catch (Exception e) {
             throw new MetadigIndexException("Error during indexing", e);
