@@ -128,6 +128,14 @@
 					<groupId>org.apache.httpcomponents</groupId>
 					<artifactId>httpclient-cache</artifactId>
 				</exclusion>
+                                <exclusion>
+                                        <groupId>org.apache.logging.log4j</groupId>
+                                        <artifactId>log4j-api</artifactId>
+                                </exclusion>
+                                <exclusion>
+                                        <groupId>org.apache.logging.log4j</groupId>
+                                        <artifactId>log4j-core</artifactId>
+				</exclusion>
 			</exclusions>
 		</dependency>
 		<!-- https://mvnrepository.com/artifact/com.rabbitmq/amqp-client -->
@@ -282,6 +290,26 @@
 					<groupId>com.rabbitmq</groupId>
 					<artifactId>amqp-client</artifactId>
 				</exclusion>
+				<exclusion>
+					<groupId>org.slf4j</groupId>
+					<artifactId>slf4j-log4j12</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>com.hp.hpl.jena</groupId>
+					<artifactId>jena</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>xml-apis</groupId>
+					<artifactId>xml-apis</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.apache.httpcomponents</groupId>
+					<artifactId>httpclient</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.slf4j</groupId>
+					<artifactId>slf4j-api</artifactId>
+				</exclusion>
 			</exclusions>
 		</dependency>
 		<!-- https://mvnrepository.com/artifact/org.json/json -->
@@ -367,6 +395,12 @@
 		</repository>
 	</repositories>
 	<build>
+		<resources>
+			<resource>
+				<directory>src/main/resources</directory>
+				<filtering>true</filtering>
+			</resource>
+		</resources>
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
