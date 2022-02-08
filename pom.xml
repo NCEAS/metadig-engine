@@ -4,7 +4,7 @@
 
 	<groupId>edu.ucsb.nceas</groupId>
 	<artifactId>metadig-engine</artifactId>
-	<version>2.3.2</version>
+	<version>2.3.3</version>
 	<packaging>jar</packaging>
 
 	<name>metadig-engine</name>
@@ -28,7 +28,7 @@
 		<spring.version>3.1.4.RELEASE</spring.version>
         <!-- <docker.registry>docker.io</docker.registry> -->
         <docker.repo>metadig</docker.repo>
-        <docker.tag>2.3.2</docker.tag>
+        <docker.tag>2.3.3dev</docker.tag>
 		<modules.test.includes>**/*Test.java</modules.test.includes>
 		<modules.test.excludes>**/LTERSuiteTest.java</modules.test.excludes>
 	</properties>
@@ -481,15 +481,15 @@
 						<configuration>
 							<!-- Copy files needed by the local environments of the Docker containers -->
 							<target name="copy files">
-								<copy file="${project.build.directory}/metadig-engine-${project.version}.jar" tofile="${project.basedir}/Kubernetes/metadig-worker/metadig-engine.jar" />
-								<copy file="${project.build.directory}/metadig-engine-${project.version}.jar" tofile="${project.basedir}/Kubernetes/metadig-scheduler/metadig-engine.jar" />
-                                <copy file="${project.build.directory}/metadig-engine-${project.version}.jar" tofile="${project.basedir}/Kubernetes/metadig-scorer/metadig-engine.jar" />
-                                <copy file="${project.build.directory}/classes/solr/application-context-mdq.xml" tofile="${project.basedir}/Kubernetes/metadig-worker/solr/application-context-mdq.xml" />
-                                <copy file="${project.build.directory}/classes/solr/application-context-systemmeta-200.xml" tofile="${project.basedir}/Kubernetes/metadig-worker/solr/application-context-systemmeta-200.xml" />
-								<copy file="${project.build.directory}/classes/solr/metadig-index-processor-context.xml" tofile="${project.basedir}/Kubernetes/metadig-worker/solr/metadig-index-processor-context.xml" />
-								<copy file="${project.build.directory}/classes/solr/application-context-mdq.xml" tofile="${project.basedir}/Kubernetes/metadig-scorer/solr/application-context-mdq.xml" />
-								<copy file="${project.build.directory}/classes/solr/application-context-systemmeta-200.xml" tofile="${project.basedir}/Kubernetes/metadig-scorer/solr/application-context-systemmeta-200.xml" />
-								<copy file="${project.build.directory}/classes/solr/metadig-index-processor-context.xml" tofile="${project.basedir}/Kubernetes/metadig-scorer/solr/metadig-index-processor-context.xml" />
+								<copy file="${project.build.directory}/metadig-engine-${project.version}.jar" tofile="${project.basedir}/Docker/metadig-worker/metadig-engine.jar" />
+								<copy file="${project.build.directory}/metadig-engine-${project.version}.jar" tofile="${project.basedir}/Docker/metadig-scheduler/metadig-engine.jar" />
+                                <copy file="${project.build.directory}/metadig-engine-${project.version}.jar" tofile="${project.basedir}/Docker/metadig-scorer/metadig-engine.jar" />
+                                <copy file="${project.build.directory}/classes/solr/application-context-mdq.xml" tofile="${project.basedir}/Docker/metadig-worker/solr/application-context-mdq.xml" />
+                                <copy file="${project.build.directory}/classes/solr/application-context-systemmeta-200.xml" tofile="${project.basedir}/Docker/metadig-worker/solr/application-context-systemmeta-200.xml" />
+								<copy file="${project.build.directory}/classes/solr/metadig-index-processor-context.xml" tofile="${project.basedir}/Docker/metadig-worker/solr/metadig-index-processor-context.xml" />
+								<copy file="${project.build.directory}/classes/solr/application-context-mdq.xml" tofile="${project.basedir}/Docker/metadig-scorer/solr/application-context-mdq.xml" />
+								<copy file="${project.build.directory}/classes/solr/application-context-systemmeta-200.xml" tofile="${project.basedir}/Docker/metadig-scorer/solr/application-context-systemmeta-200.xml" />
+								<copy file="${project.build.directory}/classes/solr/metadig-index-processor-context.xml" tofile="${project.basedir}/Docker/metadig-scorer/solr/metadig-index-processor-context.xml" />
 							</target>
 						</configuration>
 					</execution>
@@ -505,19 +505,19 @@
                         <image>
                             <name>${docker.repo}/metadig-worker:${docker.tag}</name>
                             <build>
-                                <dockerFileDir>${project.basedir}/Kubernetes/metadig-worker</dockerFileDir>
+                                <dockerFileDir>${project.basedir}/Docker/metadig-worker</dockerFileDir>
                             </build>
                         </image>
 						<image>
 							<name>${docker.repo}/metadig-scheduler:${docker.tag}</name>
 							<build>
-								<dockerFileDir>${project.basedir}/Kubernetes/metadig-scheduler</dockerFileDir>
+								<dockerFileDir>${project.basedir}/Docker/metadig-scheduler</dockerFileDir>
 							</build>
 						</image>
 						<image>
 							<name>${docker.repo}/metadig-scorer:${docker.tag}</name>
 							<build>
-								<dockerFileDir>${project.basedir}/Kubernetes/metadig-scorer</dockerFileDir>
+								<dockerFileDir>${project.basedir}/Docker/metadig-scorer</dockerFileDir>
 							</build>
 						</image>
 					</images>
