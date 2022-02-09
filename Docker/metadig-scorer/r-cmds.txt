@@ -1,3 +1,0 @@
-install.packages(c("httr","xml2","tidyr","scales","lubridate","mgcv","ggplot2","magrittr","readr"), repos=c(CRAN = "http://cran.rstudio.com"))
-install.packages("metadig.tar.gz", repos=NULL)
-
