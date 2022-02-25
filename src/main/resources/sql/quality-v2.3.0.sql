@@ -47,7 +47,7 @@ create TABLE runs (
   results TEXT not null,
   status TEXT not null DEFAULT 'success'::text,
   error TEXT not null,
-  sequenceId TEXT,
+  sequence_id TEXT,
   is_latest boolean DEFAULT false,
   CONSTRAINT runs_metadata_id_fk FOREIGN KEY (metadata_id) REFERENCES identifiers,
   CONSTRAINT metadata_id_suite_id_fk UNIQUE (metadata_id, suite_id)

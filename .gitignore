@@ -3,9 +3,5 @@ src/main/resources/schemas/META-INF
 .idea/**
 test/**
 **/metadig-engine.jar
-Kubernetes/metadig-worker/**/*.xml
 metadig-engine.iml
 bin/**
-Kubernetes/metadig-scorer/solr
-Kubernetes/Admin/python
-Kubernetes/Admin/jython

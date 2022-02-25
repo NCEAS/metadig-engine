@@ -140,7 +140,7 @@ public class Graph {
         }
 
         if(result.getStatus() != Status.SUCCESS) {
-            log.error("Error running graphics program" + result.getOutput());
+            log.error("Error running graphics program" + result.getOutput().toString());
         }
 
         return tmpfile.getCanonicalPath();

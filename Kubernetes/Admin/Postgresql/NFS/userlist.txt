@@ -1,2 +1,0 @@
-"metadig" "metadig"
-"postgres" "postgres"
