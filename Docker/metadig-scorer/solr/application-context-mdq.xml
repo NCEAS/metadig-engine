@@ -188,33 +188,6 @@
 
 	<!-- the composite score -->
 	<!-- overallScore: count(pass) div count(pass + fail) -->
-    <!--
-    	Here is an explaination of the 'total score' algorithm (formula).
-
-    	These are the possible 'level' values: INFO, METADATA, OPTIONAL, REQUIRED
-        These are the possible 'status' values: SUCCESS, FAILURE, ERROR (SKIP is not longer used)
-
-    	For the algorithm:
-    	    Tpass = is the count of all checks with SUCCESS status (includes REQUIRED and OPTIONAL, NOT INFO or METADATA)
-    	    Rpass = is the count of REQUIRED checks with SUCCESS status
-    	    Opass = is the count of OPTIONAL checks with SUCCESS status
-    	    Ofail = is the count of OPTIONAL checks with FAILURE or ERROR status
-    	    Rfail = is the count of REQUIRED checks with FAILURE or ERROR status
-
-    	In documentation and papers regarding MetaDIG, FAIR, etc, the formula that is shown:
-
-    	         (Rpass + Opass) / (Rpass + Rfail + Opass)
-
-    	Here is the algorithm that is actually used by MetaDIG, shown by the bean 'mdq.scores.overal',
-    	which is essentially:
-
-                 Tpass / (Tpass + Rfail)
-
-    	Note that these two formulas are equivalent, and that implicitly Ofail is not counted, as it does not
-    	appear in the demoninator. Therefore, the scoring counts optional checks that pass, but doesn't count
-    	optional checks that fail.
-    -->
-
 	<bean id="mdq.score.overall" class="org.dataone.cn.indexer.parser.SolrField">
 		<constructor-arg name="name" value="scoreOverall"/>
 		<constructor-arg name="xpath"
