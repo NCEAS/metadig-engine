@@ -18,7 +18,7 @@ spec:
       #serviceAccountName: metadig-serviceaccount
       containers:
         - name: metadig-scheduler
-          image: docker.io/metadig/metadig-scheduler:2.3.1
+          image: docker.io/metadig/metadig-scheduler:2.3.3
           #imagePullPolicy: Always
           imagePullPolicy: IfNotPresent
           volumeMounts:

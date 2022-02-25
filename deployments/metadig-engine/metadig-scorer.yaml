@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
       - name: metadig-scorer
-        image: docker.io/metadig/metadig-scorer:2.3.1
+        image: docker.io/metadig/metadig-scorer:2.3.3
         imagePullPolicy: IfNotPresent
         #imagePullPolicy: Always
         volumeMounts:
