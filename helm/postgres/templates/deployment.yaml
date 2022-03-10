@@ -1,0 +1,53 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Chart.Name }}
+  namespace: {{ .Release.Namespace }}
+spec:
+  selector:
+    matchLabels:
+      app: {{ .Chart.Name }}
+  replicas: {{ .Values.replicaCount }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Chart.Name }}
+    spec:
+      containers:
+      - name:  postgres
+        image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        command: [ "su", "-", "postgres", "-c", "postgres -D {{ .Values.persistence.mountPath }}/postgresql/data" ]
+        ports:
+        - name: postgres
+          containerPort:    {{ .Values.service.port }}
+        volumeMounts:
+        - name: metadig-pv
+          mountPath: {{ .Values.persistence.mountPath }}
+          readOnly: false
+      - name: pgbouncer
+        image: edoburu/pgbouncer:1.9.0
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        command: [ "pgbouncer", "-v", "{{ .Values.persistence.mountPath }}/pgbouncer/pgbouncer.ini" ]
+        ports:
+        - name: pgbouncer
+          containerPort: 6432
+        volumeMounts:
+        - name: metadig-pv
+          mountPath: {{ .Values.persistence.mountPath }}
+          readOnly: false
+        - name: {{ .Release.Name }}-config-volume
+          mountPath: {{ .Values.persistence.mountPath }}/pgbouncer/pgbouncer.ini
+          subPath: pgbouncer.ini
+        - name: {{ .Release.Name }}-config-volume
+          mountPath: {{ .Values.persistence.mountPath }}/pgbouncer/userlist.txt
+          subPath: userlist.txt
+      restartPolicy: Always
+      volumes:
+      - name: metadig-pv
+        persistentVolumeClaim:
+          claimName: {{ .Values.persistence.existingClaim }}
+      - name: {{ .Release.Name }}-config-volume
+        configMap:
+          name: {{ .Release.Name }}-configfiles
+          defaultMode: 0644
