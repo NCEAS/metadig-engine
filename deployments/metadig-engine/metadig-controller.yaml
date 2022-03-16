@@ -13,10 +13,10 @@ spec:
       labels:
         app: metadig-controller
     spec:
-      #serviceAccountName: metadig-serviceaccount
       containers:
       - name: metadig-controller
-        image: docker.io/metadig/metadig-controller:2.3.3
+        #image: docker.io/metadig/metadig-controller:2.3.1
+        image: docker.io/metadig/metadig-controller:2.3.2
         env:
         - name: JAVA_OPTS
           value: "-Dlog4j2.formatMsgNoLookups=true"
@@ -31,8 +31,20 @@ spec:
       volumes:
       - name: metadig-pv
         persistentVolumeClaim:
+          #claimName: nfs-pvc
           claimName: cephfs-metadig-pvc
       restartPolicy: Always
+      dnsPolicy: None
+      dnsConfig:
+        nameservers:
+          - 10.96.0.10
+        searches:
+        - metadig.svc.cluster.local
+        - svc.cluster.local
+        - cluster.local
+        options:
+        - name: ndots
+          value: "5"
 
 ---
 
@@ -45,10 +57,6 @@ spec:
   selector:
     app: metadig-controller
   ports:
-  #- name: metadig-httpd
-  #  port: 80
-  #  protocol: TCP
-  #  targetPort: metadig-httpd
   - name: metadig-controller
     port: 8080
     protocol: TCP

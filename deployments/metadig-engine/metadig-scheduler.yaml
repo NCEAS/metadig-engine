@@ -15,12 +15,11 @@ spec:
         app: metadig-scheduler
         tier: backend
     spec:
-      #serviceAccountName: metadig-serviceaccount
       containers:
         - name: metadig-scheduler
-          image: docker.io/metadig/metadig-scheduler:2.3.3
-          #imagePullPolicy: Always
-          imagePullPolicy: IfNotPresent
+          image: docker.io/metadig/metadig-scheduler:2.4.0
+          imagePullPolicy: Always
+          #imagePullPolicy: IfNotPresent
           volumeMounts:
           - name: metadig-pv
             mountPath: /opt/local
@@ -30,4 +29,16 @@ spec:
       volumes:
       - name: metadig-pv
         persistentVolumeClaim:
+          #claimName: nfs-pvc
           claimName: cephfs-metadig-pvc
+      dnsPolicy: None
+      dnsConfig:
+        nameservers:
+          - 10.96.0.10
+        searches:
+        - metadig.svc.cluster.local
+        - svc.cluster.local
+        - cluster.local
+        options:
+        - name: ndots
+          value: "5"
