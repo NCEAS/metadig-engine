@@ -1,22 +1,19 @@
----
 apiVersion: v1
 kind: Service
 metadata:
-  name:  {{ include "postgres.fullname" . }}
-  namespace: {{ .Release.Namespace }} 
+  name: {{ include "postgres.fullname" . }}
+  labels:
+    {{- include "postgres.labels" . | nindent 4 }}
 spec:
-  selector:
-    app: {{ .Chart.Name }}
+  type: {{ .Values.service.type }}
   ports:
-  - name: postgres
-    port: {{ .Values.service.port }}
-    protocol: TCP
-    targetPort: postgres
-    # disable pgbouncer until closed connection problem can be fixed 20181126
-    # i.e set the 'targetPort' back to pgbouncer so that connections to the DB (port 6432)
-    # go through pgbouncer and not through postgres directly
-    # pcs: 20190416 - testing with pgbouncer again
-  - name: pgbouncer
-    port: 6432
-    protocol: TCP
-    targetPort: pgbouncer
+    - name: postgres
+      port: {{ .Values.service.port }}
+      targetPort: postgres
+      protocol: TCP
+    - name: pgbouncer
+      port: 6432
+      protocol: TCP
+      targetPort: pgbouncer
+  selector:
+    {{- include "postgres.selectorLabels" . | nindent 4 }}

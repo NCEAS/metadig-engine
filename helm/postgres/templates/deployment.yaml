@@ -1,47 +1,62 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ .Chart.Name }}
-  namespace: {{ .Release.Namespace }}
+  name: {{ include "postgres.fullname" . }}
+  namespace: metadig
 spec:
   selector:
     matchLabels:
-      app: {{ .Chart.Name }}
-  replicas: {{ .Values.replicaCount }}
+      {{- include "postgres.selectorLabels" . | nindent 6 }}
   template:
     metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
       labels:
-        app: {{ .Chart.Name }}
+        {{- include "postgres.selectorLabels" . | nindent 8 }}
     spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "postgres.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
       containers:
-      - name:  postgres
-        image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
-        imagePullPolicy: {{ .Values.image.pullPolicy }}
-        command: [ "su", "-", "postgres", "-c", "postgres -D {{ .Values.persistence.mountPath }}/postgresql/data" ]
-        ports:
-        - name: postgres
-          containerPort:    {{ .Values.service.port }}
-        volumeMounts:
-        - name: metadig-pv
-          mountPath: {{ .Values.persistence.mountPath }}
-          readOnly: false
-      - name: pgbouncer
-        image: edoburu/pgbouncer:1.9.0
-        imagePullPolicy: {{ .Values.image.pullPolicy }}
-        command: [ "pgbouncer", "-v", "{{ .Values.persistence.mountPath }}/pgbouncer/pgbouncer.ini" ]
-        ports:
-        - name: pgbouncer
-          containerPort: 6432
-        volumeMounts:
-        - name: metadig-pv
-          mountPath: {{ .Values.persistence.mountPath }}
-          readOnly: false
-        - name: {{ .Release.Name }}-config-volume
-          mountPath: {{ .Values.persistence.mountPath }}/pgbouncer/pgbouncer.ini
-          subPath: pgbouncer.ini
-        - name: {{ .Release.Name }}-config-volume
-          mountPath: {{ .Values.persistence.mountPath }}/pgbouncer/userlist.txt
-          subPath: userlist.txt
+        - name: {{ .Chart.Name }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          command: [ "su", "-", "postgres", "-c", "postgres -D /opt/local/postgresql/data" ]
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+          - name: postgres
+            containerPort: 5432
+            protocol: TCP
+          volumeMounts:
+          - name: metadig-pv
+            mountPath: {{ .Values.persistence.mountPath }}
+            readOnly: false
+        {{- if .Values.sidecar.enabled }}
+        - name: {{ .Values.sidecar.name }}
+          image: "{{ .Values.sidecar.repository }}:{{ .Values.sidecar.tag }}"
+          imagePullPolicy: {{ .Values.sidecar.pullPolicy }}
+          command: [ "pgbouncer", "-v", "{{ .Values.persistence.mountPath }}/{{ .Values.sidecar.initFile }}" ]
+          ports:
+          - name: {{ .Values.sidecar.name }}
+            containerPort: 6432
+          volumeMounts:
+          - name: metadig-pv
+            mountPath: {{ .Values.persistence.mountPath }}
+            readOnly: false
+          - name: {{ .Release.Name }}-config-volume
+            mountPath: {{ .Values.persistence.mountPath }}/{{ .Values.sidecar.initFile }}
+            subPath: pgbouncer.ini
+          - name: {{ .Release.Name }}-config-volume
+            mountPath: {{ .Values.persistence.mountPath }}/{{ .Values.sidecar.authFile }}
+            subPath: userlist.txt
+        {{- end }}
       restartPolicy: Always
       volumes:
       - name: metadig-pv
@@ -51,3 +66,15 @@ spec:
         configMap:
           name: {{ .Release.Name }}-configfiles
           defaultMode: 0644
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
