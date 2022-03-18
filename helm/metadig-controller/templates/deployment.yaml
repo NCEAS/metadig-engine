@@ -1,12 +1,16 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "postgres.fullname" . }}
-  namespace: metadig
+  name: {{ include "metadig-controller.fullname" . }}
+  labels:
+    {{- include "metadig-controller.labels" . | nindent 4 }}
 spec:
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+  {{- end }}
   selector:
     matchLabels:
-      {{- include "postgres.selectorLabels" . | nindent 6 }}
+      {{- include "metadig-controller.selectorLabels" . | nindent 6 }}
   template:
     metadata:
       {{- with .Values.podAnnotations }}
@@ -14,49 +18,35 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       labels:
-        {{- include "postgres.selectorLabels" . | nindent 8 }}
+        {{- include "metadig-controller.selectorLabels" . | nindent 8 }}
     spec:
       {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      serviceAccountName: {{ include "postgres.serviceAccountName" . }}
+      serviceAccountName: {{ include "metadig-controller.serviceAccountName" . }}
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
       containers:
         - name: {{ .Chart.Name }}
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
-          command: [ "su", "-", "postgres", "-c", "postgres -D /opt/local/postgresql/data" ]
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
-          - name: postgres
-            containerPort: 5432
+          - name: metadig-tomcat
+            containerPort: 8080
             protocol: TCP
-          volumeMounts:
-          - name: metadig-pv
-            mountPath: {{ .Values.persistence.mountPath }}
-            readOnly: false
-        {{- if .Values.sidecar.enabled }}
-        - name: {{ .Values.sidecar.name }}
-          image: "{{ .Values.sidecar.repository }}:{{ .Values.sidecar.tag }}"
-          imagePullPolicy: {{ .Values.sidecar.pullPolicy }}
-          command: [ "pgbouncer", "-v", "{{ .Values.persistence.mountPath }}/{{ .Values.sidecar.initFile }}" ]
-          ports:
-          - name: {{ .Values.sidecar.name }}
-            containerPort: 6432
+          env:
+          - name: JAVA_OPTS
+            value: "-Dlog4j2.formatMsgNoLookups=true"
           volumeMounts:
           - name: metadig-pv
             mountPath: {{ .Values.persistence.mountPath }}
             readOnly: false
           - name: metadig-config-volume
-            mountPath: {{ .Values.persistence.mountPath }}/{{ .Values.sidecar.initFile }}
-            subPath: pgbouncer.ini
-          - name: metadig-config-volume
-            mountPath: {{ .Values.persistence.mountPath }}/{{ .Values.sidecar.authFile }}
-            subPath: userlist.txt
-        {{- end }}
+            mountPath: {{ .Values.persistence.mountPath }}/metadig/metadig.properties
+            subPath: metadig.properties
       restartPolicy: Always
       volumes:
       - name: metadig-pv
@@ -64,7 +54,7 @@ spec:
           claimName: {{ .Values.persistence.claimName }}
       - name: metadig-config-volume
         configMap:
-          name: metadig-configfiles
+          name: metadig-config-volume
           defaultMode: 0644
       {{- with .Values.nodeSelector }}
       nodeSelector:
@@ -78,3 +68,14 @@ spec:
       tolerations:
         {{- toYaml . | nindent 8 }}
       {{- end }}
+      dnsPolicy: None
+      dnsConfig:
+        nameservers:
+          - {{ (lookup "v1" "Service" "kube-system" "kube-dns").spec.clusterIP }}
+        searches:
+        - metadig.svc.cluster.local
+        - svc.cluster.local
+        - cluster.local
+        options:
+        - name: ndots
+          value: "5"

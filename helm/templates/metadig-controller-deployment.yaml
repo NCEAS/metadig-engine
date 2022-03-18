@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Chart.name }}
+  namespace: metadig
+spec:
+  selector:
+    matchLabels:
+      app: {{ .Chart.name }}
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: {{ .Chart.name }}
+    spec:
+      #serviceAccountName: metadig-serviceaccount
+      containers:
+      - name: {{ .Chart.name }}
+        image: {{ .Values.image.repository }}/{{ .Chart.Name }}:{{ .Chart.appVersion }}
+        env:
+        - name: JAVA_OPTS
+          value: "-Dlog4j2.formatMsgNoLookups=true"
+        ports:
+        - name: metadig-tomcat
+          containerPort: 8080
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        volumeMounts:
+        - name: metadig-pv
+          mountPath: "/opt/local"
+          readOnly: true
+      volumes:
+      - name: metadig-pv
+        persistentVolumeClaim:
+          claimName: {{ .Values.persistence.persistentVolumeClaimNamee }}
+      restartPolicy: Always
+
