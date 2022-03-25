@@ -13,10 +13,10 @@ spec:
       labels:
         app: metadig-controller
     spec:
-      #serviceAccountName: metadig-serviceaccount
+      serviceAccountName: metadig
       containers:
       - name: metadig-controller
-        image: docker.io/metadig/metadig-controller:2.3.3
+        image: docker.io/metadig/metadig-controller:2.3.4
         env:
         - name: JAVA_OPTS
           value: "-Dlog4j2.formatMsgNoLookups=true"

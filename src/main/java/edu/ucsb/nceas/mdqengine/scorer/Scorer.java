@@ -66,7 +66,7 @@ public class Scorer {
     private static int RabbitMQport = 0;
     private static String RabbitMQpassword = null;
     private static String RabbitMQusername = null;
-    private static String CNauthToken = null;
+    private static String DataONEauthToken = null;
     private static String CNsubjectId = null;
     private static String CNserviceUrl = null;
     private static String CNnodeId="urn:node:CN";
@@ -104,13 +104,25 @@ public class Scorer {
         Scorer gfr = new Scorer();
         MDQconfig cfg = new MDQconfig();
 
+        /* The DataONE auth token is available as an environment variable and is no longer stored on disk. However, for
+           backward compatibility, first try the environment, and if not found there, try the metadig
+           parameter file.
+        */
+
+        DataONEauthToken = System.getenv("DATAONE_AUTH_TOKEN");
+        if (DataONEauthToken == null) {
+            DataONEauthToken =  cfg.getString("DataONE.authToken");
+            log.debug("Got token from properties file");
+        } else {
+            log.debug("Got token from env");
+        }
+
         try {
             RabbitMQpassword = cfg.getString("RabbitMQ.password");
             RabbitMQusername = cfg.getString("RabbitMQ.username");
             RabbitMQhost = cfg.getString("RabbitMQ.host");
             RabbitMQport = cfg.getInt("RabbitMQ.port");
             solrLocation = cfg.getString("solr.location");
-            CNauthToken =  cfg.getString("CN.authToken");
             CNserviceUrl = cfg.getString("CN.serviceUrl");
             CNsubjectId = cfg.getString("CN.subjectId");
         } catch (ConfigurationException cex) {
@@ -143,7 +155,6 @@ public class Scorer {
                 String graphFilename = null;
                 MetadigException metadigException = null;
                 String subjectId = null;
-                String authToken = null;
                 String nodeServiceUrl = null;
                 String label = null;
                 String title = null;
@@ -199,8 +210,9 @@ public class Scorer {
                     // Pids associated with a collection, based on query results using 'collectionQuery' field in solr.
                     ArrayList<String> collectionPids = null;
 
+                    // Get the admin subject id and MN URL from the config file. Note this could also be obtained
+                    // from the CN, but this is faster and doesn't require a web service call
                     String nodeAbbr = nodeId.replace("urn:node:", "");
-                    authToken = cfg.getString(nodeAbbr + ".authToken");
                     subjectId = cfg.getString(nodeAbbr + ".subjectId");
                     // TODO:  Cache the node values from the CN listNode service
                     nodeServiceUrl = cfg.getString(nodeAbbr + ".serviceUrl");
@@ -209,7 +221,7 @@ public class Scorer {
 
                     MetadigFile mdFile = new MetadigFile();
                     Graph graph = new Graph();
-                    Session session = DataONE.getSession(subjectId, authToken);
+                    Session session = DataONE.getSession(subjectId, DataONEauthToken);
 
                     d1Node = DataONE.getMultipartD1Node(session, nodeServiceUrl);
 
@@ -397,7 +409,7 @@ public class Scorer {
 
         try {
 
-            CNsession = DataONE.getSession(CNsubjectId, CNauthToken);
+            CNsession = DataONE.getSession(CNsubjectId, DataONEauthToken);
             // Only CNs can call the 'subjectInfo' service (aka accounts), so we have to use
             // a MultipartCNode instance here.
             try {

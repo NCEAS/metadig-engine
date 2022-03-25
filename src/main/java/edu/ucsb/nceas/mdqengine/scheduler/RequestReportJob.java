@@ -142,16 +142,23 @@ public class RequestReportJob implements Job {
         MultipartMNode mnNode = null;
         MultipartCNode cnNode = null;
 
-        String authToken = null;
+        String DataONEauthToken = null;
         String subjectId = null;
         String nodeServiceUrl = null;
+
+        DataONEauthToken = System.getenv("DATAONE_AUTH_TOKEN");
+        if (DataONEauthToken == null) {
+            DataONEauthToken =  cfg.getString("DataONE.authToken");
+            log.debug("Got token from properties file");
+        } else {
+            log.debug("Got token from env");
+        }
 
         try {
             MDQconfig cfg = new MDQconfig();
             qualityServiceUrl = cfg.getString("quality.serviceUrl");
 
             String nodeAbbr = nodeId.replace("urn:node:", "");
-            authToken = cfg.getString(nodeAbbr + ".authToken");
             subjectId = cfg.getString(nodeAbbr + ".subjectId");
             // TODO:  Cache the node values from the CN listNode service
             nodeServiceUrl = cfg.getString(nodeAbbr + ".serviceUrl");
@@ -172,7 +179,7 @@ public class RequestReportJob implements Job {
             throw jee;
         }
 
-        Session session = DataONE.getSession(subjectId, authToken);
+        Session session = DataONE.getSession(subjectId, DataONEauthToken);
 
         // Don't know node type yet from the id, so have to manually check if it's a CN
         Boolean isCN = DataONE.isCN(nodeServiceUrl);

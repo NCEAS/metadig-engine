@@ -132,7 +132,7 @@ public class RequestScorerJob implements Job {
         String requestType = null;
         String formatFamily = null;
         MultipartD1Node d1Node = null;
-        String authToken = null;
+        String DataONEauthToken = null;
         String subjectId = null;
         String nodeServiceUrl = null;
 
@@ -142,12 +142,19 @@ public class RequestScorerJob implements Job {
 
         log.debug("Executing task " + taskType + ", " + taskName + " for node: " + nodeId + ", suiteId: " + suiteId);
 
+        DataONEauthToken = System.getenv("DATAONE_AUTH_TOKEN");
+        if (DataONEauthToken == null) {
+            DataONEauthToken =  cfg.getString("DataONE.authToken");
+            log.debug("Got token from properties file");
+        } else {
+            log.debug("Got token from env");
+        }
+
         try {
             cfg = new MDQconfig();
             qualityServiceUrl = cfg.getString("quality.serviceUrl");
             log.trace("nodeId from request: " + nodeId);
             String nodeAbbr = nodeId.replace("urn:node:", "");
-            authToken = cfg.getString(nodeAbbr + ".authToken");
             subjectId = cfg.getString(nodeAbbr + ".subjectId");
             nodeServiceUrl = cfg.getString(nodeAbbr + ".serviceUrl");
             log.trace("nodeServiceUrl: " + nodeServiceUrl);
@@ -162,7 +169,7 @@ public class RequestScorerJob implements Job {
             throw new JobExecutionException(msg);
         }
 
-        Session session = DataONE.getSession(subjectId, authToken);
+        Session session = DataONE.getSession(subjectId, DataONEauthToken);
 
         // Get a connection to the DataONE node (CN or MN)
         try {

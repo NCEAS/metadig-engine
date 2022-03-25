@@ -18,7 +18,7 @@ spec:
       #serviceAccountName: metadig-serviceaccount
       containers:
       - name: metadig-worker
-        image: docker.io/metadig/metadig-worker:2.3.3
+        image: docker.io/metadig/metadig-worker:2.3.4
         #imagePullPolicy: Always
         imagePullPolicy: IfNotPresent
         env:
