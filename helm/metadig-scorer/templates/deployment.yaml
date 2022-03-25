@@ -1,16 +1,16 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "metadig-worker.fullname" . }}
+  name: {{ include "metadig-scorer.fullname" . }}
   labels:
-    {{- include "metadig-worker.labels" . | nindent 4 }}
+    {{- include "metadig-scorer.labels" . | nindent 4 }}
 spec:
   {{- if not .Values.autoscaling.enabled }}
   replicas: {{ .Values.replicaCount }}
   {{- end }}
   selector:
     matchLabels:
-      {{- include "metadig-worker.selectorLabels" . | nindent 6 }}
+      {{- include "metadig-scorer.selectorLabels" . | nindent 6 }}
   template:
     metadata:
       {{- with .Values.podAnnotations }}
@@ -18,13 +18,13 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       labels:
-        {{- include "metadig-worker.selectorLabels" . | nindent 8 }}
+        {{- include "metadig-scorer.selectorLabels" . | nindent 8 }}
     spec:
       {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      serviceAccountName: {{ include "metadig-worker.serviceAccountName" . }}
+      serviceAccountName: {{ include "metadig-scorer.serviceAccountName" . }}
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
       containers:
@@ -36,6 +36,13 @@ spec:
           env:
           - name: JAVA_OPTS
             value: "-Dlog4j2.formatMsgNoLookups=true"
+          - name: DATAONE_AUTH_TOKEN
+            valueFrom:
+              secretKeyRef:
+                name: dataone-token
+                key: DataONEauthToken
+                # If 'false", the secret must exist before the pod can start
+                optional: false
           volumeMounts:
           - name: metadig-pv
             mountPath: {{ .Values.persistence.mountPath }}
@@ -43,7 +50,16 @@ spec:
           - name: metadig-config-volume
             mountPath: {{ .Values.persistence.mountPath }}/metadig/metadig.properties
             subPath: metadig.properties
-      restartPolicy: Always
+          livenessProbe:
+            httpGet:
+              path: /
+              port: http
+          readinessProbe:
+            httpGet:
+              path: /
+              port: http
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
@@ -56,14 +72,6 @@ spec:
       tolerations:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      volumes:
-      - name: metadig-pv
-        persistentVolumeClaim:
-          claimName: {{ .Values.persistence.claimName }}
-      - name: metadig-config-volume
-        configMap:
-          name: metadig-config-volume
-          defaultMode: 0644
       {{- if .Values.dns.config}}
       dnsPolicy: None
       dnsConfig:

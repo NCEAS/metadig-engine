@@ -1,11 +1,11 @@
-# Default values for metadig-worker.
+# Default values for metadig-scorer.
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
 replicaCount: 1
 
 image:
-  repository: docker.io/metadig/metadig-worker
+  repository: docker.io/metadig/metadig-scorer
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
   tag: "2.4.0"
@@ -39,29 +39,6 @@ securityContext: {}
   # readOnlyRootFilesystem: true
   # runAsNonRoot: true
   # runAsUser: 1000
-
-service:
-  type: ClusterIP
-  port: 80
-
-ingress:
-  enabled: true
-  className: nginx
-  annotations:
-    nginx.ingress.kubernetes.io/enable-cors: "true"
-    nginx.ingress.kubernetes.io/cors-allow-methods: "GET, POST, OPTIONS"
-    nginx.ingress.kubernetes.io/cors-allow-origin: '$http_origin'
-    nginx.ingress.kubernetes.io/cors-allow-credentials: "true"
-    cert-manager.io/cluster-issuer: "letsencrypt-prod"
-  hosts:
-    - host: api.test.dataone.org
-      paths:
-        - path: /quality
-          pathType: Prefix
-  tls:
-  - hosts:
-    - api.test.dataone.org
-    secretName: ingress-nginx-tls-cert
 
 resources: {}
   # We usually recommend not to specify default resources and to leave this as a conscious
@@ -97,6 +74,7 @@ persistence:
   ## The value is evaluated as a template
   ##
   claimName: "cephfs-metadig-pvc"
+  volumeName: "cephfs-metadig-pv"
   ## @param persistence.storageClass Storage class of backing PVC
   ## If defined, storageClassName: <storageClass>
   ## If set to "-", storageClassName: "", which disables dynamic provisioning
@@ -106,10 +84,11 @@ persistence:
   storageClass: ""
   ## @param persistence.accessModes Persistent Volume Access Modes
   ##
-  accessModes: ReadWriteMany
-  ## @param persistence.size Size of data volume
+  accessModes:
+    - ReadWriteMany
+  ## @param persistence.claimeSize size of data volume
   ##
-  size: 8Gi
+  size: 100Gi
   ## @param persistence.annotations Persistence annotations for Solr
   ##
   annotations: {}

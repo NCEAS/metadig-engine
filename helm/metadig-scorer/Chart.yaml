@@ -1,6 +1,6 @@
 apiVersion: v2
-name: metadig-worker
-description: MetaDIG Worker
+name: metadig-scorer
+description: MetaDIG Scorer
 
 # A chart can be either an 'application' or a 'library' chart.
 #
