@@ -43,8 +43,29 @@ spec:
                 key: DataONEauthToken
                 # If 'false", the secret must exist before the pod can start
                 optional: false
-          resources:
-            {{- toYaml .Values.resources | nindent 12 }}
+          volumeMounts:
+          - name: metadig-pv
+            mountPath: {{ .Values.persistence.mountPath }}
+            readOnly: false
+          - name: metadig-config-volume
+            mountPath: {{ .Values.persistence.mountPath }}/metadig/metadig.properties
+            subPath: metadig.properties
+          - name: metadig-tasks-volume
+            mountPath: {{ .Values.persistence.mountPath }}/metadig/taskList.csv
+            subPath: taskList.csv
+      volumes:
+      - name: metadig-pv
+        persistentVolumeClaim:
+          claimName: {{ .Values.persistence.claimName }}
+      - name: metadig-config-volume
+        configMap:
+          name: metadig-config-volume
+          defaultMode: 0644
+      - name: metadig-tasks-volume
+        configMap:
+          name: metadig-tasks-volume
+          defaultMode: 0644
+      restartPolicy: Always
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
