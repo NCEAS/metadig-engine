@@ -146,18 +146,16 @@ public class RequestReportJob implements Job {
         String subjectId = null;
         String nodeServiceUrl = null;
 
-        DataONEauthToken = System.getenv("DATAONE_AUTH_TOKEN");
-        if (DataONEauthToken == null) {
-            DataONEauthToken =  cfg.getString("DataONE.authToken");
-            log.debug("Got token from properties file");
-        } else {
-            log.debug("Got token from env");
-        }
-
         try {
             MDQconfig cfg = new MDQconfig();
             qualityServiceUrl = cfg.getString("quality.serviceUrl");
-
+            DataONEauthToken = System.getenv("DATAONE_AUTH_TOKEN");
+            if (DataONEauthToken == null) {
+                DataONEauthToken =  cfg.getString("DataONE.authToken");
+                log.debug("Got token from properties file.");
+            } else {
+                log.debug("Got token from env.");
+            }
             String nodeAbbr = nodeId.replace("urn:node:", "");
             subjectId = cfg.getString(nodeAbbr + ".subjectId");
             // TODO:  Cache the node values from the CN listNode service

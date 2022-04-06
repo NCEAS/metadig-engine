@@ -139,16 +139,7 @@ public class RequestScorerJob implements Job {
         if (taskType.equalsIgnoreCase("score")) {
             requestType = dataMap.getString("requestType");
         }
-
         log.debug("Executing task " + taskType + ", " + taskName + " for node: " + nodeId + ", suiteId: " + suiteId);
-
-        DataONEauthToken = System.getenv("DATAONE_AUTH_TOKEN");
-        if (DataONEauthToken == null) {
-            DataONEauthToken =  cfg.getString("DataONE.authToken");
-            log.debug("Got token from properties file");
-        } else {
-            log.debug("Got token from env");
-        }
 
         try {
             cfg = new MDQconfig();
@@ -158,6 +149,14 @@ public class RequestScorerJob implements Job {
             subjectId = cfg.getString(nodeAbbr + ".subjectId");
             nodeServiceUrl = cfg.getString(nodeAbbr + ".serviceUrl");
             log.trace("nodeServiceUrl: " + nodeServiceUrl);
+
+            DataONEauthToken = System.getenv("DATAONE_AUTH_TOKEN");
+            if (DataONEauthToken == null) {
+                DataONEauthToken =  cfg.getString("DataONE.authToken");
+                log.debug("Got token from properties file.");
+            } else {
+                log.debug("Got token from env.");
+            }
         } catch (ConfigurationException | IOException ce) {
             JobExecutionException jee = new JobExecutionException(taskName + ": Error executing task: " + ce.getMessage());
             jee.initCause(ce);

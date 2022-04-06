@@ -42,7 +42,8 @@ spec:
                 name: dataone-token
                 key: DataONEauthToken
                 # If 'false", the secret must exist before the pod can start
-                optional: false
+                # App versions before v2.3.4 will read this value from a config file, not the env var.
+                optional: true
           volumeMounts:
           - name: metadig-pv
             mountPath: {{ .Values.persistence.mountPath }}

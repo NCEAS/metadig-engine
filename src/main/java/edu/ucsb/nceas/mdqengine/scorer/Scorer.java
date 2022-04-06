@@ -108,13 +108,12 @@ public class Scorer {
            backward compatibility, first try the environment, and if not found there, try the metadig
            parameter file.
         */
-
         DataONEauthToken = System.getenv("DATAONE_AUTH_TOKEN");
         if (DataONEauthToken == null) {
             DataONEauthToken =  cfg.getString("DataONE.authToken");
-            log.debug("Got token from properties file");
+            log.debug("Got token from properties file.");
         } else {
-            log.debug("Got token from env");
+            log.debug("Got token from env.");
         }
 
         try {
