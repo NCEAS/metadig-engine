@@ -50,16 +50,17 @@ spec:
           - name: metadig-config-volume
             mountPath: {{ .Values.persistence.mountPath }}/metadig/metadig.properties
             subPath: metadig.properties
-          livenessProbe:
-            httpGet:
-              path: /
-              port: http
-          readinessProbe:
-            httpGet:
-              path: /
-              port: http
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
+      volumes:
+      - name: metadig-pv
+        persistentVolumeClaim:
+          claimName: {{ .Values.persistence.claimName }}
+      - name: metadig-config-volume
+        configMap:
+          name: metadig-config-volume
+          defaultMode: 0644
+      restartPolicy: Always
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
@@ -72,6 +73,14 @@ spec:
       tolerations:
         {{- toYaml . | nindent 8 }}
       {{- end }}
+      volumes:
+      - name: metadig-pv
+        persistentVolumeClaim:
+          claimName: {{ .Values.persistence.claimName }}
+      - name: metadig-config-volume
+        configMap:
+          name: metadig-config-volume
+          defaultMode: 0644
       {{- if .Values.dns.config}}
       dnsPolicy: None
       dnsConfig:

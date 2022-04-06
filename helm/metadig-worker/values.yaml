@@ -8,7 +8,7 @@ image:
   repository: docker.io/metadig/metadig-worker
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
-  tag: "2.4.0"
+  tag: "2.3.4dev"
 
 imagePullSecrets: []
 nameOverride: ""
@@ -41,27 +41,10 @@ securityContext: {}
   # runAsUser: 1000
 
 service:
-  type: ClusterIP
-  port: 80
+  type: None
 
 ingress:
-  enabled: true
-  className: nginx
-  annotations:
-    nginx.ingress.kubernetes.io/enable-cors: "true"
-    nginx.ingress.kubernetes.io/cors-allow-methods: "GET, POST, OPTIONS"
-    nginx.ingress.kubernetes.io/cors-allow-origin: '$http_origin'
-    nginx.ingress.kubernetes.io/cors-allow-credentials: "true"
-    cert-manager.io/cluster-issuer: "letsencrypt-prod"
-  hosts:
-    - host: api.test.dataone.org
-      paths:
-        - path: /quality
-          pathType: Prefix
-  tls:
-  - hosts:
-    - api.test.dataone.org
-    secretName: ingress-nginx-tls-cert
+  enabled: false
 
 resources: {}
   # We usually recommend not to specify default resources and to leave this as a conscious

@@ -8,7 +8,7 @@ image:
   repository: docker.io/metadig/metadig-scorer
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
-  tag: "2.4.0"
+  tag: "2.3.4dev"
 
 imagePullSecrets: []
 nameOverride: ""
@@ -39,6 +39,12 @@ securityContext: {}
   # readOnlyRootFilesystem: true
   # runAsNonRoot: true
   # runAsUser: 1000
+
+service:
+  type: None
+
+ingress:
+  enabled: false
 
 resources: {}
   # We usually recommend not to specify default resources and to leave this as a conscious

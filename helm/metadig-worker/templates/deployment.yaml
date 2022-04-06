@@ -43,6 +43,14 @@ spec:
           - name: metadig-config-volume
             mountPath: {{ .Values.persistence.mountPath }}/metadig/metadig.properties
             subPath: metadig.properties
+      volumes:
+      - name: metadig-pv
+        persistentVolumeClaim:
+          claimName: {{ .Values.persistence.claimName }}
+      - name: metadig-config-volume
+        configMap:
+          name: metadig-config-volume
+          defaultMode: 0644
       restartPolicy: Always
       {{- with .Values.nodeSelector }}
       nodeSelector:
@@ -56,14 +64,6 @@ spec:
       tolerations:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      volumes:
-      - name: metadig-pv
-        persistentVolumeClaim:
-          claimName: {{ .Values.persistence.claimName }}
-      - name: metadig-config-volume
-        configMap:
-          name: metadig-config-volume
-          defaultMode: 0644
       {{- if .Values.dns.config}}
       dnsPolicy: None
       dnsConfig:

@@ -8,7 +8,7 @@ image:
   repository: docker.io/metadig/metadig-controller
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
-  tag: "2.4.0"
+  tag: "2.3.4dev"
 
 imagePullSecrets: []
 nameOverride: ""
@@ -119,3 +119,5 @@ persistence:
   ## @param persistence.mountPath Persistence mount path for Solr
   ##
   mountPath: "/opt/local"
+dns:
+  config: true

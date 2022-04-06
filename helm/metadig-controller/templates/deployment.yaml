@@ -68,6 +68,7 @@ spec:
       tolerations:
         {{- toYaml . | nindent 8 }}
       {{- end }}
+      {{- if .Values.dns.config}}
       dnsPolicy: None
       dnsConfig:
         nameservers:
@@ -79,3 +80,4 @@ spec:
         options:
         - name: ndots
           value: "5"
+      {{- end }}
