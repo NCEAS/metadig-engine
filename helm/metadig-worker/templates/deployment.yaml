@@ -43,6 +43,9 @@ spec:
           - name: metadig-config-volume
             mountPath: {{ .Values.persistence.mountPath }}/metadig/metadig.properties
             subPath: metadig.properties
+          - name: metadig-log4j-volume
+            mountPath: {{ .Values.persistence.mountPath }}/metadig/config/log4j.properties
+            subPath: log4j.properties
       volumes:
       - name: metadig-pv
         persistentVolumeClaim:
@@ -50,6 +53,10 @@ spec:
       - name: metadig-config-volume
         configMap:
           name: metadig-config-volume
+          defaultMode: 0644
+      - name: metadig-log4j-volume
+        configMap:
+          name: metadig-log4j-volume
           defaultMode: 0644
       restartPolicy: Always
       {{- with .Values.nodeSelector }}
