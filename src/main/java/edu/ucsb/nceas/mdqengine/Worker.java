@@ -393,6 +393,7 @@ public class Worker {
            need to be created.
          */
         ConnectionFactory factory = new ConnectionFactory();
+        boolean durable = true;
         factory.setHost(RabbitMQhost);
         factory.setPort(RabbitMQport);
         factory.setPassword(RabbitMQpassword);
@@ -409,8 +410,8 @@ public class Worker {
         try {
             inProcessConnection = factory.newConnection();
             inProcessChannel = inProcessConnection.createChannel();
-            inProcessChannel.exchangeDeclare(EXCHANGE_NAME, "direct", false);
-            inProcessChannel.queueDeclare(QUALITY_QUEUE_NAME, false, false, false, null);
+            inProcessChannel.exchangeDeclare(EXCHANGE_NAME, "direct", durable);
+            inProcessChannel.queueDeclare(QUALITY_QUEUE_NAME, durable, false, false, null);
             inProcessChannel.queueBind(QUALITY_QUEUE_NAME, EXCHANGE_NAME, QUALITY_ROUTING_KEY);
             // Channel will only send one request for each worker at a time.
             inProcessChannel.basicQos(1);
@@ -424,8 +425,8 @@ public class Worker {
         try {
             completedConnection = factory.newConnection();
             completedChannel = completedConnection.createChannel();
-            completedChannel.exchangeDeclare(EXCHANGE_NAME, "direct", false);
-            completedChannel.queueDeclare(COMPLETED_QUEUE_NAME, false, false, false, null);
+            completedChannel.exchangeDeclare(EXCHANGE_NAME, "direct", durable);
+            completedChannel.queueDeclare(COMPLETED_QUEUE_NAME, durable, false, false, null);
             log.info("Connected to RabbitMQ queue " + COMPLETED_QUEUE_NAME);
         } catch (Exception e) {
             log.error("Error connecting to RabbitMQ queue " + COMPLETED_QUEUE_NAME);
@@ -674,7 +675,7 @@ public class Worker {
         // messages types and formsts, so the controller needs to know what type of message it is getting.
         AMQP.BasicProperties basicProperties = new AMQP.BasicProperties.Builder()
                 .contentType("text/plain")
-                .type(MESSAGE_TYPE_QUALITY)
+                .deliveryMode(2)
                 .build();
         completedChannel.basicPublish(EXCHANGE_NAME, COMPLETED_ROUTING_KEY, basicProperties, message);
     }

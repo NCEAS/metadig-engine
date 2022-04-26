@@ -478,6 +478,7 @@ public class Controller {
      */
     public void setupQueues() throws IOException, TimeoutException {
         ConnectionFactory factory = new ConnectionFactory();
+        boolean durable = true;
         factory.setHost(RabbitMQhost);
         factory.setPort(RabbitMQport);
         factory.setPassword(RabbitMQpassword);
@@ -495,12 +496,12 @@ public class Controller {
         try {
             inProcessConnection = factory.newConnection();
             inProcessChannel = inProcessConnection.createChannel();
-            inProcessChannel.exchangeDeclare(EXCHANGE_NAME, "direct", false);
+            inProcessChannel.exchangeDeclare(EXCHANGE_NAME, "direct", durable);
 
-            inProcessChannel.queueDeclare(QUALITY_QUEUE_NAME, false, false, false, null);
+            inProcessChannel.queueDeclare(QUALITY_QUEUE_NAME, durable, false, false, null);
             inProcessChannel.queueBind(QUALITY_QUEUE_NAME, EXCHANGE_NAME, QUALITY_ROUTING_KEY);
 
-            inProcessChannel.queueDeclare(SCORER_QUEUE_NAME, false, false, false, null);
+            inProcessChannel.queueDeclare(SCORER_QUEUE_NAME, durable, false, false, null);
             inProcessChannel.queueBind(SCORER_QUEUE_NAME, EXCHANGE_NAME, SCORER_ROUTING_KEY);
 
             // Channel will only send one request for each worker at a time.
@@ -516,8 +517,8 @@ public class Controller {
         try {
             completedConnection = factory.newConnection();
             completedChannel = completedConnection.createChannel();
-            completedChannel.exchangeDeclare(EXCHANGE_NAME, "direct", false);
-            completedChannel.queueDeclare(COMPLETED_QUEUE_NAME, false, false, false, null);
+            completedChannel.exchangeDeclare(EXCHANGE_NAME, "direct", durable);
+            completedChannel.queueDeclare(COMPLETED_QUEUE_NAME, durable, false, false, null);
             completedChannel.queueBind(COMPLETED_QUEUE_NAME, EXCHANGE_NAME, COMPLETED_ROUTING_KEY);
             log.info("Connected to RabbitMQ queue " + COMPLETED_QUEUE_NAME);
         } catch (Exception e) {
@@ -622,8 +623,6 @@ public class Controller {
      * @throws IOException
      */
     public void writeInProcessChannel(byte[] message, String routingKey) throws IOException {
-
-        //inProcessChannel.basicPublish("", InProcess_QUEUE_NAME, MessageProperties.PERSISTENT_TEXT_PLAIN, message);
         inProcessChannel.basicPublish(EXCHANGE_NAME, routingKey, MessageProperties.PERSISTENT_TEXT_PLAIN, message);
     }
 
