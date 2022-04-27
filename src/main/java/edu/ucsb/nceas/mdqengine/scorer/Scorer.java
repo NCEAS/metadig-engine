@@ -56,10 +56,8 @@ public class Scorer {
     private final static String COMPLETED_ROUTING_KEY = "completed";
     private final static String MESSAGE_TYPE_SCORER = "scorer";
 
-    private static Connection inProcessConnection;
-    private static Channel inProcessChannel;
-    private static Connection completedConnection;
-    private static Channel completedChannel;
+    private static com.rabbitmq.client.Connection RabbitMQconnection;
+    private static com.rabbitmq.client.Channel RabbitMQchannel;
 
     private static Log log = LogFactory.getLog(Scorer.class);
     private static String RabbitMQhost = null;
@@ -143,7 +141,7 @@ public class Scorer {
          * </p>
          *
          */
-        final Consumer consumer = new DefaultConsumer(inProcessChannel) {
+        final Consumer consumer = new DefaultConsumer(RabbitMQchannel) {
             @Override
             public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties, byte[] body) throws IOException {
 
@@ -332,18 +330,18 @@ public class Scorer {
                     gfr.returnGraphStatus(collectionId, suiteId, qEntry);
                     log.debug("Sent report info back to controller...");
                 } catch (IOException ioe) {
-                    log.error("Unable to return quality report to controller.");
+                    log.error("Unable to return scorer report to controller.");
                     ioe.printStackTrace();
                 }
 
                 // Inform RabbitMQ that we are done with this task, and am ready for another.
-                inProcessChannel.basicAck(envelope.getDeliveryTag(), false);
+                RabbitMQchannel.basicAck(envelope.getDeliveryTag(), false);
                 log.info("Scorer completed task");
             }
         };
 
         // Initialize the RabbitMQ queue for scorer requests send by the controller
-        inProcessChannel.basicConsume(SCORER_QUEUE_NAME, false, consumer);
+        RabbitMQchannel.basicConsume(SCORER_QUEUE_NAME, false, consumer);
     }
 
     /**
@@ -875,12 +873,12 @@ public class Scorer {
         log.info("Set RabbitMQ port to: " + RabbitMQport);
 
         try {
-            inProcessConnection = factory.newConnection();
-            inProcessChannel = inProcessConnection.createChannel();
-            inProcessChannel.queueDeclare(SCORER_QUEUE_NAME, durable, false, false, null);
-            inProcessChannel.queueBind(SCORER_QUEUE_NAME, EXCHANGE_NAME, SCORER_ROUTING_KEY);
+            RabbitMQconnection = factory.newConnection();
+            RabbitMQchannel = RabbitMQconnection.createChannel();
+            RabbitMQchannel.queueDeclare(SCORER_QUEUE_NAME, durable, false, false, null);
+            RabbitMQchannel.queueBind(SCORER_QUEUE_NAME, EXCHANGE_NAME, SCORER_ROUTING_KEY);
             // Channel will only send one request for each worker at a time.
-            inProcessChannel.basicQos(1);
+            RabbitMQchannel.basicQos(1);
             log.info("Connected to RabbitMQ queue " + SCORER_QUEUE_NAME);
             log.info(" [*] Waiting for messages. To exit press CTRL+C");
         } catch (Exception e) {
@@ -889,11 +887,11 @@ public class Scorer {
         }
 
         try {
-            completedConnection = factory.newConnection();
-            completedChannel = completedConnection.createChannel();
-            completedChannel.exchangeDeclare(EXCHANGE_NAME, "direct", durable);
-            completedChannel.queueDeclare(COMPLETED_QUEUE_NAME, true, false, false, null);
-            completedChannel.queueBind(COMPLETED_QUEUE_NAME, EXCHANGE_NAME, COMPLETED_ROUTING_KEY);
+            RabbitMQconnection = factory.newConnection();
+            RabbitMQchannel = RabbitMQconnection.createChannel();
+            RabbitMQchannel.exchangeDeclare(EXCHANGE_NAME, "direct", durable);
+            RabbitMQchannel.queueDeclare(COMPLETED_QUEUE_NAME, true, false, false, null);
+            RabbitMQchannel.queueBind(COMPLETED_QUEUE_NAME, EXCHANGE_NAME, COMPLETED_ROUTING_KEY);
             log.info("Connected to RabbitMQ queue " + COMPLETED_QUEUE_NAME);
         } catch (Exception e) {
             log.error("Error connecting to RabbitMQ queue " + COMPLETED_QUEUE_NAME);
@@ -904,7 +902,7 @@ public class Scorer {
     /**
      *
      * <p>
-     * Write to the RabbitMQ 'completed' channel, which will be read by metadig-controller in the 'completed' queue, signalling that
+     * Write to the RabbitMQ channel, which will be read by metadig-controller in the 'completed' queue, signalling that
      * this graph request has completed.
      * </p>
      *
@@ -915,10 +913,10 @@ public class Scorer {
         // The completed queue doesn't use an exchange
         AMQP.BasicProperties basicProperties = new AMQP.BasicProperties.Builder()
                 .contentType("text/plain")
-                .deliveryMode(2)
+                .deliveryMode(2)  // set this message to persistent
                 .type(MESSAGE_TYPE_SCORER)
                 .build();
-        completedChannel.basicPublish(EXCHANGE_NAME, COMPLETED_ROUTING_KEY, basicProperties, message);
+        RabbitMQchannel.basicPublish(EXCHANGE_NAME, COMPLETED_ROUTING_KEY, basicProperties, message);
     }
 
     /**

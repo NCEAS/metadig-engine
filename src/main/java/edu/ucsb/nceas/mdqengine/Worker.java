@@ -58,10 +58,8 @@ public class Worker {
     private final static String springConfigFileURL = "/metadig-index-processor-context.xml";
     private final static String qualityReportObjectType = "https://nceas.ucsb.edu/mdqe/v1";
 
-    private static Connection inProcessConnection;
-    private static Channel inProcessChannel;
-    private static Connection completedConnection;
-    private static Channel completedChannel;
+    private static com.rabbitmq.client.Connection RabbitMQconnection;
+    private static com.rabbitmq.client.Channel RabbitMQchannel;
 
     public static Log log = LogFactory.getLog(Worker.class);
     // These values are read from a config file, see class 'MDQconfig'.
@@ -103,10 +101,10 @@ public class Worker {
         wkr.setupQueues();
 
         /* This method is overridden from the RabbitMQ library and serves as the callback that is invoked whenenver
-         * an entry added to the 'inProcessChannel' and this particular instance of the Worker is selected for
+         * an entry added to the 'RabbitMQchannel' and this particular instance of the Worker is selected for
          * delivery of the queue message.
          */
-        final Consumer consumer = new DefaultConsumer(inProcessChannel) {
+        final Consumer consumer = new DefaultConsumer(RabbitMQchannel) {
             @Override
             public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties, byte[] body) throws IOException {
 
@@ -316,7 +314,7 @@ public class Worker {
         };
 
         log.info("Calling basicConsume");
-    inProcessChannel.basicConsume(QUALITY_QUEUE_NAME, false, consumer);
+    RabbitMQchannel.basicConsume(QUALITY_QUEUE_NAME, false, consumer);
     }
 
     /**
@@ -356,7 +354,7 @@ public class Worker {
             try {
                 this.writeCompletedQueue(message);
                 log.info("Sent completed report for pid: '" + qEntry.getMetadataPid() + "'");
-                inProcessChannel.basicAck(envelope.getDeliveryTag(), false);
+                RabbitMQchannel.basicAck(envelope.getDeliveryTag(), false);
                 log.debug("Sent task completed acknowledgement to RabbitMQ");
             } catch (AlreadyClosedException rmqe) {
                 log.error("RabbitMQ connection error: " + rmqe.getMessage());
@@ -367,7 +365,7 @@ public class Worker {
             log.info(" [x] Sent completed report for pid: '" + qEntry.getMetadataPid() + "'");
                     // Tell RabbitMQ this worker is ready for tasks
                     log.info("Calling basicConsume");
-                    inProcessChannel.basicConsume(QUALITY_QUEUE_NAME, false, consumer);
+                    RabbitMQchannel.basicConsume(QUALITY_QUEUE_NAME, false, consumer);
                 } catch (Exception e) {
                     log.error("Error re-establishing connection to RabbitMQ server: " + e.getMessage());
                     log.error("Unable to resend report back to controller.");
@@ -408,13 +406,15 @@ public class Worker {
 
 
         try {
-            inProcessConnection = factory.newConnection();
-            inProcessChannel = inProcessConnection.createChannel();
-            inProcessChannel.exchangeDeclare(EXCHANGE_NAME, "direct", durable);
-            inProcessChannel.queueDeclare(QUALITY_QUEUE_NAME, durable, false, false, null);
-            inProcessChannel.queueBind(QUALITY_QUEUE_NAME, EXCHANGE_NAME, QUALITY_ROUTING_KEY);
+            RabbitMQconnection = factory.newConnection();
+            RabbitMQchannel = RabbitMQconnection.createChannel();
+            RabbitMQchannel.exchangeDeclare(EXCHANGE_NAME, "direct", durable);
+
+            RabbitMQchannel.queueDeclare(QUALITY_QUEUE_NAME, durable, false, false, null);
+            RabbitMQchannel.queueBind(QUALITY_QUEUE_NAME, EXCHANGE_NAME, QUALITY_ROUTING_KEY);
             // Channel will only send one request for each worker at a time.
-            inProcessChannel.basicQos(1);
+
+            RabbitMQchannel.basicQos(1);
             log.info("Connected to RabbitMQ queue " + QUALITY_QUEUE_NAME);
             log.info("Waiting for messages. To exit press CTRL+C");
         } catch (Exception e) {
@@ -423,10 +423,7 @@ public class Worker {
         }
 
         try {
-            completedConnection = factory.newConnection();
-            completedChannel = completedConnection.createChannel();
-            completedChannel.exchangeDeclare(EXCHANGE_NAME, "direct", durable);
-            completedChannel.queueDeclare(COMPLETED_QUEUE_NAME, durable, false, false, null);
+            RabbitMQchannel.queueDeclare(COMPLETED_QUEUE_NAME, durable, false, false, null);
             log.info("Connected to RabbitMQ queue " + COMPLETED_QUEUE_NAME);
         } catch (Exception e) {
             log.error("Error connecting to RabbitMQ queue " + COMPLETED_QUEUE_NAME);
@@ -675,9 +672,10 @@ public class Worker {
         // messages types and formsts, so the controller needs to know what type of message it is getting.
         AMQP.BasicProperties basicProperties = new AMQP.BasicProperties.Builder()
                 .contentType("text/plain")
-                .deliveryMode(2)
+                .deliveryMode(2) // set this message to persistent
+                .type(MESSAGE_TYPE_QUALITY)
                 .build();
-        completedChannel.basicPublish(EXCHANGE_NAME, COMPLETED_ROUTING_KEY, basicProperties, message);
+        RabbitMQchannel.basicPublish(EXCHANGE_NAME, COMPLETED_ROUTING_KEY, basicProperties, message);
     }
 
     /**
