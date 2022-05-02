@@ -56,17 +56,15 @@ public class Scorer {
     private final static String COMPLETED_ROUTING_KEY = "completed";
     private final static String MESSAGE_TYPE_SCORER = "scorer";
 
-    private static Connection inProcessConnection;
-    private static Channel inProcessChannel;
-    private static Connection completedConnection;
-    private static Channel completedChannel;
+    private static com.rabbitmq.client.Connection RabbitMQconnection;
+    private static com.rabbitmq.client.Channel RabbitMQchannel;
 
     private static Log log = LogFactory.getLog(Scorer.class);
     private static String RabbitMQhost = null;
     private static int RabbitMQport = 0;
     private static String RabbitMQpassword = null;
     private static String RabbitMQusername = null;
-    private static String CNauthToken = null;
+    private static String DataONEauthToken = null;
     private static String CNsubjectId = null;
     private static String CNserviceUrl = null;
     private static String CNnodeId="urn:node:CN";
@@ -104,13 +102,24 @@ public class Scorer {
         Scorer gfr = new Scorer();
         MDQconfig cfg = new MDQconfig();
 
+        /* The DataONE auth token is available as an environment variable and is no longer stored on disk. However, for
+           backward compatibility, first try the environment, and if not found there, try the metadig
+           parameter file.
+        */
+        DataONEauthToken = System.getenv("DATAONE_AUTH_TOKEN");
+        if (DataONEauthToken == null) {
+            DataONEauthToken =  cfg.getString("DataONE.authToken");
+            log.debug("Got token from properties file.");
+        } else {
+            log.debug("Got token from env.");
+        }
+
         try {
             RabbitMQpassword = cfg.getString("RabbitMQ.password");
             RabbitMQusername = cfg.getString("RabbitMQ.username");
             RabbitMQhost = cfg.getString("RabbitMQ.host");
             RabbitMQport = cfg.getInt("RabbitMQ.port");
             solrLocation = cfg.getString("solr.location");
-            CNauthToken =  cfg.getString("CN.authToken");
             CNserviceUrl = cfg.getString("CN.serviceUrl");
             CNsubjectId = cfg.getString("CN.subjectId");
         } catch (ConfigurationException cex) {
@@ -132,7 +141,7 @@ public class Scorer {
          * </p>
          *
          */
-        final Consumer consumer = new DefaultConsumer(inProcessChannel) {
+        final Consumer consumer = new DefaultConsumer(RabbitMQchannel) {
             @Override
             public void handleDelivery(String consumerTag, Envelope envelope, AMQP.BasicProperties properties, byte[] body) throws IOException {
 
@@ -143,7 +152,6 @@ public class Scorer {
                 String graphFilename = null;
                 MetadigException metadigException = null;
                 String subjectId = null;
-                String authToken = null;
                 String nodeServiceUrl = null;
                 String label = null;
                 String title = null;
@@ -199,8 +207,9 @@ public class Scorer {
                     // Pids associated with a collection, based on query results using 'collectionQuery' field in solr.
                     ArrayList<String> collectionPids = null;
 
+                    // Get the admin subject id and MN URL from the config file. Note this could also be obtained
+                    // from the CN, but this is faster and doesn't require a web service call
                     String nodeAbbr = nodeId.replace("urn:node:", "");
-                    authToken = cfg.getString(nodeAbbr + ".authToken");
                     subjectId = cfg.getString(nodeAbbr + ".subjectId");
                     // TODO:  Cache the node values from the CN listNode service
                     nodeServiceUrl = cfg.getString(nodeAbbr + ".serviceUrl");
@@ -209,7 +218,7 @@ public class Scorer {
 
                     MetadigFile mdFile = new MetadigFile();
                     Graph graph = new Graph();
-                    Session session = DataONE.getSession(subjectId, authToken);
+                    Session session = DataONE.getSession(subjectId, DataONEauthToken);
 
                     d1Node = DataONE.getMultipartD1Node(session, nodeServiceUrl);
 
@@ -321,18 +330,18 @@ public class Scorer {
                     gfr.returnGraphStatus(collectionId, suiteId, qEntry);
                     log.debug("Sent report info back to controller...");
                 } catch (IOException ioe) {
-                    log.error("Unable to return quality report to controller.");
+                    log.error("Unable to return scorer report to controller.");
                     ioe.printStackTrace();
                 }
 
                 // Inform RabbitMQ that we are done with this task, and am ready for another.
-                inProcessChannel.basicAck(envelope.getDeliveryTag(), false);
+                RabbitMQchannel.basicAck(envelope.getDeliveryTag(), false);
                 log.info("Scorer completed task");
             }
         };
 
         // Initialize the RabbitMQ queue for scorer requests send by the controller
-        inProcessChannel.basicConsume(SCORER_QUEUE_NAME, false, consumer);
+        RabbitMQchannel.basicConsume(SCORER_QUEUE_NAME, false, consumer);
     }
 
     /**
@@ -397,7 +406,7 @@ public class Scorer {
 
         try {
 
-            CNsession = DataONE.getSession(CNsubjectId, CNauthToken);
+            CNsession = DataONE.getSession(CNsubjectId, DataONEauthToken);
             // Only CNs can call the 'subjectInfo' service (aka accounts), so we have to use
             // a MultipartCNode instance here.
             try {
@@ -855,6 +864,7 @@ public class Scorer {
            need to be created.
          */
         ConnectionFactory factory = new ConnectionFactory();
+        boolean durable = true;
         factory.setHost(RabbitMQhost);
         factory.setPort(RabbitMQport);
         factory.setPassword(RabbitMQpassword);
@@ -863,12 +873,12 @@ public class Scorer {
         log.info("Set RabbitMQ port to: " + RabbitMQport);
 
         try {
-            inProcessConnection = factory.newConnection();
-            inProcessChannel = inProcessConnection.createChannel();
-            inProcessChannel.queueDeclare(SCORER_QUEUE_NAME, false, false, false, null);
-            inProcessChannel.queueBind(SCORER_QUEUE_NAME, EXCHANGE_NAME, SCORER_ROUTING_KEY);
+            RabbitMQconnection = factory.newConnection();
+            RabbitMQchannel = RabbitMQconnection.createChannel();
+            RabbitMQchannel.queueDeclare(SCORER_QUEUE_NAME, durable, false, false, null);
+            RabbitMQchannel.queueBind(SCORER_QUEUE_NAME, EXCHANGE_NAME, SCORER_ROUTING_KEY);
             // Channel will only send one request for each worker at a time.
-            inProcessChannel.basicQos(1);
+            RabbitMQchannel.basicQos(1);
             log.info("Connected to RabbitMQ queue " + SCORER_QUEUE_NAME);
             log.info(" [*] Waiting for messages. To exit press CTRL+C");
         } catch (Exception e) {
@@ -877,11 +887,11 @@ public class Scorer {
         }
 
         try {
-            completedConnection = factory.newConnection();
-            completedChannel = completedConnection.createChannel();
-            completedChannel.exchangeDeclare(EXCHANGE_NAME, "direct", false);
-            completedChannel.queueDeclare(COMPLETED_QUEUE_NAME, false, false, false, null);
-            completedChannel.queueBind(COMPLETED_QUEUE_NAME, EXCHANGE_NAME, COMPLETED_ROUTING_KEY);
+            RabbitMQconnection = factory.newConnection();
+            RabbitMQchannel = RabbitMQconnection.createChannel();
+            RabbitMQchannel.exchangeDeclare(EXCHANGE_NAME, "direct", durable);
+            RabbitMQchannel.queueDeclare(COMPLETED_QUEUE_NAME, true, false, false, null);
+            RabbitMQchannel.queueBind(COMPLETED_QUEUE_NAME, EXCHANGE_NAME, COMPLETED_ROUTING_KEY);
             log.info("Connected to RabbitMQ queue " + COMPLETED_QUEUE_NAME);
         } catch (Exception e) {
             log.error("Error connecting to RabbitMQ queue " + COMPLETED_QUEUE_NAME);
@@ -892,7 +902,7 @@ public class Scorer {
     /**
      *
      * <p>
-     * Write to the RabbitMQ 'completed' channel, which will be read by metadig-controller in the 'completed' queue, signalling that
+     * Write to the RabbitMQ channel, which will be read by metadig-controller in the 'completed' queue, signalling that
      * this graph request has completed.
      * </p>
      *
@@ -903,9 +913,10 @@ public class Scorer {
         // The completed queue doesn't use an exchange
         AMQP.BasicProperties basicProperties = new AMQP.BasicProperties.Builder()
                 .contentType("text/plain")
+                .deliveryMode(2)  // set this message to persistent
                 .type(MESSAGE_TYPE_SCORER)
                 .build();
-        completedChannel.basicPublish(EXCHANGE_NAME, COMPLETED_ROUTING_KEY, basicProperties, message);
+        RabbitMQchannel.basicPublish(EXCHANGE_NAME, COMPLETED_ROUTING_KEY, basicProperties, message);
     }
 
     /**
