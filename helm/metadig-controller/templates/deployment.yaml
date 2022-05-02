@@ -1,0 +1,90 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "metadig-controller.fullname" . }}
+  labels:
+    {{- include "metadig-controller.labels" . | nindent 4 }}
+spec:
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "metadig-controller.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "metadig-controller.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "metadig-controller.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ .Chart.Name }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+          - name: metadig-tomcat
+            containerPort: 8080
+            protocol: TCP
+          env:
+          - name: JAVA_OPTS
+            value: "-Dlog4j2.formatMsgNoLookups=true"
+          volumeMounts:
+          - name: metadig-pv
+            mountPath: {{ .Values.persistence.mountPath }}
+            readOnly: false
+          - name: metadig-config-volume
+            mountPath: {{ .Values.persistence.mountPath }}/metadig/metadig.properties
+            subPath: metadig.properties
+          - name: metadig-log4j-volume
+            mountPath: {{ .Values.persistence.mountPath }}/metadig/config/log4j.properties
+            subPath: log4j.properties
+      restartPolicy: Always
+      volumes:
+      - name: metadig-pv
+        persistentVolumeClaim:
+          claimName: {{ .Values.persistence.claimName }}
+      - name: metadig-config-volume
+        configMap:
+          name: metadig-config-volume
+          defaultMode: 0644
+      - name: metadig-log4j-volume
+        configMap:
+          name: metadig-log4j-volume
+          defaultMode: 0644
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- if .Values.dns.config}}
+      dnsPolicy: None
+      dnsConfig:
+        nameservers:
+          - {{ (lookup "v1" "Service" "kube-system" "kube-dns").spec.clusterIP }}
+        searches:
+        - metadig.svc.cluster.local
+        - svc.cluster.local
+        - cluster.local
+        options:
+        - name: ndots
+          value: "5"
+      {{- end }}

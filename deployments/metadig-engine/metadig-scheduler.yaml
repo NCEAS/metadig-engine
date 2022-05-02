@@ -15,11 +15,21 @@ spec:
         app: metadig-scheduler
         tier: backend
     spec:
+      serviceAccountName: metadig
       containers:
         - name: metadig-scheduler
-          image: docker.io/metadig/metadig-scheduler:2.4.0
-          imagePullPolicy: Always
-          #imagePullPolicy: IfNotPresent
+          image: docker.io/metadig/metadig-scheduler:2.3.4
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: JAVA_OPTS
+              value: "-Dlog4j2.formatMsgNoLookups=true"
+            - name: DATAONE_AUTH_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: dataone-token
+                  key: DataONEauthToken
+                  # If 'false", the secret must exist before the pod can start
+                  optional: false
           volumeMounts:
           - name: metadig-pv
             mountPath: /opt/local

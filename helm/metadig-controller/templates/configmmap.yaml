@@ -1,0 +1,15 @@
+# Load all files in the "config" directory into a ConfigMap
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: metadig-config-volume
+data:
+{{ (tpl (.Files.Glob "config/metadig.properties").AsConfig . ) | indent 4 }}
+
+--- 
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: metadig-log4j-volume
+data:
+{{ (tpl (.Files.Glob "config/log4j.properties").AsConfig . ) | indent 4 }}

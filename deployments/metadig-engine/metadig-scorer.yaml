@@ -15,17 +15,26 @@ spec:
         app: metadig-scorer
         tier: backend
     spec:
+      serviceAccountName: metadig
       containers:
       - name: metadig-scorer
+        image: docker.io/metadig/metadig-scorer:2.3.4
+        imagePullPolicy: IfNotPresent
         env:
-        - name: JAVA_OPTS
-          value: "-Dlog4j2.formatMsgNoLookups=true"
-        image: docker.io/metadig/metadig-scorer:2.3.3
-        imagePullPolicy: Always
+          - name: JAVA_OPTS
+            value: "-Dlog4j2.formatMsgNoLookups=true"
+          - name: DATAONE_AUTH_TOKEN
+            valueFrom:
+              secretKeyRef:
+                name: dataone-token
+                key: DataONEauthToken
+                # If 'false", the secret must exist before the pod can start
+                optional: false 
         volumeMounts:
         - name: metadig-pv
           mountPath: "/opt/local"
           readOnly: false
+      restartPolicy: Always
       volumes:
       - name: metadig-pv
         persistentVolumeClaim:

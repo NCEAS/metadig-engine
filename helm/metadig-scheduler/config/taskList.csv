@@ -1,0 +1,50 @@
+task-type,task-name,task-group,cron-schedule,params
+# task type, task name, task group, cron schedule, "formatId filter (regex); suite id; node id; D1 node base url; harvest begin date; harvest increment (days);requestCount"
+# - task type:
+# - task name:
+# - task group:
+# - cron schedule:
+#   - seconds, minutes, hours, day of month, month, day of week, year
+# - params
+#   - formatId filter (regex): This is a list of wildcards that will match records with these formatIds to harvest, delimeted by '|
+#   - suite id: the metadig suite id
+#   - node id: a DataONE node URN - data will be filtered using this (DataONE sysmeta "datasource")
+#   - D1 node base url: the base service URL for an MN or CN that will be used to query for pids to be processed
+#   - harvest begin date: begin date: the first date to use for the DataONE 'listObjects' service
+#   - harvest increment (days): increment (days): the time span for each search
+#   - requestCount: the number of itmes to request from DataONE listObjects
+#   - requestType: for score tasks, determine type of portal processing ("portal" or "node")
+#
+# Dataset quality scoring tasks
+quality,quality-knb,metadig,0 0/1 * * * ?,"^eml.*|^http.*eml.*;knb.suite.1;urn:node:KNB;2020-08-24T00:00:00.00Z;1;1000"
+quality,quality-arctic,metadig,5 0/1 * * * ?,"^eml.*|^http.*eml.*;arctic.data.center.suite.1;urn:node:ARCTIC;2022-04-01T00:00:00.00Z;1;1000"
+quality,quality-dataone-fair,metadig,10 0/1 * * * ?,"^eml.*|^http.*eml.*|.*www.isotc211.org.*;FAIR-suite-0.3.1;urn:node:CN;2021-09-01T00:00:00.00Z;1;1000"
+quality,quality-ess-dive,metadig,15 0/1 * * * ?,"^eml.*|^http.*eml.*;ess-dive.data.center.suite.1;urn:node:ESS_DIVE;2020-08-24T00:00:00.00Z;1;1000;"
+#
+# Portal scoring tasks
+score,portal-KNB-FAIR,metadig,5 0/1 * * * ?,"*portals*;FAIR-suite-0.3.1;urn:node:KNB;2020-08-10T00:00:00.00Z;1;100;portal"
+score,portal-ARCTIC-FAIR,metadig,10 0/1 * * * ?,"*portals*;FAIR-suite-0.3.1;urn:node:ARCTIC;2020-08-07T00:00:00.00Z;1;100;portal"
+score,portal-mnUCSB1-FAIR,metadig,15 0/1 * * * ?,"*portals*;FAIR-suite-0.3.1;urn:node:mnUCSB1;2020-08-24T00:00:00.00Z;1;100;portal"
+#
+# Note: Portal harvesting for DataONE portals created on search.dataone.org will be performed on mnUCSB1, as MetacatUI sends create and
+#       update requests performed on search.dataone.org to this host. We want to harvest them as soon as they are created, and not have to wait for mnUCSB1 to
+#      sync to the CN, and then the CN index it, so the following entry is obsolete, and no longer used.
+# #score,portal-CN-FAIR,metadig,35 0/1 * * * ?,"*portals*;FAIR.suite-0.3.1;urn:node:CN;2020-08-24T00:00:00.00Z;1;100;portal"
+#
+# Task for creating member node metadata assessment graphs
+score,mn-portal-ARCTIC-FAIR,metadig,0 0/1 * * * ?,";FAIR-suite-0.3.1;urn:node:ARCTIC;2020-08-24T00:00:00.00Z;1;1000;node"
+score,mn-portal-KNB-FAIR,metadig,0 10 * 2 * ?,";FAIR-suite-0.3.1;urn:node:KNB;2020-08-24T00:00:00.00Z;1;1000;node"
+score,mn-portal-ESS-DIVE-FAIR,metadig,0 15 2 * * ?,";FAIR-suite-0.3.1;urn:node:ESS_DIVE;2020-08-24T00:00:00.00Z;1;1000;node"
+# OPC MN is being taken down
+#score,mn-portal-CA_OPC-FAIR,metadig,0 0 20 * * ?,";FAIR-suite-0.3.1;urn:node:CA_OPC;2020-08-24T00:00:00.00Z;1;1000;node"
+score,mn-portal-DataONE-FAIR,metadig,0 25 2 * * ?,";FAIR-suite-0.3.1;urn:node:CN;2020-08-24T00:00:00.00Z;1;1000;node"
+#
+# Task for ingesting files into the file store from /data/metadig/store/stage/{code,data,graph,metadata}
+# filestore,ingest,metadig,0 0/1 * * * ?,"stage;;*.*;README.txt;filestore-ingest.log"
+#
+# Admin NOTE: it appears that DataONE HttpMultipartRestClient can't handle two clients being created at the same time, even if they are by different threads. This needs to be
+#      investigated further and potentially a bug needs to be logged in github for this. Until then, an easy workaround is to ensure that no two tasks are started
+#      at the same time, so adjust the cron schedule accordingly.
+#
+# Node list from DataONE
+nodelist,MN-NODE-LIST,metadig,0 0/1 * * * ?,"urn:node:CN"

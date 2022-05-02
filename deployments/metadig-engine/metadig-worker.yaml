@@ -17,8 +17,9 @@ spec:
     spec:
       containers:
       - name: metadig-worker
-        image: docker.io/metadig/metadig-worker:2.3.2
-        imagePullPolicy: Always
+        image: docker.io/metadig/metadig-worker:2.3.4
+        #imagePullPolicy: Always
+        imagePullPolicy: IfNotPresent
         env:
         - name: JYTHONPATH
           value: "/opt/local/metadig/metadig-py"
