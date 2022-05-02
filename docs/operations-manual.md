@@ -24,10 +24,12 @@ cephfs-metadig-pvc   Bound    cephfs-metadig-pv                          200Gi  
 
 The PVC and associated persistent volume (PV) use a CephFS subvolume. The PV and PVC were initially created with these k8s manifests from the metadig-engine repository using these commands:
 ```
+# From a local copy of the metadig-engine github repository:
 $ kubectl use content metadig
 $ kubectl create -f ./deployments/metadig-engine/cephfs-metadig-pvc.yaml
 $ kubectl create -f ./deployments/metadig-engine/cephfs-metadig-pv.yaml
 ```
+
 
 ### PostgreSQL
 The MetaDIG PostgreSQL stores assessment reports, PID information, and information about the DataONE Member Nodes and Coordinating Node from which metadata is harvested.
@@ -46,9 +48,31 @@ RabbitMQ is used to queue assement requests that are created by the metadig-sche
 The RabbitMQ deployment can be installed with the commands:
 
 ```
-cd git/NCEAS/metadig-engine/helm
-kubectl config use-context metadig
-helm install rabbitmq ./rabbitmq --namespace metadig --version=1.0.0
+helm install metadig-rabbitmq bitnami/rabbitmq \
+--version=8.29.0 \
+--namespace metadig \
+--set image.registry=docker.io \
+--set image.repository=bitnami/rabbitmq \
+--set kubeVersion=v1.23.3 \
+--set auth.username=metadig \
+--set auth.password=quality \
+--set replicaCount=3 \
+--set podSecurityContext.enabled=false \
+--set podSecurityContext.fsGroup=1001 \
+--set podManagementPolicy=Parallel \
+--set service.type=NodePort \
+--set service.externalTrafficPolicy=Cluster \
+--set ingress.enabled=false \
+--set ingress.tls=false \
+--set ingress.ingressClassName="nginx" \
+--set persistence.enabled=true \
+--set persistence.storageClass=csi-rbd-sc \
+--set persistence.size=10Gi \
+--set volumePermissions.enabled=false \
+--set volumePermissions.containerSecurityContext.runAsUser=1001 \
+--set serviceAccount.create=false \
+--set serviceAccount.name="metadig" \
+--set tls.enabled=false
 ```
 
 Note that when metadig-controller starts, it will create RabbitMQ queues if they don't already exist.
@@ -62,7 +86,7 @@ In the near future, a k8s based deployment of Solr will be used.
 
 ### DataONE token
 
-A DataONE authorization token is used by MetaDIG services and is described in the NCEAS secure repository.
+A DataONE authorization token is used by MetaDIG services and it's usage is described in the NCEAS secure repository (./k8s).
 
 ## MetaDIG Assessment Services
 
@@ -76,7 +100,13 @@ All requests from clients (via the MetaDIG REST API) are routed to metadig-contr
 what action needs occur to fulfil a request and will either complete that request itself, or send a request
 to one of the quality services.
 
-helm install metadig-controller ./metadig-controller --namespace metadig --version=1.0.0 
+helm install metadig-controller ./metadig-controller --namespace metadig --version=1.0.0
+
+The metadig-controller helm chart contains the Java property file ("metadig.properties") that is used by all metadig k8s applications. If you
+wish to change any of the configuration values, this property file can be edited locally and then restarted with helm. Since all of the metadig 
+applications mount this configuration file as a k8s volume, they will need to be restarted after any configuration change.
+
+This same techique can be used to update the configuration file "log4j.properties", which is used to control the logging level of metadig applications.
 
 ### metadig-scheduler
 The metadig-scheduler facility manages all harvesting tasks performed by the quality engine. Tasks are added to the list of schedule
@@ -99,13 +129,7 @@ helm install metadig-scorer ./metadig-scorer --namespace metadig --version=1.0.0
 
 The metadig-worker service is started with the command:
 
-    kubectl apply -f metadig-worker.yaml
-    
-The metadig-scheduler 
-
-
-helm install metadig-worker ./metadig-worker --namespace metadig --version=1.0.0 --set replicaCount=10
-
+    helm install metadig-worker ./metadig-worker --namespace metadig --version=1.0.0 --set replicaCount=1
 
 ### filestore
 
