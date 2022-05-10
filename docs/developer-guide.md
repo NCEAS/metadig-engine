@@ -37,10 +37,6 @@ Metadata assessment checks assoicated with this project can be found at https://
 
 ### RabbitMQ
 
-## Deploying metadig-engine as Web Service
-
-metadig-engine can be run 
-
 ## Building metadig-engine Docker images
 
 Docker images are built for metadig-engine services and posted to https://hub.docker.com/r/metadig. Once the
@@ -67,8 +63,7 @@ metadig-engine reads assessment suites, checks, configuration and data files fro
 
 ### Running Locally
 
-The metadig-engine assessment function can be called directly, without using metadig-controller and metadig-worker. This is 
-done by calling the metadig-engine main Java class from the metadig-engine development working directory:
+In order to quickly test an updated assessment suite or new functionality, the  metadig-engine assessment program can be called directly, without using metadig-controller and metadig-worker. This is done by calling the metadig-engine main Java class from the metadig-engine development working directory:
 
 doc="${workDir}/test/ADC/doi:10.18739_A2W08WG3R.xml"
 sysmeta="${workDir}/test/ADC/doi:10.18739_A2W08WG3R.sm"
@@ -77,11 +72,50 @@ java -cp ./target/metadig-engine-${version}.jar edu.ucsb.nceas.mdqengine.MDQEngi
 
 Edit metadig.properties
 
-### Running Locally with RabbitMQ queing
+### Running Locally with RabbitMQ Message Queuing
 
-The RabbitMQ is an open source messge brokering system that can be used to queue assessment requests for metadig-engine. The use of RabbitMQ with metadig-engine is intended to be run on a k8s deployment, however, RabbitMQ can be used on the local machine for development testing.
+RabbitMQ is an open source messge brokering system that can be used to queue assessment requests for metadig-engine. 
+
+The use of RabbitMQ with metadig-engine is intended to be run on a k8s deployment, however, RabbitMQ can be used on the local machine for development testing.
 
 RabbitMQ can be installed easily on MacOS, for example, using [Homebrew](https://www.rabbitmq.com/install-homebrew.html). 
+
+In addition, a local Solr server can be installed so that indexing of assessment scores can be tested.
+
+Depending on which programs require testing, metadig-controller, metadig-worker, metadig-scorer and metadig-scheduler can be started as background processes. Then sampe quality assessment or scoring request can be sent to metadig-controller (running in "test" mode).
+
+- Install RabbitMQ
+- Install Solr and create a "quality" core using the "solrconfig.xml" and "schema.xml" files in the metadig-engine repo
+- copy metadig.properties to /opt/local/metadig
+- copy required suite to /opt/local/metadig
+- set the desired logging levels in /opt/local/metadig/config/log4j.properties
+
+For a test of communication between metadig-controller and metadig-worker:
+- start metadig-controller in "test" mode in one terminal window
+  - bin/startController.sh
+- start metadig-worker in another terminal window
+  - bin/startWorker.sh
+- send a sample request to metadig-controller
+  - bin/sendQualityTest.py
+
+View the log files in each terminal window. An example run is shown below.
+In the metadig-controller window
+```
+$ ./bin/startController.sh 33000 &
+20220509-20:42:36: [DEBUG]: Creating new controller instance [edu.ucsb.nceas.mdqengine.Controller]
+20220509-20:42:36: [DEBUG]: Set RabbitMQ host to: localhost [edu.ucsb.nceas.mdqengine.Controller]
+20220509-20:42:36: [DEBUG]: Set RabbitMQ port to: 5672 [edu.ucsb.nceas.mdqengine.Controller]
+20220509-20:42:36: [INFO]: Connected to RabbitMQ queue quality [edu.ucsb.nceas.mdqengine.Controller]
+20220509-20:42:36: [INFO]: Connected to RabbitMQ queue scorer [edu.ucsb.nceas.mdqengine.Controller]
+20220509-20:42:36: [INFO]: Connected to RabbitMQ queue completed [edu.ucsb.nceas.mdqengine.Controller]
+20220509-20:42:36: [DEBUG]: Controller is started [edu.ucsb.nceas.mdqengine.Controller]
+20220509-20:42:36: [INFO]: The controller has been started [edu.ucsb.nceas.mdqengine.Controller]
+20220509-20:42:36: [INFO]: # of arguments: 1 [edu.ucsb.nceas.mdqengine.Controller]
+20220509-20:42:36: [INFO]: Controller test mode is enabled. [edu.ucsb.nceas.mdqengine.Controller]
+20220509-20:42:36: [INFO]: Controller listening on port 33000for filenames to submit [edu.ucsb.nceas.mdqengine.Controller]
+20220509-20:42:36: [INFO]: Waiting to establish connection to test client: [edu.ucsb.nceas.mdqengine.Controller]
+
+$ bin/sendQualityTest.py
 
 ### Running on Kubernetes
 
@@ -118,4 +152,89 @@ Note that these two formulas are equivalent, and that implicitly Ofail is not co
 appear in the denominator. Therefore, the scoring counts optional checks that pass, but doesn't count
 optional checks that fail.
 
+## Appendix A - metadig Postgres Database
+### identifiers table
+metadig=> select * from identifiers limit 5;
+                  metadata_id                  |   data_source
+-----------------------------------------------+------------------
+ doi:10.18739/A2GM3V                           | urn:node:ARCTIC
+ urn:uuid:97502dc9-0ede-4b38-aabe-f00e6be70d54 | urn:node:ARCTIC
+ 69f058e0edb7c3d63c861420f6cfce53              | urn:node:PANGAEA
+ 1f952192145a5dd031e05f80ad0a7c23              | urn:node:PANGAEA
+ urn:uuid:a94edbe2-b19a-4e7c-8459-1b46c5a271bd | urn:node:KNB
+(5 rows)
 
+### runs table
+metadig=> select metadata_id,suite_id,timestamp,error,status,sequence_id from runs limit 1;
+           metadata_id            |     suite_id     |         timestamp          | results | error   | status  |           sequence_id
+----------------------------------+------------------+----------------------------+---------+---------+----------------------------------
+ 062be19cc13c8ba9266530b55f63bc90 | FAIR-suite-0.3.0 | 2020-04-20 11:49:15.194+00 | ...     | success | 3e1bc7ba69d4e099467f0d4d7d8cedd2
+(1 row)
+
+### node_harvest table
+metadig=> select * from node_harvest;
+       task_name        | task_type |         node_id         |  last_harvest_datetime
+------------------------+-----------+-------------------------+--------------------------
+ quality-dataone-fair   | quality   | urn:node:METAGRIL       | 2021-07-11T19:23:22.090Z
+ quality-dataone-fair   | quality   | urn:node:PPBIO          | 2022-05-03T18:06:59.953Z
+ quality-dataone-fair   | quality   | urn:node:CA_OPC         | 2022-04-27T02:12:00.593Z
+ quality-dataone-fair   | quality   | urn:node:PISCO          | 2022-03-31T23:40:34.734Z
+ portal-KNB-FAIR        | score     | urn:node:KNB            | 2022-04-11T16:45:52.041Z
+ quality-dataone-fair   | quality   | urn:node:RW             | 2022-04-12T22:03:52.776Z
+ portal-mnUCSB1-FAIR    | score     | urn:node:mnUCSB1        | 2022-05-03T17:56:22.346Z
+ quality-dataone-fair   | quality   | urn:node:IEDA_USAP      | 2021-01-15T18:45:32.297Z
+ quality-dataone-fair   | quality   | urn:node:IEDA_EARTHCHEM | 2021-01-18T00:40:57.404Z
+ quality-dataone-fair   | quality   | urn:node:IEDA_MGDL      | 2021-01-18T04:36:48.839Z
+ quality-dataone-fair   | quality   | urn:node:ARCTIC         | 2022-05-09T20:44:54.223Z
+ quality-dataone-fair   | quality   | urn:node:ESS_DIVE       | 2022-05-10T02:05:12.775Z
+ quality-ess-dive       | quality   | urn:node:ESS_DIVE       | 2022-02-24T18:52:07.764Z
+ quality-dataone-fair   | quality   | urn:node:TFRI           | 2022-04-07T09:28:26.664Z
+ quality-dataone-fair   | quality   | urn:node:ARM            | 2021-11-20T00:00:00.753Z
+ quality-dataone-fair   | quality   | urn:node:ESA            | 2015-01-06T12:37:08.039Z
+ quality-dataone-fair   | quality   | urn:node:SANPARKS       | 2015-01-06T12:58:51.157Z
+ quality-dataone-fair   | quality   | urn:node:ONEShare       | 2014-06-24T23:00:08.961Z
+ quality-dataone-fair   | quality   | urn:node:GOA            | 2019-03-01T00:11:14.007Z
+ quality-dataone-fair   | quality   | urn:node:LTER_EUROPE    | 2016-01-14T09:06:57.814Z
+ quality-dataone-fair   | quality   | urn:node:IOE            | 2016-06-15T21:35:12.872Z
+ quality-dataone-fair   | quality   | urn:node:TERN           | 2019-06-21T07:13:58.711Z
+ quality-dataone-fair   | quality   | urn:node:NKN            | 2016-06-22T15:02:50.462Z
+ quality-dataone-fair   | quality   | urn:node:NRDC           | 2018-04-06T18:37:01.89Z
+ quality-dataone-fair   | quality   | urn:node:NCEI           | 2018-05-10T03:28:11.936Z
+ quality-dataone-fair   | quality   | urn:node:NEON           | 2019-12-01T19:38:06.575Z
+ quality-dataone-fair   | quality   | urn:node:GRIIDC         | 2020-02-28T03:06:02.436Z
+ quality-dataone-fair   | quality   | urn:node:R2R            | 2017-01-26T02:21:39.358Z
+ quality-dataone-fair   | quality   | urn:node:CAS_CERN       | 2018-10-25T03:06:22.3Z
+ quality-dataone-fair   | quality   | urn:node:PNDB           | 2021-05-25T11:17:02.989Z
+ quality-knb            | quality   | urn:node:KNB            | 2022-05-07T00:01:15.052Z
+ quality-dataone-fair   | quality   | urn:node:KNB            | 2022-05-07T00:01:15.052Z
+ quality-dataone-fair   | quality   | urn:node:LTER           | 2022-05-09T14:45:08.956Z
+ portal-ARCTIC-FAIR     | score     | urn:node:ARCTIC         | 2022-05-09T20:48:49.465Z
+ quality-dataone-fair   | quality   | urn:node:FEMC           | 2022-04-30T03:00:07.033Z
+ quality-dataone-fair   | quality   | urn:node:EDI            | 2022-05-03T03:45:16.425Z
+ quality-ess-dive-1.1.0 | quality   | urn:node:ESS_DIVE       | 2022-05-07T06:00:22.705Z
+ quality-arctic         | quality   | urn:node:ARCTIC         | 2022-05-09T20:44:54.223Z
+(38 rows)
+
+### nodes table
+
+metadig=> select * from nodes limit 5;
+ identifier     | name                     | type | state | synchronize | last_harvest             | baseurl
+ ---------------+--------------------------+------+-------+-------------+--------------------------+-----------------------------------------
+ urn:node:KNB   | KNB Data Repository      | MN   | UP    | t           | 2022-05-09T17:11:38.103Z | https://knb.ecoinformatics.org/knb/d1/mn
+ urn:node:LTER  | U.S. LTER Network        | MN   | UP    | t           | 2022-05-09T14:45:11.228Z | https://gmn.lternet.edu/mn
+ urn:node:CDL   | UC3 Merritt              | MN   | UP    | t           | 2014-12-11T23:12:03.884Z | https://merritt-aws.cdlib.org:8084/mn
+ urn:node:PISCO | PISCO MN                 | MN   | UP    | t           | 2022-03-31T23:41:08.365Z | https://data.piscoweb.org/catalog/d1/mn
+ urn:node:DRYAD | Dryad Digital Repository | MN   | DOWN  | t           | 2018-09-18T03:54:10.492Z | https://datadryad.org/mn 
+(5 rows)
+
+### filestore table
+
+metadig=> select file_id,pid,suite_id,storage_type,media_type,alt_filename from filestore limit 5;
+               file_id                | pid                   |     suite_id     | storage_type | media_type  | alt_filename
+--------------------------------------+-----------------------+------------------+--------------+-------------+----------------------------------
+ ac6e4e1a-fff5-4f27-aed7-42d4fdf4c674 |                       |                  | code         | text/x-rsrc | graph_cumulative_quality_scores.R
+ dfcac5cb-945b-4bdd-b25f-8c5140e626cb | urn:uuid:35f4c58e-... | FAIR-suite-0.3.1 | graph        | image/png   |
+ 2f02381e-fda1-48cd-9ba1-9beb45e280e2 | urn:uuid:35f4c58e-... | FAIR-suite-0.3.1 | data         | text/csv    |
+ 1a54e6ea-991b-44a8-89d0-ef92411198fa | urn:uuid:77fc14cc-... | FAIR-suite-0.3.1 | graph        | image/png   |
+ dfb6f42a-72e2-4a5a-ae1f-3cf23456f06e | urn:uuid:77fc14cc-... | FAIR-suite-0.3.1 | data         | text/csv    |
+(5 rows)
