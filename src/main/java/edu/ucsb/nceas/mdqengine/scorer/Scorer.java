@@ -201,7 +201,6 @@ public class Scorer {
                 }
                 log.debug("nodeId: " + nodeId);
 
-
                 label: try {
                     MDQconfig cfg = new MDQconfig();
                     // Pids associated with a collection, based on query results using 'collectionQuery' field in solr.
@@ -210,6 +209,7 @@ public class Scorer {
                     // Get the admin subject id and MN URL from the config file. Note this could also be obtained
                     // from the CN, but this is faster and doesn't require a web service call
                     String nodeAbbr = nodeId.replace("urn:node:", "");
+                    log.debug("Reading node info from properties file...");
                     subjectId = cfg.getString(nodeAbbr + ".subjectId");
                     // TODO:  Cache the node values from the CN listNode service
                     nodeServiceUrl = cfg.getString(nodeAbbr + ".serviceUrl");
