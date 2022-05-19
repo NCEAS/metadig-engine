@@ -1,0 +1,15 @@
+source,destination,params,comment
+# source: The URL of a web resource to download
+# destination: The local destination filename for the web resource
+# params: parameters related to the download of the file
+#   - "newer": if present, the downloaded file will only replace an existing file if the web resource is newer
+#   - "mediaType": for example "application/json" - used in the http request "Accept" header to obtain the URL
+# comment: a description of the resourece
+# Dataset quality scoring tasks
+# ESS-DIVE Project File V2 - stage version
+#https://mule-stage.ess-dive.lbl.gov/api/v1/project/,/opt/local/metadig/data/ess-dive-project-list-v2.json,"newer;application/json","ESS-DIVE Project List v2"
+https://mule.ess-dive.lbl.gov/api/v1/project/,/opt/local/metadig/data/ess-dive-project-list-v2.json,"newer;application/json","ESS-DIVE Project List v2"
+# R program called by metadig-scorer to create "cummulative" graphs
+#https://raw.githubusercontent.com/NCEAS/metadig-engine/main/src/main/resources/code/graph_cumulative_quality_scores.R,/opt/local/metadig/store/stage/code/graph_cumulative_quality_scores.R,"newer","R script"
+# R program called by metadig-scorer to create "monthly" graphs
+#https://raw.githubusercontent.com/NCEAS/metadig-engine/main/src/main/resources/code/graph_monthly_quality_scores.R,/opt/local/metadig/store/stage/code/graph_monthly_quality_scores.R,"newer","R script"

@@ -46,5 +46,9 @@ score,mn-portal-DataONE-FAIR,metadig,0 25 2 * * ?,";FAIR-suite-0.3.1;urn:node:CN
 #      investigated further and potentially a bug needs to be logged in github for this. Until then, an easy workaround is to ensure that no two tasks are started
 #      at the same time, so adjust the cron schedule accordingly.
 #
-# Node list from DataONE
-nodelist,MN-NODE-LIST,metadig,0 0/1 * * * ?,"urn:node:CN"
+# Node list from DataONE - run every hour, at the beginning of the hour 
+nodelist,MN-NODE-LIST,metadig,0 45 * * * ?,"urn:node:CN"
+#
+# Acquire data files that are used by assessment checks
+# This task runs every hour on the half hour
+downloads,downloads,metadig,0 30 0/1 * *  ?,"no params"
