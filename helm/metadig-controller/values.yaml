@@ -8,7 +8,7 @@ image:
   repository: docker.io/metadig/metadig-controller
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
-  tag: "2.3.4dev"
+  tag: "2.4.0"
 
 imagePullSecrets: []
 nameOverride: ""
@@ -46,7 +46,7 @@ service:
   targetPort: metadig-tomcat
 
 ingress:
-  enabled: true
+  enabled: false
   className: nginx
   annotations:
     nginx.ingress.kubernetes.io/enable-cors: "true"
@@ -55,13 +55,13 @@ ingress:
     nginx.ingress.kubernetes.io/cors-allow-credentials: "true"
     cert-manager.io/cluster-issuer: "letsencrypt-prod"
   hosts:
-    - host: api.test.dataone.org
+    - host: api.dataone.org
       paths:
         - path: /quality
           pathType: Prefix
   tls:
   - hosts:
-    - api.test.dataone.org
+    - api.dataone.org
     secretName: ingress-nginx-tls-cert
 
 resources: {}

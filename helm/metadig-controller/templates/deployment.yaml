@@ -58,11 +58,11 @@ spec:
       - name: metadig-config-volume
         configMap:
           name: metadig-config-volume
-          defaultMode: 0644
+          defaultMode: 0640
       - name: metadig-log4j-volume
         configMap:
           name: metadig-log4j-volume
-          defaultMode: 0644
+          defaultMode: 0640
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
