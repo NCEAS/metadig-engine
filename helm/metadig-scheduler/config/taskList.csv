@@ -18,8 +18,9 @@ task-type,task-name,task-group,cron-schedule,params
 # Dataset quality scoring tasks
 quality,quality-knb,metadig,0 0/1 * * * ?,"^eml.*|^http.*eml.*;knb.suite.1;urn:node:KNB;2020-08-24T00:00:00.00Z;1;1000"
 quality,quality-arctic,metadig,5 0/1 * * * ?,"^eml.*|^http.*eml.*;arctic.data.center.suite.1;urn:node:ARCTIC;2022-04-01T00:00:00.00Z;1;1000"
-quality,quality-dataone-fair,metadig,10 0/1 * * * ?,"^eml.*|^http.*eml.*|.*www.isotc211.org.*;FAIR-suite-0.3.1;urn:node:CN;2022-05-10T00:00:00.00Z;1;1000"
+quality,quality-dataone-fair,metadig,10 0/1 * * * ?,"^eml.*|^http.*eml.*|.*www.isotc211.org.*;FAIR-suite-0.3.1;urn:node:CN;2010-00-01T00:00:00.00Z;1;1000"
 quality,quality-ess-dive,metadig,15 0/1 * * * ?,"^eml.*|^http.*eml.*;ess-dive.data.center.suite-1.1.0;urn:node:ESS_DIVE;2022-05-10T00:00:00.00Z;1;1000;"
+#quality,quality-cerp_sfwmd,15 0/1 * * * ?,"^eml.*|^http.*eml.*;FAIR-suite-0.3.1;urn:node:CERP_SFWMD;2010-10-07T00:00:00.00Z;1;1000;"
 #
 # Portal scoring tasks
 score,portal-KNB-FAIR,metadig,5 0/1 * * * ?,"*portals*;FAIR-suite-0.3.1;urn:node:KNB;2020-08-10T00:00:00.00Z;1;100;portal"
@@ -44,9 +45,9 @@ score,mn-portal-DataONE-FAIR,metadig,0 25 2 * * ?,";FAIR-suite-0.3.1;urn:node:CN
 #      investigated further and potentially a bug needs to be logged in github for this. Until then, an easy workaround is to ensure that no two tasks are started
 #      at the same time, so adjust the cron schedule accordingly.
 #
-# Node list from DataONE - run every hour, at the beginning of the hour 
+# Node list from DataONE - run every hour, near the end of each hour
 nodelist,MN-NODE-LIST,metadig,0 45 * * * ?,"urn:node:CN"
 #
 # Acquire data files that are used by assessment checks
-# This task runs every hour on the half hour
-downloads,downloads,metadig,0 30 0/1 * *  ?,"no params"
+# This task runs every hour, at the half hour
+downloads,downloads,metadig,0 30 * * *  ?,"no params for this task - see docs for 'downloadsList.csv'"

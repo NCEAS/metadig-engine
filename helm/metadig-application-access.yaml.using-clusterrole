@@ -44,10 +44,9 @@ roleRef:
 
 ---
 apiVersion: rbac.authorization.k8s.io/v1
-kind: Role
+kind: ClusterRole
 metadata:
   name: kube-system-reader
-  namespace: kube-system
 rules:
 - apiGroups: [""]
   resources: ["services"]
@@ -55,16 +54,17 @@ rules:
 
 ---
 apiVersion: rbac.authorization.k8s.io/v1
-# This role binding allows metadig to read service descriptions in the kube-system namespace
-kind: RoleBinding
+# This cluster role binding allows anyone in the "manager" group to read secrets in any namespace.
+kind: ClusterRoleBinding
 metadata:
   name: kube-system-reader
-  namespace: kube-system
+  namespace: metadig
 subjects:
 - kind: ServiceAccount
   name: metadig
   namespace: metadig
 roleRef:
   apiGroup: ""
-  kind: Role
+  kind: ClusterRole
   name: kube-system-reader
+
