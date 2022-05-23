@@ -1,16 +1,67 @@
 
-# Metadata Assessment
+# MetaDIG Metadata Assessment Engine (metadig-engine)
 
-The MetaDIG (Metadata Improvement and Guidance) project was funded for metadata improvement advocacy, the development of metadata evaluation criteria and the development of metadata assessment tools. This repository contains a metadata assessment tool, the MetaDIG engine, aka metadig-engine. The metadig-engine assesses a metadata document to see how closely it adheres to a suite of checks. Each assessment check inspects the contents of one or more elements from the metadata document. From this assessment process, a report is generated that describes if each check's criteria are met or not.
+The MetaDIG (Metadata Improvement and Guidance) project has been funded for metadata improvement advocacy, the development of metadata evaluation criteria and the development of metadata assessment tools. This repository contains a metadata assessment tool, the MetaDIG engine, aka metadig-engine. The metadig-engine assesses a metadata document to see how closely it adheres to a suite of checks. Each assessment check inspects the contents of one or more elements from the metadata document. From this assessment process, a report is generated that describes if each check's criteria are met or not.
 
-## MetaDIG Assessment Engine (metadig-engine)
+## Building metadig-engine
+
+## metadig-engine Dependancies
+### metadig-r
+
+metadig-engine assessment checks that are written in the R programming language can use the [metadig-r](https://github.com/NCEAS/metadig-r) R package, which contains functions that perform common assessment tasks. The metadig-r package is made available to metadig-engine via an R source package, for example 'metadig_0.2.0.tar.gz`. This file is used during the building of the metadig-worker Docker image, which is described later in this document. Additional information on building and using the metadig-r R package is available from the [github repo](https://github.com/NCEAS/metadig-r).
+
+metadig-r can produce a distribution tar file that will be included in metadig-engine builds. This R package hasn't been published to CRAN so the distribution tar file must be created on a local 
+github repo:
+
+```
+git clone https://github.com/NCEAS/metadig-r
+R CMD build metadig-r
+cp metadig_0.2.0.tar.gz metadig-engine/Docker/metadig-scorer
+cp metadig_0.2.0.tar.gz metadig-engine/Docker/metadig-worker
+```
+
+This distribution file will be incorporated into the metadig-engine Docker containers when they are built.
+
+### metadig-py
+
+The metadig-py component is a Python package that assists in the authoring of metadig-engine checks written in Python. metadig-py is made available to metadig-engine by building the Python package from the [metadig-py](https://github.com/NCEAS/metadig-py) repository, then placing the `metadig-py` directory in the metadig-engine working directory, which is described in [Running metadig-engine](#running)
+
+Currently this file has to be manually installed to /opt/local/metadig/metadig-py (also available from /mnt/k8ssubvol/metadig/metadig-py).
+
+See https://github.com/NCEAS/metadig-py for details on building and deploying metadig-py.
+
+### metadig-checks
+
+Metadata assessment checks assoicated with this project can be found at https://github.com/NCEAS/metadig-checks. The metadig-checks distribution is built from that repository, then deployed to the metadig-engine working directory, as described in that repository.
+
+Currently a metadig-checks release must be deployed manually to /opt/local/metadig (also available from /mnt/k8ssubvol/metadig).
+
+See https://github.com/NCEAS/metadig-checks for details on building and deploying metadig-checks.
+
+### RabbitMQ
+
+RabbitMQ is an open source messge brokering system that can be used to queue assessment requests for metadig-engine. 
+
+MetaDIG engine uses RabbitMQ to communicate between metadig-controller and metadig-worker, metadig-scorer.
+
+A RabbitMQ distribution is provided by Bitnami and installed via helm. See the *operations-manual* for details.
+
+### Solr
+
+A Solr index distir
 
 ## Building metadig-engine
 
 The following Maven command performas a complete build of metadig engine. Each Maven target will be explained separately
 
 ```
-mvn clean package docker:build docker:push
+mvn clean mvn package install
+```
+
+If running tests is not desired, the package can be build with the command:
+
+```
+mvn clean mvn package install -Dmaven.test.skip=true
 ```
 
 - mvn clean
@@ -20,24 +71,10 @@ The previous build is removed in preparation for a new build.
 All source code is compiled and the metadig-engine jar file is built.
 
 - mvn install
-The metadig-engine deliverables are copied to the local Maven repository (i.e. ~/.m2/repository). This step makes the deliverables available to other packages that may require them. For example, the [metadig-webapp](https://github.com/NCEAS/metadig-webapp) componenet requires metadig-engine for builds and can obtain them from the local Mavin repository.
 
-## metadig-engine Dependancies
-### metadig-r
+The metadig-engine deliverables are copied to the local Maven repository (i.e. ~/.m2/repository). This step makes the deliverables available to other packages that require them. For example, the [metadig-webapp](https://github.com/NCEAS/metadig-webapp) repository requires metadig-engine for builds and can obtain them from the local Mavin repository. The metadig-engine repo builds and published the metadig-postgres, metadig-worker, metadig-scorer and metadig-scheduler Docker image. (The metadig-webapp repository builds and published the metadig-controller Docker image).
 
-metadig-engine assessment checks that are written in the R programming language can use the [metadig-r](https://github.com/NCEAS/metadig-r) R package, which contains functions that perform common assessment tasks. The metadig-r package is made available to metadig-engine via an R source package, for example 'metadig_0.2.0.tar.gz`. This file is used during the building of the metadig-worker Docker image, which is described later in this document. Additional information on building and using the metadig-r R package is available from the [github repo](https://github.com/NCEAS/metadig-r).
-
-### metadig-py
-
-The metadig-py component is a Python package that assists in the authoring of metadig-engine checks written in Python. metadig-py is made available to metadig-engine by building the Python package from the [metadig-py](https://github.com/NCEAS/metadig-py) repository, then placing the `metadig-py` directory in the metadig-engine working directory, which is described in [Running metadig-engine](#running)
-
-### metadig-checks
-
-Metadata assessment checks assoicated with this project can be found at https://github.com/NCEAS/metadig-checks. The metadig-checks distribution is built from that repository, then deployed to the metadig-engine working directory, as described in that repository.
-
-### RabbitMQ
-
-## Building metadig-engine Docker images
+## Building and Publishing metadig-engine Docker images
 
 Docker images are built for metadig-engine services and posted to https://hub.docker.com/r/metadig. Once the
 software has been build, the Docker images can be build and distributed using the following command:
@@ -48,14 +85,57 @@ mvn docker:build docker:push
 ```
 
 It is necessary to use Docker login credentials in order to push images to Docker Hub. The username and
-password for the Docker Hub account are available in the NCEAS Keybase system.
+password for the Docker Hub account are available in the NCEAS security repo at ./security/nceas/metadig-maven-settings.gpg.
+This file should be decrypted and copied to ~/.m2/settings.xml. When maven runs, it will read the credentials from this file and send them to Docker hub to enable the publishing of Docker images.
 
-Writing checks
+After the maven publish step, Docker images are publicly available, for example, for metadig-controller, image tags and publishing dates can be viewed at
+```
+https://hub.docker.com/r/metadig/metadig-controller
+```
 
-using subselectors
-- for each main selector, the subselector is evaluated
-- if multiple values returned, they will be returned as a list
-- if a subselector value is not returned for the corresponding selector, then that array value is set to None
+## Components dependant on metadig-engine
+### metadig-webapp
+
+The [metadig-webapp repository](https://github.com/NCEAS/metadig-webapp) builds the metadig-controller distribution and Docker image. This image contains a distribution of the Tomcat servlet engine that metadig-controller runs inside of. The build process obtains the metadig-engine distribution from the local maven repository (~/.m2) after metadig-engine has been built.
+
+Note that the pom.xml file must be updated so that the appropriate version of metadig-engine distribution is obtained, for example: https://github.com/NCEAS/metadig-webapp/blob/master/pom.xml#L10.
+
+### Building metadig-webapp
+
+Once metdig-engine has been built and installed to the local maven repository, metadig-webapp can be built.
+
+The metadig-webapp component is included in the repo mentioned above, however, for convenience the metadig-webapp build process will be described here.
+
+First, a local copy of the github repo should be created:
+
+```
+git clone https://github.com/NCEAS/metadig-webapp
+cd metadig-webapp
+```
+
+The following Maven command performas a complete build of metadig engine. Each Maven target will be explained separately
+
+```
+mvn clean mvn package install
+```
+
+If running tests is not desired, the package can be build with the command:
+
+```
+mvn clean mvn package install -Dmaven.test.skip=true
+```
+
+The maven arguments for these commands are described below:
+
+- mvn clean
+The previous build is removed in preparation for a new build.
+
+- mvn package
+All source code is compiled and the metadig-engine jar file is built.
+
+- mvn install
+
+The metadig-engine deliverables are copied to the local Maven repository (i.e. ~/.m2/repository). This step makes the deliverables available to other packages that require them. For example, the [metadig-webapp](https://github.com/NCEAS/metadig-webapp) repository requires metadig-engine for builds and can obtain them from the local Mavin repository. The metadig-engine repo builds and published the metadig-postgres, metadig-worker, metadig-scorer and metadig-scheduler Docker image. (The metadig-webapp repository builds and published the metadig-controller Docker image).
 
 ## Running metadig-engine {#running}
 
@@ -63,40 +143,48 @@ metadig-engine reads assessment suites, checks, configuration and data files fro
 
 ### Running Locally
 
-In order to quickly test an updated assessment suite or new functionality, the  metadig-engine assessment program can be called directly, without using metadig-controller and metadig-worker. This is done by calling the metadig-engine main Java class from the metadig-engine development working directory:
+In order to quickly test an updated assessment suite, the  metadig-engine assessment program can be called directly, without using metadig-controller and metadig-worker. This is done by calling the metadig-engine main Java class from the metadig-engine development working directory:
 
-doc="${workDir}/test/ADC/doi:10.18739_A2W08WG3R.xml"
-sysmeta="${workDir}/test/ADC/doi:10.18739_A2W08WG3R.sm"
-
+```
+workDir=$PWD
+doc="${workDir}/src/test/resources/test-docs/doi:10.18739_A2W08WG3R.xml"
+sysmeta="${workDir}/src/test/resources/test-docs/doi:10.18739_A2W08WG3R.sm"
+suite=/opt/local/metadig/suites/arctic-data-center.xml
 java -cp ./target/metadig-engine-${version}.jar edu.ucsb.nceas.mdqengine.MDQEngine $suite $doc $sysmeta
 
-Edit metadig.properties
+```
+
+Note that the metadig-check distribution can be installed locally into your local /opt/local/metadig directory so that this type of testing can be performed.
+See the [metadig-webapp](https://github.com/NCEAS/metadig-webapp) for directions.
 
 ### Running Locally with RabbitMQ Message Queuing
 
-RabbitMQ is an open source messge brokering system that can be used to queue assessment requests for metadig-engine. 
+In the k8s environment, RabbitMQ is used for communication between metadig-controller and other metadig services (metadig-worker, ...). Because building and publishing metadig-engine Docker iamges can be very time consuming, it is possible to test RabbitMQ messaging and Solr indexing on a local development machine.
+It is required to install and start all dependencies listed in the `metadig-engine Dependencies` section.
+
 
 The use of RabbitMQ with metadig-engine is intended to be run on a k8s deployment, however, RabbitMQ can be used on the local machine for development testing.
 
 RabbitMQ can be installed easily on MacOS, for example, using [Homebrew](https://www.rabbitmq.com/install-homebrew.html). 
 
-In addition, a local Solr server can be installed so that indexing of assessment scores can be tested.
+In addition, a local Solr server can be installed via homebrew so that indexing of assessment scores can be tested.
 
 Depending on which programs require testing, metadig-controller, metadig-worker, metadig-scorer and metadig-scheduler can be started as background processes. Then sampe quality assessment or scoring request can be sent to metadig-controller (running in "test" mode).
 
 - Install RabbitMQ
 - Install Solr and create a "quality" core using the "solrconfig.xml" and "schema.xml" files in the metadig-engine repo
 - copy metadig.properties to /opt/local/metadig
-- copy required suite to /opt/local/metadig
+- copy log4j.properties to /opt/local/metadig/config
+- copy required metadig-checks suite to /opt/local/metadig
 - set the desired logging levels in /opt/local/metadig/config/log4j.properties
 
 For a test of communication between metadig-controller and metadig-worker:
 - start metadig-controller in "test" mode in one terminal window
-  - bin/startController.sh
+  - bin/startController.sh &
 - start metadig-worker in another terminal window
-  - bin/startWorker.sh
+  - bin/startWorker.sh &
 - send a sample request to metadig-controller
-  - bin/sendQualityTest.py
+  - bin/sendAssessmentTest.py
 
 View the log files in each terminal window. An example run is shown below.
 In the metadig-controller window
@@ -114,8 +202,35 @@ $ ./bin/startController.sh 33000 &
 20220509-20:42:36: [INFO]: Controller test mode is enabled. [edu.ucsb.nceas.mdqengine.Controller]
 20220509-20:42:36: [INFO]: Controller listening on port 33000for filenames to submit [edu.ucsb.nceas.mdqengine.Controller]
 20220509-20:42:36: [INFO]: Waiting to establish connection to test client: [edu.ucsb.nceas.mdqengine.Controller]
+```
 
-$ bin/sendQualityTest.py
+Start metadig-worker in another terminal window, to separate controller and worker messages between the two windows.
+```
+$ ./bin/startWorker.sh &
+[1]+ bin/startController.sh &
+avatar:metadig-engine-develop slaughter$ bin/startWorker.sh
+20220523-15:32:49: [INFO]: Set RabbitMQ host to: localhost [edu.ucsb.nceas.mdqengine.Worker:404]
+20220523-15:32:49: [INFO]: Set RabbitMQ port to: 5672 [edu.ucsb.nceas.mdqengine.Worker:405]
+20220523-15:32:50: [INFO]: Connected to RabbitMQ queue quality [edu.ucsb.nceas.mdqengine.Worker:418]
+20220523-15:32:50: [INFO]: Waiting for messages. To exit press CTRL+C [edu.ucsb.nceas.mdqengine.Worker:419]
+20220523-15:32:50: [INFO]: Connected to RabbitMQ queue completed [edu.ucsb.nceas.mdqengine.Worker:427]
+20220523-15:32:50: [INFO]: Calling basicConsume [edu.ucsb.nceas.mdqengine.Worker:316]
+```
+
+Send a metadata document and system metadata to metadig-controller that is running in test mode. Because a parameter containing a port
+number is passed by the script, metadig-controller will enter 'test' mode, so that it will read input from the port number. The default, non-test
+behaviour of metadig-controller is to run inside a servlet engine.
+```
+$ bin/sendAssessmentTest.py
+Number of arguments:  1
+host: localhost
+port: 33000
+doi:10.18739_A2W08WG3R,./src/test/resources/test-docs/doi:10.18739_A2W08WG3R.sm,./src/test/resources/test-docs/doi:10.18739_A2W08WG3R.sm,arctic.data.center.suite.1,urn:node:ARCTIC
+20220523-15:37:08: [INFO]: Running suite 'arctic.data.center.suite.1' for metadata pid doi:10.18739_A2W08WG3R [edu.ucsb.nceas.mdqengine.Worker:454]
+20220523-15:37:08: [INFO]: Reading suites from: file:///opt/local/metadig/suites [edu.ucsb.nceas.mdqengine.store.InMemoryStore:73]
+...
+
+```
 
 ### Running on Kubernetes
 
@@ -224,7 +339,7 @@ metadig=> select * from nodes limit 5;
  urn:node:LTER  | U.S. LTER Network        | MN   | UP    | t           | 2022-05-09T14:45:11.228Z | https://gmn.lternet.edu/mn
  urn:node:CDL   | UC3 Merritt              | MN   | UP    | t           | 2014-12-11T23:12:03.884Z | https://merritt-aws.cdlib.org:8084/mn
  urn:node:PISCO | PISCO MN                 | MN   | UP    | t           | 2022-03-31T23:41:08.365Z | https://data.piscoweb.org/catalog/d1/mn
- urn:node:DRYAD | Dryad Digital Repository | MN   | DOWN  | t           | 2018-09-18T03:54:10.492Z | https://datadryad.org/mn 
+ urn:node:DRYAD | Dryad Digital Repository | MN   | DOWN  | t           | 2018-09-18T03:54:10.492Z | https://datadryad.org/mn
 (5 rows)
 
 ### filestore table
