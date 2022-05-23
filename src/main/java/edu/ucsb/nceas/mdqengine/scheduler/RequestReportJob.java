@@ -168,6 +168,7 @@ public class RequestReportJob implements Job {
 
         log.debug("Executing task " + taskType + ", " + taskName + " for node: " + nodeId + ", suiteId: " + suiteId);
 
+        /* Get connection to the DataONE MN or CN */
         try {
             mrc = new HttpMultipartRestClient();
         } catch (Exception e) {
@@ -208,6 +209,9 @@ public class RequestReportJob implements Job {
 
         ArrayList<Node> nodes = new ArrayList<>();
 
+        /* If the CN is being harvested, then get all the nodes in the node db. The node db contains
+           info about all nodes registered with the CN.
+         */
         if (isCN) {
             nodes = store.getNodes();
         } else {
@@ -224,14 +228,16 @@ public class RequestReportJob implements Job {
             }
         }
 
+        /* Depending on the scheduled task, either process a single MN or if the task is for the CN,
+           process all nodes current registered with the CN.
+         */
         String harvestNodeId = null;
         for (Node node : nodes) {
 
             harvestNodeId = node.getIdentifier().getValue();
             // If processing a CN, check each MN to see if it is being synchronized and if it
-            // is up.
+            // is marked as up.
             if (isCN) {
-
                 // The NodeList task doesn't save CN entries from the DataONE 'listNodes()' service, but check
                 // just in case.
                 if (node.getType().equals(NodeType.CN)) {
@@ -239,6 +245,7 @@ public class RequestReportJob implements Job {
                     continue;
                 }
 
+                // Skip MN entries that have not been synchronized
                 if (! node.isSynchronize() || ! node.getState().equals(NodeState.UP)) {
                     log.trace("Skipping disabled node: " + node.getIdentifier().getValue() + ", sync: " + node.isSynchronize()
                             + ", status: " + node.getState().toString());
@@ -248,12 +255,16 @@ public class RequestReportJob implements Job {
                 DateTime mnLastHarvestDT = new DateTime(node.getSynchronization().getLastHarvested(), DateTimeZone.UTC);
                 DateTime oneMonthAgoDT = new DateTime(DateTimeZone.UTC).minusMonths(1);
 
+                /* If an MN hasn't been harvested for a month, then skip it - we don't want to waste time contacting MNs that
+                   don't have new content.
+                 */
                 if (mnLastHarvestDT.isBefore(oneMonthAgoDT.toInstant())) {
                     DateTimeZone.setDefault(DateTimeZone.UTC);
                     DateTimeFormatter dtfOut = DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
                     log.trace("Skipping node " + node.getIdentifier().getValue() + " that hasn't been sync'd since " + dtfOut.print(mnLastHarvestDT));
                     continue;
                 }
+
             }
 
             log.trace("Harvesting node: " + node.getIdentifier().getValue());
@@ -267,9 +278,9 @@ public class RequestReportJob implements Job {
 
             Task task;
             task = store.getTask(taskName, taskType, harvestNodeId);
-            // If a 'task' entry has not been saved for this task name yet, then a 'lastHarvested'
-            // DataTime will not be available, in which case the 'startHarvestDataTime' from the
-            // config file will be used.
+            // If a 'task' entry has not been saved for this task name yet (i.e. this is an MN that has just been
+            // registerd with DataONE), then a 'lastHarvested' DataTime will not be available, in which case the
+            // 'startHarvestDataTime' from the config file will be used.
             if (task.getLastHarvestDatetime(harvestNodeId) == null) {
                 task.setTaskName(taskName);
                 task.setTaskType(taskType);
