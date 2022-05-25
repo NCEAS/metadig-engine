@@ -1,22 +1,36 @@
 # MetaDIG Kubernetes Operations Manual
 
-The MetaDIG Metadata Assessment services (MAS) can be configured and installed on the DataONE Kubernetes (k8s) cluster. This documentation describes the installation and configuration of these services for k8s.
+The MetaDIG Metadata Assessment services can be configured and installed on the DataONE Kubernetes (k8s) cluster. This documentation describes the installation and configuration of these services for k8s.
 
-For information regarding building MES software, please refer to the MetaDIG Developer Guide.
+For information regarding building MetaDIG software, please refer to the MetaDIG Developer Guide.
 
 # Deploying MetaDIG Assessment Services on k8s
 
 ## MetaDIG Service Dependencies
 
-The MetaDIG Assessment Services (MAS) are dependant on the following components which must be configured and installed before any MAS can be installed.
+The MetaDIG Assessment services are dependant on the following components which must be configured and installed before any of the services can be installed.
+
+### Metadig Ingress
+
+A k8s ingress resource provides network traffic routing from outside the k8s cluster network to a k8s service.
+
+The metadig-engine ingress definition can be found in ./k8s/ingress-metadig.yaml. This k8s resource only needs to be created once, and at this time is
+not included in the Helm install, but could be if desired. Note that every time the ingress resource is deleted and recreated, as would happen with a 'helm delete' and 'helm install',
+the cert-manager sends a new request to the Let's Encrypt service to the Let's Encrypt service. Cert-manager is described in the DataONE k8s-cluster documentation [here](https://github.com/DataONEorg/k8s-cluster/blob/main/authentication/LetsEncrypt.md).
 
 ### Role and Rolebinding definitions
 
 The k8s Role Based Access Control (RBAC) defintions for metadig-engine are provided at ./k8s/metadig-application-access.yaml.
 
-The *metadig* Role and RoleBinding are similar to those for any other DataONE k8s application. Metadig-engine also requires the additional Role and RoleBinding
-'kube-system-reader'. This is necessary so that metadig services can define a specific DNS configuration issue that is unique to metadig-engine. The details are
-providied in the github issue https://github.com/NCEAS/metadig-engine/issues/312.
+The *metadig* Role and RoleBinding are similar to those for any other DataONE k8s application, providing all k8s access to a single k8s namespace. 
+ 
+Metadig-engine also requires the additional Role and RoleBinding 'kube-system-reader'. This is necessary so that metadig services can define a specific DNS configuration to resolve aissue that is unique to metadig-engine. The details are providied in the github issue https://github.com/NCEAS/metadig-engine/issues/312.
+
+Note that the appropriate `~/.kube/config` must be installed on the local system to enable modifying the `metadig` namespace. Once this file is installed, the following command must be issued
+to enable authorization to the `metadig` namespace:
+```
+kubectl config use-context prod-metadig
+```
 
 ### Persistent Storage
 
@@ -38,20 +52,23 @@ $ kubectl create -f ./k8s/cephfs-metadig-pvc.yaml
 $ kubectl create -f ./k8s/cephfs-metadig-pv.yaml
 ```
 
-These commands only need to be entered once, and as they have been run for the current DataONE production and development k8s clusters, do not need to be run again. 
-These PV and PVC defintions can be added to the Helm chart in the future for completeness.
+These commands only need to be entered once, and as they have been run for the current DataONE production and development k8s clusters, do not need to be run again.
+The PV that metadig-engine services uses is manually created. See a description of CephFS subvolumes used with k8s services described [here](https://github.com/DataONEorg/k8s-cluster/blob/main/storage/Ceph/Ceph-CSI-CephFS.md).
 
 ### PostgreSQL
-The MetaDIG PostgreSQL stores assessment reports, PID information, and information about the DataONE Member Nodes and Coordinating Node from which metadata is harvested.
 
-PostgreSQL must be started before any MetaDIG service is started. The PostgreSQL server can be started from a local copy of the metadig-engine github repository, for example:
+The MetaDIG PostgreSQL stores assessment reports, DataONE persistent Identifier (pid) information, and information about the DataONE Member Nodes and Coordinating Node from which metadata is harvested.
+
+PostgreSQL must be started before any MetaDIG service is started. The PostgreSQL server can be started from a local copy of the metadig-engine github repository using the [Helm package manager](https://helm.sh). For example:
+
 ```
 cd git/NCEAS/metadig-engine/helm
 kubectl config use-context prod-metadig
 helm install postgres ./metadig-postgres --namespace metadig --version=1.0.0
 ```
 
-The metadig-postgres service uses the CephFS Persistent Volume 'cephfs-metadig-pv'. Communication between the metadig-postgres pod and the PV is provided by ceph-csi.
+The metadig-postgres service uses the CephFS Persistent Volume 'cephfs-metadig-pv'. Communication between the metadig-postgres pod and the PV is provided by [ceph-csi](https://github.com/DataONEorg/k8s-cluster/blob/main/storage/Ceph/Ceph-CSI.md).
+
 In addition, the PV has been made available to the Linux command line on the production control node `k8s-ctrl-1.dataone.org` via a volume mount. This volume mount
 was manually created and is available at `/mnt/k8ssubvol`. The subdirectory `postgresql` contains the metadig-postgres database files.
 
@@ -66,7 +83,7 @@ for any metadig-engine services, as access to the Ceph Storage Cluster is provid
 
 RabbitMQ is used to queue assement requests that are created by the metadig-scheduler service.
 
-First the repository that contains the Helm chart must be added:
+First the Bitnami repository that contains the Helm chart must be added:
 
 ```
 helm repo add bitnami https://charts.bitnami.com/bitnami
@@ -103,6 +120,8 @@ helm install metadig-rabbitmq bitnami/rabbitmq \
 --set tls.enabled=false
 ```
 
+See `metadig-rabbitmq/install-metadig-rabbitmq.sh`.
+
 *Note that the correct username and password must be substituted for '<username>' and '<password>'.*
 These values area available from the security repo at ./k8s/metadigPWs.gpg.
 
@@ -112,12 +131,17 @@ Chart options and additional information is described [here](https://github.com/
 
 Note that when metadig-controller starts, it will create RabbitMQ queues if they don't already exist.
 
+The Metadig RabbitMQ Server can be uninstalled with the command:
+```
+helm delete metadig-rabbitmq -n metadig
+```
+
 ### Solr
 
-Metadata assessments are written to an Apache Solr server for each PID/Assessment Suite combination. 
+After metadig-worker creates a metadata assessments, a summary of that information is written to an Apache Solr server for each PID/Assessment Suite combination. 
 
 Currently the Metadig Solr server runs in standalone mode (not SolrCloud) and is not available outside of the local Kubernetes network. 
-This can be upgraded by adding SolrCloud support if and when the Metadig Solr Server is made available to client applications.
+This could be upgraded in the future by adding SolrCloud support if and when the Metadig Solr Server is made available to client applications.
 
 The Metadig Solr Server uses the Bitnami Helm chart and Docker image. 
 
@@ -171,6 +195,8 @@ helm install metadig-solr bitnami/solr \
 --set zookeeper.persistence.storageClass=""
 ```
 
+See `./helm/metadig-solr/install-metadig-solr.sh`
+
 Note that the *image.tag* parameter specifies an *immutable* tag, not a *rolling* release tag. See https://docs.bitnami.com/kubernetes/apps/drupal/configuration/understand-rolling-immutable-tags/.
 A *rolling* tag represents a container that may be updated by the provider, so is not suitable for a produciton k8s environment.
 
@@ -190,7 +216,8 @@ file. This token needs to be created before metadig-scheduler and metadig-scorer
 
 ## MetaDIG Assessment Services
 
-The metadata assessment engine (metadig-engine) components are installed and updated on the DataONE Kubernetes cluster using the Helm package manager https://helm.sh.
+The metadata assessment engine (metadig-engine) components are installed and updated on the DataONE Kubernetes cluster using helm. Helm charts for metadig-engine servers
+are in the metadig-engine repo `./helm` directory.
 
 The following sections describe the commands needed configure, install and update metadig-engine services.
 
@@ -200,10 +227,10 @@ All requests from clients (via the MetaDIG REST API) are routed to metadig-contr
 what action needs occur to fulfil a request and will either complete that request itself, or send a request
 to one of the quality services.
 
-The metadig-controller service can be started with the command:
+The metadig-controller service can be started with the commands:
 
 ```
-
+cd ./helm
 helm install metadig-controller ./metadig-controller --namespace metadig --version=1.0.0
 ```
 
@@ -212,7 +239,6 @@ wish to change any of the configuration values, this property file can be edited
 applications mount this configuration file as a k8s volume, they will need to be restarted after any configuration change.
 
 This same techique can be used to update the configuration file "log4j.properties", which is used to control the logging level of metadig applications.
-
 
 This service can be uninstalled with the command
 ```
@@ -240,18 +266,23 @@ helm delete metadig-scheduler -n metadig
 
 ### metadig-scorer
 
-metadig-scorer is started with the command
-    kubectl apply -f metadig-scorer.yaml
+The metadig-scorer service creates summary graphics for DataONE portals and member nodes.
+
+metadig-scorer is started with the command:
+```
+helm install metadig-scorer ./metadig-scorer --namespace metadig --version=1.0.0 --set image.pullPolicy=Always
+```
     
 Work done by metadig-scorer is scheduled via metadig-scheduler, which sends requests to metadig-controller that forwards them to metadig-scorer determined by the task list.
 
-helm install metadig-scorer ./metadig-scorer --namespace metadig --version=1.0.0
 
 ### metadig-worker
 
+The metadig-worker service creates metadata assessments for a metadata document and associated DataONE system metadata. 
+
 The metadig-worker service is started with the command:
 ```
-    helm install metadig-worker ./metadig-worker --namespace metadig --version=1.0.0 --set replicaCount=1
+helm install metadig-worker ./metadig-worker --namespace metadig --version=1.0.0 --set replicaCount=1
 ```
 
 This service can be uninstalled with the command:
@@ -282,12 +313,14 @@ will ingest it into the metadig engine system, by moving the file to a permanent
 entry for it in the 'filestore' table. The directory in the staging area is used to determine the 'storage_type' column
 value for the entry, for example 'code', 'data' or 'graph'.
 
-cp src/main/resources/code/graph_monthly_quality_scores.R /data/metadig/store/stage/code/
+```
+cp src/main/resources/code/graph_monthly_quality_scores.R /mnt/k8ssubvol/metadig/store/stage/code/
+```
 
-Then add a 'filestore' entry into the "task file" as shown below.
+When the metadig-scheduler `filestore` task runs, the file will be moved from `./store/stage/code` to `./store/code`. Then an entry for this
+file will be added to the metadig database `filestore` table, so that it can be easily retrieved by programs such as metadig-scorer.
 
 This method is how R scripts that are run by metadig-engine are added to the system.
-
 
 # Managing Metadata Quality Engine Services
 
@@ -376,8 +409,15 @@ https://arcticdata.io/catalog/quality/urn%3Auuid%3Ac4e33a9c-f886-476b-880d-ee9fa
 ```
 
 #### Scorer task entry for portals
+```
+score,portal-ARCTIC-FAIR,metadig,10 0/1 * * * ?,"*portals*;FAIR-suite-0.3.1;urn:node:ARCTIC;2022-05-01T00:00:00.00Z;1;100;portal"
+```
 
 #### Scorer task entry for repositories
+
+```
+score,mn-portal-ARCTIC-FAIR,metadig,0 0 2 * * ?,";FAIR-suite-0.3.1;urn:node:ARCTIC;2022-05-01T00:00:00.00Z;1;1000;node"
+```
 
 #### filestore ingest task 
 ```
@@ -464,10 +504,6 @@ Note that this information could be obtained using CN DataONE API calls, but thi
 - assessment and scorer task queing request and returned status are logged to metadig-controller
 
 ## Increase Logging Level For MetaDIG Services
-
-## Queue A Test Assessment Request
-
-## Queue A Test Scorer Request
 
 ## Checking Privileges
 

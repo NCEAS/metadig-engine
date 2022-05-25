@@ -137,13 +137,21 @@ All source code is compiled and the metadig-engine jar file is built.
 
 The metadig-engine deliverables are copied to the local Maven repository (i.e. ~/.m2/repository). This step makes the deliverables available to other packages that require them. For example, the [metadig-webapp](https://github.com/NCEAS/metadig-webapp) repository requires metadig-engine for builds and can obtain them from the local Mavin repository. The metadig-engine repo builds and published the metadig-postgres, metadig-worker, metadig-scorer and metadig-scheduler Docker image. (The metadig-webapp repository builds and published the metadig-controller Docker image).
 
-## Running metadig-engine {#running}
+## Testing metadig-engine {#running}
 
 metadig-engine reads assessment suites, checks, configuration and data files from the metadig-engine working directory. The metadig-engine working directory is always located at /opt/local/metadig. When running metadig-engine is run locally, this directory is simply /opt/local/metadig on the local system. When running metadig-engine inside a Docker container, this directory is typically mapped to an external persistent volume. For example, /opt/local/metadig inside the container might be mapped to /data/metadig on the maching running Docker.
 
+### Junit Tests
+
+To run the metadig-engine unit tests, type the following command:
+
+```
+mvn surefire:test
+```
+
 ### Running Locally
 
-In order to quickly test an updated assessment suite, the  metadig-engine assessment program can be called directly, without using metadig-controller and metadig-worker. This is done by calling the metadig-engine main Java class from the metadig-engine development working directory:
+In order to quickly test an updated assessment suite, the metadig-engine assessment program can be called directly, without using metadig-controller and metadig-worker. This is done by calling the metadig-engine main Java class from the metadig-engine development working directory:
 
 ```
 workDir=$PWD
@@ -236,6 +244,12 @@ doi:10.18739_A2W08WG3R,./src/test/resources/test-docs/doi:10.18739_A2W08WG3R.sm,
 
 See the *MetaDIG Engine Kubernetes Operations Manual* for information on how to deploy metadig-engine on Kubernetes.
 
+
+## Queue A Test Assessment Request
+
+## Queue A Test Scorer Request
+
+# Appendix A
 ## metadig-engine Assessment Algorithm
 
 Here is an explaination of the 'total score' algorithm (formula).
@@ -267,8 +281,37 @@ Note that these two formulas are equivalent, and that implicitly Ofail is not co
 appear in the denominator. Therefore, the scoring counts optional checks that pass, but doesn't count
 optional checks that fail.
 
-## Appendix A - metadig Postgres Database
+## Appendix B - metadig Postgres Database
+
+Access to the metadig-postres database service is available to any pod running in the metadig k8s namespace. For debugging
+purposes, the database can be accessed locally from a host in the k8s cluster (i.e. k8s-ctrl-1.dataone.org), if the appropriate kubectl context is set.
+Access is not available from outside the k8s cluster. 
+
+For example, if on a k8s node, it is possible to use the PostgreSQL client program (if installed on the k8s host) to connect directly to the postgres 
+container that runs within the metadig-postgres pod:
+```
+addr=`kubectl get service metadig-postgres --namespace=metadig -o wide | grep 'metadig-postgres' | awk '{print $3}'`
+psql -h $addr -p 5432 -U metadig metadig
+```
+
+Once connected, it is possible to inspect metadig database tables for debugging purposes.
+
+In the same manner, the pgbouncer container:
+```
+addr=`kubectl get service metadig-postgres --namespace=metadig -o wide | grep 'metadig-postgres' | awk '{print $3}'`
+psql -h $addr -p 6432 -U postgres pgbouncer
+```
+
+Once connected, pgbouncer commands can be used to inspect connection information regarding metadig-postgres client connections.
+
+See https://www.pgbouncer.org/ for more information
+
 ### identifiers table
+
+The `identifiers` table contains a record for every DataONE pid that has been processed by metadig-engine. Below is a sample of the
+records in this table:
+
+```
 metadig=> select * from identifiers limit 5;
                   metadata_id                  |   data_source
 -----------------------------------------------+------------------
@@ -278,15 +321,26 @@ metadig=> select * from identifiers limit 5;
  1f952192145a5dd031e05f80ad0a7c23              | urn:node:PANGAEA
  urn:uuid:a94edbe2-b19a-4e7c-8459-1b46c5a271bd | urn:node:KNB
 (5 rows)
+```
 
 ### runs table
+
+The `runs` table is linked to the `identifiers` table and creates an entry for every assessment of a pid/suite combination.
+
+```
 metadig=> select metadata_id,suite_id,timestamp,error,status,sequence_id from runs limit 1;
            metadata_id            |     suite_id     |         timestamp          | results | error   | status  |           sequence_id
 ----------------------------------+------------------+----------------------------+---------+---------+----------------------------------
  062be19cc13c8ba9266530b55f63bc90 | FAIR-suite-0.3.0 | 2020-04-20 11:49:15.194+00 | ...     | success | 3e1bc7ba69d4e099467f0d4d7d8cedd2
 (1 row)
+```
 
 ### node_harvest table
+
+The `node_harvest` table contains an entry for each harvest performed for a suite.
+
+
+```
 metadig=> select * from node_harvest;
        task_name        | task_type |         node_id         |  last_harvest_datetime
 ------------------------+-----------+-------------------------+--------------------------
@@ -330,8 +384,16 @@ metadig=> select * from node_harvest;
  quality-arctic         | quality   | urn:node:ARCTIC         | 2022-05-09T20:44:54.223Z
 (38 rows)
 
+```
+
 ### nodes table
 
+The `nodes` table is derived from the DataONE CN `listNodes` service. This table contains recent information about every node
+that is registered with the DataONE CN.
+
+
+
+```
 metadig=> select * from nodes limit 5;
  identifier     | name                     | type | state | synchronize | last_harvest             | baseurl
  ---------------+--------------------------+------+-------+-------------+--------------------------+-----------------------------------------
@@ -341,15 +403,48 @@ metadig=> select * from nodes limit 5;
  urn:node:PISCO | PISCO MN                 | MN   | UP    | t           | 2022-03-31T23:41:08.365Z | https://data.piscoweb.org/catalog/d1/mn
  urn:node:DRYAD | Dryad Digital Repository | MN   | DOWN  | t           | 2018-09-18T03:54:10.492Z | https://datadryad.org/mn
 (5 rows)
+```
 
 ### filestore table
 
 metadig=> select file_id,pid,suite_id,storage_type,media_type,alt_filename from filestore limit 5;
-               file_id                | pid                   |     suite_id     | storage_type | media_type  | alt_filename
---------------------------------------+-----------------------+------------------+--------------+-------------+----------------------------------
- ac6e4e1a-fff5-4f27-aed7-42d4fdf4c674 |                       |                  | code         | text/x-rsrc | graph_cumulative_quality_scores.R
- dfcac5cb-945b-4bdd-b25f-8c5140e626cb | urn:uuid:35f4c58e-... | FAIR-suite-0.3.1 | graph        | image/png   |
- 2f02381e-fda1-48cd-9ba1-9beb45e280e2 | urn:uuid:35f4c58e-... | FAIR-suite-0.3.1 | data         | text/csv    |
- 1a54e6ea-991b-44a8-89d0-ef92411198fa | urn:uuid:77fc14cc-... | FAIR-suite-0.3.1 | graph        | image/png   |
- dfb6f42a-72e2-4a5a-ae1f-3cf23456f06e | urn:uuid:77fc14cc-... | FAIR-suite-0.3.1 | data         | text/csv    |
+               file_id                  | pid                   |     suite_id     | storage_type | media_type  | alt_filename
+----------------------------------------+-----------------------+------------------+--------------+-------------+----------------------------------
+ ac6e4e1a-fff5-4f27-aed7-42d4fdf4c674   |                       |                  | code         | text/x-rsrc | graph_cumulative_quality_scores.R
+ dfcac5cb-945b-4bdd-b25f-8c5140e626cb   | urn:uuid:35f4c58e-... | FAIR-suite-0.3.1 | graph        | image/png   |
+ 2f02381e-fda1-48cd-9ba1-9beb45e280e2   | urn:uuid:35f4c58e-... | FAIR-suite-0.3.1 | data         | text/csv    |
+ 1a54e6ea-991b-44a8-89d0-ef92411198fa   | urn:uuid:77fc14cc-... | FAIR-suite-0.3.1 | graph        | image/png   |
+ dfb6f42a-72e2-4a5a-ae1f-3:wcf23456f06e | urn:uuid:77fc14cc-... | FAIR-suite-0.3.1 | data         | text/csv    |
 (5 rows)
+
+
+## metadig-scheduler operation
+
+### CN metadata harvesting
+
+The information from the `nodes` table is used for the `CN` metadig metadata harvest to determine the queries that are
+performed against the CN `object` store. A query is performed for each node that is currently in the `UP` state, and has a `last_harvest`
+date within the last month.:w
+
+
+The production CN metadaig scheduler task entry is:
+
+```
+quality,quality-dataone-fair,metadig,10 0/1 * * * ?,"^eml.*|^http.*eml.*|.*www.isotc211.org.*;FAIR-suite-0.3.1;urn:node:CN;2010-00-01T00:00:00.00Z;1;1000"
+```
+
+This task entry tells metadig-scheduler to perform a CN harvest 10 seconds after the start of every minute. Metadata records with formatIds that match the
+regular expression `^eml.*|^http.*eml.*|.*www.isotc211.org.*` are selected for assessment. For each MN in the `nodes` table:
+
+- if the node is 'UP' and has a recent `last_harvest` it is queried
+- if the node has an entry in the `node_harvest` table, 
+  - the query begin date from `last_harvest_datetime` is used
+  - the query end date is the current time
+- else if the the node does not have an entry in the `node_harvest` table
+    - the harvest start time from the metadig-scheduler task list is used 
+- all pids with a system modified date within the specified date range are selected (from the CN `listObjects` service)
+- pids that do not match the desired formatIds are filtered out
+- all matching pids are queued for assessment
+- when the assessment is complete, an entry is made in the `node_harvest` entry with the `last_harvest_datetime` set to most recent system metadata modified datetime from all the pids processed
+
+
