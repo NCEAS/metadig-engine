@@ -45,8 +45,10 @@ cephfs-metadig-pvc   Bound    cephfs-metadig-pv                          200Gi  
 ```
 
 The PVC and associated persistent volume (PV) use a CephFS subvolume. The PV and PVC were initially created with these k8s manifests from the metadig-engine repository using these commands:
+
 ```
 # From a local copy of the metadig-engine github repository:
+
 $ kubectl use content metadig
 $ kubectl create -f ./k8s/cephfs-metadig-pvc.yaml
 $ kubectl create -f ./k8s/cephfs-metadig-pv.yaml
@@ -132,6 +134,7 @@ Chart options and additional information is described [here](https://github.com/
 Note that when metadig-controller starts, it will create RabbitMQ queues if they don't already exist.
 
 The Metadig RabbitMQ Server can be uninstalled with the command:
+
 ```
 helm delete metadig-rabbitmq -n metadig
 ```
@@ -205,6 +208,7 @@ The Solr Helm chart is described [here](https://bitnami.com/stack/solr/helm).
 Installation options and other information can be found [here](https://github.com/bitnami/charts/tree/master/bitnami/solr/#installing-the-chart).
 
 The Metadig Solr Server can be uninstalled with the command:
+
 ```
 helm delete metadig-solr -n metadig
 ```
@@ -240,7 +244,8 @@ applications mount this configuration file as a k8s volume, they will need to be
 
 This same techique can be used to update the configuration file "log4j.properties", which is used to control the logging level of metadig applications.
 
-This service can be uninstalled with the command
+This service can be uninstalled with the command:
+
 ```
 helm delete metadig-controller -n metadig
 ```
@@ -429,12 +434,14 @@ The current *taskList.csv* file is included in the Appendix.
 ### Supplimentation Data File Download Task
 
 The `download` task is responsible for acquiring web resources that are required by the MetaDIG assessment checks. 
-Resources to acquire are entered in the `helm/metadig-scheduler/config/downloadsList.csv` file, which has the format
+Resources to acquire are entered in the `helm/metadig-scheduler/config/downloadsList.csv` file, which has the format:
+
 ```
 source, destination, parameters, comments
 ```
 
 For example:
+
 ```
 https://mule.ess-dive.lbl.gov/api/v1/project/,/opt/local/metadig/data/ess-dive-project-list-v2.json,"newer;application/json","ESS-DIVE Project List v2"
 ```
@@ -462,7 +469,8 @@ that would be available to the services, such as a log4j.properties file that is
 The metadig-scorer facility creates the metrics graphics for portals and member nodes. In order to manually retrieve a graphic,
 the portal document seriesId or the member nodeId needs to be specified.
 
-To manually trigger the creation a POST request can be sent to the 'scores' service
+To manually trigger the creation a POST request can be sent to the 'scores' service:
+
 ```
 curl -X POST --insecure -H "Accept: */*" "https://api.dataone.org/quality/scores?id=${pid}&suite=${qualitySuite}&node=urn:node:ARCTIC"
 ```
@@ -470,18 +478,24 @@ curl -X POST --insecure -H "Accept: */*" "https://api.dataone.org/quality/scores
 Once the scores have been processed, they can be retrieved with a GET request:
 
 ```
-curl --insecure -H "Accept: image/png" "https://api.dataone.org/quality/scores?id=${pid}&suite=${qualitySuite}&node=urn:node:ARCTIC"```
+$ curl --insecure -H "Accept: image/png" "https://api.dataone.org/quality/scores?id=${pid}&suite=${qualitySuite}&node=urn:node:ARCTIC"
+
+$ curl --insecure -H "Accept: text/csv" "https://api.dataone.org/quality/scores?id=${pid}&suite=${qualitySuite}
 ```
-curl --insecure -H "Accept: text/csv" "https://api.dataone.org/quality/scores?id=${pid}&suite=${qualitySuite}```
+
+# Upgrading metadig-engine services on k8s
 
 # Adding a Member Node to the Assessment Harvest
 
 To add an MN to the assessment harvest:
 - add an entry to the metadig-scheduler task file ./helm/metadig-scheduler/config/taskList.csv: 
+
 ```
 quality,quality-arctic,metadig,5 0/1 * * * ?,"^eml.*|^http.*eml.*;arctic.data.center.suite.1;urn:node:ARCTIC;2022-04-01T00:00:00.00Z;1;1000"
 ```
+
 - add entries to the metadig-controller properties file ./helm/metadig-controller/config/metadig.properties:
+
 ```
 ARCTIC.subjectId = CN=urn:node:ARCTIC,DC=dataone,DC=org
 ARCTIC.serviceUrl = https://arcticdata.io/metacat/d1/mn
@@ -500,6 +514,7 @@ Note that this information could be obtained using CN DataONE API calls, but thi
 # Troubleshooting MetaDIG Engine Services
 
 ## Inspect Log Files
+
 - increase log level 
 - assessment and scorer task queing request and returned status are logged to metadig-controller
 

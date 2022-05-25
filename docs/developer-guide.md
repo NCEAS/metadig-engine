@@ -55,19 +55,21 @@ A Solr index distir
 The following Maven command performas a complete build of metadig engine. Each Maven target will be explained separately
 
 ```
-mvn clean mvn package install
+mvn clean package install
 ```
 
 If running tests is not desired, the package can be build with the command:
 
 ```
-mvn clean mvn package install -Dmaven.test.skip=true
+mvn clean package install -Dmaven.test.skip=true
 ```
 
 - mvn clean
+
 The previous build is removed in preparation for a new build.
 
 - mvn package
+
 All source code is compiled and the metadig-engine jar file is built.
 
 - mvn install
