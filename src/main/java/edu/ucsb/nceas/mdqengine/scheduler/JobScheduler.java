@@ -55,6 +55,8 @@ public class JobScheduler {
         String fileIncludeMatch = null;
         String fileExcludeMatch = null;
         String logFile = null;
+        Boolean replaceIfNewer = false; // replace a local data file if the associated web resoruce is newer
+        String comments = null;
 
         String taskListFilename = js.readConfig("task.file");
         log.debug("task list filename: " + taskListFilename);
@@ -190,6 +192,9 @@ public class JobScheduler {
                 log.debug("Split length: " + splitted.length);
                 nodeId = splitted[++icnt].trim();
                 log.debug("nodeId: " + nodeId);
+            } else if (taskType.equals("downloads")) {
+                // Note that currently there are no parameters specified for this task.
+                log.debug("Scheduling download of web resources for assessment checks, task name: " + taskName + ", task group: " + taskGroup);
             }
 
             try {
@@ -238,14 +243,21 @@ public class JobScheduler {
                             .usingJobData("taskType", taskType)
                             .usingJobData("nodeId", nodeId)
                             .build();
-                }
+                } else if (taskType.equalsIgnoreCase("downloads")) {
+                    log.debug("Scheduling task type: " + taskType);
+                    job = newJob(AcquireWebResourcesJob.class)
+                        .withIdentity(taskName, taskGroup)
+                        .usingJobData("taskName", taskName)
+                        .usingJobData("taskType", taskType)
+                        .build();
+               }
 
-                CronTrigger trigger = newTrigger()
+               CronTrigger trigger = newTrigger()
                     .withIdentity(taskName + "-trigger", taskGroup)
                     .withSchedule(cronSchedule(cronSchedule))
                     .build();
 
-                scheduler.scheduleJob(job, trigger);
+               scheduler.scheduleJob(job, trigger);
 
             } catch (SchedulerException se) {
                 se.printStackTrace();

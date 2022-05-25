@@ -1,0 +1,400 @@
+openapi: 3.0.0
+servers:
+  # Added by API Auto Mocking Plugin
+  - description: SwaggerHub API Auto Mocking
+    url: https://virtserver.swaggerhub.com/gothub/metadig/v2.3.0
+  - url: 'https://virtserver.swaggerhub.com/mbjones/metadig/v2'
+info:
+  description: >-
+    This API can be used to manage metadata and data quality services on the
+    MetaDIG system.
+  version: v2.3.3
+  title: MetaDIG API
+  contact:
+    email: slaughter@nceas.ucsb.edu
+  license:
+    name: Apache 2.0
+    url: 'http://www.apache.org/licenses/LICENSE-2.0.html'
+tags:
+  - name: admins
+    description: Secured Admin-only calls
+  - name: developers
+    description: Operations available to regular developers
+  - name: public
+    description: Calls available to all users
+paths:
+  "/checks":
+    get:
+      tags:
+        - public
+      summary: lists registered checks
+      operationId: listChecks
+      description: List quality checks that have been registered in the system.
+      responses:
+        '200':
+          description: lists all registered checks
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Check'
+        '400':
+          description: bad input parameter
+  "/checks/{id}":
+    get:
+      tags:
+        - public
+      summary: retrieve a single check
+      operationId: getCheck
+      description: Retrieve a quality check defintion document.
+      parameters:
+        - name: id
+          in: path
+          description: the id of the check
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: the check definition
+          content:
+            application/xml:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Check'
+        '400':
+          description: unsupported encoding
+  "/checks/{id}/run":
+    post:
+      tags:
+        - admins
+      summary: runs the specified check
+      operationId: runCheck
+      description: Runs a check for a supplied metadata document
+      parameters:
+        - name: id
+          in: path
+          description: id of the check to run
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        content:
+          multipart/mixed:
+            schema:
+              type: object
+              properties:
+                id:
+                  # default is text/plain
+                  type: string
+                  format: uuid
+                document:
+                  # need to declare XML format!
+                  description: metadata in XML format
+                  type: object
+                  properties: {}
+                systemMetadata:
+                  description: system metadata in XML format
+                  # default is application/octet-stream, need to declare an image type only!
+                  type: object
+                  format: properties {}
+            encoding:
+              document:
+                # require XML Content-Type in utf-8 encoding
+                contentType: application/xml; charset=utf-8
+              systemMetadata:
+                 # require XML Content-Type in utf-8 encoding
+                contentType: application/xml; charset=utf-8
+      responses:
+        '201':
+          description: check created
+        '400':
+          description: 'invalid input, object invalid'
+        '409':
+          description: an existing check already exists
+  "/runs/{suite}/{id}":
+    get:
+      tags:
+        - public
+      summary: retrieve a single quality suite
+      operationId: getRun
+      description: Retrieve a quality suite defintion document.
+      parameters:
+        - name: suite
+          in: path
+          description: the id of the suite
+          required: true
+          schema:
+            type: string
+        - name: id
+          in: path
+          description: the id of the suite
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: the completed run for a suite and id
+          content:
+            application/xml:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Run'
+        '400':
+          description: unsupported encoding
+  "/suites":
+    get:
+      tags:
+        - public
+      summary: lists registered suites
+      operationId: listSuites
+      description: List quality suites that have been registered in the system.
+      responses:
+        '200':
+          description: returns the names of all registered suites
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Suite'
+  "/suite/{suite}":
+    get:
+      tags:
+        - public
+      summary: retrieve a single quality suite
+      operationId: getSuite
+      description: Retrieve a quality suite defintion document.
+      parameters:
+        - name: suite
+          in: path
+          description: the id of the suite
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: the suite definition
+          content:
+            application/xml:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Suite'
+        '400':
+          description: unsupported encoding
+  "/suites/{suite}/run":
+    post:
+      tags:
+        - admins
+      summary: runs the specified Suite
+      operationId: runSuite
+      description: Runs a Suite for a supplied metadata document
+      parameters:
+        - name: suite
+          in: path
+          description: id of the check to run
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          multipart/mixed:
+            schema:
+              type: object
+              properties:
+                priority:
+                  description: run priority (high, regular, low)
+                  type: string
+                document:
+                  # need to declare XML format!
+                  description: metadata in XML format
+                  type: object
+                  properties: {}
+                systemMetadata:
+                  description: system metadata in XML format
+                  # default is application/octet-stream, need to declare an image type only!
+                  type: object
+                  format: properties {}
+            encoding:
+              document:
+                # require XML Content-Type in utf-8 encoding
+                contentType: application/xml; charset=utf-8
+              systemMetadata:
+                 # require XML Content-Type in utf-8 encoding
+                contentType: application/xml; charset=utf-8
+      responses:
+        '201':
+          description: check created
+        '400':
+          description: 'invalid input, object invalid'
+        '409':
+          description: an existing check already exists
+  "/scores/{suite}/{pid}":
+    get:
+      tags:
+        - public
+      summary: retrieve an aggregated assessment report (graph)
+      operationId: retrieveReport
+      description: Retrieve a report (graph or CSV) of aggregated assessment scores 
+      parameters:
+        - name: suite
+          in: path
+          description: the desired assessment suite  (e.g. "FAIR-0.3.1", "knb-suite")
+          required: true
+          schema:
+            type: string
+        - name: pid
+          in: path
+          description: the collection id to retrieve the assessment for (e.g. "doi:10.18739/A23B5W875", "urn:node:KNB", "urn:node:CN")
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: the success response
+          content:
+            image/png:
+              schema:
+                type: object
+            text/csv:
+              schema:
+                type: object
+    post:
+      tags:
+        - admins
+      summary: generate an aggregated report (graph)
+      operationId: generateReport
+      description: Generate a report (graph) of aggregated assessment scores
+      parameters:
+        - name: suite
+          in: path
+          description: the desired assessment suite  (e.g. "FAIR-0.3.1", "knb-suite")
+          required: true
+          schema:
+            type: string
+        - name: pid
+          in: path
+          description: the collection id to retrieve the assessment for (e.g. "doi:10.18739/A23B5W875", "urn:node:KNB", "urn:node:CN")
+          required: true
+          schema:
+            type: string
+        - name: node
+          in: query
+          description: The DataONE node to obtain and evaluate the Solr 'collectionQuery' field on (e.g. "urn:node:CN", "urn:node:ARCTIC")
+          required: true
+          schema:
+            type: string
+        - name: format
+          in: query
+          description: the format families to include in the assessment (e.g. "eml", "eml,iso")
+          required: true
+          schema:
+            type: string
+      responses:
+        '201':
+          description: request queued
+components:
+  schemas:
+    Check:
+      type: object
+      required:
+        - id
+        - name
+      properties:
+        id:
+          type: string
+          example: check.abstract.100.words.1
+        name:
+          type: string
+          example: Abstract length
+        description:
+          type: string
+          example: Abstract should be at least 100 words long
+        type:
+          type: string
+          example: discovery
+        level:
+          type: string
+          example: REQUIRED
+        environment:
+          type: string
+          example: rscript
+        code:
+          type: string
+          example: if (length(abstract) < 200)  status <- "FAILURE"}
+        selector:
+          type: string
+        dialect:
+          type: string
+    Run:
+      type: object
+      required:
+        - id
+        - name
+        - description
+        - check
+      properties:
+        id:
+          type: string
+          example: FAIR-suite-0.3.1
+        name:
+          type: string
+          example: The FAIR Suite v0.3.1
+        description:
+          type: string
+          example: This is the FAIR Assessment Suite
+        check:
+          type: string
+          example: check.identifier.is.present.1
+    Suite:
+      type: object
+      required:
+        - id
+        - name
+        - description
+        - check
+      properties:
+        id:
+          type: string
+          example: arctic.data.test.suite.1
+        name:
+          type: string
+          example: Arctic Data Center Quality Suite
+        description:
+          type: string
+          example: This is a provisional Arctic Data Center Quality Suite
+        check:
+          type: string
+          example: check.identifier.is.present.1
+    Metadata:
+      type: object
+    SystemMetadata:
+      type: object
+      required:
+        - serialVersion
+        - identifier
+        - formatId
+      properties:
+        identifier:
+          type: string
+          example: knb.1.1
+        serialVersion:
+          type: string
+          example: 1
+        formatId:
+          type: string
+          example: eml://ecoinformatics.org/eml-2.1.1
+        checksum:
+          type: string
+          example: '0775b5e25cd425398acd94b3512e51eb'
+        rightsHolder:
+          type: string
+          example: CN=Matt Jones A729,O=Google,C=US,DC=cilogon,DC=org
+        submitter:
+          type: string
+          example: uid=kepler,o=unaffiliated,dc=ecoinformatics,dc=org

@@ -1,0 +1,7 @@
+# Load all files in the "config" directory into a ConfigMap
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: metadig-configfiles
+data:
+{{ (tpl (.Files.Glob "config/*").AsConfig . ) | indent 4 }}

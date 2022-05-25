@@ -1,0 +1,80 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "postgres.fullname" . }}
+  namespace: metadig
+spec:
+  selector:
+    matchLabels:
+      {{- include "postgres.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "postgres.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "postgres.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ .Chart.Name }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          command: [ "su", "-", "postgres", "-c", "postgres -D /opt/local/postgresql/data" ]
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+          - name: postgres
+            containerPort: 5432
+            protocol: TCP
+          volumeMounts:
+          - name: metadig-pv
+            mountPath: {{ .Values.persistence.mountPath }}
+            readOnly: false
+        {{- if .Values.sidecar.enabled }}
+        - name: {{ .Values.sidecar.name }}
+          image: "{{ .Values.sidecar.repository }}:{{ .Values.sidecar.tag }}"
+          imagePullPolicy: {{ .Values.sidecar.pullPolicy }}
+          command: [ "pgbouncer", "-v", "{{ .Values.persistence.mountPath }}/{{ .Values.sidecar.initFile }}" ]
+          ports:
+          - name: {{ .Values.sidecar.name }}
+            containerPort: 6432
+          volumeMounts:
+          - name: metadig-pv
+            mountPath: {{ .Values.persistence.mountPath }}
+            readOnly: false
+          - name: metadig-config-volume
+            mountPath: {{ .Values.persistence.mountPath }}/{{ .Values.sidecar.initFile }}
+            subPath: pgbouncer.ini
+          - name: metadig-config-volume
+            mountPath: {{ .Values.persistence.mountPath }}/{{ .Values.sidecar.authFile }}
+            subPath: userlist.txt
+        {{- end }}
+      restartPolicy: Always
+      volumes:
+      - name: metadig-pv
+        persistentVolumeClaim:
+          claimName: {{ .Values.persistence.claimName }}
+      - name: metadig-config-volume
+        configMap:
+          name: metadig-configfiles
+          defaultMode: 0644
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

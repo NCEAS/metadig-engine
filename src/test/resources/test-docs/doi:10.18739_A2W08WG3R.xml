@@ -1,0 +1,1065 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<eml:eml xmlns:eml="eml://ecoinformatics.org/eml-2.1.1" xmlns:stmml="http://www.xml-cml.org/schema/stmml-1.1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" packageId="doi:10.18739/A2W08WG3R" system="https://arcticdata.io" xsi:schemaLocation="eml://ecoinformatics.org/eml-2.1.1 eml.xsd">
+  <dataset>
+    <alternateIdentifier>Key words: DBO, Dr. Sue Moore, Marine Mammal Watch (MMW), 2017</alternateIdentifier>
+    <title>Marine Mammal Watch, Northern Bering Sea and Chukchi Sea, August-September, 2017, so what do you frigging want?</title>
+    <creator id="7471693372347790">
+      <individualName>
+        <givenName>Sue</givenName>
+        <surName>Moore</surName>
+      </individualName>
+      <organizationName>NOAA, PMEL, EcoFOCI</organizationName>
+      <positionName>Biological Oceanographer</positionName>
+      <address>
+        <deliveryPoint>NOAA, PMEL</deliveryPoint>
+        <deliveryPoint>7600 Sand Point Way NE</deliveryPoint>
+        <city>Seattle</city>
+        <administrativeArea>WA</administrativeArea>
+        <postalCode>98115</postalCode>
+        <country>USA</country>
+      </address>
+      <phone phonetype="voice">2065266889</phone>
+      <electronicMailAddress>sue.moore@noaa.gov</electronicMailAddress>
+      <onlineUrl>https://www.pmel.noaa.gov/scientist/dr-sue-moore</onlineUrl>
+      <userId directory="https://orcid.org">https://orcid.org/0000-0002-3104-1740</userId>
+    </creator>
+    <associatedParty id="4488718901744457">
+      <individualName>
+        <givenName>Jacqueline</givenName>
+        <surName>Grebmeier</surName>
+      </individualName>
+      <organizationName>University of Maryland Center for Environmental Science, Chesapeake Biological Laboratory</organizationName>
+      <positionName>Academic Researcher</positionName>
+      <address>
+        <deliveryPoint>146 Williams Street</deliveryPoint>
+        <deliveryPoint>P.O. Box 38</deliveryPoint>
+        <city>Solomons</city>
+        <administrativeArea>MD</administrativeArea>
+        <postalCode>20688</postalCode>
+        <country>USA</country>
+      </address>
+      <phone phonetype="voice">(410) 326 - 7334</phone>
+      <electronicMailAddress>jgrebmei@umces.edu</electronicMailAddress>
+      <onlineUrl>https://www.umces.edu/jackie-grebmeier</onlineUrl>
+      <userId directory="https://orcid.org">https://orcid.org/0000-0001-7624-3568</userId>
+      <role>principalInvestigator</role>
+    </associatedParty>
+    <associatedParty id="4010790887259205">
+      <individualName>
+        <givenName>Sue</givenName>
+        <surName>Moore</surName>
+      </individualName>
+      <organizationName>NOAA, PMEL, EcoFOCI</organizationName>
+      <positionName>Biological Oceanographer</positionName>
+      <address>
+        <deliveryPoint>NOAA, PMEL</deliveryPoint>
+        <deliveryPoint>7600 Sand Point Way N.E., Bldg 3</deliveryPoint>
+        <city>Seattle</city>
+        <administrativeArea>WA</administrativeArea>
+        <postalCode>98115</postalCode>
+        <country>USA</country>
+      </address>
+      <phone phonetype="voice">2065266889</phone>
+      <electronicMailAddress>sue.moore@noaa.gov</electronicMailAddress>
+      <onlineUrl>https://www.pmel.noaa.gov/scientist/dr-sue-moore</onlineUrl>
+      <userId directory="https://orcid.org">https://orcid.org/0000-0002-3104-1740</userId>
+      <role>principalInvestigator</role>
+    </associatedParty>
+    <associatedParty id="5562509471275752">
+      <individualName>
+        <givenName>Svein</givenName>
+        <surName>Vagle</surName>
+      </individualName>
+      <organizationName>Institute of Ocean Sciences, Department of Fisheries and Oceans</organizationName>
+      <positionName>Oceanographer</positionName>
+      <address>
+        <deliveryPoint>P.O. Box 6000</deliveryPoint>
+        <deliveryPoint>9860 West Saanich Road</deliveryPoint>
+        <city>Sidney</city>
+        <administrativeArea>British Columbia</administrativeArea>
+        <postalCode>V8L 4B2</postalCode>
+        <country>Canada</country>
+      </address>
+      <phone phonetype="voice">(250) 363 - 6339</phone>
+      <electronicMailAddress>Svein.Vagle@dfo-mpo.gc.ca</electronicMailAddress>
+      <onlineUrl>http://www.dfo-mpo.gc.ca/science/collaboration/c3/scientists-eng.html</onlineUrl>
+      <userId directory="https://orcid.org">https://orcid.org/0000-0002-0098-2329</userId>
+      <role>principalInvestigator</role>
+    </associatedParty>
+    <!-- <pubDate>2021-01-01</pubDate> -->
+    <abstract>
+      <para>Marine mammal observations were recorded along-track from north of Dutch Harbor, Alaska in the Bering Sea (166.50 W, 53.90 N) northward to Barrow Canyon at the boundary of the Chukchi and Beaufort Seas (157.42 W, 73.46 N) aboard United States Coast Gaurd Cutter (USCGC) Healy (Hly17-02), during an August-September, 2017 research cruise.  Observations include individual mammal species identification and counts, ice-cover percent, sea state, visibility and weather.  Marine Mammal Watch observations were made as part of the Distributed Biological Observatory (DBO) to more systematically track the broad biological response to sea ice retreat and associated environmental change.  The spatially-explicit DBO network focuses multi-disciplinary sampling in regional biological "hotspot" locations and is organized through the Pacific Arctic Group (PAG), an international collaboration sanctioned by the International Arctic Science Committee.</para>
+    </abstract>
+    <keywordSet>
+      <keyword>CETACEANS</keyword>
+      <keyword>PMEL</keyword>
+      <keyword>Arctic Ocean</keyword>
+      <keyword>Chukchi Sea</keyword>
+      <keyword>Beaufort Sea</keyword>
+      <keyword>Bering Sea</keyword>
+      <keyword>NOAA</keyword>
+      <!-- <keywordThesaurus>GCMD</keywordThesaurus> -->
+    </keywordSet>
+    <keywordSet>
+      <keyword>DBO</keyword>
+      <keyword>Distributed Biological Observatory</keyword>
+      <keyword>Pacific Arctic Group</keyword>
+      <keyword>PAG</keyword>
+      <keyword>sea ice</keyword>
+      <keyword>marine mammals</keyword>
+      <keyword>Alaska</keyword>
+      <keyword>seals</keyword>
+      <keyword>walruses</keyword>
+      <keyword>porpoise</keyword>
+      <keywordThesaurus>None</keywordThesaurus>
+    </keywordSet>
+    <intellectualRights>
+      <para>This work is licensed under the Creative Commons Attribution 4.0 International License. To view a copy of this license, visit http://creativecommons.org/licenses/by/4.0/.</para>
+    </intellectualRights>
+    <coverage>
+      <geographicCoverage>
+        <geographicDescription>Observation data were collected on a research cruise heading north from Dutch Harbor, Alaska in the Aleutian Islands, through the eastern Bering Sea and Bering Strait, outside Norton Sound, through the Chukchi Sea, and to Barrow Canyon and the western side of the Beaufort Sea.  The cruise intentionally passed through the Distributed Biological Observatory (DBO) designated regions 1 through 5 as defined in metadata within the data.</geographicDescription>
+        <boundingCoordinates>
+          <westBoundingCoordinate>-176</westBoundingCoordinate>
+          <eastBoundingCoordinate>-154</eastBoundingCoordinate>
+          <northBoundingCoordinate>74</northBoundingCoordinate>
+          <southBoundingCoordinate>53</southBoundingCoordinate>
+        </boundingCoordinates>
+      </geographicCoverage>
+      <temporalCoverage>
+        <rangeOfDates>
+          <beginDate>
+            <calendarDate>2017-08-28</calendarDate>
+          </beginDate>
+          <endDate>
+            <calendarDate>2017-09-14</calendarDate>
+          </endDate>
+        </rangeOfDates>
+      </temporalCoverage>
+      <taxonomicCoverage>
+        <generalTaxonomicCoverage>A visual watch for marine mammals was conducted during daylight hours as the ship was underway, by a single expert observer positioned on the bridge.  All marine mammals were identified to species when possible, and sightings were noted &amp;apos;unidentified&amp;apos; when species was uncertain.  The marine mammal species list coincides with that of the Aerial Surveys of Arctic Marine Mammals (ASAMM) project, and is documented in metadata within data spreadsheet document.</generalTaxonomicCoverage>
+        <taxonomicClassification>
+          <taxonRankName>Kingdom</taxonRankName>
+          <taxonRankValue>Animalia</taxonRankValue>
+        </taxonomicClassification>
+        <taxonomicClassification>
+          <taxonRankName>Kingdom</taxonRankName>
+          <taxonRankValue>Animalia</taxonRankValue>
+        </taxonomicClassification>
+      </taxonomicCoverage>
+    </coverage>
+    <contact id="6947671836785158">
+      <individualName>
+        <givenName>Peggy</givenName>
+        <surName>Sullivan</surName>
+      </individualName>
+      <organizationName>Univ. of Washington, Joint Institute for the Study of the Atmosphere and Ocean (JISAO)</organizationName>
+      <positionName>Research Scientist</positionName>
+      <address>
+        <deliveryPoint>NOAA, PMEL</deliveryPoint>
+        <deliveryPoint>7600 Sand Point Way N.E., Bldg 3</deliveryPoint>
+        <city>Seattle</city>
+        <administrativeArea>WA</administrativeArea>
+        <postalCode>98115</postalCode>
+        <country>US</country>
+      </address>
+      <phone phonetype="voice">(206) 526 - 6185</phone>
+      <electronicMailAddress>peggy.sullivan@noaa.gov</electronicMailAddress>
+      <onlineUrl>https://www.ecofoci.noaa.gov/scientist/margaret-peggy-sullivan</onlineUrl>
+      <userId directory="https://orcid.org">https://orcid.org/0000-0003-1383-7814</userId>
+    </contact>
+    <contact id="3879547936853981">
+      <individualName>
+        <givenName>Alynne</givenName>
+        <surName>Bayard</surName>
+      </individualName>
+      <organizationName>Chesapeake Biological Laboratory (CBL) University of Maryland Center for Environmental Science (UMCES)</organizationName>
+      <positionName>Faculty Research Assistant</positionName>
+      <address>
+        <deliveryPoint>146 Williams Street</deliveryPoint>
+        <city>Solomons</city>
+        <administrativeArea>MD</administrativeArea>
+        <postalCode>20688</postalCode>
+        <country>USA</country>
+      </address>
+      <phone phonetype="voice">(410) 326 - 7242</phone>
+      <electronicMailAddress>bayard@umces.edu</electronicMailAddress>
+      <onlineUrl>http://arctic.cbl.umces.edu/</onlineUrl>
+      <userId directory="https://orcid.org">https://orcid.org/0000-0002-5011-102X</userId>
+    </contact>
+    <methods>
+      <methodStep>
+<software>ARC/GIS</software>
+        <description>
+          <para>Data observations were recorded by a marine mammal observer as described in the "Sampling, Study Extent" section.  All data are from a 2017 USCGC Healy research cruise, and data range from August 26, to September 14, 2017.  Observational data were recorded on a laptop computer in Microsoft Excel and are comprised of time-sequential lines of data that include time, date, position, sea ice %, sea state, weather and visibility.  Lines of data can be marine mammal observations, and/or comments on research stations or conditions.  Data were visually checked for input errors, and were color-coded to show DBO regions 1 to 5 in the Bering, Chukchi and Beaufort Seas.  Enhanced headers, descriptors and keys are were added to the workbook for clarity and usability. A second worksheet was added to define DBO regions and define data columns and other codes. Maps of observations were created and include an overview map, and sub-set maps for each DBO region that contains observations.</para>
+        </description>
+      </methodStep>
+      <sampling>
+        <studyExtent>
+          <description>
+            <para>Data observations were recorded along the ship track on regular watches during the 2017 USCGC Healy research cruise (HLY 1701).  Watches began on August 26, 2017 after the ship left Dutch Harbor, Alaska.  The first recorded observations were at 53.923N, 166.485W. Observations continued during watches as the ship continued north through the Bering Sea, Bering Strait, Chukchi Sea, Barrow Canyon, and western edge of the Beaufort Sea.  The north-most observations were recorded at 73.562N, 159.717W.  Color-coded observations in the data set indicate observation locations within DBO regions 1 to 5, and DBO regions are defined in metadata within data spreadsheet document.</para>
+          </description>
+        </studyExtent>
+        <samplingDescription>
+          <para>A visual watch for marine mammals was conducted during daylight hours as the ship was underway.   A single observer was positioned on the bridge, and stood watches using naked eye and handheld binoculars to scan a 120º arc forward of the ship (abeam, to +30° of the bow) out to the horizon.  Observations were augmented by 360º scans around the ship when on station.  A watch was curtailed when sea state exceeded Beaufort 05 sea state (wind speed ~25kts), or visibility was reduced to &lt; 1km by precipitation/fog.</para>
+          <para>All marine mammal sightings were noted by (i) time, (ii) position, (iii) species, and (iv) number of animals.  Position were read directly from the ship's GPS.  All marine mammals were identified to species when possible, and sightings were noted 'unidentified' when species was uncertain. Marine mammal species list coincides with that of the Aerial Surveys of Arctic Marine Mammals (ASAMM) project.  Associated environmental conditions routinely noted on the data form included: (v) an estimate of ice cover (percent), (vi) sea state (Beaufort scale), (vii) weather and (viii) approximate visibility range. Codes for weather and visibility are defined in metadata within data spreadsheet document.  Data observation points include sightings, sampling stations, and physical conditions.  Maps were created to show full observation area with observed species, and sub-set maps for each DBO region (1-5) where observations exist.</para>
+        </samplingDescription>
+      </sampling>
+    </methods>
+    <project>
+      <title>Marine Mammal Watch August 26 - September 14, 2017, Hly17-02. “Collaborative Research: The Distributed Biological Observatory (DBO)-A Change Detection Array in the Pacific Arctic Region” (NSF 1204082)</title>
+      <personnel id="6420391219132552">
+        <individualName>
+          <givenName>Sue</givenName>
+          <surName>Moore</surName>
+        </individualName>
+        <organizationName>NOAA, PMEL, EcoFOCI</organizationName>
+        <positionName>Biological Oceanographer</positionName>
+        <role>principalInvestigator</role>
+      </personnel>
+      <funding>
+        <para>NSF Award 1204082 (Collaborative Research:  The Distributed Biological Observatory (DBO)-A Change Detection Array in the Pacific Arctic Region) NOAA OAR Arctic Program</para>
+      </funding>
+    </project>
+    <dataTable>
+      <entityName>DBO_MMWatch_HLY1702_August2017_SMoore.xlsx</entityName>
+      <entityDescription>Data File (MS excel worksheet) containing marine mammal watch data conducted by Dr. Sue Moore August-September 2017 from the vessel USCGC Healy, cruise number hly1702. The first tab in file contains rows of observational data, including species, location, time, ice and weather. The second tab in file has metadata information describing data columns and DBO regions.</entityDescription>
+      <physical scope="document">
+        <objectName>DBO_MMWatch_HLY1702_August2017_SMoore.xlsx</objectName>
+        <size unit="bytes">52385</size>
+        <!-- <authentication method="SHA1">215f08dd9b77ca2a7f82bca5afaa4aba0f253d36</authentication> -->
+        <dataFormat>
+          <externallyDefinedFormat>
+            <formatName>application/vnd.openxmlformats-officedocument.spreadsheetml.sheet</formatName>
+          </externallyDefinedFormat>
+        </dataFormat>
+        <distribution scope="document">
+          <online>
+            <url function="download">https://cn.dataone.org/cn/v2/resolve/urn:uuid:de8fef7d-e6a7-4e2e-906b-fa5890d2e5bd</url>
+          </online>
+        </distribution>
+      </physical>
+      <attributeList>
+        <attribute>
+          <attributeName>Date</attributeName>
+          <attributeDefinition>Date that observation was taken, with day, month and year separated by periods</attributeDefinition>
+          <measurementScale>
+            <dateTime>
+              <formatString>DD.MM.YY</formatString>
+            </dateTime>
+          </measurementScale>
+        </attribute>
+        <attribute>
+          <attributeName>Time (AKDT)</attributeName>
+          <attributeDefinition>Time that observation was taken</attributeDefinition>
+          <measurementScale>
+            <dateTime>
+              <formatString>hh:mm</formatString>
+            </dateTime>
+          </measurementScale>
+        </attribute>
+        <attribute>
+          <attributeName>LAT (N)</attributeName>
+          <attributeDefinition>latitude North in degrees and decimal minutes</attributeDefinition>
+          <measurementScale>
+            <interval>
+              <unit>
+                <standardUnit>degree</standardUnit>
+              </unit>
+              <numericDomain>
+                <numberType>real</numberType>
+              </numericDomain>
+            </interval>
+          </measurementScale>
+        </attribute>
+        <attribute>
+          <attributeName>LONG (W)</attributeName>
+          <attributeDefinition>longitude West in degrees and decimal minutes</attributeDefinition>
+          <measurementScale>
+            <interval>
+              <unit>
+                <standardUnit>degree</standardUnit>
+              </unit>
+              <numericDomain>
+                <numberType>real</numberType>
+              </numericDomain>
+            </interval>
+          </measurementScale>
+        </attribute>
+        <attribute>
+          <attributeName>RFE</attributeName>
+          <attributeDefinition>DBO “Reason for Entry” (1=Station; 2=Position on Search; 3=Sighting on Search)</attributeDefinition>
+          <measurementScale>
+            <nominal>
+              <nonNumericDomain>
+                <enumeratedDomain>
+                  <codeDefinition>
+                    <code>1</code>
+                    <definition>station on search</definition>
+                  </codeDefinition>
+                  <codeDefinition>
+                    <code>2</code>
+                    <definition>station</definition>
+                  </codeDefinition>
+                  <codeDefinition>
+                    <code>3</code>
+                    <definition>position on search</definition>
+                  </codeDefinition>
+                </enumeratedDomain>
+              </nonNumericDomain>
+            </nominal>
+          </measurementScale>
+        </attribute>
+        <attribute>
+          <attributeName>Ice</attributeName>
+          <attributeDefinition>Ice Cover in decimal percent</attributeDefinition>
+          <measurementScale>
+            <ratio>
+              <unit>
+                <standardUnit>dimensionless</standardUnit>
+              </unit>
+              <numericDomain>
+                <numberType>real</numberType>
+              </numericDomain>
+            </ratio>
+          </measurementScale>
+        </attribute>
+        <attribute>
+          <attributeName>SS</attributeName>
+          <attributeDefinition>Sea State</attributeDefinition>
+          <measurementScale>
+            <ordinal>
+              <nonNumericDomain>
+                <enumeratedDomain>
+                  <codeDefinition>
+                    <code>1</code>
+                    <definition>light air</definition>
+                  </codeDefinition>
+                  <codeDefinition>
+                    <code>2</code>
+                    <definition>light breeze</definition>
+                  </codeDefinition>
+                  <codeDefinition>
+                    <code>3</code>
+                    <definition>gentle breeze</definition>
+                  </codeDefinition>
+                  <codeDefinition>
+                    <code>4</code>
+                    <definition>moderate breeze</definition>
+                  </codeDefinition>
+                </enumeratedDomain>
+              </nonNumericDomain>
+            </ordinal>
+          </measurementScale>
+        </attribute>
+        <attribute>
+          <attributeName>WEA</attributeName>
+          <attributeDefinition>DBO weather codes</attributeDefinition>
+          <measurementScale>
+            <nominal>
+              <nonNumericDomain>
+                <enumeratedDomain>
+                  <codeDefinition>
+                    <code>1</code>
+                    <definition>clear</definition>
+                  </codeDefinition>
+                  <codeDefinition>
+                    <code>2</code>
+                    <definition>partly cloudy</definition>
+                  </codeDefinition>
+                  <codeDefinition>
+                    <code>3</code>
+                    <definition>fog</definition>
+                  </codeDefinition>
+                  <codeDefinition>
+                    <code>4</code>
+                    <definition>overcast</definition>
+                  </codeDefinition>
+                  <codeDefinition>
+                    <code>5</code>
+                    <definition>precipitation</definition>
+                  </codeDefinition>
+                  <codeDefinition>
+                    <code>6</code>
+                    <definition>low ceiling</definition>
+                  </codeDefinition>
+                  <codeDefinition>
+                    <code>7</code>
+                    <definition>haze</definition>
+                  </codeDefinition>
+                  <codeDefinition>
+                    <code>8</code>
+                    <definition>glare</definition>
+                  </codeDefinition>
+                </enumeratedDomain>
+              </nonNumericDomain>
+            </nominal>
+          </measurementScale>
+        </attribute>
+        <attribute>
+          <attributeName>VIS</attributeName>
+          <attributeDefinition>DBO visibility codes (1=&lt; km; 6=unlimited)</attributeDefinition>
+          <measurementScale>
+            <ordinal>
+              <nonNumericDomain>
+                <enumeratedDomain>
+                  <codeDefinition>
+                    <code>1</code>
+                    <definition>&lt;1 km</definition>
+                  </codeDefinition>
+                  <codeDefinition>
+                    <code>2</code>
+                    <definition>1-2 km</definition>
+                  </codeDefinition>
+                  <codeDefinition>
+                    <code>3</code>
+                    <definition>2-3 km</definition>
+                  </codeDefinition>
+                  <codeDefinition>
+                    <code>4</code>
+                    <definition>3-5 km</definition>
+                  </codeDefinition>
+                  <codeDefinition>
+                    <code>5</code>
+                    <definition>5-10 km</definition>
+                  </codeDefinition>
+                  <codeDefinition>
+                    <code>6</code>
+                    <definition>unlimited</definition>
+                  </codeDefinition>
+                </enumeratedDomain>
+              </nonNumericDomain>
+            </ordinal>
+          </measurementScale>
+        </attribute>
+        <attribute>
+          <attributeName>SPP</attributeName>
+          <attributeDefinition>DBO species codes</attributeDefinition>
+          <measurementScale>
+            <nominal>
+              <nonNumericDomain>
+                <enumeratedDomain>
+                  <codeDefinition>
+                    <code>1</code>
+                    <definition>bowhead whale</definition>
+                  </codeDefinition>
+                  <codeDefinition>
+                    <code>2</code>
+                    <definition>gray whale</definition>
+                  </codeDefinition>
+                  <codeDefinition>
+                    <code>3</code>
+                    <definition>beluga</definition>
+                  </codeDefinition>
+                  <codeDefinition>
+                    <code>4</code>
+                    <definition>fin whale</definition>
+                  </codeDefinition>
+                  <codeDefinition>
+                    <code>5</code>
+                    <definition>humpback whale</definition>
+                  </codeDefinition>
+                  <codeDefinition>
+                    <code>6</code>
+                    <definition>minke whale</definition>
+                  </codeDefinition>
+                  <codeDefinition>
+                    <code>7</code>
+                    <definition>right whale</definition>
+                  </codeDefinition>
+                  <codeDefinition>
+                    <code>8</code>
+                    <definition>killer whale</definition>
+                  </codeDefinition>
+                  <codeDefinition>
+                    <code>9</code>
+                    <definition>harbor porpoise</definition>
+                  </codeDefinition>
+                  <codeDefinition>
+                    <code>10</code>
+                    <definition>polar bear </definition>
+                  </codeDefinition>
+                  <codeDefinition>
+                    <code>11</code>
+                    <definition>walrus</definition>
+                  </codeDefinition>
+                  <codeDefinition>
+                    <code>12</code>
+                    <definition>bearded seal</definition>
+                  </codeDefinition>
+                  <codeDefinition>
+                    <code>13</code>
+                    <definition>ringed seal</definition>
+                  </codeDefinition>
+                  <codeDefinition>
+                    <code>14</code>
+                    <definition>spotted seal</definition>
+                  </codeDefinition>
+                  <codeDefinition>
+                    <code>15</code>
+                    <definition>ribbon seal</definition>
+                  </codeDefinition>
+                  <codeDefinition>
+                    <code>16</code>
+                    <definition>unidentified cetacean</definition>
+                  </codeDefinition>
+                  <codeDefinition>
+                    <code>17</code>
+                    <definition>unidentified pinniped</definition>
+                  </codeDefinition>
+                  <codeDefinition>
+                    <code>18</code>
+                    <definition>sperm whale</definition>
+                  </codeDefinition>
+                  <codeDefinition>
+                    <code>19</code>
+                    <definition>Dall's porpoise</definition>
+                  </codeDefinition>
+                  <codeDefinition>
+                    <code>20</code>
+                    <definition>pacific white-sided dolphin</definition>
+                  </codeDefinition>
+                  <codeDefinition>
+                    <code>21</code>
+                    <definition>Steller Sea Lion</definition>
+                  </codeDefinition>
+                  <codeDefinition>
+                    <code>22</code>
+                    <definition>fur seal</definition>
+                  </codeDefinition>
+                  <codeDefinition>
+                    <code>23</code>
+                    <definition>harbor seal</definition>
+                  </codeDefinition>
+                  <codeDefinition>
+                    <code>24</code>
+                    <definition>Northern Right Whale Dolphin (added 2015 Laurier)</definition>
+                  </codeDefinition>
+                </enumeratedDomain>
+              </nonNumericDomain>
+            </nominal>
+          </measurementScale>
+          <missingValueCode>
+            <code>NA</code>
+            <codeExplanation>data not available</codeExplanation>
+          </missingValueCode>
+        </attribute>
+        <attribute>
+          <attributeName>No.</attributeName>
+          <attributeDefinition>number of individuals of a species counted</attributeDefinition>
+          <measurementScale>
+            <ratio>
+              <unit>
+                <standardUnit>number</standardUnit>
+              </unit>
+              <numericDomain>
+                <numberType>whole</numberType>
+              </numericDomain>
+            </ratio>
+          </measurementScale>
+          <missingValueCode>
+            <code>NA</code>
+            <codeExplanation>data not available</codeExplanation>
+          </missingValueCode>
+        </attribute>
+        <attribute>
+          <attributeName>Comment</attributeName>
+          <attributeDefinition>observer’s comments</attributeDefinition>
+          <measurementScale>
+            <nominal>
+              <nonNumericDomain>
+                <textDomain>
+                  <definition>observer’s comments</definition>
+                </textDomain>
+              </nonNumericDomain>
+            </nominal>
+          </measurementScale>
+          <missingValueCode>
+            <code>NA</code>
+            <codeExplanation>no comments made</codeExplanation>
+          </missingValueCode>
+        </attribute>
+      </attributeList>
+    </dataTable>
+    <dataTable>
+      <entityName>DBO_MMWatch_HLY1702_August2017_SMoore</entityName>
+      <entityDescription>Contains marine mammal watch data conducted by Dr. Sue Moore August-September 2017 from the vessel USCGC Healy, cruise number hly1702. The first tab in file contains rows of observational data, including species, location, time, ice and weather. This is a .csv version of the .xml file contained in this entry.</entityDescription>
+      <physical scope="document">
+        <objectName>DBO_MMWatch_HLY1702_August2017_SMoore.csv</objectName>
+        <size unit="bytes">15061</size>
+        <authentication method="SHA1">a7219b11487cfe0b42ca147fe18d045642e22454</authentication>
+        <dataFormat>
+          <externallyDefinedFormat>
+            <formatName>text/csv</formatName>
+          </externallyDefinedFormat>
+        </dataFormat>
+        <distribution scope="document">
+          <online>
+            <url function="download">https://cn.dataone.org/cn/v2/resolve/urn:uuid:89eda76e-a689-4409-a52a-426bc2254a34</url>
+          </online>
+        </distribution>
+      </physical>
+      <attributeList>
+        <attribute>
+          <attributeName>Date</attributeName>
+          <attributeDefinition>Date that observation was taken, with day, month and year separated by periods</attributeDefinition>
+          <measurementScale>
+            <dateTime>
+              <formatString>DD.MM.YY</formatString>
+            </dateTime>
+          </measurementScale>
+        </attribute>
+        <attribute>
+          <attributeName>Time (AKDT)</attributeName>
+          <attributeDefinition>Time that observation was taken</attributeDefinition>
+          <measurementScale>
+            <dateTime>
+              <formatString>hh:mm</formatString>
+            </dateTime>
+          </measurementScale>
+        </attribute>
+        <attribute>
+          <attributeName>LAT (N)</attributeName>
+          <attributeDefinition>latitude North in degrees and decimal minutes</attributeDefinition>
+          <measurementScale>
+            <interval>
+              <unit>
+                <standardUnit>degree</standardUnit>
+              </unit>
+              <numericDomain>
+                <numberType>real</numberType>
+              </numericDomain>
+            </interval>
+          </measurementScale>
+        </attribute>
+        <attribute>
+          <attributeName>LONG (W)</attributeName>
+          <attributeDefinition>longitude West in degrees and decimal minutes</attributeDefinition>
+          <measurementScale>
+            <interval>
+              <unit>
+                <standardUnit>degree</standardUnit>
+              </unit>
+              <numericDomain>
+                <numberType>real</numberType>
+              </numericDomain>
+            </interval>
+          </measurementScale>
+        </attribute>
+        <attribute>
+          <attributeName>RFE</attributeName>
+          <attributeDefinition>DBO “Reason for Entry” (1=Station; 2=Position on Search; 3=Sighting on Search)</attributeDefinition>
+          <measurementScale>
+            <nominal>
+              <nonNumericDomain>
+                <enumeratedDomain>
+                  <codeDefinition>
+                    <code>1</code>
+                    <definition>station on search</definition>
+                  </codeDefinition>
+                  <codeDefinition>
+                    <code>2</code>
+                    <definition>station</definition>
+                  </codeDefinition>
+                  <codeDefinition>
+                    <code>3</code>
+                    <definition>position on search</definition>
+                  </codeDefinition>
+                </enumeratedDomain>
+              </nonNumericDomain>
+            </nominal>
+          </measurementScale>
+        </attribute>
+        <attribute>
+          <attributeName>Ice</attributeName>
+          <attributeDefinition>Ice Cover in decimal percent</attributeDefinition>
+          <measurementScale>
+            <ratio>
+              <unit>
+                <standardUnit>dimensionless</standardUnit>
+              </unit>
+              <numericDomain>
+                <numberType>real</numberType>
+              </numericDomain>
+            </ratio>
+          </measurementScale>
+        </attribute>
+        <attribute>
+          <attributeName>SS</attributeName>
+          <attributeDefinition>Sea State</attributeDefinition>
+          <measurementScale>
+            <ordinal>
+              <nonNumericDomain>
+                <enumeratedDomain>
+                  <codeDefinition>
+                    <code>1</code>
+                    <definition>light air</definition>
+                  </codeDefinition>
+                  <codeDefinition>
+                    <code>2</code>
+                    <definition>light breeze</definition>
+                  </codeDefinition>
+                  <codeDefinition>
+                    <code>3</code>
+                    <definition>gentle breeze</definition>
+                  </codeDefinition>
+                  <codeDefinition>
+                    <code>4</code>
+                    <definition>moderate breeze</definition>
+                  </codeDefinition>
+                </enumeratedDomain>
+              </nonNumericDomain>
+            </ordinal>
+          </measurementScale>
+        </attribute>
+        <attribute>
+          <attributeName>WEA</attributeName>
+          <attributeDefinition>DBO weather codes</attributeDefinition>
+          <measurementScale>
+            <nominal>
+              <nonNumericDomain>
+                <enumeratedDomain>
+                  <codeDefinition>
+                    <code>1</code>
+                    <definition>clear</definition>
+                  </codeDefinition>
+                  <codeDefinition>
+                    <code>2</code>
+                    <definition>partly cloudy</definition>
+                  </codeDefinition>
+                  <codeDefinition>
+                    <code>3</code>
+                    <definition>fog</definition>
+                  </codeDefinition>
+                  <codeDefinition>
+                    <code>4</code>
+                    <definition>overcast</definition>
+                  </codeDefinition>
+                  <codeDefinition>
+                    <code>5</code>
+                    <definition>precipitation</definition>
+                  </codeDefinition>
+                  <codeDefinition>
+                    <code>6</code>
+                    <definition>low ceiling</definition>
+                  </codeDefinition>
+                  <codeDefinition>
+                    <code>7</code>
+                    <definition>haze</definition>
+                  </codeDefinition>
+                  <codeDefinition>
+                    <code>8</code>
+                    <definition>glare</definition>
+                  </codeDefinition>
+                </enumeratedDomain>
+              </nonNumericDomain>
+            </nominal>
+          </measurementScale>
+        </attribute>
+        <attribute>
+          <attributeName>VIS</attributeName>
+          <attributeDefinition>DBO visibility codes (1=&lt; km; 6=unlimited)</attributeDefinition>
+          <measurementScale>
+            <ordinal>
+              <nonNumericDomain>
+                <enumeratedDomain>
+                  <codeDefinition>
+                    <code>1</code>
+                    <definition>&lt;1 km</definition>
+                  </codeDefinition>
+                  <codeDefinition>
+                    <code>2</code>
+                    <definition>1-2 km</definition>
+                  </codeDefinition>
+                  <codeDefinition>
+                    <code>3</code>
+                    <definition>2-3 km</definition>
+                  </codeDefinition>
+                  <codeDefinition>
+                    <code>4</code>
+                    <definition>3-5 km</definition>
+                  </codeDefinition>
+                  <codeDefinition>
+                    <code>5</code>
+                    <definition>5-10 km</definition>
+                  </codeDefinition>
+                  <codeDefinition>
+                    <code>6</code>
+                    <definition>unlimited</definition>
+                  </codeDefinition>
+                </enumeratedDomain>
+              </nonNumericDomain>
+            </ordinal>
+          </measurementScale>
+        </attribute>
+        <attribute>
+          <attributeName>SPP</attributeName>
+          <attributeDefinition>DBO species codes</attributeDefinition>
+          <measurementScale>
+            <nominal>
+              <nonNumericDomain>
+                <enumeratedDomain>
+                  <codeDefinition>
+                    <code>1</code>
+                    <definition>bowhead whale</definition>
+                  </codeDefinition>
+                  <codeDefinition>
+                    <code>2</code>
+                    <definition>gray whale</definition>
+                  </codeDefinition>
+                  <codeDefinition>
+                    <code>3</code>
+                    <definition>beluga</definition>
+                  </codeDefinition>
+                  <codeDefinition>
+                    <code>4</code>
+                    <definition>fin whale</definition>
+                  </codeDefinition>
+                  <codeDefinition>
+                    <code>5</code>
+                    <definition>humpback whale</definition>
+                  </codeDefinition>
+                  <codeDefinition>
+                    <code>6</code>
+                    <definition>minke whale</definition>
+                  </codeDefinition>
+                  <codeDefinition>
+                    <code>7</code>
+                    <definition>right whale</definition>
+                  </codeDefinition>
+                  <codeDefinition>
+                    <code>8</code>
+                    <definition>killer whale</definition>
+                  </codeDefinition>
+                  <codeDefinition>
+                    <code>9</code>
+                    <definition>harbor porpoise</definition>
+                  </codeDefinition>
+                  <codeDefinition>
+                    <code>10</code>
+                    <definition>polar bear </definition>
+                  </codeDefinition>
+                  <codeDefinition>
+                    <code>11</code>
+                    <definition>walrus</definition>
+                  </codeDefinition>
+                  <codeDefinition>
+                    <code>12</code>
+                    <definition>bearded seal</definition>
+                  </codeDefinition>
+                  <codeDefinition>
+                    <code>13</code>
+                    <definition>ringed seal</definition>
+                  </codeDefinition>
+                  <codeDefinition>
+                    <code>14</code>
+                    <definition>spotted seal</definition>
+                  </codeDefinition>
+                  <codeDefinition>
+                    <code>15</code>
+                    <definition>ribbon seal</definition>
+                  </codeDefinition>
+                  <codeDefinition>
+                    <code>16</code>
+                    <definition>unidentified cetacean</definition>
+                  </codeDefinition>
+                  <codeDefinition>
+                    <code>17</code>
+                    <definition>unidentified pinniped</definition>
+                  </codeDefinition>
+                  <codeDefinition>
+                    <code>18</code>
+                    <definition>sperm whale</definition>
+                  </codeDefinition>
+                  <codeDefinition>
+                    <code>19</code>
+                    <definition>Dall's porpoise</definition>
+                  </codeDefinition>
+                  <codeDefinition>
+                    <code>20</code>
+                    <definition>pacific white-sided dolphin</definition>
+                  </codeDefinition>
+                  <codeDefinition>
+                    <code>21</code>
+                    <definition>Steller Sea Lion</definition>
+                  </codeDefinition>
+                  <codeDefinition>
+                    <code>22</code>
+                    <definition>fur seal</definition>
+                  </codeDefinition>
+                  <codeDefinition>
+                    <code>23</code>
+                    <definition>harbor seal</definition>
+                  </codeDefinition>
+                  <codeDefinition>
+                    <code>24</code>
+                    <definition>Northern Right Whale Dolphin (added 2015 Laurier)</definition>
+                  </codeDefinition>
+                </enumeratedDomain>
+              </nonNumericDomain>
+            </nominal>
+          </measurementScale>
+          <missingValueCode>
+            <code>NA</code>
+            <codeExplanation>data not available</codeExplanation>
+          </missingValueCode>
+        </attribute>
+        <attribute>
+          <attributeName>No.</attributeName>
+          <attributeDefinition>number of individuals of a species counted</attributeDefinition>
+          <measurementScale>
+            <ratio>
+              <unit>
+                <standardUnit>number</standardUnit>
+              </unit>
+              <numericDomain>
+                <numberType>whole</numberType>
+              </numericDomain>
+            </ratio>
+          </measurementScale>
+          <missingValueCode>
+            <code>NA</code>
+            <codeExplanation>data not available</codeExplanation>
+          </missingValueCode>
+        </attribute>
+        <attribute>
+          <attributeName>Comment</attributeName>
+          <attributeDefinition>observer’s comments</attributeDefinition>
+          <measurementScale>
+            <nominal>
+              <nonNumericDomain>
+                <textDomain>
+                  <definition>observer’s comments</definition>
+                </textDomain>
+              </nonNumericDomain>
+            </nominal>
+          </measurementScale>
+          <missingValueCode>
+            <code>NA</code>
+            <codeExplanation>no comments made</codeExplanation>
+          </missingValueCode>
+        </attribute>
+      </attributeList>
+    </dataTable>
+    <otherEntity id="urn:uuid:fce56311-357e-454c-b46a-084248a86f01" scope="document">
+      <entityName>DBO2017Healy_MMWatchMap_allData_labs.fw.png</entityName>
+      <entityDescription>Map showing full research cruise area, and symbols indicating locations and types of species sightings. The area included Distributed Biological Observatory (DBO) regions 1 through 5 in the Bering, Chukchi and Beaufort Seas.</entityDescription>
+      <physical scope="document">
+        <objectName>DBO2017Healy_MMWatchMap_allData_labs.fw.png</objectName>
+        <size unit="bytes">274175</size>
+        <authentication method="SHA1">de7f1043fb8b2a2cf3babcb5f35c1f878e631fb8</authentication>
+        <dataFormat>
+          <externallyDefinedFormat>
+            <formatName>image/png</formatName>
+          </externallyDefinedFormat>
+        </dataFormat>
+        <distribution scope="document">
+          <online>
+            <url function="download">https://cn.dataone.org/cn/v2/resolve/urn:uuid:fce56311-357e-454c-b46a-084248a86f01</url>
+          </online>
+        </distribution>
+      </physical>
+      <entityType>Other</entityType>
+    </otherEntity>
+    <otherEntity id="urn:uuid:5e6d523a-52f1-441b-b7eb-079828524e6f" scope="document">
+      <entityName>DBO2017Healy_MMWatchMap_region1_SLIP_labs.fw.png</entityName>
+      <entityDescription>Map showing Distributed Biological Observatory (DBO) region 1 in the Bering Sea near St. Lawrence Island, Alaska, and symbols indicating locations and types of species sightings.</entityDescription>
+      <physical scope="document">
+        <objectName>DBO2017Healy_MMWatchMap_region1_SLIP_labs.fw.png</objectName>
+        <size unit="bytes">109777</size>
+        <authentication method="SHA1">788a8972f1ee670bd1d94ece21f1c8687ae098a7</authentication>
+        <dataFormat>
+          <externallyDefinedFormat>
+            <formatName>image/png</formatName>
+          </externallyDefinedFormat>
+        </dataFormat>
+        <distribution scope="document">
+          <online>
+            <url function="download">https://cn.dataone.org/cn/v2/resolve/urn:uuid:5e6d523a-52f1-441b-b7eb-079828524e6f</url>
+          </online>
+        </distribution>
+      </physical>
+      <entityType>Other</entityType>
+    </otherEntity>
+    <otherEntity id="urn:uuid:fdf7728d-1df1-4d64-b5a4-06cb56f11142" scope="document">
+      <entityName>DBO2017Healy_MMWatchMap_region2_Chirikov_labs.fw.png</entityName>
+      <entityDescription>Map showing Distributed Biological Observatory (DBO) region 2 in the Bering Sea near Bering Strait, and symbols indicating locations and types of species sightings.</entityDescription>
+      <physical scope="document">
+        <objectName>DBO2017Healy_MMWatchMap_region2_Chirikov_labs.fw.png</objectName>
+        <size unit="bytes">89164</size>
+        <authentication method="SHA1">adf1592a0fe392baf458d1838cb1c98ca6897e12</authentication>
+        <dataFormat>
+          <externallyDefinedFormat>
+            <formatName>image/png</formatName>
+          </externallyDefinedFormat>
+        </dataFormat>
+        <distribution scope="document">
+          <online>
+            <url function="download">https://cn.dataone.org/cn/v2/resolve/urn:uuid:fdf7728d-1df1-4d64-b5a4-06cb56f11142</url>
+          </online>
+        </distribution>
+      </physical>
+      <entityType>Other</entityType>
+    </otherEntity>
+    <otherEntity id="urn:uuid:3f17b26a-0510-4c97-a0d5-8b8ef2d3a29e" scope="document">
+      <entityName>DBO2017Healy_MMWatchMap_region3_HopeBasin_labs.fw.png</entityName>
+      <entityDescription>Map showing Distributed Biological Observatory (DBO) region 3 in the Chukchi Sea west of Point Hope, Alaska, and symbols indicating locations and types of species sightings.</entityDescription>
+      <physical scope="document">
+        <objectName>DBO2017Healy_MMWatchMap_region3_HopeBasin_labs.fw.png</objectName>
+        <size unit="bytes">130848</size>
+        <authentication method="SHA1">9393ffb11bad626ce41b79cbb83c0afbcd07e744</authentication>
+        <dataFormat>
+          <externallyDefinedFormat>
+            <formatName>image/png</formatName>
+          </externallyDefinedFormat>
+        </dataFormat>
+        <distribution scope="document">
+          <online>
+            <url function="download">https://cn.dataone.org/cn/v2/resolve/urn:uuid:3f17b26a-0510-4c97-a0d5-8b8ef2d3a29e</url>
+          </online>
+        </distribution>
+      </physical>
+      <entityType>Other</entityType>
+    </otherEntity>
+    <otherEntity id="urn:uuid:6ca3422c-0b07-477f-b7a5-3f39e982318f" scope="document">
+      <entityName>DBO2017Healy_MMWatchMap_region4_NEChukchi_labs.fw.png</entityName>
+      <entityDescription>Map showing Distributed Biological Observatory (DBO) region 4 in the Chukchi Sea west of Wainwright, Alaska, and symbols indicating locations and types of species sightings.</entityDescription>
+      <physical scope="document">
+        <objectName>DBO2017Healy_MMWatchMap_region4_NEChukchi_labs.fw.png</objectName>
+        <size unit="bytes">133679</size>
+        <authentication method="SHA1">72e6e49e1895435309b97d0a8e471fa728d5b3c1</authentication>
+        <dataFormat>
+          <externallyDefinedFormat>
+            <formatName>image/png</formatName>
+          </externallyDefinedFormat>
+        </dataFormat>
+        <distribution scope="document">
+          <online>
+            <url function="download">https://cn.dataone.org/cn/v2/resolve/urn:uuid:6ca3422c-0b07-477f-b7a5-3f39e982318f</url>
+          </online>
+        </distribution>
+      </physical>
+      <entityType>Other</entityType>
+    </otherEntity>
+    <otherEntity id="urn:uuid:bf3e12f5-48f6-4495-8cde-7f3f1f360b7a" scope="document">
+      <entityName>DBO2017Healy_MMWatchMap_region5_BarrowCanyon_labs.fw.png</entityName>
+      <entityDescription>Map showing Distributed Biological Observatory (DBO) region 5 near Barrow Canyon and Barrow, Alaska, and symbols indicating locations and types of species sightings.</entityDescription>
+      <physical scope="document">
+        <objectName>DBO2017Healy_MMWatchMap_region5_BarrowCanyon_labs.fw.png</objectName>
+        <size unit="bytes">110339</size>
+        <authentication method="SHA1">26c42237979bcdc2cf0d1807b77bca8f7275de56</authentication>
+        <dataFormat>
+          <externallyDefinedFormat>
+            <formatName>image/png</formatName>
+          </externallyDefinedFormat>
+        </dataFormat>
+        <distribution scope="document">
+          <online>
+            <url function="download">https://cn.dataone.org/cn/v2/resolve/urn:uuid:bf3e12f5-48f6-4495-8cde-7f3f1f360b7a</url>
+          </online>
+        </distribution>
+      </physical>
+      <entityType>Other</entityType>
+    </otherEntity>
+  </dataset>
+</eml:eml>

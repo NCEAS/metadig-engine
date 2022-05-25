@@ -132,14 +132,13 @@ public class RequestScorerJob implements Job {
         String requestType = null;
         String formatFamily = null;
         MultipartD1Node d1Node = null;
-        String authToken = null;
+        String DataONEauthToken = null;
         String subjectId = null;
         String nodeServiceUrl = null;
 
         if (taskType.equalsIgnoreCase("score")) {
             requestType = dataMap.getString("requestType");
         }
-
         log.debug("Executing task " + taskType + ", " + taskName + " for node: " + nodeId + ", suiteId: " + suiteId);
 
         try {
@@ -147,10 +146,17 @@ public class RequestScorerJob implements Job {
             qualityServiceUrl = cfg.getString("quality.serviceUrl");
             log.trace("nodeId from request: " + nodeId);
             String nodeAbbr = nodeId.replace("urn:node:", "");
-            authToken = cfg.getString(nodeAbbr + ".authToken");
             subjectId = cfg.getString(nodeAbbr + ".subjectId");
             nodeServiceUrl = cfg.getString(nodeAbbr + ".serviceUrl");
             log.trace("nodeServiceUrl: " + nodeServiceUrl);
+
+            DataONEauthToken = System.getenv("DATAONE_AUTH_TOKEN");
+            if (DataONEauthToken == null) {
+                DataONEauthToken =  cfg.getString("DataONE.authToken");
+                log.debug("Got token from properties file.");
+            } else {
+                log.debug("Got token from env.");
+            }
         } catch (ConfigurationException | IOException ce) {
             JobExecutionException jee = new JobExecutionException(taskName + ": Error executing task: " + ce.getMessage());
             jee.initCause(ce);
@@ -162,7 +168,7 @@ public class RequestScorerJob implements Job {
             throw new JobExecutionException(msg);
         }
 
-        Session session = DataONE.getSession(subjectId, authToken);
+        Session session = DataONE.getSession(subjectId, DataONEauthToken);
 
         // Get a connection to the DataONE node (CN or MN)
         try {
