@@ -9,6 +9,7 @@ helm install metadig-rabbitmq bitnami/rabbitmq \
 --namespace metadig \
 --set image.registry=docker.io \
 --set image.repository=bitnami/rabbitmq \
+--set image.tag=8.11.1-debian-10-r14 \
 --set kubeVersion=v1.23.3 \
 --set auth.username=metadig \
 --set auth.password=quality \
