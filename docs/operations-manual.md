@@ -38,7 +38,7 @@ The Ceph-csi facility is used to provide persistent storage for metadig-engine k
 
 The following persistent volume claim (PVC) used by MetaDIG can be seen by entering the following commands:
 ```
-$ kubectl use content metadig
+$ kubectl config use-content prod-metadig
 $ kubectl get pvc -n metadig
 NAME                 STATUS   VOLUME                                     CAPACITY   ACCESS MODES   STORAGECLASS   AGE
 cephfs-metadig-pvc   Bound    cephfs-metadig-pv                          200Gi      RWX                           106d
@@ -49,7 +49,7 @@ The PVC and associated persistent volume (PV) use a CephFS subvolume. The PV and
 ```
 # From a local copy of the metadig-engine github repository:
 
-$ kubectl use content metadig
+$ kubectl config use-ontent prod-metadig
 $ kubectl create -f ./k8s/cephfs-metadig-pvc.yaml
 $ kubectl create -f ./k8s/cephfs-metadig-pv.yaml
 ```
@@ -534,6 +534,47 @@ Note that this information could be obtained using CN DataONE API calls, but thi
 - assessment and scorer task queing request and returned status are logged to metadig-controller
 
 ## Increase Logging Level For MetaDIG Services
+
+- update the logging levels in ./helm/metadig-controller/config/log4j.properties and perform a 'helm upgrade' on metadig-controller and any other necessary metadig-engine service.
+
+The log4j.properties file is shown below with logging set to `DEBUG` for metadig-worker:
+
+```
+# set the log level to WARN and the log should be printed to stdout.
+log4j.rootLogger=DEBUG, stderr
+#log4j.threshold=FATAL, ERROR, WARN, INFO
+
+
+### LOGGING TO CONSOLE #########################################################
+log4j.appender.stderr=org.apache.log4j.ConsoleAppender
+log4j.appender.stderr.layout=org.apache.log4j.PatternLayout
+
+# define the pattern to be used in the logs...
+log4j.appender.stderr.layout.ConversionPattern=%d{yyyyMMdd-HH:mm:ss}: [%p]: %m [%c:%L]%n
+
+# %p -> priority level of the event - (e.g. WARN)
+# %m -> message to be printed
+# %c -> category name ... in this case name of the class
+# %d -> Used to output the date of the logging event. example, %d{HH:mm:ss,SSS} or %d{dd MMM yyyy HH:mm:ss,SSS}. Default format is ISO8601 format
+# %M -> print the method name where the event was generated ... can be extremely slow.
+# %L -> print the line number of the event generated ... can be extremely slow.
+# %t -> Used to output the name of the thread that generated the log event
+# %n -> carriage return
+
+################################################################################
+# EXAMPLE: Print only messages of level WARN or above in the package com.foo:
+log4j.logger.edu.ucsb.nceas.mdqengine=INFO
+log4j.logger.edu.ucsb.nceas.mdqengine.worker=DEBUG # this line is usually commented out or not included
+log4j.logger.com.hp.hpl.jena=WARN
+log4j.logger.org.dataone=OFF
+log4j.logger.org.apache.commons=WARN
+log4j.logger.org.apache.http=WARN
+log4j.logger.org.dataone.mimemultipart=ERROR
+log4j.logger.org.springframework=ERROR
+log4j.logger.org.quartz=INFO
+log4j.logger.org.apache.solr=WARN
+log4j.logger.org.python=WARN
+```
 
 ## Checking Privileges
 
