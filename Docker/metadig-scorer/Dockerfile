@@ -21,9 +21,8 @@ COPY solr solr
 RUN mkdir -p /etc/dataone/index && touch /etc/dataone/index/d1client.properties && touch /etc/dataone/node.properties && touch /etc/dataone/index/cn-index-processor.properties
 
 # Add R runtime and install packges required by the quality suites
-RUN apt update
-RUN apt -y install vim bash
-RUN apt -y install r-base r-cran-httr r-cran-xml2 r-cran-tidyr r-cran-scales r-cran-lubridate r-cran-ggplot2 r-cran-magrittr r-cran-readr
+RUN apt-get clean ; apt update
+RUN apt-get -y install vim bash r-base r-cran-httr r-cran-xml2 r-cran-tidyr r-cran-scales r-cran-lubridate r-cran-ggplot2 r-cran-magrittr r-cran-readr
 # Install the metadig-engine distribution
 RUN Rscript --vanilla -e 'install.packages("metadig.tar.gz", repos=NULL)'
 
