@@ -139,18 +139,6 @@ All source code is compiled and the metadig-engine jar file is built.
 
 The metadig-engine deliverables are copied to the local Maven repository (i.e. ~/.m2/repository). This step makes the deliverables available to other packages that require them. For example, the [metadig-webapp](https://github.com/NCEAS/metadig-webapp) repository requires metadig-engine for builds and can obtain them from the local Mavin repository. The metadig-engine repo builds and published the metadig-postgres, metadig-worker, metadig-scorer and metadig-scheduler Docker image. (The metadig-webapp repository builds and published the metadig-controller Docker image).
 
-## Testing metadig-engine {#running}
-
-metadig-engine reads assessment suites, checks, configuration and data files from the metadig-engine working directory. The metadig-engine working directory is always located at /opt/local/metadig. When running metadig-engine is run locally, this directory is simply /opt/local/metadig on the local system. When running metadig-engine inside a Docker container, this directory is typically mapped to an external persistent volume. For example, /opt/local/metadig inside the container might be mapped to /data/metadig on the maching running Docker.
-
-### Junit Tests
-
-To run the metadig-engine unit tests, type the following command:
-
-```
-mvn surefire:test
-```
-
 ### Running Locally
 
 In order to quickly test an updated assessment suite, the metadig-engine assessment program can be called directly, without using metadig-controller and metadig-worker. This is done by calling the metadig-engine main Java class from the metadig-engine development working directory:
@@ -247,43 +235,25 @@ doi:10.18739_A2W08WG3R,./src/test/resources/test-docs/doi:10.18739_A2W08WG3R.sm,
 See the *MetaDIG Engine Kubernetes Operations Manual* for information on how to deploy metadig-engine on Kubernetes.
 
 
-## Queue A Test Assessment Request
+## Testing metadig-engine {#running}
 
-## Queue A Test Scorer Request
+metadig-engine reads assessment suites, checks, configuration and data files from the metadig-engine working directory. The metadig-engine working directory is always located at /opt/local/metadig. When running metadig-engine is run locally, this directory is simply /opt/local/metadig on the local system. When running metadig-engine inside a Docker container, this directory is typically mapped to an external persistent volume. For example, /opt/local/metadig inside the container might be mapped to /data/metadig on the maching running Docker.
 
-# Appendix A
-## metadig-engine Assessment Algorithm
+### Junit Tests
 
-Here is an explaination of the 'total score' algorithm (formula).
+To run the metadig-engine unit tests, type the following command:
 
-These are the possible 'level' values: INFO, METADATA, OPTIONAL, REQUIRED
-These are the possible 'status' values: SUCCESS, FAILURE, ERROR (SKIP is not longer used)
+```
+mvn surefire:test
+```
 
-For the algorithm:
-    Tpass = is the count of all checks with SUCCESS status (includes REQUIRED and OPTIONAL, NOT INFO or METADATA)
-    Rpass = is the count of REQUIRED checks with SUCCESS status
-    Opass = is the count of OPTIONAL checks with SUCCESS status
-    Ofail = is the count of OPTIONAL checks with FAILURE or ERROR status
-    Rfail = is the count of REQUIRED checks with FAILURE or ERROR status
+## Testing running services
 
-In documentation and papers regarding MetaDIG, FAIR, etc, the formula that is shown:
+### Queue A Test Assessment Request
 
-         Rpass + Opass
-     ---------------------
-     Rpass + Rfail + Opass
+### Queue A Test Scorer Request
 
-Here is the algorithm that is actually used by MetaDIG, shown by the bean 'mdq.scores.overal',
-which is essentially:
-
-         Tpass
-     -------------
-     Tpass + Rfail
-
-Note that these two formulas are equivalent, and that implicitly Ofail is not counted, as it does not
-appear in the denominator. Therefore, the scoring counts optional checks that pass, but doesn't count
-optional checks that fail.
-
-## Appendix B - metadig Postgres Database
+## metadig Postgres Database
 
 Access to the metadig-postres database service is available to any pod running in the metadig k8s namespace. For debugging
 purposes, the database can be accessed locally from a host in the k8s cluster (i.e. k8s-ctrl-1.dataone.org), if the appropriate kubectl context is set.
@@ -409,6 +379,7 @@ metadig=> select * from nodes limit 5;
 
 ### filestore table
 
+```
 metadig=> select file_id,pid,suite_id,storage_type,media_type,alt_filename from filestore limit 5;
                file_id                  | pid                   |     suite_id     | storage_type | media_type  | alt_filename
 ----------------------------------------+-----------------------+------------------+--------------+-------------+----------------------------------
@@ -418,9 +389,80 @@ metadig=> select file_id,pid,suite_id,storage_type,media_type,alt_filename from 
  1a54e6ea-991b-44a8-89d0-ef92411198fa   | urn:uuid:77fc14cc-... | FAIR-suite-0.3.1 | graph        | image/png   |
  dfb6f42a-72e2-4a5a-ae1f-3:wcf23456f06e | urn:uuid:77fc14cc-... | FAIR-suite-0.3.1 | data         | text/csv    |
 (5 rows)
+```
 
+## metadig-engine Solr index
+
+Here is an example row returned from the metadig-engine Solr index in responds to a Solr query. Currently this index is used internally by metadig-engine, but is not available outside of k8s. It may be used in the future by client programs to retrieve data and disply graphics.
+
+```
+ /usr/bin/curl 'http://10.96.136.9:8983/solr/quality/select?q=suiteId:FAIR-suite-0.3.1+datasource:urn\:node\:ARCTIC&q.op=AND&sort=timestamp+desc&rows=1'
+{
+  "responseHeader":{
+    "status":0,
+    "QTime":1,
+    "params":{
+      "q":"suiteId:FAIR-suite-0.3.1 datasource:urn\\:node\\:ARCTIC",
+      "q.op":"AND",
+      "sort":"timestamp desc",
+      "rows":"1"}},
+  "response":{"numFound":31157,"start":0,"numFoundExact":true,"docs":[
+      {
+        "metadataId":"urn:uuid:b12d7a2e-f9be-49ee-8048-b2fb11d6f9bf",
+        "formatId":"https://nceas.ucsb.edu/mdqe/v1",
+        "runId":"670a86f0-8d25-40c2-8d8c-22218090075d",
+        "suiteId":"FAIR-suite-0.3.1",
+        "timestamp":"2022-05-26T13:22:21.725Z",
+        "datasource":"urn:node:ARCTIC",
+        "metadataFormatId":"https://eml.ecoinformatics.org/eml-2.2.0",
+        "dateUploaded":"2022-05-26T13:18:02.874Z",
+        "obsoletes":"urn:uuid:6211cdaa-4a77-4438-ab49-2daf5a7b8658",
+        "rightsHolder":"http://orcid.org/0000-0001-5398-4478",
+        "checksPassed":35,
+        "checksWarned":9,
+        "checksFailed":7,
+        "checksInfo":0,
+        "checksErrored":0,
+        "checkCount":51,
+        "scoreOverall":0.8333333,
+        "scoreByType_Interoperable_f":1.0,
+        "scoreByType_Reusable_f":0.64,
+        "scoreByType_Accessible_f":0.62,
+        "scoreByType_Findable_f":1.0,
+        "_version_":1733895223714512896}]
+  }}
+
+```
+
+The associated Solr schema file can be found at ./helm/metadig-solr/quality/conf/schema.xml in the metadig-engine repository.
+
+Note that the Solr fields `scoreByType*` are dynamic, so these field names will vary based on the assessment check categories of each assessment suite.
 
 ## metadig-scheduler operation
+
+### MN metadata harvesting
+
+Several DataONE MNs have custom assessment suites, that are different than the default suite running on the CN. THe current suites in use are:
+
+
+| node id  | suite id    |
+|----------|-------------|
+| KNB      - knb.suite.1 |
+| ARCTIC   | arctic.data.center.suite.1 |
+| ESS_DIVE | ess-dive.data.center.suite-1.1.0 |
+| CN       | FAIR-suite-0.3.1 |
+
+Because all DataONE content is assessed via the CN harvesting task (for supported metadata document formats), it is only necessary to add an
+MN harvesting task to the metadig-scheduler task file if a different suite needs to be assessed for the content of that MN. For example, the
+task for the Arctic Data Center suite is shown below:
+
+```
+quality,quality-arctic,metadig,5 0/1 * * * ?,"^eml.*|^http.*eml.*;arctic.data.center.suite.1;urn:node:ARCTIC;2022-04-01T00:00:00.00Z;1;1000"
+```
+This tasks causes harvesting to be performed every minute (5 seconds after the start), for metadata with sysmeta formatIds matching the regular expression 
+`^eml.*|^http.*eml.*``.
+
+See the `operations-manual.md` for more information about the metadig-scheduler task list file.
 
 ### CN metadata harvesting
 
@@ -449,4 +491,33 @@ regular expression `^eml.*|^http.*eml.*|.*www.isotc211.org.*` are selected for a
 - all matching pids are queued for assessment
 - when the assessment is complete, an entry is made in the `node_harvest` entry with the `last_harvest_datetime` set to most recent system metadata modified datetime from all the pids processed
 
+## metadig-engine Assessment Algorithm
 
+Here is an explaination of the 'total score' algorithm (formula).
+
+These are the possible 'level' values: INFO, METADATA, OPTIONAL, REQUIRED
+These are the possible 'status' values: SUCCESS, FAILURE, ERROR (SKIP is not longer used)
+
+For the algorithm:
+    Tpass = is the count of all checks with SUCCESS status (includes REQUIRED and OPTIONAL, NOT INFO or METADATA)
+    Rpass = is the count of REQUIRED checks with SUCCESS status
+    Opass = is the count of OPTIONAL checks with SUCCESS status
+    Ofail = is the count of OPTIONAL checks with FAILURE or ERROR status
+    Rfail = is the count of REQUIRED checks with FAILURE or ERROR status
+
+In documentation and papers regarding MetaDIG, FAIR, etc, the formula that is shown:
+
+         Rpass + Opass
+     ---------------------
+     Rpass + Rfail + Opass
+
+Here is the algorithm that is actually used by MetaDIG, shown by the bean 'mdq.scores.overal',
+which is essentially:
+
+         Tpass
+     -------------
+     Tpass + Rfail
+
+Note that these two formulas are equivalent, and that implicitly Ofail is not counted, as it does not
+appear in the denominator. Therefore, the scoring counts optional checks that pass, but doesn't count
+optional checks that fail.

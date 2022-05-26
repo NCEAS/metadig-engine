@@ -485,6 +485,21 @@ $ curl --insecure -H "Accept: text/csv" "https://api.dataone.org/quality/scores?
 
 # Upgrading metadig-engine services on k8s
 
+Services are upgraded using the [`helm upgrade`](https://helm.sh/docs/helm/helm_upgrade/) command. 
+
+Once you have released a new verion of metadig-engine and published new Docker images, you can modify `values.xml` file in each metadig-engine service to update `image.tag` value.
+Also update the `Chart.yaml` file to upgrade the `version` and `appVersion` values. Once that is done, the new chart can be installed with the command:
+
+```
+helm upgrade <service> ./<service directory>
+```
+
+for each service to be upgraded. For example:
+
+```
+helm upgrade metadig-controller ./metadig-controller
+```
+
 # Adding a Member Node to the Assessment Harvest
 
 To add an MN to the assessment harvest:
