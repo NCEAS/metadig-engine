@@ -253,7 +253,7 @@ mvn surefire:test
 
 ### Queue A Test Scorer Request
 
-## metadig Postgres Database
+## metadig-engine PostgreSQL Database
 
 Access to the metadig-postres database service is available to any pod running in the metadig k8s namespace. For debugging
 purposes, the database can be accessed locally from a host in the k8s cluster (i.e. k8s-ctrl-1.dataone.org), if the appropriate kubectl context is set.
