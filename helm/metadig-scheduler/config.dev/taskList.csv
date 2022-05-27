@@ -1,0 +1,43 @@
+task-type,task-name,task-group,cron-schedule,params
+# 
+# metadig-scheduler task file for the k8s development environment
+#
+# task type, task name, task group, cron schedule, "formatId filter (regex); suite id; node id; D1 node base url; harvest begin date; harvest increment (days);requestCount"
+# - task type:
+# - task name:
+# - task group:
+# - cron schedule:
+#   - seconds, minutes, hours, day of month, month, day of week, year
+# - params
+#   - formatId filter (regex): This is a list of wildcards that will match records with these formatIds to harvest, delimeted by '|
+#   - suite id: the metadig suite id
+#   - node id: a DataONE node URN - data will be filtered using this (DataONE sysmeta "datasource")
+#   - D1 node base url: the base service URL for an MN or CN that will be used to query for pids to be processed
+#   - harvest begin date: begin date: the first date to use for the DataONE 'listObjects' service
+#   - harvest increment (days): increment (days): the time span for each search
+#   - requestCount: the number of itmes to request from DataONE listObjects
+#   - requestType: for score tasks, determine type of portal processing ("portal" or "node")
+#
+# Dataset quality scoring tasks
+quality,quality-test-arctic,metadig,5 0/1 * * * ?,"^eml.*|^http.*eml.*;arctic.data.center.suite.1;urn:node:mnTestARCTIC;2022-05-01T00:00:00.00Z;1;1000"
+quality,quality-test-dataone-fair,metadig,10 0/1 * * * ?,"^eml.*|^http.*eml.*|.*www.isotc211.org.*;FAIR-suite-0.3.1;urn:node:cnStage;2022-05-01T00:00:00.00Z;1;1000"
+#
+# Portal scoring tasks
+score,portal-test-arctic-FAIR,metadig,10 0/1 * * * ?,"*portals*;FAIR-suite-0.3.1;urn:node:mnTestARCTIC;2022-05-01T00:00:00.00Z;1;100;portal"
+#
+# Task for creating member node metadata assessment graphs
+score,mn-portal-test-arctic-FAIR,metadig,0 0 2 * * ?,";FAIR-suite-0.3.1;urn:node:mnTestARCTIC;2022-05-01T00:00:00.00Z;1;1000;node"
+#
+# Task for ingesting files into the file store from /data/metadig/store/stage/{code,data,graph,metadata}
+#filestore,ingest,metadig,0 0/1 * * * ?,"stage;;*.*;README.txt;filestore-ingest.log"
+#
+# Admin NOTE: it appears that DataONE HttpMultipartRestClient can't handle two clients being created at the same time, even if they are by different threads. This needs to be
+#      investigated further and potentially a bug needs to be logged in github for this. Until then, an easy workaround is to ensure that no two tasks are started
+#      at the same time, so adjust the cron schedule accordingly.
+#
+# Node list from DataONE - run every hour, near the end of each hour
+nodelist,MN-NODE-LIST,metadig,0 45 * * * ?,"urn:node:cnStage"
+#
+# Acquire data files that are used by assessment checks
+# This task runs every hour, at the half hour
+#downloads,downloads,metadig,0 30 * * *  ?,"no params for this task - see docs for 'downloadsList.csv'"

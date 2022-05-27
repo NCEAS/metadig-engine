@@ -1,4 +1,7 @@
 task-type,task-name,task-group,cron-schedule,params
+# 
+# metadig-scheduler task file for the k8s production Cluster
+#
 # task type, task name, task group, cron schedule, "formatId filter (regex); suite id; node id; D1 node base url; harvest begin date; harvest increment (days);requestCount"
 # - task type:
 # - task name:

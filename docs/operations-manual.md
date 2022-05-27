@@ -662,8 +662,6 @@ This file is deployed from `./helm/metadig-controller/config/metadig.properties`
 The production properties file is shown below:
 
 ```
-# Note that metadig-engine uses Apache Commons Configuration, so that variable substitution is supported (the value
-# of CN.token can be used to define other values).
 DataONE.authToken = not-set in config - see github ./k8s/k8s-secret-for-DataONE-token.txt.gpg
 CN.subjectId = CN=urn:node:CN,DC=dataone,DC=org
 CN.serviceUrl = https://cn.dataone.org/cn
@@ -716,9 +714,20 @@ downloadsList = ${metadig.data.dir}/downloadsList.csv
 Here is a list of all the Helm commands required to run all MetaDIG services. Note that longer Helm commands, especially for non-NCEAS charts have been 
 included in Bash shell scripts for convienence.
 
+### Installing packages on the k8s production cluster
+
+The default helm setup for metadig-engine charts authored by NCEAS (not bitnami) is to use configuration files for the k8s production cluster. As 
+k8s production is the default, it is not necesary to set a helm parameter to select the appropriate metadig-engine configuration files. Therefor
+the commands below can be used to install metadig-engine services to k8s production.
+
 ```
+#
+# Set the appropriate kubectl context so that helm installation are sent to k8s production cluster
+#
+kubectl config use-context prod-metadig
+kubectl config get-contexts
 cd ./helm
-helm install metadig-postgres ./metadig-postgres --namespace metadig --version=1.0.0 --values ./postgres/values.yaml
+helm install metadig-postgres ./metadig-postgres --namespace metadig --version=1.0.0
 
 # Bitnami rabbitmq
 ./metadig-rabbitmq/install-metadig-rabbitmq.sh
@@ -728,10 +737,50 @@ helm install metadig-postgres ./metadig-postgres --namespace metadig --version=1
 
 helm install metadig-controller ./metadig-controller --namespace metadig --version=1.0.0  --set image.pullPolicy=Always
 
-helm install metadig-worker ./metadig-worker --namespace metadig --version=1.0.0 --set replicaCount=1 --set image.pullPolicy=Always
+helm install metadig-worker ./metadig-worker --namespace metadig --version=1.0.0 --set replicaCount=10 --set image.pullPolicy=Always
 helm install metadig-scorer ./metadig-scorer --namespace metadig --version=1.0.0 --set image.pullPolicy=Always
 helm install metadig-scheduler ./metadig-scheduler --namespace metadig --version=1.0.0 --set image.pullPolicy=Always
 ```
+
+### Installing packages on the k8s development cluster
+
+To install metadig-engine services to the k8s development cluster, the following commands can be used. Note that additional helm parameters are
+required for the metadig-controller and metadig-scheduler installations, so that approriate configuration files are selected for k8s development.
+
+```
+#
+# Set the appropriate kubectl context so that helm installation are sent to k8s development cluster
+#
+kubectl config use-context dev-metadig
+kubectl config get-contexts
+cd ./helm
+helm install metadig-postgres ./metadig-postgres --namespace metadig --version=1.0.0
+
+# Bitnami rabbitmq
+./metadig-rabbitmq/install-metadig-rabbitmq.sh
+
+# Bitnami Solr
+./metadig-solr/install-metadig-solr.sh
+
+helm install metadig-controller ./metadig-controller --namespace metadig --version=1.0.0  --set image.pullPolicy=Always --set k8s.cluster=dev
+
+helm install metadig-worker ./metadig-worker --namespace metadig --version=1.0.0 --set replicaCount=1 --set image.pullPolicy=Always
+helm install metadig-scorer ./metadig-scorer --namespace metadig --version=1.0.0 --set image.pullPolicy=Always
+helm install metadig-scheduler ./metadig-scheduler --namespace metadig --version=1.0.0 --set image.pullPolicy=Always --set k8s.cluster=dev
+```
+
+### Debugging helm charts
+
+Note that helm can be used in a debugging mode, so that the .yaml files that it generates can be inspected. When the helm `--dry-run` argument is used,
+the .yaml files that it generates are not send to k8s, but are printed out to the console instead. For example:
+
+```
+helm install --dry-run --debug metadig-controller ./metadig-controller --namespace metadig --version=1.0.0  --set dns.config=false
+```
+
+Note that metadig-engine charts have the special argument `dns.config=false` that must be used when using the helm debug arguments. This
+is related to the `dns` section of `./templates/deployment.yaml` and the helm `lookup` function which is not supported when using `--dry-run`.
+Therefor this section must be skipped when using `--dry-run`. See https://github.com/helm/helm-www/issues/635 for details.
 
 ## Useful Bash aliases and Scripts
 

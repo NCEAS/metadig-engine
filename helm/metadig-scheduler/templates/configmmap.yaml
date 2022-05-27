@@ -1,3 +1,7 @@
+#
+# Production k8s cluster configuration files
+#
+{{- if eq .Values.k8s.cluster "prod" }}
 # Load all files in the "config" directory into a ConfigMap
 apiVersion: v1
 kind: ConfigMap
@@ -13,3 +17,26 @@ metadata:
   name: metadig-downloads-list-volume
 data:
 {{ (tpl (.Files.Glob "config/downloadsList.csv").AsConfig . ) | indent 4 }}
+
+{{- else }}
+#
+# Development k8s cluster configuration files
+#
+# Load all files in the "config" directory into a ConfigMap
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: metadig-tasks-volume
+data:
+{{ (tpl (.Files.Glob "config.dev/taskList.csv").AsConfig . ) | indent 4 }}
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: metadig-downloads-list-volume
+data:
+{{ (tpl (.Files.Glob "config.dev/downloadsList.csv").AsConfig . ) | indent 4 }}
+
+{{- end }}
+
