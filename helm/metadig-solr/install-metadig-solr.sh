@@ -11,7 +11,7 @@ helm install metadig-solr bitnami/solr \
 --set coreNames="quality" \
 --set collection="quality" \
 --set cloudEnabled=false \
---set image.tag=8.11.1-debian-10-r14 \
+--set image.tag=8.11.1-debian-10-r153 \
 --set collectionShards=1 \
 --set collectionReplicas=1 \
 --set podSecurityContext.enabled=true \
