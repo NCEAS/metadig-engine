@@ -725,6 +725,7 @@ the commands below can be used to install metadig-engine services to k8s product
 # Set the appropriate kubectl context so that helm installation are sent to k8s production cluster
 #
 kubectl config use-context prod-metadig
+# Always confirm the current context is correct
 kubectl config get-contexts
 cd ./helm
 helm install metadig-postgres ./metadig-postgres --namespace metadig --version=1.0.0
@@ -752,6 +753,7 @@ required for the metadig-controller and metadig-scheduler installations, so that
 # Set the appropriate kubectl context so that helm installation are sent to k8s development cluster
 #
 kubectl config use-context dev-metadig
+# Always confirm the current context is correct
 kubectl config get-contexts
 cd ./helm
 helm install metadig-postgres ./metadig-postgres --namespace metadig --version=1.0.0
@@ -767,6 +769,24 @@ helm install metadig-controller ./metadig-controller --namespace metadig --versi
 helm install metadig-worker ./metadig-worker --namespace metadig --version=1.0.0 --set replicaCount=1 --set image.pullPolicy=Always
 helm install metadig-scorer ./metadig-scorer --namespace metadig --version=1.0.0 --set image.pullPolicy=Always
 helm install metadig-scheduler ./metadig-scheduler --namespace metadig --version=1.0.0 --set image.pullPolicy=Always --set k8s.cluster=dev
+```
+
+## Uninstalling packages
+
+The metadig-engine services can be uninstalled from either k8s cluster with the commands:
+
+```
+# Always confirm the current context is correct
+kubectl config get-contexts
+
+helm delete metadig-scheduler -n metadig
+helm delete metadig-scorer -n metadig
+helm delete metadig-worker -n metadig
+helm delete metadig-controller -n metadig
+
+helm delete metadig-rabbitmq -n metadig
+helm delete metadig-postgres -n metadig
+helm delete metadig-solr -n metadig
 ```
 
 ### Debugging helm charts
