@@ -3,12 +3,15 @@
 
 The MetaDIG (Metadata Improvement and Guidance) project has been funded for metadata improvement advocacy, the development of metadata evaluation criteria and the development of metadata assessment tools. This repository contains a metadata assessment tool, the MetaDIG engine, aka metadig-engine. The metadig-engine assesses a metadata document to see how closely it adheres to a suite of checks. Each assessment check inspects the contents of one or more elements from the metadata document. From this assessment process, a report is generated that describes if each check's criteria are met or not.
 
-## Building metadig-engine
+## metadig-engine dependancies Dependancies
 
-## metadig-engine Dependancies
+The following components are required for the metadig-engine build or runtime.
+
 ### metadig-r
 
 metadig-engine assessment checks that are written in the R programming language can use the [metadig-r](https://github.com/NCEAS/metadig-r) R package, which contains functions that perform common assessment tasks. The metadig-r package is made available to metadig-engine via an R source package, for example 'metadig_0.2.0.tar.gz`. This file is used during the building of the metadig-worker Docker image, which is described later in this document. Additional information on building and using the metadig-r R package is available from the [github repo](https://github.com/NCEAS/metadig-r).
+
+The tar file build from this component is required for the metadig-engine build.
 
 metadig-r can produce a distribution tar file that will be included in metadig-engine builds. This R package hasn't been published to CRAN so the distribution tar file must be created on a local 
 github repo:
@@ -26,6 +29,8 @@ This distribution file will be incorporated into the metadig-engine Docker conta
 
 The metadig-py component is a Python package that assists in the authoring of metadig-engine checks written in Python. metadig-py is made available to metadig-engine by building the Python package from the [metadig-py](https://github.com/NCEAS/metadig-py) repository, then placing the `metadig-py` directory in the metadig-engine working directory, which is described in [Running metadig-engine](#running)
 
+The Python package built by this package is required for meatdig-engine at runtime.
+
 Currently this file has to be manually installed to /opt/local/metadig/metadig-py (also available from /mnt/k8ssubvol/metadig/metadig-py).
 
 See https://github.com/NCEAS/metadig-py for details on building and deploying metadig-py.
@@ -38,6 +43,8 @@ Currently a metadig-checks release must be deployed manually to /opt/local/metad
 
 See https://github.com/NCEAS/metadig-checks for details on building and deploying metadig-checks.
 
+The metadig-engine suites and checks are required by metadig-engine at runtime.
+
 ### RabbitMQ
 
 RabbitMQ is an open source messge brokering system that can be used to queue assessment requests for metadig-engine. 
@@ -48,7 +55,9 @@ A RabbitMQ distribution is provided by Bitnami and installed via helm. See the *
 
 ### Solr
 
-A Solr index distir
+A Solr Index search engine is used by metadig-engine at runtime.
+
+A Solr distribution is provided by Bitnami and installed via helm. See the *operations-manual* for details.
 
 ## Building metadig-engine
 
@@ -96,6 +105,7 @@ https://hub.docker.com/r/metadig/metadig-controller
 ```
 
 ## Components dependant on metadig-engine
+
 ### metadig-webapp
 
 The [metadig-webapp repository](https://github.com/NCEAS/metadig-webapp) builds the metadig-controller distribution and Docker image. This image contains a distribution of the Tomcat servlet engine that metadig-controller runs inside of. The build process obtains the metadig-engine distribution from the local maven repository (~/.m2) after metadig-engine has been built.
@@ -139,9 +149,13 @@ All source code is compiled and the metadig-engine jar file is built.
 
 The metadig-engine deliverables are copied to the local Maven repository (i.e. ~/.m2/repository). This step makes the deliverables available to other packages that require them. For example, the [metadig-webapp](https://github.com/NCEAS/metadig-webapp) repository requires metadig-engine for builds and can obtain them from the local Mavin repository. The metadig-engine repo builds and published the metadig-postgres, metadig-worker, metadig-scorer and metadig-scheduler Docker image. (The metadig-webapp repository builds and published the metadig-controller Docker image).
 
+## Environments supported by metadig-engine
+
+metadig-engine can be run in the following environments, each of which can facilitate different levels of testing and development.
+
 ### Running Locally
 
-In order to quickly test an updated assessment suite, the metadig-engine assessment program can be called directly, without using metadig-controller and metadig-worker. This is done by calling the metadig-engine main Java class from the metadig-engine development working directory:
+In order to quickly test an updated an assessment suite, the metadig-engine assessment program can be called directly, without using metadig-controller and metadig-worker. This is done by calling the metadig-engine main Java class from the metadig-engine development working directory:
 
 ```
 workDir=$PWD
@@ -247,11 +261,16 @@ To run the metadig-engine unit tests, type the following command:
 mvn surefire:test
 ```
 
-## Testing running services
+## Troubleshooting metadig-engine
 
 ### Queue A Test Assessment Request
 
 ### Queue A Test Scorer Request
+
+### k8s metadig-engine
+
+For information regarding monitoring and troubleshooting metadig-engine running in the k8s environment, se"e Troubleshooting MetaDIG Engine Services" in the 
+`MetaDIG Kubernetes Operations Manual`.
 
 ## metadig-engine PostgreSQL Database
 
@@ -259,8 +278,9 @@ Access to the metadig-postres database service is available to any pod running i
 purposes, the database can be accessed locally from a host in the k8s cluster (i.e. k8s-ctrl-1.dataone.org), if the appropriate kubectl context is set.
 Access is not available from outside the k8s cluster. 
 
-For example, if on a k8s node, it is possible to use the PostgreSQL client program (if installed on the k8s host) to connect directly to the postgres 
-container that runs within the metadig-postgres pod:
+For example, if on a k8s cluster node, it is possible to use the PostgreSQL client program (if installed on the k8s host) to connect directly to the postgres 
+pod/container that runs within the metadig-postgres pod:
+
 ```
 addr=`kubectl get service metadig-postgres --namespace=metadig -o wide | grep 'metadig-postgres' | awk '{print $3}'`
 psql -h $addr -p 5432 -U metadig metadig

@@ -14,15 +14,15 @@ The MetaDIG Assessment services are dependant on the following components which 
 
 A k8s ingress resource provides network traffic routing from outside the k8s cluster network to a k8s service.
 
-The metadig-engine ingress definition can be found in ./k8s/ingress-metadig.yaml. This k8s resource only needs to be created once, and at this time is
+The metadig-engine ingress definition can be found [here](https://github.com/NCEAS/metadig-engine/blob/main/k8s/ingress-metadig.yaml). This k8s resource only needs to be created once, and at this time is
 not included in the Helm install, but could be if desired. Note that every time the ingress resource is deleted and recreated, as would happen with a 'helm delete' and 'helm install',
 the cert-manager sends a new request to the Let's Encrypt service to the Let's Encrypt service. Cert-manager is described in the DataONE k8s-cluster documentation [here](https://github.com/DataONEorg/k8s-cluster/blob/main/authentication/LetsEncrypt.md).
 
 ### Role and Rolebinding definitions
 
-The k8s Role Based Access Control (RBAC) defintions for metadig-engine are provided at ./k8s/metadig-application-access.yaml.
+The k8s Role Based Access Control (RBAC) defintions for metadig-engine can be found [here](https://github.com/NCEAS/metadig-engine/blob/main/k8s/metadig-application-access.yaml).
 
-The *metadig* Role and RoleBinding are similar to those for any other DataONE k8s application, providing all k8s access to a single k8s namespace. 
+The *metadig* Role and RoleBinding are similar to those for other DataONE k8s application, providing all k8s access to a single k8s namespace. 
  
 Metadig-engine also requires the additional Role and RoleBinding 'kube-system-reader'. This is necessary so that metadig services can define a specific DNS configuration to resolve aissue that is unique to metadig-engine. The details are providied in the github issue https://github.com/NCEAS/metadig-engine/issues/312.
 
@@ -31,6 +31,20 @@ to enable authorization to the `metadig` namespace:
 ```
 kubectl config use-context prod-metadig
 ```
+
+### Authentication
+
+A `metadig` k8s [ServiceAccount](https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/) and [authentication context](https://kubernetes.io/docs/tasks/access-application-cluster/configure-access-multiple-clusters/#define-clusters-users-and-contexts
+) (token) have been created for metadig-engine services. These are required in order to have privilege to start, stop and monitor metadig-engine services.
+
+The appropriate `~/.kube/config` must be installed on the local system to enable modifying the `metadig` namespace. Once this file is installed, the following command must be issued
+to enable authorization to the `metadig` namespace:
+```
+kubectl config use-context prod-metadig
+
+```
+
+See the NCEAS security repo ./security/k8s/config* for further details.
 
 ### Persistent Storage
 
@@ -57,6 +71,9 @@ $ kubectl create -f ./k8s/cephfs-metadig-pv.yaml
 These commands only need to be entered once, and as they have been run for the current DataONE production and development k8s clusters, do not need to be run again.
 The PV that metadig-engine services uses is manually created. See a description of CephFS subvolumes used with k8s services described [here](https://github.com/DataONEorg/k8s-cluster/blob/main/storage/Ceph/Ceph-CSI-CephFS.md).
 
+*Note that the CephFS volume can be maid available to the Linux comnand line at `/mnt/k8ssubvol` for convienence and debugging purposes. This Linux volume mount is not required
+for any metadig-engine services, as access to the Ceph Storage Cluster is provided through ceph-csi. To make this CephFS volume directly accessible to the Linux command line, for machines within the k8s cluster see https://github.com/DataONEorg/k8s-cluster/blob/main/storage/Ceph/Ceph-CSI-CephFS.md#provisioning-static-cephfs-volumes*
+
 ### PostgreSQL
 
 The MetaDIG PostgreSQL stores assessment reports, DataONE persistent Identifier (pid) information, and information about the DataONE Member Nodes and Coordinating Node from which metadata is harvested.
@@ -78,8 +95,6 @@ Two containers run inside the metadig-postgres pod, named `postgres` and `pgboun
 
 The `pgbouncer` container provides connection caching between postgres and client pods (metadig-controller, metadig-worker, metadig-scorer, metadig-scheduler).
 
-*Note that the volume mount `/mnt/k8ssubvol` available to the Linux command line is provided for convienence and debugging purposes. This volume mount is not required
-for any metadig-engine services, as access to the Ceph Storage Cluster is provided through ceph-csi.*
 
 ### RabbitMQ
 
@@ -533,12 +548,137 @@ Note that this information could be obtained using CN DataONE API calls, but thi
 
 ## Troubleshooting MetaDIG Engine Services
 
+If metadata assessments are not being generated in an acceptable amount of time after a metadata document has been uploaded to DataONE, one or more
+of the following methods can be used to determine the cause of the delay.
+
+### View currently running metadig-engine pods and services
+
+The commands shown below show all currently running metadig-engine services:
+
+```
+kubectl config use-context prod-metadig
+kubectl get pods,services -n metadig -o wide
+NAME                                      READY   STATUS    RESTARTS   AGE     IP                NODE            NOMINATED NODE   READINESS GATES
+pod/metadig-controller-7f4d4d6c4b-6j427   1/1     Running   0          2d23h   192.168.71.89     docker-ucsb-6   <none>           <none>
+pod/metadig-postgres-656f5975d4-ms6r2     2/2     Running   0          3d      192.168.181.152   docker-ucsb-5   <none>           <none>
+pod/metadig-rabbitmq-0                    1/1     Running   0          3d      192.168.181.188   docker-ucsb-5   <none>           <none>
+pod/metadig-rabbitmq-1                    1/1     Running   0          2d23h   192.168.71.85     docker-ucsb-6   <none>           <none>
+pod/metadig-rabbitmq-2                    1/1     Running   0          3d      192.168.181.133   docker-ucsb-5   <none>           <none>
+pod/metadig-scheduler-6c8fdfff-lgv5f      1/1     Running   0          2d21h   192.168.219.52    docker-ucsb-7   <none>           <none>
+pod/metadig-scorer-665894c66b-hk98v       1/1     Running   0          2d20h   192.168.219.27    docker-ucsb-7   <none>           <none>
+pod/metadig-solr-0                        1/1     Running   0          2d23h   192.168.71.124    docker-ucsb-6   <none>           <none>
+pod/metadig-worker-6b9bdb9445-cmd4k       1/1     Running   0          2d23h   192.168.181.171   docker-ucsb-5   <none>           <none>
+pod/metadig-worker-6b9bdb9445-fj4fr       1/1     Running   0          3d      192.168.181.173   docker-ucsb-5   <none>           <none>
+pod/metadig-worker-6b9bdb9445-gr6sp       1/1     Running   0          2d23h   192.168.181.177   docker-ucsb-5   <none>           <none>
+pod/metadig-worker-6b9bdb9445-jh7r9       1/1     Running   0          3d      192.168.181.175   docker-ucsb-5   <none>           <none>
+pod/metadig-worker-6b9bdb9445-lp6kd       1/1     Running   0          3d      192.168.181.182   docker-ucsb-5   <none>           <none>
+pod/metadig-worker-6b9bdb9445-mpfm8       1/1     Running   0          3d      192.168.71.65     docker-ucsb-6   <none>           <none>
+pod/metadig-worker-6b9bdb9445-qtvrf       1/1     Running   0          2d23h   192.168.71.75     docker-ucsb-6   <none>           <none>
+pod/metadig-worker-6b9bdb9445-vpg2w       1/1     Running   0          3d      192.168.71.71     docker-ucsb-6   <none>           <none>
+pod/metadig-worker-6b9bdb9445-x5znm       1/1     Running   0          3d      192.168.71.119    docker-ucsb-6   <none>           <none>
+pod/metadig-worker-6b9bdb9445-xcshl       1/1     Running   0          3d      192.168.71.98     docker-ucsb-6   <none>           <none>
+
+NAME                                TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)                                 AGE   SELECTOR
+service/metadig-controller          ClusterIP   10.102.171.8    <none>        8080/TCP                                12d   app.kubernetes.io/instance=metadig-controller,app.kubernetes.io/name=metadig-controller
+service/metadig-postgres            ClusterIP   10.106.91.87    <none>        5432/TCP,6432/TCP                       13d   app.kubernetes.io/instance=metadig-postgres,app.kubernetes.io/name=postgres
+service/metadig-rabbitmq            ClusterIP   10.106.39.185   <none>        5672/TCP,4369/TCP,25672/TCP,15672/TCP   13d   app.kubernetes.io/instance=metadig-rabbitmq,app.kubernetes.io/name=rabbitmq
+service/metadig-rabbitmq-headless   ClusterIP   None            <none>        4369/TCP,5672/TCP,25672/TCP,15672/TCP   13d   app.kubernetes.io/instance=metadig-rabbitmq,app.kubernetes.io/name=rabbitmq
+service/metadig-solr                ClusterIP   10.96.136.9     <none>        8983/TCP                                12d   app.kubernetes.io/component=solr,app.kubernetes.io/instance=metadig-solr,app.kubernetes.io/name=solr
+service/metadig-solr-headless       ClusterIP   None            <none>        8983/TCP                                12d   app.kubernetes.io/component=solr,app.kubernetes.io/instance=metadig-solr,app.kubernetes.io/name=solr
+```
+
+For each pod, check the `STATUS` field for the `Running` state. If a pod is not in the `Running` state, the pod can be inpected for further information regarding it's operation, for example, the pod
+`metadig-controller` can be inspected with the command, using the current pod `NAME`:
+
+```
+pod/metadig-controller-7f4d4d6c4b-6j427
+
+avatar:helm slaughter$ kubectl describe pod/metadig-controller-7f4d4d6c4b-6j427 -n metadig
+Name:         metadig-controller-7f4d4d6c4b-6j427
+Namespace:    metadig
+Priority:     0
+Node:         docker-ucsb-6/128.111.85.196
+Start Time:   Thu, 26 May 2022 11:28:58 -0700
+Labels:       app.kubernetes.io/instance=metadig-controller
+              app.kubernetes.io/name=metadig-controller
+              pod-template-hash=7f4d4d6c4b
+Annotations:  cni.projectcalico.org/podIP: 192.168.71.89/32
+              cni.projectcalico.org/podIPs: 192.168.71.89/32
+Status:       Running
+IP:           192.168.71.89
+IPs:
+  IP:           192.168.71.89
+Controlled By:  ReplicaSet/metadig-controller-7f4d4d6c4b
+Containers:
+  metadig-controller:
+    Container ID:   docker://ebec968f479c7fcf5554128a4a72212b59e7b55e61a6c5bb79b5896d5d21f83c
+    Image:          docker.io/metadig/metadig-controller:2.4.0
+    Image ID:       docker-pullable://metadig/metadig-controller@sha256:fc3a29b2c2139de24d6fc884781260b6c203073a323eb5a603e062d790912bb3
+    Port:           8080/TCP
+    Host Port:      0/TCP
+    State:          Running
+      Started:      Thu, 26 May 2022 11:29:25 -0700
+    Ready:          True
+    Restart Count:  0
+    Environment:
+      JAVA_OPTS:  -Dlog4j2.formatMsgNoLookups=true
+    Mounts:
+      /opt/local from metadig-pv (rw)
+      /opt/local/metadig/config/log4j.properties from metadig-log4j-volume (rw,path="log4j.properties")
+      /opt/local/metadig/metadig.properties from metadig-config-volume (rw,path="metadig.properties")
+      /var/run/secrets/kubernetes.io/serviceaccount from kube-api-access-rbqrw (ro)
+Conditions:
+  Type              Status
+  Initialized       True
+  Ready             True
+  ContainersReady   True
+  PodScheduled      True
+Volumes:
+  metadig-pv:
+    Type:       PersistentVolumeClaim (a reference to a PersistentVolumeClaim in the same namespace)
+    ClaimName:  cephfs-metadig-pvc
+    ReadOnly:   false
+  metadig-config-volume:
+    Type:      ConfigMap (a volume populated by a ConfigMap)
+    Name:      metadig-config-volume
+    Optional:  false
+  metadig-log4j-volume:
+    Type:      ConfigMap (a volume populated by a ConfigMap)
+    Name:      metadig-log4j-volume
+    Optional:  false
+  kube-api-access-rbqrw:
+    Type:                    Projected (a volume that contains injected data from multiple sources)
+    TokenExpirationSeconds:  3607
+    ConfigMapName:           kube-root-ca.crt
+    ConfigMapOptional:       <nil>
+    DownwardAPI:             true
+QoS Class:                   BestEffort
+Node-Selectors:              <none>
+Tolerations:                 node.kubernetes.io/not-ready:NoExecute op=Exists for 300s
+                             node.kubernetes.io/unreachable:NoExecute op=Exists for 300s
+Events:                      <none>
+```
+
+
+The `kubectl describe` command can be used to inspect any resource used by metadig-engine pods and services, for example:
+
+```
+kubectl describe service/metadig-controller -n metadig
+kubectl get pvc -n metadig
+kubectl describe pvc cephfs-metadig-pvc -n metadig 
+kubectl describe ingress -n metadig
+ 
+```
+
 ### Inspect Log Files
 
-- increase log level 
-- assessment and scorer task queing request and returned status are logged to metadig-controller
+Log files for the metadig-engine pods can be inspected 
+
+- assessment and scorer task queing request and returned status are logged to metadig-controller log file
 
 ### Increase Logging Level For MetaDIG Services
+
+If the logging level doesn't provide sufficient detail to determine the cause of a problem, the logging level can be increased.
 
 - update the logging levels in ./helm/metadig-controller/config/log4j.properties and perform a 'helm upgrade' on metadig-controller and any other necessary metadig-engine service.
 
@@ -583,7 +723,7 @@ log4j.logger.org.python=WARN
 
 ### Checking Privileges
 
-If access to a k8s resource is encountered, privileges of a kubectl context can be checked:
+If problems with access to a k8s resource is encountered, privileges of a kubectl context can be checked with the following commands:
 
 ```
 
