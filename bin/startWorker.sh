@@ -1,5 +1,6 @@
 #!/bin/bash
 
+# Start a local copy of metadig-worker for RabbitMQ based development testing.
 version=2.4.0
 
 # Include the MetaDIG python library
