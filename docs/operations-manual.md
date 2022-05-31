@@ -139,9 +139,6 @@ helm install metadig-rabbitmq bitnami/rabbitmq \
 
 See `metadig-rabbitmq/install-metadig-rabbitmq.sh`.
 
-*Note that the correct username and password must be substituted for '<username>' and '<password>'.*
-These values area available from the security repo at ./k8s/metadigPWs.gpg.
-
 The Bitnami Helm chart is described [here](https://bitnami.com/stack/rabbitmq/helm). 
 
 Chart options and additional information is described [here](https://github.com/bitnami/charts/tree/master/bitnami/rabbitmq#installing-the-chart)
@@ -850,8 +847,8 @@ mnStageUCSB2.serviceUrl = https://mn-stage-ucsb-2.test.dataone.org/metacat/d1/mn
 # The RabbitMQ connecction information
 RabbitMQ.host = metadig-rabbitmq.metadig.svc.cluster.local
 RabbitMQ.port = 5672
-RabbitMQ.username = <see ./security/k8s/metadigPWs.gpg>
-RabbitMQ.password = <see ./security/k8s/metadigPWs.gpg>
+RabbitMQ.username = metadig
+RabbitMQ.password = quality
 solr.location = http://metadig-solr.metadig.svc.cluster.local:8983/solr
 # PostgreSQL connection information
 postgres.user = metadig
