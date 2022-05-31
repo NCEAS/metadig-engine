@@ -25,6 +25,13 @@ imagePullSecrets: []
 nameOverride: ""
 fullnameOverride: ""
 
+# The default k8s cluster is "prod". Alternatively, "dev" can be specified.
+# This parameter controls which set of configuration files are used.
+# - "prod" : use servers from the DataONE production environment
+# - "dev" : use servers from the DataONE stage environment
+k8s:
+  cluster: prod
+
 serviceAccount:
   # Specifies whether a service account should be created
   create: false

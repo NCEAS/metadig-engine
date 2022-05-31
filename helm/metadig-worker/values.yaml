@@ -14,6 +14,13 @@ imagePullSecrets: []
 nameOverride: ""
 fullnameOverride: ""
 
+# The default k8s cluster is "prod". Alternatively, "dev" can be specified.
+# This parameter controls which set of configuration files are used.
+# - "prod" : use servers from the DataONE production environment
+# - "dev" : use servers from the DataONE stage environment
+k8s:
+  cluster: prod
+
 env:
 - name: JAVA_OPTS
   value: "-Dlog4j2.formatMsgNoLookups=true"
