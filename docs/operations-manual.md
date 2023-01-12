@@ -315,6 +315,12 @@ modify the replica count, for example, specify a different count number with the
 helm upgrade metadig-worker ./metadig-worker --namespace metadig --version=1.0.0 --set replicaCount=20
 ```
 
+Alternatively, once `metadig-worker` is running, the number of workers can also be scaled using standard k8s `kubectl scale`, such as:
+
+```
+kubectl scale deployment metadig-worker --replicas=20
+```
+
 ## Configuring Metadata Quality Engine Services
 
 Metadig-engine services are configured by editing a few configuration files including the the metadig-engine helm charts. The following
