@@ -44,7 +44,7 @@ kubectl config use-context prod-metadig
 
 ```
 
-See the NCEAS security repo ./security/k8s/config* for further details.
+See the NCEAS security repo `./security/k8s/config*` for further details.
 
 ### Persistent Storage
 
@@ -71,7 +71,7 @@ $ kubectl create -f ./k8s/cephfs-metadig-pv.yaml
 These commands only need to be entered once, and as they have been run for the current DataONE production and development k8s clusters, do not need to be run again.
 The PV that metadig-engine services uses is manually created. See a description of CephFS subvolumes used with k8s services described [here](https://github.com/DataONEorg/k8s-cluster/blob/main/storage/Ceph/Ceph-CSI-CephFS.md).
 
-*Note that the CephFS volume can be maid available to the Linux comnand line at `/mnt/k8ssubvol` for convienence and debugging purposes. This Linux volume mount is not required
+*Note that the CephFS volume can be made available to the Linux comnand line at `/mnt/k8ssubvol` for convienence and debugging purposes. This Linux volume mount is not required
 for any metadig-engine services, as access to the Ceph Storage Cluster is provided through ceph-csi. To make this CephFS volume directly accessible to the Linux command line, for machines within the k8s cluster see https://github.com/DataONEorg/k8s-cluster/blob/main/storage/Ceph/Ceph-CSI-CephFS.md#provisioning-static-cephfs-volumes*
 
 ### PostgreSQL
@@ -227,7 +227,7 @@ helm delete metadig-solr -n metadig
 
 ### DataONE token
 
-A DataONE authorization token is used by MetaDIG services and it's usage is described in the NCEAS secure repository (see ./k8s/*-DataONE-token.txt).
+A DataONE authorization token is used by MetaDIG services and it's usage is described in the NCEAS secure repository (see `./k8s/*-DataONE-token.txt`).
 file. This token needs to be created before metadig-scheduler and metadig-scorer are started.
 
 ## MetaDIG Assessment Services
