@@ -679,6 +679,14 @@ Log files for the metadig-engine pods can be inspected
 
 - assessment and scorer task queing request and returned status are logged to metadig-controller log file
 
+To view logs for the controller pod, run the following.
+
+```
+kubectl logs pod/metadig-controller-7f4d4d6c4b-g5j9v --tail=500
+```
+
+It also might be helpful to save the log into a file. Logs can be quite large, as a warning.
+
 ### Increase Logging Level For MetaDIG Services
 
 If the logging level doesn't provide sufficient detail to determine the cause of a problem, the logging level can be increased.
@@ -737,6 +745,18 @@ kubectl auth can-i get secrets -n metadig --as=system:serviceaccount:metadig:met
 ```
 ### Debugging RabbitMQ
 
+#### Dashboard
+
+You can inspect RabbitMQ using it's control panel with the following command. View the panel by opening a browser to a local host at the specified port (in this example, 15672, available from viewing the `kubectl get all` listing)
+
+```
+kubectl port-forward "service/metadig-rabbitmq" 15672
+```
+
+The panel shows the total queue length, number of connections and channels, and other helpful information, including realtime graphs.
+
+#### `rabbitmq_management`
+
 The Bitnami Helm installation used by metadig-engine contains a management component (rabbitmq_management) that can be queried to obtain information about queues that are created
 and managed by metadig-engine services. In this example, a request is sent to the local network IP address of the RabbitMQ server to get the length of the `quality` queue.
 
@@ -749,10 +769,66 @@ and managed by metadig-engine services. In this example, a request is sent to th
 
 Note also that Bitnami installs a `rabbitmq_prometheus` component that can be used by [Grafana](https://grafana.com/grafana/dashboards/4279) to graph usage metrics.
 
-## Inspecting metadig-engine PostgreSQL tables
 
-See the `developer-guide.md` under `metadig-engine PostgreSQL Database` for information on how to connect to the database.
-Information about the structure and usage of these tables by metadig-engine is described in that document.
+## Restarting Metadig
+
+If you determine in the debugging process that restarting one or more pods might help, run:
+
+```
+kubectl delete pod podname
+```
+
+Kubernetes will automatically restart the pod. To delete multiple pods at once, all of the workers for example, run the following:
+
+```
+kubectl get -o name pods | grep metadig-worker | xargs -n 1 kubectl delete
+```
+
+If a full restart of all of the pods is needed, the following order is recommended:
+
+1. RabbitMQ
+2. Controller
+3. Workers
+4. Scheduler
+
+### Triggering a run after restart
+
+If you had to restart the service, its likely you did so because some documents were not being run through the engine, but should have. It is possible to modify the Postgres database so that a run is triggered and those documents get processed.
+
+The `developer-guide.md` under `metadig-engine PostgreSQL Database` has information on how to connect to the database and the structure of the tables. Some of that will be included here as well.
+
+To connect:
+
+```
+kubectl exec -it pod/metadig-postgres-656f5975d4-xc7cq -- psql -U metadig -W metadig
+```
+
+This will prompt you for the metadig password, then connect you to a sql prompt.
+
+First, examine recent entries in the `runs` table. If there was a period of time when documents were not being processed, you should see that reflected in the `timestamp` variable. Since documents are submitted more or less continuously by various nodes, large gaps between successive runs likely reflect an outage of some kind in the system during that period. You may also already have an idea of how long things have been awry based on the user feedback prompting investigation into the issue.
+
+```
+select metadata_id, suite_id, timestamp, error, status from runs order by timestamp desc limit 1000;
+```
+
+It also might be relevant to look at when the last run was for all suites:
+
+```
+select suite_id, max(timestamp) as ts from runs group by suite_id;
+```
+
+Once the date and/or suites that need to be addressed have been identified, switch to the `node_harvest` table. This table contains a variable `last_harvest_datetime`, which is the `dateUploaded` field of the system metadata of the most recent pid that was processed. Many of these dates are in the past, because these nodes have not uploaded content to DataONE recently.
+
+The goal here is to roll the `last_harvest_datetime` field back to the last known date when metadig was operational on relevant nodes/tasks. This is the date selected after investigation of the `runs` table. Note that in any given row, the `last_harvest_datetime` should never be moved forwards from where it is currently listed, it should only be moved backwards. Moving the date back will trigger any content uploaded after that date on that node to be harvested.
+
+First look at the rows you are going to modify. In this example we determined metadig went down around 2022-11-09, so we pick one day before that. It is important to ensure no jobs were missed, so a day buffer is beneficial, but you also don't want to needlessly trigger too many jobs. We also selected just quality jobs in this example, omitting portal suites.
+
+```
+select * from node_harvest where task_name like 'quality%' and last_harvest_datetime > '2022-11-08';
+```
+
+When you are sure you have the correct nodes and tasks selected based on the output of the above, run an `update` command and set the `last_harvest_datetime` to the date in the query above where variables match the values used in the select statement above. Once this is done, if you examine the RabbitMQ dashboard, you should see an uptick in the queue as documents are processed. The `last_harvest_datetime` will reset back to the `dateUploaded` field of the system metadata of the most recent pid that was processed once all the jobs are finished.
+
 
 ## Kubernetes Software
 
