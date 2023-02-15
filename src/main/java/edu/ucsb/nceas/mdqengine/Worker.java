@@ -360,15 +360,22 @@ public class Worker {
                 log.error("RabbitMQ connection error: " + rmqe.getMessage());
                 try {
                     log.info("Resetting RabbitMQ queues and resending completed report...");
+                    // destroy channel before setting up queues again
+                    RabbitMQchannel.close();
+                    RabbitMQconnection.close();
+                    // setup queues
                     this.setupQueues();
-            this.writeCompletedQueue(message);
-            log.info(" [x] Sent completed report for pid: '" + qEntry.getMetadataPid() + "'");
+                    this.writeCompletedQueue(message);
+                    log.info(" [x] Sent completed report for pid: '" + qEntry.getMetadataPid() + "'");
+                    RabbitMQchannel.basicAck(envelope.getDeliveryTag(), false);
                     // Tell RabbitMQ this worker is ready for tasks
                     log.info("Calling basicConsume");
                     RabbitMQchannel.basicConsume(QUALITY_QUEUE_NAME, false, consumer);
                 } catch (Exception e) {
                     log.error("Error re-establishing connection to RabbitMQ server: " + e.getMessage());
                     log.error("Unable to resend report back to controller.");
+                    // acknowledge delivery failure for single message and requeue it
+                    RabbitMQchannel.basicNack(envelope.getDeliveryTag(), false, true);
                 }
             }
         } catch (Exception e) {
