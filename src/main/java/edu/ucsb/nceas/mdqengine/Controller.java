@@ -399,19 +399,8 @@ public class Controller {
         out.writeObject(qEntry);
         message = bos.toByteArray();
 
-        try {
-            this.writeInProcessChannel(message, QUALITY_ROUTING_KEY);
-            log.info(" [x] Queued report request for pid: '" + qEntry.getMetadataPid() + "'" + " quality suite " + qualitySuiteId);
-        } finally {
-            try {
-                shutdown();
-            } catch (TimeoutException e) {
-                log.error("Error closing connections in RabbitMQ queue " + QUALITY_QUEUE_NAME);
-                log.error(e.getMessage());
-            }
-            
-        }
-        
+        this.writeInProcessChannel(message, QUALITY_ROUTING_KEY);
+        log.info(" [x] Queued report request for pid: '" + qEntry.getMetadataPid() + "'" + " quality suite " + qualitySuiteId);
     }
 
 
@@ -475,18 +464,8 @@ public class Controller {
         out.writeObject(qEntry);
         message = bos.toByteArray();
 
-        try{
-            this.writeInProcessChannel(message, SCORER_ROUTING_KEY);
-            log.info(" [x] Queued Scorer request for id: '" + qEntry.getCollectionId() + "'" + ", quality suite " + qualitySuiteId + ", nodeId: " + nodeId + ", formatFamily: " + formatFamily);
-        } finally {
-            try {
-                shutdown();
-            } catch (TimeoutException e) {
-                log.error("Error connecting to RabbitMQ queue " + QUALITY_QUEUE_NAME);
-                log.error(e.getMessage());
-            }
-            
-        }
+        this.writeInProcessChannel(message, SCORER_ROUTING_KEY);
+        log.info(" [x] Queued Scorer request for id: '" + qEntry.getCollectionId() + "'" + ", quality suite " + qualitySuiteId + ", nodeId: " + nodeId + ", formatFamily: " + formatFamily);
     }
 
     /**
@@ -654,10 +633,10 @@ public class Controller {
      * @throws TimeoutException
      */
     public void shutdown() throws IOException, TimeoutException {
-            RabbitMQchannel.close();
-            RabbitMQconnection.close();
-    
-            isStarted = false;
+        RabbitMQchannel.close();
+        RabbitMQconnection.close();
+
+        isStarted = false;
     }
 
 

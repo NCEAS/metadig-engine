@@ -376,14 +376,6 @@ public class Worker {
             log.error(" Unable to return report to controller");
             e.printStackTrace();
             throw e;
-        } finally {
-            try {
-                shutdown();
-            } catch (TimeoutException e) {
-                log.error("Error closing connections in RabbitMQ queue " + QUALITY_QUEUE_NAME);
-                log.error(e.getMessage());
-            }
-            
         }
     }
 
@@ -705,16 +697,5 @@ public class Worker {
 
         return is;
     }
-
-        /**
-     * @throws IOException
-     * @throws TimeoutException
-     */
-    public void shutdown() throws IOException, TimeoutException {
-        RabbitMQchannel.close();
-        RabbitMQconnection.close();
-    }
 }
-
-
 

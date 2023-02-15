@@ -809,14 +809,6 @@ public class Scorer {
             log.error(" Unable to return report to controller");
             e.printStackTrace();
             throw e;
-        } finally {
-            try {
-                shutdown();
-            } catch (TimeoutException e) {
-                log.error("Error shutting down RabbitMQ connection");
-                log.error(e.getMessage());
-            }
-            
         }
     }
 
@@ -1009,15 +1001,6 @@ public class Scorer {
         } catch (UnsupportedEncodingException ex) {
             throw new RuntimeException(ex.getCause());
         }
-    }
-
-        /**
-     * @throws IOException
-     * @throws TimeoutException
-     */
-    public void shutdown() throws IOException, TimeoutException {
-        RabbitMQchannel.close();
-        RabbitMQconnection.close();
     }
 }
 
