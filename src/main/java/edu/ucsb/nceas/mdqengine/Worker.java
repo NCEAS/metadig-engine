@@ -83,7 +83,7 @@ public class Worker {
     public static void main(String[] argv) throws Exception {
 
         Worker wkr = new Worker();
-        MDQconfig cfg = new MDQconfig ();
+        MDQconfig cfg = new MDQconfig();
 
         try {
             RabbitMQpassword = cfg.getString("RabbitMQ.password");
@@ -147,7 +147,7 @@ public class Worker {
                     // worker.
                     qEntry.setHostname(InetAddress.getLocalHost().getHostName());
                     run = wkr.processReport(qEntry);
-                    if(run.getObjectIdentifier() == null) {
+                    if (run.getObjectIdentifier() == null) {
                         run.setObjectIdentifier(metadataPid);
                     }
                     runXML = XmlMarshaller.toXml(run, true);
@@ -174,7 +174,8 @@ public class Worker {
                     try {
                         log.debug("Saving quality run status after error");
                         // convert String into InputStream
-                        if(run == null) run = new Run();
+                        if (run == null)
+                            run = new Run();
                         run.setObjectIdentifier(metadataPid);
                         run.setSuiteId(suiteId);
                         run.setObjectIdentifier(metadataPid);
@@ -193,55 +194,55 @@ public class Worker {
                     // Determine the sequence identifier for the metadata pids DataONE obsolescence chain. This is
                     // not the DataONE seriesId, which may not exist for a pid, but instead is a quality engine maintained
                     // sequence id, that is needed to determine the highest score for a obs. chain for each month.
-                    log.debug("Searching for sequence id for pid: " + run.getObjectIdentifier());
-                    // Add current run to collection, it will be saved during the run.update
-                    run.setObjectIdentifier(metadataPid);
-                    run.setRunStatus(Run.SUCCESS);
-                    run.setErrorDescription("");
-                    // Should a 'sequenceId' and 'isLatest' be added to the Solr index?
-                    if(indexSequenceId) {
-                        // Add the current run to the collection, as a starting point for the sequence id search
-                        runsInSequence.addRun(run.getObjectIdentifier(), run);
+                        log.debug("Searching for sequence id for pid: " + run.getObjectIdentifier());
+                        // Add current run to collection, it will be saved during the run.update
+                        run.setObjectIdentifier(metadataPid);
+                        run.setRunStatus(Run.SUCCESS);
+                        run.setErrorDescription("");
+                        // Should a 'sequenceId' and 'isLatest' be added to the Solr index?
+                        if (indexSequenceId) {
+                            // Add the current run to the collection, as a starting point for the sequence id search
+                            runsInSequence.addRun(run.getObjectIdentifier(), run);
 
                         // Traverse through the collection, stopping if the sequenceId is found. If the sequenceId
                         // is already found, then all pids in the chain that are stored should already have this
-                        // sequenceId
+                            // sequenceId
                         //Boolean stopWhenSIfound = true;
-                        Boolean stopWhenSIfound = false;
-                        runsInSequence.getRunSequence(run, suiteId, stopWhenSIfound);
-                        sequenceId = runsInSequence.getSequenceId();
-                        // Ok, a sequence id wasn't set for these runs (if any), so generate a new one
-                        // Only assign a new pid if the first pid in the sequence is found, so that we don't
-                        // have multiple segments of a chain with different sequenceIds.
-                        if (sequenceId == null && runsInSequence.getFoundFirstPid()) {
-                            sequenceId = runsInSequence.getFirstPidInSequence();
-                            runsInSequence.setSequenceId(sequenceId);
-                            log.debug("Setting sequenceId to first pid in sequence: " + sequenceId);
-                        } else {
-                            log.debug("Using found sequenceId: " + sequenceId);
+                            Boolean stopWhenSIfound = false;
+                            runsInSequence.getRunSequence(run, suiteId, stopWhenSIfound);
+                            sequenceId = runsInSequence.getSequenceId();
+                            // Ok, a sequence id wasn't set for these runs (if any), so generate a new one
+                            // Only assign a new pid if the first pid in the sequence is found, so that we don't
+                            // have multiple segments of a chain with different sequenceIds.
+                            if (sequenceId == null && runsInSequence.getFoundFirstPid()) {
+                                sequenceId = runsInSequence.getFirstPidInSequence();
+                                runsInSequence.setSequenceId(sequenceId);
+                                log.debug("Setting sequenceId to first pid in sequence: " + sequenceId);
+                            } else {
+                                log.debug("Using found sequenceId: " + sequenceId);
+                            }
+
+                            run.setSequenceId(sequenceId);
                         }
 
-                        run.setSequenceId(sequenceId);
-                    }
+                        run.save();
 
-                    run.save();
-
-                    // Update runs in persist storage with sequenceId for this obsolesence chain
-                    if(indexSequenceId && sequenceId != null) {
-                        log.debug("Updating sequenceId to " + sequenceId);
+                        // Update runs in persist storage with sequenceId for this obsolesence chain
+                    if (indexSequenceId && sequenceId != null) {
+                            log.debug("Updating sequenceId to " + sequenceId);
                         //sequenceId = runsInSequence.getSequenceId();
-                        runsInSequence.updateSequenceId(sequenceId);
-                        runsInSequence.update();
+                            runsInSequence.updateSequenceId(sequenceId);
+                            runsInSequence.update();
+                        }
+                    } catch (MetadigException me) {
+                        failFast = true;
+                        log.error("Unable to save (then index) quality report to database.");
+                        qEntry.setException(me);
                     }
-                } catch (MetadigException me) {
-                    failFast = true;
-                    log.error("Unable to save (then index) quality report to database.");
-                    qEntry.setException(me);
-                }
 
                 /* Once the quality report has been created and saved to persistent storage,
                    it can be added to the Solr index */
-                if(!failFast) {
+                if (!failFast) {
                     log.debug("Indexing report");
                     try {
                         startTimeIndexing = System.currentTimeMillis();
@@ -255,7 +256,7 @@ public class Worker {
 
                         // Update any runs in this sequence that have been modified, either set as latest in sequence
                         // or unset as latest in sequence.
-                        if(indexLatest) {
+                        if (indexLatest) {
                             // Put files to be updated in a HashMap (can update multiple fields)
                             HashMap<String, Object> fields = new HashMap<>();
                             for (Run r : runsInSequence.getModifiedRuns()) {
@@ -316,7 +317,7 @@ public class Worker {
         };
 
         log.info("Calling basicConsume");
-    RabbitMQchannel.basicConsume(QUALITY_QUEUE_NAME, false, consumer);
+        RabbitMQchannel.basicConsume(QUALITY_QUEUE_NAME, false, consumer);
     }
 
     /**
@@ -368,7 +369,6 @@ public class Worker {
                     this.setupQueues();
                     this.writeCompletedQueue(message);
                     log.info(" [x] Sent completed report for pid: '" + qEntry.getMetadataPid() + "'");
-                    RabbitMQchannel.basicAck(envelope.getDeliveryTag(), false);
                     // Tell RabbitMQ this worker is ready for tasks
                     log.info("Calling basicConsume");
                     RabbitMQchannel.basicConsume(QUALITY_QUEUE_NAME, false, consumer);
@@ -391,7 +391,7 @@ public class Worker {
      * @throws IOException
      * @throws TimeoutException
      */
-    public void setupQueues () throws IOException, TimeoutException {
+    public void setupQueues() throws IOException, TimeoutException {
 
         /* Connect to the RabbitMQ queue containing entries for which quality reports
            need to be created.
@@ -454,6 +454,7 @@ public class Worker {
 
         String suiteId = message.getQualitySuiteId();
         String metadataDoc = message.getMetadataDoc();
+        String metadataPid = message.getMetadataPid();
         InputStream input = new ByteArrayInputStream(metadataDoc.getBytes("UTF-8"));
         SystemMetadata sysmeta = message.getSystemMetadata();
 
@@ -464,8 +465,19 @@ public class Worker {
         // To run the suite, we need the in memory store, that contains all checks and suites.
         MDQStore store = new InMemoryStore();
 
+        // see if there is an existing run
         Run run = null;
         try {
+            run = Run.getRun(metadataPid, suiteId);
+            // TODO: set try counter to try + 1
+            // TODO: if try counter > 10, exit and handle
+        } catch (MetadigException me) {
+            // carry on, this exception is handled in the getRun method
+            // TODO: set try counter in run to 1
+        }
+
+        try {
+            run.setRunStatus(Run.PROCESSING);
             MDQEngine engine = new MDQEngine();
             Suite suite = store.getSuite(suiteId);
             run = engine.runSuite(suite, input, params, sysmeta);
@@ -476,7 +488,7 @@ public class Worker {
         }
 
         // Add DataONE sysmeta, if it was provided.
-        if(sysmeta != null) {
+        if (sysmeta != null) {
             SysmetaModel smm = new SysmetaModel();
             // These sysmeta fields are always provided
             smm.setOriginMemberNode(sysmeta.getOriginMemberNode().getValue());
