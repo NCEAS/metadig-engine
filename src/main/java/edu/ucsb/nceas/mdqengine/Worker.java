@@ -126,6 +126,8 @@ public class Worker {
                     e.printStackTrace();
                     return;
                 }
+                // ack the quality message right away
+                RabbitMQchannel.basicAck(envelope.getDeliveryTag(), false);
 
                 Worker wkr = new Worker();
                 String runXML = null;
@@ -354,7 +356,6 @@ public class Worker {
             try {
                 this.writeCompletedQueue(message);
                 log.info("Sent completed report for pid: '" + qEntry.getMetadataPid() + "'");
-                RabbitMQchannel.basicAck(envelope.getDeliveryTag(), false);
                 log.debug("Sent task completed acknowledgement to RabbitMQ");
             } catch (AlreadyClosedException rmqe) {
                 log.error("RabbitMQ connection error: " + rmqe.getMessage());
@@ -374,8 +375,6 @@ public class Worker {
                 } catch (Exception e) {
                     log.error("Error re-establishing connection to RabbitMQ server: " + e.getMessage());
                     log.error("Unable to resend report back to controller.");
-                    // acknowledge delivery failure for single message and requeue it
-                    RabbitMQchannel.basicNack(envelope.getDeliveryTag(), false, true);
                 }
             }
         } catch (Exception e) {
