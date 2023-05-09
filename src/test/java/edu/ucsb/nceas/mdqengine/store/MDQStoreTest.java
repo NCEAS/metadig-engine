@@ -2,6 +2,7 @@ package edu.ucsb.nceas.mdqengine.store;
 
 import edu.ucsb.nceas.mdqengine.MDQEngine;
 import edu.ucsb.nceas.mdqengine.exception.MetadigException;
+import edu.ucsb.nceas.mdqengine.exception.MetadigStoreException;
 import edu.ucsb.nceas.mdqengine.model.*;
 import org.dataone.service.types.v2.SystemMetadata;
 import org.apache.commons.configuration2.ex.ConfigurationException;
@@ -14,6 +15,10 @@ import java.io.InputStream;
 import java.net.URL;
 import java.util.Calendar;
 import java.util.Collection;
+import java.util.List;
+import java.util.Date;
+import java.time.Duration;
+import java.time.Instant;
 
 import static org.junit.Assert.*;
 
@@ -105,6 +110,39 @@ public class MDQStoreTest {
 		} catch (Exception e) {
 			e.printStackTrace();
 			fail(e.getMessage());
+		}
+		
+	}
+
+	@Test
+	public void testGetProcessing() {
+		
+		// Create a mock Run object with a timestamp more than 24 hours ago and PROCESSING status
+		Run mockRun1 = new Run();
+		mockRun1.setTimestamp(Date.from(Instant.now().minus(Duration.ofHours(25))));
+		mockRun1.setStatus("PROCESSING");
+
+		// Create a mock Run object with a timestamp less than 24 hours ago and PROCESSING status
+		Run mockRun2 = new Run();
+		mockRun2.setTimestamp(Date.from(Instant.now().minus(Duration.ofHours(23))));
+		mockRun2.setStatus("PROCESSING");
+
+		// Create a mock Run object with COMPLETED status
+		Run mockRun3 = new Run();
+		mockRun3.setStatus("COMPLETED");
+
+		// Add mock Run objects to a mock MDQEngine object
+		store.createRun(mockRun1);
+		store.createRun(mockRun2);
+		store.createRun(mockRun3);
+
+		// Call the getProcessing() method and verify that it returns only the mockRun1 object
+		try {
+			List<Run> processing = store.getProcessing();
+			assertEquals(1, processing.size());
+			assertTrue(processing.contains(mockRun1));
+		} catch (MetadigStoreException e){
+			e.printStackTrace();
 		}
 		
 	}
