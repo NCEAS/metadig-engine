@@ -35,6 +35,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
+import java.util.List;
 
 import static org.dataone.configuration.Settings.getConfiguration;
 
@@ -311,6 +312,12 @@ public class MNStore implements MDQStore {
 	@Override
 	public Run getRun(String suite, String id) {
 		return (Run) get(id, Run.class);
+	}
+
+	@Override
+	public List<Run> getProcessing() {
+		List<Run> runs = null;
+		return runs;
 	}
 
 	@Override

@@ -29,6 +29,10 @@ import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.util.*;
 import java.util.Date;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.time.Duration;
+
 
 /**
  * Persistent storage for quality runs.
@@ -191,6 +195,76 @@ public class DatabaseStore implements MDQStore {
 
         return(run);
     }
+
+    /*
+     * Get a set of runs that are stuck processing.
+     */
+    @Override
+    public List<Run> getProcessing() throws MetadigStoreException  {
+        
+        List<Run> runs = new ArrayList<Run>();
+        Run run = null;
+        PreparedStatement stmt = null;
+        String mId = null;
+        String sId = null;
+        String seqId = null;
+        String status = null;
+        String resultStr = null;
+        Timestamp timestamp = null;
+        Boolean isLatest = false;
+
+        // Hope for the best, prepare for the worst!
+        MetadigStoreException me = new MetadigStoreException("Unable get runs from the datdabase.");
+        // Select records from the 'runs' table
+        try {
+            log.trace("preparing statement for query");
+            String sql = "select * from runs where status = 'PROCESSING'";
+            stmt = conn.prepareStatement(sql);
+            log.trace("issuing query: " + sql);
+            ResultSet rs = stmt.executeQuery();
+            if(rs.next()) {
+                timestamp = rs.getTimestamp("timestamp");
+                mId = rs.getString("metadata_id");
+                sId = rs.getString("suite_id");
+                seqId = rs.getString("sequence_id");
+                isLatest = rs.getBoolean("is_latest");
+                status = rs.getString("status");
+                resultStr = rs.getString("results");
+                rs.close();
+                stmt.close();
+                // Convert the returned run xml document to a 'run' object.
+                InputStream is = new ByteArrayInputStream(resultStr.getBytes());
+                run = TypeMarshaller.unmarshalTypeFromStream(Run.class, is);
+                // populate the run object
+                run.setSequenceId(seqId);
+                run.setIsLatest(isLatest);
+                run.setId(mId);
+                run.setSuiteId(sId);
+                run.setStatus(status);
+                // if the object hasn't been processing for more than 24 hours, discard it
+                LocalDateTime now = LocalDateTime.now(ZoneOffset.of("-07:00"));
+                long hours_diff = Duration.between(now, timestamp.toLocalDateTime()).toHours();
+                if (hours_diff > 24) {
+                    runs.add(run); // add a run to the list
+                    log.trace("Retrieved processing run for metadata id: " + run.getObjectIdentifier());
+                } else {
+                    log.trace("Run for metadata id: " + run.getObjectIdentifier() + "is less than 24 hours old");
+                }
+            } else {
+                log.trace("No processing runs found.");
+            }
+        } catch ( Exception e ) {
+            log.error( e.getClass().getName()+": "+ e.getMessage());
+            e.printStackTrace();
+            me.initCause(e);
+            throw(me);
+        }
+
+
+        return(runs);
+    }
+
+
 
     /*
      * Save a single run, first populating the 'pids' table, then the 'runs' table.

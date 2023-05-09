@@ -21,6 +21,13 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.List;
+import java.util.Date;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.time.Duration;
+import java.time.Instant;
+import java.time.ZoneId;
 
 /**
  * Place-holder storage implementation for 
@@ -184,6 +191,23 @@ public class InMemoryStore implements MDQStore{
 	@Override
 	public Run getRun(String suite, String id) {
 		return runs.get(id);
+	}
+
+	@Override
+	public List<Run> getProcessing() {
+		List<Run> processing = new ArrayList<Run>();
+		for (String key : runs.keySet()) {
+            Run run = runs.get(key);
+			Date date = run.getTimestamp();
+			Instant instant = date.toInstant();
+			LocalDateTime datetime = LocalDateTime.ofInstant(instant, ZoneId.of("GMT-7"));
+			LocalDateTime now = LocalDateTime.now(ZoneOffset.of("-07:00"));
+            long hours_diff = Duration.between(now, datetime).toHours();
+            if (run.getStatus().equals("PROCESSING") && hours_diff > 24) {
+                processing.add(run);
+            }
+        }
+		return processing;
 	}
 
 	@Override
