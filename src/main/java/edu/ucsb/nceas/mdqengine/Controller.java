@@ -4,6 +4,7 @@ import com.rabbitmq.client.*;
 import edu.ucsb.nceas.mdqengine.authorization.BookkeeperClient;
 import edu.ucsb.nceas.mdqengine.scorer.ScorerQueueEntry;
 import edu.ucsb.nceas.mdqengine.exception.MetadigException;
+import edu.ucsb.nceas.mdqengine.scheduler.MonitorJob;
 import org.apache.commons.configuration2.ex.ConfigurationException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -22,6 +23,13 @@ import java.net.Socket;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.lang.Thread;
+
+import static org.quartz.CronScheduleBuilder.cronSchedule;
+import static org.quartz.JobBuilder.newJob;
+import static org.quartz.TriggerBuilder.newTrigger;
+import org.quartz.impl.StdSchedulerFactory;
+import org.quartz.*;
 
 /**
  * The Controller class accepts requests for generating quality reports from
@@ -215,6 +223,7 @@ public class Controller {
         try {
             this.readConfig();
             this.setupQueues();
+            this.monitor();
             this.isStarted = true;
             log.debug("Controller is started");
         } catch (java.io.IOException | java.util.concurrent.TimeoutException | ConfigurationException e) {
@@ -612,6 +621,35 @@ public class Controller {
 
         RabbitMQchannel.basicConsume(COMPLETED_QUEUE_NAME, false, consumer);
     }
+
+// the monitor method
+    public void monitor(){
+        log.debug("creating monitor");
+        try {
+            SchedulerFactory sf = new StdSchedulerFactory();
+            Scheduler scheduler = sf.getScheduler();
+            scheduler.start();
+    
+            String taskName = "processing";
+            String groupName = "monitor";
+            JobDetail job = null;
+            job = newJob(MonitorJob.class)
+                                .withIdentity(taskName, groupName)
+                                .build();
+    
+            CronTrigger trigger = newTrigger()
+                .withIdentity(taskName + "-trigger", groupName)
+                .withSchedule(cronSchedule("0 * * * * ?"))
+                .build();
+            
+            scheduler.scheduleJob(job, trigger);
+            Thread.sleep(60L * 1000L);
+            scheduler.shutdown(true);
+        } catch (Exception se) {
+            se.printStackTrace();
+        }
+    }
+
 
     /**
      * Write an entry to the "InProcess" queue.
