@@ -243,7 +243,7 @@ public class DatabaseStore implements MDQStore {
                 run.setStatus(status);
                 // if the object hasn't been processing for more than 24 hours, discard it
                 LocalDateTime now = LocalDateTime.now(ZoneOffset.of("-07:00"));
-                long hours_diff = Duration.between(now, timestamp.toLocalDateTime()).toHours();
+                long hours_diff = Duration.between(timestamp.toLocalDateTime(), now).toHours();
                 if (hours_diff > 24) {
                     runs.add(run); // add a run to the list
                     log.trace("Retrieved processing run for metadata id: " + run.getObjectIdentifier());
