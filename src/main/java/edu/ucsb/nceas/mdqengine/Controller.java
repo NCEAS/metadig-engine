@@ -622,7 +622,10 @@ public class Controller {
         RabbitMQchannel.basicConsume(COMPLETED_QUEUE_NAME, false, consumer);
     }
 
-// the monitor method
+/**
+ * Monitors for pids stuck processing using Quartz Scheduler.
+ * Starts the scheduler, creates the MonitorJob, and schedules it with a cron trigger.
+ */
     public void monitor(){
         log.debug("creating monitor");
         try {
@@ -645,7 +648,7 @@ public class Controller {
             scheduler.scheduleJob(job, trigger);
             Thread.sleep(60L * 1000L);
             scheduler.shutdown(true);
-        } catch (Exception se) {
+        } catch (SchedulerException | InterruptedException se) {
             se.printStackTrace();
         }
     }
