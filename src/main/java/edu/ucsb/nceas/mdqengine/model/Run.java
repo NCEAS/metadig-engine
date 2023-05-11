@@ -15,7 +15,8 @@ import java.util.List;
 
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(propOrder = { "id", "timestamp", "objectIdentifier", "suiteId", "status", "runStatus", "errorDescription",
+@XmlType(propOrder = { "id", "timestamp", "objectIdentifier", "suiteId", "nodeId", "status", "runStatus",
+		"errorDescription",
 		"sysmeta", "result", "sequenceId" })
 public class Run {
 
