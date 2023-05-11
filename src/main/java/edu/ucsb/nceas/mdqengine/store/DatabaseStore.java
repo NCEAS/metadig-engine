@@ -206,7 +206,6 @@ public class DatabaseStore implements MDQStore {
     public List<Run> getProcessing() throws MetadigStoreException {
 
         List<Run> runs = new ArrayList<Run>();
-        Run run = null;
         PreparedStatement stmt = null;
         String mId = null;
         String sId = null;
@@ -226,6 +225,7 @@ public class DatabaseStore implements MDQStore {
             log.trace("issuing query: " + sql);
             ResultSet rs = stmt.executeQuery();
             if (rs.next()) {
+                Run run = new Run();
                 timestamp = rs.getTimestamp("timestamp");
                 mId = rs.getString("metadata_id");
                 sId = rs.getString("suite_id");
