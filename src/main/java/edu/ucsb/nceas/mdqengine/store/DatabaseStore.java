@@ -209,7 +209,7 @@ public class DatabaseStore implements MDQStore {
         String sId = null;
         String seqId = null;
         String status = null;
-        String resultStr = null;
+        String nodeId = null;
         Timestamp timestamp = null;
         Boolean isLatest = false;
 
@@ -218,7 +218,7 @@ public class DatabaseStore implements MDQStore {
         // Select records from the 'runs' table
         try {
             log.trace("preparing statement for query");
-            String sql = "select * from runs where status = 'PROCESSING'";
+            String sql = "SELECT * FROM runs JOIN identifiers ON runs.metadata_id = identifiers.metadata_id WHERE runs.status = 'processing';";
             stmt = conn.prepareStatement(sql);
             log.trace("issuing query: " + sql);
             ResultSet rs = stmt.executeQuery();
@@ -229,12 +229,9 @@ public class DatabaseStore implements MDQStore {
                 seqId = rs.getString("sequence_id");
                 isLatest = rs.getBoolean("is_latest");
                 status = rs.getString("status");
-                resultStr = rs.getString("results");
+                nodeId = rs.getString("data_source");
                 rs.close();
                 stmt.close();
-                // Convert the returned run xml document to a 'run' object.
-                InputStream is = new ByteArrayInputStream(resultStr.getBytes());
-                run = TypeMarshaller.unmarshalTypeFromStream(Run.class, is);
                 // populate the run object
                 run.setSequenceId(seqId);
                 run.setIsLatest(isLatest);

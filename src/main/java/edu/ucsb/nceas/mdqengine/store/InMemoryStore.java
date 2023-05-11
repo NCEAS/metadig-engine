@@ -203,7 +203,7 @@ public class InMemoryStore implements MDQStore{
 			LocalDateTime datetime = LocalDateTime.ofInstant(instant, ZoneId.of("GMT-7"));
 			LocalDateTime now = LocalDateTime.now(ZoneOffset.of("-07:00"));
             long hours_diff = Duration.between(now, datetime).toHours();
-            if (run.getStatus().equals("PROCESSING") && hours_diff > 24) {
+            if (run.getStatus().equals("processing") && hours_diff > 24) {
                 processing.add(run);
             }
         }
