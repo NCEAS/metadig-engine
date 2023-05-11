@@ -30,30 +30,32 @@ import java.time.Instant;
 import java.time.ZoneId;
 
 /**
- * Place-holder storage implementation for 
+ * Place-holder storage implementation for
  * Checks, Suites, and Runs
  * NOT INTENDED FOR PRODUCTION USE
+ * 
  * @author leinfelder
  *
  */
-public class InMemoryStore implements MDQStore{
-	
+public class InMemoryStore implements MDQStore {
+
 	Map<String, Suite> suites = new HashMap<String, Suite>();
-	
+
 	Map<String, Check> checks = new HashMap<String, Check>();
-	
+
 	Map<String, Run> runs = new HashMap<String, Run>();
-	
+
 	public InMemoryStore() throws MetadigStoreException {
 		this.init();
 	}
+
 	protected Log log = LogFactory.getLog(this.getClass());
-	
+
 	private void init() throws MetadigStoreException {
 
 		MDQconfig cfg = null;
 
-	    try {
+		try {
 			cfg = new MDQconfig();
 		} catch (IOException | ConfigurationException e) {
 
@@ -68,17 +70,18 @@ public class InMemoryStore implements MDQStore{
 			mse.initCause(cex.getCause());
 			throw mse;
 		}
-		
+
 		PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
-		
+
 		Resource[] suiteResources = null;
 		// load all the resources from local files
 		try {
-			suiteResources  = resolver.getResources("classpath*:/suites/*.xml");
+			suiteResources = resolver.getResources("classpath*:/suites/*.xml");
 			// do we have an additional location for these?
 			if (storeDirectory != null) {
 				log.info("Reading suites from: file://" + storeDirectory + "/suites");
-				Resource[] additionalSuiteResources = resolver.getResources("file://" + storeDirectory + "/suites/*.xml");
+				Resource[] additionalSuiteResources = resolver
+						.getResources("file://" + storeDirectory + "/suites/*.xml");
 				log.debug("Adding " + additionalSuiteResources.length + " additional suites");
 				suiteResources = (Resource[]) ArrayUtils.addAll(suiteResources, additionalSuiteResources);
 			}
@@ -86,7 +89,7 @@ public class InMemoryStore implements MDQStore{
 			log.error("Could not read local suite resources: " + e.getMessage(), e);
 		}
 		if (suiteResources != null) {
-			for (Resource resource: suiteResources) {
+			for (Resource resource : suiteResources) {
 				Suite suite = null;
 				try {
 					URL url = resource.getURL();
@@ -94,23 +97,25 @@ public class InMemoryStore implements MDQStore{
 					String xml = IOUtils.toString(url.openStream(), "UTF-8");
 					suite = (Suite) XmlMarshaller.fromXml(xml, Suite.class);
 				} catch (JAXBException | IOException | SAXException e) {
-					log.warn("Could not load suite '" + resource.getFilename() + "' due to an error: " + e.getMessage() + ".");
+					log.warn("Could not load suite '" + resource.getFilename() + "' due to an error: " + e.getMessage()
+							+ ".");
 					continue;
 				}
 				this.createSuite(suite);
-	
+
 			}
 		}
-		
+
 		// checks
 		Resource[] checkResources = null;
 		// load all the resources from local files
 		try {
-			checkResources  = resolver.getResources("classpath*:/checks/*.xml");
+			checkResources = resolver.getResources("classpath*:/checks/*.xml");
 			// do we have an additional location for these?
 			if (storeDirectory != null) {
 				log.debug("Reading checks from: file://" + storeDirectory + "/checks");
-				Resource[] additionalCheckResources = resolver.getResources("file://" + storeDirectory + "/checks/*.xml");
+				Resource[] additionalCheckResources = resolver
+						.getResources("file://" + storeDirectory + "/checks/*.xml");
 				checkResources = (Resource[]) ArrayUtils.addAll(checkResources, additionalCheckResources);
 				log.debug("Adding " + additionalCheckResources.length + " additional checks");
 			}
@@ -118,8 +123,8 @@ public class InMemoryStore implements MDQStore{
 			log.error("Could not read local check resources: " + e.getMessage(), e);
 		}
 		if (checkResources != null) {
-			for (Resource resource: checkResources) {
-				
+			for (Resource resource : checkResources) {
+
 				Check check = null;
 				try {
 					URL url = resource.getURL();
@@ -127,14 +132,15 @@ public class InMemoryStore implements MDQStore{
 					String xml = IOUtils.toString(url.openStream(), "UTF-8");
 					check = (Check) XmlMarshaller.fromXml(xml, Check.class);
 				} catch (JAXBException | IOException | SAXException e) {
-					log.warn("Could not load check '" + resource.getFilename() + "' due to an error: " + e.getMessage() + ".");
+					log.warn("Could not load check '" + resource.getFilename() + "' due to an error: " + e.getMessage()
+							+ ".");
 					continue;
 				}
 				this.createCheck(check);
 			}
-		}		
+		}
 	}
-	
+
 	@Override
 	public Collection<String> listSuites() {
 		return suites.keySet();
@@ -157,7 +163,7 @@ public class InMemoryStore implements MDQStore{
 
 	@Override
 	public void deleteSuite(Suite rec) {
-		suites.remove(rec.getId());		
+		suites.remove(rec.getId());
 	}
 
 	@Override
@@ -171,11 +177,13 @@ public class InMemoryStore implements MDQStore{
 	}
 
 	@Override
-	public void createCheck(Check check) { checks.put(check.getId(), check); }
+	public void createCheck(Check check) {
+		checks.put(check.getId(), check);
+	}
 
 	@Override
 	public void updateCheck(Check check) {
-		checks.put(check.getId(), check);		
+		checks.put(check.getId(), check);
 	}
 
 	@Override
@@ -197,21 +205,22 @@ public class InMemoryStore implements MDQStore{
 	public List<Run> getProcessing() {
 		List<Run> processing = new ArrayList<Run>();
 		for (String key : runs.keySet()) {
-            Run run = runs.get(key);
+			Run run = runs.get(key);
 			Date date = run.getTimestamp();
 			Instant instant = date.toInstant();
 			LocalDateTime datetime = LocalDateTime.ofInstant(instant, ZoneId.of("GMT-7"));
 			LocalDateTime now = LocalDateTime.now(ZoneOffset.of("-07:00"));
-            long hours_diff = Duration.between(now, datetime).toHours();
-            if (run.getStatus().equals("processing") && hours_diff > 24) {
-                processing.add(run);
-            }
-        }
+			long hours_diff = Duration.between(now, datetime).toHours();
+			if (run.getStatus().equals("processing") && hours_diff > 24) {
+				processing.add(run);
+			}
+		}
 		return processing;
 	}
 
 	@Override
-	public void saveRun(Run run) { }
+	public void saveRun(Run run) {
+	}
 
 	@Override
 	public void createRun(Run run) {
@@ -224,34 +233,45 @@ public class InMemoryStore implements MDQStore{
 	}
 
 	@Override
-	public boolean isAvailable() { return true; }
+	public boolean isAvailable() {
+		return true;
+	}
 
 	@Override
-	public void renew() {};
+	public void renew() {
+	};
 
-//	@Override
-//	public Node getNode(String nodeId, String jobName) { return new Node(); }
-//
-//	@Override
-//	public void saveNode(Node node) throws MetadigStoreException { }
-
-	@Override
-	public Task getTask(String taskName, String taskType, String nodeId) { return new Task(); }
+	// @Override
+	// public Node getNode(String nodeId, String jobName) { return new Node(); }
+	//
+	// @Override
+	// public void saveNode(Node node) throws MetadigStoreException { }
 
 	@Override
-	public void saveTask(Task task, String nodeId) throws MetadigStoreException { }
+	public Task getTask(String taskName, String taskType, String nodeId) {
+		return new Task();
+	}
 
 	@Override
-	public void shutdown() {};
-
-
-	@Override
-	public Node getNode (String nodeId) { return new Node(); };
+	public void saveTask(Task task, String nodeId) throws MetadigStoreException {
+	}
 
 	@Override
-	public void saveNode(Node node) throws MetadigStoreException {};
+	public void shutdown() {
+	};
 
 	@Override
-	public ArrayList<Node> getNodes() { return new ArrayList<> (); };
+	public Node getNode(String nodeId) {
+		return new Node();
+	};
+
+	@Override
+	public void saveNode(Node node) throws MetadigStoreException {
+	};
+
+	@Override
+	public ArrayList<Node> getNodes() {
+		return new ArrayList<>();
+	};
 
 }
