@@ -238,6 +238,10 @@ public class Run {
 		}
 	}
 
+	public void setNodeId(String nodeId) {
+		this.nodeId = nodeId;
+	}
+
 	/**
 	 * Save a quality report to a DatabaseStore.
 	 * <p>

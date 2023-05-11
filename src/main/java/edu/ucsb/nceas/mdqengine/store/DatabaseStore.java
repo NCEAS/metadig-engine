@@ -241,6 +241,7 @@ public class DatabaseStore implements MDQStore {
                 run.setId(mId);
                 run.setSuiteId(sId);
                 run.setStatus(status);
+                run.setNodeId(nodeId);
                 // if the object hasn't been processing for more than 24 hours, discard it
                 LocalDateTime now = LocalDateTime.now(ZoneOffset.of("-07:00"));
                 long hours_diff = Duration.between(timestamp.toLocalDateTime(), now).toHours();
