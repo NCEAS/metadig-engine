@@ -61,6 +61,12 @@ public class Run {
 	private String suiteId;
 
 	/**
+	 * The identifier for the node of the object
+	 */
+	@XmlElement(required = false)
+	private String nodeId;
+
+	/**
 	 *  The error message for a check
 	 */
 	@XmlElement(required = true)
@@ -199,6 +205,15 @@ public class Run {
 			return sysmeta.getDateUploaded();
 		} else {
 			return null;
+		}
+	}
+
+	// Passthru to nested sysmeta
+	public String getNodeId() {
+		if(sysmeta != null) {
+				return sysmeta.getOriginMemberNode();
+		} else {
+				return this.nodeId;
 		}
 	}
 
