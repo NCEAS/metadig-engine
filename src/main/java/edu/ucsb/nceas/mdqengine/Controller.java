@@ -722,11 +722,8 @@ public class Controller {
                     .build();
 
             scheduler.scheduleJob(job, trigger);
-            // sleep (in minutes) to allow quartz to finish its job
-            // maybe configure this?
-            int sleep = 10;
-            Thread.sleep(sleep * 60L * 1000L);
-        } catch (SchedulerException | InterruptedException se) {
+
+        } catch (SchedulerException se) {
             se.printStackTrace();
         }
     }
