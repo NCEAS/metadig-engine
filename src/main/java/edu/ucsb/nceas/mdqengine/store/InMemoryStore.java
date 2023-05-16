@@ -201,6 +201,13 @@ public class InMemoryStore implements MDQStore {
 		return runs.get(id);
 	}
 
+	/**
+	 * Get a list of runs that are stuck with the processing status for more than 24
+	 * hours.
+	 *
+	 * @return a List of Run objects
+	 * @throws MetadigStoreException
+	 */
 	@Override
 	public List<Run> getProcessing() {
 		List<Run> processing = new ArrayList<Run>();

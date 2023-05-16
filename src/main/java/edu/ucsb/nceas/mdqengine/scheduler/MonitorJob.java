@@ -35,7 +35,11 @@ import java.io.ByteArrayInputStream;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 
-// the job to run
+/**
+ * A Quartz job implementation for monitoring for metadata quality requests
+ * 'stuck' with a status of 'processing' in the persistent store for more than
+ * 24 hours.
+ */
 @DisallowConcurrentExecution
 public class MonitorJob implements Job {
 
@@ -100,6 +104,14 @@ public class MonitorJob implements Job {
         }
     }
 
+    /**
+     * Establishes an authenticated session using the DataONEauthToken in
+     * metadig.properties
+     * 
+     * @return a Session object
+     * 
+     * @throws JobExecutionException if there is an error executing the quartz task
+     */
     public Session getSession() throws JobExecutionException {
 
         String DataONEauthToken = null;
@@ -123,6 +135,17 @@ public class MonitorJob implements Job {
         return session;
     }
 
+    /**
+     * Retrieves the metadata of an object specified by the provided pid
+     * from a specified node using the given session.
+     * 
+     * @param pidStr  the pid of the object
+     * @param nodeId  the identifier of the node where the object is located
+     * @param session the session used to authenticate the request
+     * @return an InputStream containing the metadata of the specified object
+     * 
+     * @throws JobExecutionException if there is an error executing the quartz task
+     */
     public InputStream getMetadata(String pidStr, String nodeId, Session session) throws JobExecutionException {
 
         String nodeServiceUrl = null;
@@ -186,6 +209,17 @@ public class MonitorJob implements Job {
 
     }
 
+    /**
+     * Retrieves the system metadata of an object specified by the provided pid
+     * from a specified node using the given session.
+     * 
+     * @param pidStr  the pid of the object
+     * @param nodeId  the identifier of the node where the object is located
+     * @param session the session used to authenticate the request
+     * @return an InputStream containing the system metadata of the specified object
+     * 
+     * @throws JobExecutionException if there is an error executing the quartz task
+     */
     public InputStream getSystemMetadata(String pidStr, String nodeId, Session session) throws JobExecutionException {
 
         String nodeServiceUrl = null;

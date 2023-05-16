@@ -199,8 +199,12 @@ public class DatabaseStore implements MDQStore {
         return (run);
     }
 
-    /*
-     * Get a set of runs that are stuck processing.
+    /**
+     * Get a list of runs that are stuck with the processing status for more than 24
+     * hours.
+     *
+     * @return a List of Run objects
+     * @throws MetadigStoreException
      */
     @Override
     public List<Run> getProcessing() throws MetadigStoreException {
