@@ -275,6 +275,8 @@ public class DatabaseStore implements MDQStore {
         SysmetaModel sysmeta = run.getSysmeta();
         if (sysmeta != null) {
             datasource = sysmeta.getOriginMemberNode();
+        } else {
+            datasource = run.getNodeId();
         }
         String metadataId = run.getObjectIdentifier();
         String suiteId = run.getSuiteId();
