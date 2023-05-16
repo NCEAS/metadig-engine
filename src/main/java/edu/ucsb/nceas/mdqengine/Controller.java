@@ -707,7 +707,7 @@ public class Controller {
 
             scheduler.scheduleJob(job, trigger);
             Thread.sleep(60L * 1000L);
-        } catch (SchedulerException | InterruptedException  se) {
+        } catch (SchedulerException | InterruptedException se) {
             se.printStackTrace();
         }
     }
