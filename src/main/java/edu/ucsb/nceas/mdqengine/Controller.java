@@ -72,6 +72,8 @@ public class Controller {
     private static int RabbitMQport = 0;
     private static String RabbitMQpassword = null;
     private static String RabbitMQusername = null;
+    private static String monitorSchedule = null;
+    private static boolean monitor = true;
     private static Controller instance;
     private boolean isStarted = false;
     private int testCount = 0;
@@ -236,7 +238,9 @@ public class Controller {
         try {
             this.readConfig();
             this.setupQueues();
-            this.monitor();
+            if (monitor) {
+                this.monitor();
+            }
             this.isStarted = true;
             log.debug("Controller is started");
         } catch (java.io.IOException | java.util.concurrent.TimeoutException | ConfigurationException e) {
@@ -262,6 +266,14 @@ public class Controller {
         this.totalElapsedSeconds = 0;
     }
 
+    /**
+     * Reads metadig configuration settings and initalizes instance variables.
+     *
+     * @throws ConfigurationException if an error occurs while reading the
+     *                                configuration.
+     * @throws IOException            if an I/O error occurs while accessing the
+     *                                configuration file.
+     */
     public void readConfig() throws ConfigurationException, IOException {
         MDQconfig cfg = new MDQconfig();
 
@@ -270,6 +282,8 @@ public class Controller {
         RabbitMQhost = cfg.getString("RabbitMQ.host");
         RabbitMQport = cfg.getInt("RabbitMQ.port");
         bookkeeperEnabled = new Boolean(cfg.getString("bookkeeper.enabled"));
+        monitorSchedule = cfg.getString("quartz.monitor.schedule");
+        monitor = new Boolean(cfg.getString("quartz.monitor"));
     }
 
     public String readConfigParam(String paramName) throws ConfigurationException, IOException {
@@ -684,10 +698,12 @@ public class Controller {
     /**
      * Monitors for pids stuck processing using Quartz Scheduler.
      * Starts the scheduler, creates the MonitorJob, and schedules it with a cron
-     * trigger.
+     * trigger, the schedule of which is stored in metadig.properties as
+     * quartz.monitor.schedule.
      */
     public void monitor() {
-        log.debug("creating monitor");
+        log.debug("Creating stuck processing job monitor.");
+
         try {
             SchedulerFactory sf = new StdSchedulerFactory();
             Scheduler scheduler = sf.getScheduler();
@@ -702,11 +718,14 @@ public class Controller {
 
             CronTrigger trigger = newTrigger()
                     .withIdentity(taskName + "-trigger", groupName)
-                    .withSchedule(cronSchedule("0 * * * * ?"))
+                    .withSchedule(cronSchedule(monitorSchedule))
                     .build();
 
             scheduler.scheduleJob(job, trigger);
-            Thread.sleep(60L * 1000L);
+            // sleep (in minutes) to allow quartz to finish its job
+            // maybe configure this?
+            int sleep = 10;
+            Thread.sleep(sleep * 60L * 1000L);
         } catch (SchedulerException | InterruptedException se) {
             se.printStackTrace();
         }
