@@ -17,7 +17,7 @@ import java.util.List;
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(propOrder = { "id", "timestamp", "objectIdentifier", "suiteId", "nodeId", "status", "runStatus",
 		"errorDescription",
-		"sysmeta", "result", "sequenceId" })
+		"sysmeta", "result", "sequenceId", "runCount" })
 public class Run {
 
 	public static final String SUCCESS = "success";
@@ -99,6 +99,12 @@ public class Run {
 	 */
 	@XmlElement(required = false)
 	private String sequenceId;
+
+	/**
+	 * Number of times the run has been executed or attempted to be executed
+	 */
+	@XmlElement(required = false)
+	private Integer runCount;
 
 	/**
 	 * Has this run been modified since being retrieved from the data store?
@@ -241,6 +247,14 @@ public class Run {
 
 	public void setNodeId(String nodeId) {
 		this.nodeId = nodeId;
+	}
+
+	public void setRunCount(Integer runCount) {
+		this.runCount = runCount;
+	}
+
+	public Integer getRunCount() {
+		return this.runCount;
 	}
 
 	/**
