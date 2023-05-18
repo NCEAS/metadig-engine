@@ -102,6 +102,7 @@ public class MonitorJob implements Job {
             }
 
         }
+        store.shutdown();
     }
 
     /**
