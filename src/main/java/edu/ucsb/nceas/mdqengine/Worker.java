@@ -2,7 +2,6 @@ package edu.ucsb.nceas.mdqengine;
 
 import com.rabbitmq.client.*;
 import edu.ucsb.nceas.mdqengine.collections.Runs;
-import edu.ucsb.nceas.mdqengine.collections.Runs;
 import edu.ucsb.nceas.mdqengine.exception.MetadigException;
 import edu.ucsb.nceas.mdqengine.exception.MetadigIndexException;
 import edu.ucsb.nceas.mdqengine.exception.MetadigProcessException;
@@ -148,16 +147,37 @@ public class Worker {
                 } catch (ConfigurationException ce) {
                     log.error("Configuration exception");
                 }
+
                 if (run == null) {
                     run = new Run();
-                    // set the run status to processing and update the database
+                    // if no run exists
                     run.setObjectIdentifier(metadataPid);
                     run.setSuiteId(suiteId);
                     run.setNodeId(nodeId);
                     run.setErrorDescription("");
+                    run.setRunCount(0);
                 }
 
-                // set run status
+                // set the run_count to count + 1
+                Integer runCount = run.getRunCount() + 1;
+                run.setRunCount(runCount);
+
+                // log and exit if 10 attempts have been made
+                if (run.getRunCount() > 10) {
+                    log.info("More than 10 attempts for pid: " + metadataPid + "and suite: " + suiteId
+                            + " , logging with a FAILED status.");
+                    run.setRunStatus(Run.FAILURE);
+                    run.setErrorDescription("Run has been attempted 10 times, aborting.");
+                    try {
+                        run.save();
+                    } catch (MetadigException me) {
+                        log.error("Unable to save run with status 'failure': " + metadataPid);
+                    }
+                    return;
+
+                }
+
+                // set run status and continue otherwise
                 run.setRunStatus(Run.PROCESSING);
                 // update database
                 try {
@@ -222,6 +242,7 @@ public class Worker {
                             run = new Run();
                         run.setRunStatus(Run.FAILURE);
                         run.setErrorDescription(e.getMessage());
+                        run.setRunCount(runCount);
                         run.save();
                         log.debug("Saved quality run status after error");
                     } catch (Exception ex) {
@@ -273,6 +294,7 @@ public class Worker {
                             }
 
                             run.setSequenceId(sequenceId);
+                            run.setRunCount(runCount);
                         }
 
                         run.save();
