@@ -49,7 +49,7 @@ create TABLE runs (
   error TEXT not null,
   sequence_id TEXT,
   is_latest boolean DEFAULT false,
-  try_count INTEGER DEFAULT 1,
+  run_count INTEGER DEFAULT 1,
   CONSTRAINT runs_metadata_id_fk FOREIGN KEY (metadata_id) REFERENCES identifiers,
   CONSTRAINT metadata_id_suite_id_fk UNIQUE (metadata_id, suite_id)
 );
