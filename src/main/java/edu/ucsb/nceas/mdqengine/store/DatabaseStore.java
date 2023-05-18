@@ -154,6 +154,7 @@ public class DatabaseStore implements MDQStore {
         String sId = null;
         String seqId = null;
         Boolean isLatest = false;
+        Integer runCount = null;
         String resultStr = null;
 
         // Hope for the best, prepare for the worst!
@@ -173,6 +174,7 @@ public class DatabaseStore implements MDQStore {
                 sId = rs.getString("suite_id");
                 seqId = rs.getString("sequence_id");
                 isLatest = rs.getBoolean("is_latest");
+                runCount = rs.getInt("run_count");
                 resultStr = rs.getString("results");
                 rs.close();
                 stmt.close();
@@ -183,6 +185,9 @@ public class DatabaseStore implements MDQStore {
                 // XML, so
                 // have to be manually added after the JAXB marshalling has created the run
                 // object.
+                run.setObjectIdentifier(mId);
+                run.setSuiteId(sId);
+                run.setRunCount(runCount);
                 run.setSequenceId(seqId);
                 run.setIsLatest(isLatest);
                 log.trace("Retrieved run successfully for metadata id: " + run.getObjectIdentifier());
@@ -288,6 +293,7 @@ public class DatabaseStore implements MDQStore {
         String error = run.getErrorDescription();
         String sequenceId = run.getSequenceId();
         Boolean isLatest = run.getIsLatest();
+        Integer runCount = run.getRunCount();
         String resultStr = null;
         Timestamp dateTime = Timestamp.from(Instant.now());
         run.setTimestamp(dateTime);
@@ -313,7 +319,7 @@ public class DatabaseStore implements MDQStore {
 
         // First, insert a record into the main table ('pids')
         try {
-            // Insert a pid into the 'identifiers' table and if it is already their, update
+            // Insert a pid into the 'identifiers' table and if it is already there, update
             // it
             // with any new info, e.g. the 'datasource' may have changed.
             String sql = "INSERT INTO identifiers (metadata_id, data_source) VALUES (?, ?)"
@@ -339,7 +345,7 @@ public class DatabaseStore implements MDQStore {
         try {
             String sql = "INSERT INTO runs (metadata_id, suite_id, timestamp, results, status, error, sequence_id, is_latest) VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
                     + " ON CONFLICT ON CONSTRAINT metadata_id_suite_id_fk "
-                    + " DO UPDATE SET (timestamp, results, status, error, sequence_id, is_latest) = (?, ?, ?, ?, ?, ?);";
+                    + " DO UPDATE SET (timestamp, results, status, error, sequence_id, is_latest, run_count) = (?, ?, ?, ?, ?, ?, ?);";
 
             stmt = conn.prepareStatement(sql);
             stmt.setString(1, metadataId);
@@ -357,6 +363,7 @@ public class DatabaseStore implements MDQStore {
             stmt.setString(12, error);
             stmt.setString(13, sequenceId);
             stmt.setBoolean(14, isLatest);
+            stmt.setInt(15, runCount);
             stmt.executeUpdate();
             stmt.close();
             conn.commit();
