@@ -147,8 +147,6 @@ public class DatabaseStore implements MDQStore {
         Run run = null;
         Result result = new Result();
         PreparedStatement stmt = null;
-        String mId = null;
-        String sId = null;
         String seqId = null;
         Boolean isLatest = false;
         Integer runCount = null;
@@ -167,8 +165,6 @@ public class DatabaseStore implements MDQStore {
             log.trace("issuing query: " + sql);
             ResultSet rs = stmt.executeQuery();
             if (rs.next()) {
-                mId = rs.getString("metadata_id");
-                sId = rs.getString("suite_id");
                 seqId = rs.getString("sequence_id");
                 isLatest = rs.getBoolean("is_latest");
                 runCount = rs.getInt("run_count");
@@ -182,8 +178,8 @@ public class DatabaseStore implements MDQStore {
                 // XML, so
                 // have to be manually added after the JAXB marshalling has created the run
                 // object.
-                run.setObjectIdentifier(mId);
-                run.setSuiteId(sId);
+                run.setObjectIdentifier(metadataId);
+                run.setSuiteId(suiteId);
                 run.setRunCount(runCount);
                 run.setSequenceId(seqId);
                 run.setIsLatest(isLatest);
@@ -213,9 +209,9 @@ public class DatabaseStore implements MDQStore {
 
         List<Run> runs = new ArrayList<Run>();
         PreparedStatement stmt = null;
-        String mId = null;
-        String sId = null;
-        String seqId = null;
+        String metadataId = null;
+        String seriesId = null;
+        String sequenceId = null;
         String status = null;
         String nodeId = null;
         Boolean isLatest = false;
@@ -243,19 +239,19 @@ public class DatabaseStore implements MDQStore {
             ResultSet rs = stmt.executeQuery();
             if (rs.next()) {
                 Run run = new Run();
-                mId = rs.getString("metadata_id");
-                sId = rs.getString("suite_id");
-                seqId = rs.getString("sequence_id");
+                metadataId = rs.getString("metadata_id");
+                seriesId = rs.getString("suite_id");
+                sequenceId = rs.getString("sequence_id");
                 isLatest = rs.getBoolean("is_latest");
                 status = rs.getString("status");
                 nodeId = rs.getString("data_source");
                 rs.close();
                 stmt.close();
                 // populate the run object
-                run.setSequenceId(seqId);
+                run.setSequenceId(sequenceId);
                 run.setIsLatest(isLatest);
-                run.setId(mId);
-                run.setSuiteId(sId);
+                run.setId(metadataId);
+                run.setSuiteId(seriesId);
                 run.setStatus(status);
                 run.setNodeId(nodeId);
 
