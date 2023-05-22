@@ -211,7 +211,8 @@ public class InMemoryStore implements MDQStore {
 	@Override
 	public List<Run> listInProcessRuns() {
 		List<Run> processing = new ArrayList<Run>();
-		Integer processingTime = null;
+		Integer processingTime = null; // configurable in metadig.properties, the number of hours to wait before
+		// requeueing a run stuck in processing (eg: 24)
 
         try {
             MDQconfig cfg = new MDQconfig();
