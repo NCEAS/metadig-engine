@@ -219,13 +219,25 @@ public class DatabaseStore implements MDQStore {
         String status = null;
         String nodeId = null;
         Boolean isLatest = false;
+        String processingTime = null; // configurable in metadig.properties, the amount of time to wait before
+                                      // requeueing a run stuck in processing (eg: 24 hours)
+
+        try {
+            MDQconfig cfg = new MDQconfig();
+            processingTime = cfg.getString("quartz.monitor.processing.time");
+        } catch (IOException | ConfigurationException e) {
+            log.error("Could not read configuration");
+        }
+
+        // IOException | ConfigurationException
 
         // Hope for the best, prepare for the worst!
         MetadigStoreException me = new MetadigStoreException("Unable get runs from the datdabase.");
         // Select records from the 'runs' table
         try {
             log.trace("preparing statement for query");
-            String sql = "SELECT * FROM runs JOIN identifiers ON runs.metadata_id = identifiers.metadata_id WHERE runs.status = 'processing' AND AGE(CURRENT_TIMESTAMP, runs.timestamp) > INTERVAL '24 hours'";
+            String sql = "SELECT * FROM runs JOIN identifiers ON runs.metadata_id = identifiers.metadata_id WHERE runs.status = 'processing' AND AGE(CURRENT_TIMESTAMP, runs.timestamp) > INTERVAL '"
+                    + processingTime + "'";
             stmt = conn.prepareStatement(sql);
             log.trace("issuing query: " + sql);
             ResultSet rs = stmt.executeQuery();
