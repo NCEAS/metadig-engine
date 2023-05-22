@@ -71,8 +71,8 @@ public class Controller {
     private static int RabbitMQport = 0;
     private static String RabbitMQpassword = null;
     private static String RabbitMQusername = null;
-    private static String monitorSchedule = null;
-    private static boolean monitor = true;
+    private static String monitorSchedule = null; // quartz monitor schedule, as a quartz-style crontab
+    private static boolean monitor = true; // whether or not quartz monitor should be turned on
     private static Controller instance;
     private boolean isStarted = false;
     private int testCount = 0;
