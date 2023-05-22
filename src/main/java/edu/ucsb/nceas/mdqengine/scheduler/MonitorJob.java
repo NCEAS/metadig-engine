@@ -51,11 +51,16 @@ public class MonitorJob implements Job {
     private Log log = LogFactory.getLog(RequestReportJob.class);
     private Controller controller = null;
 
-    // Default constructor
+    /**
+     * Default constructor for the MonitorJob class.
+     * Initializes the MonitorJob object by getting an instance of the Controller,
+     * which is a singleton.
+     */
     public MonitorJob() {
         this.controller = Controller.getInstance();
     }
-/**
+
+    /**
      * Execute method for the MonitorJob.
      *
      * @param context JobExecutionContext object with environment information
@@ -92,7 +97,7 @@ public class MonitorJob implements Job {
 
         // request job via rabbitMQ
         for (Run run : processing) {
-            log.info(run.getId() + run.getStatus() + run.getNodeId());
+            log.info("Requesting monitor job: " + run.getId() + run.getStatus() + run.getNodeId());
             Session session = getSession();
             String pidStr = run.getId();
             String suiteId = run.getSuiteId();
@@ -166,7 +171,6 @@ public class MonitorJob implements Job {
         InputStream objectIS = null;
         Identifier pid = new Identifier();
         pid.setValue(pidStr);
-        log.info(pid.getValue());
 
         try {
             MDQconfig cfg = new MDQconfig();
@@ -187,7 +191,7 @@ public class MonitorJob implements Job {
             jee.setRefireImmediately(false);
             throw jee;
         }
-        log.info(nodeServiceUrl);
+
         Boolean isCN = DataONE.isCN(nodeServiceUrl);
         if (isCN) {
             cnNode = new MultipartCNode(mrc, nodeServiceUrl, session);
