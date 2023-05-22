@@ -317,7 +317,7 @@ public class MNStore implements MDQStore {
 	}
 
 	@Override
-	public List<Run> getProcessing() {
+	public List<Run> listInProcessRuns() {
 		List<Run> runs = null;
 		return runs;
 	}

@@ -90,7 +90,7 @@ public class MonitorJob implements Job {
 
         // query database
         try {
-            processing = store.getProcessing();
+            processing = store.listInProcessRuns();
         } catch (MetadigStoreException e) {
             e.printStackTrace();
         }

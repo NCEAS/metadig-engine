@@ -212,7 +212,7 @@ public class DatabaseStore implements MDQStore {
      * @throws MetadigStoreException
      */
     @Override
-    public List<Run> getProcessing() throws MetadigStoreException {
+    public List<Run> listInProcessRuns() throws MetadigStoreException {
 
         List<Run> runs = new ArrayList<Run>();
         PreparedStatement stmt = null;

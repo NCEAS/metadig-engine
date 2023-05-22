@@ -209,7 +209,7 @@ public class InMemoryStore implements MDQStore {
 	 * @throws MetadigStoreException
 	 */
 	@Override
-	public List<Run> getProcessing() {
+	public List<Run> listInProcessRuns() {
 		List<Run> processing = new ArrayList<Run>();
 		for (String key : runs.keySet()) {
 			Run run = runs.get(key);

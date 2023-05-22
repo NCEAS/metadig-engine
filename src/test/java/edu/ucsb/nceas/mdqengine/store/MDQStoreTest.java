@@ -115,7 +115,7 @@ public class MDQStoreTest {
 	}
 
 	@Test
-	public void testGetProcessing() {
+	public void testListInProcessRuns() {
 		
 		// Create a mock Run object with a timestamp more than 24 hours ago and PROCESSING status
 		Run mockRun1 = new Run();
@@ -136,9 +136,9 @@ public class MDQStoreTest {
 		store.createRun(mockRun2);
 		store.createRun(mockRun3);
 
-		// Call the getProcessing() method and verify that it returns only the mockRun1 object
+		// Call the listInProcessRuns() method and verify that it returns only the mockRun1 object
 		try {
-			List<Run> processing = store.getProcessing();
+			List<Run> processing = store.listInProcessRuns();
 			assertEquals(1, processing.size());
 			assertTrue(processing.contains(mockRun1));
 		} catch (MetadigStoreException e){
