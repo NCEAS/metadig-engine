@@ -219,8 +219,8 @@ public class DatabaseStore implements MDQStore {
         String status = null;
         String nodeId = null;
         Boolean isLatest = false;
-        String processingTime = null; // configurable in metadig.properties, the amount of time to wait before
-                                      // requeueing a run stuck in processing (eg: 24 hours)
+        String processingTime = null; // configurable in metadig.properties, the number of hours to wait before
+                                      // requeueing a run stuck in processing (eg: 24)
 
         try {
             MDQconfig cfg = new MDQconfig();
@@ -237,7 +237,7 @@ public class DatabaseStore implements MDQStore {
         try {
             log.trace("preparing statement for query");
             String sql = "SELECT * FROM runs JOIN identifiers ON runs.metadata_id = identifiers.metadata_id WHERE runs.status = 'processing' AND AGE(CURRENT_TIMESTAMP, runs.timestamp) > INTERVAL '"
-                    + processingTime + "'";
+                    + processingTime + " hours'";
             stmt = conn.prepareStatement(sql);
             log.trace("issuing query: " + sql);
             ResultSet rs = stmt.executeQuery();

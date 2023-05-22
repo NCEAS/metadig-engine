@@ -211,14 +211,23 @@ public class InMemoryStore implements MDQStore {
 	@Override
 	public List<Run> listInProcessRuns() {
 		List<Run> processing = new ArrayList<Run>();
+		Integer processingTime = null;
+
+        try {
+            MDQconfig cfg = new MDQconfig();
+            processingTime = cfg.getInt("quartz.monitor.processing.time");
+        } catch (IOException | ConfigurationException e) {
+            log.error("Could not read configuration");
+        }
+
 		for (String key : runs.keySet()) {
 			Run run = runs.get(key);
 			Date date = run.getTimestamp();
 			Instant instant = date.toInstant();
-			LocalDateTime datetime = LocalDateTime.ofInstant(instant, ZoneId.of("GMT-7"));
-			LocalDateTime now = LocalDateTime.now(ZoneOffset.of("-07:00"));
+			LocalDateTime datetime = LocalDateTime.ofInstant(instant, ZoneId.systemDefault());
+			LocalDateTime now = LocalDateTime.now(ZoneId.systemDefault());
 			long hours_diff = Duration.between(now, datetime).toHours();
-			if (run.getStatus().equals("processing") && hours_diff > 24) {
+			if (run.getStatus().equals("processing") && hours_diff > processingTime) {
 				processing.add(run);
 			}
 		}
