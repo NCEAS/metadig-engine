@@ -29,9 +29,6 @@ import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.util.*;
 import java.util.Date;
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
-import java.time.Duration;
 
 /**
  * Persistent storage for quality runs.
@@ -221,7 +218,6 @@ public class DatabaseStore implements MDQStore {
         String seqId = null;
         String status = null;
         String nodeId = null;
-        Timestamp timestamp = null;
         Boolean isLatest = false;
 
         // Hope for the best, prepare for the worst!
@@ -229,13 +225,12 @@ public class DatabaseStore implements MDQStore {
         // Select records from the 'runs' table
         try {
             log.trace("preparing statement for query");
-            String sql = "SELECT * FROM runs JOIN identifiers ON runs.metadata_id = identifiers.metadata_id WHERE runs.status = 'processing';";
+            String sql = "SELECT * FROM runs JOIN identifiers ON runs.metadata_id = identifiers.metadata_id WHERE runs.status = 'processing' AND AGE(CURRENT_TIMESTAMP, runs.timestamp) > INTERVAL '24 hours'";
             stmt = conn.prepareStatement(sql);
             log.trace("issuing query: " + sql);
             ResultSet rs = stmt.executeQuery();
             if (rs.next()) {
                 Run run = new Run();
-                timestamp = rs.getTimestamp("timestamp");
                 mId = rs.getString("metadata_id");
                 sId = rs.getString("suite_id");
                 seqId = rs.getString("sequence_id");
@@ -251,15 +246,9 @@ public class DatabaseStore implements MDQStore {
                 run.setSuiteId(sId);
                 run.setStatus(status);
                 run.setNodeId(nodeId);
-                // if the object hasn't been processing for more than 24 hours, discard it
-                LocalDateTime now = LocalDateTime.now(ZoneOffset.of("-07:00"));
-                long hours_diff = Duration.between(timestamp.toLocalDateTime(), now).toHours();
-                if (hours_diff > 24) {
-                    runs.add(run); // add a run to the list
-                    log.trace("Retrieved processing run for metadata id: " + run.getObjectIdentifier());
-                } else {
-                    log.trace("Run for metadata id: " + run.getObjectIdentifier() + "is less than 24 hours old");
-                }
+
+                runs.add(run); // add a run to the list
+
             } else {
                 log.trace("No processing runs found.");
             }
