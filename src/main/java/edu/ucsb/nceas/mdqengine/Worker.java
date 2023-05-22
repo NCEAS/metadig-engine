@@ -81,6 +81,7 @@ public class Worker {
     private static long elapsedTimeSecondsIndexing;
     private static long elapsedTimeSecondsProcessing;
     private static long totalElapsedTimeSeconds;
+    private static Integer runLimit; // configurable in metadig.properties, the number of tries to attempt a run
 
     public static void main(String[] argv) throws Exception {
 
@@ -93,6 +94,7 @@ public class Worker {
             RabbitMQhost = cfg.getString("RabbitMQ.host");
             RabbitMQport = cfg.getInt("RabbitMQ.port");
             indexLatest = Boolean.parseBoolean(cfg.getString("index.latest"));
+            runLimit = cfg.getInt("quartz.monitor.run.limit");
         } catch (ConfigurationException cex) {
             log.error("Unable to read configuration");
             MetadigException me = new MetadigException("Unable to read config properties");
@@ -138,7 +140,6 @@ public class Worker {
                 String nodeId = qEntry.getMemberNode();
 
                 // see if there is an existing run
-                // TODO: this is where some try counter logic comes in maybe
                 Run run = null;
                 try {
                     run = Run.getRun(metadataPid, suiteId);
@@ -163,8 +164,8 @@ public class Worker {
                 run.setRunCount(runCount);
 
                 // log and exit if 10 attempts have been made
-                if (run.getRunCount() > 10) {
-                    log.info("More than 10 attempts for pid: " + metadataPid + "and suite: " + suiteId
+                if (run.getRunCount() > runLimit) {
+                    log.info("Limit " + runLimit + " attempts hit for pid: " + metadataPid + "and suite: " + suiteId
                             + " , logging with a FAILED status.");
                     run.setRunStatus(Run.FAILURE);
                     run.setErrorDescription("Run has been attempted 10 times, aborting.");
