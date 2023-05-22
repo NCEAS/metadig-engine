@@ -38,7 +38,12 @@ import org.joda.time.DateTimeZone;
 /**
  * A Quartz job implementation for monitoring for metadata quality requests
  * 'stuck' with a status of 'processing' in the persistent store for more than
- * 24 hours.
+ * 24 hours. This could happen if the Worker processing the job dies
+ * unexpectedly after it saves the run with processing status, but before
+ * finishing and updating that status to success. No jobs should take longer
+ * than 24 hours to complete. If the job has been run 10 times and still has a
+ * status of 'processing' the MonitorJob is not run, and the status is updated
+ * to 'error' (see Controller)
  */
 @DisallowConcurrentExecution
 public class MonitorJob implements Job {
