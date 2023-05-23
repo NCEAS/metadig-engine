@@ -48,7 +48,7 @@ import org.joda.time.DateTimeZone;
 @DisallowConcurrentExecution
 public class MonitorJob implements Job {
 
-    private Log log = LogFactory.getLog(RequestReportJob.class);
+    private final Log log = LogFactory.getLog(RequestReportJob.class);
     private Controller controller = null;
 
     /**
@@ -275,7 +275,7 @@ public class MonitorJob implements Job {
 
         try {
             if (isCN) {
-                sysmeta = mnNode.getSystemMetadata(session, pid);
+                sysmeta = cnNode.getSystemMetadata(session, pid);
                 try {
                     ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
                     TypeMarshaller.marshalTypeToOutputStream(sysmeta, outputStream);
