@@ -273,8 +273,6 @@ public class Controller {
      * </p>
      */
     public void initTests(int cnt) {
-        // this.startTime = System.nanoTime();
-        this.startTime = System.currentTimeMillis();
         this.testMode = true;
         this.testCount = cnt;
         this.runCount = 0;
@@ -415,7 +413,7 @@ public class Controller {
         InputStream sysmetaInputStream = null;
         Object tmpSysmeta = null;
 
-        Class smClasses[] = { org.dataone.service.types.v2.SystemMetadata.class,
+        Class<?>[] smClasses = { org.dataone.service.types.v2.SystemMetadata.class,
                 org.dataone.service.types.v1.SystemMetadata.class };
         for (Class thisClass : smClasses) {
             try {
