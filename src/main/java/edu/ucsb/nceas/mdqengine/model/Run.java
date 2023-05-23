@@ -16,8 +16,7 @@ import java.util.List;
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(propOrder = { "id", "timestamp", "objectIdentifier", "suiteId", "nodeId", "status", "runStatus",
-		"errorDescription",
-		"sysmeta", "result", "sequenceId", "runCount" })
+		"errorDescription", "sysmeta", "result", "sequenceId", "runCount" })
 public class Run {
 
 	public static final String SUCCESS = "success";
