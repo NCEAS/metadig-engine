@@ -58,6 +58,7 @@ public class InMemoryStore implements MDQStore {
 		try {
 			cfg = new MDQconfig();
 		} catch (IOException | ConfigurationException e) {
+			log.error("Unable to read configuration.");
 
 		}
 		String storeDirectory;
@@ -202,11 +203,10 @@ public class InMemoryStore implements MDQStore {
 	}
 
 	/**
-	 * Get a list of runs that are stuck with the processing status for more than 24
-	 * hours.
+	 * Get a list of runs that are stuck with the processing status for more than
+	 * the processing time, configurable in metadig properties.
 	 *
 	 * @return a List of Run objects
-	 * @throws MetadigStoreException
 	 */
 	@Override
 	public List<Run> listInProcessRuns() {
@@ -214,12 +214,12 @@ public class InMemoryStore implements MDQStore {
 		Integer processingTime = null; // configurable in metadig.properties, the number of hours to wait before
 		// requeueing a run stuck in processing (eg: 24)
 
-        try {
-            MDQconfig cfg = new MDQconfig();
-            processingTime = cfg.getInt("quartz.monitor.processing.time");
-        } catch (IOException | ConfigurationException e) {
-            log.error("Could not read configuration");
-        }
+		try {
+			MDQconfig cfg = new MDQconfig();
+			processingTime = cfg.getInt("quartz.monitor.processing.time");
+		} catch (IOException | ConfigurationException e) {
+			log.error("Could not read configuration");
+		}
 
 		for (String key : runs.keySet()) {
 			Run run = runs.get(key);
@@ -256,13 +256,7 @@ public class InMemoryStore implements MDQStore {
 
 	@Override
 	public void renew() {
-	};
-
-	// @Override
-	// public Node getNode(String nodeId, String jobName) { return new Node(); }
-	//
-	// @Override
-	// public void saveNode(Node node) throws MetadigStoreException { }
+	}
 
 	@Override
 	public Task getTask(String taskName, String taskType, String nodeId) {
@@ -275,20 +269,20 @@ public class InMemoryStore implements MDQStore {
 
 	@Override
 	public void shutdown() {
-	};
+	}
 
 	@Override
 	public Node getNode(String nodeId) {
 		return new Node();
-	};
+	}
 
 	@Override
 	public void saveNode(Node node) throws MetadigStoreException {
-	};
+	}
 
 	@Override
 	public ArrayList<Node> getNodes() {
 		return new ArrayList<>();
-	};
+	}
 
 }
