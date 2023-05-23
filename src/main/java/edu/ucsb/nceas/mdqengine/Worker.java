@@ -71,9 +71,9 @@ public class Worker {
     private static String authToken = null;
     private static SolrClient client = null;
     private static Boolean indexLatest = false; // Determine the latest report in the month and record in the index
-    // create a sequenceId based on obsolesence chain. Currently this item is always
-    // performed, but it could be
-    // controlled by a metadig.properties config item in the future if desired.
+                                                // create a sequenceId based on obsolesence chain. Currently this item
+                                                // is always performed, but it could be controlled by a
+                                                // metadig.properties config item in the future if desired.
     private static Boolean indexSequenceId = true;
 
     private static long startTimeIndexing;
@@ -106,10 +106,9 @@ public class Worker {
 
         /*
          * This method is overridden from the RabbitMQ library and serves as the
-         * callback that is invoked whenenver
-         * an entry added to the 'RabbitMQchannel' and this particular instance of the
-         * Worker is selected for
-         * delivery of the queue message.
+         * callback that is invoked whenever an entry added to the 'RabbitMQchannel' and
+         * this particular instance of the Worker is selected for delivery of the queue
+         * message.
          */
         final Consumer consumer = new DefaultConsumer(RabbitMQchannel) {
             @Override
@@ -144,9 +143,9 @@ public class Worker {
                 try {
                     run = Run.getRun(metadataPid, suiteId);
                 } catch (MetadigException me) {
-                    log.info("No existing found for pid: " + metadataPid + "suite: " + suiteId);
+                    log.info("No existing run found for pid: " + metadataPid + "suite: " + suiteId);
                 } catch (ConfigurationException ce) {
-                    log.error("Configuration exception");
+                    log.error("Configuration exception" + ce.getMessage());
                 }
 
                 if (run == null) {
@@ -222,25 +221,24 @@ public class Worker {
                     log.error("Unable to run quality suite.");
                     e.printStackTrace();
                     // Store an exception in the queue entry. This will be returned to the
-                    // Controller so
-                    // so that it can take the appropriate action, for example, to resubmit the
-                    // entry
-                    // or to log the error in an easily assessible location, or to notify a user.
+                    // Controller so that it can take the appropriate action, for example, to
+                    // resubmit the entry or to log the error in an easily assessible location, or
+                    // to notify a user.
                     MetadigException me = new MetadigProcessException("Unable to run quality suite.");
                     me.initCause(e);
                     qEntry.setException(me);
                     // Note: Don't explicitly call 'return' from this routine causes the worker to
-                    // silently loose connection
-                    // to rabbitmq, i.e. the message to the completed queue doesn't appear to be
-                    // queued
+                    // silently lose connection to rabbitmq, i.e. the message to the completed
+                    // queue doesn't appear to be queued
 
                     // Even though the run didn't complete, save the processing report to
                     // persistent storage, so that we can save the error and status of the run.
                     try {
                         log.debug("Saving quality run status after error");
                         // convert String into InputStream
-                        if (run == null)
+                        if (run == null) {
                             run = new Run();
+                        }
                         run.setRunStatus(Run.FAILURE);
                         run.setErrorDescription(e.getMessage());
                         run.setRunCount(runCount);
@@ -257,11 +255,9 @@ public class Worker {
                 if (!failFast)
                     try {
                         // Determine the sequence identifier for the metadata pids DataONE obsolescence
-                        // chain. This is
-                        // not the DataONE seriesId, which may not exist for a pid, but instead is a
-                        // quality engine maintained
-                        // sequence id, that is needed to determine the highest score for a obs. chain
-                        // for each month.
+                        // chain. This is not the DataONE seriesId, which may not exist for a pid, but
+                        // instead is a quality engine maintained sequence id, that is needed to
+                        // determine the highest score for a obs. chain for each month.
                         log.debug("Searching for sequence id for pid: " + run.getObjectIdentifier());
                         // Add current run to collection, it will be saved during the run.update
                         run.setObjectIdentifier(metadataPid);
@@ -274,18 +270,14 @@ public class Worker {
                             runsInSequence.addRun(run.getObjectIdentifier(), run);
 
                             // Traverse through the collection, stopping if the sequenceId is found. If the
-                            // sequenceId
-                            // is already found, then all pids in the chain that are stored should already
-                            // have this
-                            // sequenceId
-                            // Boolean stopWhenSIfound = true;
+                            // sequenceId is already found, then all pids in the chain that are stored
+                            // should already have this sequenceId Boolean stopWhenSIfound = true;
                             Boolean stopWhenSIfound = false;
                             runsInSequence.getRunSequence(run, suiteId, stopWhenSIfound);
                             sequenceId = runsInSequence.getSequenceId();
                             // Ok, a sequence id wasn't set for these runs (if any), so generate a new one
                             // Only assign a new pid if the first pid in the sequence is found, so that we
-                            // don't
-                            // have multiple segments of a chain with different sequenceIds.
+                            // don't have multiple segments of a chain with different sequenceIds.
                             if (sequenceId == null && runsInSequence.getFoundFirstPid()) {
                                 sequenceId = runsInSequence.getFirstPidInSequence();
                                 runsInSequence.setSequenceId(sequenceId);
@@ -300,7 +292,7 @@ public class Worker {
 
                         run.save();
 
-                        // Update runs in persist storage with sequenceId for this obsolesence chain
+                        // Update runs in persist storage with sequenceId for this obsolescence chain
                         if (indexSequenceId && sequenceId != null) {
                             log.debug("Updating sequenceId to " + sequenceId);
                             // sequenceId = runsInSequence.getSequenceId();
@@ -349,7 +341,7 @@ public class Worker {
                                             + ", dateUploaded: " + r.getDateUploaded());
                                     try {
                                         wkr.updateIndex(r.getObjectIdentifier(), r.getSuiteId(), fields, solrLocation);
-                                        log.debug("Sucessfully updated Solr index with modified run with pid: "
+                                        log.debug("Successfully updated Solr index with modified run with pid: "
                                                 + r.getObjectIdentifier() + ", isLatest: " + r.getIsLatest().toString()
                                                 + ", dateUploaded: " + r.getDateUploaded());
                                     } catch (Exception mie2) {
