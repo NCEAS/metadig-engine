@@ -75,14 +75,11 @@ public class Controller {
     private static com.rabbitmq.client.Channel RabbitMQchannel;
 
     // Default values for the RabbitMQ message broker server. The value of
-    // 'localhost' is valid for
-    // a RabbitMQ server running on a 'bare metal' server, inside a VM, or within a
-    // Kubernetes
-    // where metadig-controller and the RabbitMQ server are running in containers
-    // that belong
-    // to the same Pod. These defaults will be used if the properties file cannot be
-    // read.
-    // These values are read from a config file, see class 'MDQconfig'
+    // 'localhost' is valid for a RabbitMQ server running on a 'bare metal' server,
+    // inside a VM, or within a Kubernetes cluster where metadig-controller and the
+    // RabbitMQ server are running in containers that belong to the same Pod. These
+    // defaults will be used if the properties file cannot be read. These values are
+    // read from a config file, see class 'MDQconfig'
     private static Boolean bookkeeperEnabled = false;
     private static String RabbitMQhost = null;
     private static int RabbitMQport = 0;
@@ -114,12 +111,12 @@ public class Controller {
         log.info("# of arguments: " + argv.length);
         /*
          * When in "test" mode (i.e. if cmd args are passed in), records will be
-         * read from the port number (argv[0]) which will are the metadata and
+         * read from the port number (argv[0]) which are the metadata and
          * sysmeta filenames to submit to the report generation queue. Records will
          * be read in until a line with 'Done' is encountered. The outer loop here
          * is so that mulitple 'test' sessions can occur, i.e. controller will wait
          * again for a new client to connect to the port, and then begin again reading
-         * filesnames to run.
+         * filenames to run.
          */
 
         Boolean stop = false;
@@ -211,8 +208,9 @@ public class Controller {
                 // Close current connection, then start again with new connection
                 clientSocket.close();
                 serverSocket.close();
-                if (stop)
+                if (stop) {
                     break;
+                }
             }
         }
     }
@@ -248,8 +246,9 @@ public class Controller {
 
     public void start() {
         /* Don't try to re-initialize the queues if they are already started */
-        if (isStarted)
+        if (isStarted) {
             return;
+        }
 
         try {
             this.readConfig();
@@ -283,7 +282,7 @@ public class Controller {
     }
 
     /**
-     * Reads metadig configuration settings and initalizes instance variables.
+     * Reads metadig configuration settings and initializes instance variables.
      *
      * @throws ConfigurationException if an error occurs while reading the
      *                                configuration.
@@ -297,9 +296,9 @@ public class Controller {
         RabbitMQusername = cfg.getString("RabbitMQ.username");
         RabbitMQhost = cfg.getString("RabbitMQ.host");
         RabbitMQport = cfg.getInt("RabbitMQ.port");
-        bookkeeperEnabled = new Boolean(cfg.getString("bookkeeper.enabled"));
+        bookkeeperEnabled = Boolean.parseBoolean(cfg.getString("bookkeeper.enabled"));
         monitorSchedule = cfg.getString("quartz.monitor.schedule");
-        monitor = new Boolean(cfg.getString("quartz.monitor"));
+        monitor = Boolean.parseBoolean(cfg.getString("quartz.monitor"));
     }
 
     public String readConfigParam(String paramName) throws ConfigurationException, IOException {
@@ -370,10 +369,8 @@ public class Controller {
      * Forward a request to the "InProcess" queue.
      * <p>
      * A request to create a quality report is serialized and placed on the RabbitMQ
-     * "InProcess"
-     * queue. This queue is read by worker processes that call the quality engine
-     * core to generate
-     * the report.
+     * "InProcess" queue. This queue is read by worker processes that call the
+     * quality engine core to generate the report.
      * </p>
      *
      * @param memberNode      the member node service URL to send the quality report
@@ -414,14 +411,6 @@ public class Controller {
         }
         // StandardCharsets.UTF_8.name() > JDK 7
         String metadataDoc = buf.toString("UTF-8");
-
-        // try {
-        // sysmeta = TypeMarshaller.unmarshalTypeFromStream(SystemMetadata.class,
-        // systemMetadata);
-        // } catch (InstantiationException | IllegalAccessException | IOException |
-        // MarshallingException fis) {
-        // fis.printStackTrace();
-        // }
 
         InputStream sysmetaInputStream = null;
         Object tmpSysmeta = null;
@@ -471,9 +460,8 @@ public class Controller {
      * Forward a scorer request to the "InProcess" queue.
      * <p>
      * A request to create a graph of aggregated quality scores is serialized and
-     * placed on the RabbitMQ "InProcess"
-     * queue. This queue is read by worker processes that call the scorer program to
-     * obtain the quality scores and
+     * placed on the RabbitMQ "InProcess" queue. This queue is read by worker
+     * processes that call the scorer program to obtain the quality scores and
      * create the graph from them.
      * </p>
      *
@@ -502,9 +490,8 @@ public class Controller {
 
         /**
          * Bookkeeper checking can be disabled via a metadig-engine configuration
-         * parameter. The primary use case for
-         * doing this is for testing purposes, otherwise checking should always be
-         * enabled.
+         * parameter. The primary use case for doing this is for testing purposes,
+         * otherwise checking should always be enabled.
          */
         if (bookkeeperEnabled) {
             try {
@@ -564,11 +551,9 @@ public class Controller {
         log.debug("Set RabbitMQ port to: " + RabbitMQport);
 
         // Setup the 'InProcess' queue with a routing key - messages consumed by this
-        // queue require that
-        // this routine key be used. The routine key QUALITY_ROUTING_KEY sends messages
-        // to the quality report worker,
-        // the routing key SCORER_ROUTING_KEY sends messages to the aggregation stats
-        // scorer.
+        // queue require that this routine key be used. The routine key
+        // QUALITY_ROUTING_KEY sends messages to the quality report worker, the routing
+        // key SCORER_ROUTING_KEY sends messages to the aggregation stats scorer.
         try {
             RabbitMQconnection = factory.newConnection();
             RabbitMQchannel = RabbitMQconnection.createChannel();
@@ -615,7 +600,7 @@ public class Controller {
 
                 ByteArrayInputStream bis = new ByteArrayInputStream(body);
                 ObjectInput in = new ObjectInputStream(bis);
-                // Which client is this message being sent from? The Controller can recieve
+                // Which client is this message being sent from? The Controller can receive
                 // messages from either an assessment worker (type="quality")
                 // or from a scorer worker (type="scorer"). These messages contain status
                 // information about the task that the workers performed.
@@ -629,9 +614,8 @@ public class Controller {
                         RabbitMQchannel.basicAck(envelope.getDeliveryTag(), false);
                     }
 
-                    log.info(" [x] Controller received completed report for pid: '" + qEntry.getMetadataPid() + "'"
-                            + ", " +
-                            "hostsname: " + qEntry.getHostname());
+                    log.info(" [x] Controller received completed report for pid: '" + qEntry.getMetadataPid()
+                            + ", hostname: " + qEntry.getHostname());
                     log.info("Total processing time for worker " + qEntry.getHostname() + " for PID "
                             + qEntry.getMetadataPid() + ": " + qEntry.getProcessingElapsedTimeSeconds());
                     log.info("Total indexing time for worker " + qEntry.getHostname() + " for PID "
@@ -641,8 +625,8 @@ public class Controller {
 
                     /*
                      * An exception caught by the worker will be passed back to the controller via
-                     * the queue entry
-                     * 'exception' field. Check this now and take the appropriate action.
+                     * the queue entry 'exception' field. Check this now and take the appropriate
+                     * action.
                      */
                     Exception me = qEntry.getException();
                     if (me instanceof MetadigException) {
@@ -662,7 +646,7 @@ public class Controller {
                         if (runCount == testCount) {
                             log.info("Tests for this run are complete.");
                             log.info("Number of tests run: " + runCount);
-                            log.info("Cummulative elapsed time for all workers: "
+                            log.info("Cumulative elapsed time for all workers: "
                                     + TimeUnit.SECONDS.toMinutes(totalElapsedSeconds) + " minutes");
                             log.info("Average worker elapsed time: " + totalElapsedSeconds / runCount + " seconds");
                             log.info("Total elapsed time for controller: "
@@ -681,8 +665,7 @@ public class Controller {
                     }
 
                     log.info(" [x] Controller received notification of completed score for: '"
-                            + qEntry.getCollectionId() + "'" + ", " +
-                            "hostsname: " + qEntry.getHostname());
+                            + qEntry.getCollectionId() + "', hostname: " + qEntry.getHostname());
                     log.info("Total processing time for worker " + qEntry.getHostname() + " for PID "
                             + qEntry.getCollectionId() + ": " + qEntry.getProcessingElapsedTimeSeconds());
 
