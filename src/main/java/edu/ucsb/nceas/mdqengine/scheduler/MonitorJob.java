@@ -121,7 +121,7 @@ public class MonitorJob implements Job {
     }
 
     /**
-     * Establishes an authenticated session using the DataONEauthToken in
+     * Establishes an authenticated session using the dataOneAuthToken in
      * metadig.properties
      * 
      * @return a Session object
@@ -130,14 +130,14 @@ public class MonitorJob implements Job {
      */
     public Session getSession() throws JobExecutionException {
 
-        String DataONEauthToken = null;
+        String dataOneAuthToken = null;
         String subjectId = null;
 
         try {
             MDQconfig cfg = new MDQconfig();
-            DataONEauthToken = System.getenv("DATAONE_AUTH_TOKEN");
-            if (DataONEauthToken == null) {
-                DataONEauthToken = cfg.getString("DataONE.authToken");
+            dataOneAuthToken = System.getenv("DATAONE_AUTH_TOKEN");
+            if (dataOneAuthToken == null) {
+                dataOneAuthToken = cfg.getString("DataONE.authToken");
                 log.debug("Got token from properties file.");
             } else {
                 log.debug("Got token from env.");
@@ -147,7 +147,7 @@ public class MonitorJob implements Job {
             jee.initCause(ce);
             throw jee;
         }
-        Session session = DataONE.getSession(subjectId, DataONEauthToken);
+        Session session = DataONE.getSession(subjectId, dataOneAuthToken);
         return session;
     }
 

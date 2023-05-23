@@ -64,7 +64,7 @@ public class Scorer {
     private static int RabbitMQport = 0;
     private static String RabbitMQpassword = null;
     private static String RabbitMQusername = null;
-    private static String DataONEauthToken = null;
+    private static String dataOneAuthToken = null;
     private static String CNsubjectId = null;
     private static String CNserviceUrl = null;
     private static String CNnodeId="urn:node:CN";
@@ -106,9 +106,9 @@ public class Scorer {
            backward compatibility, first try the environment, and if not found there, try the metadig
            parameter file.
         */
-        DataONEauthToken = System.getenv("DATAONE_AUTH_TOKEN");
-        if (DataONEauthToken == null) {
-            DataONEauthToken =  cfg.getString("DataONE.authToken");
+        dataOneAuthToken = System.getenv("DATAONE_AUTH_TOKEN");
+        if (dataOneAuthToken == null) {
+            dataOneAuthToken =  cfg.getString("DataONE.authToken");
             log.debug("Got token from properties file.");
         } else {
             log.debug("Got token from env.");
@@ -218,7 +218,7 @@ public class Scorer {
 
                     MetadigFile mdFile = new MetadigFile();
                     Graph graph = new Graph();
-                    Session session = DataONE.getSession(subjectId, DataONEauthToken);
+                    Session session = DataONE.getSession(subjectId, dataOneAuthToken);
 
                     d1Node = DataONE.getMultipartD1Node(session, nodeServiceUrl);
 
@@ -406,7 +406,7 @@ public class Scorer {
 
         try {
 
-            CNsession = DataONE.getSession(CNsubjectId, DataONEauthToken);
+            CNsession = DataONE.getSession(CNsubjectId, dataOneAuthToken);
             // Only CNs can call the 'subjectInfo' service (aka accounts), so we have to use
             // a MultipartCNode instance here.
             try {
