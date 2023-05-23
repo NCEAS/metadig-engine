@@ -118,8 +118,7 @@ public class DatabaseStore implements MDQStore {
                     String xml = IOUtils.toString(url.openStream(), "UTF-8");
                     suite = (Suite) XmlMarshaller.fromXml(xml, Suite.class);
                 } catch (JAXBException | IOException | SAXException e) {
-                    // log.warn("Could not load suite '" + resource.getFilename() + "' due to an
-                    // error: " + e.getMessage() + ".");
+                    log.error("Could not load suite.");
                     continue;
                 }
                 this.createSuite(suite);
@@ -148,12 +147,12 @@ public class DatabaseStore implements MDQStore {
         Result result = new Result();
         PreparedStatement stmt = null;
         String seqId = null;
-        Boolean isLatest = false;
+        boolean isLatest;
         Integer runCount = null;
         String resultStr = null;
 
         // Hope for the best, prepare for the worst!
-        MetadigStoreException me = new MetadigStoreException("Unable get quality report to the datdabase.");
+        MetadigStoreException me = new MetadigStoreException("Unable get quality report to the database.");
         // Select records from the 'runs' table
         try {
             log.trace("preparing statement for query");
@@ -198,11 +197,12 @@ public class DatabaseStore implements MDQStore {
     }
 
     /**
-     * Get a list of runs that are stuck with the processing status for more than 24
-     * hours.
+     * Get a list of runs that are stuck with the processing status for more than
+     * the processing time, configurable in metadig properties. These stuck runs
+     * could occur if the Worker dies before finishing a run
      *
      * @return a List of Run objects
-     * @throws MetadigStoreException
+     * @throws MetadigStoreException if unable to query the DB
      */
     @Override
     public List<Run> listInProcessRuns() throws MetadigStoreException {
@@ -214,7 +214,7 @@ public class DatabaseStore implements MDQStore {
         String sequenceId = null;
         String status = null;
         String nodeId = null;
-        Boolean isLatest = false;
+        boolean isLatest;
         String processingTime = null; // configurable in metadig.properties, the number of hours to wait before
                                       // requeueing a run stuck in processing (eg: 24)
 
@@ -225,10 +225,8 @@ public class DatabaseStore implements MDQStore {
             log.error("Could not read configuration");
         }
 
-        // IOException | ConfigurationException
-
         // Hope for the best, prepare for the worst!
-        MetadigStoreException me = new MetadigStoreException("Unable get runs from the datdabase.");
+        MetadigStoreException me = new MetadigStoreException("Unable get runs from the database.");
         // Select records from the 'runs' table
         try {
             log.trace("preparing statement for query");
@@ -297,7 +295,7 @@ public class DatabaseStore implements MDQStore {
 
         String runStr = null;
 
-        MetadigStoreException me = new MetadigStoreException("Unable save quality report to the datdabase.");
+        MetadigStoreException me = new MetadigStoreException("Unable save quality report to the database.");
         try {
             // JAXB annotations (e.g. in Check.java) are unable to prevent marshalling from
             // performing
@@ -431,7 +429,7 @@ public class DatabaseStore implements MDQStore {
             // conn.close();
         } catch (SQLException e) {
             log.error(e.getClass().getName() + ": " + e.getMessage());
-            MetadigStoreException me = new MetadigStoreException("Unable save last harvest date to the datdabase.");
+            MetadigStoreException me = new MetadigStoreException("Unable save last harvest date to the database.");
             me.initCause(e);
             throw (me);
         }
@@ -533,7 +531,7 @@ public class DatabaseStore implements MDQStore {
             // conn.close();
         } catch (SQLException e) {
             log.error(e.getClass().getName() + ": " + e.getMessage());
-            MetadigStoreException me = new MetadigStoreException("Unable save last harvest date to the datdabase.");
+            MetadigStoreException me = new MetadigStoreException("Unable save last harvest date to the database.");
             me.initCause(e);
             throw (me);
         }
