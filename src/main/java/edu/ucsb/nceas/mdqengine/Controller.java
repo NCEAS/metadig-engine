@@ -607,7 +607,9 @@ public class Controller {
                     try {
                         qEntry = (QueueEntry) in.readObject();
                     } catch (java.lang.ClassNotFoundException e) {
-                        log.info("Class 'QueueEntry' not found");
+                        log.error("Class 'QueueEntry' not found");
+                        return; // if we've this this catch something very serious has occurred, just return
+                                // since the whole program has probably crashed anyway
                     } finally {
                         RabbitMQchannel.basicAck(envelope.getDeliveryTag(), false);
                     }
@@ -657,7 +659,9 @@ public class Controller {
                     try {
                         qEntry = (ScorerQueueEntry) in.readObject();
                     } catch (java.lang.ClassNotFoundException e) {
-                        log.info("Class 'ScorerQueueEntry' not found");
+                        log.error("Class 'ScorerQueueEntry' not found");
+                        return; // if we've this this catch something very serious has occurred, just return
+                                // since the whole program has probably crashed anyway
                     } finally {
                         RabbitMQchannel.basicAck(envelope.getDeliveryTag(), false);
                     }
