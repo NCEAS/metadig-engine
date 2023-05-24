@@ -197,9 +197,8 @@ public class MonitorJob implements Job {
      * @return an InputStream containing the metadata of the specified object
      * 
      * @throws MetadigException If a NotAuthorized, InvalidToken, ServiceFailure,
-     *                          InsufficientResources exception is hit, or if a
-     *                          failed run (NotImplemented, NotFound) cannot be
-     *                          saved to the DB
+     *                          InsufficientResources, or NotFound exception is hit,
+     *                          or if a failed run cannot be saved to the DB
      */
     public InputStream getMetadata(Run run, Session session) throws MetadigException {
 
@@ -243,10 +242,10 @@ public class MonitorJob implements Job {
             } else {
                 objectIS = mnNode.get(session, pid);
             }
-            log.trace("Monitor: Retrieved metadata object for pid: " + pidStr);
+            log.debug("Monitor: Retrieved metadata object for pid: " + pidStr);
         } catch (NotAuthorized na) { // handle this in the caller by refiring, possible token just expired and needed
                                      // to be renewed
-            log.error("Monitor: Not authorized to read pid: " + pidStr + ", unable to retrieve object");
+            log.warn("Monitor: Not authorized to read pid: " + pidStr + ", unable to retrieve object");
             MetadigException jee = new MetadigException(na);
             throw jee;
         } catch (NotImplemented ni) { // save this to the DB, absorb and don't retry the run
@@ -263,20 +262,13 @@ public class MonitorJob implements Job {
             }
         } catch (InvalidToken it) { // handle this in the caller by refiring, possible token just expired and needed
                                     // to be renewed
-            log.error("Monitor: Invalid token for pid: " + pidStr + ", unable to retrieve object");
+            log.warn("Monitor: Invalid token for pid: " + pidStr + ", unable to retrieve object");
             MetadigException jee = new MetadigException(it);
             throw jee;
-        } catch (NotFound nf) { // save this to the DB, absorb and don't retry the run
-            log.error("Monitor: Object not found for pid: " + pidStr + ", unable to retrieve object");
-            // set a failure status for the run
-            run.setRunStatus(Run.FAILURE);
-            run.setErrorDescription("DataONE object not found exception.");
-            try {
-                run.save();
-            } catch (MetadigException me) {
-                MetadigException jee = new MetadigException(me);
-                throw jee;
-            }
+        } catch (NotFound nf) { // handle this in caller and refire it
+            log.warn("Monitor: Object not found for pid: " + pidStr + ", unable to retrieve object");
+            MetadigException jee = new MetadigException(nf);
+            throw jee;
         } catch (ServiceFailure sf) { // handle this in the caller by refiring, possible random datone outage
             log.error("Monitor: Service failure for pid: " + pidStr + ", unable to retrieve object");
             MetadigException me = new MetadigException(sf);
@@ -301,9 +293,9 @@ public class MonitorJob implements Job {
      * @return an InputStream containing the system metadata of the specified object
      * 
      * @throws MetadigException If a NotAuthorized, InvalidToken, ServiceFailure,
-     *                          InsufficientResources exception is hit, or if a
-     *                          failed run (NotImplemented, NotFound) cannot be
-     *                          saved to the DB
+     *                          InsufficientResources, NotFound exception is hit, or
+     *                          if a failed run (NotImplemented) cannot be saved to
+     *                          the DB
      */
     public InputStream getSystemMetadata(Run run, Session session) throws MetadigException {
         // throw a different exception here
@@ -351,7 +343,9 @@ public class MonitorJob implements Job {
                     TypeMarshaller.marshalTypeToOutputStream(sysmeta, outputStream);
                     sysmetaIS = new ByteArrayInputStream(outputStream.toByteArray());
                 } catch (MarshallingException | IOException me) {
-
+                    log.error("Monitor: Unable to convert system metadta to InputStream");
+                    MetadigException jee = new MetadigException(me);
+                    throw jee;
                 }
 
             } else {
@@ -361,13 +355,15 @@ public class MonitorJob implements Job {
                     TypeMarshaller.marshalTypeToOutputStream(sysmeta, outputStream);
                     sysmetaIS = new ByteArrayInputStream(outputStream.toByteArray());
                 } catch (MarshallingException | IOException me) {
-
+                    log.error("Monitor: Unable to convert system metadta to InputStream");
+                    MetadigException jee = new MetadigException(me);
+                    throw jee;
                 }
             }
             log.trace("Monitor: Retrieved metadata object for pid: " + pidStr);
         } catch (NotAuthorized na) { // handle this in the caller by refiring, possible token just expired and needed
-                                     // to be renewed
-            log.error("Monitor: Not authorized to read pid: " + pidStr + ", unable to retrieve object");
+            // to be renewed
+            log.warn("Monitor: Not authorized to read pid: " + pidStr + ", unable to retrieve object");
             MetadigException jee = new MetadigException(na);
             throw jee;
         } catch (NotImplemented ni) { // save this to the DB, absorb and don't retry the run
@@ -383,21 +379,14 @@ public class MonitorJob implements Job {
                 throw jee;
             }
         } catch (InvalidToken it) { // handle this in the caller by refiring, possible token just expired and needed
-                                    // to be renewed
-            log.error("Monitor: Invalid token for pid: " + pidStr + ", unable to retrieve object");
+            // to be renewed
+            log.warn("Monitor: Invalid token for pid: " + pidStr + ", unable to retrieve object");
             MetadigException jee = new MetadigException(it);
             throw jee;
-        } catch (NotFound nf) { // save this to the DB, absorb and don't retry the run
-            log.error("Monitor: Object not found for pid: " + pidStr + ", unable to retrieve object");
-            // set a failure status for the run
-            run.setRunStatus(Run.FAILURE);
-            run.setErrorDescription("DataONE object not found exception.");
-            try {
-                run.save();
-            } catch (MetadigException me) {
-                MetadigException jee = new MetadigException(me);
-                throw jee;
-            }
+        } catch (NotFound nf) { // handle this in caller and refire it
+            log.warn("Monitor: Object not found for pid: " + pidStr + ", unable to retrieve object");
+            MetadigException jee = new MetadigException(nf);
+            throw jee;
         } catch (ServiceFailure sf) { // handle this in the caller by refiring, possible random datone outage
             log.error("Monitor: Service failure for pid: " + pidStr + ", unable to retrieve object");
             MetadigException me = new MetadigException(sf);
