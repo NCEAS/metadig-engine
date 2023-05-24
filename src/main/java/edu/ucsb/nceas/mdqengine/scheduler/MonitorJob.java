@@ -1,6 +1,7 @@
 package edu.ucsb.nceas.mdqengine.scheduler;
 
 import edu.ucsb.nceas.mdqengine.exception.MetadigStoreException;
+import edu.ucsb.nceas.mdqengine.exception.MetadigException;
 import edu.ucsb.nceas.mdqengine.model.Run;
 import edu.ucsb.nceas.mdqengine.MDQconfig;
 import edu.ucsb.nceas.mdqengine.DataONE;
@@ -76,7 +77,8 @@ public class MonitorJob implements Job {
             store = new DatabaseStore();
         } catch (MetadigStoreException e) {
             e.printStackTrace();
-            throw new JobExecutionException("Cannot create store, unable to schedule job", e);
+            JobExecutionException jee = new JobExecutionException("Cannot create store, unable to schedule job", e);
+            throw jee;
         }
 
         if (!store.isAvailable()) {
@@ -84,7 +86,8 @@ public class MonitorJob implements Job {
                 store.renew();
             } catch (MetadigStoreException e) {
                 e.printStackTrace();
-                throw new JobExecutionException("Cannot renew store, unable to schedule job", e);
+                JobExecutionException jee = new JobExecutionException("Cannot renew store, unable to schedule job", e);
+                throw jee;
             }
         }
 
@@ -92,19 +95,50 @@ public class MonitorJob implements Job {
         try {
             processing = store.listInProcessRuns();
         } catch (MetadigStoreException e) {
-            e.printStackTrace();
+            JobExecutionException jee = new JobExecutionException("Monitor: Error getting in process runs from store.");
+            throw jee;
+        }
+
+        // get a session
+        Session session = null;
+        try {
+            session = getSession();
+        } catch (MetadigException me) {
+            JobExecutionException jee = new JobExecutionException("Could not connect to a DataONE session." + me);
+            jee.setRefireImmediately(true);
+            throw jee;
         }
 
         // request job via rabbitMQ
         for (Run run : processing) {
             log.info("Requesting monitor job: " + run.getId() + run.getStatus() + run.getNodeId());
-            Session session = getSession();
-            String pidStr = run.getId();
+
             String suiteId = run.getSuiteId();
+            String pidStr = run.getId();
             String nodeId = run.getNodeId();
-            // the methods below are pretty clunky
-            InputStream metadata = getMetadata(pidStr, nodeId, session);
-            InputStream sysmeta = getSystemMetadata(pidStr, nodeId, session);
+            InputStream metadata = null;
+            InputStream sysmeta = null;
+
+            try {
+                metadata = getMetadata(run, session);
+            } catch (MetadigException me) {
+                JobExecutionException jee = new JobExecutionException(me);
+                jee.setRefireImmediately(true);
+                throw jee;
+            }
+
+            try {
+                sysmeta = getSystemMetadata(run, session);
+            } catch (MetadigException me) {
+                JobExecutionException jee = new JobExecutionException(me);
+                jee.setRefireImmediately(true);
+                throw jee;
+            }
+
+            if (metadata == null | sysmeta == null) { // any case where the metadata or sysmeta should be thrown above
+                log.error("Monitor: Aborting run - Metadata or system metadata not found for " + pidStr);
+                continue;
+            }
 
             String localFilePath = null;
             DateTime requestDateTime = new DateTime(DateTimeZone.forOffsetHours(-7));
@@ -113,7 +147,9 @@ public class MonitorJob implements Job {
                         localFilePath, requestDateTime,
                         sysmeta);
             } catch (IOException io) {
-                io.printStackTrace();
+                JobExecutionException jee = new JobExecutionException("Monitor: Error processing quality request.");
+                jee.initCause(io);
+                throw jee;
             }
 
         }
@@ -126,9 +162,9 @@ public class MonitorJob implements Job {
      * 
      * @return a Session object
      * 
-     * @throws JobExecutionException if there is an error executing the quartz task
+     * @throws MetadigException If a session cannot be created
      */
-    public Session getSession() throws JobExecutionException {
+    public Session getSession() throws MetadigException {
 
         String dataOneAuthToken = null;
         String subjectId = null;
@@ -143,7 +179,7 @@ public class MonitorJob implements Job {
                 log.debug("Got token from env.");
             }
         } catch (ConfigurationException | IOException ce) {
-            JobExecutionException jee = new JobExecutionException("error executing task.");
+            MetadigException jee = new MetadigException("error executing task.");
             jee.initCause(ce);
             throw jee;
         }
@@ -160,15 +196,20 @@ public class MonitorJob implements Job {
      * @param session the session used to authenticate the request
      * @return an InputStream containing the metadata of the specified object
      * 
-     * @throws JobExecutionException if there is an error executing the quartz task
+     * @throws MetadigException If a NotAuthorized, InvalidToken, ServiceFailure,
+     *                          InsufficientResources exception is hit, or if a
+     *                          failed run (NotImplemented, NotFound) cannot be
+     *                          saved to the DB
      */
-    public InputStream getMetadata(String pidStr, String nodeId, Session session) throws JobExecutionException {
+    public InputStream getMetadata(Run run, Session session) throws MetadigException {
 
         String nodeServiceUrl = null;
         MultipartRestClient mrc = null;
         MultipartMNode mnNode = null;
         MultipartCNode cnNode = null;
         InputStream objectIS = null;
+        String pidStr = run.getId();
+        String nodeId = run.getNodeId();
         Identifier pid = new Identifier();
         pid.setValue(pidStr);
 
@@ -176,20 +217,17 @@ public class MonitorJob implements Job {
             MDQconfig cfg = new MDQconfig();
             String nodeAbbr = nodeId.replace("urn:node:", "");
             nodeServiceUrl = cfg.getString(nodeAbbr + ".serviceUrl");
-
         } catch (ConfigurationException | IOException ce) {
-            JobExecutionException jee = new JobExecutionException("Monitor: error executing task.");
-            jee.initCause(ce);
-            throw jee;
+            MetadigException me = new MetadigException("Monitor: Error reading configuration.");
+            throw me;
         }
 
         try {
             mrc = new HttpMultipartRestClient();
         } catch (Exception e) {
             log.error("Monitor: error creating rest client: " + e.getMessage());
-            JobExecutionException jee = new JobExecutionException(e);
-            jee.setRefireImmediately(false);
-            throw jee;
+            MetadigException me = new MetadigException("Monitor: error creating rest client");
+            throw me;
         }
 
         Boolean isCN = DataONE.isCN(nodeServiceUrl);
@@ -206,18 +244,47 @@ public class MonitorJob implements Job {
                 objectIS = mnNode.get(session, pid);
             }
             log.trace("Monitor: Retrieved metadata object for pid: " + pidStr);
-        } catch (NotAuthorized na) {
+        } catch (NotAuthorized na) { // handle this in the caller by refiring, possible token just expired and needed
+                                     // to be renewed
             log.error("Monitor: Not authorized to read pid: " + pidStr + ", unable to retrieve object");
-        } catch (NotImplemented ni) {
-            log.error("Monitor: Service not implemented for pid: " + pidStr + ", unable to retrieve object");
-        } catch (InvalidToken it) {
+            MetadigException jee = new MetadigException(na);
+            throw jee;
+        } catch (NotImplemented ni) { // save this to the DB, absorb and don't retry the run
+            log.error("Monitor: Service not implemented for pid: " + pidStr
+                    + ", unable to retrieve object. Saving run with status: failure");
+            // set a failure status for the run
+            run.setRunStatus(Run.FAILURE);
+            run.setErrorDescription("DataONE exception: service not implemented.");
+            try {
+                run.save();
+            } catch (MetadigException me) {
+                MetadigException jee = new MetadigException(me);
+                throw jee;
+            }
+        } catch (InvalidToken it) { // handle this in the caller by refiring, possible token just expired and needed
+                                    // to be renewed
             log.error("Monitor: Invalid token for pid: " + pidStr + ", unable to retrieve object");
-        } catch (NotFound nf) {
+            MetadigException jee = new MetadigException(it);
+            throw jee;
+        } catch (NotFound nf) { // save this to the DB, absorb and don't retry the run
             log.error("Monitor: Object not found for pid: " + pidStr + ", unable to retrieve object");
-        } catch (ServiceFailure sf) {
+            // set a failure status for the run
+            run.setRunStatus(Run.FAILURE);
+            run.setErrorDescription("DataONE object not found exception.");
+            try {
+                run.save();
+            } catch (MetadigException me) {
+                MetadigException jee = new MetadigException(me);
+                throw jee;
+            }
+        } catch (ServiceFailure sf) { // handle this in the caller by refiring, possible random datone outage
             log.error("Monitor: Service failure for pid: " + pidStr + ", unable to retrieve object");
-        } catch (InsufficientResources ir) {
+            MetadigException me = new MetadigException(sf);
+            throw me;
+        } catch (InsufficientResources ir) { // handle this in the caller by refiring, possible random datone outage
             log.error("Monitor: Insufficient resources for pid: " + pidStr + ", unable to retrieve object");
+            MetadigException me = new MetadigException(ir);
+            throw me;
         }
 
         return objectIS;
@@ -233,9 +300,13 @@ public class MonitorJob implements Job {
      * @param session the session used to authenticate the request
      * @return an InputStream containing the system metadata of the specified object
      * 
-     * @throws JobExecutionException if there is an error executing the quartz task
+     * @throws MetadigException If a NotAuthorized, InvalidToken, ServiceFailure,
+     *                          InsufficientResources exception is hit, or if a
+     *                          failed run (NotImplemented, NotFound) cannot be
+     *                          saved to the DB
      */
-    public InputStream getSystemMetadata(String pidStr, String nodeId, Session session) throws JobExecutionException {
+    public InputStream getSystemMetadata(Run run, Session session) throws MetadigException {
+        // throw a different exception here
 
         String nodeServiceUrl = null;
         MultipartRestClient mrc = null;
@@ -243,6 +314,8 @@ public class MonitorJob implements Job {
         MultipartCNode cnNode = null;
         SystemMetadata sysmeta = null;
         InputStream sysmetaIS = null;
+        String pidStr = run.getId();
+        String nodeId = run.getNodeId();
         Identifier pid = new Identifier();
         pid.setValue(pidStr);
 
@@ -250,20 +323,17 @@ public class MonitorJob implements Job {
             MDQconfig cfg = new MDQconfig();
             String nodeAbbr = nodeId.replace("urn:node:", "");
             nodeServiceUrl = cfg.getString(nodeAbbr + ".serviceUrl");
-
         } catch (ConfigurationException | IOException ce) {
-            JobExecutionException jee = new JobExecutionException("Monitor: error executing task.");
-            jee.initCause(ce);
-            throw jee;
+            MetadigException me = new MetadigException("Monitor: Error reading configuration.");
+            throw me;
         }
 
         try {
             mrc = new HttpMultipartRestClient();
         } catch (Exception e) {
             log.error("Monitor: error creating rest client: " + e.getMessage());
-            JobExecutionException jee = new JobExecutionException(e);
-            jee.setRefireImmediately(false);
-            throw jee;
+            MetadigException me = new MetadigException("Monitor: error creating rest client");
+            throw me;
         }
 
         Boolean isCN = DataONE.isCN(nodeServiceUrl);
@@ -295,16 +365,43 @@ public class MonitorJob implements Job {
                 }
             }
             log.trace("Monitor: Retrieved metadata object for pid: " + pidStr);
-        } catch (NotAuthorized na) {
-            log.error("Monitor: Not authorized to read pid: " + pid + ", unable to retrieve object");
-        } catch (NotImplemented ni) {
-            log.error("Monitor: Service not implemented for pid: " + pid + ", unable to retrieve object");
-        } catch (InvalidToken it) {
-            log.error("Monitor: Invalid token for pid: " + pid + ", unable to retrieve object");
-        } catch (NotFound nf) {
-            log.error("Monitor: Object not found for pid: " + pid + ", unable to retrieve object");
-        } catch (ServiceFailure sf) {
-            log.error("Monitor: Service failure for pid: " + pid + ", unable to retrieve object");
+        } catch (NotAuthorized na) { // handle this in the caller by refiring, possible token just expired and needed
+                                     // to be renewed
+            log.error("Monitor: Not authorized to read pid: " + pidStr + ", unable to retrieve object");
+            MetadigException jee = new MetadigException(na);
+            throw jee;
+        } catch (NotImplemented ni) { // save this to the DB, absorb and don't retry the run
+            log.error("Monitor: Service not implemented for pid: " + pidStr
+                    + ", unable to retrieve object. Saving run with status: failure");
+            // set a failure status for the run
+            run.setRunStatus(Run.FAILURE);
+            run.setErrorDescription("DataONE exception: service not implemented.");
+            try {
+                run.save();
+            } catch (MetadigException me) {
+                MetadigException jee = new MetadigException(me);
+                throw jee;
+            }
+        } catch (InvalidToken it) { // handle this in the caller by refiring, possible token just expired and needed
+                                    // to be renewed
+            log.error("Monitor: Invalid token for pid: " + pidStr + ", unable to retrieve object");
+            MetadigException jee = new MetadigException(it);
+            throw jee;
+        } catch (NotFound nf) { // save this to the DB, absorb and don't retry the run
+            log.error("Monitor: Object not found for pid: " + pidStr + ", unable to retrieve object");
+            // set a failure status for the run
+            run.setRunStatus(Run.FAILURE);
+            run.setErrorDescription("DataONE object not found exception.");
+            try {
+                run.save();
+            } catch (MetadigException me) {
+                MetadigException jee = new MetadigException(me);
+                throw jee;
+            }
+        } catch (ServiceFailure sf) { // handle this in the caller by refiring, possible random datone outage
+            log.error("Monitor: Service failure for pid: " + pidStr + ", unable to retrieve object");
+            MetadigException me = new MetadigException(sf);
+            throw me;
         }
 
         return sysmetaIS;
