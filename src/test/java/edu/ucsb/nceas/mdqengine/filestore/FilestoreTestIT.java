@@ -18,10 +18,13 @@ import static junit.framework.TestCase.assertTrue;
 import static org.junit.Assert.assertEquals;
 
 /**
- * Verify that the MetaDIG filestore works correctly, by saving, fetching and deleting a file from it.
+ * Verify that the MetaDIG filestore works correctly, by saving, fetching and
+ * deleting a file from it.
  * <p>
- *     This test uses a fully configured MetaDIG PostgreSQL database, configuration file and designated
- *     directory for the filestore, so is therefor configured as an integration test.
+ * This test uses a fully configured MetaDIG PostgreSQL database, configuration
+ * file and designated
+ * directory for the filestore, so is therefor configured as an integration
+ * test.
  * </p>
  */
 public class FilestoreTestIT {
@@ -61,7 +64,7 @@ public class FilestoreTestIT {
 
         // Save a file entry
         try {
-            File file = new File ( getClass().getClassLoader().getResource("data/sample-FAIR.suite.1.png").getFile());
+            File file = new File(getClass().getClassLoader().getResource("data/sample-FAIR.suite.1.png").getFile());
             newPath = mfs.saveFile(mdFile, file.getAbsolutePath(), replace);
             System.out.println("Saved file to filestore: " + newPath);
         } catch (IOException ioe) {
@@ -71,7 +74,7 @@ public class FilestoreTestIT {
 
         // Get a file entry
         File newFile = mfs.getFile(mdFile);
-        if(newFile.exists()) {
+        if (newFile.exists()) {
             System.out.println("Retrived file from filestore: " + newFile.getAbsolutePath());
         } else {
             System.out.println("Unable to retrieve file from filestore: " + mfs.getFilePath(mdFile));
@@ -79,7 +82,7 @@ public class FilestoreTestIT {
 
         // Verify that the entry was saved to disk
         File f = new File(newPath);
-        if(f.exists() && !f.isDirectory()) {
+        if (f.exists() && !f.isDirectory()) {
             System.out.println("Verified that a file was saved to the filestore: " + newPath);
         } else {
             System.out.println("Unable to save file to filestore: " + newPath);
@@ -87,10 +90,10 @@ public class FilestoreTestIT {
 
         // Delete the file entry
         boolean success = mfs.deleteFile(mdFile);
-        assertTrue( "A file can be deleted from the MetaDIG filestore", success);
+        assertTrue("A file can be deleted from the MetaDIG filestore", success);
         System.out.println("Removed file from filestore: " + newPath);
 
-        if(f.exists() && !f.isDirectory()) {
+        if (f.exists() && !f.isDirectory()) {
             System.out.println("The saved file still exists in the filestore: " + newPath);
         } else {
             System.out.println("Verified that the saved file has been removed from the filestore: " + newPath);
@@ -105,7 +108,7 @@ public class FilestoreTestIT {
         mdFile.setAltFilename("sample-FAIR.suite.1.png");
 
         try {
-            File file = new File ( getClass().getClassLoader().getResource("data/sample-FAIR.suite.1.png").getFile());
+            File file = new File(getClass().getClassLoader().getResource("data/sample-FAIR.suite.1.png").getFile());
             newPath = mfs.saveFile(mdFile, file.getAbsolutePath(), replace);
             System.out.println("Saved file to filestore: " + newPath);
         } catch (IOException ioe) {
@@ -115,7 +118,7 @@ public class FilestoreTestIT {
 
         // Get the file entry we just saved
         newFile = mfs.getFile(mdFile);
-        if(newFile.exists()) {
+        if (newFile.exists()) {
             System.out.println("Retrived file from filestore: " + newFile.getAbsolutePath());
         } else {
             System.out.println("Unable to retrieve file from filestore: " + mfs.getFilePath(mdFile));
@@ -123,21 +126,21 @@ public class FilestoreTestIT {
 
         // Next delete the file
         success = mfs.deleteFile(mdFile);
-        assertTrue( "A file can be deleted from the MetaDIG filestore", success);
+        assertTrue("A file can be deleted from the MetaDIG filestore", success);
         System.out.println("Removed file from filestore: " + newPath);
 
         // Verify that the file was deleted
         f = new File(newPath);
-        if(f.exists() && !f.isDirectory()) {
+        if (f.exists() && !f.isDirectory()) {
             System.out.println("The saved file still exists in the filestore: " + newPath);
         } else {
             System.out.println("Verified that the saved file has been removed from the filestore: " + newPath);
         }
 
-        //assertEquals(rec.getName(), r.getName());
+        // assertEquals(rec.getName(), r.getName());
     }
 
     public void getFile() {
-        //assertEquals(rec.getName(), r.getName());
+        // assertEquals(rec.getName(), r.getName());
     }
 }
