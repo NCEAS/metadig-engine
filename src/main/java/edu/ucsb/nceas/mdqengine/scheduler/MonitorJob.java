@@ -99,6 +99,11 @@ public class MonitorJob implements Job {
             throw jee;
         }
 
+        if (processing.isEmpty()) { // if no stuck jobs are found go ahead and exit
+            log.info("Monitor: No stuck jobs found.");
+            return;
+        }
+
         // get a session
         Session session = null;
         try {
