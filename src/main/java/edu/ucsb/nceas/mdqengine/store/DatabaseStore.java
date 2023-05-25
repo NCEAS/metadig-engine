@@ -222,7 +222,8 @@ public class DatabaseStore implements MDQStore {
             MDQconfig cfg = new MDQconfig();
             processingTime = cfg.getString("quartz.monitor.processing.time");
         } catch (IOException | ConfigurationException e) {
-            log.error("Could not read configuration");
+            log.error("Could not read configuration.");
+            return runs;
         }
 
         // Hope for the best, prepare for the worst!
@@ -258,7 +259,7 @@ public class DatabaseStore implements MDQStore {
             } else {
                 log.trace("No processing runs found.");
             }
-        } catch (Exception e) {
+        } catch (SQLException e) {
             log.error(e.getClass().getName() + ": " + e.getMessage());
             e.printStackTrace();
             me.initCause(e);
