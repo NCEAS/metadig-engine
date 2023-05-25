@@ -37,10 +37,9 @@ import java.util.concurrent.*;
 
 /**
  * The Worker class contains methods that create quality reports for metadata
- * documents
- * and uploads these reports to DataONE member nodes for cataloging and
- * indexing.
- * A worker reads from a RabbitMQ queue that a controller process writes to.
+ * documents and uploads these reports to DataONE member nodes for cataloging
+ * and indexing. A worker reads from a RabbitMQ queue that a controller process
+ * writes to.
  *
  * @author Peter Slaughter
  * @version %I%, %G%

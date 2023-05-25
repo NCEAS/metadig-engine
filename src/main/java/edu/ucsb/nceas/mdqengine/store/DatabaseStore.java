@@ -174,9 +174,8 @@ public class DatabaseStore implements MDQStore {
                 InputStream is = new ByteArrayInputStream(resultStr.getBytes());
                 run = TypeMarshaller.unmarshalTypeFromStream(Run.class, is);
                 // Note: These fields are in the Solr index, but don't need to be in the run
-                // XML, so
-                // have to be manually added after the JAXB marshalling has created the run
-                // object.
+                // XML, so have to be manually added after the JAXB marshalling has created the
+                // run object.
                 run.setObjectIdentifier(metadataId);
                 run.setSuiteId(suiteId);
                 run.setRunCount(runCount);

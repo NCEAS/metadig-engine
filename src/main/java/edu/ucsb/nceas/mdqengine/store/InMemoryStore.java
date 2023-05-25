@@ -58,7 +58,7 @@ public class InMemoryStore implements MDQStore {
 		try {
 			cfg = new MDQconfig();
 		} catch (IOException | ConfigurationException e) {
-			log.error("Unable to read configuration.");
+			log.error("Unable to read configuration." + e.getMessage());
 
 		}
 		String storeDirectory;
