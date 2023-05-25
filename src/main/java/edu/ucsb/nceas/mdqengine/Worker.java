@@ -143,9 +143,11 @@ public class Worker {
                 try {
                     run = Run.getRun(metadataPid, suiteId);
                 } catch (MetadigException me) {
-                    log.info("No existing run found for pid: " + metadataPid + "suite: " + suiteId);
+                    log.info("Unable to get run for pid: " + metadataPid + "suite: " + suiteId);
                 } catch (ConfigurationException ce) {
-                    log.error("Configuration exception" + ce.getMessage());
+                    log.error("Unable to read configuration");
+                    // consume, since a new run will be created below anyway
+
                 }
 
                 if (run == null) {
@@ -167,14 +169,16 @@ public class Worker {
                     log.info("Limit " + runLimit + " attempts hit for pid: " + metadataPid + "and suite: " + suiteId
                             + " , logging with a FAILED status.");
                     run.setRunStatus(Run.FAILURE);
-                    run.setErrorDescription("Run has been attempted 10 times, aborting.");
+                    run.setErrorDescription("Run has been attempted " + runLimit + " times, aborting.");
                     try {
                         run.save();
-                    } catch (MetadigException me) {
+                    } catch (MetadigException me) { // requeue the message if unable to save the status
                         log.error("Unable to save run with status 'failure': " + metadataPid);
+                        RabbitMQchannel.basicNack(envelope.getDeliveryTag(), false, true);
                     }
+                    // make sure to ack the message even though we aren't attempting the run
+                    RabbitMQchannel.basicAck(envelope.getDeliveryTag(), false);
                     return;
-
                 }
 
                 // set run status and continue otherwise
@@ -182,12 +186,10 @@ public class Worker {
                 // update database
                 try {
                     run.save();
-                } catch (MetadigException me) {
+                } catch (MetadigException me) { // requeue the message if unable to save the status
                     log.error("Unable to save run with status 'processing': " + metadataPid);
-                    // TODO: Should the whole program stop here?
+                    RabbitMQchannel.basicNack(envelope.getDeliveryTag(), false, true);
                 }
-
-                // metadigException
 
                 // ack the quality message
                 RabbitMQchannel.basicAck(envelope.getDeliveryTag(), false);
@@ -244,7 +246,7 @@ public class Worker {
                         run.setRunCount(runCount);
                         run.save();
                         log.debug("Saved quality run status after error");
-                    } catch (Exception ex) {
+                    } catch (MetadigException ex) {
                         log.error("Processing failed, then unable to save the quality report to database:"
                                 + ex.getMessage());
                     }
@@ -300,6 +302,10 @@ public class Worker {
                             runsInSequence.update();
                         }
                     } catch (MetadigException me) {
+                        // Store an exception in the queue entry. This will be returned to the
+                        // Controller so that it can take the appropriate action, for example, to
+                        // resubmit the entry or to log the error in an easily assessible location, or
+                        // to notify a user.
                         failFast = true;
                         log.error("Unable to save (then index) quality report to database.");
                         qEntry.setException(me);
