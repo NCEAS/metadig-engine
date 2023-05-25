@@ -258,7 +258,7 @@ public class Controller {
             }
             this.isStarted = true;
             log.debug("Controller is started");
-        } catch (java.io.IOException | java.util.concurrent.TimeoutException | ConfigurationException e) {
+        } catch (java.io.IOException | java.util.concurrent.TimeoutException | ConfigurationException | SchedulerException e) {
             e.printStackTrace();
             log.error("Error starting queue:");
             log.error(e.getMessage());
@@ -702,7 +702,7 @@ public class Controller {
      * trigger, the schedule of which is stored in metadig.properties as
      * quartz.monitor.schedule.
      */
-    public void monitor() {
+    public void monitor() throws SchedulerException{
         log.debug("Creating stuck processing job monitor.");
 
         try {
@@ -724,8 +724,10 @@ public class Controller {
 
             scheduler.scheduleJob(job, trigger);
 
-        } catch (SchedulerException se) {
-            se.printStackTrace();
+        } catch (Exception e) { 
+            log.error("Monitor: Unable to start Quartz scheduler.");
+            SchedulerException s = new SchedulerException(e.getMessage());
+            throw s;  // log an error if the monitor can't be started but the rest of the engine can still run
         }
     }
 
