@@ -95,7 +95,8 @@ public class MonitorJob implements Job {
         try {
             processing = store.listInProcessRuns();
         } catch (MetadigStoreException e) {
-            JobExecutionException jee = new JobExecutionException("Monitor: Error getting in process runs from store.");
+            JobExecutionException jee = new JobExecutionException("Monitor: Error getting in process runs from store.",
+                    e);
             throw jee;
         }
 
@@ -196,8 +197,7 @@ public class MonitorJob implements Job {
      * Retrieves the metadata of an object specified by the provided pid
      * from a specified node using the given session.
      * 
-     * @param pidStr  the pid of the object
-     * @param nodeId  the identifier of the node where the object is located
+     * @param run     a Run object
      * @param session the session used to authenticate the request
      * @return an InputStream containing the metadata of the specified object
      * 
@@ -292,8 +292,7 @@ public class MonitorJob implements Job {
      * Retrieves the system metadata of an object specified by the provided pid
      * from a specified node using the given session.
      * 
-     * @param pidStr  the pid of the object
-     * @param nodeId  the identifier of the node where the object is located
+     * @param run     a Run object
      * @param session the session used to authenticate the request
      * @return an InputStream containing the system metadata of the specified object
      * 
