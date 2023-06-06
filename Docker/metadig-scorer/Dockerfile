@@ -1,7 +1,10 @@
 # Use an OpenJDK runtime as a parent image
 FROM openjdk:8-jdk
 
-MAINTAINER slaughter@nceas.ucsb.edu
+LABEL org.opencontainers.image.source="https://github.com/nceas/metadig-engine"
+LABEL org.opencontainers.image.title="metadig-engine scorer"
+LABEL org.opencontainers.image.version="2.4.1"
+LABEL maintainer="Jeanette Clark jclark@nceas.ucsb.edu"
 
 # Set the working directory
 WORKDIR /var/lib/metadig
