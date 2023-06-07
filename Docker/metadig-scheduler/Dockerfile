@@ -6,6 +6,9 @@ LABEL org.opencontainers.image.title="metadig-engine scheduler"
 LABEL org.opencontainers.image.version="2.4.1"
 LABEL maintainer="Jeanette Clark jclark@nceas.ucsb.edu"
 
+ARG TAG=2.0.0
+ENV TAG=${TAG}
+
 # Set the working directory 
 WORKDIR /var/lib/metadig
 
