@@ -30,6 +30,23 @@ jobs:
           distribution: 'temurin'
           cache: 'maven'
 
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '2.7' # Version range or exact version of a Python version to use, using SemVer's version range syntax          
+     
+      - name: Setup R
+        uses: r-lib/actions/setup-r@v2
+
+      - uses: r-lib/actions/setup-r-dependencies@v2
+        with:
+          cache-version: 2
+          extra-packages: |
+            any::remotes
+            any::jsonlite
+      
+      - name: Install metadig
+        run: Rscript -e 'remotes::install_github("nceas/metadig-r")'
+
       - name: Extract Maven project version
         run: echo "version="$(mvn -q -Dexec.executable=echo -Dexec.args='${project.version}' --non-recursive exec:exec) >> $GITHUB_OUTPUT
         id: get_version
