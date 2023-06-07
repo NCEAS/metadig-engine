@@ -1,0 +1,5 @@
+{
+    "java.compile.nullAnalysis.mode": "disabled",
+    "java.format.settings.profile": "eclipse-java-google-style.xml"
+
+}

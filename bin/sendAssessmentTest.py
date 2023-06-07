@@ -1,11 +1,14 @@
-#!/usr/bin/python
+#!/Users/clark/.virtualenvs/metadig/bin/python
+
+# this is a shebang to your python path. needs to be 2.7
+#/usr/bin/python
 
 # This Python program can be used for local testing of RabbitMQ messaging between
 # metadig services, assessment processing and Solr indexing.
 
 import sys
 import re
-print "Sending assessment request to metadig-controoler (test mode):"
+print "Sending assessment request to metadig-controler (test mode):"
 print "Number of arguments: ", len(sys.argv)
 import socket
 
@@ -21,13 +24,13 @@ clientsocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 clientsocket.connect((host, portNum))
 
 testCount = 1
-suiteId = "arctic.data.center.suite.1"
+suiteId = "test.suite"
 nodeId = "urn:node:ARCTIC"
 
-idVal = "doi:10.18739_A2W08WG3R"
+idVal = "doi:10.18739/A2W08WG3R"
 fileIdVal = re.sub('[/\(\")]', '_', idVal)
 testDir = "./src/test/resources/test-docs"
-mdFile = "%s/%s.sm" % (testDir, fileIdVal)
+mdFile = "%s/%s.xml" % (testDir, fileIdVal)
 smFile = "%s/%s.sm" % (testDir, fileIdVal)
 
 # First send the type of request, either 'graph' or 'quality'

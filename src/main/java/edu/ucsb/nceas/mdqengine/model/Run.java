@@ -15,7 +15,8 @@ import java.util.List;
 
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(propOrder = {"id", "timestamp", "objectIdentifier", "suiteId", "status", "runStatus", "errorDescription", "sysmeta", "result", "sequenceId"})
+@XmlType(propOrder = { "id", "timestamp", "objectIdentifier", "suiteId", "nodeId", "status", "runStatus",
+		"errorDescription", "sysmeta", "result", "sequenceId", "runCount" })
 public class Run {
 
 	public static final String SUCCESS = "success";
@@ -26,7 +27,7 @@ public class Run {
 
 	/**
 	 * The unique identifier for the QC run. This will likely be long and opaque
-	 * (like a UUID) considering the quantity of runs that will likely be performed 
+	 * (like a UUID) considering the quantity of runs that will likely be performed
 	 * over the content in a large repository.
 	 */
 	@XmlElement(required = true)
@@ -37,23 +38,23 @@ public class Run {
 	 */
 	@XmlElement(required = true)
 	private Date timestamp;
-	
+
 	/**
 	 * The identifier of the metadata document that was QCed.
-	 * This is optional since in some cases, we will be performing 
-	 * QC on objects that are being actively edited/created and 
+	 * This is optional since in some cases, we will be performing
+	 * QC on objects that are being actively edited/created and
 	 * do not yet exist with persistent identifiers.
 	 */
 	@XmlElement(required = false)
 	private String objectIdentifier;
 
 	/**
-	 * The list of results for this run. Results contain the check that was run and 
+	 * The list of results for this run. Results contain the check that was run and
 	 * the outcome of the check.
 	 */
 	@XmlElement(required = false)
 	private List<Result> result;
-	
+
 	/**
 	 * The identifier for the suite that was run
 	 */
@@ -61,13 +62,20 @@ public class Run {
 	private String suiteId;
 
 	/**
-	 *  The error message for a check
+	 * The identifier for the node of the object
+	 */
+	@XmlElement(required = false)
+	private String nodeId;
+
+	/**
+	 * The error message for a check
 	 */
 	@XmlElement(required = true)
 	private String status;
 
 	/**
-	 * The processing status of the run, i.e. was an error encountered generating the run
+	 * The processing status of the run, i.e. was an error encountered generating
+	 * the run
 	 */
 	@XmlElement(required = true)
 	private String runStatus;
@@ -92,8 +100,14 @@ public class Run {
 	private String sequenceId;
 
 	/**
+	 * Number of times the run has been executed or attempted to be executed
+	 */
+	@XmlElement(required = false)
+	private Integer runCount;
+
+	/**
 	 * Has this run been modified since being retrieved from the data store?
-     * This field is not included in the Solr index.
+	 * This field is not included in the Solr index.
 	 */
 	@XmlTransient
 	private Boolean modified = false;
@@ -101,7 +115,8 @@ public class Run {
 	/**
 	 * For internal use by the 'Runs' collection. Is this the latest run in a series
 	 * for a specified time period.
-	 * Note that this field is maintained in the Solr index separately from the DataONE
+	 * Note that this field is maintained in the Solr index separately from the
+	 * DataONE
 	 * indexing.
 	 */
 	@XmlTransient
@@ -151,23 +166,41 @@ public class Run {
 		return suiteId;
 	}
 
-	public void setSuiteId(String suiteId) { this.suiteId = suiteId; }
+	public void setSuiteId(String suiteId) {
+		this.suiteId = suiteId;
+	}
 
-	public String getStatus() { return status; }
+	public String getStatus() {
+		return status;
+	}
 
-	public void setStatus(String status) { this.status = status; }
+	public void setStatus(String status) {
+		this.status = status;
+	}
 
-	public String getRunStatus() { return runStatus; }
+	public String getRunStatus() {
+		return runStatus;
+	}
 
-	public void setRunStatus(String status) { this.runStatus = status; }
+	public void setRunStatus(String status) {
+		this.runStatus = status;
+	}
 
-	public String getErrorDescription() { return errorDescription; }
+	public String getErrorDescription() {
+		return errorDescription;
+	}
 
-	public void setErrorDescription(String errorDescription) { this.errorDescription = errorDescription; }
+	public void setErrorDescription(String errorDescription) {
+		this.errorDescription = errorDescription;
+	}
 
-	public String getSequenceId() { return sequenceId; }
+	public String getSequenceId() {
+		return sequenceId;
+	}
 
-	public void setSequenceId(String sequenceId) { this.sequenceId = sequenceId; }
+	public void setSequenceId(String sequenceId) {
+		this.sequenceId = sequenceId;
+	}
 
 	public String getObsoletes() {
 		return sysmeta.getObsoletes();
@@ -195,11 +228,32 @@ public class Run {
 
 	// Passthru to nested sysmeta
 	public Date getDateUploaded() {
-		if(sysmeta != null) {
+		if (sysmeta != null) {
 			return sysmeta.getDateUploaded();
 		} else {
 			return null;
 		}
+	}
+
+	// Passthru to nested sysmeta
+	public String getNodeId() {
+		if (sysmeta != null) {
+			return sysmeta.getOriginMemberNode();
+		} else {
+			return this.nodeId;
+		}
+	}
+
+	public void setNodeId(String nodeId) {
+		this.nodeId = nodeId;
+	}
+
+	public void setRunCount(Integer runCount) {
+		this.runCount = runCount;
+	}
+
+	public Integer getRunCount() {
+		return this.runCount;
 	}
 
 	/**
@@ -212,29 +266,32 @@ public class Run {
 	 */
 	public void save() throws MetadigException {
 
-	    boolean persist = true;
+		boolean persist = true;
 		MDQStore store = StoreFactory.getStore(persist);
 
-		log.debug("Saving to persistent storage: metadata PID: " + this.getObjectIdentifier()  + ", suite id: " + this.getSuiteId());
+		log.debug("Saving to persistent storage: metadata PID: " + this.getObjectIdentifier() + ", suite id: "
+				+ this.getSuiteId());
 
 		try {
 			store.saveRun(this);
 		} catch (MetadigException me) {
 			log.debug("Error saving run: " + me.getCause());
-			if(me.getCause() instanceof SQLException) {
+			if (me.getCause() instanceof SQLException) {
 				log.debug("Retrying saveRun() due to error");
 				store.renew();
 				store.saveRun(this);
 			} else {
-				throw(me);
+				throw (me);
 			}
 		}
 
-		// Note that when the connection pooler 'pgbouncer' is used, closing the connection actually just returns
+		// Note that when the connection pooler 'pgbouncer' is used, closing the
+		// connection actually just returns
 		// the connection to the pool that pgbouncer maintains.
-        log.debug("Shutting down store");
+		log.debug("Shutting down store");
 		store.shutdown();
-		log.debug("Done saving to persistent storage: metadata PID: " + this.getObjectIdentifier() + ", suite id: " + this.getSuiteId());
+		log.debug("Done saving to persistent storage: metadata PID: " + this.getObjectIdentifier() + ", suite id: "
+				+ this.getSuiteId());
 	}
 
 	/**
@@ -244,10 +301,11 @@ public class Run {
 	 * </p>
 	 *
 	 * @param metadataId The DataONE identifier of the run to fetch
-	 * @param suiteId The metadig-engine suite id of the suite to match
+	 * @param suiteId    The metadig-engine suite id of the suite to match
 	 * @throws Exception
 	 */
-	public static Run getRun(String metadataId, String suiteId) throws MetadigException, IOException, ConfigurationException {
+	public static Run getRun(String metadataId, String suiteId)
+			throws MetadigException, IOException, ConfigurationException {
 		boolean persist = true;
 		MDQStore store = StoreFactory.getStore(persist);
 
@@ -258,17 +316,17 @@ public class Run {
 			run = store.getRun(metadataId, suiteId);
 		} catch (MetadigException me) {
 			log.debug("Error getting run: " + me.getCause());
-			if(me.getCause() instanceof SQLException) {
+			if (me.getCause() instanceof SQLException) {
 				log.debug("Retrying getRun() due to error");
 				store.renew();
 				store.getRun(metadataId, suiteId);
 			} else {
-				throw(me);
+				throw (me);
 			}
 		}
 		log.debug("Shutting down store");
 		store.shutdown();
-		log.debug("Done getting from persistent storage: metadata PID: " + metadataId  + ", suite id: " + suiteId);
+		log.debug("Done getting from persistent storage: metadata PID: " + metadataId + ", suite id: " + suiteId);
 		return run;
 	}
 }

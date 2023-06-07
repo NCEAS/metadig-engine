@@ -32,6 +32,7 @@ import java.util.Date;
 
 /**
  * Persistent storage for quality runs.
+ * 
  * @author slaughter
  *
  */
@@ -49,7 +50,7 @@ public class DatabaseStore implements MDQStore {
     private Connection conn = null;
     private DataSource dataSource = null;
 
-    public DatabaseStore () throws MetadigStoreException {
+    public DatabaseStore() throws MetadigStoreException {
         log.trace("Initializing a new DatabaseStore to " + dbUrl + ".");
         this.init();
     }
@@ -68,7 +69,7 @@ public class DatabaseStore implements MDQStore {
             dbPasswd = cfg.getString("postgres.passwd");
             additionalDir = cfg.getString("mdq.store.directory");
 
-        } catch (ConfigurationException | IOException ex ) {
+        } catch (ConfigurationException | IOException ex) {
             log.error(ex.getMessage());
             MetadigStoreException mse = new MetadigStoreException("Unable to create new Store");
             mse.initCause(ex.getCause());
@@ -77,19 +78,19 @@ public class DatabaseStore implements MDQStore {
 
         try {
             Properties props = new Properties();
-            props.setProperty("user",dbUser);
-            props.setProperty("password",dbPasswd);
+            props.setProperty("user", dbUser);
+            props.setProperty("password", dbPasswd);
             props.setProperty("prepareThreshold", "0");
-            //props.setProperty("extra_float_digits", "2");
+            // props.setProperty("extra_float_digits", "2");
             Class.forName("org.postgresql.Driver");
             conn = DriverManager.getConnection(dbUrl, props);
             conn.setAutoCommit(false);
         } catch (Exception e) {
             e.printStackTrace();
-            log.error(e.getClass().getName()+": "+e.getMessage());
+            log.error(e.getClass().getName() + ": " + e.getMessage());
             MetadigStoreException mse = new MetadigStoreException("Unable to create the database store.");
             mse.initCause(e);
-            throw(mse);
+            throw (mse);
         }
 
         log.trace("Connection initialized");
@@ -99,31 +100,32 @@ public class DatabaseStore implements MDQStore {
         Resource[] suiteResources = null;
         // load all metadig quality suites and checks from local files, if available
         try {
-            suiteResources  = resolver.getResources("classpath*:/suites/*.xml");
+            suiteResources = resolver.getResources("classpath*:/suites/*.xml");
             // do we have an additional location for these?
             if (additionalDir != null) {
-                Resource[] additionalSuiteResources = resolver.getResources("file://" + additionalDir + "/suites/*.xml");
+                Resource[] additionalSuiteResources = resolver
+                        .getResources("file://" + additionalDir + "/suites/*.xml");
                 suiteResources = (Resource[]) ArrayUtils.addAll(suiteResources, additionalSuiteResources);
             }
         } catch (IOException e) {
             log.error("Could not read local suite resources: " + e.getMessage(), e);
         }
         if (suiteResources != null) {
-            for (Resource resource: suiteResources) {
+            for (Resource resource : suiteResources) {
                 Suite suite = null;
                 try {
                     URL url = resource.getURL();
                     String xml = IOUtils.toString(url.openStream(), "UTF-8");
                     suite = (Suite) XmlMarshaller.fromXml(xml, Suite.class);
                 } catch (JAXBException | IOException | SAXException e) {
-                    //log.warn("Could not load suite '" + resource.getFilename() + "' due to an error: " + e.getMessage() + ".");
+                    log.error("Could not load suite.");
                     continue;
                 }
                 this.createSuite(suite);
 
             }
         }
-        if(this.isAvailable()) {
+        if (this.isAvailable()) {
             log.trace("Initialized database store: opened database successfully");
         } else {
             throw new MetadigStoreException("Error initializing database, connection not available");
@@ -139,19 +141,18 @@ public class DatabaseStore implements MDQStore {
      * Get a single run from the 'runs' table.
      */
     @Override
-    public Run getRun(String metadataId, String suiteId) throws MetadigStoreException  {
-        //return runs.get(id);
+    public Run getRun(String metadataId, String suiteId) throws MetadigStoreException {
+        // return runs.get(id);
         Run run = null;
         Result result = new Result();
         PreparedStatement stmt = null;
-        String mId = null;
-        String sId = null;
         String seqId = null;
-        Boolean isLatest = false;
+        boolean isLatest;
+        Integer runCount = null;
         String resultStr = null;
 
         // Hope for the best, prepare for the worst!
-        MetadigStoreException me = new MetadigStoreException("Unable get quality report to the datdabase.");
+        MetadigStoreException me = new MetadigStoreException("Unable get quality report to the database.");
         // Select records from the 'runs' table
         try {
             log.trace("preparing statement for query");
@@ -162,47 +163,124 @@ public class DatabaseStore implements MDQStore {
 
             log.trace("issuing query: " + sql);
             ResultSet rs = stmt.executeQuery();
-            if(rs.next()) {
-                mId = rs.getString("metadata_id");
-                sId = rs.getString("suite_id");
+            if (rs.next()) {
                 seqId = rs.getString("sequence_id");
                 isLatest = rs.getBoolean("is_latest");
+                runCount = rs.getInt("run_count");
                 resultStr = rs.getString("results");
                 rs.close();
                 stmt.close();
                 // Convert the returned run xml document to a 'run' object.
                 InputStream is = new ByteArrayInputStream(resultStr.getBytes());
                 run = TypeMarshaller.unmarshalTypeFromStream(Run.class, is);
-                // Note: These fields are in the Solr index, but don't need to be in the run XML, so
-                // have to be manually added after the JAXB marshalling has created the run object.
+                // Note: These fields are in the Solr index, but don't need to be in the run
+                // XML, so have to be manually added after the JAXB marshalling has created the
+                // run object.
+                run.setObjectIdentifier(metadataId);
+                run.setSuiteId(suiteId);
+                run.setRunCount(runCount);
                 run.setSequenceId(seqId);
                 run.setIsLatest(isLatest);
                 log.trace("Retrieved run successfully for metadata id: " + run.getObjectIdentifier());
             } else {
                 log.trace("Run not found for metadata id: " + metadataId + ", suiteId: " + suiteId);
             }
-        } catch ( Exception e ) {
-            log.error( e.getClass().getName()+": "+ e.getMessage());
+        } catch (Exception e) {
+            log.error(e.getClass().getName() + ": " + e.getMessage());
             e.printStackTrace();
             me.initCause(e);
-            throw(me);
+            throw (me);
         }
 
+        return (run);
+    }
 
-        return(run);
+    /**
+     * Get a list of runs that are stuck with the processing status for more than
+     * the processing time, configurable in metadig properties. These stuck runs
+     * could occur if the Worker dies before finishing a run
+     *
+     * @return a List of Run objects
+     * @throws MetadigStoreException if unable to query the DB
+     */
+    @Override
+    public List<Run> listInProcessRuns() throws MetadigStoreException {
+
+        List<Run> runs = new ArrayList<Run>();
+        PreparedStatement stmt = null;
+        String metadataId = null;
+        String seriesId = null;
+        String sequenceId = null;
+        String status = null;
+        String nodeId = null;
+        boolean isLatest;
+        String processingTime = null; // configurable in metadig.properties, the number of hours to wait before
+                                      // requeueing a run stuck in processing (eg: 24)
+
+        try {
+            MDQconfig cfg = new MDQconfig();
+            processingTime = cfg.getString("quartz.monitor.processing.time");
+        } catch (IOException | ConfigurationException e) {
+            log.error("Could not read configuration.");
+            return runs;
+        }
+
+        // Hope for the best, prepare for the worst!
+        MetadigStoreException me = new MetadigStoreException("Unable get runs from the database.");
+        // Select records from the 'runs' table
+        try {
+            log.trace("preparing statement for query");
+            String sql = "SELECT * FROM runs JOIN identifiers ON runs.metadata_id = identifiers.metadata_id WHERE runs.status = 'processing' AND AGE(CURRENT_TIMESTAMP, runs.timestamp) > INTERVAL '"
+                    + processingTime + " hours'";
+            stmt = conn.prepareStatement(sql);
+            log.trace("issuing query: " + sql);
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                Run run = new Run();
+                metadataId = rs.getString("metadata_id");
+                seriesId = rs.getString("suite_id");
+                sequenceId = rs.getString("sequence_id");
+                isLatest = rs.getBoolean("is_latest");
+                status = rs.getString("status");
+                nodeId = rs.getString("data_source");
+                rs.close();
+                stmt.close();
+                // populate the run object
+                run.setSequenceId(sequenceId);
+                run.setIsLatest(isLatest);
+                run.setId(metadataId);
+                run.setSuiteId(seriesId);
+                run.setStatus(status);
+                run.setNodeId(nodeId);
+
+                runs.add(run); // add a run to the list
+
+            } else {
+                log.trace("No processing runs found.");
+            }
+        } catch (SQLException e) {
+            log.error(e.getClass().getName() + ": " + e.getMessage());
+            e.printStackTrace();
+            me.initCause(e);
+            throw (me);
+        }
+
+        return (runs);
     }
 
     /*
      * Save a single run, first populating the 'pids' table, then the 'runs' table.
      */
     public void saveRun(Run run) throws MetadigStoreException {
-        //runs.put(run.getId(), run);
+        // runs.put(run.getId(), run);
 
         PreparedStatement stmt = null;
         String datasource = null;
         SysmetaModel sysmeta = run.getSysmeta();
-        if(sysmeta != null) {
+        if (sysmeta != null) {
             datasource = sysmeta.getOriginMemberNode();
+        } else {
+            datasource = run.getNodeId();
         }
         String metadataId = run.getObjectIdentifier();
         String suiteId = run.getSuiteId();
@@ -210,34 +288,37 @@ public class DatabaseStore implements MDQStore {
         String error = run.getErrorDescription();
         String sequenceId = run.getSequenceId();
         Boolean isLatest = run.getIsLatest();
+        Integer runCount = run.getRunCount();
         String resultStr = null;
         Timestamp dateTime = Timestamp.from(Instant.now());
         run.setTimestamp(dateTime);
 
         String runStr = null;
 
-        MetadigStoreException me = new MetadigStoreException("Unable save quality report to the datdabase.");
+        MetadigStoreException me = new MetadigStoreException("Unable save quality report to the database.");
         try {
-            // JAXB annotations (e.g. in Check.java) are unable to prevent marshalling from performing
+            // JAXB annotations (e.g. in Check.java) are unable to prevent marshalling from
+            // performing
             // XML special character encoding (i.e. '"' to '&quot', so we have to unescape
             // these character for the entire report here.
             runStr = XmlMarshaller.toXml(run, true);
         } catch (JAXBException e) {
             e.printStackTrace();
             me.initCause(e);
-            throw(me);
+            throw (me);
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
             me.initCause(e);
-            throw(me);
+            throw (me);
         }
 
         // First, insert a record into the main table ('pids')
         try {
-            // Insert a pid into the 'identifiers' table and if it is already their, update it
+            // Insert a pid into the 'identifiers' table and if it is already there, update
+            // it
             // with any new info, e.g. the 'datasource' may have changed.
             String sql = "INSERT INTO identifiers (metadata_id, data_source) VALUES (?, ?)"
-                + " ON CONFLICT (metadata_id) DO UPDATE SET data_source = ?";
+                    + " ON CONFLICT (metadata_id) DO UPDATE SET data_source = ?";
             stmt = conn.prepareStatement(sql);
             stmt.setString(1, metadataId);
             stmt.setString(2, datasource);
@@ -246,19 +327,20 @@ public class DatabaseStore implements MDQStore {
             stmt.executeUpdate();
             stmt.close();
             conn.commit();
-            //conn.close();
+            // conn.close();
         } catch (SQLException e) {
-            log.error( e.getClass().getName()+": "+ e.getMessage());
+            log.error(e.getClass().getName() + ": " + e.getMessage());
             me.initCause(e);
-            throw(me);
+            throw (me);
         }
 
-        // Perform an 'upsert' on the 'runs' table - if a record exists for the 'metadata_id, suite_id' already,
+        // Perform an 'upsert' on the 'runs' table - if a record exists for the
+        // 'metadata_id, suite_id' already,
         // then update the record with the incoming data.
         try {
             String sql = "INSERT INTO runs (metadata_id, suite_id, timestamp, results, status, error, sequence_id, is_latest) VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
                     + " ON CONFLICT ON CONSTRAINT metadata_id_suite_id_fk "
-                    + " DO UPDATE SET (timestamp, results, status, error, sequence_id, is_latest) = (?, ?, ?, ?, ?, ?);";
+                    + " DO UPDATE SET (timestamp, results, status, error, sequence_id, is_latest, run_count) = (?, ?, ?, ?, ?, ?, ?);";
 
             stmt = conn.prepareStatement(sql);
             stmt.setString(1, metadataId);
@@ -276,14 +358,15 @@ public class DatabaseStore implements MDQStore {
             stmt.setString(12, error);
             stmt.setString(13, sequenceId);
             stmt.setBoolean(14, isLatest);
+            stmt.setInt(15, runCount);
             stmt.executeUpdate();
             stmt.close();
             conn.commit();
-            //conn.close();
+            // conn.close();
         } catch (SQLException e) {
-            log.error( e.getClass().getName()+": "+ e.getMessage());
+            log.error(e.getClass().getName() + ": " + e.getMessage());
             me.initCause(e);
-            throw(me);
+            throw (me);
         }
 
         // Next, insert a record into the child table ('runs')
@@ -298,7 +381,7 @@ public class DatabaseStore implements MDQStore {
         log.trace("Checking if store (i.e. sql connection) is available.");
         try {
             reachable = conn.isValid(10);
-        } catch (Exception e ) {
+        } catch (Exception e) {
             log.error("Error checking database connection: " + e.getMessage());
         }
         return reachable;
@@ -308,7 +391,7 @@ public class DatabaseStore implements MDQStore {
      * Reset the store, i.e. renew the database connection.
      */
     public void renew() throws MetadigStoreException {
-        if(!this.isAvailable()) {
+        if (!this.isAvailable()) {
             log.trace("Renewing connection to database");
             this.init();
         }
@@ -319,7 +402,7 @@ public class DatabaseStore implements MDQStore {
         try {
             conn.close();
             log.trace("Successfully closed database");
-        } catch ( java.sql.SQLException e) {
+        } catch (java.sql.SQLException e) {
             log.error("Error closing database: " + e.getMessage());
         }
     }
@@ -328,7 +411,8 @@ public class DatabaseStore implements MDQStore {
 
         PreparedStatement stmt = null;
 
-        // Perform an 'upsert' on the 'nodes' table - if a record exists for the 'metadata_id, suite_id' already,
+        // Perform an 'upsert' on the 'nodes' table - if a record exists for the
+        // 'metadata_id, suite_id' already,
         // then update the record with the incoming data.
         try {
             String sql = "INSERT INTO tasks (task_name, task_type) VALUES (?, ?)"
@@ -342,12 +426,12 @@ public class DatabaseStore implements MDQStore {
             stmt.close();
             conn.commit();
             saveNodeHarvest(task, nodeId);
-            //conn.close();
+            // conn.close();
         } catch (SQLException e) {
-            log.error( e.getClass().getName()+": "+ e.getMessage());
-            MetadigStoreException me = new MetadigStoreException("Unable save last harvest date to the datdabase.");
+            log.error(e.getClass().getName() + ": " + e.getMessage());
+            MetadigStoreException me = new MetadigStoreException("Unable save last harvest date to the database.");
             me.initCause(e);
-            throw(me);
+            throw (me);
         }
 
         // Next, insert a record into the child table ('runs')
@@ -356,7 +440,7 @@ public class DatabaseStore implements MDQStore {
 
     public Task getTask(String taskName, String taskType, String nodeId) {
 
-        //return runs.get(id);
+        // return runs.get(id);
         Result result = new Result();
         PreparedStatement stmt = null;
         String lastDT = null;
@@ -372,7 +456,7 @@ public class DatabaseStore implements MDQStore {
 
             log.trace("issuing query: " + sql);
             ResultSet rs = stmt.executeQuery();
-            if(rs.next()) {
+            if (rs.next()) {
                 task.setTaskName(rs.getString("task_name"));
                 task.setTaskType(rs.getString("task_type"));
                 rs.close();
@@ -382,22 +466,22 @@ public class DatabaseStore implements MDQStore {
             }
 
             task.setLastHarvestDatetimes(getNodeHarvestDatetimes(task.getTaskName(), task.getTaskType(), nodeId));
-        } catch ( Exception e ) {
-            log.error( e.getClass().getName()+": "+ e.getMessage());
+        } catch (Exception e) {
+            log.error(e.getClass().getName() + ": " + e.getMessage());
         }
 
-        return(task);
+        return (task);
     }
 
-    public HashMap<String,String> getNodeHarvestDatetimes(String taskName, String taskType, String nodeId) {
+    public HashMap<String, String> getNodeHarvestDatetimes(String taskName, String taskType, String nodeId) {
 
-        //return runs.get(id);
+        // return runs.get(id);
         Result result = new Result();
         PreparedStatement stmt = null;
         String lastDT = null;
         Task task = new Task();
 
-        HashMap<String, String> nodeHarvestDates  = new HashMap<>();
+        HashMap<String, String> nodeHarvestDates = new HashMap<>();
         // Select records from the 'nodes' table
         try {
             String sql = "select * from node_harvest where task_name = ? and task_type = ? and node_id = ?";
@@ -413,19 +497,19 @@ public class DatabaseStore implements MDQStore {
             }
             rs.close();
             stmt.close();
-        } catch ( Exception e ) {
-            log.error( e.getClass().getName()+": "+ e.getMessage());
+        } catch (Exception e) {
+            log.error(e.getClass().getName() + ": " + e.getMessage());
         }
 
-        return(nodeHarvestDates);
+        return (nodeHarvestDates);
     }
-
 
     public void saveNodeHarvest(Task task, String nodeId) throws MetadigStoreException {
 
         PreparedStatement stmt = null;
 
-        // Perform an 'upsert' on the 'nodes' table - if a record exists for the 'metadata_id, suite_id' already,
+        // Perform an 'upsert' on the 'nodes' table - if a record exists for the
+        // 'metadata_id, suite_id' already,
         // then update the record with the incoming data.
         try {
             String sql = "INSERT INTO node_harvest (task_name, task_type, node_id, last_harvest_datetime) VALUES (?, ?, ?, ?)"
@@ -444,12 +528,12 @@ public class DatabaseStore implements MDQStore {
             stmt.executeUpdate();
             stmt.close();
             conn.commit();
-            //conn.close();
+            // conn.close();
         } catch (SQLException e) {
-            log.error( e.getClass().getName()+": "+ e.getMessage());
-            MetadigStoreException me = new MetadigStoreException("Unable save last harvest date to the datdabase.");
+            log.error(e.getClass().getName() + ": " + e.getMessage());
+            MetadigStoreException me = new MetadigStoreException("Unable save last harvest date to the database.");
             me.initCause(e);
-            throw(me);
+            throw (me);
         }
 
         // Next, insert a record into the child table ('runs')
@@ -460,11 +544,13 @@ public class DatabaseStore implements MDQStore {
 
         PreparedStatement stmt = null;
 
-        // Perform an 'upsert' on the 'nodes' table - if a record exists for the 'metadata_id, suite_id' already,
+        // Perform an 'upsert' on the 'nodes' table - if a record exists for the
+        // 'metadata_id, suite_id' already,
         // then update the record with the incoming data.
         try {
             String sql = "INSERT INTO nodes " +
-                    " (identifier, name, type, state, synchronize, last_harvest, baseURL) VALUES (?, ?, ?, ?, ?, ?, ?) " +
+                    " (identifier, name, type, state, synchronize, last_harvest, baseURL) VALUES (?, ?, ?, ?, ?, ?, ?) "
+                    +
                     " ON CONFLICT ON CONSTRAINT node_id_pk DO UPDATE SET " +
                     " (identifier, name, type, state, synchronize, last_harvest, baseURL) = (?, ?, ?, ?, ?, ?, ?);";
 
@@ -491,17 +577,18 @@ public class DatabaseStore implements MDQStore {
             stmt.close();
             conn.commit();
         } catch (SQLException e) {
-            log.error( e.getClass().getName()+": "+ e.getMessage());
-            MetadigStoreException me = new MetadigStoreException("Unable to save node " + node.getIdentifier().getValue() + " to database.");
+            log.error(e.getClass().getName() + ": " + e.getMessage());
+            MetadigStoreException me = new MetadigStoreException(
+                    "Unable to save node " + node.getIdentifier().getValue() + " to database.");
             me.initCause(e);
-            throw(me);
+            throw (me);
         }
 
         // Next, insert a record into the child table ('runs')
         log.trace("Records created successfully");
     }
 
-      public Node getNode(String nodeId) {
+    public Node getNode(String nodeId) {
 
         Result result = new Result();
         PreparedStatement stmt = null;
@@ -516,18 +603,18 @@ public class DatabaseStore implements MDQStore {
 
             log.trace("issuing query: " + sql);
             ResultSet rs = stmt.executeQuery();
-            if(rs.next()) {
+            if (rs.next()) {
                 node = extractNodeFields(rs);
                 rs.close();
                 stmt.close();
             } else {
                 log.trace("No results returned for nodeId: " + nodeId);
             }
-        } catch ( Exception e ) {
-            log.error( e.getClass().getName()+": "+ e.getMessage());
+        } catch (Exception e) {
+            log.error(e.getClass().getName() + ": " + e.getMessage());
         }
 
-        return(node);
+        return (node);
     }
 
     public ArrayList<Node> getNodes() {
@@ -535,7 +622,7 @@ public class DatabaseStore implements MDQStore {
         Result result = new Result();
         PreparedStatement stmt = null;
 
-        ArrayList<Node> nodes = new ArrayList<> ();
+        ArrayList<Node> nodes = new ArrayList<>();
         ResultSet rs = null;
         Node node;
         // Select records from the 'nodes' table
@@ -546,11 +633,11 @@ public class DatabaseStore implements MDQStore {
 
             log.trace("issuing query: " + sql);
             rs = stmt.executeQuery();
-            while(rs.next()) {
+            while (rs.next()) {
                 node = extractNodeFields(rs);
                 nodes.add(node);
             }
-        } catch ( Exception e ) {
+        } catch (Exception e) {
             log.error(e.getClass().getName() + ": " + e.getMessage());
         }
 
@@ -558,15 +645,15 @@ public class DatabaseStore implements MDQStore {
             rs.close();
             stmt.close();
         } catch (Exception e) {
-            log.error("Error closing node database: " +  e.getMessage());
+            log.error("Error closing node database: " + e.getMessage());
         }
 
         log.trace(nodes.size() + " nodes found in node table.");
 
-        return(nodes);
+        return (nodes);
     }
 
-    public Node extractNodeFields (ResultSet resultSet) {
+    public Node extractNodeFields(ResultSet resultSet) {
 
         Node node = new Node();
         try {

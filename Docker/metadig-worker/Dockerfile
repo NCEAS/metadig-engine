@@ -3,7 +3,10 @@ FROM openjdk:8-jre-alpine
 # 9-jre does not run with .Worker
 #FROM openjdk:9-jre
 
-MAINTAINER slaughter@nceas.ucsb.edu
+LABEL org.opencontainers.image.source="https://github.com/nceas/metadig-engine"
+LABEL org.opencontainers.image.title="metadig-engine worker"
+LABEL org.opencontainers.image.version="2.4.1"
+LABEL maintainer="Jeanette Clark jclark@nceas.ucsb.edu"
 
 # Set the working directory 
 WORKDIR /var/lib/metadig

@@ -24,6 +24,7 @@ public interface MDQStore {
 	
 	Collection<String> listRuns();
 	Run getRun(String suite, String id ) throws MetadigStoreException;
+	List<Run> listInProcessRuns() throws MetadigStoreException;
 	void saveRun(Run run) throws MetadigStoreException;
 	void createRun(Run run);
 	void deleteRun(Run run);
