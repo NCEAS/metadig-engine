@@ -14,7 +14,7 @@ env:
   # github.repository as <account>/<repo>
   #IMAGE_NAME: ${{ github.repository }}
   IMAGE_NAME: ${{ github.repository_owner }}/metadig-engine
-  GITHUB_PAT: ${{ secrets.TOKEN }}
+  GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
 
 jobs:
   maven-build:
@@ -88,7 +88,7 @@ jobs:
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
-          password: ${{ secrets.TOKEN }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
       # Extract metadata (tags, labels) for Docker
       # https://github.com/docker/metadata-action
