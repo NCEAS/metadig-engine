@@ -14,6 +14,7 @@ env:
   # github.repository as <account>/<repo>
   #IMAGE_NAME: ${{ github.repository }}
   IMAGE_NAME: ${{ github.repository_owner }}/metadig-engine
+  GITHUB_PAT: ${{ secrets.TOKEN }}
 
 jobs:
   maven-build:
