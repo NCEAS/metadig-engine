@@ -6,15 +6,18 @@ LABEL org.opencontainers.image.title="metadig-engine scorer"
 LABEL org.opencontainers.image.version="2.4.1"
 LABEL maintainer="Jeanette Clark jclark@nceas.ucsb.edu"
 
+ARG TAG=2.0.0
+ENV TAG=${TAG}
+
 # Set the working directory
-WORKDIR /var/lib/metadig
+WORKDIR /var/lib/metadig-engine
 
 # This file was created from the https://github.com/NCEAS/metadig-r repo
 # and contains R functions that assist in writing R based quality checks.
 COPY metadig_0.2.0.tar.gz metadig.tar.gz
 # The most recently built jar file is copied from the maven build directory to this dir by maven, so that
 # it can be copyied to the image.
-COPY metadig-engine.jar metadig-engine.jar
+COPY target/metadig-engine-$TAG.jar .
 # The DataONE indexer software can't find these files unless they are put in the ./solr directory and included in the 
 # CLASSPATH (see java CMD). They are in the source tree under 'main/resources', but maybe further action needs to be 
 # taken for java/dataone to be able to find them without having to do this extra step.
