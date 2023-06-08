@@ -62,7 +62,7 @@ jobs:
 
   docker-publish:
     name: Docker Build and Publish
-    if: github.ref_name == 'develop' || github.ref_name == 'v*.*.*' || startsWith(github.ref_name, 'bugfix')
+    if: github.ref_name == 'develop' || github.ref_name == 'v*.*.*'
     needs: maven-build
     runs-on: ubuntu-latest
     permissions:
