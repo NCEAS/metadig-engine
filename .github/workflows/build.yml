@@ -12,8 +12,6 @@ env:
   # Use docker.io for Docker Hub if empty
   REGISTRY: ghcr.io
   # github.repository as <account>/<repo>
-  #IMAGE_NAME: ${{ github.repository }}
-  IMAGE_NAME: ${{ github.repository_owner }}/metadig-engine
   GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
 
 jobs:
@@ -92,11 +90,11 @@ jobs:
 
       # Extract metadata (tags, labels) for Docker
       # https://github.com/docker/metadata-action
-      - name: Extract Docker metadata
+      - name: Extract Docker metadata for scheduler
         id: meta
         uses: docker/metadata-action@v4
         with:
-          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          images: ${{ env.REGISTRY }}/nceas/metadig-scheduler
 
       # Build and push Docker image with Buildx (don't push on PR)
       # https://github.com/docker/build-push-action
