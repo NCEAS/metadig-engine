@@ -88,15 +88,15 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      # Extract metadata (tags, labels) for Docker
+      # SCHEDULER Extract metadata (tags, labels) for Docker
       # https://github.com/docker/metadata-action
       - name: Extract Docker metadata for scheduler
-        id: meta
+        id: metasched
         uses: docker/metadata-action@v4
         with:
           images: ${{ env.REGISTRY }}/nceas/metadig-scheduler
 
-      # Build and push Docker image with Buildx (don't push on PR)
+      # SCHEDULER Build and push Docker image with Buildx (don't push on PR)
       # https://github.com/docker/build-push-action
       - name: Build and push scheduler image
         uses: docker/build-push-action@v3
@@ -105,10 +105,18 @@ jobs:
           file: Docker/metadig-scheduler/Dockerfile
           build-args: TAG=${{needs.maven-build.outputs.version}}
           push: ${{ github.event_name != 'pull_request' }}
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
+          tags: ${{ steps.metasched.outputs.tags }}
+          labels: ${{ steps.metasched.outputs.labels }}
 
-      # Build and push Docker image with Buildx (don't push on PR)
+      # SCORER Extract metadata (tags, labels) for Docker
+      # https://github.com/docker/metadata-action
+      - name: Extract Docker metadata for scorer
+        id: metascor
+        uses: docker/metadata-action@v4
+        with:
+          images: ${{ env.REGISTRY }}/nceas/metadig-scorer
+
+      # SCORER Build and push Docker image with Buildx (don't push on PR)
       # https://github.com/docker/build-push-action
       - name: Build and push scorer image
         uses: docker/build-push-action@v3
@@ -117,10 +125,18 @@ jobs:
           file: Docker/metadig-scorer/Dockerfile
           build-args: TAG=${{needs.maven-build.outputs.version}}
           push: ${{ github.event_name != 'pull_request' }}
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
+          tags: ${{ steps.metascor.outputs.tags }}
+          labels: ${{ steps.metascor.outputs.labels }}
 
-      # Build and push Docker image with Buildx (don't push on PR)
+      # WORKER Extract metadata (tags, labels) for Docker
+      # https://github.com/docker/metadata-action
+      - name: Extract Docker metadata for worker
+        id: metawor
+        uses: docker/metadata-action@v4
+        with:
+          images: ${{ env.REGISTRY }}/nceas/metadig-worker
+
+      # WORKER Build and push Docker image with Buildx (don't push on PR)
       # https://github.com/docker/build-push-action
       - name: Build and push worker image
         uses: docker/build-push-action@v3
@@ -129,5 +145,5 @@ jobs:
           file: Docker/metadig-worker/Dockerfile
           build-args: TAG=${{needs.maven-build.outputs.version}}
           push: ${{ github.event_name != 'pull_request' }}
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
+          tags: ${{ steps.metawor.outputs.tags }}
+          labels: ${{ steps.metawor.outputs.labels }}
