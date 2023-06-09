@@ -10,7 +10,7 @@ ARG TAG=2.0.0
 ENV TAG=${TAG}
 
 # Set the working directory 
-WORKDIR /var/lib/metadig-engine
+WORKDIR /var/lib/metadig
 
 # The most recently built jar file is copied from the maven build directory to this dir by maven, so that
 # it can be copied to the image.

@@ -10,7 +10,7 @@ ARG TAG=2.0.0
 ENV TAG=${TAG}
 
 # Set the working directory
-WORKDIR /var/lib/metadig-engine
+WORKDIR /var/lib/metadig
 
 # This file was created from the https://github.com/NCEAS/metadig-r repo
 # and contains R functions that assist in writing R based quality checks.

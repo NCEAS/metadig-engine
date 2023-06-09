@@ -9,9 +9,9 @@ LABEL org.opencontainers.image.version="2.4.1"
 LABEL maintainer="Jeanette Clark jclark@nceas.ucsb.edu"
 
 # Set the working directory 
-WORKDIR /var/lib/metadig-engine
+WORKDIR /var/lib/metadig
 
-ARG TAG=2.0.0
+ARG TAG=2.4.1
 ENV TAG=${TAG}
 
 # This file was created from the https://github.com/NCEAS/metadig-r repo
@@ -25,19 +25,19 @@ COPY target/metadig-engine-$TAG.jar .
 # directory and included in the CLASSPATH (see java CMD). They are in the source tree under 'main/resources',
 # but maybe further action needs to be taken for java/dataone to be able to find them without having to
 # do this extra step.
-COPY Docker/metadig-worker/solr solr
-
-# DataONE indexer prints copious error msgs if these files don't exist
-RUN mkdir -p /etc/dataone/index && touch /etc/dataone/index/d1client.properties && touch /etc/dataone/node.properties && touch /etc/dataone/index/cn-index-processor.properties
+COPY Docker/metadig-worker/solr .
 
 # Add R runtime and install packges required by the quality suites
-COPY Docker/metadig-worker/r-cmds.txt r-cmds.txt
+COPY Docker/metadig-worker/r-cmds.txt .
 RUN apk update
 # bash is needed by the openssl install
 RUN apk add bash
 RUN apk add g++ R R-dev R-doc libc-dev openssl-dev libxml2 libxml2-dev
 RUN echo 'options(repos = c(CRAN = "http://cran.rstudio.com"))' >> /usr/lib/R/etc/Rprofile.site
 RUN Rscript --vanilla r-cmds.txt
+
+# DataONE indexer prints copious error msgs if these files don't exist
+RUN mkdir -p /etc/dataone/index && touch /etc/dataone/index/d1client.properties && touch /etc/dataone/node.properties && touch /etc/dataone/index/cn-index-processor.properties
 
 # Run the Worker process
 # Note: docker --buile-arg only allows one argument (one token only, multiple tokens inside quotes doesn't work, so have
