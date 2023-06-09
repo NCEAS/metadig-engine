@@ -8,7 +8,7 @@ image:
   repository: docker.io/metadig/metadig-controller
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
-  tag: "2.4.1"
+  tag: "2.4.1-SNAPSHOT"
 
 imagePullSecrets: []
 nameOverride: ""

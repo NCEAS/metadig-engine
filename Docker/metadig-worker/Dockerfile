@@ -5,7 +5,7 @@ FROM openjdk:8-jre-alpine
 
 LABEL org.opencontainers.image.source="https://github.com/nceas/metadig-engine"
 LABEL org.opencontainers.image.title="metadig-engine worker"
-LABEL org.opencontainers.image.version="2.4.1"
+LABEL org.opencontainers.image.version="2.4.1-SNAPSHOT"
 LABEL maintainer="Jeanette Clark jclark@nceas.ucsb.edu"
 
 # Set the working directory 

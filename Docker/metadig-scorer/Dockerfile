@@ -3,7 +3,7 @@ FROM openjdk:8-jdk
 
 LABEL org.opencontainers.image.source="https://github.com/nceas/metadig-engine"
 LABEL org.opencontainers.image.title="metadig-engine scorer"
-LABEL org.opencontainers.image.version="2.4.1"
+LABEL org.opencontainers.image.version="2.4.1-SNAPSHOT"
 LABEL maintainer="Jeanette Clark jclark@nceas.ucsb.edu"
 
 ARG TAG=2.0.0
