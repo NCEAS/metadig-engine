@@ -29,6 +29,7 @@
     <docker.tag>2.4.1-SNAPSHOT</docker.tag>
     <modules.test.includes>**/*Test.java</modules.test.includes>
     <modules.test.excludes>**/LTERSuiteTest.java</modules.test.excludes>
+    <maven.wagon.version>3.5.3</maven.wagon.version>
   </properties>
   <scm>
     <url>https://github.com/NCEAS/metadig-engine.git</url>
@@ -558,6 +559,13 @@
         </executions>
       </plugin>
     </plugins>
+    <extensions>
+            <extension>
+                <groupId>org.apache.maven.wagon</groupId>
+                <artifactId>wagon-ssh</artifactId>
+                <version>${maven.wagon.version}</version>
+            </extension>
+    </extensions>
   </build>
   <distributionManagement>
         <repository>
@@ -567,5 +575,5 @@
             <url>scp://maven.dataone.org/var/www/maven</url>
             <layout>default</layout>
         </repository>
-    </distributionManagement>
+  </distributionManagement>
 </project>
