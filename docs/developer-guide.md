@@ -85,6 +85,60 @@ All source code is compiled and the metadig-engine jar file is built.
 
 The metadig-engine deliverables are copied to the local Maven repository (i.e. ~/.m2/repository). This step makes the deliverables available to other packages that require them. For example, the [metadig-webapp](https://github.com/NCEAS/metadig-webapp) repository requires metadig-engine for builds and can obtain them from the local Mavin repository. The metadig-engine repo builds and published the metadig-postgres, metadig-worker, metadig-scorer and metadig-scheduler Docker image. (The metadig-webapp repository builds and published the metadig-controller Docker image).
 
+## Distributing metadig-engine
+
+metadig-engine is hosted at [maven.dataone.org](http://maven.dataone.org) using `wagon`.
+
+It is configured as an extension `pom.xml` with the property 
+
+```<maven.wagon.version>3.5.3</maven.wagon.version>```
+
+```
+  <extensions>
+            <extension>
+                <groupId>org.apache.maven.wagon</groupId>
+                <artifactId>wagon-ssh</artifactId>
+                <version>${maven.wagon.version}</version>
+            </extension>
+    </extensions>
+```
+
+and distribution section:
+
+```
+  <distributionManagement>
+        <repository>
+            <uniqueVersion>false</uniqueVersion>
+            <id>maven.dataone.org</id>
+            <name>DataONE</name>
+            <url>scp://maven.dataone.org/var/www/maven</url>
+            <layout>default</layout>
+        </repository>
+  </distributionManagement>
+```
+
+To distribute to the repository, edit the `~/.m2/settings.xml` file as below, then run `mvn deploy`. 
+
+```
+<settings xmlns="http://maven.apache.org/SETTINGS/1.2.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.2.0 http://maven.apache.org/xsd/settings-1.2.0.xsd">
+    <servers>
+        <server>
+            <id>maven.dataone.org</id>
+            <username>jclark</username>
+        <!-- other optional elements:
+            <privateKey>/path/to/identity</privateKey> (default is ~/.ssh/id_dsa)
+            <passphrase>my_key_passphrase</passphrase>
+        -->
+            <filePermissions>664</filePermissions>
+            <directoryPermissions>775</directoryPermissions>
+        </server>
+    </servers>
+</settings>
+
+```
+
+
 ## Building and Publishing metadig-engine Docker images
 
 Docker images are built for metadig-engine services and posted to https://hub.docker.com/r/metadig. Once the
