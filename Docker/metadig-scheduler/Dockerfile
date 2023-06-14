@@ -1,5 +1,5 @@
 # Use an OpenJDK runtime as a parent image
-FROM openjdk:8-jre-alpine 
+FROM eclipse-temurin:8u372-b07-jre-jammy
 
 LABEL org.opencontainers.image.source="https://github.com/nceas/metadig-engine"
 LABEL org.opencontainers.image.title="metadig-engine scheduler"
@@ -14,7 +14,7 @@ WORKDIR /var/lib/metadig
 
 # The most recently built jar file is copied from the maven build directory to this dir by maven, so that
 # it can be copied to the image.
-COPY target/metadig-engine-$TAG.jar .
+COPY target/metadig-engine-$TAG.jar metadig-engine.jar
 
 # Set classpath to include /opt/local/metadig/log4j.properties, if it exists, so that logging can be changed without
 # having to rebuild the container. Note that on k8s, this dir is mapped to the persistent volume, so will be /data/metadig/log4j.properties
