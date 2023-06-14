@@ -1,12 +1,12 @@
 # Use an OpenJDK runtime as a parent image
-FROM openjdk:8-jdk
+FROM eclipse-temurin:8u372-b07-jdk-jammy
 
 LABEL org.opencontainers.image.source="https://github.com/nceas/metadig-engine"
 LABEL org.opencontainers.image.title="metadig-engine scorer"
-LABEL org.opencontainers.image.version="2.4.1-SNAPSHOT"
+LABEL org.opencontainers.image.version="2.4.0"
 LABEL maintainer="Jeanette Clark jclark@nceas.ucsb.edu"
 
-ARG TAG=2.0.0
+ARG TAG=2.4.0
 ENV TAG=${TAG}
 
 # Set the working directory
@@ -17,7 +17,7 @@ WORKDIR /var/lib/metadig
 COPY Docker/metadig-scorer/metadig_0.2.0.tar.gz metadig.tar.gz
 # The most recently built jar file is copied from the maven build directory to this dir by maven, so that
 # it can be copyied to the image.
-COPY target/metadig-engine-$TAG.jar .
+COPY target/metadig-engine-$TAG.jar metadig-engine.jar
 # The DataONE indexer software can't find these files unless they are put in the ./solr directory and included in the 
 # CLASSPATH (see java CMD). They are in the source tree under 'main/resources', but maybe further action needs to be 
 # taken for java/dataone to be able to find them without having to do this extra step.

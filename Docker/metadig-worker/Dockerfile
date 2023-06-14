@@ -1,5 +1,5 @@
 # Use an OpenJDK runtime as a parent image
-FROM openjdk:8-jre-alpine 
+FROM eclipse-temurin:8u372-b07-jre-jammy
 # 9-jre does not run with .Worker
 #FROM openjdk:9-jre
 
@@ -11,7 +11,7 @@ LABEL maintainer="Jeanette Clark jclark@nceas.ucsb.edu"
 # Set the working directory 
 WORKDIR /var/lib/metadig
 
-ARG TAG=2.4.1
+ARG TAG=2.4.1-SNAPSHOT
 ENV TAG=${TAG}
 
 # This file was created from the https://github.com/NCEAS/metadig-r repo
@@ -20,7 +20,7 @@ COPY Docker/metadig-worker/metadig_0.2.0.tar.gz metadig.tar.gz
 #COPY log4j.properties .
 # The most recently built jar file is copied from the maven build directory to this dir by maven, so that
 # it can be copyied to the image.
-COPY target/metadig-engine-$TAG.jar .
+COPY target/metadig-engine-$TAG.jar metadig-engine.jar
 # For some reason, the DataONE indexer software can't find these files unless they are put in
 # directory and included in the CLASSPATH (see java CMD). They are in the source tree under 'main/resources',
 # but maybe further action needs to be taken for java/dataone to be able to find them without having to
@@ -29,10 +29,10 @@ COPY Docker/metadig-worker/solr .
 
 # Add R runtime and install packges required by the quality suites
 COPY Docker/metadig-worker/r-cmds.txt .
-RUN apk update
-# bash is needed by the openssl install
-RUN apk add bash
-RUN apk add g++ R R-dev R-doc libc-dev openssl-dev libxml2 libxml2-dev
+
+RUN apt-get update
+RUN apt-get install -y g++ r-base r-base-dev r-base-core r-doc-html libc6-dev libssl-dev libxml2 libxml2-dev
+
 RUN echo 'options(repos = c(CRAN = "http://cran.rstudio.com"))' >> /usr/lib/R/etc/Rprofile.site
 RUN Rscript --vanilla r-cmds.txt
 
