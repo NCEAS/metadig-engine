@@ -5,7 +5,7 @@
 replicaCount: 1
 
 image:
-  repository: docker.io/metadig/metadig-scorer
+  repository: ghcr.io/nceas/metadig-scorer
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
   tag: "2.4.1-SNAPSHOT"
