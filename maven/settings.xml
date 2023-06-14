@@ -1,30 +1,17 @@
 <!-- This file is placed in the ~/.m2/settings.xml file on the local machine. This provides the
-     credentials maven uses when publishing Docker images to Docker Hub.
-     This file with the live credentials are in the security repo at ./nceas/metadig-maven-dockerhub-pw.gpg
+     credentials maven uses when publishing to the dataone repository.
 -->
-<settings xmlns="http://maven.apache.org/SETTINGS/1.1.0"
-          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-          xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.1.0 http://maven.apache.org/xsd/settings-1.1.0.xsd">
-  <localRepository/>
-  <interactiveMode/>
-  <offline/>
-  <pluginGroups/>
-  <servers>
-  <!--
-    <server>
-      <id>docker.io</id>
-      <username>d1bookkeeper</username>
-      <password>dataone bookkeeper 2020</password>
-    </server>
-  -->
-    <server>
-      <id>docker.io</id>
-      <username>metadig</username>
-      <password>get password from security repo</password>
-    </server>
-  </servers>
-  <mirrors/>
-  <proxies/>
-  <profiles/>
-  <activeProfiles/>
+<settings xmlns="http://maven.apache.org/SETTINGS/1.2.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.2.0 http://maven.apache.org/xsd/settings-1.2.0.xsd">
+    <servers>
+        <server>
+        <id>maven.dataone.org</id>
+        <username>username</username>
+        <!-- default is id_rsa
+	      <privateKey></privateKey>
+        -->
+        <filePermissions>664</filePermissions>
+        <directoryPermissions>775</directoryPermissions>
+        </server>
+    </servers>
 </settings>
