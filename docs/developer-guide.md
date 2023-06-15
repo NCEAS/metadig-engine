@@ -3,7 +3,7 @@
 
 The MetaDIG (Metadata Improvement and Guidance) project has been funded for metadata improvement advocacy, the development of metadata evaluation criteria and the development of metadata assessment tools. This repository contains a metadata assessment tool, the MetaDIG engine, aka metadig-engine. The metadig-engine assesses a metadata document to see how closely it adheres to a suite of checks. Each assessment check inspects the contents of one or more elements from the metadata document. From this assessment process, a report is generated that describes if each check's criteria are met or not.
 
-## metadig-engine dependancies Dependancies
+## metadig-engine dependencies
 
 The following components are required for the metadig-engine build or runtime.
 
@@ -141,28 +141,15 @@ To distribute to the repository, edit the `~/.m2/settings.xml` file as below, th
 
 ## Building and Publishing metadig-engine Docker images
 
-Docker images are built for metadig-engine services and posted to https://hub.docker.com/r/metadig. Once the
-software has been build, the Docker images can be build and distributed using the following command:
+Docker images are built for metadig-engine services and posted to the GitHub container registry (GHCR) using GitHub Actions. The `metadig-scheduler`, `metadig-scorer`, and `metadig-worker` containers are all available from the [metadig-engine repository](https://github.com/orgs/NCEAS/packages?repo_name=metadig-engine). `metadig-controller` is in the [metadig-webapp repository](https://github.com/orgs/NCEAS/packages?repo_name=metadig-webapp).
 
-```
-mvn docker:build docker:push
+GitHub actions will build and test metadig-engine on pushes to feature*, bugfix*, and develop branches, in addition to any new tag that is pushed. Docker images are only built on pushes to develop or tags. 
 
-```
-
-It is necessary to use Docker login credentials in order to push images to Docker Hub. The username and
-password for the Docker Hub account are available in the NCEAS security repo at ./security/nceas/metadig-maven-settings.gpg.
-This file should be decrypted and copied to ~/.m2/settings.xml. When maven runs, it will read the credentials from this file and send them to Docker hub to enable the publishing of Docker images.
-
-After the maven publish step, Docker images are publicly available, for example, for metadig-controller, image tags and publishing dates can be viewed at
-```
-https://hub.docker.com/r/metadig/metadig-controller
-```
-
-## Components dependant on metadig-engine
+## Components dependent on metadig-engine
 
 ### metadig-webapp
 
-The [metadig-webapp repository](https://github.com/NCEAS/metadig-webapp) builds the metadig-controller distribution and Docker image. This image contains a distribution of the Tomcat servlet engine that metadig-controller runs inside of. The build process obtains the metadig-engine distribution from the local maven repository (~/.m2) after metadig-engine has been built.
+The [metadig-webapp repository](https://github.com/NCEAS/metadig-webapp) builds the metadig-controller distribution and Docker image. This image contains a distribution of the Tomcat servlet engine that metadig-controller runs inside of. The build process obtains the metadig-engine distribution from the [DataONE repository](https://maven.dataone.org) after metadig-engine has been built.
 
 Note that the pom.xml file must be updated so that the appropriate version of metadig-engine distribution is obtained, for example: https://github.com/NCEAS/metadig-webapp/blob/master/pom.xml#L10.
 
@@ -179,7 +166,7 @@ git clone https://github.com/NCEAS/metadig-webapp
 cd metadig-webapp
 ```
 
-The following Maven command performas a complete build of metadig engine. Each Maven target will be explained separately
+The following Maven command performs a complete build of metadig engine. Each Maven target will be explained separately
 
 ```
 mvn clean mvn package install
@@ -202,6 +189,8 @@ All source code is compiled and the metadig-engine jar file is built.
 - mvn install
 
 The metadig-engine deliverables are copied to the local Maven repository (i.e. ~/.m2/repository). This step makes the deliverables available to other packages that require them. For example, the [metadig-webapp](https://github.com/NCEAS/metadig-webapp) repository requires metadig-engine for builds and can obtain them from the local Mavin repository. The metadig-engine repo builds and published the metadig-postgres, metadig-worker, metadig-scorer and metadig-scheduler Docker image. (The metadig-webapp repository builds and published the metadig-controller Docker image).
+
+Note that the metadig-webapp has a GitHub action which will build, test, and build the Docker image automatically on pushes to develop, bugfix, and feature branches, in addition to tags.
 
 ## Environments supported by metadig-engine
 
@@ -300,12 +289,12 @@ doi:10.18739_A2W08WG3R,./src/test/resources/test-docs/doi:10.18739_A2W08WG3R.sm,
 
 ### Running on Kubernetes
 
-See the *MetaDIG Engine Kubernetes Operations Manual* for information on how to deploy metadig-engine on Kubernetes.
+See the [operations manual](operations-manual.md) for information on how to deploy metadig-engine on Kubernetes.
 
 
 ## Testing metadig-engine {#running}
 
-metadig-engine reads assessment suites, checks, configuration and data files from the metadig-engine working directory. The metadig-engine working directory is always located at /opt/local/metadig. When running metadig-engine is run locally, this directory is simply /opt/local/metadig on the local system. When running metadig-engine inside a Docker container, this directory is typically mapped to an external persistent volume. For example, /opt/local/metadig inside the container might be mapped to /data/metadig on the maching running Docker.
+metadig-engine reads assessment suites, checks, configuration and data files from the metadig-engine working directory. The metadig-engine working directory is always located at /opt/local/metadig. When running metadig-engine is run locally, this directory is simply /opt/local/metadig on the local system. When running metadig-engine inside a Docker container, this directory is typically mapped to an external persistent volume. For example, /opt/local/metadig inside the container might be mapped to /data/metadig on the machine running Docker.
 
 ### Junit Tests
 
@@ -317,14 +306,9 @@ mvn surefire:test
 
 ## Troubleshooting metadig-engine
 
-### Queue A Test Assessment Request
-
-### Queue A Test Scorer Request
-
 ### k8s metadig-engine
 
-For information regarding monitoring and troubleshooting metadig-engine running in the k8s environment, se"e Troubleshooting MetaDIG Engine Services" in the 
-`MetaDIG Kubernetes Operations Manual`.
+For information regarding monitoring and troubleshooting metadig-engine running in the k8s environment, see Troubleshooting MetaDIG Engine Services" in the [operations manual](operations-manual.md).
 
 ## metadig-engine PostgreSQL Database
 
