@@ -227,8 +227,37 @@ helm delete metadig-solr -n metadig
 
 ### DataONE token
 
-A DataONE authorization token is used by MetaDIG services and it's usage is described in the NCEAS secure repository (see `./k8s/*-DataONE-token.txt`).
-file. This token needs to be created before metadig-scheduler and metadig-scorer are started.
+The metadig-engine uses a k8s secret to contain the CN administrative token. This token is used by metadig-scorer and metadig-scheduler services in order to read private content (sysmeta and metadata) that is necessary to create metadata
+assessments and graphics. The k8s secret is only created using a kubectl command and is never contained in any Helm chart or manifest file. This secret is made available to metadig pods as an environment variable, for example, see https://github.com/NCEAS/metadig-engine/blob/feature-helm-%23152/helm/metadig-scheduler/templates/deployment.yaml#L39
+
+The secret is created with the kubectl command, for example:
+
+    `kubectl config use-context metadig`
+
+    `kubectl create secret generic -n metadig --type=opaque dataone-token --from-literal=DataONEauthToken="this is the new value"`
+
+The secret must be deleted before it can be updated:
+
+    `kubectl delete secret dataone-token -n metadig --ignore-not-found`
+
+The secret can also be created by reading the token from a file, but care must be taken to remove the file after the
+secret is created.
+
+    `kubectl create secret generic -n metadig --type=opaque dataone-token --from-file=DataONEauthToken=token.txt`
+
+Once the secret is created, the services that reference the CN token must be restarted:
+
+    ```
+    helm delete metadig-scorer -n metadig`
+    helm install metadig-scorer ./metadig-scorer --namespace metadig --version=1.0.0
+    helm delete metadig-scheduler -n metadig
+    helm install metadig-scheduler ./metadig-scheduler --namespace metadig --version=1.0.0
+    ```
+
+The CN token contained in the secret can be inspected with the command:
+
+    `kubectl get secret dataone-token -n metadig -o jsonpath='{.data.DataONEauthToken}' | base64 --decode`
+
 
 ## MetaDIG Assessment Services
 
