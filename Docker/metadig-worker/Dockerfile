@@ -14,10 +14,6 @@ WORKDIR /var/lib/metadig
 ARG ENGINE_TAG=2.0.0
 ENV ENGINE_TAG=${ENGINE_TAG}
 
-# This file was created from the https://github.com/NCEAS/metadig-r repo
-# and contains R functions that assist in writing R based quality checks.
-COPY Docker/metadig-worker/metadig_0.2.0.tar.gz metadig.tar.gz
-#COPY log4j.properties .
 # The most recently built jar file is copied from the maven build directory to this dir by maven, so that
 # it can be copyied to the image.
 COPY target/metadig-engine-$ENGINE_TAG.jar metadig-engine.jar
@@ -32,6 +28,10 @@ COPY Docker/metadig-worker/r-cmds.txt .
 
 RUN apt-get update
 RUN apt-get install -y g++ r-base r-base-dev r-base-core r-doc-html libc6-dev libssl-dev libxml2 libxml2-dev
+
+# Install required R packages
+RUN Rscript -e "install.packages('remotes')"
+RUN Rscript -e "remotes::install_github('NCEAS/metadig-r@0.2.1')"
 
 RUN echo 'options(repos = c(CRAN = "http://cran.rstudio.com"))' >> /usr/lib/R/etc/Rprofile.site
 RUN Rscript --vanilla r-cmds.txt
