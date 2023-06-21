@@ -30,11 +30,9 @@ RUN apt-get update
 RUN apt-get install -y g++ r-base r-base-dev r-base-core r-doc-html libc6-dev libssl-dev libxml2 libxml2-dev libcurl4-openssl-dev
 
 # Install required R packages
-RUN Rscript -e "install.packages('remotes')"
-RUN Rscript -e "remotes::install_github('NCEAS/metadig-r', ref = 'v.0.2.0')"
-
 RUN echo 'options(repos = c(CRAN = "http://cran.rstudio.com"))' >> /usr/lib/R/etc/Rprofile.site
-RUN Rscript --vanilla r-cmds.txt
+RUN Rscript -e "install.packages(c('remotes', 'stringr', 'jsonlite'))"
+RUN Rscript -e "remotes::install_github('NCEAS/metadig-r', ref = 'v.0.2.0')"
 
 # DataONE indexer prints copious error msgs if these files don't exist
 RUN mkdir -p /etc/dataone/index && touch /etc/dataone/index/d1client.properties && touch /etc/dataone/node.properties && touch /etc/dataone/index/cn-index-processor.properties
