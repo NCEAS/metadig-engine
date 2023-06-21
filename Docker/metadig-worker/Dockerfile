@@ -27,7 +27,7 @@ COPY Docker/metadig-worker/solr .
 COPY Docker/metadig-worker/r-cmds.txt .
 
 RUN apt-get update
-RUN apt-get install -y g++ r-base r-base-dev r-base-core r-doc-html libc6-dev libssl-dev libxml2 libxml2-dev
+RUN apt-get install -y g++ r-base r-base-dev r-base-core r-doc-html libc6-dev libssl-dev libxml2 libxml2-dev libcurl4-openssl-dev
 
 # Install required R packages
 RUN Rscript -e "install.packages('remotes')"
