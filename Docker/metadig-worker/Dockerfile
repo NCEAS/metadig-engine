@@ -31,7 +31,7 @@ RUN apt-get install -y g++ r-base r-base-dev r-base-core r-doc-html libc6-dev li
 
 # Install required R packages
 RUN Rscript -e "install.packages('remotes')"
-RUN Rscript -e "remotes::install_github('NCEAS/metadig-r@0.2.1')"
+RUN Rscript -e "remotes::install_github('NCEAS/metadig-r', ref = 'v.0.2.0')"
 
 RUN echo 'options(repos = c(CRAN = "http://cran.rstudio.com"))' >> /usr/lib/R/etc/Rprofile.site
 RUN Rscript --vanilla r-cmds.txt
