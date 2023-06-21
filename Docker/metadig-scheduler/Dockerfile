@@ -6,15 +6,15 @@ LABEL org.opencontainers.image.title="metadig-engine scheduler"
 LABEL org.opencontainers.image.version="1.0.1"
 LABEL maintainer="Jeanette Clark jclark@nceas.ucsb.edu"
 
-ARG TAG=2.0.0
-ENV TAG=${TAG}
+ARG ENGINE_TAG=2.0.0
+ENV ENGINE_TAG=${ENGINE_TAG}
 
 # Set the working directory 
 WORKDIR /var/lib/metadig
 
 # The most recently built jar file is copied from the maven build directory to this dir by maven, so that
 # it can be copied to the image.
-COPY target/metadig-engine-$TAG.jar metadig-engine.jar
+COPY target/metadig-engine-$ENGINE_TAG.jar metadig-engine.jar
 
 # Set classpath to include /opt/local/metadig/log4j.properties, if it exists, so that logging can be changed without
 # having to rebuild the container. Note that on k8s, this dir is mapped to the persistent volume, so will be /data/metadig/log4j.properties
