@@ -23,9 +23,6 @@ COPY target/metadig-engine-$ENGINE_TAG.jar metadig-engine.jar
 # do this extra step.
 COPY Docker/metadig-worker/solr .
 
-# Add R runtime and install packges required by the quality suites
-COPY Docker/metadig-worker/r-cmds.txt .
-
 RUN apt-get update
 RUN apt-get install -y g++ r-base r-base-dev r-base-core r-doc-html libc6-dev libssl-dev libxml2 libxml2-dev libcurl4-openssl-dev
 
