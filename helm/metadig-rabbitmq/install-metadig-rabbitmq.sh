@@ -5,7 +5,7 @@
 # helm repo add bitnami https://charts.bitnami.com/bitnami
 
 helm install metadig-rabbitmq bitnami/rabbitmq \
---version=8.29.0 \
+--version=10.3.9 \
 --namespace metadig \
 --set image.registry=docker.io \
 --set image.repository=bitnami/rabbitmq \
