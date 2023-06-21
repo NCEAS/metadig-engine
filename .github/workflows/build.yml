@@ -100,8 +100,8 @@ jobs:
           context: .
           file: Docker/metadig-scheduler/Dockerfile
           build-args: |
-            TAG= ${{ steps.metasched.outputs.labels['org.opencontainers.image.version'] }}
-            ENGINE_TAG= ${{needs.maven-build.outputs.version}}
+            TAG=${{ steps.metasched.outputs.labels['org.opencontainers.image.version'] }}
+            ENGINE_TAG=${{needs.maven-build.outputs.version}}
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.metasched.outputs.tags }}
           labels: ${{ steps.metasched.outputs.labels }}
@@ -122,8 +122,8 @@ jobs:
           context: .
           file: Docker/metadig-scorer/Dockerfile
           build-args: |
-            TAG= ${{ steps.metascor.outputs.labels['org.opencontainers.image.version'] }}
-            ENGINE_TAG= ${{needs.maven-build.outputs.version}}
+            TAG=${{ steps.metascor.outputs.labels['org.opencontainers.image.version'] }}
+            ENGINE_TAG=${{needs.maven-build.outputs.version}}
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.metascor.outputs.tags }}
           labels: ${{ steps.metascor.outputs.labels }}
@@ -144,8 +144,8 @@ jobs:
           context: .
           file: Docker/metadig-worker/Dockerfile
           build-args: |
-            TAG= ${{ steps.metawor.outputs.labels['org.opencontainers.image.version'] }}
-            ENGINE_TAG= ${{needs.maven-build.outputs.version}}
+            TAG=${{ steps.metawor.outputs.labels['org.opencontainers.image.version'] }}
+            ENGINE_TAG=${{needs.maven-build.outputs.version}}
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.metawor.outputs.tags }}
           labels: ${{ steps.metawor.outputs.labels }}
