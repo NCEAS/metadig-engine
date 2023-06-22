@@ -17,7 +17,7 @@ WORKDIR /var/lib/metadig
 COPY Docker/metadig-scorer/metadig_0.2.0.tar.gz metadig.tar.gz
 # The most recently built jar file is copied from the maven build directory to this dir by maven, so that
 # it can be copyied to the image.
-COPY target/metadig-engine-$ENGINE_TAG.jar metadig-engine.jar
+COPY target/metadig-engine-$ENGINE_TAG.jar metadig-engine-$ENGINE_TAG.jar
 # The DataONE indexer software can't find these files unless they are put in the ./solr directory and included in the 
 # CLASSPATH (see java CMD). They are in the source tree under 'main/resources', but maybe further action needs to be 
 # taken for java/dataone to be able to find them without having to do this extra step.
@@ -35,5 +35,5 @@ RUN Rscript --vanilla -e 'install.packages("metadig.tar.gz", repos=NULL)'
 # Run the Scorer process
 # Set classpath to include /opt/local/metadig/log4j.properties, if it exists, so that logging can be changed without
 # having to rebuild the container. Note that on k8s, this dir is mapped to the persistent volume, so will be /data/metadig/log4j.properties
-CMD java -Dlog4j2.formatMsgNoLookups=true -XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap -XX:+UseSerialGC -cp /opt/local/metadig/config:./metadig-engine.jar:./solr edu.ucsb.nceas.mdqengine.scorer.Scorer
+CMD java -Dlog4j2.formatMsgNoLookups=true -XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap -XX:+UseSerialGC -cp /opt/local/metadig/config:./metadig-engine-$ENGINE_TAG.jar:./solr edu.ucsb.nceas.mdqengine.scorer.Scorer
 

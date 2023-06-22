@@ -16,7 +16,7 @@ ENV ENGINE_TAG=${ENGINE_TAG}
 
 # The most recently built jar file is copied from the maven build directory to this dir by maven, so that
 # it can be copyied to the image.
-COPY target/metadig-engine-$ENGINE_TAG.jar metadig-engine.jar
+COPY target/metadig-engine-$ENGINE_TAG.jar metadig-engine-$ENGINE_TAG.jar
 # For some reason, the DataONE indexer software can't find these files unless they are put in
 # directory and included in the CLASSPATH (see java CMD). They are in the source tree under 'main/resources',
 # but maybe further action needs to be taken for java/dataone to be able to find them without having to
@@ -39,5 +39,5 @@ RUN mkdir -p /etc/dataone/index && touch /etc/dataone/index/d1client.properties 
 #   to specify java options directly on command line.
 # Set classpath to include /opt/local/metadig/log4j.properties, if it exists, so that logging can be changed without
 # having to rebuild the container. Note that on k8s, this dir is mapped to the persistent volume, so will be /data/metadig/log4j.properties
-CMD java -Dlog4j2.formatMsgNoLookups=true -XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap -XX:+UseSerialGC -cp /opt/local/metadig/config:./metadig-engine.jar:./solr -Dpython.path=/opt/local/metadig/metadig-py edu.ucsb.nceas.mdqengine.Worker
+CMD java -Dlog4j2.formatMsgNoLookups=true -XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap -XX:+UseSerialGC -cp /opt/local/metadig/config:./metadig-engine-$ENGINE_TAG.jar:./solr -Dpython.path=/opt/local/metadig/metadig-py edu.ucsb.nceas.mdqengine.Worker
 
