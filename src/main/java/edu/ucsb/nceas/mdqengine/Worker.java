@@ -55,7 +55,7 @@ public class Worker {
     private final static String COMPLETED_ROUTING_KEY = "completed";
     private final static String MESSAGE_TYPE_QUALITY = "quality";
 
-    private final static String springConfigFileURL = "/metadig-index-processor-context.xml";
+    private final static String springConfigFileURL = "/solr/metadig-index-processor-context.xml";
     private final static String qualityReportObjectType = "https://nceas.ucsb.edu/mdqe/v1";
 
     private static com.rabbitmq.client.Connection RabbitMQconnection;
