@@ -21,7 +21,7 @@ COPY target/metadig-engine-$ENGINE_TAG.jar metadig-engine-$ENGINE_TAG.jar
 # directory and included in the CLASSPATH (see java CMD). They are in the source tree under 'main/resources',
 # but maybe further action needs to be taken for java/dataone to be able to find them without having to
 # do this extra step.
-COPY Docker/metadig-worker/solr .
+COPY Docker/metadig-worker/solr solr/
 
 RUN apt-get update
 RUN apt-get install -y g++ r-base r-base-dev r-base-core r-doc-html libc6-dev libssl-dev libxml2 libxml2-dev libcurl4-openssl-dev
