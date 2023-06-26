@@ -221,6 +221,12 @@ public class MonitorJob implements Job {
             MDQconfig cfg = new MDQconfig();
             String nodeAbbr = nodeId.replace("urn:node:", "");
             nodeServiceUrl = cfg.getString(nodeAbbr + ".serviceUrl");
+
+            if (nodeServiceUrl == null) {
+                log.error("Node is not supported in the configuration file.");
+                throw new MetadigException("Node" + nodeAbbr + "is not supported.");
+            }
+
         } catch (ConfigurationException | IOException ce) {
             MetadigException me = new MetadigException("Monitor: Error reading configuration.");
             throw me;
@@ -319,6 +325,12 @@ public class MonitorJob implements Job {
             MDQconfig cfg = new MDQconfig();
             String nodeAbbr = nodeId.replace("urn:node:", "");
             nodeServiceUrl = cfg.getString(nodeAbbr + ".serviceUrl");
+
+            if (nodeServiceUrl == null) {
+                log.error("Node is not supported in the configuration file.");
+                throw new MetadigException("Node" + nodeAbbr + "is not supported.");
+            }
+
         } catch (ConfigurationException | IOException ce) {
             MetadigException me = new MetadigException("Monitor: Error reading configuration.");
             throw me;
