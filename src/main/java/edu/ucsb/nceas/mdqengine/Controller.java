@@ -709,10 +709,13 @@ public class Controller {
         try {
             SchedulerFactory sf = new StdSchedulerFactory();
             Scheduler scheduler = sf.getScheduler();
-            scheduler.start();
-
             String taskName = "processing";
             String groupName = "monitor";
+
+            if (!scheduler.isStarted()) {
+                scheduler.start();
+            }
+
             JobDetail job = null;
             job = newJob(MonitorJob.class)
                     .withIdentity(taskName, groupName)
