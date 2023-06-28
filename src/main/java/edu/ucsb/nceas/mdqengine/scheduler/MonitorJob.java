@@ -117,7 +117,7 @@ public class MonitorJob implements Job {
 
         // request job via rabbitMQ
         for (Run run : processing) {
-            log.info("Requesting monitor job: " + run.getId() + run.getStatus() + run.getNodeId());
+            log.info("Requesting monitor job: " + run.getId() + ", " + run.getNodeId());
 
             String suiteId = run.getSuiteId();
             String pidStr = run.getId();
@@ -131,6 +131,11 @@ public class MonitorJob implements Job {
                 JobExecutionException jee = new JobExecutionException(me);
                 jee.setRefireImmediately(true);
                 throw jee;
+            } catch (ConfigurationException ce) {
+                JobExecutionException jee = new JobExecutionException(ce);
+                jee.setRefireImmediately(false);
+                store.shutdown();
+                throw jee;
             }
 
             try {
@@ -138,6 +143,11 @@ public class MonitorJob implements Job {
             } catch (MetadigException me) {
                 JobExecutionException jee = new JobExecutionException(me);
                 jee.setRefireImmediately(true);
+                throw jee;
+            } catch (ConfigurationException ce) {
+                JobExecutionException jee = new JobExecutionException(ce);
+                jee.setRefireImmediately(false);
+                store.shutdown();
                 throw jee;
             }
 
@@ -204,8 +214,10 @@ public class MonitorJob implements Job {
      * @throws MetadigException If a NotAuthorized, InvalidToken, ServiceFailure,
      *                          InsufficientResources, or NotFound exception is hit,
      *                          or if a failed run cannot be saved to the DB
+     * 
+     * @throws ConfigurationException If a node is not supported in the configuration file.
      */
-    public InputStream getMetadata(Run run, Session session) throws MetadigException {
+    public InputStream getMetadata(Run run, Session session) throws MetadigException, ConfigurationException {
 
         String nodeServiceUrl = null;
         MultipartRestClient mrc = null;
@@ -224,11 +236,11 @@ public class MonitorJob implements Job {
 
             if (nodeServiceUrl == null) {
                 log.error("Node is not supported in the configuration file.");
-                throw new MetadigException("Node" + nodeAbbr + "is not supported.");
+                throw new ConfigurationException("Node " + nodeAbbr + " is not supported.");
             }
 
         } catch (ConfigurationException | IOException ce) {
-            MetadigException me = new MetadigException("Monitor: Error reading configuration.");
+            ConfigurationException me = new ConfigurationException("Monitor: Error reading configuration.");
             throw me;
         }
 
@@ -306,8 +318,10 @@ public class MonitorJob implements Job {
      *                          InsufficientResources, NotFound exception is hit, or
      *                          if a failed run (NotImplemented) cannot be saved to
      *                          the DB
+     * 
+     * @throws ConfigurationException If a node is not supported in the configuration file.
      */
-    public InputStream getSystemMetadata(Run run, Session session) throws MetadigException {
+    public InputStream getSystemMetadata(Run run, Session session) throws MetadigException, ConfigurationException {
         // throw a different exception here
 
         String nodeServiceUrl = null;
@@ -328,11 +342,11 @@ public class MonitorJob implements Job {
 
             if (nodeServiceUrl == null) {
                 log.error("Node is not supported in the configuration file.");
-                throw new MetadigException("Node" + nodeAbbr + "is not supported.");
+                throw new ConfigurationException("Node " + nodeAbbr + " is not supported.");
             }
 
         } catch (ConfigurationException | IOException ce) {
-            MetadigException me = new MetadigException("Monitor: Error reading configuration.");
+            ConfigurationException me = new ConfigurationException("Monitor: Error reading configuration.");
             throw me;
         }
 
