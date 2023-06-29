@@ -130,12 +130,13 @@ public class MonitorJob implements Job {
             } catch (MetadigException me) {
                 JobExecutionException jee = new JobExecutionException(me);
                 jee.setRefireImmediately(true);
-                throw jee;
+                log.error("Problem getting metadata:" + me.getMessage());
+                continue; // the run will be refired immediately, continue to next run
             } catch (ConfigurationException ce) {
                 JobExecutionException jee = new JobExecutionException(ce);
                 jee.setRefireImmediately(false);
-                store.shutdown();
-                throw jee;
+                log.error("Configuration error:" + ce.getMessage());
+                continue; // the run will NOT be refired immediately, continue to next run
             }
 
             try {
@@ -143,12 +144,13 @@ public class MonitorJob implements Job {
             } catch (MetadigException me) {
                 JobExecutionException jee = new JobExecutionException(me);
                 jee.setRefireImmediately(true);
-                throw jee;
+                log.error("Problem getting metadata:" + me.getMessage());
+                continue; // the run will be refired immediately, continue to next run
             } catch (ConfigurationException ce) {
                 JobExecutionException jee = new JobExecutionException(ce);
                 jee.setRefireImmediately(false);
-                store.shutdown();
-                throw jee;
+                log.error("Configuration error:" + ce.getMessage());
+                continue; // the run will NOT be refired immediately, continue to next run
             }
 
             if (metadata == null | sysmeta == null) { // any case where the metadata or sysmeta should be thrown above
@@ -211,11 +213,14 @@ public class MonitorJob implements Job {
      * @param session the session used to authenticate the request
      * @return an InputStream containing the metadata of the specified object
      * 
-     * @throws MetadigException If a NotAuthorized, InvalidToken, ServiceFailure,
-     *                          InsufficientResources, or NotFound exception is hit,
-     *                          or if a failed run cannot be saved to the DB
+     * @throws MetadigException       If a NotAuthorized, InvalidToken,
+     *                                ServiceFailure,
+     *                                InsufficientResources, or NotFound exception
+     *                                is hit,
+     *                                or if a failed run cannot be saved to the DB
      * 
-     * @throws ConfigurationException If a node is not supported in the configuration file.
+     * @throws ConfigurationException If a node is not supported in the
+     *                                configuration file.
      */
     public InputStream getMetadata(Run run, Session session) throws MetadigException, ConfigurationException {
 
@@ -314,12 +319,16 @@ public class MonitorJob implements Job {
      * @param session the session used to authenticate the request
      * @return an InputStream containing the system metadata of the specified object
      * 
-     * @throws MetadigException If a NotAuthorized, InvalidToken, ServiceFailure,
-     *                          InsufficientResources, NotFound exception is hit, or
-     *                          if a failed run (NotImplemented) cannot be saved to
-     *                          the DB
+     * @throws MetadigException       If a NotAuthorized, InvalidToken,
+     *                                ServiceFailure,
+     *                                InsufficientResources, NotFound exception is
+     *                                hit, or
+     *                                if a failed run (NotImplemented) cannot be
+     *                                saved to
+     *                                the DB
      * 
-     * @throws ConfigurationException If a node is not supported in the configuration file.
+     * @throws ConfigurationException If a node is not supported in the
+     *                                configuration file.
      */
     public InputStream getSystemMetadata(Run run, Session session) throws MetadigException, ConfigurationException {
         // throw a different exception here
