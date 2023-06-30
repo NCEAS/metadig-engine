@@ -244,8 +244,8 @@ public class MonitorJob implements Job {
                 throw new ConfigurationException("Node " + nodeAbbr + " is not supported.");
             }
 
-        } catch (ConfigurationException | IOException ce) {
-            ConfigurationException me = new ConfigurationException("Monitor: Error reading configuration.");
+        } catch (IOException ce) {
+            MetadigException me = new MetadigException("Monitor: Error reading configuration.");
             throw me;
         }
 
@@ -354,8 +354,8 @@ public class MonitorJob implements Job {
                 throw new ConfigurationException("Node " + nodeAbbr + " is not supported.");
             }
 
-        } catch (ConfigurationException | IOException ce) {
-            ConfigurationException me = new ConfigurationException("Monitor: Error reading configuration.");
+        } catch (IOException ce) {
+            MetadigException me = new MetadigException("Monitor: Error reading configuration.");
             throw me;
         }
 
