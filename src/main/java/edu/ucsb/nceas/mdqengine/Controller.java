@@ -711,10 +711,8 @@ public class Controller {
             Scheduler scheduler = sf.getScheduler();
             String taskName = "processing";
             String groupName = "monitor";
-
-            if (!scheduler.isStarted()) {
-                scheduler.start();
-            }
+            
+            scheduler.start();
 
             JobDetail job = null;
             job = newJob(MonitorJob.class)
