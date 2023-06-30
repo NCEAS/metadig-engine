@@ -236,25 +236,28 @@ public class DatabaseStore implements MDQStore {
             log.trace("issuing query: " + sql);
             ResultSet rs = stmt.executeQuery();
             if (rs.next()) {
-                Run run = new Run();
-                metadataId = rs.getString("metadata_id");
-                seriesId = rs.getString("suite_id");
-                sequenceId = rs.getString("sequence_id");
-                isLatest = rs.getBoolean("is_latest");
-                status = rs.getString("status");
-                nodeId = rs.getString("data_source");
+                do {
+                    Run run = new Run();
+                    metadataId = rs.getString("metadata_id");
+                    seriesId = rs.getString("suite_id");
+                    sequenceId = rs.getString("sequence_id");
+                    isLatest = rs.getBoolean("is_latest");
+                    status = rs.getString("status");
+                    nodeId = rs.getString("data_source");
+
+                    // populate the run object
+                    run.setSequenceId(sequenceId);
+                    run.setIsLatest(isLatest);
+                    run.setId(metadataId);
+                    run.setSuiteId(seriesId);
+                    run.setStatus(status);
+                    run.setNodeId(nodeId);
+
+                    runs.add(run); // add a run to the list
+                } while (rs.next());
+
                 rs.close();
                 stmt.close();
-                // populate the run object
-                run.setSequenceId(sequenceId);
-                run.setIsLatest(isLatest);
-                run.setId(metadataId);
-                run.setSuiteId(seriesId);
-                run.setStatus(status);
-                run.setNodeId(nodeId);
-
-                runs.add(run); // add a run to the list
-
             } else {
                 log.trace("No processing runs found.");
             }
