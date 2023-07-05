@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Start a local copy of metadig-worker for RabbitMQ based development testing.
-version=2.4.1-SNAPSHOT
+version=2.4.1
 
 # Include the MetaDIG python library
 export JYTHONPATH=/opt/local/metadig/metadig-py

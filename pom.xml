@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>edu.ucsb.nceas</groupId>
   <artifactId>metadig-engine</artifactId>
-  <version>2.4.1-SNAPSHOT</version>
+  <version>2.4.1</version>
   <packaging>jar</packaging>
   <name>metadig-engine</name>
   <description>MetaDIG library for running metadata quality tests</description>
@@ -26,7 +26,7 @@
     <spring.version>3.1.4.RELEASE</spring.version>
     <!-- <docker.registry>docker.io</docker.registry> -->
     <docker.repo>metadig</docker.repo>
-    <docker.tag>2.4.1-SNAPSHOT</docker.tag>
+    <docker.tag>2.4.1</docker.tag>
     <modules.test.includes>**/*Test.java</modules.test.includes>
     <modules.test.excludes>**/LTERSuiteTest.java</modules.test.excludes>
     <maven.wagon.version>3.5.3</maven.wagon.version>
