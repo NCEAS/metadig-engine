@@ -16,6 +16,7 @@ spec:
       {{- with .Values.podAnnotations }}
       annotations:
         {{- toYaml . | nindent 8 }}
+        rollme: {{ randAlphaNum 5 | quote }}
       {{- end }}
       labels:
         {{- include "metadig-controller.selectorLabels" . | nindent 8 }}
