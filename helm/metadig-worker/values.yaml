@@ -8,7 +8,7 @@ image:
   repository: ghcr.io/nceas/metadig-worker
   pullPolicy: Always
   # Overrides the image tag whose default is the chart appVersion.
-  # tag: "1.0.1"
+  tag: "v.2.4.1"
 
 imagePullSecrets: []
 nameOverride: ""
