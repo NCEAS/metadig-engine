@@ -12,30 +12,10 @@ metadata quality reports for holdings in DataONE Member Nodes.
 * Robust to failures and restarts of master and/or workers
 
 ## MetaDIG system components
-* Metadig-controller:
-    * Includes MetaDIG API 
-        * Web API that implements the MetaDIG REST API
-    * dependencies
-        * Metadig-report-worker
-    * Renamed/refactored version of mdq-webapp
-* Metadig-engine-core
-    * Java library for executing quality suites
-    * No dependencies on any other MetaDIG component
-* Metadig-report-worker: a lightweight server instance that can be configured to process MetaDIG jobs
-    * Depends: metadig-engine-core
-    * servlet that exposes an API for running quality jobs
-* Metadig-index-worker: a lightweight server instance that can be configured to process MetaDIG jobs
-        * servlet that exposes an API for running quality jobs
-        * Renamed/refactored version of mdq-webapp
-* API
-    * definition available at https://app.swaggerhub.com/apis/mbjones/metadig/2.0.0-a1-oas3#/
-* Internal functions
-    * private processTask()
-    * private getTaskFromMaster()
 * Metadig-controller: a controller for managing a pool of MetaDIG engines and a task 
 queue
     * dependencies
-        * metadig-report-worker
+        * metadig-engine
         * RabbitMQ
         * Tier 3 MN implementation supporting SOLR query engine (e.g., Metacat)
         * Docker Container Manager
@@ -52,22 +32,22 @@ queue
         * RabbitMQ taskqueue, persistent across reboots
             * List of MetaDIGTask
         * Configuration state
-        * MetaDIGTask -- data structure describing a task, including
+        * tasklist.csv -- data structure describing a task, including
             * Metadata pid
             * Metadata formatid
             * Metadata access info (url, or other pointer like filesystem location)
             * Sysmeta access info (url, or other pointer like filesystem location)
             * Data access info ( (url, or other pointer like filesystem location)
             * Resource map and its sysmeta
-    * Metadig-r
+    * metadig-r
         * R package used to author and test R quality tests
-    * Metadig-py
+    * metadig-py
         * Python module used to author and test quality tests written in python
-    * Mdq-webapp:
+    * mdq-webapp:
         * The Apache Tomcat based webapp that accepts MetaDIG service requests and forwards
           them to metadig-controller
 
-* Metadig Graph Generator (metadig-scorer)
+* metadig-scorer: creates graphs and CSV of aggregated quality scores and writes them to disk
 	* creates graphs and CSV of aggregated quality scores and writes them to disk
 	* dependencies
 		* metadig-controller
@@ -96,8 +76,25 @@ queue
 	* The following sequence diagram shows the events that occur during the generation of an
 	accumulated metadata assessment graphic ![MetaDIG Graph Generator](https://github.com/NCEAS/metadig-engine/blob/master/docs/images/generate-metadata-assessment-graph.png "MetaDIG Engine Grapher")
 
-* Metadig-py
-    * Python module used to author and test quality tests written in python
+* metadig-scheduler: handles scheduling various jobs
+    * dependencies:
+        - metadig-engine
+    * takes the items in taskList.csv and schedules by task type using quartz jobs running on cron triggers
+    * task types
+        - quality: Dataset quality scoring
+        - score: Portal and member node scoring tasks
+        - filestore: Task for ingesting files into the file store from /data/metadig/store/stage/{code,data,graph,metadata}
+        - node list:  Node list from DataONE
+        - download: Acquire data files that are used by assessment checks
+
+* metadig-worker: runs quality jobs
+    * dependencies:
+        - metadig-engine
+        - metadig-r
+        - metadig-py
+        - solr
+        - postgres
+        - rabbitMQ
     
 ## MetaDIG engine components
 
@@ -120,6 +117,43 @@ The following diagram shows the various components of the MetaDIG engine:
 * This sequence diagram shows how the scheduler determines which DataONE metadata documents to create quality reports for, then submits requests to metadig-engine to create the reports.
 
 ![Scheduler Sequence](https://github.com/NCEAS/metadig-engine/blob/master/docs/images/index-monitor_sequence.png "Scheduler Sequence")
+
+### Monitoring for stuck jobs
+
+The controller launches a quartz job on a schedule configurable in the metadig.properties file to make sure that quality jobs don't get "stuck" in the processing state. This might happen if a worker unexpectedly dies mid-process, after acknowledging the RabbitMQ quality message, but before completing the task. The following sequence diagram shows how this process works. In this case the "Client" could either be a direct request from the API or (more likely) the scheduler.
+
+<pre>
+```mermaid
+sequenceDiagram
+    participant Client
+    participant Controller
+    participant RMQ Quality
+    participant Worker
+    participant RMQ Completed
+
+    Client->>Controller: Request report
+    Controller-->>RMQ Quality: basicPublish()
+    Worker-->>RMQ Quality: basicConsume()
+    Note over Worker: run.Save() [processing]
+    Worker -->> RMQ Quality: basicAck()
+    Note over Worker: processReport()
+    Note over Worker: run.Save() [success]
+    Worker-->>RMQ Completed: basicPublish()
+    Controller -->> RMQ Completed: basicConsume()
+
+    alt Quartz Monitor
+    Note over Controller: listInProcessRuns()
+    Controller-->>RMQ Quality: basicPublish()
+    Worker-->>RMQ Quality: basicConsume()
+    Note over Worker: run.Save() [processing]
+    Worker -->> RMQ Quality: basicAck()
+    Note over Worker: processReport()
+    Note over Worker: run.Save() [success]
+    Worker-->>RMQ Completed: basicPublish()
+    Controller -->> RMQ Completed: basicConsume()
+    end
+    ```
+    </pre>
 
 ## Metadata Assessment
 ## Metadata Quality Display Mockups
