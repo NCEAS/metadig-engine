@@ -122,7 +122,7 @@ The following diagram shows the various components of the MetaDIG engine:
 
 The controller launches a quartz job on a schedule configurable in the metadig.properties file to make sure that quality jobs don't get "stuck" in the processing state. This might happen if a worker unexpectedly dies mid-process, after acknowledging the RabbitMQ quality message, but before completing the task. The following sequence diagram shows how this process works. In this case the "Client" could either be a direct request from the API or (more likely) the scheduler.
 
-<pre>
+
 ```mermaid
 sequenceDiagram
     participant Client
@@ -152,8 +152,8 @@ sequenceDiagram
     Worker-->>RMQ Completed: basicPublish()
     Controller -->> RMQ Completed: basicConsume()
     end
-    ```
-    </pre>
+```
+
 
 ## Metadata Assessment
 ## Metadata Quality Display Mockups
