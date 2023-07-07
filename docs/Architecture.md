@@ -100,11 +100,45 @@ queue
 
 The following diagram shows the various components of the MetaDIG engine:
 
-![MetaDIG Engine Components](https://github.com/NCEAS/metadig-engine/blob/master/docs/images/metadig-engine_components.png "MetaDIG Engine Components")
+```mermaid
+graph LR
+  A[Client] --> D1[DataONE member node]
+  subgraph Metadig Engine
+    Ms[metadig-scheduler]
+    Mc[metadig-controller]
+    Mw[metadig-worker]
+    Msc[metadig-scorer]
+  end
+  Ms ----> |Solr Query| D1
+  Ms --> |Metadig API| Mc
+  Mc --> |basicPublish| Rq
+  Mc --> |basicPublish| Rs
+  Rc --> |basicConsume| Mc
+  Rq --> |basicConsume|Mw
+  Mw --> |basicPublish| Rc 
+  Msc --> |basicPublish| Rc
+  Mw --> Solr
+  Mw <--> PG
+  Rs --> |basicConsume| Msc
+  Msc --> Solr
+  Msc --> FS
+  subgraph RabbitMQ
+    Rq([RabbitMQ Quality])
+    Rc([RabbitMQ Completed])
+    Rs([RabbitMQ Scorer])
+  end
+  subgraph Storage
+    Solr[metadig-solr]
+    PG[metadig-postgres]
+    FS[Persistent Filestore]
+  end
+```
+
+An older, more detailed, but less accurate, diagram is available [here](https://github.com/NCEAS/metadig-engine/blob/master/docs/images/metadig-engine_components.png)
 
 ## The following diagrams show message passing between the MetaDIG components:
 
-* This sequence diagram showing how a job is popped off of the pending queue by a worker, added to the inprocess queue, processed by the worker, results saved to a Tier 3 node, and then the controller is told the job is complete.
+* This sequence diagram showing how a job is popped off of the quality queue by a worker, added to the inprocess queue, processed by the worker, results saved to a Tier 3 node, and then the controller is told the job is complete.
 
 ![Worker Process](https://github.com/NCEAS/metadig-engine/blob/master/docs/images/process-queue-entry_sequence.png "Worker Process")
 
