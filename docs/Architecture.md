@@ -138,13 +138,76 @@ An older, more detailed, but less accurate, diagram is available [here](https://
 
 ## The following diagrams show message passing between the MetaDIG components:
 
-* This sequence diagram showing how a job is popped off of the quality queue by a worker, added to the inprocess queue, processed by the worker, results saved to a Tier 3 node, and then the controller is told the job is complete.
+* This sequence diagram showing how a job is popped off of the quality queue by a worker, processed by the worker, results saved to Postgres and Solr, and then the controller is told the job is complete.
 
-![Worker Process](https://github.com/NCEAS/metadig-engine/blob/master/docs/images/process-queue-entry_sequence.png "Worker Process")
+```mermaid
+sequenceDiagram
+  participant QualityQueue 
+  participant Worker
+  participant Postgres
+  participant Solr
+  participant Completed as CompletedQueue
+  participant Controller
+
+  title MetaDIG Engine: Processing a Request
+
+  QualityQueue->>Worker: basicConsume()
+  Worker->>Postgres: insert('processing')
+  Worker->>QualityQueue: acknowledgement
+  activate Worker
+  Worker->>Worker: processReport()
+  deactivate Worker
+
+  alt success case
+    Worker->>Solr: add(document)
+    Worker->>Postgres: update('success')
+    Worker->>CompletedQueue: QueueEntry
+    
+    CompletedQueue->>Controller: handleCompleted(success)
+    Controller->>CompletedQueue: acknowledgement
+  else failure
+    Worker->>Postgres: update('failure')
+    Worker->>CompletedQueue: QueueEntry
+    CompletedQueue->>Controller: handleCompleted(failure)
+    Controller->>CompletedQueue: acknowledgement
+  end
+```
 
 * This sequence diagram shows how a trigger event on a MN or CN results in a job being added to the pending queue.
 
-![Queue Event Sequence](https://github.com/NCEAS/metadig-engine/blob/master/docs/images/queue-event-trigger_sequence.png "Queue Event Sequence")
+```mermaid
+sequenceDiagram
+  participant D1Client
+  participant Metacat
+  participant Scheduler
+  participant Controller
+  participant Queue
+  participant Worker
+
+  title MetaDIG Engine: 'Quality' Queue
+
+  activate D1Client
+  D1Client ->> Metacat: MN.create(metadata, sysmeta)
+  deactivate D1Client
+
+  activate Metacat
+  Metacat --> Scheduler: Harvest
+  deactivate Metacat
+
+  activate Scheduler
+  Scheduler ->> Scheduler: MDQClient.requestReport(sysmeta)
+  Scheduler ->> Controller: https://quality..../suite/{id}/run
+  deactivate Scheduler
+
+  activate Controller
+  Controller->>Queue: BasicPublish
+  deactivate Controller
+
+  Queue ->> Worker: BasicConsume
+  activate Worker
+  Worker ->> Worker: processRun(metadata, sysmeta, suiteId)
+  deactivate Worker
+```
 
 ## The metadig-engine scheduler
 
@@ -190,7 +253,8 @@ sequenceDiagram
 
 
 ## Metadata Assessment
-## Metadata Quality Display Mockups
+
+### Metadata Quality Display Mockups
 * The following display shows metadata quality summarized for all of DataONE:
 
 ![DataONE Metadata Quality](https://github.com/NCEAS/metadig-engine/blob/master/docs/mockups/DataONE/DataONE-profile.png "DataONE Profile Page")
