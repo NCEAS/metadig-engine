@@ -213,7 +213,30 @@ sequenceDiagram
 
 * This sequence diagram shows how the scheduler determines which DataONE metadata documents to create quality reports for, then submits requests to metadig-engine to create the reports.
 
-![Scheduler Sequence](https://github.com/NCEAS/metadig-engine/blob/master/docs/images/index-monitor_sequence.png "Scheduler Sequence")
+```mermaid
+sequenceDiagram
+  participant Scheduler
+  participant MNIndex
+  participant QualityIndex
+  participant Controller
+
+  title MetaDIG Engine: Index Monitor
+
+  activate Scheduler
+  Scheduler ->> MNIndex: query(pid="*", updateId)
+  activate MNIndex
+  MNIndex ->> Scheduler: pid list
+  deactivate MNIndex
+  Scheduler ->> QualityIndex: query(pid, suiteId)
+  activate QualityIndex
+  QualityIndex ->> Scheduler: pid status
+  alt does not exist
+    Scheduler ->> Controller: /suite/id/run
+    Controller ->> QualityIndex: add()
+  end
+  deactivate QualityIndex
+  deactivate Scheduler
+```
 
 ### Monitoring for stuck jobs
 
