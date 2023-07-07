@@ -47,7 +47,7 @@ The metadig-engine suites and checks are required by metadig-engine at runtime.
 
 ### RabbitMQ
 
-RabbitMQ is an open source messge brokering system that can be used to queue assessment requests for metadig-engine. 
+RabbitMQ is an open source message brokering system that can be used to queue assessment requests for metadig-engine. 
 
 MetaDIG engine uses RabbitMQ to communicate between metadig-controller and metadig-worker, metadig-scorer.
 
@@ -64,13 +64,13 @@ A Solr distribution is provided by Bitnami and installed via helm. See the *oper
 The following Maven command performas a complete build of metadig engine. Each Maven target will be explained separately
 
 ```
-mvn clean package install
+mvn install
 ```
 
 If running tests is not desired, the package can be build with the command:
 
 ```
-mvn clean package install -Dmaven.test.skip=true
+mvn install -DskipTests
 ```
 
 - mvn clean
