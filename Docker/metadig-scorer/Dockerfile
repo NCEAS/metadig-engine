@@ -1,5 +1,5 @@
 # Use an OpenJDK runtime as a parent image
-FROM eclipse-temurin:8u372-b07-jdk-jammy
+FROM eclipse-temurin:17.0.7_7-jre-jammy
 
 LABEL org.opencontainers.image.source="https://github.com/nceas/metadig-engine"
 LABEL org.opencontainers.image.title="metadig-engine scorer"

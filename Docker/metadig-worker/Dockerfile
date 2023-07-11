@@ -1,5 +1,5 @@
 # Use an OpenJDK runtime as a parent image
-FROM eclipse-temurin:8u372-b07-jre-jammy
+FROM eclipse-temurin:17.0.7_7-jre-jammy
 # 9-jre does not run with .Worker
 #FROM openjdk:9-jre
 
