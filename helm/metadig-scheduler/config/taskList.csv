@@ -22,11 +22,10 @@ task-type,task-name,task-group,cron-schedule,params
 quality,quality-knb,metadig,0 0/1 * * * ?,"^eml.*|^http.*eml.*;knb.suite.1;urn:node:KNB;2020-08-24T00:00:00.00Z;1;1000"
 quality,quality-arctic,metadig,5 0/1 * * * ?,"^eml.*|^http.*eml.*;arctic.data.center.suite.1;urn:node:ARCTIC;2022-04-01T00:00:00.00Z;1;1000"
 quality,quality-dataone-fair,metadig,10 0/1 * * * ?,"^eml.*|^http.*eml.*|.*www.isotc211.org.*;FAIR-suite-0.3.1;urn:node:CN;2010-01-01T00:00:00.00Z;1;1000"
-quality,quality-ess-dive,metadig,15 0/1 * * * ?,"^eml.*|^http.*eml.*;ess-dive.data.center.suite-1.1.0;urn:node:ESS_DIVE;2022-05-10T00:00:00.00Z;1;1000;"
-quality,quality-cerp_sfwmd,15 0/1 * * * ?,"^eml.*|^http.*eml.*;FAIR-suite-0.3.1;urn:node:CERP_SFWMD;2010-10-07T00:00:00.00Z;1;1000;"
-quality,quality-opc,15 0/1 * * * ?,"^eml.*|^http.*eml.*;FAIR-suite-0.3.1;urn:node:OPC;2010-10-07T00:00:00.00Z;1;1000;"
-quality,quality-sctld,15 0/1 * * * ?,"^eml.*|^http.*eml.*;FAIR-suite-0.3.1;urn:node:SCTLD;2010-10-07T00:00:00.00Z;1;1000;"
-quality,quality-drp,15 0/1 * * * ?,"^eml.*|^http.*eml.*;FAIR-suite-0.3.1;urn:node:DRP;2010-10-07T00:00:00.00Z;1;1000;"
+quality,quality-ess-dive-1.1.0,metadig,15 0/1 * * * ?,"^eml.*|^http.*eml.*;ess-dive.data.center.suite-1.1.0;urn:node:ESS_DIVE;2016-01-01T00:00:00.00Z;1;1000;"
+#quality,quality-cerp_sfwmd,metadig,15 0/1 * * * ?,"^eml.*|^http.*eml.*;FAIR-suite-0.3.1;urn:node:CERP_SFWMD;2010-10-07T00:00:00.00Z;1;1000;"
+quality,quality-CA_OPC,metadig,15 0/1 * * * ?,"^eml.*|^http.*eml.*;FAIR-suite-0.3.1;urn:node:CA_OPC;2010-10-07T00:00:00.00Z;1;1000;"
+quality,quality-sctld,metadig,15 0/1 * * * ?,"^eml.*|^http.*eml.*;FAIR-suite-0.3.1;urn:node:SCTLD;2010-10-07T00:00:00.00Z;1;1000;"
 #
 # Portal scoring tasks
 score,portal-KNB-FAIR,metadig,5 0/1 * * * ?,"*portals*;FAIR-suite-0.3.1;urn:node:KNB;2020-08-10T00:00:00.00Z;1;100;portal"
@@ -44,9 +43,8 @@ score,mn-portal-KNB-FAIR,metadig,0 10 2 * * ?,";FAIR-suite-0.3.1;urn:node:KNB;20
 score,mn-portal-ESS-DIVE-FAIR,metadig,0 45 2 * * ?,";FAIR-suite-0.3.1;urn:node:ESS_DIVE;2020-08-24T00:00:00.00Z;1;1000;node"
 score,mn-portal-DataONE-FAIR,metadig,0 25 2 * * ?,";FAIR-suite-0.3.1;urn:node:CN;2020-08-24T00:00:00.00Z;1;1000;node"
 score,mn-portal-CA_OPC-FAIR,metadig,0 3 2 * * ?,";FAIR-suite-0.3.1;urn:node:CA_OPC;2020-08-28T00:00:00.00Z;1;1000;node"
-score,mn-portal-CREP_SFWMD-FAIR,metadig,0 3 2 * * ?,";FAIR-suite-0.3.1;urn:node:CERP_SFWMD;2020-08-28T00:00:00.00Z;1;1000;node"
+#score,mn-portal-CERP_SFWMD-FAIR,metadig,0 3 2 * * ?,";FAIR-suite-0.3.1;urn:node:CERP_SFWMD;2020-08-28T00:00:00.00Z;1;1000;node"
 score,mn-portal-SCTLD,metadig,0 3 2 * * ?,";FAIR-suite-0.3.1;urn:node:SCTLD;2020-08-28T00:00:00.00Z;1;1000;node"
-score,mn-portal-DRP,metadig,0 3 2 * * ?,";FAIR-suite-0.3.1;urn:node:DRP;2020-08-28T00:00:00.00Z;1;1000;node"
 #
 # Task for ingesting files into the file store from /data/metadig/store/stage/{code,data,graph,metadata}
 #filestore,ingest,metadig,0 0/1 * * * ?,"stage;;*.*;README.txt;filestore-ingest.log"
