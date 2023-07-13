@@ -10,7 +10,7 @@
   <url>https://github.com/NCEAS/metadig-engine</url>
   <properties>
     <bookkeeper.version>0.1.0-SNAPSHOT</bookkeeper.version>
-    <jackson.version>2.9.8</jackson.version>
+    <jackson.version>2.15.0</jackson.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <d1_libclient_java.version>2.3.1</d1_libclient_java.version>
     <renjin.version>0.8.2567</renjin.version>
@@ -319,7 +319,7 @@
     <dependency>
       <groupId>org.json</groupId>
       <artifactId>json</artifactId>
-      <version>20180130</version>
+      <version>20230227</version>
     </dependency>
     <!-- https://mvnrepository.com/artifact/org.postgresql/postgresql -->
     <dependency>
