@@ -17,8 +17,6 @@ import org.dataone.client.rest.MultipartRestClient;
 import org.dataone.client.v2.impl.MultipartCNode;
 import org.dataone.client.v2.impl.MultipartMNode;
 import org.dataone.exceptions.MarshallingException;
-import org.dataone.service.types.v1.Session;
-import org.dataone.service.exceptions.NotAuthorized;
 import org.dataone.service.exceptions.*;
 import org.dataone.service.types.v1.*;
 import org.dataone.service.types.v2.SystemMetadata;
@@ -240,8 +238,8 @@ public class MonitorJob implements Job {
             nodeServiceUrl = cfg.getString(nodeAbbr + ".serviceUrl");
 
             if (nodeServiceUrl == null) {
-                log.error("Node is not supported in the configuration file.");
-                throw new ConfigurationException("Node " + nodeAbbr + " is not supported.");
+                log.warn("Node is not supported in the configuration file, trying the CN.");
+                nodeServiceUrl = cfg.getString("CN.serviceUrl");
             }
 
         } catch (IOException ce) {
@@ -350,8 +348,8 @@ public class MonitorJob implements Job {
             nodeServiceUrl = cfg.getString(nodeAbbr + ".serviceUrl");
 
             if (nodeServiceUrl == null) {
-                log.error("Node is not supported in the configuration file.");
-                throw new ConfigurationException("Node " + nodeAbbr + " is not supported.");
+                log.warn("Node is not supported in the configuration file, trying the CN.");
+                nodeServiceUrl = cfg.getString("CN.serviceUrl");
             }
 
         } catch (IOException ce) {
