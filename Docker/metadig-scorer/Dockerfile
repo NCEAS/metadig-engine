@@ -35,5 +35,5 @@ RUN Rscript --vanilla -e 'install.packages("metadig.tar.gz", repos=NULL)'
 # Run the Scorer process
 # Set classpath to include /opt/local/metadig/log4j.properties, if it exists, so that logging can be changed without
 # having to rebuild the container. Note that on k8s, this dir is mapped to the persistent volume, so will be /data/metadig/log4j.properties
-CMD java -Dlog4j2.formatMsgNoLookups=true -XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap -XX:+UseSerialGC -cp /opt/local/metadig/config:./metadig-engine-$ENGINE_TAG.jar:./solr edu.ucsb.nceas.mdqengine.scorer.Scorer
+CMD java -Dlog4j2.formatMsgNoLookups=true -XX:+UnlockExperimentalVMOptions -XX:+UseSerialGC -cp /opt/local/metadig/config:./metadig-engine-$ENGINE_TAG.jar:./solr edu.ucsb.nceas.mdqengine.scorer.Scorer
 
