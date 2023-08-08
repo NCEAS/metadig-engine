@@ -139,7 +139,14 @@
           <groupId>org.apache.logging.log4j</groupId>
           <artifactId>log4j-core</artifactId>
         </exclusion>
-      </exclusions>
+        <exclusion><groupId>org.javassist</groupId>
+          <artifactId>javassist</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>javax.xml.bind</groupId>
+           <artifactId>jaxb-api</artifactId>
+       </exclusion>
+        </exclusions>
     </dependency>
     <!-- https://mvnrepository.com/artifact/com.rabbitmq/amqp-client -->
     <dependency>
@@ -384,18 +391,24 @@
         </exclusion>
       </exclusions>
     </dependency>
-  <!-- API, java.xml.bind module -->
-    <dependency>
-        <groupId>jakarta.xml.bind</groupId>
-        <artifactId>jakarta.xml.bind-api</artifactId>
-        <version>2.3.2</version>
-        </dependency>
-    <!-- Runtime, com.sun.xml.bind module -->
-    <dependency>
-        <groupId>org.glassfish.jaxb</groupId>
-        <artifactId>jaxb-runtime</artifactId>
-        <version>2.3.2</version>
+   <!-- API, java.xml.bind module -->
+   <dependency>
+      <groupId>jakarta.xml.bind</groupId>
+      <artifactId>jakarta.xml.bind-api</artifactId>
+      <version>2.3.2</version>
     </dependency>
+    <dependency>
+      <groupId>org.glassfish.jaxb</groupId>
+      <artifactId>jaxb-runtime</artifactId>
+      <version>2.3.2</version>
+    </dependency>
+   <!-- <dependency>
+        <groupId>com.sun.xml.bind</groupId>
+        <artifactId>jaxb-impl</artifactId>
+        <version>4.0.3</version>
+        <scope>runtime</scope>
+    </dependency>-->
+
   </dependencies>
   <repositories>
     <repository>
