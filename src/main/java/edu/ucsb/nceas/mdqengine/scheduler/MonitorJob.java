@@ -291,10 +291,17 @@ public class MonitorJob implements Job {
             log.warn("Monitor: Invalid token for pid: " + pidStr + ", unable to retrieve object");
             MetadigException jee = new MetadigException(it);
             throw jee;
-        } catch (NotFound nf) { // handle this in caller and refire it
-            log.warn("Monitor: Object not found for pid: " + pidStr + ", unable to retrieve object");
-            MetadigException jee = new MetadigException(nf);
-            throw jee;
+        } catch (NotFound nf) { // save this to the DB, absorb and don't retry the run
+            log.error("Monitor: Object not found for pid: " + pidStr + ", unable to retrieve object");
+                     // set a failure status for the run
+            run.setRunStatus(Run.FAILURE);
+            run.setErrorDescription("Object not found at serviceURL " + nodeServiceUrl);
+            try {
+                run.save();
+            } catch (MetadigException me) {
+                MetadigException jee = new MetadigException(me);
+                throw jee;
+            }
         } catch (ServiceFailure sf) { // handle this in the caller by refiring, possible random datone outage
             log.error("Monitor: Service failure for pid: " + pidStr + ", unable to retrieve object");
             MetadigException me = new MetadigException(sf);
