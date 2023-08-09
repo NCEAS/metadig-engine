@@ -293,7 +293,7 @@ public class MonitorJob implements Job {
             throw jee;
         } catch (NotFound nf) { // save this to the DB, absorb and don't retry the run
             log.error("Monitor: Object not found for pid: " + pidStr + ", unable to retrieve object");
-                     // set a failure status for the run
+            // set a failure status for the run
             run.setRunStatus(Run.FAILURE);
             run.setErrorDescription("Object not found at serviceURL " + nodeServiceUrl);
             try {
