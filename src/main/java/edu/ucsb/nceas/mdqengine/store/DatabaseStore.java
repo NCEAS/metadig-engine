@@ -209,11 +209,13 @@ public class DatabaseStore implements MDQStore {
         List<Run> runs = new ArrayList<Run>();
         PreparedStatement stmt = null;
         String metadataId = null;
-        String seriesId = null;
+        String suiteId = null;
         String sequenceId = null;
         String status = null;
         String nodeId = null;
+        Integer runCount = null;
         boolean isLatest;
+
         String processingTime = null; // configurable in metadig.properties, the number of hours to wait before
                                       // requeueing a run stuck in processing (eg: 24)
 
@@ -239,19 +241,21 @@ public class DatabaseStore implements MDQStore {
                 do {
                     Run run = new Run();
                     metadataId = rs.getString("metadata_id");
-                    seriesId = rs.getString("suite_id");
+                    suiteId = rs.getString("suite_id");
                     sequenceId = rs.getString("sequence_id");
                     isLatest = rs.getBoolean("is_latest");
                     status = rs.getString("status");
                     nodeId = rs.getString("data_source");
+                    runCount = rs.getInt("run_count");
 
                     // populate the run object
                     run.setSequenceId(sequenceId);
                     run.setIsLatest(isLatest);
                     run.setObjectIdentifier(metadataId);
-                    run.setSuiteId(seriesId);
+                    run.setSuiteId(suiteId);
                     run.setStatus(status);
                     run.setNodeId(nodeId);
+                    run.setRunCount(runCount);
 
                     runs.add(run); // add a run to the list
                 } while (rs.next());
