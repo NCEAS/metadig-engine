@@ -124,7 +124,7 @@ public class MonitorJob implements Job {
             InputStream sysmeta = null;
 
             try {
-                metadata = getMetadata(run, session);
+                metadata = getMetadata(run, session, store);
             } catch (MetadigException me) {
                 JobExecutionException jee = new JobExecutionException(me);
                 jee.setRefireImmediately(true);
@@ -138,7 +138,7 @@ public class MonitorJob implements Job {
             }
 
             try {
-                sysmeta = getSystemMetadata(run, session);
+                sysmeta = getSystemMetadata(run, session, store);
             } catch (MetadigException me) {
                 JobExecutionException jee = new JobExecutionException(me);
                 jee.setRefireImmediately(true);
@@ -220,7 +220,8 @@ public class MonitorJob implements Job {
      * @throws ConfigurationException If a node is not supported in the
      *                                configuration file.
      */
-    public InputStream getMetadata(Run run, Session session) throws MetadigException, ConfigurationException {
+    public InputStream getMetadata(Run run, Session session, MDQStore store)
+            throws MetadigException, ConfigurationException {
 
         String nodeServiceUrl = null;
         MultipartRestClient mrc = null;
@@ -231,6 +232,16 @@ public class MonitorJob implements Job {
         String nodeId = run.getNodeId();
         Identifier pid = new Identifier();
         pid.setValue(pidStr);
+
+        if (!store.isAvailable()) {
+            try {
+                store.renew();
+            } catch (MetadigStoreException e) {
+                e.printStackTrace();
+                MetadigException jee = new MetadigException("Cannot renew store.", e);
+                throw jee;
+            }
+        }
 
         try {
             MDQconfig cfg = new MDQconfig();
@@ -294,6 +305,7 @@ public class MonitorJob implements Job {
         } catch (NotFound nf) { // save this to the DB, absorb and don't retry the run
             log.error("Monitor: Object not found for pid: " + pidStr + ", unable to retrieve object");
             // set a failure status for the run
+
             run.setRunStatus(Run.FAILURE);
             run.setErrorDescription("Object not found at serviceURL " + nodeServiceUrl);
             try {
@@ -335,7 +347,8 @@ public class MonitorJob implements Job {
      * @throws ConfigurationException If a node is not supported in the
      *                                configuration file.
      */
-    public InputStream getSystemMetadata(Run run, Session session) throws MetadigException, ConfigurationException {
+    public InputStream getSystemMetadata(Run run, Session session, MDQStore store)
+            throws MetadigException, ConfigurationException {
         // throw a different exception here
 
         String nodeServiceUrl = null;
@@ -348,6 +361,16 @@ public class MonitorJob implements Job {
         String nodeId = run.getNodeId();
         Identifier pid = new Identifier();
         pid.setValue(pidStr);
+
+        if (!store.isAvailable()) {
+            try {
+                store.renew();
+            } catch (MetadigStoreException e) {
+                e.printStackTrace();
+                MetadigException jee = new MetadigException("Cannot renew store.", e);
+                throw jee;
+            }
+        }
 
         try {
             MDQconfig cfg = new MDQconfig();
@@ -428,9 +451,16 @@ public class MonitorJob implements Job {
             MetadigException jee = new MetadigException(it);
             throw jee;
         } catch (NotFound nf) { // handle this in caller and refire it
-            log.warn("Monitor: Object not found for pid: " + pidStr + ", unable to retrieve object");
-            MetadigException jee = new MetadigException(nf);
-            throw jee;
+            log.error("Monitor: Object not found for pid: " + pidStr + ", unable to retrieve object");
+            // set a failure status for the run
+            run.setRunStatus(Run.FAILURE);
+            run.setErrorDescription("Object not found at serviceURL " + nodeServiceUrl);
+            try {
+                run.save();
+            } catch (MetadigException me) {
+                MetadigException jee = new MetadigException(me);
+                throw jee;
+            }
         } catch (ServiceFailure sf) { // handle this in the caller by refiring, possible random datone outage
             log.error("Monitor: Service failure for pid: " + pidStr + ", unable to retrieve object");
             MetadigException me = new MetadigException(sf);
