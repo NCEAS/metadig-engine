@@ -248,7 +248,7 @@ public class DatabaseStore implements MDQStore {
                     // populate the run object
                     run.setSequenceId(sequenceId);
                     run.setIsLatest(isLatest);
-                    run.setId(metadataId);
+                    run.setObjectIdentifier(metadataId);
                     run.setSuiteId(seriesId);
                     run.setStatus(status);
                     run.setNodeId(nodeId);

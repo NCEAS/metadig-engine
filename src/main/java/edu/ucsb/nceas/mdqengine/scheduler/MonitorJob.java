@@ -115,10 +115,10 @@ public class MonitorJob implements Job {
 
         // request job via rabbitMQ
         for (Run run : processing) {
-            log.info("Requesting monitor job: " + run.getId() + ", " + run.getNodeId());
+            log.info("Requesting monitor job: " + run.getObjectIdentifier() + ", " + run.getNodeId());
 
             String suiteId = run.getSuiteId();
-            String pidStr = run.getId();
+            String pidStr = run.getObjectIdentifier();
             String nodeId = run.getNodeId();
             InputStream metadata = null;
             InputStream sysmeta = null;
@@ -228,7 +228,7 @@ public class MonitorJob implements Job {
         MultipartMNode mnNode = null;
         MultipartCNode cnNode = null;
         InputStream objectIS = null;
-        String pidStr = run.getId();
+        String pidStr = run.getObjectIdentifier();
         String nodeId = run.getNodeId();
         Identifier pid = new Identifier();
         pid.setValue(pidStr);
@@ -357,7 +357,7 @@ public class MonitorJob implements Job {
         MultipartCNode cnNode = null;
         SystemMetadata sysmeta = null;
         InputStream sysmetaIS = null;
-        String pidStr = run.getId();
+        String pidStr = run.getObjectIdentifier();
         String nodeId = run.getNodeId();
         Identifier pid = new Identifier();
         pid.setValue(pidStr);
