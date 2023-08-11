@@ -512,34 +512,6 @@
           </execution>
         </executions>
       </plugin>
-      <!-- docker.io username and password is in the ~/.m2/settings.xml file -->
-      <plugin>
-        <groupId>io.fabric8</groupId>
-        <artifactId>docker-maven-plugin</artifactId>
-        <version>0.30.0</version>
-        <configuration>
-          <images>
-            <image>
-              <name>${docker.repo}/metadig-worker:${docker.tag}</name>
-              <build>
-                <dockerFileDir>${project.basedir}/Docker/metadig-worker</dockerFileDir>
-              </build>
-            </image>
-            <image>
-              <name>${docker.repo}/metadig-scheduler:${docker.tag}</name>
-              <build>
-                <dockerFileDir>${project.basedir}/Docker/metadig-scheduler</dockerFileDir>
-              </build>
-            </image>
-            <image>
-              <name>${docker.repo}/metadig-scorer:${docker.tag}</name>
-              <build>
-                <dockerFileDir>${project.basedir}/Docker/metadig-scorer</dockerFileDir>
-              </build>
-            </image>
-          </images>
-        </configuration>
-      </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
