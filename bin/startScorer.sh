@@ -2,7 +2,7 @@
 
 
 # Start a local copy of metadig-scorer for RabbitMQ based development testing.
-version=2.5.0-SNAPSHOT
+version=2.5.0
 
 # Include the MetaDIG python library
 #export JYTHONPATH=/Users/slaughter/git/NCEAS/metadig-py
