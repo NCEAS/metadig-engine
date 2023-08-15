@@ -240,7 +240,7 @@ sequenceDiagram
 
 ### Monitoring for stuck jobs
 
-The controller launches a quartz job on a schedule configurable in the metadig.properties file to make sure that quality jobs don't get "stuck" in the processing state. This might happen if a worker unexpectedly dies mid-process, after acknowledging the RabbitMQ quality message, but before completing the task. The following sequence diagram shows how this process works. In this case the "Client" could either be a direct request from the API or (more likely) the scheduler.
+As shown in the diagram below, the worker pre-emptively acknowledges ('acks') the message before finishing the quality process. This is because while most processes are quite short (< 1 minute), occasionally they are very long (> 30 minutes). By default, [the RabbitMQ consumer will timeout](https://www.rabbitmq.com/consumers.html#acknowledgement-timeout) it's connection if it has not received an `ack` within 30 minutes of sending a message. Although the two phase queue system (quality and completed queues) was initially implemented to help this problem, it was not sufficient to prevent the timeouts and resuling stranded connections, thus the pre-emptive ack was also implemented. As part of this impelementation, the controller also launches a quartz job on a schedule configurable in the metadig.properties file to make sure that quality jobs don't get "stuck" in the processing state. This might happen if a worker unexpectedly dies mid-process, after acknowledging the RabbitMQ quality message, but before completing the task.  The following sequence diagram shows how this process works. In the diagram below the "Client" could either be a direct request from the API or (more likely) the scheduler.
 
 
 ```mermaid

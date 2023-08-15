@@ -397,7 +397,7 @@ quality,quality-dataone-fair,metadig,10 0/1 * * * ?,"^eml.*|^http.*eml.*|.*www.i
 ```
 
 All metadata from all DataONE registered MNs that match the formatIds in the CN task entry are processed. 
-Once a dataset has been assessest, the assessment report is available from the dataset landing page from https://search.dataone.org, for example:
+Once a dataset has been assessed, the assessment report is available from the dataset landing page from https://search.dataone.org, for example:
 
 ```
 https://search.dataone.org/quality/https%3A%2F%2Fpasta.lternet.edu%2Fpackage%2Fmetadata%2Feml%2Fknb-lter-vcr%2F355%2F2
