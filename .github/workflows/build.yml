@@ -35,6 +35,18 @@ jobs:
       - name: Install linux deps
         run: sudo apt-get install -y libcurl4-openssl-dev
 
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.8
+      
+      - name: Install python dependencies
+        run: pip install jep==3.9  # Install the jep library
+
+      - name: Set JEP_LIBRARY_PATH environment variable
+        run: |
+          echo "JEP_LIBRARY_PATH=$(python -c 'import sysconfig; print(sysconfig.get_path("purelib"))')" >> $LD_LIBRARY_PATH
+
       - name: Install deps
         run: Rscript -e 'install.packages(c("httr", "jsonlite", "remotes"))'
       
