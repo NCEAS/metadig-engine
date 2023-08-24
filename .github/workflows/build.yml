@@ -46,6 +46,7 @@ jobs:
       - name: Set JEP_LIBRARY_PATH environment variable
         run: |
           echo "LD_LIBRARY_PATH=$(python -c 'import sysconfig; print(sysconfig.get_path("purelib"))')" >> $GITHUB_ENV
+          ls $LD_LIBRARY_PATH
 
       - name: Install deps
         run: Rscript -e 'install.packages(c("httr", "jsonlite", "remotes"))'
