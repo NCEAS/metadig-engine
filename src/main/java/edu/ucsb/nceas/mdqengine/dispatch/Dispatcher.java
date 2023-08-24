@@ -179,6 +179,15 @@ public class Dispatcher {
 		// harvest all other vars for downstream dispatchers
 		bindings = engine.getBindings(ScriptContext.ENGINE_SCOPE);
 
+		if (engine instanceof SharedInterpreter) {
+            SharedInterpreter jepInterpreter = (SharedInterpreter) engine;
+            try {
+				jepInterpreter.close(); // Call the shutdown() method for SharedInterpreter
+			} catch (JepException je) {
+				throw new RuntimeException("Unable to close jep SharedInterpreter");
+			}
+        } 
+
 		return dr;
 
 	}
@@ -354,7 +363,7 @@ public class Dispatcher {
 		 * @param script The python script as a string
 		 * 
 		 * @throws RuntimeException If an error occurs during script execution.
-		 * @see jep.Jep.SharedInterpreter#exec()
+		 * @see jep.SharedInterpreter#exec()
 		 * 
 		 */
 		@Override
@@ -374,7 +383,7 @@ public class Dispatcher {
 		 * @param key The key representing the value to retrieve.
 		 * @return The value associated with the key, if found.
 		 * @throws RuntimeException If an error occurs during value retrieval.
-		 * @see jep.Jep.SharedInterpreter#getValue(String)
+		 * @see jep.SharedInterpreter#getValue(String)
 		 */
 		@Override
 		public Object get(String key) {
@@ -392,7 +401,7 @@ public class Dispatcher {
 		 * @param key   The key to set.
 		 * @param value The value to assign to the key.
 		 * @throws RuntimeException If an error occurs.
-		 * @see jep.Jep.SharedInterpreter#setValue(String)
+		 * @see jep.SharedInterpreter#set(String, Object)
 		 */
 		@Override
 		public void put(String key, Object value) {
@@ -438,6 +447,10 @@ public class Dispatcher {
 			}
 
 			return this.globalBindings;
+		}
+
+		public String getEngineName() {
+			return "python";
 		}
 
 		@Override
@@ -530,8 +543,7 @@ public class Dispatcher {
 
 		@Override
 		public String getLanguageName() {
-			throw new UnsupportedOperationException(
-					"getLanguageName is not implemented for the JepScriptEngineFactory class");
+			return "python";
 		}
 
 		@Override
