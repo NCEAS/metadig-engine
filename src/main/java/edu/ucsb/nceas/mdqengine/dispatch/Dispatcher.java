@@ -180,13 +180,13 @@ public class Dispatcher {
 		bindings = engine.getBindings(ScriptContext.ENGINE_SCOPE);
 
 		if (engine instanceof SharedInterpreter) {
-            SharedInterpreter jepInterpreter = (SharedInterpreter) engine;
-            try {
+			SharedInterpreter jepInterpreter = (SharedInterpreter) engine;
+			try {
 				jepInterpreter.close(); // Call the shutdown() method for SharedInterpreter
 			} catch (JepException je) {
 				throw new RuntimeException("Unable to close jep SharedInterpreter");
 			}
-        } 
+		}
 
 		return dr;
 
@@ -328,22 +328,26 @@ public class Dispatcher {
 				}
 			}
 
+			// define the jep library path
+			String jepPath = pythonFolder + "/libjep.jnilib";
+
+			if (!Files.exists(Path.of(jepPath))) {
+				jepPath = pythonFolder + "/libjep.so";
+			}
+
 			try {
-
-				// define the jep library path
-				String jepPath = pythonFolder + "/libjep.jnilib";
-
-				if (!Files.exists(Path.of(jepPath))) {
-					jepPath = pythonFolder + "/libjep.so";
-				}
 				// set path for jep executing python
 				MainInterpreter.setJepLibraryPath(jepPath);
 
-				// create the interpreter for python executing
-				jepInterpreter = new SharedInterpreter();
-
 			} catch (JepException e) {
 				throw new RuntimeException("Error setting configurating Jep interpreter: " + e);
+			}
+
+			try {
+				// create the interpreter for python executing
+				jepInterpreter = new SharedInterpreter();
+			} catch (JepException e) {
+				throw new RuntimeException("Error initializing Jep interpreter: " + e);
 			}
 		}
 
