@@ -303,20 +303,17 @@ public class Dispatcher {
 		 * ScriptEngine methods are implemented, the rest will error if they
 		 * are called. The interpreter is configured to find the jep path listed
 		 * in metadig.properties as `jep.path` for production deployments. For testing
-		 * on linux machines, the path can be set using the environment variable
-		 * LD_LIBRARY_PATH, on a mac it is DYLD_LIBRARY_PATH.
+		 * on other machines, the configured path can be set using the environment
+		 * variable JEP_LIBRARY_PATH.
 		 * 
 		 * @throws RuntimeException              for script or configuration errors
 		 * @throws UnsupportedOperationException for methods not implemented
 		 */
 		public JepScriptEngine() {
-			// first look for the linux env var (this is mostly for the GHA build)
+			// first look for an env var (this is mostly for local testing)
 			String pythonFolder = System.getenv("JEP_LIBRARY_PATH");
-			// then look for mac env var (for anyone testing locally)
-			//if (pythonFolder == null) {
-			//	pythonFolder = System.getenv("JEP_LIBRARY_PATH");
-			//}
-			// finally look in the mdq config
+
+			// then look in mdq config
 			if (pythonFolder == null) {
 				try {
 					MDQconfig cfg = new MDQconfig();
