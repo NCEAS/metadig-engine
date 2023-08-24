@@ -311,11 +311,11 @@ public class Dispatcher {
 		 */
 		public JepScriptEngine() {
 			// first look for the linux env var (this is mostly for the GHA build)
-			String pythonFolder = System.getenv("LD_LIBRARY_PATH");
+			String pythonFolder = System.getenv("JEP_LIBRARY_PATH");
 			// then look for mac env var (for anyone testing locally)
-			if (pythonFolder == null) {
-				pythonFolder = System.getenv("DYLD_LIBRARY_PATH");
-			}
+			//if (pythonFolder == null) {
+			//	pythonFolder = System.getenv("JEP_LIBRARY_PATH");
+			//}
 			// finally look in the mdq config
 			if (pythonFolder == null) {
 				try {
