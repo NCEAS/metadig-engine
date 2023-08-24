@@ -45,7 +45,7 @@ jobs:
 
       - name: Set JEP_LIBRARY_PATH environment variable
         run: |
-          echo "JEP_LIBRARY_PATH=$(python -c 'import site; print(site.getsitepackages())[0]')" >> $GITHUB_ENV
+          echo "JEP_LIBRARY_PATH=$(python -c 'import site; print(site.getsitepackages()[0])')" >> $GITHUB_ENV
 
       - name: test
         run: |
