@@ -9,7 +9,7 @@ import org.apache.commons.configuration2.ex.ConfigurationException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import jep.SharedInterpreter;
+import jep.SubInterpreter;
 import jep.MainInterpreter;
 import jep.JepException;
 
@@ -112,81 +112,68 @@ public class Dispatcher {
 			}
 		}
 
-		if (res instanceof Result) {
+		if (res instanceof Result) { // if res is a Result, save it
 			dr = (Result) res;
+		} else if (res != null && res != "_NA_") { // if res is a string, save it
+			dr.setOutput(new Output(res.toString()));
 		} else {
-
-			// do we have a result object?
-			Object var = null;
+			// for R and Python, the result has to be retrieved from engine global vars
+			Object var_r = null;
+			Object var_py = null;
+			// do we have a result object from an R check?
 			try {
-				var = engine.get("mdq_result");
+				var_r = engine.get("mdq_result");
 			} catch (Exception e) {
-				// catch this silently since we are just fishing
+				// catch this silently since we are just fishing for results
+				// the no result case is handled later
 			}
+			// save the result if we get one
+			if (var_r != null && !var_r.toString().equals("<unbound>")) {
+				log.trace("result is: " + var_r);
+				log.debug("result is class: " + var_r.getClass());
 
-			if (var != null && !var.toString().equals("<unbound>")) {
-				log.trace("result is: " + var);
-				log.debug("result is class: " + var.getClass());
-
-				dr = (Result) var;
+				dr = (Result) var_r;
 			} else {
-
-				// if res has something in it, save it to the output
-				if (res != null && res != "_NA_") {
-					dr.setOutput(new Output(res.toString()));
-					var = null;
-				}
-
-				// try to find other result items
+				// try to find other result items from python checks
 				try {
-					var = engine.get("call()");
+					var_py = engine.get("call()"); // run the python function
+				} catch (Exception e) {
+					log.error(e.getMessage());
+					log.error(e.getStackTrace());
+					dr.setOutput(new Output("ERROR: " + e.getMessage())); // catch the python stack trace
+					dr.setStatus(Status.valueOf("ERROR"));
+				}
+				// try to get the global output variable from python
+				try {
+					var_py = engine.get("output");
 				} catch (Exception e) {
 					// catch this silently since we are just fishing
+					// the no result case is handled later
 				}
-				if (var != null && !var.toString().equals("<unbound>")) {
-					dr.setOutput(new Output(var.toString()));
-					var = null;
+				// save the output
+				if (var_py != null && !var_py.toString().equals("<unbound>")) {
+					dr.setOutput(new Output(var_py.toString()));
+					var_py = null;
 				}
-
+				// try to get the global status variable from python
 				try {
-					var = engine.get("output");
+					var_py = engine.get("status");
 				} catch (Exception e) {
 					// catch this silently since we are just fishing
+					// the no result case is handled later
 				}
-				if (var != null && !var.toString().equals("<unbound>")) {
-					dr.setOutput(new Output(var.toString()));
-					var = null;
-				}
-
-				try {
-					var = engine.get("status");
-				} catch (Exception e) {
-					// catch this silently since we are just fishing
-				}
-				if (var != null && !var.toString().equals("<unbound>")) {
-					dr.setStatus(Status.valueOf(var.toString()));
+				// save the status
+				if (var_py != null && !var_py.toString().equals("<unbound>")) {
+					dr.setStatus(Status.valueOf(var_py.toString()));
 				} else {
-					// assume a true result means that the test was successful
-					if (dr.getOutput() != null) {
-						dr.setStatus(Status.SUCCESS);
-					} else {
-						dr.setStatus(Status.FAILURE);
-					}
+					// if we haven't found anything at this point it probably failed
+					dr.setStatus(Status.FAILURE);
 				}
 			}
 		}
 
 		// harvest all other vars for downstream dispatchers
 		bindings = engine.getBindings(ScriptContext.ENGINE_SCOPE);
-
-		if (engine instanceof SharedInterpreter) {
-			SharedInterpreter jepInterpreter = (SharedInterpreter) engine;
-			try {
-				jepInterpreter.close(); // Call the shutdown() method for SharedInterpreter
-			} catch (JepException je) {
-				throw new RuntimeException("Unable to close jep SharedInterpreter");
-			}
-		}
 
 		return dr;
 
@@ -290,7 +277,7 @@ public class Dispatcher {
 	 */
 	public class JepScriptEngine implements ScriptEngine {
 
-		private SharedInterpreter jepInterpreter = null;
+		private SubInterpreter jepInterpreter = null;
 		private Bindings bindings = new SimpleBindings();
 		private Bindings globalBindings = new SimpleBindings();
 		private ScriptEngineFactory factory = null;
@@ -342,7 +329,7 @@ public class Dispatcher {
 
 			try {
 				// create the interpreter for python executing
-				jepInterpreter = new SharedInterpreter();
+				jepInterpreter = new SubInterpreter();
 			} catch (JepException e) {
 				throw new RuntimeException("Error initializing Jep interpreter: " + e);
 			}
@@ -373,6 +360,14 @@ public class Dispatcher {
 			try {
 				jepInterpreter.exec(script);
 				return "_NA_";
+			} catch (JepException e) {
+				throw new RuntimeException(e);
+			}
+		}
+
+		public void close() {
+			try {
+				jepInterpreter.close();
 			} catch (JepException e) {
 				throw new RuntimeException(e);
 			}
@@ -578,7 +573,6 @@ public class Dispatcher {
 			if (p == null)
 				return null;
 
-			// this is fucking retarded
 			if (p.equals(ScriptEngine.ENGINE))
 				return getEngineName();
 
