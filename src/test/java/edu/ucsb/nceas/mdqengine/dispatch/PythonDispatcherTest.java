@@ -57,13 +57,13 @@ public class PythonDispatcherTest {
 		names.put("x", 2);
 		names.put("y", 2);
 		String code = "def call(): \n"
-				+ "  from edu.ucsb.nceas.mdqengine.model import Result \n"
-				+ "  from edu.ucsb.nceas.mdqengine.model import Output \n"
-				+ "  mdq_result = Result() \n"
-				+ "  mdq_result.setOutput(Output(\"Testing the result object, X equals Y\")) \n"
-				+ "  from edu.ucsb.nceas.mdqengine.model import Status \n"
-				+ "  mdq_result.setStatus(Status.SUCCESS) \n"
-				+ "  return (mdq_result) \n";
+				+ "  global status \n"
+				+ "  global result \n"
+				+ "  result = x == y \n"
+				+ "  if (result == True):\n"
+				+ "    status = 'SUCCESS' \n"
+				+ "  else:\n"
+				+ "    status = 'FAILURE'";
 		Result result = null;
 		try {
 			result = dispatcher.dispatch(names, code);
