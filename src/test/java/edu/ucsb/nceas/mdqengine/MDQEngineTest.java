@@ -1,6 +1,7 @@
 package edu.ucsb.nceas.mdqengine;
 
 import edu.ucsb.nceas.mdqengine.exception.MetadigException;
+import edu.ucsb.nceas.mdqengine.dispatch.Dispatcher;
 import edu.ucsb.nceas.mdqengine.model.*;
 import edu.ucsb.nceas.mdqengine.processor.XMLDialect;
 import edu.ucsb.nceas.mdqengine.serialize.JsonMarshaller;
@@ -37,8 +38,8 @@ public class MDQEngineTest {
 	
 	@Test
 	public void testMetadataCheck() {
+		Dispatcher dispatcher;
 		try {
-			
 			// parse the metadata content
 			String metadataURL = "https://knb.ecoinformatics.org/knb/d1/mn/v2/object/" + id;
 			InputStream input = new URL(metadataURL).openStream();
@@ -46,7 +47,8 @@ public class MDQEngineTest {
 			
 			// run a check in the suite
 			for (Check check: suite.getCheck()) {
-				Result result = xml.runCheck(check);
+				dispatcher = Dispatcher.getDispatcher(check.getEnvironment());
+				Result result = xml.runCheck(check, dispatcher);
 				log.debug("Check result: " + JsonMarshaller.toJson(result));
 				assertEquals(Status.SUCCESS, result.getStatus());
 				break;
