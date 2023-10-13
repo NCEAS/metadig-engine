@@ -53,8 +53,6 @@ public class XMLDialect {
 
 	private String directory;
 
-	private Dispatcher dispatcher;
-
 	public static Log log = LogFactory.getLog(XMLDialect.class);
 
 	public XMLDialect(InputStream input) throws SAXException, IOException, ParserConfigurationException {
@@ -118,7 +116,7 @@ public class XMLDialect {
 		}
 	}
 
-	public Result runCheck(Check check) throws XPathExpressionException {
+	public Result runCheck(Check check, Dispatcher dispatcher) throws XPathExpressionException {
 
 		Result result = null;
 
