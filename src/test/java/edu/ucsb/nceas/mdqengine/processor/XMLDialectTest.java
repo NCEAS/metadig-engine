@@ -1,6 +1,5 @@
 package edu.ucsb.nceas.mdqengine.processor;
 
-import edu.ucsb.nceas.mdqengine.dispatch.Dispatcher;
 import edu.ucsb.nceas.mdqengine.model.*;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -64,8 +63,7 @@ public class XMLDialectTest {
 			XMLDialect xml = new XMLDialect(input);
 			
 			// run the complex check
-			Dispatcher dispatcher = null;
-			Result result = xml.runCheck(complexCheck, dispatcher);
+			Result result = xml.runCheck(complexCheck);
 			assertEquals(Status.SUCCESS, result.getStatus());
 			
 		} catch (Exception e) {
@@ -82,8 +80,7 @@ public class XMLDialectTest {
 			XMLDialect xml = new XMLDialect(input);
 			
 			// run the complex check
-			Dispatcher dispatcher = null;
-			Result result = xml.runCheck(complexCheck, dispatcher);
+			Result result = xml.runCheck(complexCheck);
 			// TODO: what is the result?
 			
 		} catch (Exception e) {
@@ -135,8 +132,7 @@ public class XMLDialectTest {
 			XMLDialect xml = new XMLDialect(input);
 			
 			// run check
-			Dispatcher dispatcher = null;
-			Result result = xml.runCheck(check, dispatcher);
+			Result result = xml.runCheck(check);
 			assertEquals(Status.SUCCESS, result.getStatus());
 			
 		} catch (Exception e) {
@@ -153,8 +149,7 @@ public class XMLDialectTest {
 			XMLDialect xml = new XMLDialect(input);
 			
 			// run check
-			Dispatcher dispatcher = null;
-			Result result = xml.runCheck(check, dispatcher);
+			Result result = xml.runCheck(check);
 			assertEquals(Status.SKIP, result.getStatus());
 			
 		} catch (Exception e) {
@@ -191,8 +186,7 @@ public class XMLDialectTest {
 			XMLDialect xml = new XMLDialect(input);
 			
 			// run check
-			Dispatcher dispatcher = null;
-			Result result = xml.runCheck(check, dispatcher);
+			Result result = xml.runCheck(check);
 			assertEquals(result.getOutput().get(0).getValue(), Status.SUCCESS, result.getStatus());
 			
 		} catch (Exception e) {
@@ -208,8 +202,7 @@ public class XMLDialectTest {
 			XMLDialect xml = new XMLDialect(input);
 			
 			// run check
-			Dispatcher dispatcher = null;
-			Result result = xml.runCheck(check, dispatcher);
+			Result result = xml.runCheck(check);
 			assertEquals(result.getOutput().get(0).getValue(), Status.FAILURE, result.getStatus());
 			
 		} catch (Exception e) {
@@ -246,8 +239,7 @@ public class XMLDialectTest {
 			XMLDialect xml = new XMLDialect(input);
 			
 			// run check
-			Dispatcher dispatcher = null;
-			Result result = xml.runCheck(check, dispatcher);
+			Result result = xml.runCheck(check);
 			log.debug("Result output: " + result.getOutput().get(0).getValue());
 			assertEquals(result.getOutput().get(0).getValue(), Status.SUCCESS, result.getStatus());
 			
@@ -290,8 +282,7 @@ public class XMLDialectTest {
 			xml.setSystemMetadata(systemMetadata);
 			
 			// run check
-			Dispatcher dispatcher = null;
-			Result result = xml.runCheck(check, dispatcher);
+			Result result = xml.runCheck(check);
 			log.debug("First result output: " + result.getOutput().get(0).getValue());
 			assertEquals(result.getOutput().get(0).getValue(), Status.SUCCESS, result.getStatus());
 			
@@ -334,8 +325,7 @@ public class XMLDialectTest {
 			xml.setSystemMetadata(systemMetadata);
 			
 			// run check
-			Dispatcher dispatcher = null;
-			Result result = xml.runCheck(check, dispatcher);
+			Result result = xml.runCheck(check);
 			log.debug("First result output: " + result.getOutput().get(0).getValue());
 			assertEquals(result.getOutput().get(0).getValue(), Status.SUCCESS, result.getStatus());
 			
@@ -377,8 +367,7 @@ public class XMLDialectTest {
 			XMLDialect xml = new XMLDialect(input);
 			
 			// run check
-			Dispatcher dispatcher = null;
-			Result result = xml.runCheck(check, dispatcher);
+			Result result = xml.runCheck(check);
 			assertEquals(result.getOutput().get(0).getValue(), Status.SUCCESS, result.getStatus());
 			
 		} catch (Exception e) {
@@ -419,8 +408,7 @@ public class XMLDialectTest {
 		try {
 			
 			// run check
-			Dispatcher dispatcher = null;
-			Result result = xml.runCheck(check, dispatcher);
+			Result result = xml.runCheck(check);
 			assertEquals(result.getOutput().get(0).getValue(), Status.SUCCESS, result.getStatus());
 			
 		} catch (Exception e) {
@@ -448,8 +436,7 @@ public class XMLDialectTest {
 		try {
 			
 			// run check
-			Dispatcher dispatcher = null;
-			Result result = xml.runCheck(check, dispatcher);
+			Result result = xml.runCheck(check);
 			assertEquals(result.getOutput().get(0).getValue(), Status.SUCCESS, result.getStatus());
 			
 		} catch (Exception e) {
@@ -479,8 +466,7 @@ public class XMLDialectTest {
 		try {
 			
 			// run check
-			Dispatcher dispatcher = null;
-			Result result = xml.runCheck(check, dispatcher);
+			Result result = xml.runCheck(check);
 			assertEquals(result.getOutput().get(0).getValue(), Status.SUCCESS, result.getStatus());
 			
 		} catch (Exception e) {
@@ -514,8 +500,7 @@ public class XMLDialectTest {
 		try {
 			
 			// run check
-			Dispatcher dispatcher = null;
-			Result result = xml.runCheck(check, dispatcher);
+			Result result = xml.runCheck(check);
 			assertEquals(result.getOutput().get(0).getValue(), Status.SUCCESS, result.getStatus());
 			
 		} catch (Exception e) {
@@ -536,8 +521,7 @@ public class XMLDialectTest {
 		try {
 			
 			// run check
-			Dispatcher dispatcher = null;
-			Result result = xml.runCheck(check, dispatcher);
+			Result result = xml.runCheck(check);
 			assertEquals(result.getOutput().get(0).getValue(), Status.SUCCESS, result.getStatus());
 			
 		} catch (Exception e) {
@@ -589,11 +573,10 @@ public class XMLDialectTest {
 
 		// Run check and test it
 		try {
-			Dispatcher dispatcher = null;
-			Result rscript_result = xml.runCheck(rscript_check, dispatcher);
+			Result rscript_result = xml.runCheck(rscript_check);
 			assertEquals(Status.SUCCESS, rscript_result.getStatus());
 
-			Result python_result = xml.runCheck(python_check, dispatcher);
+			Result python_result = xml.runCheck(python_check);
 			assertEquals(Status.SUCCESS, python_result.getStatus());
 
 		} catch (Exception e) {
@@ -639,8 +622,7 @@ public class XMLDialectTest {
 
 		// Run check and test it
 		try {
-			Dispatcher dispatcher = null;
-			Result result = xml.runCheck(check, dispatcher);
+			Result result = xml.runCheck(check);
 			List<Output> output = result.getOutput();
 			assertEquals(Status.SUCCESS, result.getStatus());
 
