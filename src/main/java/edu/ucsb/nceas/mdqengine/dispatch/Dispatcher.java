@@ -1,9 +1,13 @@
 package edu.ucsb.nceas.mdqengine.dispatch;
 
+import edu.ucsb.nceas.mdqengine.MDQconfig;
 import edu.ucsb.nceas.mdqengine.model.Output;
 import edu.ucsb.nceas.mdqengine.model.Result;
 import edu.ucsb.nceas.mdqengine.model.Status;
+import jep.JepException;
+import jep.MainInterpreter;
 
+import org.apache.commons.configuration2.ex.ConfigurationException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
@@ -13,6 +17,9 @@ import javax.script.ScriptException;
 import javax.script.ScriptEngineManager;
 import javax.script.Invocable;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -183,6 +190,7 @@ public class Dispatcher {
 		} else {
 			log.debug("Didn't close Jep interpreter");
 		}
+		instances = new HashMap<>(); // reset the static variable
 	}
 
 	protected Dispatcher() {
@@ -262,5 +270,33 @@ public class Dispatcher {
 
 	public void setBindings(Map<String, Object> bindings) {
 		this.bindings = bindings;
+	}
+
+	public static void setupJep() {
+		// first look for an env var (this is mostly for local testing)
+		String pythonFolder = System.getenv("JEP_LIBRARY_PATH");
+
+		// then look in mdq config
+		if (pythonFolder == null) {
+			try {
+				MDQconfig cfg = new MDQconfig();
+				pythonFolder = cfg.getString("jep.path");
+			} catch (ConfigurationException ce) {
+				throw new RuntimeException("Error reading metadig configuration, ConfigurationException: " + ce);
+			} catch (IOException io) {
+				throw new RuntimeException("Error reading metadig configuration, IOException: " + io);
+			}
+		}
+
+		// define the jep library path
+		String jepPath = pythonFolder + "/libjep.jnilib";
+
+		if (!Files.exists(Path.of(jepPath))) {
+			jepPath = pythonFolder + "/libjep.so";
+		}
+
+			// set path for jep executing python
+		MainInterpreter.setJepLibraryPath(jepPath);
+		
 	}
 }
