@@ -1,16 +1,8 @@
 package edu.ucsb.nceas.mdqengine.dispatch;
 
-import edu.ucsb.nceas.mdqengine.MDQconfig;
-
-import org.apache.commons.configuration2.ex.ConfigurationException;
-
-import jep.SubInterpreter;
-import jep.MainInterpreter;
+import jep.SharedInterpreter;
 import jep.JepException;
 
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.io.IOException;
 import java.io.Reader;
 
 import javax.script.Bindings;
@@ -26,8 +18,7 @@ import javax.script.SimpleBindings;
  */
 public class JepScriptEngine implements ScriptEngine {
 
-    private SubInterpreter jepInterpreter = null;
-    private MainInterpreter mainInterpreter;
+    private SharedInterpreter jepInterpreter = null;
     private Bindings bindings = new SimpleBindings();
     private Bindings globalBindings = new SimpleBindings();
     private ScriptEngineFactory factory = null;
@@ -47,39 +38,10 @@ public class JepScriptEngine implements ScriptEngine {
      * @throws UnsupportedOperationException for methods not implemented
      */
     public JepScriptEngine() {
-        // first look for an env var (this is mostly for local testing)
-        String pythonFolder = System.getenv("JEP_LIBRARY_PATH");
-
-        // then look in mdq config
-        if (pythonFolder == null) {
-            try {
-                MDQconfig cfg = new MDQconfig();
-                pythonFolder = cfg.getString("jep.path");
-            } catch (ConfigurationException ce) {
-                throw new RuntimeException("Error reading metadig configuration, ConfigurationException: " + ce);
-            } catch (IOException io) {
-                throw new RuntimeException("Error reading metadig configuration, IOException: " + io);
-            }
-        }
-
-        // define the jep library path
-        String jepPath = pythonFolder + "/libjep.jnilib";
-
-        if (!Files.exists(Path.of(jepPath))) {
-            jepPath = pythonFolder + "/libjep.so";
-        }
-
-        try {
-            // set path for jep executing python
-            MainInterpreter.setJepLibraryPath(jepPath);
-
-        } catch (JepException e) {
-            throw new RuntimeException("Error setting configurating Jep interpreter: " + e);
-        }
 
         try {
             // create the interpreter for python executing
-            jepInterpreter = new SubInterpreter();
+            jepInterpreter = new SharedInterpreter();
         } catch (JepException e) {
             throw new RuntimeException("Error initializing Jep interpreter: " + e);
         }
@@ -118,7 +80,6 @@ public class JepScriptEngine implements ScriptEngine {
     public void close() {
         try {
             jepInterpreter.close();
-            mainInterpreter.close();
         } catch (JepException e) {
             throw new RuntimeException(e);
         }
