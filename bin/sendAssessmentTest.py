@@ -1,4 +1,4 @@
-#!/Users/clark/.virtualenvs/metadig/bin/python
+#!/Users/clark/.virtualenvs/jep/bin/python
 
 # this is a shebang to your python path. needs to be 2.7
 #/usr/bin/python
@@ -8,8 +8,8 @@
 
 import sys
 import re
-print "Sending assessment request to metadig-controler (test mode):"
-print "Number of arguments: ", len(sys.argv)
+print("Sending assessment request to metadig-controler (test mode):")
+print("Number of arguments: ", len(sys.argv))
 import socket
 
 host="localhost"
@@ -24,7 +24,7 @@ clientsocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 clientsocket.connect((host, portNum))
 
 testCount = 1
-suiteId = "test.suite"
+suiteId = "python.suite"
 nodeId = "urn:node:ARCTIC"
 
 idVal = "doi:10.18739/A2W08WG3R"
@@ -34,17 +34,17 @@ mdFile = "%s/%s.xml" % (testDir, fileIdVal)
 smFile = "%s/%s.sm" % (testDir, fileIdVal)
 
 # First send the type of request, either 'graph' or 'quality'
-clientsocket.send("%s\n" % 'quality')
+clientsocket.send('quality\n'.encode('utf-8'))
 
 # Next send the number of tests that will be run
-clientsocket.send("%s\n" % testCount)
+clientsocket.send(f"{testCount}\n".encode('utf-8'))
 
 msg = '%s,%s,%s,%s,%s\n' % (idVal, mdFile, smFile, suiteId, nodeId)
 
 print(msg)
-clientsocket.send(msg)
+clientsocket.send(msg.encode('utf-8'))
 
 # Server will stop reading from the current port connection
-clientsocket.send("Done\n")
+clientsocket.send("Done\n".encode('utf-8'))
 # Server will stop reading from any port connection, but will continue to run
 clientsocket.close()
