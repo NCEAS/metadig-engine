@@ -258,6 +258,7 @@ public class XMLDialect {
 				result.setStatus(Status.ERROR);
 				result.setOutput(new Output(e.getMessage()));
 			}
+			//dispatcher.close();
 
 		} else {
 			// we just skip instead

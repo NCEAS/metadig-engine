@@ -13,6 +13,7 @@ import javax.script.ScriptException;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.IOUtils;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import edu.ucsb.nceas.mdqengine.model.Result;
@@ -25,8 +26,13 @@ public class PythonDispatcherTest {
 
 	private String dataUrl = "https://knb.ecoinformatics.org/knb/d1/mn/v2/object/doi:10.5063/AA/wolkovich.29.1";
 
+	@BeforeClass
+	public static void setupOnce() {
+		Dispatcher.setupJep();
+	}
+
 	@Before
-	public void init() {
+	public void init(){
 		dispatcher = Dispatcher.getDispatcher("python");
 	}
 
