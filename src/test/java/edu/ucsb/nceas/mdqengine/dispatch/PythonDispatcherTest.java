@@ -4,6 +4,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import edu.ucsb.nceas.mdqengine.exception.MetadigException;
+
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
@@ -28,7 +30,11 @@ public class PythonDispatcherTest {
 
 	@BeforeClass
 	public static void setupOnce() {
-		Dispatcher.setupJep();
+		try {
+			Dispatcher.setupJep();
+		} catch (MetadigException me){
+			fail("Setup failed with MetadigException: " + me.getMessage());
+		}
 	}
 
 	@Before
