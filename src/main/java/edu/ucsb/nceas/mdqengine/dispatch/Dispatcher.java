@@ -1,6 +1,7 @@
 package edu.ucsb.nceas.mdqengine.dispatch;
 
 import edu.ucsb.nceas.mdqengine.MDQconfig;
+import edu.ucsb.nceas.mdqengine.exception.MetadigException;
 import edu.ucsb.nceas.mdqengine.model.Output;
 import edu.ucsb.nceas.mdqengine.model.Result;
 import edu.ucsb.nceas.mdqengine.model.Status;
@@ -272,7 +273,7 @@ public class Dispatcher {
 		this.bindings = bindings;
 	}
 
-	public static void setupJep() {
+	public static void setupJep() throws MetadigException {
 		// first look for an env var (this is mostly for local testing)
 		String pythonFolder = System.getenv("JEP_LIBRARY_PATH");
 
@@ -295,8 +296,12 @@ public class Dispatcher {
 			jepPath = pythonFolder + "/libjep.so";
 		}
 
-			// set path for jep executing python
-		MainInterpreter.setJepLibraryPath(jepPath);
-		
+		// set path for jep executing python
+		try {
+			MainInterpreter.setJepLibraryPath(jepPath);
+		} catch (JepException e) {
+			throw new MetadigException("Error confguring Jep: " + e);
+		}
+
 	}
 }
