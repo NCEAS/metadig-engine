@@ -11,7 +11,7 @@ LABEL maintainer="Jeanette Clark jclark@nceas.ucsb.edu"
 # Set the working directory 
 WORKDIR /var/lib/metadig
 
-ARG ENGINE_TAG=2.0.0
+ARG ENGINE_TAG=3.0.0-SNAPSHOT
 ENV ENGINE_TAG=${ENGINE_TAG}
 
 # The most recently built jar file is copied from the maven build directory to this dir by maven, so that
@@ -27,7 +27,7 @@ RUN apt-get update
 RUN apt-get install -y g++ git r-base r-base-dev r-base-core r-doc-html libc6-dev libssl-dev libxml2 libxml2-dev libcurl4-openssl-dev python3 python3-pip python3-dev openjdk-17-jdk
 
 # Set Java environment variables
-ENV JAVA_HOME=/usr/lib/jvm/openjdk-17
+ENV JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
 ENV PATH="$PATH:$JAVA_HOME/bin"
 
 # Install required R packages
