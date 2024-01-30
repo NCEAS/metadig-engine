@@ -519,6 +519,7 @@ public class Worker {
 
         try {
             RabbitMQchannel.queueDeclare(COMPLETED_QUEUE_NAME, durable, false, false, null);
+            RabbitMQchannel.queueBind(COMPLETED_QUEUE_NAME, EXCHANGE_NAME, COMPLETED_ROUTING_KEY);
             log.info("Connected to RabbitMQ queue " + COMPLETED_QUEUE_NAME);
         } catch (Exception e) {
             log.error("Error connecting to RabbitMQ queue " + COMPLETED_QUEUE_NAME);
