@@ -23,7 +23,7 @@ import java.util.concurrent.Callable;
  */
 public class AwardLookupCheck implements Callable<Result> {
 
-	private static String apiUrl = "https://www.research.gov/awardapi-service/v1/awards.json"
+	private static String apiUrl = "https://arcticdata.io/research.gov/awardapi-service/v1/awards.json"
 			+ "?printFields="
 			+ "id,"
 			+ "title,"
