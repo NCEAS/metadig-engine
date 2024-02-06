@@ -11,6 +11,9 @@ import org.apache.commons.logging.LogFactory;
 
 import java.io.InputStream;
 import java.net.URL;
+import java.net.MalformedURLException;
+import java.io.IOException;
+import net.minidev.json.parser.ParseException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -68,37 +71,51 @@ public class AwardLookupCheck implements Callable<Result> {
 
 					// parse the JSON array directly
 					JSONParser parser = new JSONParser(JSONParser.DEFAULT_PERMISSIVE_MODE);
-					JSONArray jsonAwards = (JSONArray) parser.parse(jsonStream);
+					JSONObject json = (JSONObject) parser.parse(jsonStream);
 
-					if (jsonAwards.isEmpty()) {
+					JSONObject jsonResponse = (JSONObject) json.get("response");
+					JSONArray jsonAwards = (JSONArray) jsonResponse.get("award");
+
+					if (jsonAwards == null || jsonAwards.size() < 1) {
 						log.warn("No award information found for " + idString);
 						continue;
 					}
 
 					// Process each award in the JSON array
-					for (Object obj : jsonAwards) {
-						JSONObject jsonAward = (JSONObject) obj;
 
-						// Extract desired information about the award
-						String title = (String) jsonAward.get("title");
-						String agency = (String) jsonAward.get("agency");
-						String id = (String) jsonAward.get("id");
-						String fundProgramName = (String) jsonAward.get("fundProgramName");
-						String primaryProgram = (String) jsonAward.get("primaryProgram");
+					JSONObject jsonAward = (JSONObject) jsonAwards.get(0);
 
-						// Add them all as outputs for search and grouping
-						outputs.add(new Output(title + " (" + agency + " " + id + ")"));
-						outputs.add(new Output(title));
-						outputs.add(new Output(agency));
-						outputs.add(new Output(id));
-						outputs.add(new Output(fundProgramName));
-						outputs.add(new Output(primaryProgram));
+					// Extract desired information about the award
+					String title = (String) jsonAward.get("title");
+					String agency = (String) jsonAward.get("agency");
+					String id = (String) jsonAward.get("id");
+					String fundProgramName = (String) jsonAward.get("fundProgramName");
+					JSONArray program = (JSONArray) jsonAward.get("primaryProgram");
+					String primaryProgram = (String) program.get(0);
 
-						// Look up cross-reference info as well
-						outputs.addAll(this.lookupCrossRef(id));
-					}
-				} catch (Exception e) {
-					log.error("Could not look up award " + awardId + " at URL " + url.toString() + ": ", e);
+					// Add them all as outputs for search and grouping
+					outputs.add(new Output(title + " (" + agency + " " + id + ")"));
+					outputs.add(new Output(title));
+					outputs.add(new Output(agency));
+					outputs.add(new Output(id));
+					outputs.add(new Output(fundProgramName));
+					outputs.add(new Output(primaryProgram));
+
+					// Look up cross-reference info as well
+					outputs.addAll(this.lookupCrossRef(id));
+
+				} catch (MalformedURLException me) {
+					log.error("Could not look up award " + awardId + " at URL " + url.toString()
+							+ "malformed URL exception");
+					log.error(me.getMessage());
+					continue;
+				} catch (IOException ioe) {
+					log.error("Could not look up award " + awardId + " at URL " + url.toString() + "IO exception");
+					log.error(ioe.getMessage());
+					continue;
+				} catch (ParseException pe) {
+					log.error("Could not look up award " + awardId + " at URL " + url.toString() + "parse exception");
+					log.error(pe.getMessage());
 					continue;
 				}
 			}
