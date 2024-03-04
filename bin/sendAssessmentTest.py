@@ -1,14 +1,11 @@
-#!/Users/clark/.virtualenvs/jep/bin/python
-
-# this is a shebang to your python path. needs to be 2.7
-#/usr/bin/python
+#!/usr/bin/python
 
 # This Python program can be used for local testing of RabbitMQ messaging between
 # metadig services, assessment processing and Solr indexing.
 
 import sys
 import re
-print("Sending assessment request to metadig-controler (test mode):")
+print("Sending assessment request to metadig-controller (test mode):")
 print("Number of arguments: ", len(sys.argv))
 import socket
 
