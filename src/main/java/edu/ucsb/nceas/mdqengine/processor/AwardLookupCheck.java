@@ -126,13 +126,4 @@ public class AwardLookupCheck implements Callable<Result> {
         return result;
 
     }
-
-    public Object getAwards() {
-        return awards;
-    }
-
-    public void setAwards(Object awards) {
-        this.awards = awards;
-    }
-
 }
