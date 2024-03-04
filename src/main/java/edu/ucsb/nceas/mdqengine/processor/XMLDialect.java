@@ -85,8 +85,6 @@ public class XMLDialect {
 		XPath xpath = xPathfactory.newXPath();
 		NodeList nodes = null;
 		try {
-			// String selectorPath = "//*[namespace-uri()]/concat(substring-before(name(),
-			// ':'),':',namespace-uri())";
 			String selectorPath = "//*[namespace-uri()]";
 
 			nodes = (NodeList) xpath.evaluate(selectorPath, this.nsAwareDocument, XPathConstants.NODESET);
@@ -384,8 +382,9 @@ public class XMLDialect {
 				String uri = entry.getUri();
 				// Some metadata files may have improper xmlns declarations that don't include
 				// a prefix (encountered in Dryad Data), so skip these.
-				if (prefix == null)
+				if (prefix == null){
 					continue;
+				}
 
 				// make sure we are overriding the found namespace[s] with the asserted ones
 				String existing = nsContext.getNamespaceURI(prefix);
@@ -461,8 +460,7 @@ public class XMLDialect {
 	public static Object retypeObject(Object value) {
 		Object result = value;
 
-		if (value instanceof String) {
-			String stringValue = (String) value;
+		if (value instanceof String stringValue) {
 			// try to type the value correctly
 			if (NumberUtils.isNumber(stringValue) && !stringValue.matches("^0\\d*$")) {
 				// If it's a valid number and doesn't start with zeros, create a Number object
@@ -509,7 +507,7 @@ public class XMLDialect {
 			transformer.transform(source, result);
 			return result.getWriter().toString();
 		} catch (TransformerException ex) {
-			ex.printStackTrace();
+			log.error("Error transforming to XML string." + ex.getMessage());
 			return null;
 		}
 
