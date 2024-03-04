@@ -143,8 +143,6 @@ public class JepScriptEngine implements ScriptEngine {
     /**
      * Get bindings
      * 
-     * Not sure exactly how/if this works, got this from an old Jep release
-     * 
      * @param scope
      * @return a Bindings value
      */
@@ -155,10 +153,6 @@ public class JepScriptEngine implements ScriptEngine {
         }
 
         return this.globalBindings;
-    }
-
-    public String getEngineName() {
-        return "python";
     }
 
     @Override
