@@ -35,6 +35,23 @@ jobs:
       - name: Install linux deps
         run: sudo apt-get install -y libcurl4-openssl-dev
 
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.8
+      
+      - name: Install python dependencies
+        run: pip install jep==3.9  # Install the jep library
+
+      - name: Set JEP_LIBRARY_PATH environment variable
+        run: |
+          echo "JEP_LIBRARY_PATH=$(python -c 'import site; print(site.getsitepackages()[0])')/jep" >> $GITHUB_ENV
+
+      - name: test
+        run: |
+          echo $JEP_LIBRARY_PATH
+          ls $JEP_LIBRARY_PATH
+
       - name: Install deps
         run: Rscript -e 'install.packages(c("httr", "jsonlite", "remotes"))'
       
@@ -58,7 +75,7 @@ jobs:
 
   docker-publish:
     name: Docker Build and Publish
-    if: github.ref_name == 'develop' || startsWith(github.ref, 'refs/tags/v') || startsWith(github.ref_name, 'bugfix')
+    if: github.ref_name == 'develop' || startsWith(github.ref, 'refs/tags/v') || startsWith(github.ref_name, 'feature')
     needs: maven-build
     runs-on: ubuntu-latest
     permissions:

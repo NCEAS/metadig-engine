@@ -2,6 +2,7 @@ package edu.ucsb.nceas.mdqengine;
 
 import com.rabbitmq.client.*;
 import edu.ucsb.nceas.mdqengine.collections.Runs;
+import edu.ucsb.nceas.mdqengine.dispatch.Dispatcher;
 import edu.ucsb.nceas.mdqengine.exception.MetadigException;
 import edu.ucsb.nceas.mdqengine.exception.MetadigIndexException;
 import edu.ucsb.nceas.mdqengine.exception.MetadigProcessException;
@@ -86,6 +87,7 @@ public class Worker {
 
         Worker wkr = new Worker();
         MDQconfig cfg = new MDQconfig();
+        Dispatcher.setupJep();
 
         try {
             RabbitMQpassword = cfg.getString("RabbitMQ.password");

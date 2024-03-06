@@ -44,7 +44,6 @@ import org.dataone.service.exceptions.UnsupportedType;
 import org.dataone.service.types.v1.Identifier;
 import org.dataone.service.types.v2.SystemMetadata;
 import org.dataone.service.util.TypeMarshaller;
-import org.python.core.buffer.Strided1DBuffer;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 

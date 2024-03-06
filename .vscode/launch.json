@@ -20,6 +20,18 @@
                 ".",
                 "${fileDirname}"
             ]
+        },
+        {
+            "name": "Run MDQEngine",
+            "type": "java",
+            "request": "launch",
+            "mainClass": "edu.ucsb.nceas.mdqengine.MDQEngine",
+            "args": [
+                "/opt/local/metadig/suites/python-suite.xml",
+                "${workspaceFolder}/src/test/resources/test-docs/doi:10.18739_A2W08WG3R.xml",
+                "${workspaceFolder}/src/test/resources/test-docs/doi:10.18739_A2W08WG3R.sm",
+            ],
+            "cwd": "${workspaceFolder}"
         }
     ]
 }
