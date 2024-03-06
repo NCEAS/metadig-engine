@@ -23,7 +23,7 @@
     <d1_cn_index_common_version>2.3.2</d1_cn_index_common_version>
     <!-- Have to use a very old version of Spring in order to stay compatible with d1_cn_index_processor -->
     <!-- <spring.version>4.3.8.RELEASE</spring.version> -->
-    <spring.version>5.3.22</spring.version>
+    <spring.version>6.1.4</spring.version>
     <!-- <docker.registry>docker.io</docker.registry> -->
     <docker.repo>metadig</docker.repo>
     <docker.tag>2.5.0</docker.tag>
