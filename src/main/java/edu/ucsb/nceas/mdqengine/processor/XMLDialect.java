@@ -507,7 +507,7 @@ public class XMLDialect {
 			transformer.transform(source, result);
 			return result.getWriter().toString();
 		} catch (TransformerException ex) {
-			log.error("Error transforming to XML string." + ex.getMessage());
+			log.error("Error transforming to XML string. " + ex.getMessage());
 			return null;
 		}
 
