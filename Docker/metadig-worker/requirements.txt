@@ -1,2 +1,2 @@
 numpy
-metadig @ git+https://github.com/NCEAS/metadig-py.git@develop
+metadig @ git+https://github.com/NCEAS/metadig-py.git
