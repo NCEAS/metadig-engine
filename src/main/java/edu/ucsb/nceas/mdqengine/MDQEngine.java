@@ -1,5 +1,6 @@
 package edu.ucsb.nceas.mdqengine;
 
+import edu.ucsb.nceas.mdqengine.dispatch.Dispatcher;
 import edu.ucsb.nceas.mdqengine.dispatch.MDQCache;
 import edu.ucsb.nceas.mdqengine.exception.MetadigException;
 import edu.ucsb.nceas.mdqengine.model.*;
@@ -128,6 +129,8 @@ public class MDQEngine {
 		}
 		run.setResult(results);
 
+		Dispatcher.getDispatcher("python").close();
+		
 		log.trace("Run results: " + JsonMarshaller.toJson(run));
 		
 		// clean up

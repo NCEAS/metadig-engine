@@ -1,0 +1,2 @@
+numpy
+metadig @ git+https://github.com/NCEAS/metadig-py.git
