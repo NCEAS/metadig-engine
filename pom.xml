@@ -10,7 +10,7 @@
   <url>https://github.com/NCEAS/metadig-engine</url>
   <properties>
     <bookkeeper.version>0.1.0-SNAPSHOT</bookkeeper.version>
-    <jackson.version>2.15.2</jackson.version>
+    <jackson.version>2.16.2</jackson.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <d1_libclient_java.version>2.3.1</d1_libclient_java.version>
     <renjin.version>0.8.2567</renjin.version>
