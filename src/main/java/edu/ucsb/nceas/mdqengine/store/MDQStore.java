@@ -29,7 +29,7 @@ public interface MDQStore {
 	void createRun(Run run);
 	void deleteRun(Run run);
 
-	void shutdown();
+	void close();
 
 	boolean isAvailable();
 	void renew() throws MetadigStoreException;

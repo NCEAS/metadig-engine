@@ -36,7 +36,7 @@ import java.util.Date;
  * @author slaughter
  *
  */
-public class DatabaseStore implements MDQStore {
+public class DatabaseStore implements MDQStore, AutoCloseable {
 
     protected Log log = LogFactory.getLog(this.getClass());
 
@@ -404,7 +404,7 @@ public class DatabaseStore implements MDQStore {
         }
     }
 
-    public void shutdown() {
+    public void close() {
 
         try {
             conn.close();

@@ -14,6 +14,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.xml.sax.SAXException;
 
+import javax.script.ScriptContext;
 import javax.xml.bind.JAXBException;
 import java.io.IOException;
 import java.net.URL;
@@ -48,6 +49,12 @@ public class InMemoryStore implements MDQStore {
 	public InMemoryStore() throws MetadigStoreException {
 		this.init();
 	}
+
+	@Override
+    public void close() {
+        throw new UnsupportedOperationException(
+                "close() is not implemented for the InMemoryStore");
+    }
 
 	protected Log log = LogFactory.getLog(this.getClass());
 
@@ -265,10 +272,6 @@ public class InMemoryStore implements MDQStore {
 
 	@Override
 	public void saveTask(Task task, String nodeId) throws MetadigStoreException {
-	}
-
-	@Override
-	public void shutdown() {
 	}
 
 	@Override

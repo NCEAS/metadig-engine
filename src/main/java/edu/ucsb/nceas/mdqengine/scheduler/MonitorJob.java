@@ -67,109 +67,109 @@ public class MonitorJob implements Job {
      */
     public void execute(JobExecutionContext context) throws JobExecutionException {
 
-        MDQStore store = null;
         List<Run> processing = new ArrayList<Run>();
         // Get a connection to the database
 
-        try {
-            store = new DatabaseStore();
+        try (DatabaseStore store = new DatabaseStore()) {
+
+            if (!store.isAvailable()) {
+                try {
+                    store.renew();
+                } catch (MetadigStoreException e) {
+                    e.printStackTrace();
+                    JobExecutionException jee = new JobExecutionException("Cannot renew store, unable to schedule job",
+                            e);
+                    throw jee;
+                }
+            }
+
+            // query database
+            try {
+                processing = store.listInProcessRuns();
+            } catch (MetadigStoreException e) {
+                JobExecutionException jee = new JobExecutionException(
+                        "Monitor: Error getting in process runs from store.",
+                        e);
+                throw jee;
+            }
+
+            if (processing.isEmpty()) { // if no stuck jobs are found go ahead and exit
+                log.info("Monitor: No stuck jobs found.");
+                return;
+            }
+
+            // get a session
+            Session session = null;
+            try {
+                session = getSession();
+            } catch (MetadigException me) {
+                JobExecutionException jee = new JobExecutionException("Could not connect to a DataONE session." + me);
+                jee.setRefireImmediately(true);
+                throw jee;
+            }
+
+            // request job via rabbitMQ
+            for (Run run : processing) {
+                log.info("Requesting monitor job: " + run.getObjectIdentifier() + ", " + run.getNodeId());
+
+                String suiteId = run.getSuiteId();
+                String pidStr = run.getObjectIdentifier();
+                String nodeId = run.getNodeId();
+                InputStream metadata = null;
+                InputStream sysmeta = null;
+
+                try {
+                    metadata = getMetadata(run, session, store);
+                } catch (MetadigException me) {
+                    JobExecutionException jee = new JobExecutionException(me);
+                    jee.setRefireImmediately(true);
+                    log.error("Problem getting metadata:" + me.getMessage());
+                    continue; // the run will be refired immediately, continue to next run
+                } catch (ConfigurationException ce) {
+                    JobExecutionException jee = new JobExecutionException(ce);
+                    jee.setRefireImmediately(false);
+                    log.error("Configuration error:" + ce.getMessage());
+                    continue; // the run will NOT be refired immediately, continue to next run
+                }
+
+                try {
+                    sysmeta = getSystemMetadata(run, session, store);
+                } catch (MetadigException me) {
+                    JobExecutionException jee = new JobExecutionException(me);
+                    jee.setRefireImmediately(true);
+                    log.error("Problem getting metadata:" + me.getMessage());
+                    continue; // the run will be refired immediately, continue to next run
+                } catch (ConfigurationException ce) {
+                    JobExecutionException jee = new JobExecutionException(ce);
+                    jee.setRefireImmediately(false);
+                    log.error("Configuration error:" + ce.getMessage());
+                    continue; // the run will NOT be refired immediately, continue to next run
+                }
+
+                if (metadata == null | sysmeta == null) { // any case where the metadata or sysmeta should be thrown
+                                                          // above
+                    log.error("Monitor: Aborting run - Metadata or system metadata not found for " + pidStr);
+                    continue;
+                }
+
+                String localFilePath = null;
+                DateTime requestDateTime = new DateTime(DateTimeZone.forOffsetHours(-7));
+                try {
+                    controller.processQualityRequest(nodeId, pidStr, metadata, suiteId,
+                            localFilePath, requestDateTime,
+                            sysmeta);
+                } catch (IOException io) {
+                    JobExecutionException jee = new JobExecutionException("Monitor: Error processing quality request.");
+                    jee.initCause(io);
+                    throw jee;
+                }
+
+            }
         } catch (MetadigStoreException e) {
             e.printStackTrace();
             JobExecutionException jee = new JobExecutionException("Cannot create store, unable to schedule job", e);
             throw jee;
         }
-
-        if (!store.isAvailable()) {
-            try {
-                store.renew();
-            } catch (MetadigStoreException e) {
-                e.printStackTrace();
-                JobExecutionException jee = new JobExecutionException("Cannot renew store, unable to schedule job", e);
-                throw jee;
-            }
-        }
-
-        // query database
-        try {
-            processing = store.listInProcessRuns();
-        } catch (MetadigStoreException e) {
-            JobExecutionException jee = new JobExecutionException("Monitor: Error getting in process runs from store.",
-                    e);
-            throw jee;
-        }
-
-        if (processing.isEmpty()) { // if no stuck jobs are found go ahead and exit
-            log.info("Monitor: No stuck jobs found.");
-            return;
-        }
-
-        // get a session
-        Session session = null;
-        try {
-            session = getSession();
-        } catch (MetadigException me) {
-            JobExecutionException jee = new JobExecutionException("Could not connect to a DataONE session." + me);
-            jee.setRefireImmediately(true);
-            throw jee;
-        }
-
-        // request job via rabbitMQ
-        for (Run run : processing) {
-            log.info("Requesting monitor job: " + run.getObjectIdentifier() + ", " + run.getNodeId());
-
-            String suiteId = run.getSuiteId();
-            String pidStr = run.getObjectIdentifier();
-            String nodeId = run.getNodeId();
-            InputStream metadata = null;
-            InputStream sysmeta = null;
-
-            try {
-                metadata = getMetadata(run, session, store);
-            } catch (MetadigException me) {
-                JobExecutionException jee = new JobExecutionException(me);
-                jee.setRefireImmediately(true);
-                log.error("Problem getting metadata:" + me.getMessage());
-                continue; // the run will be refired immediately, continue to next run
-            } catch (ConfigurationException ce) {
-                JobExecutionException jee = new JobExecutionException(ce);
-                jee.setRefireImmediately(false);
-                log.error("Configuration error:" + ce.getMessage());
-                continue; // the run will NOT be refired immediately, continue to next run
-            }
-
-            try {
-                sysmeta = getSystemMetadata(run, session, store);
-            } catch (MetadigException me) {
-                JobExecutionException jee = new JobExecutionException(me);
-                jee.setRefireImmediately(true);
-                log.error("Problem getting metadata:" + me.getMessage());
-                continue; // the run will be refired immediately, continue to next run
-            } catch (ConfigurationException ce) {
-                JobExecutionException jee = new JobExecutionException(ce);
-                jee.setRefireImmediately(false);
-                log.error("Configuration error:" + ce.getMessage());
-                continue; // the run will NOT be refired immediately, continue to next run
-            }
-
-            if (metadata == null | sysmeta == null) { // any case where the metadata or sysmeta should be thrown above
-                log.error("Monitor: Aborting run - Metadata or system metadata not found for " + pidStr);
-                continue;
-            }
-
-            String localFilePath = null;
-            DateTime requestDateTime = new DateTime(DateTimeZone.forOffsetHours(-7));
-            try {
-                controller.processQualityRequest(nodeId, pidStr, metadata, suiteId,
-                        localFilePath, requestDateTime,
-                        sysmeta);
-            } catch (IOException io) {
-                JobExecutionException jee = new JobExecutionException("Monitor: Error processing quality request.");
-                jee.initCause(io);
-                throw jee;
-            }
-
-        }
-        store.shutdown();
     }
 
     /**
