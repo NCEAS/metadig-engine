@@ -281,6 +281,11 @@ public class Dispatcher {
                 throw new RuntimeException("Error reading metadig configuration, IOException: " + io);
             }
         }
+        // if its still null, throw a runtime exception
+        // we don't want to start without Jep configured properly
+        if (pythonFolder == null){
+            throw new RuntimeException("Could not find path to jep install. Check JEP_LIBRARY_PATH in metadig.proerties and ensure it is correct.");
+        }
 
         // define the jep library path
         String jepPath = pythonFolder + "/libjep.jnilib";
