@@ -451,7 +451,6 @@ public class Worker {
                 try {
                     log.info("Resetting RabbitMQ queues and resending completed report...");
                     // destroy channel before setting up queues again
-                    RabbitMQchannel.close();
                     RabbitMQconnection.close();
                     // setup queues
                     this.setupQueues();
