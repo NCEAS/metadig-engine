@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   name: {{ include "metadig-worker.fullname" . }}
   labels:
-    {{- include "metadig-worker.labels" . | nindent 4 }}
+    app: metadig-worker
 spec:
   {{- if not .Values.autoscaling.enabled }}
   replicas: {{ .Values.replicaCount }}
@@ -27,6 +27,8 @@ spec:
       serviceAccountName: {{ include "metadig-worker.serviceAccountName" . }}
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      topologySpreadConstraints:
+        {{- toYaml .Values.topologySpreadConstraints | nindent 8}}
       containers:
         - name: {{ .Chart.Name }}
           securityContext:
@@ -60,14 +62,6 @@ spec:
           defaultMode: 0644
       restartPolicy: Always
       {{- with .Values.nodeSelector }}
-      nodeSelector:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
-      {{- with .Values.affinity }}
-      affinity:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
-      {{- with .Values.tolerations }}
       tolerations:
         {{- toYaml . | nindent 8 }}
       {{- end }}
