@@ -24,7 +24,7 @@ COPY target/metadig-engine-$ENGINE_TAG.jar metadig-engine-$ENGINE_TAG.jar
 COPY Docker/metadig-worker/solr solr/
 
 RUN apt-get update
-RUN apt-get install -y g++ git r-base r-base-dev r-base-core r-doc-html libc6-dev libssl-dev libxml2 libxml2-dev python3 python3-pip python3-dev openjdk-17-jdk librdf0-dev libcurl4-gnutls-dev 
+RUN apt-get install -y g++ git r-base r-base-dev r-base-core r-doc-html libc6-dev libssl-dev libxml2 libxml2-dev python3 python3-pip python3-dev openjdk-17-jdk librdf0-dev libcurl4-gnutls-dev libjq-dev
 
 # Set Java environment variables
 ENV JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
