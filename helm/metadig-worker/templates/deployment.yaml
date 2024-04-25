@@ -36,6 +36,14 @@ spec:
           env:
           - name: JAVA_OPTS
             value: "-Dlog4j2.formatMsgNoLookups=true"
+          - name: DATAONE_AUTH_TOKEN
+            valueFrom:
+              secretKeyRef:
+                name: dataone-token
+                key: DataONEauthToken
+                # If 'false", the secret must exist before the pod can start
+                # App versions before v2.3.4 will read this value from a config file, not the env var.
+                optional: true
           volumeMounts:
           - name: metadig-pv
             mountPath: {{ .Values.persistence.mountPath }}
