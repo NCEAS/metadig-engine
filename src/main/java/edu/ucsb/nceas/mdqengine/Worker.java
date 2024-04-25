@@ -218,6 +218,11 @@ public class Worker {
                     difference = System.currentTimeMillis() - startTimeProcessing;
                     elapsedTimeSecondsProcessing = TimeUnit.MILLISECONDS.toSeconds(difference);
                     qEntry.setProcessingElapsedTimeSeconds(elapsedTimeSecondsProcessing);
+                    run.setObjectIdentifier(metadataPid);
+                    run.setRunStatus(Run.SUCCESS);
+                    run.setErrorDescription("");
+                    run.setRunCount(runCount);
+                    run.save();
                     log.debug("Completed running quality suite.");
                 } catch (java.lang.Exception e) {
                     failFast = true;
@@ -263,9 +268,6 @@ public class Worker {
                         // determine the highest score for a obs. chain for each month.
                         log.debug("Searching for sequence id for pid: " + run.getObjectIdentifier());
                         // Add current run to collection, it will be saved during the run.update
-                        run.setObjectIdentifier(metadataPid);
-                        run.setRunStatus(Run.SUCCESS);
-                        run.setErrorDescription("");
                         // Should a 'sequenceId' and 'isLatest' be added to the Solr index?
                         if (indexSequenceId) {
                             // Add the current run to the collection, as a starting point for the sequence
@@ -290,10 +292,10 @@ public class Worker {
                             }
 
                             run.setSequenceId(sequenceId);
-                            run.setRunCount(runCount);
+                            run.save();
                         }
 
-                        run.save();
+                    
 
                         // Update runs in persist storage with sequenceId for this obsolescence chain
                         if (indexSequenceId && sequenceId != null) {
