@@ -249,12 +249,10 @@ public class RequestReportJob implements Job {
 
                 harvestNodeId = node.getIdentifier().getValue();
                 // If processing a CN, check each MN to see if it is being synchronized and if
-                // it
-                // is marked as up.
+                // it is marked as up.
                 if (isCN) {
                     // The NodeList task doesn't save CN entries from the DataONE 'listNodes()'
-                    // service, but check
-                    // just in case.
+                    // service, but check just in case.
                     if (node.getType().equals(NodeType.CN)) {
                         log.debug("Harvesting from CN, skipping CN entry from node list for "
                                 + node.getIdentifier().getValue());
@@ -300,10 +298,9 @@ public class RequestReportJob implements Job {
                 Task task;
                 task = store.getTask(taskName, taskType, harvestNodeId);
                 // If a 'task' entry has not been saved for this task name yet (i.e. this is an
-                // MN that has just been
-                // registerd with DataONE), then a 'lastHarvested' DataTime will not be
-                // available, in which case the
-                // 'startHarvestDataTime' from the config file will be used.
+                // MN that has just been registerd with DataONE), then a 'lastHarvested'
+                // DataTime will not be available, in which case the 'startHarvestDataTime' from
+                // the config file will be used.
                 if (task.getLastHarvestDatetime(harvestNodeId) == null) {
                     task.setTaskName(taskName);
                     task.setTaskType(taskType);
@@ -315,12 +312,9 @@ public class RequestReportJob implements Job {
 
                 DateTime lastHarvestDateDT = new DateTime(lastHarvestDateStr);
                 // Set the search start datetime to the last harvest datetime, unless it is in
-                // the
-                // future. (This can happen when the previous time range end was for the current
-                // day,
-                // as the end datetime range for the previous task run will have been stored as
-                // the
-                // new lastharvestDateTime.
+                // the future. (This can happen when the previous time range end was for the
+                // current day, as the end datetime range for the previous task run will have
+                // been stored as the new lastharvestDateTime.
                 DateTime startDT = null;
                 if (lastHarvestDateDT.isAfter(currentDT.toInstant())) {
                     startDT = currentDT;
@@ -331,15 +325,13 @@ public class RequestReportJob implements Job {
                 DateTime endDT = new DateTime(currentDT);
 
                 // If the start and end harvest dates are the same (happens for a new node),
-                // then
-                // tweak the start so that DataONE listObjects doesn't complain.
+                // then tweak the start so that DataONE listObjects doesn't complain.
                 if (startDT == endDT) {
                     startDT = startDT.minusMinutes(1);
                 }
 
                 // Track the sysmeta dateUploaded of the latest harvested pid. This will become
-                // the starting time of
-                // the next harvest.
+                // the starting time of the next harvest.
                 DateTime lastDateModifiedDT = startDT;
 
                 String startDTstr = dtfOut.print(startDT);
@@ -467,8 +459,7 @@ public class RequestReportJob implements Job {
         Boolean replicaStatus = false;
 
         // Do some back-flips to convert the start and end date to the ancient Java
-        // 'Date' type that is
-        // used by DataONE 'listObjects()'.
+        // 'Date' type that is used by DataONE 'listObjects()'.
         ZonedDateTime zdt = ZonedDateTime.parse(startHarvestDatetimeStr);
         // start date milliseconds since the epoch date "midnight, January 1, 1970 UTC"
         long msSinceEpoch = zdt.toInstant().toEpochMilli();
