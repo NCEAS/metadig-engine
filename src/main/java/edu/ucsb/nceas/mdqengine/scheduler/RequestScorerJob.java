@@ -130,9 +130,8 @@ public class RequestScorerJob implements Job {
         String pidFilter = dataMap.getString("pidFilter");
         String suiteId = dataMap.getString("suiteId");
         // The nodeId is used for filterine queries based on DataONE sysmeta
-        // 'datasource'.
-        // For example, if one wished to get scores for Arctic Data Center, the
-        // urn:node:ARCTIC would be specified.
+        // 'datasource'. For example, if one wished to get scores for Arctic Data
+        // Center, the urn:node:ARCTIC would be specified.
         String nodeId = dataMap.getString("nodeId");
         String startHarvestDatetimeStr = dataMap.getString("startHarvestDatetime");
         int harvestDatetimeInc = dataMap.getInt("harvestDatetimeInc");
@@ -213,10 +212,8 @@ public class RequestScorerJob implements Job {
             task = store.getTask(taskName, taskType, nodeId);
 
             // If a 'task' entry has not been saved for this task name yet, then a
-            // 'lastHarvested'
-            // DataTime will not be available, in which case the 'startHarvestDataTime' from
-            // the
-            // config file will be used.
+            // 'lastHarvested' DataTime will not be available, in which case the
+            // 'startHarvestDataTime' from the config file will be used.
             if (task.getLastHarvestDatetime(nodeId) == null) {
                 task = new Task();
                 task.setTaskName(taskName);
@@ -229,12 +226,9 @@ public class RequestScorerJob implements Job {
 
             DateTime lastHarvestDateDT = new DateTime(lastHarvestDateStr);
             // Set the search start datetime to the last harvest datetime, unless it is in
-            // the
-            // future. (This can happen when the previous time range end was for the current
-            // day,
-            // as the end datetime range for the previous task run will have been stored as
-            // the
-            // new lastharvestDateTime.
+            // the future. (This can happen when the previous time range end was for the
+            // current day, as the end datetime range for the previous task run will have
+            // been stored as the new lastharvestDateTime.
             DateTime startDT = null;
             if (lastHarvestDateDT.isAfter(currentDT.toInstant())) {
                 startDT = currentDT;
@@ -245,15 +239,13 @@ public class RequestScorerJob implements Job {
             DateTime endDT = new DateTime(currentDT);
 
             // If the start and end harvest dates are the same (happends for a new node),
-            // then
-            // tweek the start so that DataONE listObjects doesn't complain.
+            // then tweak the start so that DataONE listObjects doesn't complain.
             if (startDT == endDT) {
                 startDT = startDT.minusMinutes(1);
             }
 
             // Track the sysmeta dateUploaded of the latest harvested pid. This will become
-            // the starting time of
-            // the next harvest.
+            // the starting time of the next harvest.
             DateTime lastDateModifiedDT = startDT;
 
             String startDTstr = dtfOut.print(startDT);
@@ -264,10 +256,9 @@ public class RequestScorerJob implements Job {
             Integer resultCount = 0;
 
             // Two types of score requests can be processed - a "node" request that will get
-            // score info for an
-            // entire repository (e.g. urn:node:ARCTIC) or a "portal" request that will get
-            // scores for a
-            // specific portal (from the Solr portal entry collectionQuery).
+            // score info for an entire repository (e.g. urn:node:ARCTIC) or a "portal"
+            // request that will get scores for a specific portal (from the Solr portal
+            // entry collectionQuery).
             if (requestType != null && requestType.equalsIgnoreCase("node")) {
                 try {
                     // For a 'node' scores request, the 'collection' is the entire node, so specify
@@ -327,8 +318,7 @@ public class RequestScorerJob implements Job {
                     }
 
                     // Check if DataONE returned the max number of results. If so, we have to
-                    // request more by paging through
-                    // the results.
+                    // request more by paging through the results.
                     allIds += pidsToProcess.size();
                     if (resultCount >= countRequested) {
                         morePids = true;
@@ -404,11 +394,9 @@ public class RequestScorerJob implements Job {
         // frame
 
         // One query can return many documents, so use the paging mechanism to make sure
-        // we retrieve them all.
-        // Keep paging through query results until all pids have been fetched. The last
-        // 'page' of query
-        // results is indicated by the number of items returned being less than the
-        // number requested.
+        // we retrieve them all. Keep paging through query results until all pids have
+        // been fetched. The last 'page' of query results is indicated by the number of
+        // items returned being less than the number requested.
         int thisResultLength;
         // Now setup the xpath to retrieve the ids returned from the collection query.
         try {
@@ -426,8 +414,7 @@ public class RequestScorerJob implements Job {
         }
 
         // Loop through the Solr result. As the result may be large, page through the
-        // results, accumulating
-        // the pids returned into a ListResult object.
+        // results, accumulating the pids returned into a ListResult object.
         log.trace("Getting portal seriesIds from Solr ");
         int startPos = startCount;
 
