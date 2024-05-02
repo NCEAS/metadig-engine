@@ -225,8 +225,7 @@ public class Runs {
 
             // Start the traversal in the backward direction
             log.debug("Getting all runs (backward) for suiteId: " + suiteId + ", metadataId: " + metadataId
-                    + ", minDate: "
-                    + minDate + ", " + maxDate);
+                    + ", minDate: " + minDate + ", " + maxDate);
             forward = false;
             getNextRun(metadataId, suiteId, stopWhenSIfound, store, forward, level);
 
