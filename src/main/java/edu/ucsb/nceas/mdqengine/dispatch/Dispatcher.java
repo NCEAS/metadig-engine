@@ -283,8 +283,9 @@ public class Dispatcher {
         }
         // if its still null, throw a runtime exception
         // we don't want to start without Jep configured properly
-        if (pythonFolder == null){
-            throw new RuntimeException("Could not find path to jep install. Check JEP_LIBRARY_PATH in metadig.proerties and ensure it is correct.");
+        if (pythonFolder == null) {
+            throw new RuntimeException(
+                    "Could not find path to jep install. Check JEP_LIBRARY_PATH in metadig.proerties and ensure it is correct.");
         }
 
         // define the jep library path
