@@ -185,7 +185,7 @@ public class RequestScorerJob implements Job {
         try {
             d1Node = DataONE.getMultipartD1Node(session, nodeServiceUrl);
         } catch (MetadigException mpe) {
-            mpe.printStackTrace();
+            log.error(taskName + ": unable to create connection to service URL " + nodeServiceUrl, mpe);
             throw new JobExecutionException(taskName + ": unable to create connection to service URL " + nodeServiceUrl,
                     mpe);
         }
@@ -197,7 +197,7 @@ public class RequestScorerJob implements Job {
                 try {
                     store.renew();
                 } catch (MetadigStoreException e) {
-                    e.printStackTrace();
+                    log.error("Cannot renew store, unable to schedule job", e);
                     throw new JobExecutionException("Cannot renew store, unable to schedule job", e);
                 }
             }
@@ -357,7 +357,7 @@ public class RequestScorerJob implements Job {
                 }
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("Cannot create store, unable to schedule job", e);
             throw new JobExecutionException("Cannot create store, unable to schedule job", e);
         }
 
