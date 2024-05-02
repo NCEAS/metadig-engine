@@ -205,23 +205,13 @@ public class RequestReportJob implements Job {
 
         // Get a connection to the database
 
-        try (DatabaseStore store = new DatabaseStore();) {
-
-            if (!store.isAvailable()) {
-                try {
-                    store.renew();
-                } catch (MetadigStoreException e) {
-                    e.printStackTrace();
-                    throw new JobExecutionException("Cannot renew store, unable to schedule job", e);
-                }
-            }
+        try (DatabaseStore store = new DatabaseStore()) {
 
             ArrayList<Node> nodes = new ArrayList<>();
 
             /*
              * If the CN is being harvested, then get all the nodes in the node db. The node
-             * db contains
-             * info about all nodes registered with the CN.
+             * db contains info about all nodes registered with the CN.
              */
             if (isCN) {
                 nodes = store.getNodes();
