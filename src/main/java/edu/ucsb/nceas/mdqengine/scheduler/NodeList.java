@@ -98,7 +98,7 @@ public class NodeList implements Job {
         try {
             nodeList = cnNode.listNodes();
         } catch (NotImplemented | ServiceFailure e) {
-            e.printStackTrace();
+            log.error(taskName + ": cannot renew store, unable to schedule job", e);
             throw new JobExecutionException(taskName + ": cannot renew store, unable to schedule job", e);
         }
 
@@ -110,7 +110,7 @@ public class NodeList implements Job {
                 try {
                     store.renew();
                 } catch (MetadigStoreException e) {
-                    e.printStackTrace();
+                    log.error(taskName + ": cannot renew store, unable to schedule job" + e);
                     throw new JobExecutionException(taskName + ": cannot renew store, unable to schedule job", e);
                 }
             }
@@ -132,7 +132,7 @@ public class NodeList implements Job {
                     try {
                         store.saveNode(node);
                     } catch (MetadigStoreException mse) {
-                        mse.printStackTrace();
+                        log.error("Cannot save node to store." + mse.getStackTrace());
                         throw new JobExecutionException(
                                 "Cannot save node " + node.getIdentifier().getValue() + " to store",
                                 mse);
@@ -163,7 +163,7 @@ public class NodeList implements Job {
             }
 
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error(taskName + ": cannot create store, unable to schedule job", e);
             throw new JobExecutionException(taskName + ": cannot create store, unable to schedule job", e);
         }
     }
