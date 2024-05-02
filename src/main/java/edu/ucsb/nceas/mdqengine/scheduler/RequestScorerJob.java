@@ -397,9 +397,7 @@ public class RequestScorerJob implements Job {
         Document xmldoc = null;
 
         String queryStr = "?q=formatId:" + pidFilter + "+-obsoletedBy:*" + "+dateModified:[" + startHarvestDatetimeStr
-                + "%20TO%20"
-                + endHarvestDatetimeStr + "]"
-                + "&fl=seriesId,dateModified&q.op=AND";
+                + "%20TO%20" + endHarvestDatetimeStr + "]" + "&fl=seriesId,dateModified&q.op=AND";
         log.trace("query: " + queryStr);
 
         // Send the query to DataONE Solr to retrieve portal seriesIds for a given time
