@@ -34,6 +34,7 @@ ENV PATH="$PATH:$JAVA_HOME/bin"
 RUN echo 'options(repos = c(CRAN = "http://cran.rstudio.com"))' >> /usr/lib/R/etc/Rprofile.site
 RUN Rscript -e "install.packages(c('remotes', 'stringr', 'jsonlite'))"
 RUN Rscript -e "remotes::install_github('NCEAS/metadig-r', ref = 'v.0.2.0')"
+RUN Rscript -e "remotes::install_github('NCEAS/metadig-rake', ref = 'develop')"
 
 # DataONE indexer prints copious error msgs if these files don't exist
 RUN mkdir -p /etc/dataone/index && touch /etc/dataone/index/d1client.properties && touch /etc/dataone/node.properties && touch /etc/dataone/index/cn-index-processor.properties
