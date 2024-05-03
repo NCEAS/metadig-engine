@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   name: {{ include "metadig-worker.fullname" . }}
   labels:
-    app: metadig-worker
+    {{- include "metadig-worker.labels" . | nindent 4 }}
 spec:
   {{- if not .Values.autoscaling.enabled }}
   replicas: {{ .Values.replicaCount }}

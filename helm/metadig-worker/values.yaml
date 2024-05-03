@@ -4,6 +4,9 @@
 
 replicaCount: 1
 
+labels:
+  app: metadig-worker
+
 image:
   repository: ghcr.io/nceas/metadig-worker
   pullPolicy: Always
