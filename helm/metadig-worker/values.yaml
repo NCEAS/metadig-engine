@@ -10,7 +10,7 @@ labels:
 image:
   repository: ghcr.io/nceas/metadig-worker
   pullPolicy: Always
-  tag: "bugfix-postgres-connections"
+  tag: "develop"
 
 imagePullSecrets: []
 nameOverride: ""
