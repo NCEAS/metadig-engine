@@ -4,10 +4,13 @@
 
 replicaCount: 1
 
+labels:
+  app: metadig-worker
+
 image:
   repository: ghcr.io/nceas/metadig-worker
   pullPolicy: Always
-  tag: "v.3.0.0"
+  tag: "3.0.1"
 
 imagePullSecrets: []
 nameOverride: ""
@@ -37,6 +40,14 @@ podAnnotations: {}
 
 podSecurityContext: {}
   # fsGroup: 2000
+
+topologySpreadConstraints:
+  - maxSkew: 10
+    topologyKey: kubernetes.io/hostname
+    whenUnsatisfiable: ScheduleAnyway
+    labelSelector:
+      matchLabels:
+        app: metadig-worker
 
 securityContext: {}
   # capabilities:

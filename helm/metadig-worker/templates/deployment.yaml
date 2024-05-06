@@ -27,6 +27,8 @@ spec:
       serviceAccountName: {{ include "metadig-worker.serviceAccountName" . }}
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      topologySpreadConstraints:
+        {{- toYaml .Values.topologySpreadConstraints | nindent 8}}
       containers:
         - name: {{ .Chart.Name }}
           securityContext:
@@ -60,14 +62,6 @@ spec:
           defaultMode: 0644
       restartPolicy: Always
       {{- with .Values.nodeSelector }}
-      nodeSelector:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
-      {{- with .Values.affinity }}
-      affinity:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
-      {{- with .Values.tolerations }}
       tolerations:
         {{- toYaml . | nindent 8 }}
       {{- end }}

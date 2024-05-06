@@ -4,12 +4,11 @@
 
 # helm repo add bitnami https://charts.bitnami.com/bitnami
 
-helm install metadig-rabbitmq bitnami/rabbitmq \
---version=10.3.9 \
+helm upgrade metadig-rabbitmq bitnami/rabbitmq \
+--version=12.8.2 \
 --namespace metadig \
 --set image.registry=docker.io \
 --set image.repository=bitnami/rabbitmq \
---set image.tag=3.9.18-debian-10-r5 \
 --set auth.username=metadig \
 --set auth.password=quality \
 --set replicaCount=3 \
