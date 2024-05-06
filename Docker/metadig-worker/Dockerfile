@@ -11,7 +11,7 @@ LABEL maintainer="Jeanette Clark jclark@nceas.ucsb.edu"
 # Set the working directory 
 WORKDIR /var/lib/metadig
 
-ARG ENGINE_TAG=3.0.0-SNAPSHOT
+ARG ENGINE_TAG=3.0.1
 ENV ENGINE_TAG=${ENGINE_TAG}
 
 # The most recently built jar file is copied from the maven build directory to this dir by maven, so that

@@ -10,7 +10,7 @@ labels:
 image:
   repository: ghcr.io/nceas/metadig-worker
   pullPolicy: Always
-  tag: "develop"
+  tag: "3.0.1"
 
 imagePullSecrets: []
 nameOverride: ""
