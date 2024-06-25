@@ -1,9 +1,11 @@
 <?xml version="1.0"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>edu.ucsb.nceas</groupId>
   <artifactId>metadig-engine</artifactId>
-  <version>3.0.2</version>
+  <version>3.0.3-SNAPSHOT</version>
   <packaging>jar</packaging>
   <name>metadig-engine</name>
   <description>MetaDIG library for running metadata quality tests</description>
@@ -16,14 +18,15 @@
     <renjin.version>0.8.2567</renjin.version>
     <jython.version>2.7.3</jython.version>
     <gson.version>2.10.1</gson.version>
-    <json-path.version>2.8.0</json-path.version>
+    <json-path.version>2.9.0</json-path.version>
     <moxy.version>2.7.0</moxy.version>
     <log4j.version>2.23.0</log4j.version>
     <d1_cn_index_processor_version>2.3.15</d1_cn_index_processor_version>
     <d1_cn_index_common_version>2.3.2</d1_cn_index_common_version>
-    <!-- Have to use a very old version of Spring in order to stay compatible with d1_cn_index_processor -->
+    <!-- Have to use a very old version of Spring in order to stay compatible with
+    d1_cn_index_processor -->
     <!-- <spring.version>4.3.8.RELEASE</spring.version> -->
-    <spring.version>5.3.22</spring.version>
+    <spring.version>6.1.10</spring.version>
     <!-- <docker.registry>docker.io</docker.registry> -->
     <docker.repo>metadig</docker.repo>
     <docker.tag>2.5.0</docker.tag>
@@ -91,7 +94,7 @@
     <dependency>
       <groupId>net.minidev</groupId>
       <artifactId>json-smart</artifactId>
-      <version>2.5.0</version>
+      <version>2.5.1</version>
     </dependency>
     <!-- http://mvnrepository.com/artifact/commons-io/commons-io -->
     <dependency>
@@ -140,14 +143,15 @@
           <groupId>org.apache.logging.log4j</groupId>
           <artifactId>log4j-core</artifactId>
         </exclusion>
-        <exclusion><groupId>org.javassist</groupId>
+        <exclusion>
+          <groupId>org.javassist</groupId>
           <artifactId>javassist</artifactId>
         </exclusion>
         <exclusion>
           <groupId>javax.xml.bind</groupId>
-           <artifactId>jaxb-api</artifactId>
-       </exclusion>
-        </exclusions>
+          <artifactId>jaxb-api</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <!-- https://mvnrepository.com/artifact/com.rabbitmq/amqp-client -->
     <dependency>
@@ -240,11 +244,17 @@
       <groupId>org.apache.logging.log4j</groupId>
       <artifactId>log4j-jcl</artifactId>
       <version>${log4j.version}</version>
+      <exclusions>
+        <exclusion>
+          <groupId>commons-logging</groupId>
+          <artifactId>commons-logging</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>commons-logging</groupId>
       <artifactId>commons-logging</artifactId>
-      <version>1.3.0</version>
+      <version>1.3.2</version>
       <exclusions>
         <exclusion>
           <groupId>log4j</groupId>
@@ -396,8 +406,8 @@
         </exclusion>
       </exclusions>
     </dependency>
-   <!-- API, java.xml.bind module -->
-   <dependency>
+    <!-- API, java.xml.bind module -->
+    <dependency>
       <groupId>jakarta.xml.bind</groupId>
       <artifactId>jakarta.xml.bind-api</artifactId>
       <version>2.3.2</version>
@@ -426,7 +436,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
-        <version>3.8.1</version>
+        <version>3.13.0</version>
         <configuration>
           <source>17</source>
           <target>17</target>
@@ -441,7 +451,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-shade-plugin</artifactId>
-        <version>3.5.1</version>
+        <version>3.6.0</version>
         <executions>
           <execution>
             <phase>package</phase>
@@ -470,7 +480,8 @@
                 </excludes>
               </artifactSet>
               <transformers>
-                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                <transformer
+                  implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
                   <manifestEntries>
                     <Main-Class>edu.ucsb.nceas.mdqengine.Controller</Main-Class>
                     <Build-Number>1</Build-Number>
@@ -503,15 +514,28 @@
             <configuration>
               <!-- Copy files needed by the local environments of the Docker containers -->
               <target name="copy files">
-                <copy file="${project.build.directory}/metadig-engine-${project.version}.jar" tofile="${project.basedir}/Docker/metadig-worker/metadig-engine.jar"/>
-                <copy file="${project.build.directory}/metadig-engine-${project.version}.jar" tofile="${project.basedir}/Docker/metadig-scheduler/metadig-engine.jar"/>
-                <copy file="${project.build.directory}/metadig-engine-${project.version}.jar" tofile="${project.basedir}/Docker/metadig-scorer/metadig-engine.jar"/>
-                <copy file="${project.build.directory}/classes/solr/application-context-mdq.xml" tofile="${project.basedir}/Docker/metadig-worker/solr/application-context-mdq.xml"/>
-                <copy file="${project.build.directory}/classes/solr/application-context-systemmeta-200.xml" tofile="${project.basedir}/Docker/metadig-worker/solr/application-context-systemmeta-200.xml"/>
-                <copy file="${project.build.directory}/classes/solr/metadig-index-processor-context.xml" tofile="${project.basedir}/Docker/metadig-worker/solr/metadig-index-processor-context.xml"/>
-                <copy file="${project.build.directory}/classes/solr/application-context-mdq.xml" tofile="${project.basedir}/Docker/metadig-scorer/solr/application-context-mdq.xml"/>
-                <copy file="${project.build.directory}/classes/solr/application-context-systemmeta-200.xml" tofile="${project.basedir}/Docker/metadig-scorer/solr/application-context-systemmeta-200.xml"/>
-                <copy file="${project.build.directory}/classes/solr/metadig-index-processor-context.xml" tofile="${project.basedir}/Docker/metadig-scorer/solr/metadig-index-processor-context.xml"/>
+                <copy file="${project.build.directory}/metadig-engine-${project.version}.jar"
+                  tofile="${project.basedir}/Docker/metadig-worker/metadig-engine.jar" />
+                <copy file="${project.build.directory}/metadig-engine-${project.version}.jar"
+                  tofile="${project.basedir}/Docker/metadig-scheduler/metadig-engine.jar" />
+                <copy file="${project.build.directory}/metadig-engine-${project.version}.jar"
+                  tofile="${project.basedir}/Docker/metadig-scorer/metadig-engine.jar" />
+                <copy file="${project.build.directory}/classes/solr/application-context-mdq.xml"
+                  tofile="${project.basedir}/Docker/metadig-worker/solr/application-context-mdq.xml" />
+                <copy
+                  file="${project.build.directory}/classes/solr/application-context-systemmeta-200.xml"
+                  tofile="${project.basedir}/Docker/metadig-worker/solr/application-context-systemmeta-200.xml" />
+                <copy
+                  file="${project.build.directory}/classes/solr/metadig-index-processor-context.xml"
+                  tofile="${project.basedir}/Docker/metadig-worker/solr/metadig-index-processor-context.xml" />
+                <copy file="${project.build.directory}/classes/solr/application-context-mdq.xml"
+                  tofile="${project.basedir}/Docker/metadig-scorer/solr/application-context-mdq.xml" />
+                <copy
+                  file="${project.build.directory}/classes/solr/application-context-systemmeta-200.xml"
+                  tofile="${project.basedir}/Docker/metadig-scorer/solr/application-context-systemmeta-200.xml" />
+                <copy
+                  file="${project.build.directory}/classes/solr/metadig-index-processor-context.xml"
+                  tofile="${project.basedir}/Docker/metadig-scorer/solr/metadig-index-processor-context.xml" />
               </target>
             </configuration>
           </execution>
@@ -550,20 +574,20 @@
       </plugin>
     </plugins>
     <extensions>
-            <extension>
-                <groupId>org.apache.maven.wagon</groupId>
-                <artifactId>wagon-ssh</artifactId>
-                <version>${maven.wagon.version}</version>
-            </extension>
+      <extension>
+        <groupId>org.apache.maven.wagon</groupId>
+        <artifactId>wagon-ssh</artifactId>
+        <version>${maven.wagon.version}</version>
+      </extension>
     </extensions>
   </build>
   <distributionManagement>
-        <repository>
-            <uniqueVersion>false</uniqueVersion>
-            <id>maven.dataone.org</id>
-            <name>DataONE</name>
-            <url>scp://maven.dataone.org/var/www/maven</url>
-            <layout>default</layout>
-        </repository>
+    <repository>
+      <uniqueVersion>false</uniqueVersion>
+      <id>maven.dataone.org</id>
+      <name>DataONE</name>
+      <url>scp://maven.dataone.org/var/www/maven</url>
+      <layout>default</layout>
+    </repository>
   </distributionManagement>
 </project>
