@@ -273,8 +273,9 @@ public class MDQEngine {
 			for (int i = 0; i < nodeList.getLength(); i++) {
 				Element element = (Element) nodeList.item(i);
 				if ("id".equals(element.getAttribute("name"))) {
-					System.out.println(element.getTextContent());
-					dataObjects.add(element.getTextContent());
+					if (element.getTextContent() != identifier){
+						dataObjects.add(element.getTextContent());
+					}
 				}
 			}
 
