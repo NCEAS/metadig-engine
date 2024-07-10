@@ -8,6 +8,7 @@ import edu.ucsb.nceas.mdqengine.serialize.XmlMarshaller;
 import org.apache.commons.configuration2.ex.ConfigurationException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.dataone.service.types.v1.NodeReference;
 import org.dataone.service.types.v2.SystemMetadata;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -109,8 +110,10 @@ public class MDQEngineTest {
 	@Test
     public void testFindDataObjects() throws Exception {
 		MDQEngine mdqe = new MDQEngine();
-		String nodeId = "urn:node:ARCTIC";
-        ArrayList<String> objs = mdqe.findDataObjects(nodeId, "doi:10.18739/A26M33558");
+		NodeReference nodeId = new NodeReference();
+		nodeId.setValue("urn:node:ARCTIC");
+
+        ArrayList<String> objs = mdqe.findDataPids(nodeId, "doi:10.18739/A26M33558");
 
 		ArrayList<String> expected = new ArrayList<>(Arrays.asList(
             "urn:uuid:d1773868-1e6e-4a42-b21e-4ea744b1c1ae",
