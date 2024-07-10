@@ -16,6 +16,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.dataone.client.v2.itk.D1Client;
 import org.dataone.exceptions.MarshallingException;
+import org.dataone.service.exceptions.NotImplemented;
 import org.dataone.service.exceptions.ServiceFailure;
 import org.dataone.service.types.v1.NodeReference;
 import org.dataone.service.types.v2.SystemMetadata;
@@ -244,6 +245,14 @@ public class MDQEngine {
 			MetadigException jee = new MetadigException("error executing task.");
 			jee.initCause(ce);
 			throw jee;
+		}
+
+		if (nodeId.getValue().matches(".*[Tt]est.*")) {
+			try {
+				D1Client.setCN("https://cn-stage.test.dataone.org/cn");
+			} catch (NotImplemented | ServiceFailure e) {
+				log.error("Problem confiruging test CN" + e);
+			}
 		}
 
 		try {
