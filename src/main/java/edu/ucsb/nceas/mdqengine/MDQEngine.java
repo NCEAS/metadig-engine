@@ -99,7 +99,6 @@ public class MDQEngine {
 		String metadataContent = content;
 
 		XMLDialect xml = new XMLDialect(IOUtils.toInputStream(metadataContent, "UTF-8"));
-		xml.setParams(params);
 		xml.setSystemMetadata(sysMeta);
 		Path tempDir = Files.createTempDirectory("mdq_run");
 		xml.setDirectory(tempDir.toFile().getAbsolutePath());
@@ -115,7 +114,16 @@ public class MDQEngine {
 
 		// get list of data pids
 		NodeReference nodeId = sysMeta.getAuthoritativeMemberNode();
-		// findDataObjects(nodeId, sysMeta.getIdentifier());
+		ArrayList<String> dataPids = null;
+		try {
+			dataPids = findDataPids(nodeId, sysMeta.getIdentifier().getValue());
+		} catch (MetadigException e) {
+			log.error("Could not retrieve data objects for pid:" + sysMeta.getIdentifier().getValue() + ", node:"
+					+ nodeId.getValue());
+		}
+		params.put("dataPids", dataPids);
+
+		xml.setParams(params);
 
 		// run the checks in the suite to get results
 		for (Check check : suite.getCheck()) {
@@ -219,10 +227,10 @@ public class MDQEngine {
 		this.store = store;
 	}
 
-	public ArrayList<String> findDataObjects(String nodeId, String identifier) throws MetadigException {
+	public ArrayList<String> findDataPids(NodeReference nodeId, String identifier) throws MetadigException {
 		ArrayList<String> dataObjects = new ArrayList<>();
 		String dataOneAuthToken = null;
-
+		// TODO: Test the auth
 		try {
 			MDQconfig cfg = new MDQconfig();
 			dataOneAuthToken = System.getenv("DATAONE_AUTH_TOKEN");
@@ -239,10 +247,7 @@ public class MDQEngine {
 		}
 
 		try {
-
-			NodeReference nodeRef = new NodeReference();
-			nodeRef.setValue(nodeId);
-			String nodeEndpoint = D1Client.getMN(nodeRef).getNodeBaseServiceUrl();
+			String nodeEndpoint = D1Client.getMN(nodeId).getNodeBaseServiceUrl();
 			String encodedId = URLEncoder.encode(identifier, "UTF-8");
 			String queryUrl = nodeEndpoint + "/query/solr/?q=isDocumentedBy:" + "\"" + encodedId + "\"" + "&fl=id";
 
@@ -250,10 +255,10 @@ public class MDQEngine {
 			HttpURLConnection connection = (HttpURLConnection) url.openConnection();
 			connection.setRequestMethod("GET");
 			connection.setRequestProperty("Accept", "application/xml");
-			if (dataOneAuthToken != null){
+			if (dataOneAuthToken != null) {
 				connection.setRequestProperty("Authorization", "Bearer " + dataOneAuthToken);
 			}
-			
+
 			if (connection.getResponseCode() != 200) {
 				throw new RuntimeException("Failed : HTTP error code : " + connection.getResponseCode());
 			}
