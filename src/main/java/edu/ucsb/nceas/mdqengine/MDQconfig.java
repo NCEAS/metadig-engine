@@ -11,6 +11,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Iterator;
 
 public class MDQconfig {
 
@@ -51,6 +52,10 @@ public class MDQconfig {
      */
     public int getInt(String paramName) throws ConfigurationException {
         return(config.getInt(paramName));
+    }
+
+    public Iterator<String> getKeys() {
+        return(config.getKeys());
     }
 
     public static String readConfigParam (String paramName) throws ConfigurationException, IOException {
