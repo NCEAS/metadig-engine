@@ -24,6 +24,7 @@ import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Iterator;
 
 public class Dispatcher {
 
@@ -31,6 +32,7 @@ public class Dispatcher {
 
     protected ScriptEngine engine = null;
     protected String engineName = null;
+    protected String prefix = "store.";
 
     protected Map<String, Object> bindings = null;
 
@@ -55,6 +57,26 @@ public class Dispatcher {
      * @throws ScriptException
      */
     public Result dispatch(Map<String, Object> variables, String code) throws ScriptException {
+
+        try {
+            MDQconfig cfg = new MDQconfig();
+            Iterator<String> keys = cfg.getKeys();
+            Map<String, Object> storeConfig = new HashMap<>();
+
+            while (keys.hasNext()) {
+                String key = keys.next();
+                if (key.startsWith(prefix)) {
+                    String value = cfg.getString(key);
+                    String strippedKey = key.substring(prefix.length());
+                    storeConfig.put(strippedKey, value);
+                }
+            }
+            variables.put("storeConfiguration", storeConfig);
+        } catch (ConfigurationException ce) {
+            throw new RuntimeException("Error reading metadig configuration, ConfigurationException: " + ce);
+        } catch (IOException io) {
+            throw new RuntimeException("Error reading metadig configuration, IOException: " + io);
+        }
 
         Result dr = new Result();
 
