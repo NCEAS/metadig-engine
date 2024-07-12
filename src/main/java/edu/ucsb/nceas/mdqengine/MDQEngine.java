@@ -231,7 +231,6 @@ public class MDQEngine {
 	public ArrayList<String> findDataPids(NodeReference nodeId, String identifier) throws MetadigException {
 		ArrayList<String> dataObjects = new ArrayList<>();
 		String dataOneAuthToken = null;
-		// TODO: Test the auth
 		try {
 			MDQconfig cfg = new MDQconfig();
 			dataOneAuthToken = System.getenv("DATAONE_AUTH_TOKEN");
@@ -282,7 +281,7 @@ public class MDQEngine {
 			for (int i = 0; i < nodeList.getLength(); i++) {
 				Element element = (Element) nodeList.item(i);
 				if ("id".equals(element.getAttribute("name"))) {
-					if (element.getTextContent() != identifier){
+					if (element.getTextContent() != identifier) {
 						dataObjects.add(element.getTextContent());
 					}
 				}
@@ -320,13 +319,11 @@ public class MDQEngine {
 			Object tmpSysmeta = null;
 
 			// Read in the system metadata XML file if it is provided. Suites can be run
-			// without it.
-			// The SystemMetadata can be either version 1 or 2. The current type marshaller
-			// cannot handle version 1,
-			// so we have to convert v1 to v2 (seems like the marshalling call should do
-			// this for us).
-			// THe drawback to this approach is that it will be necessary to test for
-			// sysmeta v3 when it is released.
+			// without it. The SystemMetadata can be either version 1 or 2. The current type
+			// marshaller cannot handle version 1, so we have to convert v1 to v2 (seems
+			// like the marshalling call should do this for us). The drawback to this
+			// approach is that it will be necessary to test for sysmeta v3 when it is
+			// released.
 			if (args.length >= 3) {
 				Class smClasses[] = { org.dataone.service.types.v2.SystemMetadata.class,
 						org.dataone.service.types.v1.SystemMetadata.class };
