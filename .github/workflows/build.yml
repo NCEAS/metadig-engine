@@ -58,6 +58,12 @@ jobs:
       - name: Install metadig
         run: Rscript -e 'remotes::install_github("nceas/metadig-r")'
 
+      - name: Create /opt/local directory
+        run: mkdir -p /opt/local/metadig
+
+      - name: Copy properties file to /opt/local
+        run: cp helm/metadig-controller/config.dev/metadig.properties /opt/local/metadig/metadig.properties
+
       - name: Extract Maven project version
         run: echo "version="$(mvn -q -Dexec.executable=echo -Dexec.args='${project.version}' --non-recursive exec:exec) >> $GITHUB_OUTPUT
         id: get_version
