@@ -187,7 +187,10 @@ public class Dispatcher {
                             o.setType(type);
                             outputList.add(o);
                         }
-                        
+                        dr.setOutput(outputList);    
+                    } else {
+                        Output o = new Output(out_py.toString());
+                        dr.setOutput(o);
                     }
                   
                 }
