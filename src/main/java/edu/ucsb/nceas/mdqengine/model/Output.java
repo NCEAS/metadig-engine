@@ -33,6 +33,12 @@ public class Output {
 	@XmlAttribute(required = false)
 	private String type;
 
+	/**
+	 * The identifier of the object that was checked.
+	 */
+	@XmlAttribute(required = false)
+	private String identifier;
+
 	public Output() {}
 	
 	public Output(String value) {
@@ -53,6 +59,10 @@ public class Output {
 
 	public void setType(String type) {
 		this.type = type;
+	}
+
+	public void setIdentifier(String identifier) {
+		this.identifier = identifier;
 	}
 
 }
