@@ -21,6 +21,7 @@ import javax.script.Invocable;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -127,7 +128,10 @@ public class Dispatcher {
         } else {
             // for R and Python, the result has to be retrieved from engine global vars
             Object var_r = null;
-            Object var_py = null;
+            Object out = null;
+            Object out_py = null;
+            Object out_ids = null;
+            Object out_type = null;
             // do we have a result object from an R check?
             try {
                 var_r = engine.get("mdq_result");
@@ -145,7 +149,7 @@ public class Dispatcher {
             } else {
                 // try to find other result items from python checks
                 try {
-                    var_py = engine.get("call()"); // run the python function
+                    out = engine.get("call()"); // run the python function
                 } catch (Exception e) {
                     log.error(e.getMessage());
                     log.error(e.getStackTrace());
@@ -154,28 +158,50 @@ public class Dispatcher {
                 }
                 // try to get the global output variable from python
                 try {
-                    var_py = engine.get("output");
+                    out_py = engine.get("output");
+                    out_ids = engine.get("output_identifiers");
+                    out_type = engine.get("output_type");
+
                 } catch (Exception e) {
                     log.trace("No result found for python check variable variable output.");
                     // catch this silently since we are just fishing
                     // the no result case is handled later
                 }
                 // save the output
-                if (var_py != null && !var_py.toString().equals("<unbound>")) {
-                    dr.setOutput(new Output(var_py.toString()));
-                    var_py = null;
+                if (out_py != null && !out_py.toString().equals("<unbound>")) {
+                    
+                    if (out_py instanceof ArrayList){
+                        ArrayList<Output> outputList = new ArrayList<>();
+
+                        ArrayList<?> out_py_l = (ArrayList<?>) out_py;
+                        ArrayList<?> out_type_l = (ArrayList<?>) out_type;
+                        ArrayList<?> out_ids_l = (ArrayList<?>) out_ids;
+
+                        for (int i = 0; i < out_py_l.size(); i++) {
+                            Output o = new Output(out_py_l.get(i).toString());
+                        
+                            String id = out_ids_l.get(i).toString();
+                            String type = out_type_l.get(i).toString();
+                        
+                            o.setIdentifier(id);
+                            o.setType(type);
+                            outputList.add(o);
+                        }
+                        
+                    }
+                  
                 }
                 // try to get the global status variable from python
                 try {
-                    var_py = engine.get("status");
+                    out_py = engine.get("status");
                 } catch (Exception e) {
                     // catch this silently since we are just fishing
                     // the no result case is handled later
                     log.trace("No result found for python check variable variable status.");
                 }
                 // save the status
-                if (var_py != null && !var_py.toString().equals("<unbound>")) {
-                    dr.setStatus(Status.valueOf(var_py.toString()));
+                if (out_py != null && !out_py.toString().equals("<unbound>")) {
+                    dr.setStatus(Status.valueOf(out_py.toString()));
                 } else {
                     // if we haven't found anything at this point it probably failed
                     dr.setStatus(Status.FAILURE);
