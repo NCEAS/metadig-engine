@@ -29,24 +29,24 @@ quality,quality-sctld,metadig,30 0/1 * * * ?,"^eml.*|^http.*eml.*;FAIR-suite-0.4
 quality,quality-drp,metadig,35 0/1 * * * ?,"^eml.*|^http.*eml.*;FAIR-suite-0.4.0;urn:node:DRP;2010-10-07T00:00:00.00Z;1;1000;"
 #
 # Portal scoring tasks
-score,portal-KNB-FAIR,metadig,1 0/1 * * * ?,"*portals*;FAIR-suite-0.3.1;urn:node:KNB;2020-08-10T00:00:00.00Z;1;100;portal"
-score,portal-ARCTIC-FAIR,metadig,6 0/1 * * * ?,"*portals*;FAIR-suite-0.3.1;urn:node:ARCTIC;2022-05-01T00:00:00.00Z;1;100;portal"
-score,portal-mnUCSB1-FAIR,metadig,11 0/1 * * * ?,"*portals*;FAIR-suite-0.3.1;urn:node:mnUCSB1;2020-08-24T00:00:00.00Z;1;100;portal"
+score,portal-KNB-FAIR,metadig,1 0/1 * * * ?,"*portals*;FAIR-suite-0.4.0;urn:node:KNB;2020-08-10T00:00:00.00Z;1;100;portal"
+score,portal-ARCTIC-FAIR,metadig,6 0/1 * * * ?,"*portals*;FAIR-suite-0.4.0;urn:node:ARCTIC;2022-05-01T00:00:00.00Z;1;100;portal"
+score,portal-mnUCSB1-FAIR,metadig,11 0/1 * * * ?,"*portals*;FAIR-suite-0.4.0;urn:node:mnUCSB1;2020-08-24T00:00:00.00Z;1;100;portal"
 #
 # Note: Portal harvesting for DataONE portals created on search.dataone.org will be performed on mnUCSB1, as MetacatUI sends create and
 #       update requests performed on search.dataone.org to this host. We want to harvest them as soon as they are created, and not have to wait for mnUCSB1 to
 #      sync to the CN, and then the CN index it, so the following entry is obsolete, and no longer used.
-# #score,portal-CN-FAIR,metadig,35 0/1 * * * ?,"*portals*;FAIR.suite-0.3.1;urn:node:CN;2020-08-24T00:00:00.00Z;1;100;portal"
+# #score,portal-CN-FAIR,metadig,35 0/1 * * * ?,"*portals*;FAIR.suite-0.4.0;urn:node:CN;2020-08-24T00:00:00.00Z;1;100;portal"
 #
 # Task for creating member node metadata assessment graphs
-score,mn-portal-ARCTIC-FAIR,metadig,2 10 2 * * ?,";FAIR-suite-0.3.1;urn:node:ARCTIC;2022-05-01T00:00:00.00Z;1;1000;node"
-score,mn-portal-KNB-FAIR,metadig,7 10 2 * * ?,";FAIR-suite-0.3.1;urn:node:KNB;2020-08-24T00:00:00.00Z;1;1000;node"
-score,mn-portal-ESS-DIVE-FAIR,metadig,12 10 2 * * ?,";FAIR-suite-0.3.1;urn:node:ESS_DIVE;2020-08-24T00:00:00.00Z;1;1000;node"
-score,mn-portal-DataONE-FAIR,metadig,17 10 2 * * ?,";FAIR-suite-0.3.1;urn:node:CN;2020-08-24T00:00:00.00Z;1;1000;node"
-score,mn-portal-CA_OPC-FAIR,metadig,22 10 2 * * ?,";FAIR-suite-0.3.1;urn:node:CA_OPC;2020-08-28T00:00:00.00Z;1;1000;node"
-score,mn-portal-CERP_SFWMD-FAIR,metadig,27 10 2 * * ?,";FAIR-suite-0.3.1;urn:node:CERP_SFWMD;2020-08-28T00:00:00.00Z;1;1000;node"
-score,mn-portal-SCTLD,metadig,32 10 2 * * ?,";FAIR-suite-0.3.1;urn:node:SCTLD;2020-08-28T00:00:00.00Z;1;1000;node"
-score,mn-portal-DRP,metadig,37 10 2 * * ?,";FAIR-suite-0.3.1;urn:node:DRP;2020-08-28T00:00:00.00Z;1;1000;node"
+score,mn-portal-ARCTIC-FAIR,metadig,2 10 2 * * ?,";FAIR-suite-0.4.0;urn:node:ARCTIC;2022-05-01T00:00:00.00Z;1;1000;node"
+score,mn-portal-KNB-FAIR,metadig,7 10 2 * * ?,";FAIR-suite-0.4.0;urn:node:KNB;2020-08-24T00:00:00.00Z;1;1000;node"
+score,mn-portal-ESS-DIVE-FAIR,metadig,12 10 2 * * ?,";FAIR-suite-0.4.0;urn:node:ESS_DIVE;2020-08-24T00:00:00.00Z;1;1000;node"
+score,mn-portal-DataONE-FAIR,metadig,17 10 2 * * ?,";FAIR-suite-0.4.0;urn:node:CN;2020-08-24T00:00:00.00Z;1;1000;node"
+score,mn-portal-CA_OPC-FAIR,metadig,22 10 2 * * ?,";FAIR-suite-0.4.0;urn:node:CA_OPC;2020-08-28T00:00:00.00Z;1;1000;node"
+score,mn-portal-CERP_SFWMD-FAIR,metadig,27 10 2 * * ?,";FAIR-suite-0.4.0;urn:node:CERP_SFWMD;2020-08-28T00:00:00.00Z;1;1000;node"
+score,mn-portal-SCTLD,metadig,32 10 2 * * ?,";FAIR-suite-0.4.0;urn:node:SCTLD;2020-08-28T00:00:00.00Z;1;1000;node"
+score,mn-portal-DRP,metadig,37 10 2 * * ?,";FAIR-suite-0.4.0;urn:node:DRP;2020-08-28T00:00:00.00Z;1;1000;node"
 #
 # Task for ingesting files into the file store from /data/metadig/store/stage/{code,data,graph,metadata}
 #filestore,ingest,metadig,0 0/1 * * * ?,"stage;;*.*;README.txt;filestore-ingest.log"
