@@ -132,6 +132,7 @@ public class Dispatcher {
             Object out_py = null;
             Object out_ids = null;
             Object out_type = null;
+            Object out_status = null;
             // do we have a result object from an R check?
             try {
                 var_r = engine.get("mdq_result");
@@ -169,8 +170,8 @@ public class Dispatcher {
                 }
                 // save the output
                 if (out_py != null && !out_py.toString().equals("<unbound>")) {
-                    
-                    if (out_py instanceof ArrayList){
+
+                    if (out_py instanceof ArrayList) {
                         ArrayList<Output> outputList = new ArrayList<>();
 
                         ArrayList<?> out_py_l = (ArrayList<?>) out_py;
@@ -179,32 +180,37 @@ public class Dispatcher {
 
                         for (int i = 0; i < out_py_l.size(); i++) {
                             Output o = new Output(out_py_l.get(i).toString());
-                        
+
                             String id = out_ids_l.get(i).toString();
                             String type = out_type_l.get(i).toString();
-                        
+
                             o.setIdentifier(id);
                             o.setType(type);
                             outputList.add(o);
                         }
-                        dr.setOutput(outputList);    
+                        dr.setOutput(outputList);
                     } else {
                         Output o = new Output(out_py.toString());
                         dr.setOutput(o);
                     }
-                  
+
                 }
+                // if we didn't get any "normal" output from python grab whatever got returned
+                if (out != null & out_py == null) {
+                    Output o = new Output(out.toString());
+                    dr.setOutput(o);
+                } 
                 // try to get the global status variable from python
                 try {
-                    out_py = engine.get("status");
+                    out_status = engine.get("status");
                 } catch (Exception e) {
                     // catch this silently since we are just fishing
                     // the no result case is handled later
                     log.trace("No result found for python check variable variable status.");
                 }
                 // save the status
-                if (out_py != null && !out_py.toString().equals("<unbound>")) {
-                    dr.setStatus(Status.valueOf(out_py.toString()));
+                if (out_status != null && !out_status.toString().equals("<unbound>")) {
+                    dr.setStatus(Status.valueOf(out_status.toString()));
                 } else {
                     // if we haven't found anything at this point it probably failed
                     dr.setStatus(Status.FAILURE);
