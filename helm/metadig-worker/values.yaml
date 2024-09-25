@@ -89,32 +89,29 @@ tolerations: []
 affinity: {}
 
 persistence:
-  ## @param persistence.enabled Use a PVC to persist data.
-  ##
-  enabled: true
-  ## @param persistence.existingClaim A manually managed Persistent Volume and Claim
-  ## If defined, PVC must be created manually before volume will be bound
-  ## The value is evaluated as a template
-  ##
-  claimName: "cephfs-metadig-pvc"
-  ## @param persistence.storageClass Storage class of backing PVC
-  ## If defined, storageClassName: <storageClass>
-  ## If set to "-", storageClassName: "", which disables dynamic provisioning
-  ## If undefined (the default) or set to null, no storageClassName spec is
-  ## set, choosing the default provisioner.
-  ##
-  storageClass: ""
-  ## @param persistence.accessModes Persistent Volume Access Modes
-  ##
-  accessModes: ReadWriteMany
-  ## @param persistence.size Size of data volume
-  ##
-  size: 20Gi
-  ## @param persistence.annotations Persistence annotations for Solr
-  ##
-  annotations: {}
-  ## @param persistence.mountPath Persistence mount path for Solr
-  ##
-  mountPath: "/opt/local"
+  metadig:
+    enabled: true
+    ## @param persistence.existingClaim
+    claimName: "cephfs-metadig-pvc"
+    ## @param persistence.storageClass Storage class of backing PVC
+    ## If defined, storageClassName: <storageClass>
+    ## If set to "-", storageClassName: "", which disables dynamic provisioning
+    ## If undefined (the default) or set to null, no storageClassName spec is
+    ## set, choosing the default provisioner.
+    ##
+    storageClass: ""
+    accessModes: ReadWriteMany
+    size: 20Gi
+    ## @param persistence.annotations Persistence annotations for Solr
+    ##
+    annotations: {}
+    ## @param persistence.mountPath Persistence mount path for Solr
+    ##
+    mountPath: "/opt/local"
+
+  metacat:
+    claimName: metadig-worker-metacat-pvc
+    mountPath: "/var/data/metacat"
+    
 dns:
   config: true
