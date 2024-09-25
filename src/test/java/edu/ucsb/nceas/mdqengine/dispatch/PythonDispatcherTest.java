@@ -60,7 +60,7 @@ public class PythonDispatcherTest {
 			e.printStackTrace();
 			fail(e.getMessage());
 		}
-		assertEquals("True", result.getOutput().get(0).getValue());
+		assertEquals("true", result.getOutput().get(0).getValue());
 	}
 
 	@Test
