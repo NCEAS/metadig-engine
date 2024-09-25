@@ -50,6 +50,7 @@ spec:
             subPath: log4j.properties
           - name: {{ .Values.persistence.metacat.claimName }}
             mountPath: {{ .Values.persistence.metacat.mountPath }}
+            readOnly: true
       volumes:
       - name: metadig-pv
         persistentVolumeClaim:
