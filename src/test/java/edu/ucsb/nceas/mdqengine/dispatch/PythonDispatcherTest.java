@@ -48,7 +48,7 @@ public class PythonDispatcherTest {
 
 		names.put("myInt", XMLDialect.retypeObject("2"));
 		names.put("myFloat", XMLDialect.retypeObject("1.5"));
-		names.put("myBool", XMLDialect.retypeObject("True"));
+		names.put("myBool", XMLDialect.retypeObject("true"));
 		names.put("myStr", XMLDialect.retypeObject("hello"));
 
 		String code = "output = (type(myInt) is int) and (type(myFloat) is float) and (type(myBool) is bool)";
