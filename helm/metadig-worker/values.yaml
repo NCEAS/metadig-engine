@@ -110,8 +110,8 @@ persistence:
     mountPath: "/opt/local"
 
   metacat:
-    claimName: metadig-worker-metacat-pvc
-    mountPath: "/var/data/metacat"
-    
+    claimName: metadig-repos-rom
+    mountPath: "/var/data/repos"
+
 dns:
   config: true
