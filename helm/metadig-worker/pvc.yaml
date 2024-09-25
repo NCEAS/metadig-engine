@@ -1,0 +1,10 @@
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: metadig-worker-metacat-pvc
+spec:
+  accessModes:
+    - ReadOnlyMany
+  storageClassName: csi-cephfs-sc
+  volumeName: cephfs-metacatarctic-metacat-varmetacat
