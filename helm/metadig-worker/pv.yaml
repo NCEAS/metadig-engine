@@ -17,7 +17,7 @@ spec:
     volumeAttributes:
       clusterID: 8aa4d4a0-a209-11ea-baf5-ffc787bfc812
       fsName: cephfs
-      rootPath: /volumes/tdg-subvol-group/tdg-subvol/131b18ad-e09d-4234-8bea-7c60ffa5621c/repos/
+      rootPath: /volumes/pdg-subvol-group/pdg-subvol/a5c90f20-f824-4ce9-b175-6685d7846520/repos/
       staticVolume: "true"
     # volumeHandle can be anything, need not to be same
     # as PV name or volume name. keeping same for brevity
