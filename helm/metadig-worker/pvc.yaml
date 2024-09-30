@@ -8,7 +8,7 @@ spec:
   - ReadOnlyMany
   resources:
     requests:
-      storage: 42Ti
+      storage: 500Ti
   volumeMode: Filesystem
   # volumeName should be same as PV name
   volumeName: cephfs-repos-rom

@@ -63,9 +63,10 @@ spec:
         configMap:
           name: metadig-log4j-volume
           defaultMode: 0644
-      - name: {{ .Values.persistence.metadig.claimName }}
+      - name:  {{ .Values.persistence.metacat.claimName }}
         persistentVolumeClaim:
-          claimName: {{ .Values.persistence.metadig.claimName }}
+          claimName: {{ .Values.persistence.metacat.claimName }}
+          readOnly: true
       restartPolicy: Always
       {{- with .Values.nodeSelector }}
       tolerations:

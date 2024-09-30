@@ -8,6 +8,8 @@ LABEL org.opencontainers.image.title="metadig-engine worker"
 LABEL org.opencontainers.image.version="1.0.1"
 LABEL maintainer="Jeanette Clark jclark@nceas.ucsb.edu"
 
+RUN mkdir -p /var/data/repos
+
 # Set the working directory 
 WORKDIR /var/lib/metadig
 
