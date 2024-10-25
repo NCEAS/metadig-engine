@@ -258,6 +258,7 @@ public class MDQEngine {
 			String nodeEndpoint = D1Client.getMN(nodeId).getNodeBaseServiceUrl();
 			String encodedId = URLEncoder.encode(identifier, "UTF-8");
 			String queryUrl = nodeEndpoint + "/query/solr/?q=isDocumentedBy:" + "\"" + encodedId + "\"" + "&fl=id";
+			log.debug("queryURL: " + queryUrl);
 
 			URL url = new URL(queryUrl);
 			HttpURLConnection connection = (HttpURLConnection) url.openConnection();
