@@ -267,12 +267,13 @@ public class MDQEngine {
 			HttpURLConnection connection = (HttpURLConnection) url.openConnection();
 			connection.setRequestMethod("GET");
 			connection.setRequestProperty("Accept", "application/xml");
+			connection.setRequestProperty("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36");
 			if (dataOneAuthToken != null) {
 				connection.setRequestProperty("Authorization", "Bearer " + dataOneAuthToken);
 			}
 
 			if (connection.getResponseCode() != 200) {
-				throw new RuntimeException("Failed : HTTP error code : " + connection.getResponseCode());
+				throw new RuntimeException("Failed : HTTP error code : " + connection.getResponseCode() + connection.getResponseMessage());
 			}
 
 			InputStream xml = connection.getInputStream();
