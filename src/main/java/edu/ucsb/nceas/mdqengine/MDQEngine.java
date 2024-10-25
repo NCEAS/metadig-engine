@@ -256,9 +256,11 @@ public class MDQEngine {
 
 		try {
 			String nodeEndpoint = D1Client.getMN(nodeId).getNodeBaseServiceUrl();
-//			String encodedId = URLEncoder.encode(identifier, "UTF-8");
+			String encodedId = URLEncoder.encode(identifier, "UTF-8");
+			// This is necessary for metacat's solr to process the requested queryUrl
+			String encodedQuotes = URLEncoder.encode("\"", "UTF-8");
 //			String queryUrl = nodeEndpoint + "/query/solr/?q=isDocumentedBy:" + "\"" + encodedId + "\"" + "&fl=id";
-			String queryUrl = nodeEndpoint + "/query/solr/?q=isDocumentedBy:" + "\"" + identifier + "\"" + "&fl=id";
+			String queryUrl = nodeEndpoint + "/query/solr/?q=isDocumentedBy:" + encodedQuotes + encodedId + encodedQuotes + "&fl=id";
 			log.debug("queryURL: " + queryUrl);
 
 			URL url = new URL(queryUrl);
