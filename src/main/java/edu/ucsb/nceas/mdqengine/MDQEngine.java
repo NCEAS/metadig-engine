@@ -264,9 +264,9 @@ public class MDQEngine {
 			HttpURLConnection connection = (HttpURLConnection) url.openConnection();
 			connection.setRequestMethod("GET");
 			connection.setRequestProperty("Accept", "application/xml");
-			if (dataOneAuthToken != null) {
-				connection.setRequestProperty("Authorization", "Bearer " + dataOneAuthToken);
-			}
+//			if (dataOneAuthToken != null) {
+//				connection.setRequestProperty("Authorization", "Bearer " + dataOneAuthToken);
+//			}
 
 			if (connection.getResponseCode() != 200) {
 				throw new RuntimeException("Failed : HTTP error code : " + connection.getResponseCode());
