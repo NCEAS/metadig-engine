@@ -255,18 +255,19 @@ public class MDQEngine {
 		}
 
 		try {
+			// String together the solr query URL to grab the data pids
 			String nodeEndpoint = D1Client.getMN(nodeId).getNodeBaseServiceUrl();
-			String encodedId = URLEncoder.encode(identifier, "UTF-8");
-			// This is necessary for metacat's solr to process the requested queryUrl
-			String encodedQuotes = URLEncoder.encode("\"", "UTF-8");
-//			String queryUrl = nodeEndpoint + "/query/solr/?q=isDocumentedBy:" + "\"" + encodedId + "\"" + "&fl=id";
-			String queryUrl = nodeEndpoint + "/query/solr/?q=isDocumentedBy:" + encodedQuotes + encodedId + encodedQuotes + "&fl=id";
+			// The quotations wrapping the identifier are necessary for solr to parse the request
+			String valueToEncode = "\"" + identifier + "\"";
+			String encodedId = URLEncoder.encode(valueToEncode, "UTF-8");
+			String queryUrl = nodeEndpoint + "/query/solr/?q=isDocumentedBy:" + encodedId + "&fl=id";
 			log.debug("queryURL: " + queryUrl);
 
 			URL url = new URL(queryUrl);
 			HttpURLConnection connection = (HttpURLConnection) url.openConnection();
 			connection.setRequestMethod("GET");
 			connection.setRequestProperty("Accept", "application/xml");
+			// A user-agent is necessary otherwise we will get a http 403 forbidden error
 			connection.setRequestProperty("User-Agent", "MetadigEngine/feature-hashstore-support");
 			if (dataOneAuthToken != null) {
 				connection.setRequestProperty("Authorization", "Bearer " + dataOneAuthToken);
