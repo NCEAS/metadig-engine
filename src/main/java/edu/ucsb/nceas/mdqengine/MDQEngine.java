@@ -268,7 +268,7 @@ public class MDQEngine {
 			connection.setRequestMethod("GET");
 			connection.setRequestProperty("Accept", "application/xml");
 			// A user-agent is necessary otherwise we will get a http 403 forbidden error
-			connection.setRequestProperty("User-Agent", "MetadigEngine/feature-hashstore-support");
+			connection.setRequestProperty("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36");
 			if (dataOneAuthToken != null) {
 				connection.setRequestProperty("Authorization", "Bearer " + dataOneAuthToken);
 			}
