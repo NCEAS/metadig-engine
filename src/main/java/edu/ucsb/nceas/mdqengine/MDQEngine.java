@@ -258,9 +258,10 @@ public class MDQEngine {
 			// String together the solr query URL to grab the data pids
 			String nodeEndpoint = D1Client.getMN(nodeId).getNodeBaseServiceUrl();
 			// The quotations wrapping the identifier are necessary for solr to parse the request
-			String valueToEncode = "\"" + identifier + "\"";
-			String encodedId = URLEncoder.encode(valueToEncode, "UTF-8");
-			String queryUrl = nodeEndpoint + "/query/solr/?q=isDocumentedBy:" + encodedId + "&fl=id";
+			String encodedId = URLEncoder.encode(identifier, "UTF-8");
+			String encodedQuotes = URLEncoder.encode("\"", "UTF-8");
+//			String queryUrl = nodeEndpoint + "/query/solr/?q=isDocumentedBy:" + "\"" + encodedId + "\"" + "&fl=id";
+			String queryUrl = nodeEndpoint + "/query/solr/?q=isDocumentedBy:" + encodedQuotes + encodedId + encodedQuotes + "&fl=id";
 			log.debug("queryURL: " + queryUrl);
 
 			URL url = new URL(queryUrl);
@@ -274,7 +275,7 @@ public class MDQEngine {
 			}
 
 			if (connection.getResponseCode() != 200) {
-				throw new RuntimeException("Failed : HTTP error code : " + connection.getResponseCode() + connection.getResponseMessage());
+				throw new RuntimeException("Failed : HTTP error code : " + connection.getResponseCode());
 			}
 
 			InputStream xml = connection.getInputStream();
