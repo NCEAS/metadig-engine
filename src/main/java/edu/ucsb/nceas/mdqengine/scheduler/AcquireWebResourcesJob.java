@@ -70,7 +70,9 @@ public class AcquireWebResourcesJob implements Job {
 
         try {
             MDQconfig cfg = new MDQconfig();
+            // TODO: Can be null, needs to stop and throw an appropriate config
             downloadListFilepath = cfg.getString("downloadsList");
+            log.debug("downloadListFilepath: " + downloadListFilepath);
         } catch (ConfigurationException | IOException ce) {
             JobExecutionException jee = new JobExecutionException("Error executing task.");
             jee.initCause(ce);
