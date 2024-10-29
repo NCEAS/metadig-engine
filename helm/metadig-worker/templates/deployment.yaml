@@ -38,6 +38,11 @@ spec:
           env:
           - name: JAVA_OPTS
             value: "-Dlog4j2.formatMsgNoLookups=true"
+          - name: DATAONE_AUTH_TOKEN
+            valueFrom:
+              secretKeyRef:
+                name: dataone-token
+                key: DataONEauthToken
           volumeMounts:
           - name: metadig-pv
             mountPath: {{ .Values.persistence.metadig.mountPath }}
