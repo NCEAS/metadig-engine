@@ -70,12 +70,11 @@ public class AcquireWebResourcesJob implements Job {
 
         try {
             MDQconfig cfg = new MDQconfig();
-            // TODO: Can be null, needs to stop and throw an appropriate config
             downloadListFilepath = cfg.getString("downloadsList");
             log.debug("downloadListFilepath: " + downloadListFilepath);
             if (downloadListFilepath == null) {
                 String errMsg = "Value retrieved for 'downloadsList' file path from config "
-                    + "(properties) is null.";
+                    + "(properties) is null. Please check that 'metadig.properties'.";
                 throw new NullPointerException(errMsg);
             }
         } catch (ConfigurationException | IOException ce) {
