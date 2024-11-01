@@ -73,6 +73,11 @@ public class AcquireWebResourcesJob implements Job {
             // TODO: Can be null, needs to stop and throw an appropriate config
             downloadListFilepath = cfg.getString("downloadsList");
             log.debug("downloadListFilepath: " + downloadListFilepath);
+            if (downloadListFilepath == null) {
+                String errMsg = "Value retrieved for 'downloadsList' file path from config "
+                    + "(properties) is null.";
+                throw new NullPointerException(errMsg);
+            }
         } catch (ConfigurationException | IOException ce) {
             JobExecutionException jee = new JobExecutionException("Error executing task.");
             jee.initCause(ce);
