@@ -260,7 +260,6 @@ public class MDQEngine {
 			// The quotations wrapping the identifier are necessary for solr to parse the request
 			String encodedId = URLEncoder.encode(identifier, "UTF-8");
 			String encodedQuotes = URLEncoder.encode("\"", "UTF-8");
-//			String queryUrl = nodeEndpoint + "/query/solr/?q=isDocumentedBy:" + "\"" + encodedId + "\"" + "&fl=id";
 			String queryUrl = nodeEndpoint + "/query/solr/?q=isDocumentedBy:" + encodedQuotes + encodedId + encodedQuotes + "&fl=id";
 			log.debug("queryURL: " + queryUrl);
 
@@ -268,8 +267,9 @@ public class MDQEngine {
 			HttpURLConnection connection = (HttpURLConnection) url.openConnection();
 			connection.setRequestMethod("GET");
 			connection.setRequestProperty("Accept", "application/xml");
-			// A user-agent is necessary otherwise we will get a http 403 forbidden error
-			connection.setRequestProperty("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36");
+			// A user-agent is necessary from either Chrome or Mozilla otherwise we will get a http
+			// 403 forbidden error
+			connection.setRequestProperty("User-Agent", "Mozilla/MetadigEngine (feature-hashstore-support)");
 			if (dataOneAuthToken != null) {
 				connection.setRequestProperty("Authorization", "Bearer " + dataOneAuthToken);
 			}
