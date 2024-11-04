@@ -74,7 +74,7 @@ public class AcquireWebResourcesJob implements Job {
             log.debug("downloadListFilepath: " + downloadListFilepath);
             if (downloadListFilepath == null) {
                 String errMsg = "Value retrieved for 'downloadsList' file path from config "
-                    + "(properties) is null. Please check that 'metadig.properties'.";
+                    + "(properties) is null. Please check 'metadig.properties'.";
                 throw new NullPointerException(errMsg);
             }
         } catch (ConfigurationException | IOException ce) {
