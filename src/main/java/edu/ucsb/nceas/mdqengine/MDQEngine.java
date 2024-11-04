@@ -228,6 +228,15 @@ public class MDQEngine {
 		this.store = store;
 	}
 
+	/**
+	 * This method retrieves the data pids for a dataset given an identifier and a node by
+	 * communicating with the given nodeId's solr to get a result which contains the pids.
+	 *
+	 * @param nodeId Node to retrieve from
+	 * @param identifier Persistent identifier of the dataset
+	 * @return
+	 * @throws MetadigException If there is an issue retrieving a value from the properties/config
+	 */
 	public ArrayList<String> findDataPids(NodeReference nodeId, String identifier) throws MetadigException {
 		ArrayList<String> dataObjects = new ArrayList<>();
 		String dataOneAuthToken = null;
