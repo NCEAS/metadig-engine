@@ -34,7 +34,7 @@ ENV PATH="$PATH:$JAVA_HOME/bin"
 
 # Install required R packages
 RUN echo 'options(repos = c(CRAN = "http://cran.rstudio.com"))' >> /usr/lib/R/etc/Rprofile.site
-RUN Rscript -e "install.packages(c('remotes', 'stringr', 'jsonlite'))"
+RUN Rscript -e "install.packages(c('remotes', 'stringr', 'jsonlite', 'redland', 'jqr'))"
 RUN Rscript -e "remotes::install_github('NCEAS/metadig-r', ref = 'v.0.2.0')"
 RUN Rscript -e "remotes::install_github('NCEAS/metadig-rake', ref = 'develop')"
 
