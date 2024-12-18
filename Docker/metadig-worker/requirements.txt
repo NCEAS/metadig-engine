@@ -1,2 +1,3 @@
 numpy
 metadig @ git+https://github.com/NCEAS/metadig-py.git@feature-store-interface
+hashstore @ git+https://github.com/DataONEorg/hashstore.git
