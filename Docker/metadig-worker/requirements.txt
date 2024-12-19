@@ -1,3 +1,6 @@
 numpy
 metadig @ git+https://github.com/NCEAS/metadig-py.git@feature-store-interface
 hashstore @ git+https://github.com/DataONEorg/hashstore.git
+requests @ git+https://github.com/psf/requests.git
+pandas @ git+https://github.com/pandas-dev/pandas.git
+python-magic @ git+https://github.com/ahupp/python-magic.git
