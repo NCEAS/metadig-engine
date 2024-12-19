@@ -42,7 +42,7 @@ RUN Rscript -e "remotes::install_github('NCEAS/metadig-rake', ref = 'develop')"
 RUN mkdir -p /etc/dataone/index && touch /etc/dataone/index/d1client.properties && touch /etc/dataone/node.properties && touch /etc/dataone/index/cn-index-processor.properties
 
 COPY Docker/metadig-worker/requirements.txt /opt/local/metadig/
-RUN pip install meson meson-python ninja
+RUN pip install cython meson meson-python ninja
 RUN pip install -r /opt/local/metadig/requirements.txt
 
 # Run the Worker process
