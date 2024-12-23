@@ -4,3 +4,4 @@ hashstore @ git+https://github.com/DataONEorg/hashstore.git
 requests
 pandas
 python-magic
+tabulate
