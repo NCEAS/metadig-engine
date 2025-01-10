@@ -136,6 +136,7 @@ public class Worker {
 
                 String metadataPid = qEntry.getMetadataPid();
                 String suiteId = qEntry.getQualitySuiteId();
+                // TODO: Moving forward, sysmeta at this point should not be necessary
                 SystemMetadata sysmeta = qEntry.getSystemMetadata();
                 String nodeId = qEntry.getMemberNode();
 
@@ -206,8 +207,8 @@ public class Worker {
 
                 // Create the quality report
                 try {
-                    // Set host name so controller can print stats info, referring to this
-                    // worker.
+                    // Set host name so controller can print stats info, referring to this worker.
+                    // TODO: Reminder, qEntry will not have system metadata or metadata docs
                     qEntry.setHostname(InetAddress.getLocalHost().getHostName());
                     run = wkr.processReport(qEntry);
                     if (run.getObjectIdentifier() == null) {
@@ -326,6 +327,7 @@ public class Worker {
                         // if null is passed in.
                         String solrLocation = null;
                         log.debug("calling indexReport");
+                        // TODO: Determine which system metadata values are required to index
                         wkr.indexReport(metadataPid, runXML, suiteId, sysmeta, solrLocation);
 
                         // Update any runs in this sequence that have been modified, either set as
@@ -549,12 +551,11 @@ public class Worker {
         SystemMetadata sysmeta = message.getSystemMetadata();
 
         log.info("Running suite '" + message.getQualitySuiteId() + "'" + " for metadata pid "
-                + message.getMetadataPid());
+                + message.getMetadataPid() + ", for metadataDoc: " + metadataDoc);
         // Run the Metadata Quality Engine for the specified metadata object.
-        // TODO: set suite params correctly
+        // TODO: Review how suite params are set and possibly refactor
         Map<String, Object> params = new HashMap<String, Object>();
-        // To run the suite, we need the in memory store, that contains all checks and
-        // suites.
+        // To run the suite, we need the in memory store, that contains all checks and suites.
         MDQStore store = new InMemoryStore();
 
         Run run = null;
@@ -568,6 +569,8 @@ public class Worker {
                     + suiteId + e.getMessage(), e);
         }
 
+        // TODO: System metadata is required for the solr index to obtain statistics/reports
+        // TODO: We will need a path to obtain the system metadata if its removed from qEntry
         // Add DataONE sysmeta, if it was provided.
         if (sysmeta != null) {
             SysmetaModel smm = new SysmetaModel();
