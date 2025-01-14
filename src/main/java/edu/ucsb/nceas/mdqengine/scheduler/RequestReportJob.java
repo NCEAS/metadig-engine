@@ -662,7 +662,7 @@ public class RequestReportJob implements Job {
             log.trace("Retrieved metadata object for pid: " + pidStr);
         } catch (NotAuthorized na) {
             log.error("Not authorized to read pid: " + pid
-                    + ", unable to retrieve metadata, continuing with next pid...");
+                    + ", unable to retrieve eml metadata doc, continuing with next pid...");
             return;
         }
 
