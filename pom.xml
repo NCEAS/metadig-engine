@@ -418,6 +418,11 @@
       <artifactId>jakarta.xml.bind-api</artifactId>
       <version>2.3.2</version>
     </dependency>
+    <dependency>
+      <groupId>org.dataone</groupId>
+      <artifactId>hashstore</artifactId>
+      <version>1.1.0</version>
+    </dependency>
   </dependencies>
   <repositories>
     <repository>
