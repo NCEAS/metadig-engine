@@ -38,6 +38,9 @@ import java.io.InputStream;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Properties;
+import org.dataone.hashstore.HashStore;
+import org.dataone.hashstore.HashStoreFactory;
 
 /**
  * <p>
@@ -614,6 +617,7 @@ public class RequestReportJob implements Job {
         Identifier pid = new Identifier();
         pid.setValue(pidStr);
 
+        // TODO: Potential area for retrieving path to HashStore based on mnNode
         try {
             if (isCN) {
                 sysmeta = cnNode.getSystemMetadata(session, pid);
@@ -621,7 +625,26 @@ public class RequestReportJob implements Job {
                 sysmeta = mnNode.getSystemMetadata(session, pid);
             }
         } catch (NotAuthorized na) {
-            log.error("Not authorized to read sysmeta for pid: " + pid.getValue() + ", continuing with next pid...");
+            log.info("Not authorized to read sysmeta for pid: " + pid.getValue() + ", accessing "
+                          + "sysmeta through hashstore directly.");
+            // TODO: Refactor after confirming proof of concept
+            // TODO: Then junit tests
+            // HashStore Properties to use, temporary for 'dev.nceas.ucsb.edu'
+            String storePath = "/var/data/repos/dev/metacat/hashstore";
+            String storeDepth = "3";
+            String storeWidth = "2";
+            String storeAlgo = "SHA-256";
+            String sysmetaNamespace = "https://ns.dataone.org/service/types/v2.0#SystemMetadata";
+            Properties storeProperties = new Properties();
+            storeProperties.setProperty("storePath", storePath);
+            storeProperties.setProperty("storeDepth", storeDepth);
+            storeProperties.setProperty("storeWidth", storeWidth);
+            storeProperties.setProperty("storeAlgorithm", storeAlgo);
+            storeProperties.setProperty("storeMetadataNamespace", sysmetaNamespace);
+            // Get a HashStore
+            HashStore hashStore = HashStoreFactory.getHashStore("className", storeProperties);
+            // Retrieve system metadata
+            InputStream sysmetaIS = hashStore.retrieveMetadata(pidStr);
             return;
         } catch (Exception e) {
             throw (e);
