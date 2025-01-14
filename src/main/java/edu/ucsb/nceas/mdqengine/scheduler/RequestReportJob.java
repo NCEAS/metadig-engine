@@ -645,6 +645,9 @@ public class RequestReportJob implements Job {
             HashStore hashStore = HashStoreFactory.getHashStore("className", storeProperties);
             // Retrieve system metadata
             InputStream sysmetaIS = hashStore.retrieveMetadata(pidStr);
+
+            // Now create sysmeta object from stream
+            sysmeta = TypeMarshaller.unmarshalTypeFromStream(SystemMetadata.class, sysmetaIS);
             return;
         } catch (Exception e) {
             throw (e);
