@@ -662,7 +662,25 @@ public class RequestReportJob implements Job {
             log.trace("Retrieved metadata object for pid: " + pidStr);
         } catch (NotAuthorized na) {
             log.error("Not authorized to read pid: " + pid
-                    + ", unable to retrieve eml metadata doc, continuing with next pid...");
+                    + ", accessing eml metadata doc through hashstore directly.");
+            // TODO: Refactor after confirming proof of concept
+            // TODO: Then junit tests
+            // HashStore Properties to use, temporary for 'dev.nceas.ucsb.edu'
+            String storePath = "/var/data/repos/dev/metacat/hashstore";
+            String storeDepth = "3";
+            String storeWidth = "2";
+            String storeAlgo = "SHA-256";
+            String sysmetaNamespace = "https://ns.dataone.org/service/types/v2.0#SystemMetadata";
+            Properties storeProperties = new Properties();
+            storeProperties.setProperty("storePath", storePath);
+            storeProperties.setProperty("storeDepth", storeDepth);
+            storeProperties.setProperty("storeWidth", storeWidth);
+            storeProperties.setProperty("storeAlgorithm", storeAlgo);
+            storeProperties.setProperty("storeMetadataNamespace", sysmetaNamespace);
+            // Get a HashStore
+            HashStore hashStore = HashStoreFactory.getHashStore("className", storeProperties);
+            // Retrieve object stream
+            objectIS = hashStore.retrieveObject(pidStr);
             return;
         }
 
