@@ -643,12 +643,18 @@ public class RequestReportJob implements Job {
             storeProperties.setProperty("storeMetadataNamespace", sysmetaNamespace);
             // Get a HashStore
             HashStore hashStore = HashStoreFactory.getHashStore("className", storeProperties);
-            // Retrieve system metadata
-            InputStream sysmetaIS = hashStore.retrieveMetadata(pidStr);
 
-            // Now create sysmeta object from stream
-            sysmeta = TypeMarshaller.unmarshalTypeFromStream(SystemMetadata.class, sysmetaIS);
-            return;
+            // Retrieve system metadata
+            try {
+                InputStream sysmetaIS = hashStore.retrieveMetadata(pidStr);
+
+                // Now create sysmeta object from stream
+                sysmeta = TypeMarshaller.unmarshalTypeFromStream(SystemMetadata.class, sysmetaIS);
+                return;
+            } catch (Exception e) {
+                log.error("Unable to retrieve system metadata from hashstore for pid: " + pid.getValue());
+            }
+
         } catch (Exception e) {
             throw (e);
         }
@@ -679,9 +685,15 @@ public class RequestReportJob implements Job {
             storeProperties.setProperty("storeMetadataNamespace", sysmetaNamespace);
             // Get a HashStore
             HashStore hashStore = HashStoreFactory.getHashStore("className", storeProperties);
-            // Retrieve object stream
-            objectIS = hashStore.retrieveObject(pidStr);
-            return;
+
+            try {
+                // Retrieve object stream
+                objectIS = hashStore.retrieveObject(pidStr);
+                return;
+            } catch (Exception e) {
+                log.error("Unable to retrieve eml metadata doc from hashstore for pid: " + pid.getValue());
+            }
+
         }
 
         // quality suite service url, i.e.
