@@ -656,7 +656,9 @@ public class RequestReportJob implements Job {
                 sysmeta = TypeMarshaller.unmarshalTypeFromStream(SystemMetadata.class, sysmetaIS);
                 return;
             } catch (Exception e) {
-                log.error("Unable to retrieve system metadata from hashstore for pid: " + pid.getValue());
+                log.error(
+                    "Unable to retrieve system metadata from hashstore for pid: " + pid.getValue()
+                        + ". Additional Details: " + e.getMessage());
             }
 
         } catch (Exception e) {
@@ -680,7 +682,9 @@ public class RequestReportJob implements Job {
                 objectIS = hashStore.retrieveObject(pidStr);
                 return;
             } catch (Exception e) {
-                log.error("Unable to retrieve eml metadata doc from hashstore for pid: " + pid.getValue());
+                log.error(
+                    "Unable to retrieve eml metadata doc from hashstore for pid: " + pid.getValue()
+                        + ". Additional Details: " + e.getMessage());
             }
 
         }
