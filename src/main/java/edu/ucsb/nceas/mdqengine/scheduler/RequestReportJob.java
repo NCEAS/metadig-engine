@@ -617,6 +617,25 @@ public class RequestReportJob implements Job {
         Identifier pid = new Identifier();
         pid.setValue(pidStr);
 
+        // TODO: Refactor this HashStore section after confirming proof of concept
+        // HashStore prop values - temp hardcoded for 'dev.nceas.ucsb.edu'
+        // TODO: Needs to be retrieved from a config file
+        // TODO: Then junit tests
+        String storePath = "/var/data/repos/dev/metacat/hashstore";
+        String storeDepth = "3";
+        String storeWidth = "2";
+        String storeAlgo = "SHA-256";
+        String sysmetaNamespace = "https://ns.dataone.org/service/types/v2.0#SystemMetadata";
+        String hsClassName = "org.dataone.hashstore.filehashstore.FileHashStore";
+        Properties storeProperties = new Properties();
+        storeProperties.setProperty("storePath", storePath);
+        storeProperties.setProperty("storeDepth", storeDepth);
+        storeProperties.setProperty("storeWidth", storeWidth);
+        storeProperties.setProperty("storeAlgorithm", storeAlgo);
+        storeProperties.setProperty("storeMetadataNamespace", sysmetaNamespace);
+        // Get a HashStore
+        HashStore hashStore = HashStoreFactory.getHashStore(hsClassName, storeProperties);
+
         // TODO: Potential area for retrieving path to HashStore based on mnNode
         try {
             if (isCN) {
@@ -628,24 +647,9 @@ public class RequestReportJob implements Job {
             log.info("Not authorized to read sysmeta for pid: " + pid.getValue() + ", accessing "
                           + "sysmeta through hashstore directly.");
             // TODO: Refactor after confirming proof of concept
-            // TODO: Then junit tests
-            // HashStore Properties to use, temporary for 'dev.nceas.ucsb.edu'
-            String storePath = "/var/data/repos/dev/metacat/hashstore";
-            String storeDepth = "3";
-            String storeWidth = "2";
-            String storeAlgo = "SHA-256";
-            String sysmetaNamespace = "https://ns.dataone.org/service/types/v2.0#SystemMetadata";
-            Properties storeProperties = new Properties();
-            storeProperties.setProperty("storePath", storePath);
-            storeProperties.setProperty("storeDepth", storeDepth);
-            storeProperties.setProperty("storeWidth", storeWidth);
-            storeProperties.setProperty("storeAlgorithm", storeAlgo);
-            storeProperties.setProperty("storeMetadataNamespace", sysmetaNamespace);
-            // Get a HashStore
-            HashStore hashStore = HashStoreFactory.getHashStore("className", storeProperties);
-
-            // Retrieve system metadata
+            // TODO: Consider whether we want to try calling the mn/cn for streams at all
             try {
+                // Retrieve system metadata
                 InputStream sysmetaIS = hashStore.retrieveMetadata(pidStr);
 
                 // Now create sysmeta object from stream
@@ -670,22 +674,7 @@ public class RequestReportJob implements Job {
             log.error("Not authorized to read pid: " + pid
                     + ", accessing eml metadata doc through hashstore directly.");
             // TODO: Refactor after confirming proof of concept
-            // TODO: Then junit tests
-            // HashStore Properties to use, temporary for 'dev.nceas.ucsb.edu'
-            String storePath = "/var/data/repos/dev/metacat/hashstore";
-            String storeDepth = "3";
-            String storeWidth = "2";
-            String storeAlgo = "SHA-256";
-            String sysmetaNamespace = "https://ns.dataone.org/service/types/v2.0#SystemMetadata";
-            Properties storeProperties = new Properties();
-            storeProperties.setProperty("storePath", storePath);
-            storeProperties.setProperty("storeDepth", storeDepth);
-            storeProperties.setProperty("storeWidth", storeWidth);
-            storeProperties.setProperty("storeAlgorithm", storeAlgo);
-            storeProperties.setProperty("storeMetadataNamespace", sysmetaNamespace);
-            // Get a HashStore
-            HashStore hashStore = HashStoreFactory.getHashStore("className", storeProperties);
-
+            // TODO: Consider whether we want to try calling the mn/cn for streams at all
             try {
                 // Retrieve object stream
                 objectIS = hashStore.retrieveObject(pidStr);
