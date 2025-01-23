@@ -551,7 +551,7 @@ public class Worker {
         SystemMetadata sysmeta = message.getSystemMetadata();
 
         log.info("Running suite '" + message.getQualitySuiteId() + "'" + " for metadata pid "
-                + message.getMetadataPid() + ", for metadataDoc: " + metadataDoc);
+                + message.getMetadataPid());
         // Run the Metadata Quality Engine for the specified metadata object.
         // TODO: Review how suite params are set and possibly refactor
         Map<String, Object> params = new HashMap<String, Object>();
