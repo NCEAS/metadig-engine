@@ -276,9 +276,6 @@ public class MDQEngine {
 			HttpURLConnection connection = (HttpURLConnection) url.openConnection();
 			connection.setRequestMethod("GET");
 			connection.setRequestProperty("Accept", "application/xml");
-			// A user-agent is necessary from either Chrome or Mozilla otherwise we will get a http
-			// 403 forbidden error
-			connection.setRequestProperty("User-Agent", "Mozilla/MetadigEngine (feature-hashstore-support)");
 			if (dataOneAuthToken != null) {
 				connection.setRequestProperty("Authorization", "Bearer " + dataOneAuthToken);
 			}
