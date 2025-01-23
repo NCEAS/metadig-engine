@@ -10,10 +10,12 @@ import edu.ucsb.nceas.mdqengine.serialize.JsonMarshaller;
 import edu.ucsb.nceas.mdqengine.serialize.XmlMarshaller;
 import edu.ucsb.nceas.mdqengine.store.InMemoryStore;
 import edu.ucsb.nceas.mdqengine.store.MDQStore;
+import edu.ucsb.nceas.mdqengine.DataONE.*;
 import org.apache.commons.configuration2.ex.ConfigurationException;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.dataone.client.v2.impl.MultipartD1Node;
 import org.dataone.client.v2.itk.D1Client;
 import org.dataone.exceptions.MarshallingException;
 import org.dataone.service.exceptions.NotImplemented;
@@ -22,6 +24,7 @@ import org.dataone.service.types.v1.NodeReference;
 import org.dataone.service.types.v2.SystemMetadata;
 import org.dataone.service.types.v2.TypeFactory;
 import org.dataone.service.util.TypeMarshaller;
+import org.dataone.service.types.v1.Session;
 import org.xml.sax.SAXException;
 
 import javax.script.ScriptException;
@@ -238,8 +241,22 @@ public class MDQEngine {
 	 * @throws MetadigException If there is an issue retrieving a value from the properties/config
 	 */
 	public ArrayList<String> findDataPids(NodeReference nodeId, String identifier) throws MetadigException {
+		
 		ArrayList<String> dataObjects = new ArrayList<>();
-		String dataOneAuthToken = null;
+		String dataOneAuthToken;
+		MultipartD1Node d1Node;
+		String nodeServiceUrl;
+		String subjectId;
+		Document doc;
+
+		// get node endpoint
+		try {
+			nodeServiceUrl = D1Client.getMN(nodeId).getNodeBaseServiceUrl();
+		} catch (ServiceFailure e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		// get token
 		try {
 			MDQconfig cfg = new MDQconfig();
 			dataOneAuthToken = System.getenv("DATAONE_AUTH_TOKEN");
@@ -249,6 +266,10 @@ public class MDQEngine {
 			} else {
 				log.debug("Got token from env.");
 			}
+			String nodeIdstring = nodeId.getValue();
+			String nodeAbbr = nodeIdstring.replace("urn:node:", "");
+            subjectId = cfg.getString(nodeAbbr + ".subjectId");
+            nodeServiceUrl = cfg.getString(nodeAbbr + ".serviceUrl");
 		} catch (ConfigurationException | IOException ce) {
 			MetadigException jee = new MetadigException("error executing task.");
 			jee.initCause(ce);
@@ -263,31 +284,21 @@ public class MDQEngine {
 			}
 		}
 
+		Session session = DataONE.getSession(subjectId, dataOneAuthToken);
+
 		try {
+
+			d1Node = DataONE.getMultipartD1Node(session, nodeServiceUrl);
+
 			// String together the solr query URL to grab the data pids
-			String nodeEndpoint = D1Client.getMN(nodeId).getNodeBaseServiceUrl();
+			
 			// The quotations wrapping the identifier are necessary for solr to parse the request
 			String encodedId = URLEncoder.encode(identifier, "UTF-8");
 			String encodedQuotes = URLEncoder.encode("\"", "UTF-8");
-			String queryUrl = nodeEndpoint + "/query/solr/?q=isDocumentedBy:" + encodedQuotes + encodedId + encodedQuotes + "&fl=id";
-			log.debug("queryURL: " + queryUrl);
-
-			URL url = new URL(queryUrl);
-			HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-			connection.setRequestMethod("GET");
-			connection.setRequestProperty("Accept", "application/xml");
-			if (dataOneAuthToken != null) {
-				connection.setRequestProperty("Authorization", "Bearer " + dataOneAuthToken);
-			}
-
-			if (connection.getResponseCode() != 200) {
-				throw new RuntimeException("Failed : HTTP error code : " + connection.getResponseCode());
-			}
-
-			InputStream xml = connection.getInputStream();
-			DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
-			DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
-			Document doc = dBuilder.parse(xml);
+			String encodedQuery = "?q=isDocumentedBy:" + encodedQuotes + encodedId + encodedQuotes + "&fl=id";
+			
+			doc = DataONE.querySolr(encodedQuery, 1, 10000, d1Node, session);
+			
 			doc.getDocumentElement().normalize();
 
 			NodeList nodeList = doc.getElementsByTagName("str");
@@ -300,11 +311,6 @@ public class MDQEngine {
 				}
 			}
 
-			connection.disconnect();
-		} catch (ServiceFailure e) {
-			log.error("Could not retrieve member node while finding data objects: " + e);
-		} catch (ParserConfigurationException | SAXException e) {
-			log.error("Could parse response while finding data objects:" + e);
 		} catch (IOException e) {
 			log.error("Could not retrieve data objects:" + e);
 		}
