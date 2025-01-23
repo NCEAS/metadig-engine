@@ -285,6 +285,8 @@ public class MDQEngine {
 		try {
 
 			d1Node = DataONE.getMultipartD1Node(session, nodeServiceUrl);
+			log.debug("Node service URL: " + nodeServiceUrl);
+
 
 			// String together the solr query URL to grab the data pids
 			
@@ -292,7 +294,7 @@ public class MDQEngine {
 			String encodedId = URLEncoder.encode(identifier, "UTF-8");
 			String encodedQuotes = URLEncoder.encode("\"", "UTF-8");
 			String encodedQuery = "?q=isDocumentedBy:" + encodedQuotes + encodedId + encodedQuotes + "&fl=id";
-			
+			log.debug("Encoded query: " + encodedQuery);
 			doc = DataONE.querySolr(encodedQuery, 1, 10000, d1Node, session);
 			
 			doc.getDocumentElement().normalize();
