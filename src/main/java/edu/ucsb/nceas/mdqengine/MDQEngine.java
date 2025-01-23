@@ -249,14 +249,6 @@ public class MDQEngine {
 		String subjectId;
 		Document doc;
 
-		// get node endpoint
-		try {
-			nodeServiceUrl = D1Client.getMN(nodeId).getNodeBaseServiceUrl();
-		} catch (ServiceFailure e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		// get token
 		try {
 			MDQconfig cfg = new MDQconfig();
 			dataOneAuthToken = System.getenv("DATAONE_AUTH_TOKEN");
@@ -282,6 +274,10 @@ public class MDQEngine {
 			} catch (NotImplemented | ServiceFailure e) {
 				log.error("Problem confiruging test CN" + e);
 			}
+		}
+
+		if (subjectId == null | nodeServiceUrl == null) {
+			throw new MetadigException("subjectId or nodeServiceURL are NULL. subjectId = " + subjectId + "nodeServiceURL = " + nodeServiceUrl + "node reference = " + nodeId );
 		}
 
 		Session session = DataONE.getSession(subjectId, dataOneAuthToken);
