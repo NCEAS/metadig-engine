@@ -16,7 +16,8 @@ import org.dataone.service.types.v1.Subject;
 import org.dataone.service.types.v1.SubjectInfo;
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
-
+import org.xml.sax.SAXException;
+import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.*;
@@ -132,8 +133,11 @@ public class DataONE {
                     builder = factory.newDocumentBuilder();
                     xmldoc = builder.parse(new InputSource(qis));
                     log.trace("Created xml doc: " + xmldoc.toString());
-                } catch (Exception e) {
-                    log.error("Unable to create w3c Document from input stream", e);
+                } catch (ParserConfigurationException pe){
+                    log.error("XML parser configuration exception", pe);
+                    pe.printStackTrace();
+                } catch (SAXException e) {
+                    log.error("Error parsing XML" + e.getMessage() + qis.read());
                     e.printStackTrace();
                 } finally {
                     qis.close();
