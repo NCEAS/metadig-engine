@@ -665,28 +665,33 @@ public class RequestReportJob implements Job {
             }
         }
 
+        // Retrieve the EML metadata document for the given pid
         try {
-            if (isCN) {
-                objectIS = cnNode.get(session, pid);
-            } else {
-                objectIS = mnNode.get(session, pid);
-            }
-            log.trace("Retrieved metadata object for pid: " + pidStr);
-        } catch (NotAuthorized na) {
-            log.error("Not authorized to read pid: " + pid
-                    + ", accessing eml metadata doc through hashstore directly.");
-            // TODO: Refactor after confirming proof of concept
-            // TODO: Consider whether we want to try calling the mn/cn for streams at all
-            try {
-                // Retrieve object stream
-                objectIS = hashStore.retrieveObject(pidStr);
-                return;
-            } catch (Exception e) {
-                log.error(
-                    "Unable to retrieve eml metadata doc from hashstore for pid: " + pid.getValue()
-                        + ". Additional Details: " + e.getMessage());
-            }
+            // First, try the quickest path to access via hashstore to retrieve object stream
+            objectIS = hashStore.retrieveObject(pidStr);
+            return;
 
+        } catch (Exception ge) {
+            log.error(
+                "Unable to retrieve eml metadata doc from hashstore for pid: " + pid.getValue()
+                    + ". Trying MN/CN API. Additional Details: " + ge.getMessage());
+            // If unable to, try to retrieve the sysmeta through the CN or MN as a backup
+            try {
+                if (isCN) {
+                    objectIS = cnNode.get(session, pid);
+                } else {
+                    objectIS = mnNode.get(session, pid);
+                }
+                log.trace("Retrieved metadata eml object for pid: " + pidStr);
+            } catch (NotAuthorized na) {
+                log.info(
+                    "Not authorized to read metadata eml document for pid: " + pid.getValue() +
+                        ", unable to retrieve stream to metadatal eml document.");
+            } catch (Exception e) {
+                // Raise unexpected exception
+                log.error("Unexpected exception: " + e.getMessage());
+                throw (e);
+            }
         }
 
         // quality suite service url, i.e.
