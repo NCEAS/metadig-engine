@@ -636,33 +636,33 @@ public class RequestReportJob implements Job {
         // Get a HashStore
         HashStore hashStore = HashStoreFactory.getHashStore(hsClassName, storeProperties);
 
-        // TODO: Potential area for retrieving path to HashStore based on mnNode
+        // Retrieve the system metadata
         try {
-            if (isCN) {
-                sysmeta = cnNode.getSystemMetadata(session, pid);
-            } else {
-                sysmeta = mnNode.getSystemMetadata(session, pid);
-            }
-        } catch (NotAuthorized na) {
-            log.info("Not authorized to read sysmeta for pid: " + pid.getValue() + ", accessing "
-                          + "sysmeta through hashstore directly.");
-            // TODO: Refactor after confirming proof of concept
-            // TODO: Consider whether we want to try calling the mn/cn for streams at all
+            // First access sysmeta through the quickest way possible via hashstore
+            InputStream sysmetaIS = hashStore.retrieveMetadata(pidStr);
+
+            // Now create sysmeta object from stream
+            sysmeta = TypeMarshaller.unmarshalTypeFromStream(SystemMetadata.class, sysmetaIS);
+
+        } catch (Exception ge) {
+            log.error("Unable to retrieve system metadata from hashstore for pid: " + pid.getValue()
+                          + ". Trying MN/CN API. Additional Details: " + ge.getMessage());
+            // If unable to, try to retrieve the sysmeta through the CN or MN as a backup
             try {
-                // Retrieve system metadata
-                InputStream sysmetaIS = hashStore.retrieveMetadata(pidStr);
-
-                // Now create sysmeta object from stream
-                sysmeta = TypeMarshaller.unmarshalTypeFromStream(SystemMetadata.class, sysmetaIS);
-                return;
+                if (isCN) {
+                    sysmeta = cnNode.getSystemMetadata(session, pid);
+                } else {
+                    sysmeta = mnNode.getSystemMetadata(session, pid);
+                }
+            } catch (NotAuthorized na) {
+                log.info(
+                    "Not authorized to read sysmeta for pid: " + pid.getValue() + ", accessing "
+                        + "sysmeta through hashstore directly.");
             } catch (Exception e) {
-                log.error(
-                    "Unable to retrieve system metadata from hashstore for pid: " + pid.getValue()
-                        + ". Additional Details: " + e.getMessage());
+                // Raise unexpected exception
+                log.error("Unexpected exception: " + e.getMessage());
+                throw (e);
             }
-
-        } catch (Exception e) {
-            throw (e);
         }
 
         try {
