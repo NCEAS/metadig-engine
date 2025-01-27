@@ -10,16 +10,12 @@ import edu.ucsb.nceas.mdqengine.serialize.JsonMarshaller;
 import edu.ucsb.nceas.mdqengine.serialize.XmlMarshaller;
 import edu.ucsb.nceas.mdqengine.store.InMemoryStore;
 import edu.ucsb.nceas.mdqengine.store.MDQStore;
-import edu.ucsb.nceas.mdqengine.DataONE.*;
 import org.apache.commons.configuration2.ex.ConfigurationException;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.dataone.client.v2.impl.MultipartD1Node;
-import org.dataone.client.v2.itk.D1Client;
 import org.dataone.exceptions.MarshallingException;
-import org.dataone.service.exceptions.NotImplemented;
-import org.dataone.service.exceptions.ServiceFailure;
 import org.dataone.service.types.v1.NodeReference;
 import org.dataone.service.types.v2.SystemMetadata;
 import org.dataone.service.types.v2.TypeFactory;
@@ -28,16 +24,12 @@ import org.dataone.service.types.v1.Session;
 import org.xml.sax.SAXException;
 
 import javax.script.ScriptException;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.xpath.XPathExpressionException;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
-import java.net.URL;
 import java.net.URLEncoder;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -232,16 +224,18 @@ public class MDQEngine {
 	}
 
 	/**
-	 * This method retrieves the data pids for a dataset given an identifier and a node by
-	 * communicating with the given nodeId's solr to get a result which contains the pids.
+	 * This method retrieves the data pids for a dataset given an identifier and a
+	 * node by communicating with the given nodeId's solr to get a result which
+	 * contains the pids.
 	 *
-	 * @param nodeId Node to retrieve from
+	 * @param nodeId     Node to retrieve from
 	 * @param identifier Persistent identifier of the dataset
 	 * @return
-	 * @throws MetadigException If there is an issue retrieving a value from the properties/config
+	 * @throws MetadigException If there is an issue retrieving a value from the
+	 *                          properties/config
 	 */
 	public ArrayList<String> findDataPids(NodeReference nodeId, String identifier) throws MetadigException {
-		
+
 		ArrayList<String> dataObjects = new ArrayList<>();
 		String dataOneAuthToken;
 		MultipartD1Node d1Node;
@@ -260,24 +254,17 @@ public class MDQEngine {
 			}
 			String nodeIdstring = nodeId.getValue();
 			String nodeAbbr = nodeIdstring.replace("urn:node:", "");
-            subjectId = cfg.getString(nodeAbbr + ".subjectId");
-            nodeServiceUrl = cfg.getString(nodeAbbr + ".serviceUrl");
+			subjectId = cfg.getString(nodeAbbr + ".subjectId");
+			nodeServiceUrl = cfg.getString(nodeAbbr + ".serviceUrl");
 		} catch (ConfigurationException | IOException ce) {
 			MetadigException jee = new MetadigException("error executing task.");
 			jee.initCause(ce);
 			throw jee;
 		}
 
-		if (nodeId.getValue().matches(".*[Tt]est.*")) {
-			try {
-				D1Client.setCN("https://cn-stage.test.dataone.org/cn");
-			} catch (NotImplemented | ServiceFailure e) {
-				log.error("Problem confiruging test CN" + e);
-			}
-		}
-
 		if (subjectId == null | nodeServiceUrl == null) {
-			throw new MetadigException("subjectId or nodeServiceURL are NULL. subjectId = " + subjectId + "nodeServiceURL = " + nodeServiceUrl + "node reference = " + nodeId );
+			throw new MetadigException("subjectId or nodeServiceURL are NULL. subjectId = " + subjectId
+					+ "nodeServiceURL = " + nodeServiceUrl + "node reference = " + nodeId);
 		}
 
 		Session session = DataONE.getSession(subjectId, dataOneAuthToken);
@@ -285,18 +272,16 @@ public class MDQEngine {
 		try {
 
 			d1Node = DataONE.getMultipartD1Node(session, nodeServiceUrl);
-			log.debug("Node service URL: " + nodeServiceUrl);
-
-
 			// String together the solr query URL to grab the data pids
-			
-			// The quotations wrapping the identifier are necessary for solr to parse the request
+
+			// The quotations wrapping the identifier are necessary for solr to parse the
+			// request
 			String encodedId = URLEncoder.encode(identifier, "UTF-8");
 			String encodedQuotes = URLEncoder.encode("\"", "UTF-8");
 			String encodedQuery = "?q=isDocumentedBy:" + encodedQuotes + encodedId + encodedQuotes + "&fl=id";
 			log.debug("Encoded query: " + encodedQuery);
 			doc = DataONE.querySolr(encodedQuery, 1, 10000, d1Node, session);
-			
+
 			doc.getDocumentElement().normalize();
 
 			NodeList nodeList = doc.getElementsByTagName("str");
