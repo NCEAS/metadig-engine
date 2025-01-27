@@ -638,14 +638,15 @@ public class RequestReportJob implements Job {
 
         // Retrieve the system metadata
         try {
-            // First access sysmeta through the quickest way possible via hashstore
-            InputStream sysmetaIS = hashStore.retrieveMetadata(pidStr);
+            // First, try the quickest path to retrieve sysmeta object via hashstore
+            InputStream sysmetaIS = hashStore.retrieveMetadata(pid.getValue());
+            log.debug("Retrieved system metadata stream via hashstore");
 
-            // Now create sysmeta object from stream
+            // Create sysmeta object from stream
             sysmeta = TypeMarshaller.unmarshalTypeFromStream(SystemMetadata.class, sysmetaIS);
 
         } catch (Exception ge) {
-            log.error("Unable to retrieve system metadata from hashstore for pid: " + pid.getValue()
+            log.info("Unable to retrieve system metadata from hashstore for pid: " + pid.getValue()
                           + ". Trying MN/CN API. Additional Details: " + ge.getMessage());
             // If unable to, try to retrieve the sysmeta through the CN or MN as a backup
             try {
@@ -654,25 +655,26 @@ public class RequestReportJob implements Job {
                 } else {
                     sysmeta = mnNode.getSystemMetadata(session, pid);
                 }
+                log.debug("Retrieved sysmeta stream for pid: " + pid.getValue());
             } catch (NotAuthorized na) {
-                log.info(
-                    "Not authorized to read sysmeta for pid: " + pid.getValue() + ", accessing "
-                        + "sysmeta through hashstore directly.");
+                log.info("Not authorized to read sysmeta for pid: " + pid.getValue()
+                             + ", unable to retrieve stream to system metadata");
             } catch (Exception e) {
                 // Raise unexpected exception
-                log.error("Unexpected exception: " + e.getMessage());
+                log.error("Unexpected exception while retrieving system metadata object: "
+                              + e.getMessage());
                 throw (e);
             }
         }
 
         // Retrieve the EML metadata document for the given pid
         try {
-            // First, try the quickest path to access via hashstore to retrieve object stream
-            objectIS = hashStore.retrieveObject(pidStr);
-            return;
+            // First, try the quickest path to retrieve object stream via hashstore
+            objectIS = hashStore.retrieveObject(pid.getValue());
+            log.debug("Retrieved eml metadata object stream via hashstore");
 
         } catch (Exception ge) {
-            log.error(
+            log.info(
                 "Unable to retrieve eml metadata doc from hashstore for pid: " + pid.getValue()
                     + ". Trying MN/CN API. Additional Details: " + ge.getMessage());
             // If unable to, try to retrieve the sysmeta through the CN or MN as a backup
@@ -682,14 +684,15 @@ public class RequestReportJob implements Job {
                 } else {
                     objectIS = mnNode.get(session, pid);
                 }
-                log.trace("Retrieved metadata eml object for pid: " + pidStr);
+                log.debug("Retrieved metadata eml object stream for pid: " + pid.getValue());
             } catch (NotAuthorized na) {
                 log.info(
-                    "Not authorized to read metadata eml document for pid: " + pid.getValue() +
-                        ", unable to retrieve stream to metadatal eml document.");
+                    "Not authorized to read eml metadata doc for pid: " + pid.getValue() +
+                        ", unable to retrieve stream to eml metadata document.");
             } catch (Exception e) {
                 // Raise unexpected exception
-                log.error("Unexpected exception: " + e.getMessage());
+                log.error("Unexpected exception while retrieving stream to eml metadata doc: "
+                              + e.getMessage());
                 throw (e);
             }
         }
