@@ -620,28 +620,8 @@ public class RequestReportJob implements Job {
         Identifier pid = new Identifier();
         pid.setValue(pidStr);
 
-        // TODO: Refactor by extracting method
         // Get hashstore props from a config file to directly retrieve sysmeta and eml metadata
-        String prefix = "store.";
-        Map<String, Object> storeConfig = new HashMap<>();
-        try {
-            MDQconfig cfg = new MDQconfig();
-            Iterator<String> keys = cfg.getKeys();
-
-            while (keys.hasNext()) {
-                String key = keys.next();
-                if (key.startsWith(prefix)) {
-                    String value = cfg.getString(key);
-                    String strippedKey = key.substring(prefix.length());
-                    storeConfig.put(strippedKey, value);
-                }
-            }
-
-        } catch (ConfigurationException ce) {
-            throw new RuntimeException("Error reading metadig configuration, ConfigurationException: " + ce);
-        } catch (IOException io) {
-            throw new RuntimeException("Error reading metadig configuration, IOException: " + io);
-        }
+        Map<String, Object> storeConfig = getHashStorePropsFromMetadigProps();
 
         // TODO: Junit tests
         String storePath = (String) storeConfig.get("store_path");
@@ -749,5 +729,36 @@ public class RequestReportJob implements Job {
         if (reponseEntity != null) {
             runResultIS = reponseEntity.getContent();
         }
+    }
+
+    /**
+     * Retrieves the hashstore properties by loading and parsing a metadig properties file for
+     * keys with the prefix 'store.'
+     *
+     * @return Map object that contains the following properties: store_path, store_depth,
+     * store_width, store_algorithm and store_metadata_namespace
+     */
+    private static Map<String, Object> getHashStorePropsFromMetadigProps() {
+        String prefix = "store.";
+        Map<String, Object> storeConfig = new HashMap<>();
+        try {
+            MDQconfig cfg = new MDQconfig();
+            Iterator<String> keys = cfg.getKeys();
+
+            while (keys.hasNext()) {
+                String key = keys.next();
+                if (key.startsWith(prefix)) {
+                    String value = cfg.getString(key);
+                    String strippedKey = key.substring(prefix.length());
+                    storeConfig.put(strippedKey, value);
+                }
+            }
+
+        } catch (ConfigurationException ce) {
+            throw new RuntimeException("Error reading metadig configuration, ConfigurationException: " + ce);
+        } catch (IOException io) {
+            throw new RuntimeException("Error reading metadig configuration, IOException: " + io);
+        }
+        return storeConfig;
     }
 }
