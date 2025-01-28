@@ -19,6 +19,10 @@ import org.dataone.client.rest.HttpMultipartRestClient;
 import org.dataone.client.rest.MultipartRestClient;
 import org.dataone.client.v2.impl.MultipartCNode;
 import org.dataone.client.v2.impl.MultipartMNode;
+import org.dataone.service.exceptions.InvalidToken;
+import org.dataone.service.exceptions.NotFound;
+import org.dataone.service.exceptions.NotImplemented;
+import org.dataone.service.exceptions.ServiceFailure;
 import org.dataone.service.types.v2.Node;
 import org.dataone.mimemultipart.SimpleMultipartEntity;
 import org.dataone.service.exceptions.NotAuthorized;
@@ -639,37 +643,8 @@ public class RequestReportJob implements Job {
         // Get a HashStore
         HashStore hashStore = HashStoreFactory.getHashStore(hashstoreClassName, storeProperties);
 
-        // TODO: Refactor by extracting method
         // Retrieve the system metadata
-        try {
-            // First, try the quickest path to retrieve sysmeta object via hashstore
-            InputStream sysmetaIS = hashStore.retrieveMetadata(pid.getValue());
-            log.debug("Retrieved system metadata stream via hashstore");
-
-            // Create sysmeta object from stream
-            sysmeta = TypeMarshaller.unmarshalTypeFromStream(SystemMetadata.class, sysmetaIS);
-
-        } catch (Exception ge) {
-            log.info("Unable to retrieve system metadata from hashstore for pid: " + pid.getValue()
-                          + ". Trying MN/CN API. Additional Details: " + ge.getMessage());
-            // If unable to, try to retrieve the sysmeta through the CN or MN as a backup
-            try {
-                if (isCN) {
-                    sysmeta = cnNode.getSystemMetadata(session, pid);
-                } else {
-                    sysmeta = mnNode.getSystemMetadata(session, pid);
-                }
-                log.debug("Retrieved sysmeta stream for pid: " + pid.getValue());
-            } catch (NotAuthorized na) {
-                log.info("Not authorized to read sysmeta for pid: " + pid.getValue()
-                             + ", unable to retrieve stream to system metadata");
-            } catch (Exception e) {
-                // Raise unexpected exception
-                log.error("Unexpected exception while retrieving system metadata object: "
-                              + e.getMessage());
-                throw (e);
-            }
-        }
+        sysmeta = getSystemMetadataFromHashStoreOrNode(pid, hashStore, cnNode, mnNode, isCN, session);
 
         // TODO: Refactor by extracting method
         // Retrieve the EML metadata document for the given pid
@@ -729,6 +704,61 @@ public class RequestReportJob implements Job {
         if (reponseEntity != null) {
             runResultIS = reponseEntity.getContent();
         }
+    }
+
+    /**
+     * Returns a system metadata object for a given pid. First, we try to retrieve the system
+     * metadata directly through the given hashstore (quickest). If we are unable to, then we
+     * will try to retrieve the system metadata through the given MN or CN API.
+     *
+     * @param pid Persistent identifier
+     * @param hashStore HashStore to check
+     * @param cnNode Coordinating Node
+     * @param mnNode Member Node
+     * @param isCN Boolean to check whether we should check the CN or MN
+     * @param session User session to check for credentials to access the CN or MN
+     * @return
+     * @throws InvalidToken If the token used to access the MN or CN is invalid
+     * @throws ServiceFailure Unexpected issue when accessing via the MN or CN
+     * @throws NotFound When the sysmeta is not found when accessing via the MN or CN
+     * @throws NotImplemented If the method to retrieve the sysmeta through the MN or CN is not
+     * implemented
+     */
+    private SystemMetadata getSystemMetadataFromHashStoreOrNode(
+        Identifier pid, HashStore hashStore, MultipartCNode cnNode, MultipartMNode mnNode,
+        Boolean isCN, Session session)
+        throws InvalidToken, ServiceFailure, NotFound, NotImplemented {
+        SystemMetadata sysmeta = null;
+        try {
+            // First, try the quickest path to retrieve sysmeta object via hashstore
+            InputStream sysmetaIS = hashStore.retrieveMetadata(pid.getValue());
+            log.debug("Retrieved system metadata stream via hashstore");
+
+            // Create sysmeta object from stream
+            sysmeta = TypeMarshaller.unmarshalTypeFromStream(SystemMetadata.class, sysmetaIS);
+
+        } catch (Exception ge) {
+            log.info("Unable to retrieve system metadata from hashstore for pid: " + pid.getValue()
+                         + ". Trying MN/CN API. Additional Details: " + ge.getMessage());
+            // If unable to, try to retrieve the sysmeta through the CN or MN as a backup
+            try {
+                if (isCN) {
+                    sysmeta = cnNode.getSystemMetadata(session, pid);
+                } else {
+                    sysmeta = mnNode.getSystemMetadata(session, pid);
+                }
+                log.debug("Retrieved sysmeta stream for pid: " + pid.getValue());
+            } catch (NotAuthorized na) {
+                log.info("Not authorized to read sysmeta for pid: " + pid.getValue()
+                             + ", unable to retrieve stream to system metadata");
+            } catch (Exception e) {
+                // Raise unexpected exception
+                log.error("Unexpected exception while retrieving system metadata object: "
+                              + e.getMessage());
+                throw (e);
+            }
+        }
+        return sysmeta;
     }
 
     /**
