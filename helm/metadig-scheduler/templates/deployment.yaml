@@ -61,6 +61,9 @@ spec:
           - name: metadig-downloads-list-volume
             mountPath: {{ .Values.persistence.mountPath }}/metadig/data/downloadsList.csv
             subPath: downloadsList.csv
+          - name: {{ .Values.persistence.metacat.claimName }}
+            mountPath: {{ .Values.persistence.metacat.mountPath }}
+            readOnly: true
       volumes:
       - name: metadig-pv
         persistentVolumeClaim:
