@@ -81,6 +81,10 @@ spec:
         configMap:
           name: metadig-downloads-list-volume
           defaultMode: 0644
+      - name:  {{ .Values.persistence.metacat.claimName }}
+        persistentVolumeClaim:
+          claimName: {{ .Values.persistence.metacat.claimName }}
+          readOnly: true
       restartPolicy: Always
       {{- with .Values.nodeSelector }}
       nodeSelector:
