@@ -624,26 +624,9 @@ public class RequestReportJob implements Job {
 
         Identifier pid = new Identifier();
         pid.setValue(pidStr);
-
-        // Get hashstore props from a config file to directly retrieve sysmeta and eml metadata
-        Map<String, Object> storeConfig = getHashStorePropsFromMetadigProps();
+        HashStore hashStore = getHashStoreFromMetadigProps();
 
         // TODO: Junit tests
-        String storePath = (String) storeConfig.get("store_path");
-        String storeDepth = (String) storeConfig.get("store_depth");
-        String storeWidth = (String) storeConfig.get("store_width");
-        String storeAlgo = (String) storeConfig.get("store_algorithm");
-        String sysmetaNamespace = (String) storeConfig.get("store_metadata_namespace");
-        String hashstoreClassName = "org.dataone.hashstore.filehashstore.FileHashStore";
-        Properties storeProperties = new Properties();
-        storeProperties.setProperty("storePath", storePath);
-        storeProperties.setProperty("storeDepth", storeDepth);
-        storeProperties.setProperty("storeWidth", storeWidth);
-        storeProperties.setProperty("storeAlgorithm", storeAlgo);
-        storeProperties.setProperty("storeMetadataNamespace", sysmetaNamespace);
-        // Get a HashStore
-        HashStore hashStore = HashStoreFactory.getHashStore(hashstoreClassName, storeProperties);
-
         // Retrieve the system metadata
         sysmeta = getSystemMetadataFromHashStoreOrNode(pid, hashStore, cnNode, mnNode, isCN, session);
 
@@ -677,6 +660,36 @@ public class RequestReportJob implements Job {
         if (responseEntity != null) {
             runResultIS = responseEntity.getContent();
         }
+    }
+
+    /**
+     * Retrieve a hashstore by loading the metadig.properties file and parsing it for keys with
+     * the 'store.' prefix. These keys are then used to form properties to instantiate a
+     * hashstore which can be used to retrieve system metadata or data objects.
+     *
+     * @return A hashstore based on metadig properties
+     * @throws IOException When there is an issue with using metadig properties to retrieve store
+     * keys to retrieve a hashstore
+     */
+    private static HashStore getHashStoreFromMetadigProps() throws IOException {
+        // Get hashstore with props from a config file to directly access sysmeta and eml metadata
+        Map<String, Object> storeConfig = getHashStorePropsFromMetadigProps();
+        String storePath = (String) storeConfig.get("store_path");
+        String storeDepth = (String) storeConfig.get("store_depth");
+        String storeWidth = (String) storeConfig.get("store_width");
+        String storeAlgo = (String) storeConfig.get("store_algorithm");
+        String sysmetaNamespace = (String) storeConfig.get("store_metadata_namespace");
+        String hashstoreClassName = "org.dataone.hashstore.filehashstore.FileHashStore";
+        Properties storeProperties = new Properties();
+        storeProperties.setProperty("storePath", storePath);
+        storeProperties.setProperty("storeDepth", storeDepth);
+        storeProperties.setProperty("storeWidth", storeWidth);
+        storeProperties.setProperty("storeAlgorithm", storeAlgo);
+        storeProperties.setProperty("storeMetadataNamespace", sysmetaNamespace);
+
+        // Get a HashStore
+        HashStore hashStore = HashStoreFactory.getHashStore(hashstoreClassName, storeProperties);
+        return hashStore;
     }
 
     /**
