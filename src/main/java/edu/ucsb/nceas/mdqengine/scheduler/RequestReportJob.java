@@ -673,7 +673,7 @@ public class RequestReportJob implements Job {
      */
     private static HashStore getHashStoreFromMetadigProps() throws IOException {
         // Get hashstore with props from a config file to directly access sysmeta and eml metadata
-        Map<String, Object> storeConfig = getHashStorePropsFromMetadigProps();
+        Map<String, Object> storeConfig = getStorePropsFromMetadigProps();
         String storePath = (String) storeConfig.get("store_path");
         String storeDepth = (String) storeConfig.get("store_depth");
         String storeWidth = (String) storeConfig.get("store_width");
@@ -803,13 +803,13 @@ public class RequestReportJob implements Job {
     }
 
     /**
-     * Retrieves the hashstore properties by loading and parsing a metadig properties file for
-     * keys with the prefix 'store.'
+     * Retrieves the properties for a hashstore by loading and parsing a metadig properties file
+     * for keys with the prefix 'store.'
      *
      * @return Map object that contains the following properties: store_path, store_depth,
      * store_width, store_algorithm and store_metadata_namespace
      */
-    private static Map<String, Object> getHashStorePropsFromMetadigProps() {
+    private static Map<String, Object> getStorePropsFromMetadigProps() {
         String prefix = "store.";
         Map<String, Object> storeConfig = new HashMap<>();
         try {
