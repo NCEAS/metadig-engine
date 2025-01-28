@@ -38,6 +38,9 @@ import java.io.InputStream;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 import java.util.Properties;
 import org.dataone.hashstore.HashStore;
 import org.dataone.hashstore.HashStoreFactory;
@@ -617,16 +620,36 @@ public class RequestReportJob implements Job {
         Identifier pid = new Identifier();
         pid.setValue(pidStr);
 
-        // TODO: Refactor this HashStore section after confirming proof of concept
-        // HashStore prop values - temp hardcoded for 'dev.nceas.ucsb.edu'
-        // TODO: Needs to be retrieved from a config file
-        // TODO: Then junit tests
-        String storePath = "/var/data/repos/dev/metacat/hashstore";
-        String storeDepth = "3";
-        String storeWidth = "2";
-        String storeAlgo = "SHA-256";
-        String sysmetaNamespace = "https://ns.dataone.org/service/types/v2.0#SystemMetadata";
-        String hsClassName = "org.dataone.hashstore.filehashstore.FileHashStore";
+        // TODO: Refactor by extracting method
+        // Get hashstore props from a config file to directly retrieve sysmeta and eml metadata
+        String prefix = "store.";
+        Map<String, Object> storeConfig = new HashMap<>();
+        try {
+            MDQconfig cfg = new MDQconfig();
+            Iterator<String> keys = cfg.getKeys();
+
+            while (keys.hasNext()) {
+                String key = keys.next();
+                if (key.startsWith(prefix)) {
+                    String value = cfg.getString(key);
+                    String strippedKey = key.substring(prefix.length());
+                    storeConfig.put(strippedKey, value);
+                }
+            }
+
+        } catch (ConfigurationException ce) {
+            throw new RuntimeException("Error reading metadig configuration, ConfigurationException: " + ce);
+        } catch (IOException io) {
+            throw new RuntimeException("Error reading metadig configuration, IOException: " + io);
+        }
+
+        // TODO: Junit tests
+        String storePath = (String) storeConfig.get("store_path");
+        String storeDepth = (String) storeConfig.get("store_depth");
+        String storeWidth = (String) storeConfig.get("store_width");
+        String storeAlgo = (String) storeConfig.get("store_algorithm");
+        String sysmetaNamespace = (String) storeConfig.get("store_metadata_namespace");
+        String hashstoreClassName = "org.dataone.hashstore.filehashstore.FileHashStore";
         Properties storeProperties = new Properties();
         storeProperties.setProperty("storePath", storePath);
         storeProperties.setProperty("storeDepth", storeDepth);
@@ -634,8 +657,9 @@ public class RequestReportJob implements Job {
         storeProperties.setProperty("storeAlgorithm", storeAlgo);
         storeProperties.setProperty("storeMetadataNamespace", sysmetaNamespace);
         // Get a HashStore
-        HashStore hashStore = HashStoreFactory.getHashStore(hsClassName, storeProperties);
+        HashStore hashStore = HashStoreFactory.getHashStore(hashstoreClassName, storeProperties);
 
+        // TODO: Refactor by extracting method
         // Retrieve the system metadata
         try {
             // First, try the quickest path to retrieve sysmeta object via hashstore
@@ -667,6 +691,7 @@ public class RequestReportJob implements Job {
             }
         }
 
+        // TODO: Refactor by extracting method
         // Retrieve the EML metadata document for the given pid
         try {
             // First, try the quickest path to retrieve object stream via hashstore
