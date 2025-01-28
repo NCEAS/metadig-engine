@@ -673,9 +673,9 @@ public class RequestReportJob implements Job {
         CloseableHttpResponse response = client.execute(post);
 
         // retrieve results
-        HttpEntity reponseEntity = response.getEntity();
-        if (reponseEntity != null) {
-            runResultIS = reponseEntity.getContent();
+        HttpEntity responseEntity = response.getEntity();
+        if (responseEntity != null) {
+            runResultIS = responseEntity.getContent();
         }
     }
 
