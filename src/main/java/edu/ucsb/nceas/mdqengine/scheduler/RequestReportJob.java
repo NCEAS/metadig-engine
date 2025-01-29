@@ -670,7 +670,7 @@ public class RequestReportJob implements Job {
      * @throws IOException When there is an issue with using metadig properties to retrieve store
      * keys to retrieve a hashstore
      */
-    private static HashStore getHashStoreFromMetadigProps() throws IOException {
+    public static HashStore getHashStoreFromMetadigProps() throws IOException {
         // Get hashstore with props from a config (metadig.properties) file
         Map<String, Object> storeConfig = getStorePropsFromMetadigProps();
         String storePath = (String) storeConfig.get("store_path");
@@ -712,7 +712,7 @@ public class RequestReportJob implements Job {
      * @throws InsufficientResources An unexpected issue with insufficient resources when
      * retrieving the eml metadata doc through the MN or CN
      */
-    private InputStream getEMLMetadataDocInputStream(
+    public InputStream getEMLMetadataDocInputStream(
         Identifier pid, HashStore hashStore, MultipartCNode cnNode, MultipartMNode mnNode,
         Boolean isCN, Session session)
         throws InvalidToken, ServiceFailure, NotFound, NotImplemented, InsufficientResources {
@@ -764,7 +764,7 @@ public class RequestReportJob implements Job {
      * @throws NotImplemented If the method to retrieve the sysmeta through the MN or CN is not
      * implemented
      */
-    private SystemMetadata getSystemMetadataFromHashStoreOrNode(
+    public SystemMetadata getSystemMetadataFromHashStoreOrNode(
         Identifier pid, HashStore hashStore, MultipartCNode cnNode, MultipartMNode mnNode,
         Boolean isCN, Session session)
         throws InvalidToken, ServiceFailure, NotFound, NotImplemented {
@@ -808,7 +808,7 @@ public class RequestReportJob implements Job {
      * @return Map object that contains the following properties: store_path, store_depth,
      * store_width, store_algorithm and store_metadata_namespace
      */
-    private static Map<String, Object> getStorePropsFromMetadigProps() {
+    public static Map<String, Object> getStorePropsFromMetadigProps() {
         // In the metadig.properties file, hashstore properties are keys that begin with 'store.'
         String prefix = "store.";
         Map<String, Object> storeConfig = new HashMap<>();
