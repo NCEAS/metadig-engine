@@ -5,8 +5,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.dataone.service.types.v2.SystemMetadata;
 import org.dataone.service.util.TypeMarshaller;
-import org.junit.Ignore;
-import org.junit.Test;
 import org.xml.sax.SAXException;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -16,10 +14,13 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
-@Ignore
+import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+@Disabled
 public class XMLDialectTest {
 
 	private Log log = LogFactory.getLog(this.getClass());
@@ -159,7 +160,7 @@ public class XMLDialectTest {
 			
 	}
 	
-	@Ignore
+	@Disabled
 	@Test
 	public void testValidation() {
 
