@@ -629,16 +629,15 @@ public class RequestReportJob implements Job {
         // TODO: Junit tests
         // Retrieve the system metadata
         sysmeta = getSystemMetadataFromHashStoreOrNode(pid, hashStore, cnNode, mnNode, isCN, session);
-
         // Retrieve the EML metadata document for the given pid
         objectIS = getEMLMetadataDocInputStream(pid, hashStore, cnNode, mnNode, isCN, session);
 
-        // quality suite service url, i.e.
+        // Quality suite service url, i.e.
         // "http://docke-ucsb-1.dataone.org:30433/quality/suites/knb.suite.1/run
         qualityServiceUrl = qualityServiceUrl + "/suites/" + suiteId + "/run";
         HttpPost post = new HttpPost(qualityServiceUrl);
 
-        // add document
+        // Add document
         SimpleMultipartEntity entity = new SimpleMultipartEntity();
         entity.addFilePart("document", objectIS);
 
@@ -646,16 +645,16 @@ public class RequestReportJob implements Job {
         TypeMarshaller.marshalTypeToOutputStream(sysmeta, baos);
         entity.addFilePart("systemMetadata", new ByteArrayInputStream(baos.toByteArray()));
 
-        // make sure we get XML back
+        // Make sure we get XML back
         post.addHeader("Accept", "application/xml");
 
-        // send to service
+        // Send to service
         log.trace("submitting: " + qualityServiceUrl);
         post.setEntity((HttpEntity) entity);
         CloseableHttpClient client = HttpClients.createDefault();
         CloseableHttpResponse response = client.execute(post);
 
-        // retrieve results
+        // Retrieve results
         HttpEntity responseEntity = response.getEntity();
         if (responseEntity != null) {
             runResultIS = responseEntity.getContent();
@@ -672,7 +671,7 @@ public class RequestReportJob implements Job {
      * keys to retrieve a hashstore
      */
     private static HashStore getHashStoreFromMetadigProps() throws IOException {
-        // Get hashstore with props from a config file to directly access sysmeta and eml metadata
+        // Get hashstore with props from a config (metadig.properties) file
         Map<String, Object> storeConfig = getStorePropsFromMetadigProps();
         String storePath = (String) storeConfig.get("store_path");
         String storeDepth = (String) storeConfig.get("store_depth");
@@ -810,6 +809,7 @@ public class RequestReportJob implements Job {
      * store_width, store_algorithm and store_metadata_namespace
      */
     private static Map<String, Object> getStorePropsFromMetadigProps() {
+        // In the metadig.properties file, hashstore properties are keys that begin with 'store.'
         String prefix = "store.";
         Map<String, Object> storeConfig = new HashMap<>();
         try {
@@ -826,7 +826,8 @@ public class RequestReportJob implements Job {
             }
 
         } catch (ConfigurationException ce) {
-            throw new RuntimeException("Error reading metadig configuration, ConfigurationException: " + ce);
+            throw new RuntimeException(
+                "Error reading metadig configuration, ConfigurationException: " + ce);
         } catch (IOException io) {
             throw new RuntimeException("Error reading metadig configuration, IOException: " + io);
         }
