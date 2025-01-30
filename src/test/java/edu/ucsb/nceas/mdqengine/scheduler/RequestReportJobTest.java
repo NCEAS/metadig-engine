@@ -13,7 +13,6 @@ import java.lang.reflect.Field;
 import java.net.URL;
 import java.util.Properties;
 
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
@@ -75,6 +74,9 @@ public class RequestReportJobTest {
 
         // Load metadig.properties from test-docs
         URL resourceUrl = this.getClass().getResource("/test-docs/metadig.properties");
+        if (resourceUrl == null) {
+            fail("Unable to get metadig.properties file");
+        }
         String fullPathToMetadigProps = resourceUrl.getPath();
         Properties properties = new Properties();
         try (FileInputStream inputStream = new FileInputStream(fullPathToMetadigProps)) {
@@ -86,7 +88,6 @@ public class RequestReportJobTest {
 
         // Re-write the updated properties to the temp folder
         Path modifiedMetadigProperties = tempFolder.resolve("modified_metadig.properties");
-
         // Save the modified props with the revised 'store_path' to the specified tmp file location
         try (FileOutputStream outputStream = new FileOutputStream(
             modifiedMetadigProperties.toFile())) {
@@ -118,6 +119,9 @@ public class RequestReportJobTest {
     public void testGetStorePropsFromMetadigProps() throws Exception {
         // Retrieve the absolute path to the metadig.properties in 'test-docs'
         URL resourceUrl = this.getClass().getResource("/test-docs/metadig.properties");
+        if (resourceUrl == null) {
+            fail("Unable to get metadig.properties file");
+        }
         String fullPathToMetadigProps = resourceUrl.getPath();
         overrideConfigFilePathInMDQConfig(fullPathToMetadigProps);
 
