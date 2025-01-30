@@ -1,6 +1,8 @@
 package edu.ucsb.nceas.mdqengine.scheduler;
 
 import edu.ucsb.nceas.mdqengine.MDQconfig;
+import org.dataone.client.v2.impl.MultipartCNode;
+import org.dataone.client.v2.impl.MultipartMNode;
 import org.dataone.hashstore.HashStore;
 import org.dataone.hashstore.HashStoreFactory;
 
@@ -17,12 +19,15 @@ import java.util.Map;
 import java.lang.reflect.Field;
 import java.util.Properties;
 
+import org.dataone.service.types.v1.Identifier;
+import org.dataone.service.types.v1.Session;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -142,11 +147,20 @@ public class RequestReportJobTest {
     // Junit Tests
 
     /**
-     * Confirm that an input stream to a data object is returned
+     * Confirm that an input stream to a data object is returned. No exception should be thrown.
      */
     @Test
     public void testGetEMLMetadataDocInputStream() throws Exception {
+        RequestReportJob job = new RequestReportJob();
+        MultipartCNode cnNode = null;
+        MultipartMNode mnNode = null;
+        Session session = null;
+        Identifier pid = new Identifier();
+        pid.setValue(testPid);
 
+        InputStream objectIS =
+            job.getEMLMetadataDocInputStream(pid, hashStore, cnNode, mnNode, false, session);
+        assertInstanceOf(InputStream.class, objectIS, "This should be an InputStream");
     }
 
     /**
