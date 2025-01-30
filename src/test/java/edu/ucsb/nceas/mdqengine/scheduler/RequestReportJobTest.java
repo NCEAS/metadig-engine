@@ -28,10 +28,6 @@ import static org.junit.jupiter.api.Assertions.fail;
  */
 public class RequestReportJobTest {
 
-    // TODO: Review and refactor the code, specifically resetting the Field Reflection values to
-    //  ensure it doesn't affect other tests to be safe. See if there is a way to have this done
-    //  with it only being set up once (ex. using '@Afterall' and '@Beforeall'
-
     /**
      * Temporary folder for tests to run in
      */
@@ -39,25 +35,27 @@ public class RequestReportJobTest {
     public static Path tempFolder;
 
     private static String hashStoreRootDirectory;
-    private static String testMetadigPropsLocation;
 
     /**
-     * Create a HashStore before all junit tests inside a temp folder with a data object
-     * and sysmeta object to work with.
+     * Create a HashStore before all junit tests inside a temp folder with a data object and sysmeta
+     * object to work with.
      */
     @BeforeAll
-    public static void prepareJunitHashStore() throws IOException, NoSuchFieldException,
-        IllegalAccessException {
+    public static void prepareJunitHashStore()
+        throws IOException, NoSuchFieldException, IllegalAccessException {
         // Create a hashstore in a tmp folder
         hashStoreRootDirectory = tempFolder.resolve("hashstore").toString();
         createHashStoreAndTestObjects(hashStoreRootDirectory);
 
         // Load metadig.properties from test-docs
-        Path fullPathToMetadigProps = Paths.get("src/test/resources/test-docs", "metadig.properties");
-        testMetadigPropsLocation = fullPathToMetadigProps.toFile().getAbsolutePath();
+        Path fullPathToMetadigProps =
+            Paths.get("src/test/resources/test-docs", "metadig.properties");
+        String testMetadigPropsLocationInTestDocs =
+            fullPathToMetadigProps.toFile().getAbsolutePath();
 
         Properties properties = new Properties();
-        try (FileInputStream inputStream = new FileInputStream(testMetadigPropsLocation)) {
+        try (
+            FileInputStream inputStream = new FileInputStream(testMetadigPropsLocationInTestDocs)) {
             properties.load(inputStream);
         }
 
@@ -88,8 +86,8 @@ public class RequestReportJobTest {
         String hashstoreClassName = "org.dataone.hashstore.filehashstore.FileHashStore";
 
         try {
-            HashStore hashStore = HashStoreFactory.getHashStore(hashstoreClassName,
-                                                                storeProperties);
+            HashStore hashStore =
+                HashStoreFactory.getHashStore(hashstoreClassName, storeProperties);
             // TODO: Store data object
             // TODO: Store sysmeta object
 
@@ -105,9 +103,8 @@ public class RequestReportJobTest {
      * '/opt/local/metadig/metadig.properties' and instead look for the properties file in the
      * 'src/test/resources/test-docs' folder.
      *
-     * The MCQconfig config file path defaults to a private static variable if it is not running
-     * in a servlet where we'd need to get the info from the webapp context.
-     *
+     * The MCQconfig config file path defaults to a private static variable if it is not running in
+     * a servlet where we'd need to get the info from the webapp context.
      */
     public static void overrideConfigFilePathInMDQConfig(String fullPathToMetadigProps)
         throws NoSuchFieldException, IllegalAccessException {
@@ -144,7 +141,7 @@ public class RequestReportJobTest {
      * Check that we are able to retrieve store properties from a metadig.properties file
      */
     @Test
-    public void testGetStorePropsFromMetadigProps() throws Exception {
+    public void testGetStorePropsFromMetadigProps() {
         Map<String, Object> storeConfig = RequestReportJob.getStorePropsFromMetadigProps();
 
         String storePath = (String) storeConfig.get("store_path");
