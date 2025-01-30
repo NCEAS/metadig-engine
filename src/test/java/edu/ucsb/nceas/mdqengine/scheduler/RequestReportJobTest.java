@@ -21,6 +21,7 @@ import java.util.Properties;
 
 import org.dataone.service.types.v1.Identifier;
 import org.dataone.service.types.v1.Session;
+import org.dataone.service.types.v2.SystemMetadata;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -48,8 +49,8 @@ public class RequestReportJobTest {
     private static final String testPid = "dou.test.eml.1";
 
     /**
-     * Create a HashStore before all junit tests inside a temp folder with a data object and sysmeta
-     * object to work with.
+     * Create a HashStore before all junit tests run inside a temp folder with a data object and
+     * sysmeta object to work with.
      */
     @BeforeAll
     public static void prepareJunitHashStore()
@@ -145,6 +146,24 @@ public class RequestReportJobTest {
     }
 
     // Junit Tests
+
+    /**
+     * Confirm that a sysmeta object is returned. No exception should be thrown.
+     */
+    @Test
+    public void testGetSystemMetadataFromHashStoreOrNode() throws Exception {
+        RequestReportJob job = new RequestReportJob();
+        MultipartCNode cnNode = null;
+        MultipartMNode mnNode = null;
+        Session session = null;
+        Identifier pid = new Identifier();
+        pid.setValue(testPid);
+
+        SystemMetadata sysmeta =
+            job.getSystemMetadataFromHashStoreOrNode(pid, hashStore, cnNode, mnNode, false,
+                                                     session);
+        assertInstanceOf(SystemMetadata.class, sysmeta, "This should be a sysmeta object");
+    }
 
     /**
      * Confirm that an input stream to a data object is returned. No exception should be thrown.
