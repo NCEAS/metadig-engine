@@ -25,6 +25,10 @@ import static org.junit.jupiter.api.Assertions.fail;
  */
 public class RequestReportJobTest {
 
+    // TODO: Review and refactor the code, specifically resetting the Field Reflection values to
+    //  ensure it doesn't affect other tests to be safe. See if there is a way to have this done
+    //  with it only being set up once (ex. using '@Afterall' and '@Beforeall'
+
     /**
      * Temporary folder for tests to run in
      */
