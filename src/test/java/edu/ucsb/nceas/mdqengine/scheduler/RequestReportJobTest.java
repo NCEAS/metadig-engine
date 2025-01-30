@@ -8,7 +8,6 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -18,7 +17,6 @@ import java.util.Map;
 import java.lang.reflect.Field;
 import java.util.Properties;
 
-import org.dataone.hashstore.ObjectMetadata;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -42,6 +40,7 @@ public class RequestReportJobTest {
     private static String hashStoreRootDirectory;
 
     private static HashStore hashStore;
+    private static final String testPid = "dou.test.eml.1";
 
     /**
      * Create a HashStore before all junit tests inside a temp folder with a data object and sysmeta
@@ -49,7 +48,7 @@ public class RequestReportJobTest {
      */
     @BeforeAll
     public static void prepareJunitHashStore()
-        throws IOException, NoSuchFieldException, IllegalAccessException, URISyntaxException {
+        throws IOException, NoSuchFieldException, IllegalAccessException {
         // Create a hashstore in a tmp folder
         hashStoreRootDirectory = tempFolder.resolve("hashstore").toString();
         createHashStoreAndTestObjects(hashStoreRootDirectory);
@@ -86,8 +85,8 @@ public class RequestReportJobTest {
         if (resourceUrlToMetadigProps == null) {
             fail("Unable to retrieve file from:" + docToRetrieve);
         }
-        String fullPathToMetadigProps = resourceUrlToMetadigProps.getPath();
-        return fullPathToMetadigProps;
+
+        return resourceUrlToMetadigProps.getPath();
     }
 
     /**
@@ -106,10 +105,17 @@ public class RequestReportJobTest {
         try {
             hashStore = HashStoreFactory.getHashStore(hashstoreClassName, storeProperties);
 
-            // TODO: Store data object
-            String pid = "dou.test.eml.1";
+            // Store data object
+            String pathToEmlDoc = getPathToDocInResources("eml.1.1.xml");
+            try (InputStream dataStream = Files.newInputStream(Paths.get(pathToEmlDoc))) {
+                hashStore.storeObject(dataStream, testPid, null, null, null, -1);
+            }
 
-            // TODO: Store sysmeta object
+            // Store sysmeta object
+            String pathToSysmeta = getPathToDocInResources("eml.1.1.sysMeta.xml");
+            try (InputStream metadataStream = Files.newInputStream(Paths.get(pathToSysmeta))) {
+                hashStore.storeMetadata(metadataStream, testPid);
+            }
 
         } catch (Exception e) {
             e.printStackTrace();
