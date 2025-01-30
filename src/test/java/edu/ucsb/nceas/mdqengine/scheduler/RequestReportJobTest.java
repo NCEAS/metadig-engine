@@ -13,6 +13,7 @@ import java.lang.reflect.Field;
 import java.net.URL;
 import java.util.Properties;
 
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
@@ -86,17 +87,12 @@ public class RequestReportJobTest {
         // Re-write the updated properties to the temp folder
         Path modifiedMetadigProperties = tempFolder.resolve("modified_metadig.properties");
 
-        // Save the modified properties to the specified temp folder
+        // Save the modified props with the revised 'store_path' to the specified tmp file location
         try (FileOutputStream outputStream = new FileOutputStream(
             modifiedMetadigProperties.toFile())) {
             properties.store(outputStream, "store_path has been changed to tmp folder");
         }
-
-        // Now override MDQconfig, so it pulls properties from the modified metadig properties
-        // found in the temp folder, which contains a revised store_path
-        Field field = MDQconfig.class.getDeclaredField("configFilePath");
-        field.setAccessible(true);
-        field.set(null, modifiedMetadigProperties.toString());
+        overrideConfigFilePathInMDQConfig(modifiedMetadigProperties.toString());
 
         // Confirm that the 'store_path' key has been modified
         MDQconfig cfg = new MDQconfig();
@@ -120,16 +116,10 @@ public class RequestReportJobTest {
      */
     @Test
     public void testGetStorePropsFromMetadigProps() throws Exception {
-        // Override the static field in MDQconfig that looks for metadig.properties in
-        // '/opt/local/metadig/metadig.properties' and instead look for the properties file in
-        // the test folder resources 'test-docs'
-        Field field = MDQconfig.class.getDeclaredField("configFilePath");
-        field.setAccessible(true);
         // Retrieve the absolute path to the metadig.properties in 'test-docs'
         URL resourceUrl = this.getClass().getResource("/test-docs/metadig.properties");
         String fullPathToMetadigProps = resourceUrl.getPath();
-        // Override MDQconfig class' private static variable
-        field.set(null, fullPathToMetadigProps);
+        overrideConfigFilePathInMDQConfig(fullPathToMetadigProps);
 
         Map<String, Object> storeConfig = RequestReportJob.getStorePropsFromMetadigProps();
 
@@ -144,5 +134,21 @@ public class RequestReportJobTest {
         assertEquals("2", storeWidth);
         assertEquals("SHA-256", storeAlgo);
         assertEquals("https://ns.dataone.org/service/types/v2.0#SystemMetadata", sysmetaNamespace);
+    }
+
+    /**
+     * Override the static field in MDQconfig that looks for metadig.properties in
+     * '/opt/local/metadig/metadig.properties' and instead look for the properties file in the
+     * 'src/test/resources/test-docs' folder.
+     *
+     * The MCQconfig config file path defaults to a private static variable if it is not running
+     * in a servlet where we'd need to get the info from the webapp context.
+     *
+     */
+    public static void overrideConfigFilePathInMDQConfig(String fullPathToMetadigProps)
+        throws NoSuchFieldException, IllegalAccessException {
+        Field field = MDQconfig.class.getDeclaredField("configFilePath");
+        field.setAccessible(true);
+        field.set(null, fullPathToMetadigProps);
     }
 }
