@@ -7,6 +7,10 @@ import org.dataone.hashstore.HashStoreFactory;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Iterator;
@@ -14,6 +18,7 @@ import java.util.Map;
 import java.lang.reflect.Field;
 import java.util.Properties;
 
+import org.dataone.hashstore.ObjectMetadata;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -36,26 +41,25 @@ public class RequestReportJobTest {
 
     private static String hashStoreRootDirectory;
 
+    private static HashStore hashStore;
+
     /**
      * Create a HashStore before all junit tests inside a temp folder with a data object and sysmeta
      * object to work with.
      */
     @BeforeAll
     public static void prepareJunitHashStore()
-        throws IOException, NoSuchFieldException, IllegalAccessException {
+        throws IOException, NoSuchFieldException, IllegalAccessException, URISyntaxException {
         // Create a hashstore in a tmp folder
         hashStoreRootDirectory = tempFolder.resolve("hashstore").toString();
         createHashStoreAndTestObjects(hashStoreRootDirectory);
 
         // Load metadig.properties from test-docs
-        Path fullPathToMetadigProps =
-            Paths.get("src/test/resources/test-docs", "metadig.properties");
-        String testMetadigPropsLocationInTestDocs =
-            fullPathToMetadigProps.toFile().getAbsolutePath();
+        String fullPathToMetadigProps = getPathToDocInResources("metadig.properties");
 
         Properties properties = new Properties();
         try (
-            FileInputStream inputStream = new FileInputStream(testMetadigPropsLocationInTestDocs)) {
+            FileInputStream inputStream = new FileInputStream(fullPathToMetadigProps)) {
             properties.load(inputStream);
         }
 
@@ -73,6 +77,20 @@ public class RequestReportJobTest {
     }
 
     /**
+     * Get the path in resources/test-docs/ for the given fileName
+     */
+    public static String getPathToDocInResources(String fileName) {
+        String docToRetrieve = "test-docs/" + fileName;
+        ClassLoader classLoader = RequestReportJobTest.class.getClassLoader();
+        URL resourceUrlToMetadigProps = classLoader.getResource(docToRetrieve);
+        if (resourceUrlToMetadigProps == null) {
+            fail("Unable to retrieve file from:" + docToRetrieve);
+        }
+        String fullPathToMetadigProps = resourceUrlToMetadigProps.getPath();
+        return fullPathToMetadigProps;
+    }
+
+    /**
      * Create a HashStore in the given path and store a data object and sysmeta object
      */
     public static void createHashStoreAndTestObjects(String storePath) {
@@ -86,9 +104,11 @@ public class RequestReportJobTest {
         String hashstoreClassName = "org.dataone.hashstore.filehashstore.FileHashStore";
 
         try {
-            HashStore hashStore =
-                HashStoreFactory.getHashStore(hashstoreClassName, storeProperties);
+            hashStore = HashStoreFactory.getHashStore(hashstoreClassName, storeProperties);
+
             // TODO: Store data object
+            String pid = "dou.test.eml.1";
+
             // TODO: Store sysmeta object
 
         } catch (Exception e) {
@@ -114,6 +134,14 @@ public class RequestReportJobTest {
     }
 
     // Junit Tests
+
+    /**
+     * Confirm that an input stream to a data object is returned
+     */
+    @Test
+    public void testGetEMLMetadataDocInputStream() throws Exception {
+
+    }
 
     /**
      * Check that we get a hashstore successfully, no exceptions should be thrown.
