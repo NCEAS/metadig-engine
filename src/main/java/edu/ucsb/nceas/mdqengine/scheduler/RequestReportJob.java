@@ -662,36 +662,6 @@ public class RequestReportJob implements Job {
     }
 
     /**
-     * Retrieve a hashstore by loading the metadig.properties file and parsing it for keys with
-     * the 'store.' prefix. These keys are then used to form properties to instantiate a
-     * hashstore which can be used to retrieve system metadata or data objects.
-     *
-     * @return A hashstore based on metadig properties
-     * @throws IOException When there is an issue with using metadig properties to retrieve store
-     * keys to retrieve a hashstore
-     */
-    public static HashStore getHashStoreFromMetadigProps() throws IOException {
-        // Get hashstore with props from a config (metadig.properties) file
-        Map<String, Object> storeConfig = getStorePropsFromMetadigProps();
-        String storePath = (String) storeConfig.get("store_path");
-        String storeDepth = (String) storeConfig.get("store_depth");
-        String storeWidth = (String) storeConfig.get("store_width");
-        String storeAlgo = (String) storeConfig.get("store_algorithm");
-        String sysmetaNamespace = (String) storeConfig.get("store_metadata_namespace");
-        String hashstoreClassName = "org.dataone.hashstore.filehashstore.FileHashStore";
-        Properties storeProperties = new Properties();
-        storeProperties.setProperty("storePath", storePath);
-        storeProperties.setProperty("storeDepth", storeDepth);
-        storeProperties.setProperty("storeWidth", storeWidth);
-        storeProperties.setProperty("storeAlgorithm", storeAlgo);
-        storeProperties.setProperty("storeMetadataNamespace", sysmetaNamespace);
-
-        // Get a HashStore
-        HashStore hashStore = HashStoreFactory.getHashStore(hashstoreClassName, storeProperties);
-        return hashStore;
-    }
-
-    /**
      * Returns an input stream to an eml metadata document for a given pid. First, we try to open
      * a stream to the eml metadata doc directly through the given hashstore (quickest). If we
      * are unable to, then we will try to retrieve a stream to the eml metadata doc through the
@@ -802,11 +772,41 @@ public class RequestReportJob implements Job {
     }
 
     /**
-     * Retrieves the properties for a hashstore by loading and parsing a metadig properties file
-     * for keys with the prefix 'store.'
+     * Retrieve a hashstore by loading the metadig.properties file and parsing it for keys with the
+     * 'store.' prefix. These keys are then used to form properties to instantiate a hashstore which
+     * can be used to retrieve system metadata or data objects.
+     *
+     * @return A hashstore based on metadig properties
+     * @throws IOException When there is an issue with using metadig properties to retrieve store
+     *                     keys to retrieve a hashstore
+     */
+    public static HashStore getHashStoreFromMetadigProps() throws IOException {
+        // Get hashstore with props from a config (metadig.properties) file
+        Map<String, Object> storeConfig = getStorePropsFromMetadigProps();
+        String storePath = (String) storeConfig.get("store_path");
+        String storeDepth = (String) storeConfig.get("store_depth");
+        String storeWidth = (String) storeConfig.get("store_width");
+        String storeAlgo = (String) storeConfig.get("store_algorithm");
+        String sysmetaNamespace = (String) storeConfig.get("store_metadata_namespace");
+        String hashstoreClassName = "org.dataone.hashstore.filehashstore.FileHashStore";
+        Properties storeProperties = new Properties();
+        storeProperties.setProperty("storePath", storePath);
+        storeProperties.setProperty("storeDepth", storeDepth);
+        storeProperties.setProperty("storeWidth", storeWidth);
+        storeProperties.setProperty("storeAlgorithm", storeAlgo);
+        storeProperties.setProperty("storeMetadataNamespace", sysmetaNamespace);
+
+        // Get a HashStore
+        HashStore hashStore = HashStoreFactory.getHashStore(hashstoreClassName, storeProperties);
+        return hashStore;
+    }
+
+    /**
+     * Retrieves the properties for a hashstore by loading and parsing a metadig properties file for
+     * keys with the prefix 'store.'
      *
      * @return Map object that contains the following properties: store_path, store_depth,
-     * store_width, store_algorithm and store_metadata_namespace
+     *     store_width, store_algorithm and store_metadata_namespace
      */
     public static Map<String, Object> getStorePropsFromMetadigProps() {
         // In the metadig.properties file, hashstore properties are keys that begin with 'store.'
