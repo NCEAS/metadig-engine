@@ -646,7 +646,16 @@ public class RequestReportJob implements Job {
         }
 
         // Retrieve the EML metadata document for the given pid
-        objectIS = getEMLMetadataDocInputStream(pid, hashStore, cnNode, mnNode, isCN, session);
+        if (hashStore != null) {
+            try {
+                objectIS = getEMLMetadataDocFromHashStore(pid, hashStore, cnNode, mnNode, isCN, session);
+            } catch (Exception e) {
+                // Attempt to retrieve object stream from the API as a backup
+                objectIS = getEMLMetadataDocFromMnOrCn(pid, cnNode, mnNode, isCN, session, objectIS);
+            }
+        } else {
+            objectIS = getEMLMetadataDocFromMnOrCn(pid, cnNode, mnNode, isCN, session, objectIS);
+        }
 
         // Quality suite service url, i.e.
         // "http://docke-ucsb-1.dataone.org:30433/quality/suites/knb.suite.1/run
@@ -698,7 +707,7 @@ public class RequestReportJob implements Job {
      * @throws InsufficientResources An unexpected issue with insufficient resources when
      * retrieving the eml metadata doc through the MN or CN
      */
-    public InputStream getEMLMetadataDocInputStream(
+    public InputStream getEMLMetadataDocFromHashStore(
         Identifier pid, HashStore hashStore, MultipartCNode cnNode, MultipartMNode mnNode,
         Boolean isCN, Session session)
         throws InvalidToken, ServiceFailure, NotFound, NotImplemented, InsufficientResources {
@@ -711,23 +720,47 @@ public class RequestReportJob implements Job {
         } catch (Exception ge) {
             log.info("Unable to retrieve eml metadata doc from hashstore for pid: " + pid.getValue()
                          + ". Trying MN/CN API. Additional Details: " + ge.getMessage());
-            // If unable to, try to retrieve the sysmeta through the CN or MN as a backup
-            try {
-                if (isCN) {
-                    objectIS = cnNode.get(session, pid);
-                } else {
-                    objectIS = mnNode.get(session, pid);
-                }
-                log.debug("Retrieved metadata eml object stream for pid: " + pid.getValue());
-            } catch (NotAuthorized na) {
-                log.info("Not authorized to read eml metadata doc for pid: " + pid.getValue()
-                             + ", unable to retrieve stream to eml metadata document.");
-            } catch (Exception e) {
-                // Raise unexpected exception
-                log.error("Unexpected exception while retrieving stream to eml metadata doc: "
-                              + e.getMessage());
-                throw (e);
+        }
+        return objectIS;
+    }
+
+    /**
+     * Returns an input stream to an eml metadata document for a given pid from the MN or CN
+     *
+     * @param pid Persistent identifier
+     * @param cnNode Coordinating Node
+     * @param mnNode Member Node
+     * @param isCN Boolean to check whether we should check the CN or MN
+     * @param session User session to check for credentials to access the CN or MN
+     * @param objectIS Inputstream to set
+     * @return
+     * @throws InvalidToken If the token used to access the MN or CN is invalid
+     * @throws ServiceFailure Unexpected issue when accessing via the MN or CN
+     * @throws NotFound When the sysmeta is not found when accessing via the MN or CN
+     * @throws NotImplemented If the method to retrieve the eml metadata doc through the MN or CN is
+     * not implemented
+     * @throws InsufficientResources An unexpected issue with insufficient resources when
+     * retrieving the eml metadata doc through the MN or CN
+     */
+    public InputStream getEMLMetadataDocFromMnOrCn(
+        Identifier pid, MultipartCNode cnNode, MultipartMNode mnNode, Boolean isCN, Session session,
+        InputStream objectIS)
+        throws InvalidToken, ServiceFailure, NotFound, NotImplemented, InsufficientResources {
+        try {
+            if (isCN) {
+                objectIS = cnNode.get(session, pid);
+            } else {
+                objectIS = mnNode.get(session, pid);
             }
+            log.debug("Retrieved metadata eml object stream for pid: " + pid.getValue());
+        } catch (NotAuthorized na) {
+            log.info("Not authorized to read eml metadata doc for pid: " + pid.getValue()
+                         + ", unable to retrieve stream to eml metadata document.");
+        } catch (Exception e) {
+            // Raise unexpected exception
+            log.error("Unexpected exception while retrieving stream to eml metadata doc: "
+                          + e.getMessage());
+            throw (e);
         }
         return objectIS;
     }
@@ -764,7 +797,6 @@ public class RequestReportJob implements Job {
         } catch (Exception e) {
             log.info("Unable to retrieve system metadata from hashstore for pid: " + pid.getValue()
                          + ". Trying MN/CN API. Additional Details: " + e.getMessage());
-            // If unable to, try to retrieve the sysmeta through the CN or MN as a backup
         }
         return sysmeta;
     }
