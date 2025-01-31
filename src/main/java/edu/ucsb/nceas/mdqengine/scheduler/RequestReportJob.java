@@ -636,7 +636,7 @@ public class RequestReportJob implements Job {
         // Retrieve the system metadata
         if (hashStore != null) {
             try {
-                sysmeta = getSystemMetadataFromHashStore(pid, hashStore, cnNode, mnNode, isCN, session);
+                sysmeta = getSystemMetadataFromHashStore(pid, hashStore);
             } catch (Exception e) {
                 // Attempt to retrieve sysmeta from the API as a backup
                 sysmeta = getSystemMetadataFromMnOrCn(pid, cnNode, mnNode, isCN, session, sysmeta);
@@ -648,7 +648,7 @@ public class RequestReportJob implements Job {
         // Retrieve the EML metadata document for the given pid
         if (hashStore != null) {
             try {
-                objectIS = getEMLMetadataDocFromHashStore(pid, hashStore, cnNode, mnNode, isCN, session);
+                objectIS = getEMLMetadataDocFromHashStore(pid, hashStore);
             } catch (Exception e) {
                 // Attempt to retrieve object stream from the API as a backup
                 objectIS = getEMLMetadataDocFromMnOrCn(pid, cnNode, mnNode, isCN, session, objectIS);
@@ -694,23 +694,9 @@ public class RequestReportJob implements Job {
      *
      * @param pid Persistent identifier
      * @param hashStore HashStore to check
-     * @param cnNode Coordinating Node
-     * @param mnNode Member Node
-     * @param isCN Boolean to check whether we should check the CN or MN
-     * @param session User session to check for credentials to access the CN or MN
-     * @return Inputstream to the eml metadata document
-     * @throws InvalidToken If the token used to access the MN or CN is invalid
-     * @throws ServiceFailure Unexpected issue when accessing via the MN or CN
-     * @throws NotFound When the sysmeta is not found when accessing via the MN or CN
-     * @throws NotImplemented If the method to retrieve the eml metadata doc through the MN or CN is
-     * not implemented
-     * @throws InsufficientResources An unexpected issue with insufficient resources when
-     * retrieving the eml metadata doc through the MN or CN
      */
     public InputStream getEMLMetadataDocFromHashStore(
-        Identifier pid, HashStore hashStore, MultipartCNode cnNode, MultipartMNode mnNode,
-        Boolean isCN, Session session)
-        throws InvalidToken, ServiceFailure, NotFound, NotImplemented, InsufficientResources {
+        Identifier pid, HashStore hashStore) {
         InputStream objectIS = null;
         try {
             // First, try the quickest path to retrieve object stream via hashstore
@@ -770,10 +756,6 @@ public class RequestReportJob implements Job {
      *
      * @param pid Persistent identifier
      * @param hashStore HashStore to check
-     * @param cnNode Coordinating Node
-     * @param mnNode Member Node
-     * @param isCN Boolean to check whether we should check the CN or MN
-     * @param session User session to check for credentials to access the CN or MN
      * @return System metadata object
      * @throws InvalidToken If the token used to access the MN or CN is invalid
      * @throws ServiceFailure Unexpected issue when accessing via the MN or CN
@@ -782,8 +764,7 @@ public class RequestReportJob implements Job {
      * implemented
      */
     public SystemMetadata getSystemMetadataFromHashStore(
-        Identifier pid, HashStore hashStore, MultipartCNode cnNode, MultipartMNode mnNode,
-        Boolean isCN, Session session)
+        Identifier pid, HashStore hashStore)
         throws InvalidToken, ServiceFailure, NotFound, NotImplemented {
         SystemMetadata sysmeta = null;
         try {

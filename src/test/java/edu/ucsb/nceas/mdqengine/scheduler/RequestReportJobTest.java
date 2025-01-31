@@ -1,7 +1,6 @@
 package edu.ucsb.nceas.mdqengine.scheduler;
 
 import edu.ucsb.nceas.mdqengine.MDQconfig;
-import org.dataone.client.v2.impl.MultipartCNode;
 import org.dataone.client.v2.impl.MultipartMNode;
 import org.dataone.hashstore.HashStore;
 import org.dataone.hashstore.HashStoreFactory;
@@ -161,15 +160,11 @@ public class RequestReportJobTest {
     @Test
     public void testGetSystemMetadataFromHashStore() throws Exception {
         RequestReportJob job = new RequestReportJob();
-        MultipartCNode cnNode = mock(MultipartCNode.class);
-        MultipartMNode mnNode = mock(MultipartMNode.class);
-        Session session = mock(Session.class);
         Identifier pid = new Identifier();
         pid.setValue(testPid);
 
         SystemMetadata sysmeta =
-            job.getSystemMetadataFromHashStore(pid, hashStore, cnNode, mnNode, false,
-                                               session);
+            job.getSystemMetadataFromHashStore(pid, hashStore);
         assertInstanceOf(SystemMetadata.class, sysmeta, "This should be a sysmeta object");
     }
 
@@ -181,7 +176,6 @@ public class RequestReportJobTest {
     @Test
     public void testGetSystemMetadataFromHashStore_NotAuthorized() throws Exception {
         RequestReportJob job = new RequestReportJob();
-        MultipartCNode cnNode = mock(MultipartCNode.class);
         MultipartMNode mnNode = mock(MultipartMNode.class);
         Session session = mock(Session.class);
         Identifier pid = new Identifier();
@@ -190,7 +184,7 @@ public class RequestReportJobTest {
         when(mnNode.getSystemMetadata(session, pid)).thenThrow(
             new NotAuthorized("8000", "User is not authorized"));
 
-        job.getSystemMetadataFromHashStore(pid, hashStore, cnNode, mnNode, false, session);
+        job.getSystemMetadataFromHashStore(pid, hashStore);
     }
 
     /**
@@ -200,7 +194,6 @@ public class RequestReportJobTest {
     @Test
     public void testGetSystemMetadataFromHashStore_nullHashStore() throws Exception {
         RequestReportJob job = new RequestReportJob();
-        MultipartCNode cnNode = mock(MultipartCNode.class);
         MultipartMNode mnNode = mock(MultipartMNode.class);
         Session session = mock(Session.class);
         Identifier pid = new Identifier();
@@ -209,23 +202,20 @@ public class RequestReportJobTest {
         when(mnNode.getSystemMetadata(session, pid)).thenThrow(
             new NotAuthorized("8000", "User is not authorized"));
 
-        job.getSystemMetadataFromHashStore(pid, null, cnNode, mnNode, false, session);
+        job.getSystemMetadataFromHashStore(pid, null);
     }
 
     /**
      * Confirm that an input stream to a data object is returned. No exception should be thrown.
      */
     @Test
-    public void testGetEMLMetadataDocFromHashStore() throws Exception {
+    public void testGetEMLMetadataDocFromHashStore() {
         RequestReportJob job = new RequestReportJob();
-        MultipartCNode cnNode = mock(MultipartCNode.class);
-        MultipartMNode mnNode = mock(MultipartMNode.class);
-        Session session = mock(Session.class);
         Identifier pid = new Identifier();
         pid.setValue(testPid);
 
         InputStream objectIS =
-            job.getEMLMetadataDocFromHashStore(pid, hashStore, cnNode, mnNode, false, session);
+            job.getEMLMetadataDocFromHashStore(pid, hashStore);
         assertInstanceOf(InputStream.class, objectIS, "This should be an InputStream");
     }
 
@@ -236,7 +226,6 @@ public class RequestReportJobTest {
     @Test
     public void testGetEMLMetadataDocFromHashStore_NotAuthorized() throws Exception {
         RequestReportJob job = new RequestReportJob();
-        MultipartCNode cnNode = mock(MultipartCNode.class);
         MultipartMNode mnNode = mock(MultipartMNode.class);
         Session session = mock(Session.class);
         Identifier pid = new Identifier();
@@ -245,7 +234,7 @@ public class RequestReportJobTest {
         when(mnNode.get(session, pid)).thenThrow(
             new NotAuthorized("8000", "User is not authorized"));
 
-        job.getEMLMetadataDocFromHashStore(pid, hashStore, cnNode, mnNode, false, session);
+        job.getEMLMetadataDocFromHashStore(pid, hashStore);
     }
 
     /**
@@ -255,7 +244,6 @@ public class RequestReportJobTest {
     @Test
     public void testGetEMLMetadataDocFromHashStore_nullHashStore() throws Exception {
         RequestReportJob job = new RequestReportJob();
-        MultipartCNode cnNode = mock(MultipartCNode.class);
         MultipartMNode mnNode = mock(MultipartMNode.class);
         Session session = mock(Session.class);
         Identifier pid = new Identifier();
@@ -264,7 +252,7 @@ public class RequestReportJobTest {
         when(mnNode.get(session, pid)).thenThrow(
             new NotAuthorized("8000", "User is not authorized"));
 
-        job.getSystemMetadataFromHashStore(pid, null, cnNode, mnNode, false, session);
+        job.getSystemMetadataFromHashStore(pid, null);
     }
 
     /**
