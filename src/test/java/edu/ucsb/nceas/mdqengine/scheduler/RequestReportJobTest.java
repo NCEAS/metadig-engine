@@ -27,12 +27,17 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
+import org.mockito.MockedStatic;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.fail;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.when;
 
 /**
@@ -264,6 +269,27 @@ public class RequestReportJobTest {
         HashStore retrievedHashStore = job.getHashStoreFromMetadigProps();
         assertNotNull(retrievedHashStore, "The object should not be null");
 
+    }
+
+    /**
+     * Check that 'getHashStorePropsFromMetadigProps' returns null for any exception thrown when
+     * a hashstore is unable to be retrieved.
+     */
+    @Test
+    public void testGetHashStorePropsFromMetadigProps_hashStoreUnavailable() throws Exception {
+        RequestReportJob job = new RequestReportJob();
+
+        try (MockedStatic<HashStoreFactory> mockedStatic = mockStatic(HashStoreFactory.class)) {
+            mockedStatic
+                .when(() -> HashStoreFactory.getHashStore(anyString(), any(Properties.class)))
+                .thenThrow(new IOException("Mocked IOException"));
+
+            HashStore result = job.getHashStoreFromMetadigProps();
+
+            assertNull(
+                result,
+                "HashStore should return as null when any exception is thrown ");
+        }
     }
 
     /**
