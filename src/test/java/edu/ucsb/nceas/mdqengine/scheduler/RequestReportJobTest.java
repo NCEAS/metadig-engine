@@ -169,8 +169,8 @@ public class RequestReportJobTest {
     }
 
     /**
-     * Confirm that when a NotAuthorized is thrown after calling the MN API, that this test method
-     * does not bubble up the exception and simply returns
+     * Confirm that when a NotAuthorized is thrown after calling the MN API to retrieve system
+     * metadata, this test method does not bubble up the exception and simply returns
      */
     @Test
     public void testGetSystemMetadataFromHashStoreOrNode_NotAuthorized() throws Exception {
@@ -202,6 +202,25 @@ public class RequestReportJobTest {
         InputStream objectIS =
             job.getEMLMetadataDocInputStream(pid, hashStore, cnNode, mnNode, false, session);
         assertInstanceOf(InputStream.class, objectIS, "This should be an InputStream");
+    }
+
+    /**
+     * Confirm that when a NotAuthorized is thrown after calling the MN API to retrieve an eml
+     * metadata document, this test method does not bubble up the exception and simply returns
+     */
+    @Test
+    public void testGetEMLMetadataDocInputStream_NotAuthorized() throws Exception {
+        RequestReportJob job = new RequestReportJob();
+        MultipartCNode cnNode = mock(MultipartCNode.class);
+        MultipartMNode mnNode = mock(MultipartMNode.class);
+        Session session = mock(Session.class);
+        Identifier pid = new Identifier();
+        pid.setValue("pid.not.found");
+
+        when(mnNode.get(session, pid)).thenThrow(
+            new NotAuthorized("8000", "User is not authorized"));
+
+        job.getEMLMetadataDocInputStream(pid, hashStore, cnNode, mnNode, false, session);
     }
 
     /**
