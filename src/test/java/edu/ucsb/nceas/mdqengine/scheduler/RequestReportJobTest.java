@@ -19,6 +19,7 @@ import java.util.Map;
 import java.lang.reflect.Field;
 import java.util.Properties;
 
+import org.dataone.service.exceptions.NotAuthorized;
 import org.dataone.service.types.v1.Identifier;
 import org.dataone.service.types.v1.Session;
 import org.dataone.service.types.v2.SystemMetadata;
@@ -31,6 +32,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.fail;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 /**
  * Test class for RequestReportJob
@@ -163,6 +166,26 @@ public class RequestReportJobTest {
             job.getSystemMetadataFromHashStoreOrNode(pid, hashStore, cnNode, mnNode, false,
                                                      session);
         assertInstanceOf(SystemMetadata.class, sysmeta, "This should be a sysmeta object");
+    }
+
+    /**
+     * Confirm that when a NotAuthorized is thrown after calling the MN API, that this test method
+     * does not bubble up the exception and simply returns
+     */
+    @Test
+    public void testGetSystemMetadataFromHashStoreOrNode_NotAuthorized() throws Exception {
+        RequestReportJob job = new RequestReportJob();
+        MultipartCNode cnNode = null;
+        // Mock MN
+        MultipartMNode mnNode = mock(MultipartMNode.class);
+        Session session = mock(Session.class);
+        Identifier pid = new Identifier();
+        pid.setValue("pid.not.found");
+
+        when(mnNode.getSystemMetadata(session, pid)).thenThrow(
+            new NotAuthorized("8000", "User is not authorized"));
+
+        job.getSystemMetadataFromHashStoreOrNode(pid, hashStore, cnNode, mnNode, false, session);
     }
 
     /**
