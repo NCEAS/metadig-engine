@@ -820,6 +820,16 @@ public class RequestReportJob implements Job {
         HashStore hashStore = null;
         try {
             Map<String, Object> storeConfig = getStorePropsFromMetadigProps();
+
+            // Check that required keys are present before attempting to create a hashstore
+            if (!storeConfig.containsKey("store_path") ||
+                !storeConfig.containsKey("store_depth") ||
+                !storeConfig.containsKey("store_width") ||
+                !storeConfig.containsKey("store_algorithm") ||
+                !storeConfig.containsKey("store_metadata_namespace")) {
+                throw new IllegalArgumentException("Missing required store properties in config.");
+            }
+
             String storePath = (String) storeConfig.get("store_path");
             String storeDepth = (String) storeConfig.get("store_depth");
             String storeWidth = (String) storeConfig.get("store_width");
