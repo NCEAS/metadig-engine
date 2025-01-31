@@ -815,7 +815,7 @@ public class RequestReportJob implements Job {
      * @throws IOException When there is an issue with using metadig properties to retrieve store
      *                     keys to retrieve a hashstore
      */
-    public static HashStore getHashStoreFromMetadigProps() throws IOException {
+    public HashStore getHashStoreFromMetadigProps() throws IOException {
         // Get hashstore with props from a config (metadig.properties) file
         Map<String, Object> storeConfig = getStorePropsFromMetadigProps();
         String storePath = (String) storeConfig.get("store_path");
@@ -843,7 +843,7 @@ public class RequestReportJob implements Job {
      * @return Map object that contains the following properties: store_path, store_depth,
      *     store_width, store_algorithm and store_metadata_namespace
      */
-    public static Map<String, Object> getStorePropsFromMetadigProps() {
+    public Map<String, Object> getStorePropsFromMetadigProps() {
         // In the metadig.properties file, hashstore properties are keys that begin with 'store.'
         String prefix = "store.";
         Map<String, Object> storeConfig = new HashMap<>();

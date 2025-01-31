@@ -260,7 +260,8 @@ public class RequestReportJobTest {
         }
 
         // Confirm a HashStore was retrieved successfully
-        HashStore retrievedHashStore = RequestReportJob.getHashStoreFromMetadigProps();
+        RequestReportJob job = new RequestReportJob();
+        HashStore retrievedHashStore = job.getHashStoreFromMetadigProps();
         assertNotNull(retrievedHashStore, "The object should not be null");
 
     }
@@ -270,7 +271,8 @@ public class RequestReportJobTest {
      */
     @Test
     public void testGetStorePropsFromMetadigProps() {
-        Map<String, Object> storeConfig = RequestReportJob.getStorePropsFromMetadigProps();
+        RequestReportJob job = new RequestReportJob();
+        Map<String, Object> storeConfig = job.getStorePropsFromMetadigProps();
 
         String storePath = (String) storeConfig.get("store_path");
         String storeDepth = (String) storeConfig.get("store_depth");
