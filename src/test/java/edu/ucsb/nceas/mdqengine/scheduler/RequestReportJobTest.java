@@ -216,7 +216,7 @@ public class RequestReportJobTest {
      * Confirm that an input stream to a data object is returned. No exception should be thrown.
      */
     @Test
-    public void testGetEMLMetadataDocInputStream() throws Exception {
+    public void testGetEMLMetadataDocFromHashStore() throws Exception {
         RequestReportJob job = new RequestReportJob();
         MultipartCNode cnNode = mock(MultipartCNode.class);
         MultipartMNode mnNode = mock(MultipartMNode.class);
@@ -225,7 +225,7 @@ public class RequestReportJobTest {
         pid.setValue(testPid);
 
         InputStream objectIS =
-            job.getEMLMetadataDocInputStream(pid, hashStore, cnNode, mnNode, false, session);
+            job.getEMLMetadataDocFromHashStore(pid, hashStore, cnNode, mnNode, false, session);
         assertInstanceOf(InputStream.class, objectIS, "This should be an InputStream");
     }
 
@@ -234,7 +234,7 @@ public class RequestReportJobTest {
      * metadata document, this test method does not bubble up the exception and simply returns
      */
     @Test
-    public void testGetEMLMetadataDocInputStream_NotAuthorized() throws Exception {
+    public void testGetEMLMetadataDocFromHashStore_NotAuthorized() throws Exception {
         RequestReportJob job = new RequestReportJob();
         MultipartCNode cnNode = mock(MultipartCNode.class);
         MultipartMNode mnNode = mock(MultipartMNode.class);
@@ -245,7 +245,26 @@ public class RequestReportJobTest {
         when(mnNode.get(session, pid)).thenThrow(
             new NotAuthorized("8000", "User is not authorized"));
 
-        job.getEMLMetadataDocInputStream(pid, hashStore, cnNode, mnNode, false, session);
+        job.getEMLMetadataDocFromHashStore(pid, hashStore, cnNode, mnNode, false, session);
+    }
+
+    /**
+     * Confirm that no exception bubbles up when a hashstore is null, and the MN and CN API
+     * throws an exception when retrieving an eml metadata object
+     */
+    @Test
+    public void testGetEMLMetadataDocFromHashStore_nullHashStore() throws Exception {
+        RequestReportJob job = new RequestReportJob();
+        MultipartCNode cnNode = mock(MultipartCNode.class);
+        MultipartMNode mnNode = mock(MultipartMNode.class);
+        Session session = mock(Session.class);
+        Identifier pid = new Identifier();
+        pid.setValue("pid.not.found");
+
+        when(mnNode.get(session, pid)).thenThrow(
+            new NotAuthorized("8000", "User is not authorized"));
+
+        job.getSystemMetadataFromHashStore(pid, null, cnNode, mnNode, false, session);
     }
 
     /**
