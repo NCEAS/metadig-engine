@@ -687,13 +687,11 @@ public class RequestReportJob implements Job {
     }
 
     /**
-     * Returns an input stream to an eml metadata document for a given pid. First, we try to open
-     * a stream to the eml metadata doc directly through the given hashstore (quickest). If we
-     * are unable to, then we will try to retrieve a stream to the eml metadata doc through the
-     * given MN or CN API.
+     * Returns an input stream to an eml metadata document for a given pid through a hashstore
      *
-     * @param pid Persistent identifier
+     * @param pid       Persistent identifier
      * @param hashStore HashStore to check
+     * @return Input stream to eml metadata doc
      */
     public InputStream getEMLMetadataDocFromHashStore(
         Identifier pid, HashStore hashStore) {
@@ -713,20 +711,20 @@ public class RequestReportJob implements Job {
     /**
      * Returns an input stream to an eml metadata document for a given pid from the MN or CN
      *
-     * @param pid Persistent identifier
-     * @param cnNode Coordinating Node
-     * @param mnNode Member Node
-     * @param isCN Boolean to check whether we should check the CN or MN
-     * @param session User session to check for credentials to access the CN or MN
+     * @param pid      Persistent identifier
+     * @param cnNode   Coordinating Node
+     * @param mnNode   Member Node
+     * @param isCN     Boolean to check whether we should check the CN or MN
+     * @param session  User session to check for credentials to access the CN or MN
      * @param objectIS Inputstream to set
-     * @return
-     * @throws InvalidToken If the token used to access the MN or CN is invalid
-     * @throws ServiceFailure Unexpected issue when accessing via the MN or CN
-     * @throws NotFound When the sysmeta is not found when accessing via the MN or CN
-     * @throws NotImplemented If the method to retrieve the eml metadata doc through the MN or CN is
-     * not implemented
-     * @throws InsufficientResources An unexpected issue with insufficient resources when
-     * retrieving the eml metadata doc through the MN or CN
+     * @return Input stream to eml metadata doc
+     * @throws InvalidToken          If the token used to access the MN or CN is invalid
+     * @throws ServiceFailure        Unexpected issue when accessing via the MN or CN
+     * @throws NotFound              When the sysmeta is not found when accessing via the MN or CN
+     * @throws NotImplemented        If the method to retrieve the eml metadata doc through the MN
+     *                               or CN is not implemented
+     * @throws InsufficientResources An unexpected issue with insufficient resources when retrieving
+     *                               the eml metadata doc through the MN or CN
      */
     public InputStream getEMLMetadataDocFromMnOrCn(
         Identifier pid, MultipartCNode cnNode, MultipartMNode mnNode, Boolean isCN, Session session,
@@ -754,18 +752,11 @@ public class RequestReportJob implements Job {
     /**
      * Returns a system metadata object for a given pid through a hashstore.
      *
-     * @param pid Persistent identifier
+     * @param pid       Persistent identifier
      * @param hashStore HashStore to check
      * @return System metadata object
-     * @throws InvalidToken If the token used to access the MN or CN is invalid
-     * @throws ServiceFailure Unexpected issue when accessing via the MN or CN
-     * @throws NotFound When the sysmeta is not found when accessing via the MN or CN
-     * @throws NotImplemented If the method to retrieve the sysmeta through the MN or CN is not
-     * implemented
      */
-    public SystemMetadata getSystemMetadataFromHashStore(
-        Identifier pid, HashStore hashStore)
-        throws InvalidToken, ServiceFailure, NotFound, NotImplemented {
+    public SystemMetadata getSystemMetadataFromHashStore(Identifier pid, HashStore hashStore) {
         SystemMetadata sysmeta = null;
         try {
             // First, try the quickest path to retrieve sysmeta object via hashstore
@@ -785,16 +776,16 @@ public class RequestReportJob implements Job {
     /**
      * Returns a system metadata object for a given pid from the MN or CN
      *
-     * @param pid Persistent identifier
-     * @param cnNode Coordinating Node
-     * @param mnNode Member Node
-     * @param isCN Boolean to check whether we should check the CN or MN
+     * @param pid     Persistent identifier
+     * @param cnNode  Coordinating Node
+     * @param mnNode  Member Node
+     * @param isCN    Boolean to check whether we should check the CN or MN
      * @param session User session to check for credentials to access the CN or MN
      * @param sysmeta Sysmeta object to set
      * @return System metadata object
-     * @throws InvalidToken If the token used to access the MN or CN is invalid
+     * @throws InvalidToken   If the token used to access the MN or CN is invalid
      * @throws ServiceFailure Unexpected issue when accessing via the MN or CN
-     * @throws NotFound When the sysmeta is not found when accessing via the MN or CN
+     * @throws NotFound       When the sysmeta is not found when accessing via the MN or CN
      * @throws NotImplemented If the method to retrieve the sysmeta through the MN or CN is not
      */
     public SystemMetadata getSystemMetadataFromMnOrCn(
@@ -812,8 +803,8 @@ public class RequestReportJob implements Job {
                          + ", unable to retrieve stream to system metadata");
         } catch (Exception e) {
             // Raise unexpected exception
-            log.error("Unexpected exception while retrieving system metadata object: "
-                          + e.getMessage());
+            log.error(
+                "Unexpected exception while retrieving system metadata object: " + e.getMessage());
             throw (e);
         }
         return sysmeta;
