@@ -817,22 +817,28 @@ public class RequestReportJob implements Job {
      */
     public HashStore getHashStoreFromMetadigProps() throws IOException {
         // Get hashstore with props from a config (metadig.properties) file
-        Map<String, Object> storeConfig = getStorePropsFromMetadigProps();
-        String storePath = (String) storeConfig.get("store_path");
-        String storeDepth = (String) storeConfig.get("store_depth");
-        String storeWidth = (String) storeConfig.get("store_width");
-        String storeAlgo = (String) storeConfig.get("store_algorithm");
-        String sysmetaNamespace = (String) storeConfig.get("store_metadata_namespace");
-        String hashstoreClassName = "org.dataone.hashstore.filehashstore.FileHashStore";
-        Properties storeProperties = new Properties();
-        storeProperties.setProperty("storePath", storePath);
-        storeProperties.setProperty("storeDepth", storeDepth);
-        storeProperties.setProperty("storeWidth", storeWidth);
-        storeProperties.setProperty("storeAlgorithm", storeAlgo);
-        storeProperties.setProperty("storeMetadataNamespace", sysmetaNamespace);
+        HashStore hashStore = null;
+        try {
+            Map<String, Object> storeConfig = getStorePropsFromMetadigProps();
+            String storePath = (String) storeConfig.get("store_path");
+            String storeDepth = (String) storeConfig.get("store_depth");
+            String storeWidth = (String) storeConfig.get("store_width");
+            String storeAlgo = (String) storeConfig.get("store_algorithm");
+            String sysmetaNamespace = (String) storeConfig.get("store_metadata_namespace");
+            String hashstoreClassName = "org.dataone.hashstore.filehashstore.FileHashStore";
+            Properties storeProperties = new Properties();
+            storeProperties.setProperty("storePath", storePath);
+            storeProperties.setProperty("storeDepth", storeDepth);
+            storeProperties.setProperty("storeWidth", storeWidth);
+            storeProperties.setProperty("storeAlgorithm", storeAlgo);
+            storeProperties.setProperty("storeMetadataNamespace", sysmetaNamespace);
 
-        // Get a HashStore
-        HashStore hashStore = HashStoreFactory.getHashStore(hashstoreClassName, storeProperties);
+            // Get a HashStore
+            hashStore = HashStoreFactory.getHashStore(hashstoreClassName, storeProperties);
+
+        } catch (Exception e) {
+            log.error("Unable to instantiate a hashstore: " + e.getMessage());
+        }
         return hashStore;
     }
 
@@ -861,9 +867,11 @@ public class RequestReportJob implements Job {
             }
 
         } catch (ConfigurationException ce) {
+            log.error("Unexpected exception reading metadig config: " + ce.getMessage());
             throw new RuntimeException(
                 "Error reading metadig configuration, ConfigurationException: " + ce);
         } catch (IOException io) {
+            log.error("Unexpected exception reading metadig config: " + io.getMessage());
             throw new RuntimeException("Error reading metadig configuration, IOException: " + io);
         }
         return storeConfig;
