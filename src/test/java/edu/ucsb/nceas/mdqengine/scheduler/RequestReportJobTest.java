@@ -154,7 +154,7 @@ public class RequestReportJobTest {
      * Confirm that a sysmeta object is returned. No exception should be thrown.
      */
     @Test
-    public void testGetSystemMetadataFromHashStoreOrNode() throws Exception {
+    public void testGetSystemMetadataFromHashStore() throws Exception {
         RequestReportJob job = new RequestReportJob();
         MultipartCNode cnNode = mock(MultipartCNode.class);
         MultipartMNode mnNode = mock(MultipartMNode.class);
@@ -163,17 +163,18 @@ public class RequestReportJobTest {
         pid.setValue(testPid);
 
         SystemMetadata sysmeta =
-            job.getSystemMetadataFromHashStoreOrNode(pid, hashStore, cnNode, mnNode, false,
-                                                     session);
+            job.getSystemMetadataFromHashStore(pid, hashStore, cnNode, mnNode, false,
+                                               session);
         assertInstanceOf(SystemMetadata.class, sysmeta, "This should be a sysmeta object");
     }
 
     /**
-     * Confirm that when a NotAuthorized is thrown after calling the MN API to retrieve system
-     * metadata, this test method does not bubble up the exception and simply returns
+     * Confirm that when a NotAuthorized is thrown after calling the MN API as a backup method to
+     * retrieve system metadata, this test method does not bubble up the exception and simply
+     * returns
      */
     @Test
-    public void testGetSystemMetadataFromHashStoreOrNode_NotAuthorized() throws Exception {
+    public void testGetSystemMetadataFromHashStore_NotAuthorized() throws Exception {
         RequestReportJob job = new RequestReportJob();
         MultipartCNode cnNode = mock(MultipartCNode.class);
         MultipartMNode mnNode = mock(MultipartMNode.class);
@@ -184,7 +185,26 @@ public class RequestReportJobTest {
         when(mnNode.getSystemMetadata(session, pid)).thenThrow(
             new NotAuthorized("8000", "User is not authorized"));
 
-        job.getSystemMetadataFromHashStoreOrNode(pid, hashStore, cnNode, mnNode, false, session);
+        job.getSystemMetadataFromHashStore(pid, hashStore, cnNode, mnNode, false, session);
+    }
+
+    /**
+     * Confirm that no exception bubbles up when a hashstore is null, and the MN and CN API
+     * throws an exception when retrieving system metadata
+     */
+    @Test
+    public void testGetSystemMetadataFromHashStore_nullHashStore() throws Exception {
+        RequestReportJob job = new RequestReportJob();
+        MultipartCNode cnNode = mock(MultipartCNode.class);
+        MultipartMNode mnNode = mock(MultipartMNode.class);
+        Session session = mock(Session.class);
+        Identifier pid = new Identifier();
+        pid.setValue("pid.not.found");
+
+        when(mnNode.getSystemMetadata(session, pid)).thenThrow(
+            new NotAuthorized("8000", "User is not authorized"));
+
+        job.getSystemMetadataFromHashStore(pid, null, cnNode, mnNode, false, session);
     }
 
     /**
