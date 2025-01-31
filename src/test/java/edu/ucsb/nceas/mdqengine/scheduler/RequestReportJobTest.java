@@ -156,9 +156,9 @@ public class RequestReportJobTest {
     @Test
     public void testGetSystemMetadataFromHashStoreOrNode() throws Exception {
         RequestReportJob job = new RequestReportJob();
-        MultipartCNode cnNode = null;
-        MultipartMNode mnNode = null;
-        Session session = null;
+        MultipartCNode cnNode = mock(MultipartCNode.class);
+        MultipartMNode mnNode = mock(MultipartMNode.class);
+        Session session = mock(Session.class);
         Identifier pid = new Identifier();
         pid.setValue(testPid);
 
@@ -175,8 +175,7 @@ public class RequestReportJobTest {
     @Test
     public void testGetSystemMetadataFromHashStoreOrNode_NotAuthorized() throws Exception {
         RequestReportJob job = new RequestReportJob();
-        MultipartCNode cnNode = null;
-        // Mock MN
+        MultipartCNode cnNode = mock(MultipartCNode.class);
         MultipartMNode mnNode = mock(MultipartMNode.class);
         Session session = mock(Session.class);
         Identifier pid = new Identifier();
@@ -194,9 +193,9 @@ public class RequestReportJobTest {
     @Test
     public void testGetEMLMetadataDocInputStream() throws Exception {
         RequestReportJob job = new RequestReportJob();
-        MultipartCNode cnNode = null;
-        MultipartMNode mnNode = null;
-        Session session = null;
+        MultipartCNode cnNode = mock(MultipartCNode.class);
+        MultipartMNode mnNode = mock(MultipartMNode.class);
+        Session session = mock(Session.class);
         Identifier pid = new Identifier();
         pid.setValue(testPid);
 
