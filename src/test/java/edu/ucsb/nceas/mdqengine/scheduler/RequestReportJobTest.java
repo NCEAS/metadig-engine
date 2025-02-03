@@ -209,22 +209,22 @@ public class RequestReportJobTest {
      * Confirm that an input stream to a data object is returned. No exception should be thrown.
      */
     @Test
-    public void testGetEMLMetadataDocFromHashStore() {
+    public void testGetObjectFromHashStore() {
         RequestReportJob job = new RequestReportJob();
         Identifier pid = new Identifier();
         pid.setValue(testPid);
 
         InputStream objectIS =
-            job.getEMLMetadataDocFromHashStore(pid, hashStore);
+            job.getObjectFromHashStore(pid, hashStore);
         assertInstanceOf(InputStream.class, objectIS, "This should be an InputStream");
     }
 
     /**
-     * Confirm that when a NotAuthorized is thrown after calling the MN API to retrieve an eml
-     * metadata document, this test method does not bubble up the exception and simply returns
+     * Confirm that when a NotAuthorized is thrown after calling the MN API to retrieve a data
+     * object, this test method does not bubble up the exception and simply returns
      */
     @Test
-    public void testGetEMLMetadataDocFromHashStore_NotAuthorized() throws Exception {
+    public void testGetObjectFromHashStore_NotAuthorized() throws Exception {
         RequestReportJob job = new RequestReportJob();
         MultipartMNode mnNode = mock(MultipartMNode.class);
         Session session = mock(Session.class);
@@ -234,7 +234,7 @@ public class RequestReportJobTest {
         when(mnNode.get(session, pid)).thenThrow(
             new NotAuthorized("8000", "User is not authorized"));
 
-        job.getEMLMetadataDocFromHashStore(pid, hashStore);
+        job.getObjectFromHashStore(pid, hashStore);
     }
 
     /**

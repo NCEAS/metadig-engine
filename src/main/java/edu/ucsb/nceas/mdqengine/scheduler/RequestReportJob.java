@@ -1,6 +1,5 @@
 package edu.ucsb.nceas.mdqengine.scheduler;
 
-import com.hp.hpl.jena.tdb.store.Hash;
 import edu.ucsb.nceas.mdqengine.MDQconfig;
 import edu.ucsb.nceas.mdqengine.DataONE;
 import edu.ucsb.nceas.mdqengine.exception.MetadigStoreException;
@@ -657,7 +656,7 @@ public class RequestReportJob implements Job {
         // Retrieve the EML metadata document for the given pid
         if (hashStore != null) {
             try {
-                objectIS = getEMLMetadataDocFromHashStore(pid, hashStore);
+                objectIS = getObjectFromHashStore(pid, hashStore);
             } catch (Exception e) {
                 // Attempt to retrieve object stream from the API as a backup
                 objectIS = getEMLMetadataDocFromMnOrCn(pid, cnNode, mnNode, isCN, session, objectIS);
@@ -696,13 +695,13 @@ public class RequestReportJob implements Job {
     }
 
     /**
-     * Returns an input stream to an eml metadata document for a given pid through a hashstore
+     * Returns an input stream to a data object for a given pid through a hashstore
      *
      * @param pid       Persistent identifier
      * @param hashStore HashStore to check
      * @return Input stream to eml metadata doc
      */
-    public InputStream getEMLMetadataDocFromHashStore(
+    public InputStream getObjectFromHashStore(
         Identifier pid, HashStore hashStore) {
         InputStream objectIS = null;
         try {
