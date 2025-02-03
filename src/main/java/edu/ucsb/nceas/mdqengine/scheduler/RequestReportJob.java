@@ -1,5 +1,6 @@
 package edu.ucsb.nceas.mdqengine.scheduler;
 
+import com.hp.hpl.jena.tdb.store.Hash;
 import edu.ucsb.nceas.mdqengine.MDQconfig;
 import edu.ucsb.nceas.mdqengine.DataONE;
 import edu.ucsb.nceas.mdqengine.exception.MetadigStoreException;
@@ -19,6 +20,7 @@ import org.dataone.client.rest.HttpMultipartRestClient;
 import org.dataone.client.rest.MultipartRestClient;
 import org.dataone.client.v2.impl.MultipartCNode;
 import org.dataone.client.v2.impl.MultipartMNode;
+import org.dataone.hashstore.exceptions.HashStoreFactoryException;
 import org.dataone.service.exceptions.InsufficientResources;
 import org.dataone.service.exceptions.InvalidToken;
 import org.dataone.service.exceptions.NotFound;
@@ -629,8 +631,15 @@ public class RequestReportJob implements Job {
         try {
             hashStore = getHashStoreFromMetadigProps();
 
+        } catch (HashStoreFactoryException hsfe) {
+            log.warn("HashStore cannot be retrieved: " + hsfe.getMessage());
+        } catch (IOException ioe) {
+            log.warn("HashStore is unavailable, unexpected IOException: " + ioe.getMessage());
+        } catch (IllegalArgumentException iae) {
+            log.warn(
+                "HashStore cannot be retrieved, missing config properties: " + iae.getMessage());
         } catch (Exception e) {
-            log.warn("HashStore is unavailable. Additional info: " + e.getMessage());
+            log.warn("Unexpected exception retrieving HashStore: " + e.getMessage());
         }
 
         // Retrieve the system metadata
@@ -816,10 +825,15 @@ public class RequestReportJob implements Job {
      * can be used to retrieve system metadata or data objects.
      *
      * @return A hashstore based on metadig properties
-     * @throws IOException When there is an issue with using metadig properties to retrieve store
-     *                     keys to retrieve a hashstore
+     * @throws IOException               When there is an issue with using metadig properties to
+     *                                   retrieve store keys to retrieve a hashstore
+     * @throws IllegalArgumentException  When a hashstore config property is missing (ex.
+     *                                   store_path)
+     * @throws HashStoreFactoryException An issue with instantiating a hashstore (ex. missing
+     *                                   class)
      */
-    public HashStore getHashStoreFromMetadigProps() throws IOException {
+    public HashStore getHashStoreFromMetadigProps()
+        throws IllegalArgumentException, HashStoreFactoryException, IOException {
         // Get hashstore with props from a config (metadig.properties) file
         HashStore hashStore = null;
         try {
@@ -852,6 +866,7 @@ public class RequestReportJob implements Job {
 
         } catch (Exception e) {
             log.error("Unable to instantiate a hashstore: " + e.getMessage());
+            throw e;
         }
         return hashStore;
     }
