@@ -209,7 +209,7 @@ public class RequestReportJobTest {
      * Confirm that an input stream to a data object is returned. No exception should be thrown.
      */
     @Test
-    public void testGetObjectFromHashStore() {
+    public void testGetObjectFromHashStore() throws Exception {
         RequestReportJob job = new RequestReportJob();
         Identifier pid = new Identifier();
         pid.setValue(testPid);
@@ -239,10 +239,10 @@ public class RequestReportJobTest {
 
     /**
      * Confirm that no exception bubbles up when a hashstore is null, and the MN and CN API
-     * throws an exception when retrieving an eml metadata object
+     * throws an exception when retrieving a data object (ex. eml metadata doc)
      */
     @Test
-    public void testGetEMLMetadataDocFromHashStore_nullHashStore() throws Exception {
+    public void testGetObjectFromHashStore_nullHashStore() throws Exception {
         RequestReportJob job = new RequestReportJob();
         MultipartMNode mnNode = mock(MultipartMNode.class);
         Session session = mock(Session.class);
@@ -252,7 +252,7 @@ public class RequestReportJobTest {
         when(mnNode.get(session, pid)).thenThrow(
             new NotAuthorized("8000", "User is not authorized"));
 
-        job.getSystemMetadataFromHashStore(pid, null);
+        job.getObjectFromHashStore(pid, null);
     }
 
     /**
@@ -291,10 +291,10 @@ public class RequestReportJobTest {
                 .when(() -> HashStoreFactory.getHashStore(anyString(), any(Properties.class)))
                 .thenThrow(new IOException("Mocked IOException"));
 
-            HashStore result = job.getHashStoreFromMetadigProps();
+            HashStore hashstore = job.getHashStoreFromMetadigProps();
 
             assertNull(
-                result,
+                hashstore,
                 "HashStore should return as null when any exception is thrown ");
         }
     }

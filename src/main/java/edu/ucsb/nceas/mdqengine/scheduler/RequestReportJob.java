@@ -865,7 +865,7 @@ public class RequestReportJob implements Job {
 
         } catch (Exception e) {
             log.error("Unable to instantiate a hashstore: " + e.getMessage());
-            throw e;
+            return hashStore;
         }
         return hashStore;
     }
