@@ -5,6 +5,7 @@ import org.dataone.hashstore.HashStore;
 import org.dataone.hashstore.HashStoreFactory;
 
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -207,22 +208,18 @@ public class RequestReportJobTest {
         assertInstanceOf(InputStream.class, objectIS, "This should be an InputStream");
     }
 
-    // TODO: Review junit tests related to testGetObjectFromHashStore
-
     /**
-     * Confirm that no exception bubbles up when a hashstore is null, and the MN and CN API
-     * throws an exception when retrieving a data object (ex. eml metadata doc)
+     * Confirm that a file not found exception is thrown when supplied with a pid that has no
+     * data object.
      */
     @Test
-    @Disabled("Revisit after checking in with team RE: flow")
-    public void testGetObjectFromHashStore_objectNotFound() throws Exception {
+    public void testGetObjectFromHashStore_objectNotFound() {
         RequestReportJob job = new RequestReportJob();
         Identifier pid = new Identifier();
-        pid.setValue("pid.not.found");
+        pid.setValue("file.wont.be.found");
 
-        job.getObjectFromHashStore(pid, hashStore);
         assertThrows(
-            IOException.class,
+            FileNotFoundException.class,
             () -> job.getObjectFromHashStore(pid, hashStore));
     }
 
