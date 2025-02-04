@@ -238,22 +238,43 @@ public class RequestReportJobTest {
         // Confirm a HashStore was retrieved successfully
         RequestReportJob job = new RequestReportJob();
         HashStore retrievedHashStore = job.getHashStoreFromMetadigProps();
+        assertInstanceOf(HashStore.class, retrievedHashStore, "This should be an InputStream");
         assertNotNull(retrievedHashStore, "The object should not be null");
 
     }
 
     /**
-     * Check that 'getHashStorePropsFromMetadigProps' returns null for any exception thrown when
-     * a hashstore is unable to be retrieved.
+     * Check that 'getHashStorePropsFromMetadigProps' returns null for an IOException thrown
      */
     @Test
-    public void testGetHashStorePropsFromMetadigProps_hashStoreUnavailable() throws Exception {
+    public void testGetHashStorePropsFromMetadigProps_IOException() throws Exception {
         RequestReportJob job = new RequestReportJob();
 
         try (MockedStatic<HashStoreFactory> mockedStatic = mockStatic(HashStoreFactory.class)) {
             mockedStatic
                 .when(() -> HashStoreFactory.getHashStore(anyString(), any(Properties.class)))
                 .thenThrow(new IOException("Mocked IOException"));
+
+            HashStore hashstore = job.getHashStoreFromMetadigProps();
+
+            assertNull(
+                hashstore,
+                "HashStore should return as null when any exception is thrown ");
+        }
+    }
+
+    /**
+     * Check that 'getHashStorePropsFromMetadigProps' returns null for an IllegalArgumentException
+     * thrown
+     */
+    @Test
+    public void testGetHashStorePropsFromMetadigProps_IllegalArgumentException() throws Exception {
+        RequestReportJob job = new RequestReportJob();
+
+        try (MockedStatic<HashStoreFactory> mockedStatic = mockStatic(HashStoreFactory.class)) {
+            mockedStatic
+                .when(() -> HashStoreFactory.getHashStore(anyString(), any(Properties.class)))
+                .thenThrow(new IllegalArgumentException("Mocked IOException"));
 
             HashStore hashstore = job.getHashStoreFromMetadigProps();
 

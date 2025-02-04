@@ -10,6 +10,7 @@ import edu.ucsb.nceas.mdqengine.store.MDQStore;
 import org.apache.commons.configuration2.ex.ConfigurationException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.commons.text.CaseUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
@@ -45,9 +46,11 @@ import java.io.InputStream;
 import java.security.NoSuchAlgorithmException;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import org.dataone.hashstore.HashStore;
@@ -886,29 +889,25 @@ public class RequestReportJob implements Job {
         // Get hashstore with props from a config (metadig.properties) file
         HashStore hashStore = null;
         try {
+            // Begin by getting store properties from a metadig.properties file
             Map<String, Object> storeConfig = getStorePropsFromMetadigProps();
-
-            // Check that required keys are present before attempting to create a hashstore
-            if (!storeConfig.containsKey("store_path") ||
-                !storeConfig.containsKey("store_depth") ||
-                !storeConfig.containsKey("store_width") ||
-                !storeConfig.containsKey("store_algorithm") ||
-                !storeConfig.containsKey("store_metadata_namespace")) {
-                throw new IllegalArgumentException("Missing required store properties in config.");
-            }
-
-            String storePath = (String) storeConfig.get("store_path");
-            String storeDepth = (String) storeConfig.get("store_depth");
-            String storeWidth = (String) storeConfig.get("store_width");
-            String storeAlgo = (String) storeConfig.get("store_algorithm");
-            String sysmetaNamespace = (String) storeConfig.get("store_metadata_namespace");
-            String hashstoreClassName = "org.dataone.hashstore.filehashstore.FileHashStore";
+            List<String> requiredKeys =
+                Arrays.asList("store_path", "store_depth", "store_width", "store_algorithm",
+                              "store_metadata_namespace");
             Properties storeProperties = new Properties();
-            storeProperties.setProperty("storePath", storePath);
-            storeProperties.setProperty("storeDepth", storeDepth);
-            storeProperties.setProperty("storeWidth", storeWidth);
-            storeProperties.setProperty("storeAlgorithm", storeAlgo);
-            storeProperties.setProperty("storeMetadataNamespace", sysmetaNamespace);
+            // Now check that the required store properties are present
+            for (String key : requiredKeys) {
+                String camelKey = CaseUtils.toCamelCase(key, false, '_');
+                Object value = storeConfig.get(key);
+
+                if (value != null) {
+                    // Add to Properties object if found
+                    storeProperties.setProperty(camelKey, value.toString());
+                } else {
+                    throw new IllegalArgumentException("Missing required store property: " + key);
+                }
+            }
+            String hashstoreClassName = "org.dataone.hashstore.filehashstore.FileHashStore";
 
             // Get a HashStore
             hashStore = HashStoreFactory.getHashStore(hashstoreClassName, storeProperties);
