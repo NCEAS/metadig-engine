@@ -41,6 +41,7 @@ import org.quartz.*;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.NoSuchAlgorithmException;
@@ -707,18 +708,37 @@ public class RequestReportJob implements Job {
      * @param pid       Persistent identifier
      * @param hashStore HashStore to check
      * @return Input stream to eml metadata doc
+     * @throws NoSuchAlgorithmException An issue with the store algorithm
+     * @throws FileNotFoundException    If a data object is not found
+     * @throws IOException              If there is an issue with retrieving the stream
      */
-    public InputStream getObjectFromHashStore(
-        Identifier pid, HashStore hashStore) {
+    public InputStream getObjectFromHashStore(Identifier pid, HashStore hashStore)
+        throws NoSuchAlgorithmException, FileNotFoundException, IOException {
         InputStream objectIS = null;
         try {
             // First, try the quickest path to retrieve object stream via hashstore
             objectIS = hashStore.retrieveObject(pid.getValue());
-            log.debug("Retrieved eml metadata object stream via hashstore");
+            log.debug("Retrieved object stream via hashstore");
+
+        } catch (NoSuchAlgorithmException nsae) {
+            log.warn("Unable to retrieve object from hashstore for pid: " + pid.getValue()
+                         + ". Trying MN/CN API. Issue with store algorithm: " + nsae.getMessage());
+            throw nsae;
+
+        } catch (FileNotFoundException fnfe) {
+            log.warn("Unable to retrieve object from hashstore for pid: " + pid.getValue()
+                         + ". Trying MN/CN API. File not found: " + fnfe.getMessage());
+            throw fnfe;
+
+        } catch (IOException ioe) {
+            log.warn("Unable to retrieve object from hashstore for pid: " + pid.getValue()
+                         + ". Trying MN/CN API. Unexpected IOException: " + ioe.getMessage());
+            throw ioe;
 
         } catch (Exception ge) {
-            log.info("Unable to retrieve eml metadata doc from hashstore for pid: " + pid.getValue()
+            log.error("Unable to retrieve eml metadata doc from hashstore for pid: " + pid.getValue()
                          + ". Trying MN/CN API. Additional Details: " + ge.getMessage());
+            throw ge;
         }
         return objectIS;
     }
@@ -824,7 +844,7 @@ public class RequestReportJob implements Job {
             throw me;
 
         } catch (Exception ge) {
-            log.warn(
+            log.error(
                 "Unable to create sysmeta object with hashstore stream for pid: " + pid.getValue()
                     + ". Trying MN/CN API. Unexpected exception: " + ge.getMessage());
             throw ge;
