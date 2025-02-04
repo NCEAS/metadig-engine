@@ -161,8 +161,6 @@ public class RequestReportJobTest {
 
     // Junit Tests
 
-    // TODO: Add junit test for 'submitReportRequest'
-
     /**
      * Confirm that a sysmeta object is returned. No exception should be thrown.
      */
@@ -178,9 +176,7 @@ public class RequestReportJobTest {
     }
 
     /**
-     * Confirm that when a NotAuthorized is thrown after calling the MN API as a backup method to
-     * retrieve system metadata, this test method does not bubble up the exception and simply
-     * returns
+     * Confirm that an IOException is thrown when a sysmeta is not available
      */
     @Test
     public void testGetSystemMetadataFromHashStore_metadataNotFound() throws Exception {
@@ -209,7 +205,7 @@ public class RequestReportJobTest {
     }
 
     /**
-     * Confirm that a file not found exception is thrown when supplied with a pid that has no
+     * Confirm that a FileNotFoundException is thrown when supplied with a pid that has no
      * data object.
      */
     @Test
@@ -303,10 +299,10 @@ public class RequestReportJobTest {
         String sysmetaNamespace = (String) storeConfig.get("store_metadata_namespace");
 
         assertEquals(hashStoreRootDirectory, storePath);
-        assertEquals("3", storeDepth);
-        assertEquals("2", storeWidth);
-        assertEquals("SHA-256", storeAlgo);
-        assertEquals("https://ns.dataone.org/service/types/v2.0#SystemMetadata", sysmetaNamespace);
+        assertEquals(hashStoreDepth, storeDepth);
+        assertEquals(hashStoreWidth, storeWidth);
+        assertEquals(hashStoreAlgorithm, storeAlgo);
+        assertEquals(hashStoreSysmetaNamespace, sysmetaNamespace);
     }
 
     /**
