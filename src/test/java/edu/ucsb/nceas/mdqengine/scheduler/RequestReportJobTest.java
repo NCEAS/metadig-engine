@@ -48,6 +48,11 @@ public class RequestReportJobTest {
     public static Path tempFolder;
 
     private static String hashStoreRootDirectory;
+    private static final String hashStoreDepth = "3";
+    private static final String hashStoreWidth = "2";
+    private static final String hashStoreAlgorithm = "SHA-256";
+    private static final String hashStoreSysmetaNamespace =
+        "https://ns.dataone.org/service/types/v2.0#SystemMetadata";
 
     private static HashStore hashStore;
     private static final String testPid = "dou.test.eml.1";
@@ -63,24 +68,29 @@ public class RequestReportJobTest {
         hashStoreRootDirectory = tempFolder.resolve("hashstore").toString();
         createHashStoreAndTestObjects(hashStoreRootDirectory);
 
-        // Load metadig.properties from test-docs
-        String fullPathToMetadigProps = getPathToDocInResources("metadig.properties");
-
+        // Load test metadig.properties from helm/metadig-controller
+        Path projectRoot = Paths.get("..").toAbsolutePath().normalize();
+        Path projectRootWithMetadigEngine = projectRoot.resolve("metadig-engine");
+        Path helmMetadigPropsFilePath = projectRootWithMetadigEngine.resolve(
+            "helm/metadig-controller/config.dev/metadig.properties");
         Properties properties = new Properties();
-        try (
-            FileInputStream inputStream = new FileInputStream(fullPathToMetadigProps)) {
+        try (FileInputStream inputStream = new FileInputStream(helmMetadigPropsFilePath.toFile())) {
             properties.load(inputStream);
         }
 
-        // Modify the key to be the temp hashstore folder
+        // Set hashstore 'store.' keys just in case they are missing
         properties.setProperty("store.store_path", hashStoreRootDirectory);
+        properties.setProperty("storeDepth", hashStoreDepth);
+        properties.setProperty("storeWidth", hashStoreWidth);
+        properties.setProperty("storeAlgorithm", hashStoreAlgorithm);
+        properties.setProperty("storeMetadataNamespace", hashStoreSysmetaNamespace);
 
         // Re-write the updated properties to the temp folder
         Path modifiedMetadigProperties = tempFolder.resolve("modified_metadig.properties");
         // Save the modified props with the revised 'store_path' to the specified tmp file location
         try (FileOutputStream outputStream = new FileOutputStream(
             modifiedMetadigProperties.toFile())) {
-            properties.store(outputStream, "store_path has been changed to tmp folder");
+            properties.store(outputStream, "Store properties have been written");
         }
         overrideConfigFilePathInMDQConfig(modifiedMetadigProperties.toString());
     }
@@ -105,11 +115,10 @@ public class RequestReportJobTest {
     public static void createHashStoreAndTestObjects(String storePath) {
         Properties storeProperties = new Properties();
         storeProperties.setProperty("storePath", storePath);
-        storeProperties.setProperty("storeDepth", "3");
-        storeProperties.setProperty("storeWidth", "2");
-        storeProperties.setProperty("storeAlgorithm", "SHA-256");
-        storeProperties.setProperty(
-            "storeMetadataNamespace", "https://ns.dataone.org/service/types/v2.0#SystemMetadata");
+        storeProperties.setProperty("storeDepth", hashStoreDepth);
+        storeProperties.setProperty("storeWidth", hashStoreWidth);
+        storeProperties.setProperty("storeAlgorithm", hashStoreAlgorithm);
+        storeProperties.setProperty("storeMetadataNamespace", hashStoreSysmetaNamespace);
         String hashstoreClassName = "org.dataone.hashstore.filehashstore.FileHashStore";
 
         try {
