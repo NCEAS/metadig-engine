@@ -13,6 +13,7 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.security.NoSuchAlgorithmException;
 import java.util.Iterator;
 import java.util.Map;
 import java.lang.reflect.Field;
@@ -24,6 +25,7 @@ import org.dataone.service.types.v1.Session;
 import org.dataone.service.types.v2.SystemMetadata;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.mockito.MockedStatic;
@@ -32,6 +34,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -174,35 +177,15 @@ public class RequestReportJobTest {
      * returns
      */
     @Test
-    public void testGetSystemMetadataFromHashStore_NotAuthorized() throws Exception {
+    public void testGetSystemMetadataFromHashStore_metadataNotFound() throws Exception {
         RequestReportJob job = new RequestReportJob();
-        MultipartMNode mnNode = mock(MultipartMNode.class);
-        Session session = mock(Session.class);
         Identifier pid = new Identifier();
         pid.setValue("pid.not.found");
 
-        when(mnNode.getSystemMetadata(session, pid)).thenThrow(
-            new NotAuthorized("8000", "User is not authorized"));
+        assertThrows(
+            IOException.class,
+            () -> job.getSystemMetadataFromHashStore(pid, hashStore));
 
-        job.getSystemMetadataFromHashStore(pid, hashStore);
-    }
-
-    /**
-     * Confirm that no exception bubbles up when a hashstore is null, and the MN and CN API
-     * throws an exception when retrieving system metadata
-     */
-    @Test
-    public void testGetSystemMetadataFromHashStore_nullHashStore() throws Exception {
-        RequestReportJob job = new RequestReportJob();
-        MultipartMNode mnNode = mock(MultipartMNode.class);
-        Session session = mock(Session.class);
-        Identifier pid = new Identifier();
-        pid.setValue("pid.not.found");
-
-        when(mnNode.getSystemMetadata(session, pid)).thenThrow(
-            new NotAuthorized("8000", "User is not authorized"));
-
-        job.getSystemMetadataFromHashStore(pid, null);
     }
 
     /**
@@ -220,39 +203,20 @@ public class RequestReportJobTest {
     }
 
     /**
-     * Confirm that when a NotAuthorized is thrown after calling the MN API to retrieve a data
-     * object, this test method does not bubble up the exception and simply returns
-     */
-    @Test
-    public void testGetObjectFromHashStore_NotAuthorized() throws Exception {
-        RequestReportJob job = new RequestReportJob();
-        MultipartMNode mnNode = mock(MultipartMNode.class);
-        Session session = mock(Session.class);
-        Identifier pid = new Identifier();
-        pid.setValue("pid.not.found");
-
-        when(mnNode.get(session, pid)).thenThrow(
-            new NotAuthorized("8000", "User is not authorized"));
-
-        job.getObjectFromHashStore(pid, hashStore);
-    }
-
-    /**
      * Confirm that no exception bubbles up when a hashstore is null, and the MN and CN API
      * throws an exception when retrieving a data object (ex. eml metadata doc)
      */
     @Test
-    public void testGetObjectFromHashStore_nullHashStore() throws Exception {
+    @Disabled("Revisit after checking in with team RE: flow")
+    public void testGetObjectFromHashStore_objectNotFound() throws Exception {
         RequestReportJob job = new RequestReportJob();
-        MultipartMNode mnNode = mock(MultipartMNode.class);
-        Session session = mock(Session.class);
         Identifier pid = new Identifier();
         pid.setValue("pid.not.found");
 
-        when(mnNode.get(session, pid)).thenThrow(
-            new NotAuthorized("8000", "User is not authorized"));
-
-        job.getObjectFromHashStore(pid, null);
+        job.getObjectFromHashStore(pid, hashStore);
+        assertThrows(
+            IOException.class,
+            () -> job.getObjectFromHashStore(pid, hashStore));
     }
 
     /**

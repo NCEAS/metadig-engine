@@ -19,6 +19,7 @@ import org.dataone.client.rest.HttpMultipartRestClient;
 import org.dataone.client.rest.MultipartRestClient;
 import org.dataone.client.v2.impl.MultipartCNode;
 import org.dataone.client.v2.impl.MultipartMNode;
+import org.dataone.exceptions.MarshallingException;
 import org.dataone.hashstore.exceptions.HashStoreFactoryException;
 import org.dataone.service.exceptions.InsufficientResources;
 import org.dataone.service.exceptions.InvalidToken;
@@ -41,6 +42,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.security.NoSuchAlgorithmException;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Date;
@@ -646,6 +648,8 @@ public class RequestReportJob implements Job {
             try {
                 sysmeta = getSystemMetadataFromHashStore(pid, hashStore);
             } catch (Exception e) {
+                log.trace("Unexpected error encountered while retrieving sysmeta from hashstore: "
+                              + e.getMessage());
                 // Attempt to retrieve sysmeta from the API as a backup
                 sysmeta = getSystemMetadataFromMnOrCn(pid, cnNode, mnNode, isCN, session, sysmeta);
             }
@@ -764,20 +768,66 @@ public class RequestReportJob implements Job {
      * @param hashStore HashStore to check
      * @return System metadata object
      */
-    public SystemMetadata getSystemMetadataFromHashStore(Identifier pid, HashStore hashStore) {
+    public SystemMetadata getSystemMetadataFromHashStore(Identifier pid, HashStore hashStore)
+        throws NoSuchAlgorithmException, IOException, InstantiationException,
+        IllegalAccessException, MarshallingException {
         SystemMetadata sysmeta = null;
+        InputStream sysmetaIS = null;
+
         try {
             // First, try the quickest path to retrieve sysmeta object via hashstore
-            InputStream sysmetaIS = hashStore.retrieveMetadata(pid.getValue());
+            sysmetaIS = hashStore.retrieveMetadata(pid.getValue());
             log.debug("Retrieved system metadata stream via hashstore");
 
-            // Create sysmeta object from stream
-            sysmeta = TypeMarshaller.unmarshalTypeFromStream(SystemMetadata.class, sysmetaIS);
+        } catch (NoSuchAlgorithmException nsae) {
+            log.warn("Unable to retrieve system metadata from hashstore for pid: " + pid.getValue()
+                         + ". Trying MN/CN API. Issue with store algorithm: " + nsae.getMessage());
+            throw nsae;
+
+        } catch (IOException ioe) {
+            log.warn("Unable to retrieve system metadata from hashstore for pid: " + pid.getValue()
+                         + ". Trying MN/CN API. Unexpected IOException: " + ioe.getMessage());
+            throw ioe;
 
         } catch (Exception e) {
-            log.info("Unable to retrieve system metadata from hashstore for pid: " + pid.getValue()
-                         + ". Trying MN/CN API. Additional Details: " + e.getMessage());
+            log.warn("Unable to retrieve system metadata from hashstore for pid: " + pid.getValue()
+                         + ". Trying MN/CN API. Unexpected exception: " + e.getMessage());
+            throw e;
         }
+
+        // Create sysmeta object from stream
+        try {
+            sysmeta = TypeMarshaller.unmarshalTypeFromStream(SystemMetadata.class, sysmetaIS);
+
+        } catch (IOException ioe) {
+            log.error("Unexpected IOException when creating sysmeta object from hashstore stream. "
+                          + "Trying MN/CN API. Additional details: " + ioe.getMessage());
+            throw ioe;
+
+        } catch (InstantiationException ie) {
+            log.error("Unexpected exception when instantiating TypeMarshaller for "
+                          + "serializing sysmeta. Trying MN/CN API. Additional details: "
+                          + ie.getMessage());
+            throw ie;
+
+        } catch (IllegalAccessException iae) {
+            log.error("Unexpected exception when accessing a field, method class or constructor. "
+                          + "Trying MN/CN API. Additional details: " + iae.getMessage());
+            throw iae;
+
+        } catch (MarshallingException me) {
+            log.error("Unexpected exception when serializing sysmeta. Trying MN/CN API. "
+                          + "Additional details: " + me.getMessage());
+            throw me;
+
+        } catch (Exception ge) {
+            log.warn(
+                "Unable to create sysmeta object with hashstore stream for pid: " + pid.getValue()
+                    + ". Trying MN/CN API. Unexpected exception: " + ge.getMessage());
+            throw ge;
+
+        }
+
         return sysmeta;
     }
 
