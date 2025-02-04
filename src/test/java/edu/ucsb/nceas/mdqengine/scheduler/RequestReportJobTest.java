@@ -1,7 +1,6 @@
 package edu.ucsb.nceas.mdqengine.scheduler;
 
 import edu.ucsb.nceas.mdqengine.MDQconfig;
-import org.dataone.client.v2.impl.MultipartMNode;
 import org.dataone.hashstore.HashStore;
 import org.dataone.hashstore.HashStoreFactory;
 
@@ -13,15 +12,12 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.security.NoSuchAlgorithmException;
 import java.util.Iterator;
 import java.util.Map;
 import java.lang.reflect.Field;
 import java.util.Properties;
 
-import org.dataone.service.exceptions.NotAuthorized;
 import org.dataone.service.types.v1.Identifier;
-import org.dataone.service.types.v1.Session;
 import org.dataone.service.types.v2.SystemMetadata;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -38,9 +34,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
-import static org.mockito.Mockito.when;
 
 /**
  * Test class for RequestReportJob
@@ -157,6 +151,8 @@ public class RequestReportJobTest {
 
     // Junit Tests
 
+    // TODO: Add junit test for 'submitReportRequest'
+
     /**
      * Confirm that a sysmeta object is returned. No exception should be thrown.
      */
@@ -201,6 +197,8 @@ public class RequestReportJobTest {
             job.getObjectFromHashStore(pid, hashStore);
         assertInstanceOf(InputStream.class, objectIS, "This should be an InputStream");
     }
+
+    // TODO: Review junit tests related to testGetObjectFromHashStore
 
     /**
      * Confirm that no exception bubbles up when a hashstore is null, and the MN and CN API
