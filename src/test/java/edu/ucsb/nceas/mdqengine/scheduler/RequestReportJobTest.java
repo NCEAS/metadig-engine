@@ -1,6 +1,12 @@
 package edu.ucsb.nceas.mdqengine.scheduler;
 
 import edu.ucsb.nceas.mdqengine.MDQconfig;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
+import org.dataone.client.v2.impl.MultipartCNode;
+import org.dataone.client.v2.impl.MultipartMNode;
 import org.dataone.hashstore.HashStore;
 import org.dataone.hashstore.HashStoreFactory;
 
@@ -19,10 +25,10 @@ import java.lang.reflect.Field;
 import java.util.Properties;
 
 import org.dataone.service.types.v1.Identifier;
+import org.dataone.service.types.v1.Session;
 import org.dataone.service.types.v2.SystemMetadata;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.mockito.MockedStatic;
@@ -35,7 +41,11 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 /**
  * Test class for RequestReportJob
@@ -160,6 +170,39 @@ public class RequestReportJobTest {
     }
 
     // Junit Tests
+
+    /**
+     * Confirm that a http post request is executed when 'submitReportRequest' is called for a
+     * pid with a data object and sysmeta that is available in hashstore
+     */
+    @Test
+    public void testSubmitReportRequest_pidFoundInHashStore() throws Exception {
+        MultipartCNode cnNode = mock(MultipartCNode.class);
+        MultipartMNode mnNode = mock(MultipartMNode.class);
+        boolean isCN = false;
+        Session session = mock(Session.class);
+        String qualityServiceUrl = "http://metadig-controller.metadig.svc:8080/quality";
+        String pidStr = testPid;
+        String suiteId = "mockSuite";
+
+        // Mock HTTP client and response
+        CloseableHttpClient mockHttpClient = mock(CloseableHttpClient.class);
+        CloseableHttpResponse mockResponse = mock(CloseableHttpResponse.class);
+
+        // Ensure execute() returns a mock response
+        when(mockHttpClient.execute(any(HttpPost.class))).thenReturn(mockResponse);
+
+        // When 'submitReportRequest' is called, it uses the mocked client that we can keep track of
+        try (MockedStatic<HttpClients> mockedHttpClients = mockStatic(HttpClients.class)) {
+            mockedHttpClients.when(HttpClients::createDefault).thenReturn(mockHttpClient);
+
+            RequestReportJob job = new RequestReportJob();
+            job.submitReportRequest(cnNode, mnNode, isCN, session, qualityServiceUrl, pidStr, suiteId);
+
+            // Verify that the HTTP POST request was executed
+            verify(mockHttpClient, times(1)).execute(any(HttpPost.class));
+        }
+    }
 
     /**
      * Confirm that a sysmeta object is returned. No exception should be thrown.
