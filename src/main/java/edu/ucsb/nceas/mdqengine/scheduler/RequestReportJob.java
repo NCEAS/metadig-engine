@@ -666,10 +666,10 @@ public class RequestReportJob implements Job {
                 objectIS = getObjectFromHashStore(pid, hashStore);
             } catch (Exception e) {
                 // Attempt to retrieve object stream from the API as a backup
-                objectIS = getEMLMetadataDocFromMnOrCn(pid, cnNode, mnNode, isCN, session, objectIS);
+                objectIS = getObjectFromMnOrCn(pid, cnNode, mnNode, isCN, session, objectIS);
             }
         } else {
-            objectIS = getEMLMetadataDocFromMnOrCn(pid, cnNode, mnNode, isCN, session, objectIS);
+            objectIS = getObjectFromMnOrCn(pid, cnNode, mnNode, isCN, session, objectIS);
         }
 
         // Quality suite service url, i.e.
@@ -741,7 +741,7 @@ public class RequestReportJob implements Job {
      * @throws InsufficientResources An unexpected issue with insufficient resources when retrieving
      *                               the eml metadata doc through the MN or CN
      */
-    public InputStream getEMLMetadataDocFromMnOrCn(
+    public InputStream getObjectFromMnOrCn(
         Identifier pid, MultipartCNode cnNode, MultipartMNode mnNode, Boolean isCN, Session session,
         InputStream objectIS)
         throws InvalidToken, ServiceFailure, NotFound, NotImplemented, InsufficientResources {
