@@ -10,9 +10,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.dataone.service.types.v1.NodeReference;
 import org.dataone.service.types.v2.SystemMetadata;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -21,10 +18,15 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 import static org.dataone.configuration.Settings.getConfiguration;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
 
-@Ignore
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
+
+@Disabled
 public class MDQEngineTest {
 	
 	protected Log log = LogFactory.getLog(this.getClass());
@@ -33,7 +35,7 @@ public class MDQEngineTest {
 
 	private Suite suite = null;
 	
-	@Before
+	@BeforeEach
 	public void setUpSuite() {
 		suite = SuiteFactory.getMockSuite();
 	}
@@ -84,7 +86,7 @@ public class MDQEngineTest {
 
 	}
 	
-	@Ignore
+	@Disabled
 	@Test
 	public void testRunSuiteForPackage() throws MetadigException, IOException, ConfigurationException {
 		MDQEngine mdqe = new MDQEngine();

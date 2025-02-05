@@ -1,9 +1,5 @@
 package edu.ucsb.nceas.mdqengine.dispatch;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-
 import java.io.File;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -15,11 +11,16 @@ import javax.script.ScriptException;
 
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.IOUtils;
-import org.junit.Before;
-import org.junit.Test;
 
 import edu.ucsb.nceas.mdqengine.model.Result;
 import edu.ucsb.nceas.mdqengine.model.Status;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class RDispatcherTest {
 	
@@ -27,7 +28,7 @@ public class RDispatcherTest {
 
 	private String dataUrl = "https://knb.ecoinformatics.org/knb/d1/mn/v2/object/doi:10.5063/AA/wolkovich.29.1";
 
-	@Before
+	@BeforeEach
 	public void init() {
 		dispatcher = new RDispatcher();
 	}
