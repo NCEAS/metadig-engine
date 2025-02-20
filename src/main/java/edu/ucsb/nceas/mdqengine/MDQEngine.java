@@ -280,7 +280,7 @@ public class MDQEngine {
 			String encodedQuotes = URLEncoder.encode("\"", "UTF-8");
 			String encodedQuery = "?q=isDocumentedBy:" + encodedQuotes + encodedId + encodedQuotes + "&fl=id";
 			log.debug("Encoded query: " + encodedQuery);
-			doc = DataONE.querySolr(encodedQuery, 1, 10000, d1Node, session);
+			doc = DataONE.querySolr(encodedQuery, 0, 10000, d1Node, session);
 
 			doc.getDocumentElement().normalize();
 
