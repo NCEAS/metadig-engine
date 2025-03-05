@@ -168,6 +168,11 @@ public class Dispatcher {
                     // catch this silently since we are just fishing
                     // the no result case is handled later
                 }
+
+                if (out_type == null) {
+                    out_type = "text";
+                }
+
                 // save the output
                 if (out_py != null && !out_py.toString().equals("<unbound>")) {
 
@@ -199,7 +204,7 @@ public class Dispatcher {
                 if (out != null & out_py == null) {
                     Output o = new Output(out.toString());
                     dr.setOutput(o);
-                } 
+                }
                 // try to get the global status variable from python
                 try {
                     out_status = engine.get("status");
