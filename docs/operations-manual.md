@@ -236,13 +236,11 @@ secret is created.
 
     `kubectl create secret generic -n metadig --type=opaque dataone-token --from-file=DataONEauthToken=token.txt`
 
-Once the secret is created, the services that reference the CN token must be restarted:
+Once the secret is created, the services that reference the CN token must be restarted. Use `kubectl get pods` to retrieve the correct pod names, then run:
 
     ```
-    helm delete metadig-scorer -n metadig`
-    helm install metadig-scorer ./metadig-scorer --namespace metadig --version=1.0.0
-    helm delete metadig-scheduler -n metadig
-    helm install metadig-scheduler ./metadig-scheduler --namespace metadig --version=1.0.0
+    kubectl delete pod metadig-scheduler-{podid}
+    kubectl delete pod metadig-scorer-{podid}
     ```
 
 The CN token contained in the secret can be inspected with the command:
@@ -269,7 +267,7 @@ helm install metadig-controller ./metadig-controller --namespace metadig --versi
 
 The metadig-controller helm chart contains the Java property file ("metadig.properties") that is used by all metadig k8s applications. If you wish to change any of the configuration values, this property file can be edited locally and then restarted with helm. Since all of the metadig  applications mount this configuration file as a k8s volume, they will need to be restarted after any configuration change.
 
-This same techique can be used to update the configuration file "log4j.properties", which is used to control the logging level of metadig applications.
+This same technique can be used to update the configuration file "log4j.properties", which is used to control the logging level of metadig applications.
 
 This service can be uninstalled with the command:
 

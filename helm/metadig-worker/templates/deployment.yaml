@@ -38,20 +38,28 @@ spec:
           env:
           - name: JAVA_OPTS
             value: "-Dlog4j2.formatMsgNoLookups=true"
+          - name: DATAONE_AUTH_TOKEN
+            valueFrom:
+              secretKeyRef:
+                name: dataone-token
+                key: DataONEauthToken
           volumeMounts:
           - name: metadig-pv
-            mountPath: {{ .Values.persistence.mountPath }}
+            mountPath: {{ .Values.persistence.metadig.mountPath }}
             readOnly: false
           - name: metadig-config-volume
-            mountPath: {{ .Values.persistence.mountPath }}/metadig/metadig.properties
+            mountPath: {{ .Values.persistence.metadig.mountPath }}/metadig/metadig.properties
             subPath: metadig.properties
           - name: metadig-log4j-volume
-            mountPath: {{ .Values.persistence.mountPath }}/metadig/config/log4j.properties
+            mountPath: {{ .Values.persistence.metadig.mountPath }}/metadig/config/log4j.properties
             subPath: log4j.properties
+          - name: {{ .Values.persistence.metacat.claimName }}
+            mountPath: {{ .Values.persistence.metacat.mountPath }}
+            readOnly: true
       volumes:
       - name: metadig-pv
         persistentVolumeClaim:
-          claimName: {{ .Values.persistence.claimName }}
+          claimName: {{ .Values.persistence.metadig.claimName }}
       - name: metadig-config-volume
         configMap:
           name: metadig-config-volume
@@ -60,6 +68,10 @@ spec:
         configMap:
           name: metadig-log4j-volume
           defaultMode: 0644
+      - name:  {{ .Values.persistence.metacat.claimName }}
+        persistentVolumeClaim:
+          claimName: {{ .Values.persistence.metacat.claimName }}
+          readOnly: true
       restartPolicy: Always
       {{- with .Values.nodeSelector }}
       tolerations:

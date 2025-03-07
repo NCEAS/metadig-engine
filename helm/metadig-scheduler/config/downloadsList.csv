@@ -13,3 +13,5 @@ https://mule.ess-dive.lbl.gov/api/v1/project/,/opt/local/metadig/data/ess-dive-p
 #https://raw.githubusercontent.com/NCEAS/metadig-engine/main/src/main/resources/code/graph_cumulative_quality_scores.R,/opt/local/metadig/store/stage/code/graph_cumulative_quality_scores.R,"newer","R script"
 # R program called by metadig-scorer to create "monthly" graphs
 #https://raw.githubusercontent.com/NCEAS/metadig-engine/main/src/main/resources/code/graph_monthly_quality_scores.R,/opt/local/metadig/store/stage/code/graph_monthly_quality_scores.R,"newer","R script"
+# all dataone formats
+https://cn.dataone.org/cn/v2/formats, /opt/local/metadig/data/all-dataone-formats.xml, "newer;application/xml", "All DataONE formatIds"

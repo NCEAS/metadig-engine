@@ -6,9 +6,6 @@ import edu.ucsb.nceas.mdqengine.exception.MetadigStoreException;
 import edu.ucsb.nceas.mdqengine.model.*;
 import org.dataone.service.types.v2.SystemMetadata;
 import org.apache.commons.configuration2.ex.ConfigurationException;
-import org.junit.BeforeClass;
-import org.junit.Ignore;
-import org.junit.Test;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -20,16 +17,22 @@ import java.util.Date;
 import java.time.Duration;
 import java.time.Instant;
 
-import static org.junit.Assert.*;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Disabled;
 
-@Ignore
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
+
+@Disabled
 public class MDQStoreTest {
 	
 	private String id = "doi:10.5063/AA/tao.1.1";
 
 	private static MDQStore store = null;
 	
-	@BeforeClass
+	@BeforeAll
 	public static void initStore() throws MetadigException, IOException, ConfigurationException {
 		
 		// use in-memory impl for now

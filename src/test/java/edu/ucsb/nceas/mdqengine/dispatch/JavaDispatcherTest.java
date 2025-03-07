@@ -1,23 +1,23 @@
 package edu.ucsb.nceas.mdqengine.dispatch;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
-
 import java.util.HashMap;
 import java.util.Map;
 
 import javax.script.ScriptException;
 
-import org.junit.Before;
-import org.junit.Test;
-
 import edu.ucsb.nceas.mdqengine.model.Result;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class JavaDispatcherTest {
 	
 	private Dispatcher dispatcher = null;
 	
-	@Before
+	@BeforeEach
 	public void init() {
 		dispatcher = Dispatcher.getDispatcher("Java");
 	}

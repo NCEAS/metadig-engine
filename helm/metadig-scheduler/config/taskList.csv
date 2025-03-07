@@ -27,6 +27,7 @@ quality,quality-cerp_sfwmd,metadig,20 0/1 * * * ?,"^eml.*|^http.*eml.*;FAIR-suit
 quality,quality-CA_OPC,metadig,25 0/1 * * * ?,"^eml.*|^http.*eml.*;FAIR-suite-0.4.0;urn:node:CA_OPC;2010-10-07T00:00:00.00Z;1;1000;"
 quality,quality-sctld,metadig,30 0/1 * * * ?,"^eml.*|^http.*eml.*;FAIR-suite-0.4.0;urn:node:SCTLD;2010-10-07T00:00:00.00Z;1;1000;"
 quality,quality-drp,metadig,35 0/1 * * * ?,"^eml.*|^http.*eml.*;FAIR-suite-0.4.0;urn:node:DRP;2010-10-07T00:00:00.00Z;1;1000;"
+quality,quality-si,metadig,45 0/1 * * * ?,"^eml.*|^http.*eml.*;FAIR-suite-0.4.0;urn:node:SI;2010-10-07T00:00:00.00Z;1;1000;"
 #
 # Portal scoring tasks
 score,portal-KNB-FAIR,metadig,1 0/1 * * * ?,"*portals*;FAIR-suite-0.4.0;urn:node:KNB;2020-08-10T00:00:00.00Z;1;100;portal"
@@ -47,6 +48,7 @@ score,mn-portal-CA_OPC-FAIR,metadig,22 10 2 * * ?,";FAIR-suite-0.4.0;urn:node:CA
 score,mn-portal-CERP_SFWMD-FAIR,metadig,27 10 2 * * ?,";FAIR-suite-0.4.0;urn:node:CERP_SFWMD;2020-08-28T00:00:00.00Z;1;1000;node"
 score,mn-portal-SCTLD,metadig,32 10 2 * * ?,";FAIR-suite-0.4.0;urn:node:SCTLD;2020-08-28T00:00:00.00Z;1;1000;node"
 score,mn-portal-DRP,metadig,37 10 2 * * ?,";FAIR-suite-0.4.0;urn:node:DRP;2020-08-28T00:00:00.00Z;1;1000;node"
+score,mn-portal-SI,metadig,47 10 2 * * ?,";FAIR-suite-0.4.0;urn:node:SI;2000-08-28T00:00:00.00Z;1;1000;node"
 #
 # Task for ingesting files into the file store from /data/metadig/store/stage/{code,data,graph,metadata}
 #filestore,ingest,metadig,0 0/1 * * * ?,"stage;;*.*;README.txt;filestore-ingest.log"

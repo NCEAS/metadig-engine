@@ -8,6 +8,8 @@ import org.apache.commons.lang.BooleanUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.dataone.service.exceptions.ServiceFailure;
+import org.dataone.service.types.v1.NodeReference;
 import org.dataone.service.types.v2.SystemMetadata;
 import org.dataone.service.util.TypeMarshaller;
 import org.springframework.util.xml.SimpleNamespaceContext;
@@ -36,6 +38,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import org.dataone.client.v2.itk.D1Client;
+import org.dataone.client.v2.MNode;
 
 public class XMLDialect {
 
@@ -170,6 +174,10 @@ public class XMLDialect {
 				} catch (Exception e) {
 					log.error("Could not serialize SystemMetadata for check", e);
 				}
+			}
+			// if data pids are present, make them available to the check code
+			if (this.params.get("dataPids") != null) {
+				variables.put("dataPids", this.params.get("dataPids"));
 			}
 
 			// make extra parameters available to the check if we have them
@@ -382,7 +390,7 @@ public class XMLDialect {
 				String uri = entry.getUri();
 				// Some metadata files may have improper xmlns declarations that don't include
 				// a prefix (encountered in Dryad Data), so skip these.
-				if (prefix == null){
+				if (prefix == null) {
 					continue;
 				}
 

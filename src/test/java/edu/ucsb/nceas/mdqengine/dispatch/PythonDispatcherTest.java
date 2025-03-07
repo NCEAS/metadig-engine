@@ -1,9 +1,5 @@
 package edu.ucsb.nceas.mdqengine.dispatch;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-
 import edu.ucsb.nceas.mdqengine.exception.MetadigException;
 
 import java.io.InputStream;
@@ -14,13 +10,18 @@ import javax.script.ScriptException;
 
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.IOUtils;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
 
 import edu.ucsb.nceas.mdqengine.model.Result;
 import edu.ucsb.nceas.mdqengine.model.Status;
 import edu.ucsb.nceas.mdqengine.processor.XMLDialect;
+
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class PythonDispatcherTest {
 
@@ -28,17 +29,17 @@ public class PythonDispatcherTest {
 
 	private String dataUrl = "https://knb.ecoinformatics.org/knb/d1/mn/v2/object/doi:10.5063/AA/wolkovich.29.1";
 
-	@BeforeClass
+	@BeforeAll
 	public static void setupOnce() {
 		try {
 			Dispatcher.setupJep();
-		} catch (MetadigException me){
+		} catch (MetadigException me) {
 			fail("Setup failed with MetadigException: " + me.getMessage());
 		}
 	}
 
-	@Before
-	public void init(){
+	@BeforeEach
+	public void init() {
 		dispatcher = Dispatcher.getDispatcher("python");
 	}
 
@@ -92,7 +93,7 @@ public class PythonDispatcherTest {
 		Map<String, Object> names = new HashMap<String, Object>();
 		names.put("x", 2);
 		names.put("y", 2);
-		String code = "x == y";
+		String code = "def call():    return(x == y)\n";
 		Result result = null;
 		try {
 			result = dispatcher.dispatch(names, code);
@@ -146,7 +147,8 @@ public class PythonDispatcherTest {
 		names.put("y", 2);
 		InputStream library = this.getClass().getResourceAsStream("/code/mdq-cache.py");
 
-		String code = "def call(): \n"
+		String code = "global output \n"
+				+ "def call(): \n"
 				+ "  return get('" + dataUrl + "') \n";
 
 		Result result = null;
@@ -158,6 +160,7 @@ public class PythonDispatcherTest {
 			e.printStackTrace();
 			fail(e.getMessage());
 		}
+		result.getOutput();
 		// make sure the file is named as expected
 		assertTrue(result.getOutput().get(0).getValue().endsWith(DigestUtils.md5Hex(dataUrl)));
 	}

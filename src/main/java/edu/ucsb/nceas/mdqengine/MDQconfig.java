@@ -11,6 +11,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Iterator;
 
 public class MDQconfig {
 
@@ -19,10 +20,11 @@ public class MDQconfig {
 
     public static Configuration config;
 
-    public MDQconfig () throws ConfigurationException, IOException {
+    public MDQconfig() throws ConfigurationException, IOException {
         boolean inServlet = false;
 
-        // If running in a servlet, have to get the config info from the webapp context, as we can't
+        // If running in a servlet, have to get the config info from the webapp context,
+        // as we can't
         // read from external dirs on disk.
         Configurations configs = new Configurations();
         if (inServlet) {
@@ -42,18 +44,25 @@ public class MDQconfig {
     /**
      * Read a configuration file for a String parameter values.
      */
-    public String getString (String paramName) throws ConfigurationException {
-        return(config.getString(paramName));
+    public String getString(String paramName) throws ConfigurationException {
+        return (config.getString(paramName));
     }
 
     /**
      * Read a configuration file for a String parameter values.
      */
     public int getInt(String paramName) throws ConfigurationException {
-        return(config.getInt(paramName));
+        return (config.getInt(paramName));
     }
 
-    public static String readConfigParam (String paramName) throws ConfigurationException, IOException {
+    /**
+     * Read a configuration file and return all the keys.
+     */
+    public Iterator<String> getKeys() {
+        return (config.getKeys());
+    }
+
+    public static String readConfigParam(String paramName) throws ConfigurationException, IOException {
         String paramValue = null;
         try {
             MDQconfig cfg = new MDQconfig();

@@ -5,8 +5,6 @@ import edu.ucsb.nceas.mdqengine.exception.MetadigFilestoreException;
 import edu.ucsb.nceas.mdqengine.store.MDQStore;
 import org.apache.commons.configuration2.ex.ConfigurationException;
 import org.joda.time.DateTime;
-import org.junit.BeforeClass;
-import org.junit.Test;
 
 import java.io.File;
 import java.io.IOException;
@@ -14,8 +12,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.UUID;
 
-import static junit.framework.TestCase.assertTrue;
-import static org.junit.Assert.assertEquals;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Verify that the MetaDIG filestore works correctly, by saving, fetching and
@@ -32,7 +32,7 @@ public class FilestoreTestIT {
     private static MDQStore store = null;
     private static Path tempDir;
 
-    @BeforeClass
+    @BeforeAll
     public static void initStore() throws MetadigException, IOException, ConfigurationException {
 
         // use in-memory impl for now
@@ -89,8 +89,7 @@ public class FilestoreTestIT {
         }
 
         // Delete the file entry
-        boolean success = mfs.deleteFile(mdFile);
-        assertTrue("A file can be deleted from the MetaDIG filestore", success);
+        assertTrue(mfs.deleteFile(mdFile)); // A file can be deleted from the MetaDIG filestore
         System.out.println("Removed file from filestore: " + newPath);
 
         if (f.exists() && !f.isDirectory()) {
@@ -125,8 +124,7 @@ public class FilestoreTestIT {
         }
 
         // Next delete the file
-        success = mfs.deleteFile(mdFile);
-        assertTrue("A file can be deleted from the MetaDIG filestore", success);
+        assertTrue(mfs.deleteFile(mdFile)); // A file can be deleted from the MetaDIG filestore
         System.out.println("Removed file from filestore: " + newPath);
 
         // Verify that the file was deleted

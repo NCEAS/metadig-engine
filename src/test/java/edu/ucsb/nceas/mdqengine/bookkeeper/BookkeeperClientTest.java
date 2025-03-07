@@ -4,20 +4,21 @@ import edu.ucsb.nceas.mdqengine.authorization.BookkeeperClient;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.dataone.bookkeeper.api.Usage;
-import org.junit.Ignore;
-import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.Assert.fail;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class BookkeeperClientTest {
     private String instanceId = "urn:uuid3b6827b9-4641-40c5-bae8-ccb23159b300";
     protected Log log = LogFactory.getLog(this.getClass());
 
     @Test
-    @Ignore
+    @Disabled
     public void testGetUsage() {
         log.debug("Checking bookkeeper portal Usage for collection: " + instanceId);
         String msg = null;
