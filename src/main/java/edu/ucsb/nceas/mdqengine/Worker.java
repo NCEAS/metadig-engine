@@ -555,7 +555,8 @@ public class Worker {
         // Run the Metadata Quality Engine for the specified metadata object.
         // TODO: Review how suite params are set and possibly refactor
         Map<String, Object> params = new HashMap<String, Object>();
-        // To run the suite, we need the in memory store, that contains all checks and suites.
+        // To run the suite, we need the in memory store, that contains all checks and
+        // suites.
         MDQStore store = new InMemoryStore();
 
         Run run = null;
@@ -569,8 +570,10 @@ public class Worker {
                     + suiteId + e.getMessage(), e);
         }
 
-        // TODO: System metadata is required for the solr index to obtain statistics/reports
-        // TODO: We will need a path to obtain the system metadata if its removed from qEntry
+        // TODO: System metadata is required for the solr index to obtain
+        // statistics/reports
+        // TODO: We will need a path to obtain the system metadata if its removed from
+        // qEntry
         // Add DataONE sysmeta, if it was provided.
         if (sysmeta != null) {
             SysmetaModel smm = new SysmetaModel();

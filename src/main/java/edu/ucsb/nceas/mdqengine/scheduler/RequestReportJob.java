@@ -642,7 +642,7 @@ public class RequestReportJob implements Job {
             log.warn("HashStore is unavailable, unexpected IOException: " + ioe.getMessage());
         } catch (IllegalArgumentException iae) {
             log.warn(
-                "HashStore cannot be retrieved, missing config properties: " + iae.getMessage());
+                    "HashStore cannot be retrieved, missing config properties: " + iae.getMessage());
         } catch (Exception e) {
             log.warn("Unexpected exception retrieving HashStore: " + e.getMessage());
         }
@@ -653,7 +653,7 @@ public class RequestReportJob implements Job {
                 sysmeta = getSystemMetadataFromHashStore(pid, hashStore);
             } catch (Exception e) {
                 log.trace("Unexpected error encountered while retrieving sysmeta from hashstore: "
-                              + e.getMessage());
+                        + e.getMessage());
                 // Attempt to retrieve sysmeta from the API as a backup
                 sysmeta = getSystemMetadataFromMnOrCn(pid, cnNode, mnNode, isCN, session, sysmeta);
             }
@@ -710,10 +710,11 @@ public class RequestReportJob implements Job {
      * @return Input stream to eml metadata doc
      * @throws NoSuchAlgorithmException An issue with the store algorithm
      * @throws FileNotFoundException    If a data object is not found
-     * @throws IOException              If there is an issue with retrieving the stream
+     * @throws IOException              If there is an issue with retrieving the
+     *                                  stream
      */
     public InputStream getObjectFromHashStore(Identifier pid, HashStore hashStore)
-        throws NoSuchAlgorithmException, FileNotFoundException, IOException {
+            throws NoSuchAlgorithmException, FileNotFoundException, IOException {
         InputStream objectIS = null;
         try {
             // First, try the quickest path to retrieve object stream via hashstore
@@ -722,29 +723,30 @@ public class RequestReportJob implements Job {
 
         } catch (NoSuchAlgorithmException nsae) {
             log.warn("Unable to retrieve object from hashstore for pid: " + pid.getValue()
-                         + ". Trying MN/CN API. Issue with store algorithm: " + nsae.getMessage());
+                    + ". Trying MN/CN API. Issue with store algorithm: " + nsae.getMessage());
             throw nsae;
 
         } catch (FileNotFoundException fnfe) {
             log.warn("Unable to retrieve object from hashstore for pid: " + pid.getValue()
-                         + ". Trying MN/CN API. File not found: " + fnfe.getMessage());
+                    + ". Trying MN/CN API. File not found: " + fnfe.getMessage());
             throw fnfe;
 
         } catch (IOException ioe) {
             log.warn("Unable to retrieve object from hashstore for pid: " + pid.getValue()
-                         + ". Trying MN/CN API. Unexpected IOException: " + ioe.getMessage());
+                    + ". Trying MN/CN API. Unexpected IOException: " + ioe.getMessage());
             throw ioe;
 
         } catch (Exception ge) {
             log.error("Unable to retrieve eml metadata doc from hashstore for pid: " + pid.getValue()
-                         + ". Trying MN/CN API. Additional Details: " + ge.getMessage());
+                    + ". Trying MN/CN API. Additional Details: " + ge.getMessage());
             throw ge;
         }
         return objectIS;
     }
 
     /**
-     * Returns an input stream to an eml metadata document for a given pid from the MN or CN
+     * Returns an input stream to an eml metadata document for a given pid from the
+     * MN or CN
      *
      * @param pid      Persistent identifier
      * @param cnNode   Coordinating Node
@@ -753,18 +755,23 @@ public class RequestReportJob implements Job {
      * @param session  User session to check for credentials to access the CN or MN
      * @param objectIS Inputstream to set
      * @return Input stream to eml metadata doc
-     * @throws InvalidToken          If the token used to access the MN or CN is invalid
-     * @throws ServiceFailure        Unexpected issue when accessing via the MN or CN
-     * @throws NotFound              When the sysmeta is not found when accessing via the MN or CN
-     * @throws NotImplemented        If the method to retrieve the eml metadata doc through the MN
+     * @throws InvalidToken          If the token used to access the MN or CN is
+     *                               invalid
+     * @throws ServiceFailure        Unexpected issue when accessing via the MN or
+     *                               CN
+     * @throws NotFound              When the sysmeta is not found when accessing
+     *                               via the MN or CN
+     * @throws NotImplemented        If the method to retrieve the eml metadata doc
+     *                               through the MN
      *                               or CN is not implemented
-     * @throws InsufficientResources An unexpected issue with insufficient resources when retrieving
+     * @throws InsufficientResources An unexpected issue with insufficient resources
+     *                               when retrieving
      *                               the eml metadata doc through the MN or CN
      */
     public InputStream getObjectFromMnOrCn(
-        Identifier pid, MultipartCNode cnNode, MultipartMNode mnNode, Boolean isCN, Session session,
-        InputStream objectIS)
-        throws InvalidToken, ServiceFailure, NotFound, NotImplemented, InsufficientResources {
+            Identifier pid, MultipartCNode cnNode, MultipartMNode mnNode, Boolean isCN, Session session,
+            InputStream objectIS)
+            throws InvalidToken, ServiceFailure, NotFound, NotImplemented, InsufficientResources {
         try {
             if (isCN) {
                 objectIS = cnNode.get(session, pid);
@@ -774,11 +781,11 @@ public class RequestReportJob implements Job {
             log.debug("Retrieved metadata eml object stream for pid: " + pid.getValue());
         } catch (NotAuthorized na) {
             log.info("Not authorized to read eml metadata doc for pid: " + pid.getValue()
-                         + ", unable to retrieve stream to eml metadata document.");
+                    + ", unable to retrieve stream to eml metadata document.");
         } catch (Exception e) {
             // Raise unexpected exception
             log.error("Unexpected exception while retrieving stream to eml metadata doc: "
-                          + e.getMessage());
+                    + e.getMessage());
             throw (e);
         }
         return objectIS;
@@ -792,8 +799,8 @@ public class RequestReportJob implements Job {
      * @return System metadata object
      */
     public SystemMetadata getSystemMetadataFromHashStore(Identifier pid, HashStore hashStore)
-        throws NoSuchAlgorithmException, IOException, InstantiationException,
-        IllegalAccessException, MarshallingException {
+            throws NoSuchAlgorithmException, IOException, InstantiationException,
+            IllegalAccessException, MarshallingException {
         SystemMetadata sysmeta = null;
         InputStream sysmetaIS = null;
 
@@ -804,17 +811,17 @@ public class RequestReportJob implements Job {
 
         } catch (NoSuchAlgorithmException nsae) {
             log.warn("Unable to retrieve system metadata from hashstore for pid: " + pid.getValue()
-                         + ". Trying MN/CN API. Issue with store algorithm: " + nsae.getMessage());
+                    + ". Trying MN/CN API. Issue with store algorithm: " + nsae.getMessage());
             throw nsae;
 
         } catch (IOException ioe) {
             log.warn("Unable to retrieve system metadata from hashstore for pid: " + pid.getValue()
-                         + ". Trying MN/CN API. Unexpected IOException: " + ioe.getMessage());
+                    + ". Trying MN/CN API. Unexpected IOException: " + ioe.getMessage());
             throw ioe;
 
         } catch (Exception e) {
             log.warn("Unable to retrieve system metadata from hashstore for pid: " + pid.getValue()
-                         + ". Trying MN/CN API. Unexpected exception: " + e.getMessage());
+                    + ". Trying MN/CN API. Unexpected exception: " + e.getMessage());
             throw e;
         }
 
@@ -824,29 +831,29 @@ public class RequestReportJob implements Job {
 
         } catch (IOException ioe) {
             log.error("Unexpected IOException when creating sysmeta object from hashstore stream. "
-                          + "Trying MN/CN API. Additional details: " + ioe.getMessage());
+                    + "Trying MN/CN API. Additional details: " + ioe.getMessage());
             throw ioe;
 
         } catch (InstantiationException ie) {
             log.error("Unexpected exception when instantiating TypeMarshaller for "
-                          + "serializing sysmeta. Trying MN/CN API. Additional details: "
-                          + ie.getMessage());
+                    + "serializing sysmeta. Trying MN/CN API. Additional details: "
+                    + ie.getMessage());
             throw ie;
 
         } catch (IllegalAccessException iae) {
             log.error("Unexpected exception when accessing a field, method class or constructor. "
-                          + "Trying MN/CN API. Additional details: " + iae.getMessage());
+                    + "Trying MN/CN API. Additional details: " + iae.getMessage());
             throw iae;
 
         } catch (MarshallingException me) {
             log.error("Unexpected exception when serializing sysmeta. Trying MN/CN API. "
-                          + "Additional details: " + me.getMessage());
+                    + "Additional details: " + me.getMessage());
             throw me;
 
         } catch (Exception ge) {
             log.error(
-                "Unable to create sysmeta object with hashstore stream for pid: " + pid.getValue()
-                    + ". Trying MN/CN API. Unexpected exception: " + ge.getMessage());
+                    "Unable to create sysmeta object with hashstore stream for pid: " + pid.getValue()
+                            + ". Trying MN/CN API. Unexpected exception: " + ge.getMessage());
             throw ge;
 
         }
@@ -866,12 +873,14 @@ public class RequestReportJob implements Job {
      * @return System metadata object
      * @throws InvalidToken   If the token used to access the MN or CN is invalid
      * @throws ServiceFailure Unexpected issue when accessing via the MN or CN
-     * @throws NotFound       When the sysmeta is not found when accessing via the MN or CN
-     * @throws NotImplemented If the method to retrieve the sysmeta through the MN or CN is not
+     * @throws NotFound       When the sysmeta is not found when accessing via the
+     *                        MN or CN
+     * @throws NotImplemented If the method to retrieve the sysmeta through the MN
+     *                        or CN is not
      */
     public SystemMetadata getSystemMetadataFromMnOrCn(
-        Identifier pid, MultipartCNode cnNode, MultipartMNode mnNode, Boolean isCN, Session session,
-        SystemMetadata sysmeta) throws InvalidToken, ServiceFailure, NotFound, NotImplemented {
+            Identifier pid, MultipartCNode cnNode, MultipartMNode mnNode, Boolean isCN, Session session,
+            SystemMetadata sysmeta) throws InvalidToken, ServiceFailure, NotFound, NotImplemented {
         try {
             if (isCN) {
                 sysmeta = cnNode.getSystemMetadata(session, pid);
@@ -881,39 +890,43 @@ public class RequestReportJob implements Job {
             log.debug("Retrieved sysmeta stream for pid: " + pid.getValue());
         } catch (NotAuthorized na) {
             log.info("Not authorized to read sysmeta for pid: " + pid.getValue()
-                         + ", unable to retrieve stream to system metadata");
+                    + ", unable to retrieve stream to system metadata");
         } catch (Exception e) {
             // Raise unexpected exception
             log.error(
-                "Unexpected exception while retrieving system metadata object: " + e.getMessage());
+                    "Unexpected exception while retrieving system metadata object: " + e.getMessage());
             throw (e);
         }
         return sysmeta;
     }
 
     /**
-     * Retrieve a hashstore by loading the metadig.properties file and parsing it for keys with the
-     * 'store.' prefix. These keys are then used to form properties to instantiate a hashstore which
+     * Retrieve a hashstore by loading the metadig.properties file and parsing it
+     * for keys with the
+     * 'store.' prefix. These keys are then used to form properties to instantiate a
+     * hashstore which
      * can be used to retrieve system metadata or data objects.
      *
      * @return A hashstore based on metadig properties
-     * @throws IOException               When there is an issue with using metadig properties to
+     * @throws IOException               When there is an issue with using metadig
+     *                                   properties to
      *                                   retrieve store keys to retrieve a hashstore
-     * @throws IllegalArgumentException  When a hashstore config property is missing (ex.
+     * @throws IllegalArgumentException  When a hashstore config property is missing
+     *                                   (ex.
      *                                   store_path)
-     * @throws HashStoreFactoryException An issue with instantiating a hashstore (ex. missing
+     * @throws HashStoreFactoryException An issue with instantiating a hashstore
+     *                                   (ex. missing
      *                                   class)
      */
     public HashStore getHashStoreFromMetadigProps()
-        throws IllegalArgumentException, HashStoreFactoryException, IOException {
+            throws IllegalArgumentException, HashStoreFactoryException, IOException {
         // Get hashstore with props from a config (metadig.properties) file
         HashStore hashStore = null;
         try {
             // Begin by getting store properties from a metadig.properties file
             Map<String, Object> storeConfig = getStorePropsFromMetadigProps();
-            List<String> requiredKeys =
-                Arrays.asList("store_path", "store_depth", "store_width", "store_algorithm",
-                              "store_metadata_namespace");
+            List<String> requiredKeys = Arrays.asList("store_path", "store_depth", "store_width", "store_algorithm",
+                    "store_metadata_namespace");
             Properties storeProperties = new Properties();
             // Now check that the required store properties are present
             for (String key : requiredKeys) {
@@ -940,14 +953,17 @@ public class RequestReportJob implements Job {
     }
 
     /**
-     * Retrieves the properties for a hashstore by loading and parsing a metadig properties file for
+     * Retrieves the properties for a hashstore by loading and parsing a metadig
+     * properties file for
      * keys with the prefix 'store.'
      *
-     * @return Map object that contains the following properties: store_path, store_depth,
-     *     store_width, store_algorithm and store_metadata_namespace
+     * @return Map object that contains the following properties: store_path,
+     *         store_depth,
+     *         store_width, store_algorithm and store_metadata_namespace
      */
     public Map<String, Object> getStorePropsFromMetadigProps() {
-        // In the metadig.properties file, hashstore properties are keys that begin with 'store.'
+        // In the metadig.properties file, hashstore properties are keys that begin with
+        // 'store.'
         String prefix = "store.";
         Map<String, Object> storeConfig = new HashMap<>();
         try {
@@ -966,7 +982,7 @@ public class RequestReportJob implements Job {
         } catch (ConfigurationException ce) {
             log.error("Unexpected exception reading metadig config: " + ce.getMessage());
             throw new RuntimeException(
-                "Error reading metadig configuration, ConfigurationException: " + ce);
+                    "Error reading metadig configuration, ConfigurationException: " + ce);
         } catch (IOException io) {
             log.error("Unexpected exception reading metadig config: " + io.getMessage());
             throw new RuntimeException("Error reading metadig configuration, IOException: " + io);

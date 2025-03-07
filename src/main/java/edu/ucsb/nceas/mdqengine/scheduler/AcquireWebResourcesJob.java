@@ -62,7 +62,8 @@ public class AcquireWebResourcesJob implements Job {
      * the <code>Job</code>.
      * </p>
      *
-     * @throws JobExecutionException if there is an exception while executing the job.
+     * @throws JobExecutionException if there is an exception while executing the
+     *                               job.
      */
     public void execute(JobExecutionContext context) throws JobExecutionException {
 
@@ -74,7 +75,7 @@ public class AcquireWebResourcesJob implements Job {
             log.debug("downloadListFilepath: " + downloadListFilepath);
             if (downloadListFilepath == null) {
                 String errMsg = "Value retrieved for 'downloadsList' file path from config "
-                    + "(properties) is null. Please check 'metadig.properties'.";
+                        + "(properties) is null. Please check 'metadig.properties'.";
                 throw new NullPointerException(errMsg);
             }
         } catch (ConfigurationException | IOException ce) {
@@ -109,8 +110,10 @@ public class AcquireWebResourcesJob implements Job {
             log.error("Error reading download file list " + "\"" + downloadListFilepath + "\": " + ioe.getMessage());
         }
 
-        // Loop through all files listed in the downloads file, and attempt to download the "source" URL to the local
-        // "destination" file. This method assumes that single files are being downloaded from the web.
+        // Loop through all files listed in the downloads file, and attempt to download
+        // the "source" URL to the local
+        // "destination" file. This method assumes that single files are being
+        // downloaded from the web.
         for (CSVRecord record : records) {
             source = record.get("source").trim();
             destination = record.get("destination").trim();
@@ -123,13 +126,13 @@ public class AcquireWebResourcesJob implements Job {
 
             int icnt = -1;
             log.debug("Param count: " + splitted.length);
-            if(splitted.length > 0) {
+            if (splitted.length > 0) {
                 String tmpStr = splitted[++icnt].trim();
                 if (tmpStr.equalsIgnoreCase("newer")) {
                     replaceIfNewer = true;
                 }
                 log.debug("replace newer: " + replaceIfNewer);
-                if(splitted.length > 1) {
+                if (splitted.length > 1) {
                     mediaType = splitted[++icnt].trim();
                     log.debug("mediaType: " + mediaType);
                 }
@@ -139,7 +142,8 @@ public class AcquireWebResourcesJob implements Job {
                 thisURL = new URL(source);
                 downloadWebResource(thisURL, destination, mediaType);
             } catch (MalformedURLException mue) {
-                log.error("Invalid URL specified for download source resource " + "\"" + source + "\"" + mue.getMessage());
+                log.error("Invalid URL specified for download source resource " + "\"" + source + "\""
+                        + mue.getMessage());
             }
         }
     }
@@ -150,16 +154,16 @@ public class AcquireWebResourcesJob implements Job {
      * The file downloaded will be accessible to metadig services.
      * </p>
      *
-     * @param url The web resource to download.
+     * @param url            The web resource to download.
      * @param outputFileName The local file to download the resource to.
-     * @param mediaType The mediaType to request from the remote server.
+     * @param mediaType      The mediaType to request from the remote server.
      */
     public void downloadWebResource(URL url, String outputFileName, String mediaType) {
 
         HttpURLConnection urlConnection = null;
         try {
-            urlConnection = (HttpURLConnection)  url.openConnection();
-            if(! mediaType.isEmpty()) {
+            urlConnection = (HttpURLConnection) url.openConnection();
+            if (!mediaType.isEmpty()) {
                 log.debug("Setting Accept header to: " + mediaType);
                 urlConnection.setRequestProperty("Accept", mediaType);
             } else {
@@ -173,7 +177,8 @@ public class AcquireWebResourcesJob implements Job {
             fos.getChannel().transferFrom(rbc, 0, Long.MAX_VALUE);
             log.debug("Successfully downloaded " + url.getFile() + " to " + outputFileName);
         } catch (MalformedURLException mue) {
-            log.error("Invalid URL specified for download source resource " + "\"" + url.getFile() + "\"" + mue.getMessage());
+            log.error("Invalid URL specified for download source resource " + "\"" + url.getFile() + "\""
+                    + mue.getMessage());
         } catch (IOException ioe) {
             log.error("Unable to download web resource " + "\"" + url.getFile() + "\": " + ioe.getMessage());
         } finally {

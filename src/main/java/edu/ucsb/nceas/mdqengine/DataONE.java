@@ -24,22 +24,22 @@ import java.io.*;
 
 public class DataONE {
 
-
     private static Log log = LogFactory.getLog(DataONE.class);
 
     /**
      * Get a DataONE subject information object
+     * 
      * @param rightsHolder the DataONE subject to get info for
-     * @param CNnode the DataONE CN to send the request to
-     * @param session the DataONE authenticated session
+     * @param CNnode       the DataONE CN to send the request to
+     * @param session      the DataONE authenticated session
      * @return a DataONE subject information object
      * @throws MetadigProcessException
      */
     public static SubjectInfo getSubjectInfo(Subject rightsHolder, MultipartCNode CNnode,
-                                             Session session) throws MetadigProcessException {
+            Session session) throws MetadigProcessException {
 
         log.trace("Getting subject info for: " + rightsHolder.getValue());
-        //MultipartCNode cnNode = null;
+        // MultipartCNode cnNode = null;
         MetadigProcessException metadigException = null;
         SubjectInfo subjectInfo = null;
 
@@ -55,9 +55,10 @@ public class DataONE {
     }
 
     /**
-     * Get a DataONE MultipartCNode object, which will be used to communication with a CN
+     * Get a DataONE MultipartCNode object, which will be used to communication with
+     * a CN
      *
-     * @param session a DataONE authentication session
+     * @param session    a DataONE authentication session
      * @param serviceUrl the service URL for the node we are connecting to
      * @return a DataONE MultipartCNode object
      * @throws MetadigException
@@ -94,18 +95,20 @@ public class DataONE {
     /**
      * Send a query to the DataONE Query Service , using the DataONE CN or MN API
      *
-     * @param queryStr the query string to pass to the Solr server
-     * @param startPos the start of the query result to return, if query pagination is being used
+     * @param queryStr       the query string to pass to the Solr server
+     * @param startPos       the start of the query result to return, if query
+     *                       pagination is being used
      * @param countRequested the number of results to return
      * @return an XML document containing the query result
      * @throws Exception
      */
     public static Document querySolr(String queryStr, int startPos, int countRequested, MultipartD1Node d1Node,
-                Session session) throws MetadigProcessException {
+            Session session) throws MetadigProcessException {
 
         // Add the start and count, if pagination is being used
         queryStr = queryStr + "&start=" + startPos + "&rows=" + countRequested;
-        // Query the MN or CN Solr engine to get the query associated with this project that will return all project related pids.
+        // Query the MN or CN Solr engine to get the query associated with this project
+        // that will return all project related pids.
         InputStream qis = null;
         MetadigProcessException metadigException = null;
 
@@ -133,7 +136,7 @@ public class DataONE {
                     builder = factory.newDocumentBuilder();
                     xmldoc = builder.parse(new InputSource(qis));
                     log.trace("Created xml doc: " + xmldoc.toString());
-                } catch (ParserConfigurationException pe){
+                } catch (ParserConfigurationException pe) {
                     log.error("XML parser configuration exception", pe);
                     pe.printStackTrace();
                 } catch (SAXException e) {
@@ -148,7 +151,8 @@ public class DataONE {
             }
         } catch (IOException ioe) {
             log.trace("IO exception: " + ioe.getMessage());
-            metadigException = new MetadigProcessException("Unable prepare query result xml document: " + ioe.getMessage());
+            metadigException = new MetadigProcessException(
+                    "Unable prepare query result xml document: " + ioe.getMessage());
             metadigException.initCause(ioe);
             throw metadigException;
         }
@@ -157,11 +161,14 @@ public class DataONE {
 
         return xmldoc;
     }
+
     /**
      * Get a DataONE authenticated session
      * <p>
-     *     If no subject or authentication token are provided, a public session is returned
+     * If no subject or authentication token are provided, a public session is
+     * returned
      * </p>
+     * 
      * @param authToken the authentication token
      * @return the DataONE session
      */
@@ -174,7 +181,8 @@ public class DataONE {
             log.trace("Creating public sessioni");
             session = new Session();
         } else {
-            log.trace("Creating authentication session for subjectId: " + subjectId + ", token: " + authToken.substring(0, 5) + "...");
+            log.trace("Creating authentication session for subjectId: " + subjectId + ", token: "
+                    + authToken.substring(0, 5) + "...");
             session = new AuthTokenSession(authToken);
         }
 
@@ -190,8 +198,10 @@ public class DataONE {
 
     /*
      * Determine if the string represents a DataONE CN.
-     * @param nodeStr either a DataONE node serviceURL (e.g. https://knb.ecoinformatics.org/knb/d1/mn)
-     *      or a DataONE node identifier (e.g. urn:node:CN)
+     * 
+     * @param nodeStr either a DataONE node serviceURL (e.g.
+     * https://knb.ecoinformatics.org/knb/d1/mn)
+     * or a DataONE node identifier (e.g. urn:node:CN)
      */
     public static Boolean isCN(String nodeStr) {
 
