@@ -46,7 +46,7 @@ public class XmlMarshaller {
 	    Unmarshaller u = context.createUnmarshaller();
 
 	    // TODO: include the schema in jar
-	    InputStream schemaStream = XmlMarshaller.class.getResourceAsStream("/schemas/schema1.xsd");
+	    InputStream schemaStream = XmlMarshaller.class.getResourceAsStream("/schemas/schema1.1.xsd");
 	    //InputStream schemaStream = new FileInputStream("/Users/leinfelder/git/mdqengine/target/schemas/schema1.xsd");
 	    
 	    SchemaFactory factory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
