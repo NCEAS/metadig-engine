@@ -7,7 +7,6 @@ replicaCount: 1
 image:
   repository: ghcr.io/nceas/metadig-scheduler
   pullPolicy: Always
-  tag: "feature-hashstore-libimport"
 
 imagePullSecrets: []
 nameOverride: ""
