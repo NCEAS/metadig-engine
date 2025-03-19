@@ -33,13 +33,11 @@ public class DataONE {
      * @param CNnode       the DataONE CN to send the request to
      * @param session      the DataONE authenticated session
      * @return a DataONE subject information object
-     * @throws MetadigProcessException
+     * @throws MetadigProcessException When unable to get subject information from CNnode
      */
     public static SubjectInfo getSubjectInfo(Subject rightsHolder, MultipartCNode CNnode,
             Session session) throws MetadigProcessException {
-
         log.trace("Getting subject info for: " + rightsHolder.getValue());
-        // MultipartCNode cnNode = null;
         MetadigProcessException metadigException = null;
         SubjectInfo subjectInfo = null;
 
