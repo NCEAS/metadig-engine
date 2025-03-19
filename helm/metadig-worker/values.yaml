@@ -10,7 +10,6 @@ labels:
 image:
   repository: ghcr.io/nceas/metadig-worker
   pullPolicy: Always
-  tag: "feature-hashstore-support"
 
 imagePullSecrets: []
 nameOverride: ""
