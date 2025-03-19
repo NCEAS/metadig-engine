@@ -136,10 +136,8 @@ public class DataONE {
                     log.trace("Created xml doc: " + xmldoc.toString());
                 } catch (ParserConfigurationException pe) {
                     log.error("XML parser configuration exception", pe);
-                    pe.printStackTrace();
                 } catch (SAXException e) {
                     log.error("Error parsing XML" + e.getMessage() + qis.read());
-                    e.printStackTrace();
                 } finally {
                     qis.close();
                 }
