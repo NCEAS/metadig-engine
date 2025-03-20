@@ -115,7 +115,7 @@ public class MDQEngine {
 			dataPids = findDataPids(nodeId, sysMeta.getIdentifier().getValue());
 		} catch (MetadigException e) {
 			log.error("Could not retrieve data objects for pid:" + sysMeta.getIdentifier().getValue() + ", node:"
-					+ nodeId.getValue());
+					+ nodeId.getValue() + ". Additional information: " + e.getMessage());
 		}
 		params.put("dataPids", dataPids);
 
@@ -293,6 +293,9 @@ public class MDQEngine {
 			doc.getDocumentElement().normalize();
 
 			NodeList nodeList = doc.getElementsByTagName("str");
+			if (nodeList == null) {
+				throw new MetadigException("Unable to retrieve data objects, nodeList is null.");
+			}
 			for (int i = 0; i < nodeList.getLength(); i++) {
 				Element element = (Element) nodeList.item(i);
 				if ("id".equals(element.getAttribute("name"))) {
