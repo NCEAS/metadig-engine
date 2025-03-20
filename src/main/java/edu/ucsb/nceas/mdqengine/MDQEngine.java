@@ -239,8 +239,8 @@ public class MDQEngine {
 		ArrayList<String> dataObjects = new ArrayList<>();
 		String dataOneAuthToken;
 		MultipartD1Node d1Node;
-		String nodeServiceUrl;
-		String subjectId;
+		String nodeServiceUrl = null;
+		String subjectId = null;
 		Document doc;
 
 		try {
@@ -252,10 +252,18 @@ public class MDQEngine {
 			} else {
 				log.debug("Got token from env.");
 			}
-			String nodeIdstring = nodeId.getValue();
-			String nodeAbbr = nodeIdstring.replace("urn:node:", "");
-			subjectId = cfg.getString(nodeAbbr + ".subjectId");
-			nodeServiceUrl = cfg.getString(nodeAbbr + ".serviceUrl");
+
+			String nodeIdstring = null;
+			String nodeAbbr = null;
+			try {
+				nodeIdstring = nodeId.getValue();
+				nodeAbbr = nodeIdstring.replace("urn:node:", "");
+				subjectId = cfg.getString(nodeAbbr + ".subjectId");
+				nodeServiceUrl = cfg.getString(nodeAbbr + ".serviceUrl");
+			} catch (NullPointerException npe) {
+				log.error("nodeIdstring and nodeAbbr is null when retrieving data pids for: "
+							  + identifier);
+			}
 		} catch (ConfigurationException | IOException ce) {
 			MetadigException jee = new MetadigException("error executing task.");
 			jee.initCause(ce);
