@@ -241,6 +241,8 @@ public class MDQEngine {
 		MultipartD1Node d1Node;
 		String nodeServiceUrl = null;
 		String subjectId = null;
+		String nodeIdstring = null;
+		String nodeAbbr = null;
 		Document doc;
 
 		try {
@@ -253,8 +255,6 @@ public class MDQEngine {
 				log.debug("Got token from env.");
 			}
 
-			String nodeIdstring = null;
-			String nodeAbbr = null;
 			try {
 				nodeIdstring = nodeId.getValue();
 				nodeAbbr = nodeIdstring.replace("urn:node:", "");
