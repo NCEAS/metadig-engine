@@ -24,9 +24,6 @@ public class JavaScriptDispatcherTest {
 	
 	private String dataUrl = "https://knb.ecoinformatics.org/knb/d1/mn/v2/object/doi:10.5063/AA/wolkovich.29.1";
 
-	
-	@BeforeEach
-	@Disabled("ignoring init")
 	public void init() {
 		dispatcher = Dispatcher.getDispatcher("JavaScript");
 	}
