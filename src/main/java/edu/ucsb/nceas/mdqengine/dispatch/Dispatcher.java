@@ -184,10 +184,9 @@ public class Dispatcher {
                         ArrayList<?> out_ids_l = (ArrayList<?>) out_ids;
 
                         for (int i = 0; i < out_py_l.size(); i++) {
-                            Output o = new Output(out_py_l.get(i).toString());
-
-                            String id = out_ids_l.get(i).toString();
-                            String type = out_type_l.get(i).toString();
+                            Output o = new Output(String.valueOf(out_py_l.get(i)));
+                            String id = String.valueOf(out_ids_l.get(i));
+                            String type = String.valueOf(out_type_l.get(i));
 
                             o.setIdentifier(id);
                             o.setType(type);
