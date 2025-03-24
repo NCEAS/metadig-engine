@@ -17,7 +17,8 @@ For initial setup with Rancher Desktop, set config env var to point to the confi
 KUBECONFIG=/Users/clark/.kube/config:/Users/clark/.kube/config-prod:/Users/clark/.kube/config-dev
 ```
 
-To set up the cluster secrets:
+To set up the cluster secrets, please reach out to support@dataone.org. Access to decrypt the file
+the `config-dev.gpg` file in the instructions below is restricted for security reasons.
 
 - Grab fresh copy of `security` repo
 - copy `config-dev.gpg` into your local `~/.kube`
@@ -28,7 +29,7 @@ To set up the cluster secrets:
 
 Docker images are built automatically for each pushed tag, each push to develop, and each push to a feature branch using GitHub actions. See `metadig-engine/.github/workflows/build.yml`:line 82 for the docker portion of things.
 
-The `metadig-engine` repo builds 3 images (worker, scorer, scheduler). `metadig-webapp` builds the controller image. My preference is that only one version of `metadig-engine` runs on the cluster. Since `metadig-webapp` has `metadig-engine` as a dependency, even if no changes are made to `metadig-webapp`, if `metadig-engine` get's a release, `metadig-webapp` will as well to upgrade the `metadig-engine` dependency to the most recent version.
+The `metadig-engine` repo builds 3 images (worker, scorer, scheduler). `metadig-webapp` builds the controller image. My preference is that only one version of `metadig-engine` runs on the cluster. Since `metadig-webapp` has `metadig-engine` as a dependency, even if no changes are made to `metadig-webapp`, if `metadig-engine` gets a release, `metadig-webapp` will as well to upgrade the `metadig-engine` dependency to the most recent version.
 
 To accomplish this, each release of `metadig-engine` needs to be pushed to the dataone maven repository using `mvn publish`. Once that is pushed (can also be a snapshot, for pre-release testing), either build and push the controller image to `metadig-webapp`, or push any commit to trigger a GHA build that will build that image with the correct version of `metadig-engine`. My usual workflow for all of this is:
 
