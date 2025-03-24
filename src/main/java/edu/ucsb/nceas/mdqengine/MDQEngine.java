@@ -255,15 +255,13 @@ public class MDQEngine {
 				log.debug("Got token from env.");
 			}
 
-			try {
-				nodeIdstring = nodeId.getValue();
-				nodeAbbr = nodeIdstring.replace("urn:node:", "");
-				subjectId = cfg.getString(nodeAbbr + ".subjectId");
-				nodeServiceUrl = cfg.getString(nodeAbbr + ".serviceUrl");
-			} catch (NullPointerException npe) {
-				log.error("nodeIdstring and nodeAbbr is null when retrieving data pids for: "
-							  + identifier);
+			if (nodeId == null) {
+				throw new MetadigException("nodeId is null.");
 			}
+			nodeIdstring = nodeId.getValue();
+			nodeAbbr = nodeIdstring.replace("urn:node:", "");
+			subjectId = cfg.getString(nodeAbbr + ".subjectId");
+			nodeServiceUrl = cfg.getString(nodeAbbr + ".serviceUrl");
 		} catch (ConfigurationException | IOException ce) {
 			MetadigException jee = new MetadigException("error executing task.");
 			jee.initCause(ce);
