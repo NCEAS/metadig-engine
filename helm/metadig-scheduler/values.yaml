@@ -7,7 +7,6 @@ replicaCount: 1
 image:
   repository: ghcr.io/nceas/metadig-scheduler
   pullPolicy: Always
-  tag: "v.3.0.1"
 
 imagePullSecrets: []
 nameOverride: ""
@@ -107,5 +106,10 @@ persistence:
   ## @param persistence.mountPath Persistence mount path for Solr
   ##
   mountPath: "/opt/local"
+
+  # Scheduler needs access to this path to access hashstore to retrieve streams
+  metacat:
+    claimName: metadig-repos-rom
+    mountPath: "/var/data/repos"
 dns:
   config: true

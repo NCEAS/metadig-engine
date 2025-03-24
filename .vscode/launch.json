@@ -18,7 +18,19 @@
             "mainClass": "edu.ucsb.nceas.mdqengine.Worker",
             "sourcePaths": [
                 ".",
-                "${fileDirname}"
+                "${fileDirname}",
+                "/opt/local/metadig/config"
+            ]
+        },
+        {
+            "type": "java",
+            "name": "Scheduler",
+            "request": "launch",
+            "mainClass": "edu.ucsb.nceas.mdqengine.scheduler.JobScheduler",
+            "sourcePaths": [
+                ".",
+                "${fileDirname}",
+                "/opt/local/metadig/config"
             ]
         },
         {
@@ -27,9 +39,9 @@
             "request": "launch",
             "mainClass": "edu.ucsb.nceas.mdqengine.MDQEngine",
             "args": [
-                "/opt/local/metadig/suites/python-suite.xml",
-                "${workspaceFolder}/src/test/resources/test-docs/doi:10.18739_A2W08WG3R.xml",
-                "${workspaceFolder}/src/test/resources/test-docs/doi:10.18739_A2W08WG3R.sm",
+                "/opt/local/metadig/suites/arctic-data-center-1.2.0.xml",
+                "${workspaceFolder}/src/test/resources/test-docs/doi:10.18739_A2KS6J63D.xml",
+                "${workspaceFolder}/src/test/resources/test-docs/doi:10.18739_A2KS6J63D.sm",
             ],
             "cwd": "${workspaceFolder}"
         }

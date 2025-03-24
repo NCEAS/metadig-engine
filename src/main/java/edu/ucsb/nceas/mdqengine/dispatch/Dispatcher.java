@@ -21,9 +21,11 @@ import javax.script.Invocable;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Iterator;
 
 public class Dispatcher {
 
@@ -31,6 +33,7 @@ public class Dispatcher {
 
     protected ScriptEngine engine = null;
     protected String engineName = null;
+    protected String prefix = "store.";
 
     protected Map<String, Object> bindings = null;
 
@@ -55,6 +58,26 @@ public class Dispatcher {
      * @throws ScriptException
      */
     public Result dispatch(Map<String, Object> variables, String code) throws ScriptException {
+
+        try {
+            MDQconfig cfg = new MDQconfig();
+            Iterator<String> keys = cfg.getKeys();
+            Map<String, Object> storeConfig = new HashMap<>();
+
+            while (keys.hasNext()) {
+                String key = keys.next();
+                if (key.startsWith(prefix)) {
+                    String value = cfg.getString(key);
+                    String strippedKey = key.substring(prefix.length());
+                    storeConfig.put(strippedKey, value);
+                }
+            }
+            variables.put("storeConfiguration", storeConfig);
+        } catch (ConfigurationException ce) {
+            throw new RuntimeException("Error reading metadig configuration, ConfigurationException: " + ce);
+        } catch (IOException io) {
+            throw new RuntimeException("Error reading metadig configuration, IOException: " + io);
+        }
 
         Result dr = new Result();
 
@@ -105,7 +128,11 @@ public class Dispatcher {
         } else {
             // for R and Python, the result has to be retrieved from engine global vars
             Object var_r = null;
-            Object var_py = null;
+            Object out = null;
+            Object out_py = null;
+            Object out_ids = null;
+            Object out_type = null;
+            Object out_status = null;
             // do we have a result object from an R check?
             try {
                 var_r = engine.get("mdq_result");
@@ -123,7 +150,7 @@ public class Dispatcher {
             } else {
                 // try to find other result items from python checks
                 try {
-                    var_py = engine.get("call()"); // run the python function
+                    out = engine.get("call()"); // run the python function
                 } catch (Exception e) {
                     log.error(e.getMessage());
                     log.error(e.getStackTrace());
@@ -132,28 +159,62 @@ public class Dispatcher {
                 }
                 // try to get the global output variable from python
                 try {
-                    var_py = engine.get("output");
+                    out_py = engine.get("output");
+                    out_ids = engine.get("output_identifiers");
+                    out_type = engine.get("output_type");
+
                 } catch (Exception e) {
                     log.trace("No result found for python check variable variable output.");
                     // catch this silently since we are just fishing
                     // the no result case is handled later
                 }
+
+                if (out_type == null) {
+                    out_type = "text";
+                }
+
                 // save the output
-                if (var_py != null && !var_py.toString().equals("<unbound>")) {
-                    dr.setOutput(new Output(var_py.toString()));
-                    var_py = null;
+                if (out_py != null && !out_py.toString().equals("<unbound>")) {
+
+                    if (out_py instanceof ArrayList) {
+                        ArrayList<Output> outputList = new ArrayList<>();
+
+                        ArrayList<?> out_py_l = (ArrayList<?>) out_py;
+                        ArrayList<?> out_type_l = (ArrayList<?>) out_type;
+                        ArrayList<?> out_ids_l = (ArrayList<?>) out_ids;
+
+                        for (int i = 0; i < out_py_l.size(); i++) {
+                            Output o = new Output(String.valueOf(out_py_l.get(i)));
+                            String id = String.valueOf(out_ids_l.get(i));
+                            String type = String.valueOf(out_type_l.get(i));
+
+                            o.setIdentifier(id);
+                            o.setType(type);
+                            outputList.add(o);
+                        }
+                        dr.setOutput(outputList);
+                    } else {
+                        Output o = new Output(out_py.toString());
+                        dr.setOutput(o);
+                    }
+
+                }
+                // if we didn't get any "normal" output from python grab whatever got returned
+                if (out != null & out_py == null) {
+                    Output o = new Output(out.toString());
+                    dr.setOutput(o);
                 }
                 // try to get the global status variable from python
                 try {
-                    var_py = engine.get("status");
+                    out_status = engine.get("status");
                 } catch (Exception e) {
                     // catch this silently since we are just fishing
                     // the no result case is handled later
                     log.trace("No result found for python check variable variable status.");
                 }
                 // save the status
-                if (var_py != null && !var_py.toString().equals("<unbound>")) {
-                    dr.setStatus(Status.valueOf(var_py.toString()));
+                if (out_status != null && !out_status.toString().equals("<unbound>")) {
+                    dr.setStatus(Status.valueOf(out_status.toString()));
                 } else {
                     // if we haven't found anything at this point it probably failed
                     dr.setStatus(Status.FAILURE);

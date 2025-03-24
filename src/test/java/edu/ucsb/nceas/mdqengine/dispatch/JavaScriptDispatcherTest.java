@@ -4,16 +4,19 @@ import edu.ucsb.nceas.mdqengine.model.Result;
 import edu.ucsb.nceas.mdqengine.model.Status;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.IOUtils;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
 
 import javax.script.ScriptException;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.junit.Assert.*;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class JavaScriptDispatcherTest {
 	
@@ -21,15 +24,12 @@ public class JavaScriptDispatcherTest {
 	
 	private String dataUrl = "https://knb.ecoinformatics.org/knb/d1/mn/v2/object/doi:10.5063/AA/wolkovich.29.1";
 
-	
-	@Before
-	@Ignore("ignoring init")
 	public void init() {
 		dispatcher = Dispatcher.getDispatcher("JavaScript");
 	}
 	
 	@Test
-	@Ignore("ignoring testEquality")
+	@Disabled("ignoring testEquality")
 	public void testEquality() {
 		Map<String, Object> names = new HashMap<String, Object>();
 		names.put("x", 2);
@@ -47,7 +47,7 @@ public class JavaScriptDispatcherTest {
 	}
 	
 	@Test
-	@Ignore("ignoring testResult")
+	@Disabled("ignoring testResult")
 	public void testResult() {
 		Map<String, Object> names = new HashMap<String, Object>();
 		names.put("x", 2);
@@ -71,7 +71,7 @@ public class JavaScriptDispatcherTest {
 	}
 	
 	@Test
-	@Ignore("ignoring testMethodReturn")
+	@Disabled("ignoring testMethodReturn")
 	public void testMethodReturn() {
 		Map<String, Object> names = new HashMap<String, Object>();
 		names.put("x", 2);
@@ -90,7 +90,7 @@ public class JavaScriptDispatcherTest {
 	}
 	
 	@Test
-	@Ignore("ignoring testCache")
+	@Disabled("ignoring testCache")
 	public void testCache() {
 		Map<String, Object> names = new HashMap<String, Object>();
 		names.put("x", 2);

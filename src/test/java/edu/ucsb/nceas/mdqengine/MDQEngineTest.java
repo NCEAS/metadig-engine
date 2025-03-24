@@ -8,20 +8,25 @@ import edu.ucsb.nceas.mdqengine.serialize.XmlMarshaller;
 import org.apache.commons.configuration2.ex.ConfigurationException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.dataone.service.types.v1.NodeReference;
 import org.dataone.service.types.v2.SystemMetadata;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.Arrays;
 
 import static org.dataone.configuration.Settings.getConfiguration;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
 
-@Ignore
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
+
+@Disabled
 public class MDQEngineTest {
 	
 	protected Log log = LogFactory.getLog(this.getClass());
@@ -30,7 +35,7 @@ public class MDQEngineTest {
 
 	private Suite suite = null;
 	
-	@Before
+	@BeforeEach
 	public void setUpSuite() {
 		suite = SuiteFactory.getMockSuite();
 	}
@@ -81,7 +86,7 @@ public class MDQEngineTest {
 
 	}
 	
-	@Ignore
+	@Disabled
 	@Test
 	public void testRunSuiteForPackage() throws MetadigException, IOException, ConfigurationException {
 		MDQEngine mdqe = new MDQEngine();
@@ -101,6 +106,31 @@ public class MDQEngineTest {
 			e.printStackTrace();
 			fail(e.getMessage());
 		}
+
+	}
+
+	@Test
+    public void testFindDataObjects() throws Exception {
+		MDQEngine mdqe = new MDQEngine();
+		NodeReference nodeId = new NodeReference();
+		nodeId.setValue("urn:node:ARCTIC");
+
+        ArrayList<String> objs = mdqe.findDataPids(nodeId, "doi:10.18739/A26M33558");
+
+		ArrayList<String> expected = new ArrayList<>(Arrays.asList(
+            "urn:uuid:d1773868-1e6e-4a42-b21e-4ea744b1c1ae",
+            "urn:uuid:0ed1454d-a157-4d44-91fd-62e14e3d364a",
+            "urn:uuid:8b9437bc-9e67-4a25-b71d-2b2094c41857",
+            "urn:uuid:ddb94621-2e01-4b78-9c3a-f5b0d8a34ae3",
+            "urn:uuid:9ec2b784-faa1-4938-aa62-8e07c30bc7a3",
+            "urn:uuid:ff172b9d-2cf8-4c48-a121-8ea7cc11a272",
+            "urn:uuid:ad2fb749-c692-40c9-ba08-17654495a840",
+            "urn:uuid:7685e2d8-bd70-41a7-afba-bc37434f7903",
+            "urn:uuid:e9b30627-e03a-4241-aa67-789f730e18e6",
+            "urn:uuid:345596a8-7729-4f00-a8e9-5ff41e853c5e"
+        ));
+
+        assertEquals(expected, objs);
 
 	}
 }

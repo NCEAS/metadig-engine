@@ -14,10 +14,13 @@ import org.apache.commons.configuration2.ex.ConfigurationException;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.dataone.client.v2.impl.MultipartD1Node;
 import org.dataone.exceptions.MarshallingException;
+import org.dataone.service.types.v1.NodeReference;
 import org.dataone.service.types.v2.SystemMetadata;
 import org.dataone.service.types.v2.TypeFactory;
 import org.dataone.service.util.TypeMarshaller;
+import org.dataone.service.types.v1.Session;
 import org.xml.sax.SAXException;
 
 import javax.script.ScriptException;
@@ -27,6 +30,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
+import java.net.URLEncoder;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
@@ -34,10 +38,15 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
+
 public class MDQEngine {
-	
-	//private static final String RESOLVE_PREFIX = getConfiguration().getString("D1Client.CN_URL") + "/v2/resolve/";
-	
+
+	// private static final String RESOLVE_PREFIX =
+	// getConfiguration().getString("D1Client.CN_URL") + "/v2/resolve/";
+
 	/**
 	 * Default store uses the in-memory implementation
 	 */
@@ -46,19 +55,20 @@ public class MDQEngine {
 
 	protected Log log = LogFactory.getLog(this.getClass());
 	private static String metadigDataDir = null;
-	
+
 	public MDQEngine() throws MetadigException, IOException, ConfigurationException {
 		store = new InMemoryStore();
-		//store = new MNStore();
-		MDQconfig cfg = new MDQconfig ();
+		// store = new MNStore();
+		MDQconfig cfg = new MDQconfig();
 		metadigDataDir = cfg.getString("metadig.data.dir");
 		MDQCache.initialize(null);
 	}
 
 	/**
 	 * Executes the given suite for a given object
+	 * 
 	 * @param suite
-	 * @param input the InputStream for the object to QC
+	 * @param input  the InputStream for the object to QC
 	 * @param params optional additional parameters to make available for the suite
 	 * @return the Run results for this execution
 	 * @throws MalformedURLException
@@ -68,13 +78,13 @@ public class MDQEngine {
 	 * @throws XPathExpressionException
 	 * @throws ScriptException
 	 */
-	public Run runSuite(Suite suite, InputStream input, Map<String, Object> params, SystemMetadata sysMeta) 
-			throws MalformedURLException, IOException, SAXException, 
+	public Run runSuite(Suite suite, InputStream input, Map<String, Object> params, SystemMetadata sysMeta)
+			throws MalformedURLException, IOException, SAXException,
 			ParserConfigurationException, XPathExpressionException, ScriptException {
 
-	    // Make the location of the data directory available to checks that need to
+		// Make the location of the data directory available to checks that need to
 		// read data files located there.
-		if(metadigDataDir != null || ! params.containsKey("metadigDataDir")) {
+		if (metadigDataDir != null || !params.containsKey("metadigDataDir")) {
 			log.debug("Setting metadigDataDir: " + metadigDataDir);
 			params.put("metadigDataDir", metadigDataDir);
 		}
@@ -83,15 +93,14 @@ public class MDQEngine {
 
 		String content = IOUtils.toString(input, "UTF-8");
 		String metadataContent = content;
-		
+
 		XMLDialect xml = new XMLDialect(IOUtils.toInputStream(metadataContent, "UTF-8"));
-		xml.setParams(params);
 		xml.setSystemMetadata(sysMeta);
 		Path tempDir = Files.createTempDirectory("mdq_run");
 		xml.setDirectory(tempDir.toFile().getAbsolutePath());
 		// include the default namespaces from the suite
 		xml.mergeNamespaces(suite.getNamespace());
-		
+
 		// make a run to capture results
 		Run run = new Run();
 		run.setSuiteId(suite.getId());
@@ -99,8 +108,21 @@ public class MDQEngine {
 		run.setTimestamp(Calendar.getInstance().getTime());
 		List<Result> results = new ArrayList<Result>();
 
+		// get list of data pids
+		NodeReference nodeId = sysMeta.getAuthoritativeMemberNode();
+		ArrayList<String> dataPids = null;
+		try {
+			dataPids = findDataPids(nodeId, sysMeta.getIdentifier().getValue());
+		} catch (MetadigException e) {
+			log.error("Could not retrieve data objects for pid:" + sysMeta.getIdentifier().getValue() + ", node:"
+					+ nodeId.getValue() + ". Additional information: " + e.getMessage());
+		}
+		params.put("dataPids", dataPids);
+
+		xml.setParams(params);
+
 		// run the checks in the suite to get results
-		for (Check check: suite.getCheck()) {
+		for (Check check : suite.getCheck()) {
 			// is this a reference to existing check?
 			if (check.getCode() == null && check.getId() != null) {
 				// then load it
@@ -119,10 +141,13 @@ public class MDQEngine {
 					continue;
 				}
 
-				// The check type and level from the suite definition file takes precedence over the check type
+				// The check type and level from the suite definition file takes precedence over
+				// the check type
 				// and level defined in the check definition file.
-				if(origCheck.getLevel() != null) check.setLevel(origCheck.getLevel());
-                if(origCheck.getType() != null) check.setType(origCheck.getType());
+				if (origCheck.getLevel() != null)
+					check.setLevel(origCheck.getLevel());
+				if (origCheck.getType() != null)
+					check.setType(origCheck.getType());
 			}
 			Result result = xml.runCheck(check);
 			results.add(result);
@@ -130,43 +155,43 @@ public class MDQEngine {
 		run.setResult(results);
 
 		Dispatcher.getDispatcher("python").close();
-		
+
 		log.trace("Run results: " + JsonMarshaller.toJson(run));
-		
+
 		// clean up
 		tempDir.toFile().delete();
-		
+
 		return run;
-		
+
 	}
-	
+
 	/**
 	 * Executes the given check for a given object
+	 * 
 	 * @param check
-	 * @param input the InputStream for the object to QC
+	 * @param input  the InputStream for the object to QC
 	 * @param params optional additional parameters to make available for the check
 	 * @return the Run results for this execution
 	 * @throws MalformedURLException
 	 * @throws IOException
 	 * @throws SAXException
-	 * @throws ParserConfigurationException
+	 * @throws ParserConfigurationException`
 	 * @throws XPathExpressionException
 	 * @throws ScriptException
 	 */
-	public Run runCheck(Check check, InputStream input, Map<String, Object> params, SystemMetadata sysMeta) 
-			throws MalformedURLException, IOException, SAXException, 
+	public Run runCheck(Check check, InputStream input, Map<String, Object> params, SystemMetadata sysMeta)
+			throws MalformedURLException, IOException, SAXException,
 			ParserConfigurationException, XPathExpressionException, ScriptException {
-			
 
 		String content = IOUtils.toString(input, "UTF-8");
 		String metadataContent = content;
-		
+
 		XMLDialect xml = new XMLDialect(IOUtils.toInputStream(metadataContent, "UTF-8"));
 		xml.setParams(params);
 		xml.setSystemMetadata(sysMeta);
 		Path tempDir = Files.createTempDirectory("mdq_run");
 		xml.setDirectory(tempDir.toFile().getAbsolutePath());
-		
+
 		// make a run to capture results
 		Run run = new Run();
 		run.setId(UUID.randomUUID().toString());
@@ -177,27 +202,116 @@ public class MDQEngine {
 		Result result = xml.runCheck(check);
 		results.add(result);
 		run.setResult(results);
-		
+
 		log.trace("Run results: " + JsonMarshaller.toJson(run));
-		
+
 		// clean up
 		tempDir.toFile().delete();
-		
+
 		return run;
-		
+
 	}
-	
-	/** 
-	 * To enable checks-by-id-reference, set the store so that checks can be retrieved
+
+	/**
+	 * To enable checks-by-id-reference, set the store so that checks can be
+	 * retrieved
 	 * if not specified inline
+	 * 
 	 * @param store The storage implementation to use for retrieving existing checks
 	 */
 	public void setStore(MDQStore store) {
 		this.store = store;
 	}
-	
+
+	/**
+	 * This method retrieves the data pids for a dataset given an identifier and a
+	 * node by communicating with the given nodeId's solr to get a result which
+	 * contains the pids.
+	 *
+	 * @param nodeId     Node to retrieve from
+	 * @param identifier Persistent identifier of the dataset
+	 * @return
+	 * @throws MetadigException If there is an issue retrieving a value from the
+	 *                          properties/config
+	 */
+	public ArrayList<String> findDataPids(NodeReference nodeId, String identifier) throws MetadigException {
+
+		ArrayList<String> dataObjects = new ArrayList<>();
+		String dataOneAuthToken;
+		MultipartD1Node d1Node;
+		String nodeServiceUrl = null;
+		String subjectId = null;
+		String nodeIdstring = null;
+		String nodeAbbr = null;
+		Document doc;
+
+		try {
+			MDQconfig cfg = new MDQconfig();
+			dataOneAuthToken = System.getenv("DATAONE_AUTH_TOKEN");
+			if (dataOneAuthToken == null) {
+				dataOneAuthToken = cfg.getString("DataONE.authToken");
+				log.debug("Got token from properties file.");
+			} else {
+				log.debug("Got token from env.");
+			}
+
+			if (nodeId == null) {
+				throw new MetadigException("nodeId is null.");
+			}
+			nodeIdstring = nodeId.getValue();
+			nodeAbbr = nodeIdstring.replace("urn:node:", "");
+			subjectId = cfg.getString(nodeAbbr + ".subjectId");
+			nodeServiceUrl = cfg.getString(nodeAbbr + ".serviceUrl");
+		} catch (ConfigurationException | IOException ce) {
+			MetadigException jee = new MetadigException("error executing task.");
+			jee.initCause(ce);
+			throw jee;
+		}
+
+		if (subjectId == null | nodeServiceUrl == null) {
+			throw new MetadigException("subjectId or nodeServiceURL are NULL. subjectId = " + subjectId
+					+ "nodeServiceURL = " + nodeServiceUrl + "node reference = " + nodeId);
+		}
+
+		Session session = DataONE.getSession(subjectId, dataOneAuthToken);
+
+		try {
+
+			d1Node = DataONE.getMultipartD1Node(session, nodeServiceUrl);
+			// String together the solr query URL to grab the data pids
+
+			// The quotations wrapping the identifier are necessary for solr to parse the
+			// request
+			String encodedId = URLEncoder.encode(identifier, "UTF-8");
+			String encodedQuotes = URLEncoder.encode("\"", "UTF-8");
+			String encodedQuery = "?q=isDocumentedBy:" + encodedQuotes + encodedId + encodedQuotes + "&fl=id";
+			log.debug("Encoded query: " + encodedQuery);
+			doc = DataONE.querySolr(encodedQuery, 0, 10000, d1Node, session);
+
+			doc.getDocumentElement().normalize();
+
+			NodeList nodeList = doc.getElementsByTagName("str");
+			if (nodeList == null) {
+				throw new MetadigException("Unable to retrieve data objects, nodeList is null.");
+			}
+			for (int i = 0; i < nodeList.getLength(); i++) {
+				Element element = (Element) nodeList.item(i);
+				if ("id".equals(element.getAttribute("name"))) {
+					if (!element.getTextContent().equals(identifier)) {
+						dataObjects.add(element.getTextContent());
+					}
+				}
+			}
+
+		} catch (IOException e) {
+			log.error("Could not retrieve data objects:" + e);
+		}
+		return (dataObjects);
+	}
+
 	/**
 	 * Run a suite on a given metadata document. Prints Run XML results.
+	 * 
 	 * @param args first is the suite file path, second is the metadata file path
 	 * 
 	 */
@@ -209,19 +323,22 @@ public class MDQEngine {
 		try {
 			engine = new MDQEngine();
 			String xml = IOUtils.toString(new FileInputStream(args[0]), "UTF-8");
-			Suite suite = (Suite) XmlMarshaller.fromXml(xml , Suite.class);
+			Suite suite = (Suite) XmlMarshaller.fromXml(xml, Suite.class);
 			InputStream input = new FileInputStream(args[1]);
 			InputStream sysmetaInputStream = null;
 			SystemMetadata sysmeta = null;
 			Object tmpSysmeta = null;
 
-			// Read in the system metadata XML file if it is provided. Suites can be run without it.
-			// The SystemMetadata can be either version 1 or 2. The current type marshaller cannot handle version 1,
-			// so we have to convert v1 to v2 (seems like the marshalling call should do this for us).
-			// THe drawback to this approach is that it will be necessary to test for sysmeta v3 when it is released.
-			if(args.length >= 3) {
-				Class smClasses[] = {org.dataone.service.types.v2.SystemMetadata.class, org.dataone.service.types.v1.SystemMetadata.class};
-				for (Class thisClass: smClasses) {
+			// Read in the system metadata XML file if it is provided. Suites can be run
+			// without it. The SystemMetadata can be either version 1 or 2. The current type
+			// marshaller cannot handle version 1, so we have to convert v1 to v2 (seems
+			// like the marshalling call should do this for us). The drawback to this
+			// approach is that it will be necessary to test for sysmeta v3 when it is
+			// released.
+			if (args.length >= 3) {
+				Class smClasses[] = { org.dataone.service.types.v2.SystemMetadata.class,
+						org.dataone.service.types.v1.SystemMetadata.class };
+				for (Class thisClass : smClasses) {
 					sysmetaInputStream = new FileInputStream(args[2]);
 					try {
 						tmpSysmeta = TypeMarshaller.unmarshalTypeFromStream(thisClass, sysmetaInputStream);
@@ -229,7 +346,7 @@ public class MDQEngine {
 						break;
 					} catch (ClassCastException cce) {
 						cce.printStackTrace();
-					   continue;
+						continue;
 					} catch (InstantiationException | IllegalAccessException | IOException | MarshallingException fis) {
 						fis.printStackTrace();
 						continue;
@@ -251,7 +368,7 @@ public class MDQEngine {
 			run.setRunStatus("SUCCESS");
 
 			// Add DataONE sysmeta, if it was provided.
-			if(sysmeta != null) {
+			if (sysmeta != null) {
 				SysmetaModel smm = new SysmetaModel();
 				// These sysmeta fields are always provided
 				smm.setOriginMemberNode(sysmeta.getOriginMemberNode().getValue());
@@ -259,15 +376,19 @@ public class MDQEngine {
 				smm.setDateUploaded(sysmeta.getDateUploaded());
 				smm.setFormatId(sysmeta.getFormatId().getValue());
 				// These fields aren't required.
-				if (sysmeta.getObsoletes() != null) smm.setObsoletes(sysmeta.getObsoletes().getValue());
-				if (sysmeta.getObsoletedBy() != null) smm.setObsoletedBy(sysmeta.getObsoletedBy().getValue());
-				if (sysmeta.getSeriesId() != null) smm.setSeriesId(sysmeta.getSeriesId().getValue());
+				if (sysmeta.getObsoletes() != null)
+					smm.setObsoletes(sysmeta.getObsoletes().getValue());
+				if (sysmeta.getObsoletedBy() != null)
+					smm.setObsoletedBy(sysmeta.getObsoletedBy().getValue());
+				if (sysmeta.getSeriesId() != null)
+					smm.setSeriesId(sysmeta.getSeriesId().getValue());
 
-				// Now make the call to DataONE to get the group information for this rightsHolder.
+				// Now make the call to DataONE to get the group information for this
+				// rightsHolder.
 				// Only wait for a certain amount of time before we will give up.
-                ExecutorService executorService = Executors.newSingleThreadExecutor();
+				ExecutorService executorService = Executors.newSingleThreadExecutor();
 
-                // Provide the rightsHolder to the DataONE group lookup.
+				// Provide the rightsHolder to the DataONE group lookup.
 				GroupLookupCheck glc = new GroupLookupCheck();
 				glc.setRightsHolder(sysmeta.getRightsHolder().getValue());
 				Future<List<String>> future = executorService.submit(glc);
@@ -281,12 +402,13 @@ public class MDQEngine {
 					}
 					// Sleep for 1 second
 
-					if(groups != null) break;
-                    System.out.println("Waiting 1 second for groups");
+					if (groups != null)
+						break;
+					System.out.println("Waiting 1 second for groups");
 					Thread.sleep(1000);
 				}
 
-				if(groups != null) {
+				if (groups != null) {
 					System.out.println("Setting groups");
 					smm.setGroups(groups);
 				} else {
@@ -310,5 +432,4 @@ public class MDQEngine {
 			}
 		}
 	}
-
 }

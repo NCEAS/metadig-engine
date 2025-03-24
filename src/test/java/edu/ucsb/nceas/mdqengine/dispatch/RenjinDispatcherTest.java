@@ -2,29 +2,30 @@ package edu.ucsb.nceas.mdqengine.dispatch;
 
 import edu.ucsb.nceas.mdqengine.model.Result;
 import edu.ucsb.nceas.mdqengine.model.Status;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
 
 import javax.script.ScriptException;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class RenjinDispatcherTest {
 	
 	private Dispatcher dispatcher = null;
 	
-	@Before
-	@Ignore("ignoring Renjin init")
+	@BeforeEach
+	@Disabled("ignoring Renjin init")
 	public void init() {
 		dispatcher = Dispatcher.getDispatcher("Renjin");
 	}
 	
 	@Test
-	@Ignore("ignoring Renjin testEquality")
+	@Disabled("ignoring Renjin testEquality")
 
 	public void testEquality() {
 		Map<String, Object> names = new HashMap<String, Object>();
@@ -43,7 +44,7 @@ public class RenjinDispatcherTest {
 	}
 	
 	@Test
-	@Ignore("ignoring testMethodReturn")
+	@Disabled("ignoring testMethodReturn")
 	public void testMethodReturn() {
 		Map<String, Object> names = new HashMap<String, Object>();
 		names.put("x", 2);
@@ -62,7 +63,7 @@ public class RenjinDispatcherTest {
 	}
 	
 	@Test
-	@Ignore("ignoring testError")
+	@Disabled("ignoring testError")
 	public void testError() {
 		Map<String, Object> names = new HashMap<String, Object>();
 		names.put("x", 1);
@@ -80,7 +81,7 @@ public class RenjinDispatcherTest {
 	}
 	
 	@Test
-	@Ignore("ignoring testNumOfRecords")
+	@Disabled("ignoring testNumOfRecords")
 	public void testNumOfRecords() {
 		
 		// will come from metadata record using xpath queries

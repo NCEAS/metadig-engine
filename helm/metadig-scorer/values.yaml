@@ -7,8 +7,6 @@ replicaCount: 1
 image:
   repository: ghcr.io/nceas/metadig-scorer
   pullPolicy: Always
-  tag: "v.3.0.1"
-
 
 imagePullSecrets: []
 nameOverride: ""
