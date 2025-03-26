@@ -566,6 +566,7 @@ public class Worker {
             run = engine.runSuite(suite, input, params, sysmeta);
             List<Result> results = run.getResult();
         } catch (Exception e) {
+            e.printStackTrace();
             throw new MetadigException("Unable to run quality suite for pid " + message.getMetadataPid() + ", suite "
                     + suiteId + e.getMessage(), e);
         }
