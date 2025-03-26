@@ -291,9 +291,10 @@ public class MDQEngine {
 			doc.getDocumentElement().normalize();
 
 			NodeList nodeList = doc.getElementsByTagName("str");
-			if (nodeList == null) {
-				throw new MetadigException("Unable to retrieve data objects, nodeList is null.");
-			}
+			// Temporarily revert for debugging purposes
+//			if (nodeList == null) {
+//				throw new MetadigException("Unable to retrieve data objects, nodeList is null.");
+//			}
 			for (int i = 0; i < nodeList.getLength(); i++) {
 				Element element = (Element) nodeList.item(i);
 				if ("id".equals(element.getAttribute("name"))) {
