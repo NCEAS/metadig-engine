@@ -278,6 +278,7 @@ public class MDQEngine {
 		try {
 
 			d1Node = DataONE.getMultipartD1Node(session, nodeServiceUrl);
+			log.debug("nodeServiceUrl: " + nodeServiceUrl);
 			// String together the solr query URL to grab the data pids
 
 			// The quotations wrapping the identifier are necessary for solr to parse the
