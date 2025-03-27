@@ -127,7 +127,7 @@ public class DataONE {
 
         try {
             // If results were returned, create an XML document from them
-            log.trace("qis available: " + qis.available());
+            log.debug("Solr Query qis available: " + qis.available());
             if (qis.available() > 0) {
                 try {
                     DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
