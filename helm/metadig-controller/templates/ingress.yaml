@@ -6,23 +6,26 @@
   {{- $_ := set .Values.ingress.annotations "kubernetes.io/ingress.class" .Values.ingress.className}}
   {{- end }}
 {{- end }}
-{{- if semverCompare ">=1.19-0" .Capabilities.KubeVersion.GitVersion -}}
-apiVersion: networking.k8s.io/v1
-{{- else if semverCompare ">=1.14-0" .Capabilities.KubeVersion.GitVersion -}}
-apiVersion: networking.k8s.io/v1beta1
-{{- else -}}
-apiVersion: extensions/v1beta1
-{{- end }}
+{{- $apiVer := "v1" }}
+apiVersion: networking.k8s.io/{{ $apiVer }}
 kind: Ingress
 metadata:
   name: {{ $fullName }}
   labels:
     {{- include "metadig-controller.labels" . | nindent 4 }}
-  {{- with .Values.ingress.annotations }}
   annotations:
+  {{- with .Values.ingress.annotations }}
     {{- toYaml . | nindent 4 }}
   {{- end }}
+  nginx.ingress.kubernetes.io/configuration-snippet: |
+  {{- if .Values.ingress.configurationSnippet }}
+    {{- .Values.ingress.configurationSnippet | nindent 6 }}
+  {{- end }}
 spec:
+  {{- if .Values.ingress.defaultBackend.enabled }}
+  defaultBackend:
+  {{- omit .Values.ingress.defaultBackend "enabled" | toYaml | nindent 4 }}
+  {{- end }}
   {{- if and .Values.ingress.className (semverCompare ">=1.18-0" .Capabilities.KubeVersion.GitVersion) }}
   ingressClassName: {{ .Values.ingress.className }}
   {{- end }}
