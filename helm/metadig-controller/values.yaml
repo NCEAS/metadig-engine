@@ -106,15 +106,13 @@ ingress:
     }
 
   hosts:
-    # - host: api.dataone.org
-    - host: api.test.dataone.org
+    - host: api.dataone.org
       paths:
         - path: /quality
           pathType: Prefix
   tls:
   - hosts:
-    # - api.dataone.org
-    - api.test.dataone.org
+    - api.dataone.org
     secretName: ingress-nginx-tls-cert
 
 resources: {}
