@@ -54,6 +54,8 @@ service:
   targetPort: metadig-tomcat
 
 ingress:
+  prodHost: api.dataone.org
+  testHost: api.test.dataone.org
   enabled: true
   className: nginx
   annotations:
@@ -106,17 +108,20 @@ ingress:
     }
 
   hosts:
-    # The host needs to be changed to 'test' when working on `dev-metadig`
+    - host: api.test.dataone.org
+      paths:
+        - path: /quality
+          pathType: Prefix
     - host: api.dataone.org
-#    - host: api.test.dataone.org
       paths:
         - path: /quality
           pathType: Prefix
   tls:
   - hosts:
-     # The host needs to be changed to 'test' when working on `dev-metadig`
     - api.dataone.org
-#    - api.test.dataone.org
+    secretName: ingress-nginx-tls-cert
+  - hosts:
+    - api.test.dataone.org
     secretName: ingress-nginx-tls-cert
 
 resources: {}
