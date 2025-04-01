@@ -190,11 +190,11 @@ public class RequestReportJob implements Job {
                 log.debug("Got token from env.");
             }
             String nodeAbbr = nodeId.replace("urn:node:", "");
-            log.debug("node abbreviated: " + nodeAbbr);
+            log.trace("node abbreviated: " + nodeAbbr);
             subjectId = cfg.getString(nodeAbbr + ".subjectId");
             // TODO: Cache the node values from the CN listNode service
             nodeServiceUrl = cfg.getString(nodeAbbr + ".serviceUrl");
-            log.debug("Node Service URL: " + nodeServiceUrl);
+            log.trace("Node Service URL: " + nodeServiceUrl);
         } catch (ConfigurationException | IOException ce) {
             JobExecutionException jee = new JobExecutionException(taskName + ": error executing task.");
             jee.initCause(ce);
@@ -220,10 +220,10 @@ public class RequestReportJob implements Job {
         Boolean isCN = DataONE.isCN(nodeServiceUrl);
         if (isCN) {
             cnNode = new MultipartCNode(mrc, nodeServiceUrl, session);
-            log.debug("CN node detected.");
+            log.trace("CN node detected.");
         } else {
             mnNode = new MultipartMNode(mrc, nodeServiceUrl, session);
-            log.debug("MN node detected.");
+            log.trace("MN node detected.");
         }
 
         // Get a connection to the database
@@ -239,7 +239,7 @@ public class RequestReportJob implements Job {
             if (isCN) {
                 nodes = store.getNodes();
             } else {
-                log.debug("Not a CN Node. Proceeding to retrieve node.");
+                log.trace("Not a CN Node. Proceeding to retrieve node.");
                 Node node = store.getNode(nodeId);
                 if (node.getIdentifier().getValue() == null) {
                     String msg = ("Node entry not found for node: " + nodeId);
@@ -262,7 +262,7 @@ public class RequestReportJob implements Job {
             for (Node node : nodes) {
 
                 harvestNodeId = node.getIdentifier().getValue();
-                log.debug("Node harvest ID retrieved: " + harvestNodeId);
+                log.trace("Node harvest ID retrieved: " + harvestNodeId);
                 // If processing a CN, check each MN to see if it is being synchronized and if
                 // it is marked as up.
                 if (isCN) {
@@ -301,7 +301,7 @@ public class RequestReportJob implements Job {
 
                 }
 
-                log.debug("Harvesting node: " + node.getIdentifier().getValue());
+                log.trace("Harvesting node: " + node.getIdentifier().getValue());
 
                 // Set UTC as the default time zone for all DateTime operations.
                 // Get current datetime, which may be used for start time range.
