@@ -75,7 +75,7 @@ ingress:
   defaultBackend:
     enabled: false
 
-  rewriteRules: ""x
+  rewriteRules: ""
 
   configurationSnippet: |
     set $cors 'true';
