@@ -18,11 +18,19 @@ metadata:
   name: {{ $fullName }}
   labels:
     {{- include "metadig-controller.labels" . | nindent 4 }}
-  {{- with .Values.ingress.annotations }}
   annotations:
-    {{- toYaml . | nindent 4 }}
-  {{- end }}
+    {{- with .Values.ingress.annotations }}
+      {{- toYaml . | nindent 4 }}
+    {{- end }}
+    nginx.ingress.kubernetes.io/configuration-snippet: |
+    {{- if .Values.ingress.configurationSnippet }}
+      {{- .Values.ingress.configurationSnippet | nindent 6 }}
+    {{- end }}
 spec:
+  {{- if .Values.ingress.defaultBackend.enabled }}
+  defaultBackend:
+  {{- omit .Values.ingress.defaultBackend "enabled" | toYaml | nindent 4 }}
+  {{- end }}
   {{- if and .Values.ingress.className (semverCompare ">=1.18-0" .Capabilities.KubeVersion.GitVersion) }}
   ingressClassName: {{ .Values.ingress.className }}
   {{- end }}

@@ -566,14 +566,13 @@ public class Worker {
             run = engine.runSuite(suite, input, params, sysmeta);
             List<Result> results = run.getResult();
         } catch (Exception e) {
+            e.printStackTrace();
             throw new MetadigException("Unable to run quality suite for pid " + message.getMetadataPid() + ", suite "
                     + suiteId + e.getMessage(), e);
         }
 
-        // TODO: System metadata is required for the solr index to obtain
-        // statistics/reports
-        // TODO: We will need a path to obtain the system metadata if its removed from
-        // qEntry
+        // Reminder: System metadata is required for the solr index to obtain statistics/reports
+        // TODO: We will need a path to obtain the system metadata if its removed from qEntry
         // Add DataONE sysmeta, if it was provided.
         if (sysmeta != null) {
             SysmetaModel smm = new SysmetaModel();

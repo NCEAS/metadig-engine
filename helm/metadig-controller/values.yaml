@@ -7,6 +7,9 @@ replicaCount: 1
 image:
   repository: ghcr.io/nceas/metadig-controller
   pullPolicy: Always
+  ## @param image.tag Overrides the image tag. Will default to the chart appVersion if set to ""
+  ##
+  tag: ""
 
 imagePullSecrets: []
 nameOverride: ""
@@ -51,15 +54,64 @@ service:
   targetPort: metadig-tomcat
 
 ingress:
-  enabled: false
+  prodHost: api.dataone.org
+  testHost: api.test.dataone.org
+  enabled: true
   className: nginx
   annotations:
-    nginx.ingress.kubernetes.io/enable-cors: "true"
-    nginx.ingress.kubernetes.io/cors-allow-methods: "GET, POST, OPTIONS"
-    nginx.ingress.kubernetes.io/cors-allow-origin: '$http_origin'
-    nginx.ingress.kubernetes.io/cors-allow-credentials: "true"
+#    nginx.ingress.kubernetes.io/enable-cors: "true"
+#    nginx.ingress.kubernetes.io/cors-allow-methods: "GET, POST, OPTIONS"
+#    nginx.ingress.kubernetes.io/cors-allow-origin: '$http_origin'
+#    nginx.ingress.kubernetes.io/cors-allow-credentials: "true"
     cert-manager.io/cluster-issuer: "letsencrypt-prod"
+    ## @param ingress.annotations.nginx.ingress.kubernetes.io/client-body-buffer-size - see docs:
+    ## https://nginx.org/en/docs/http/ngx_http_core_module.html#client_body_buffer_size
+    ##
+    nginx.ingress.kubernetes.io/client-body-buffer-size: "1m"
+
+    ## @param ingress.annotations.nginx.ingress.kubernetes.io/client_max_body_size - see docs:
+    ## https://nginx.org/en/docs/http/ngx_http_core_module.html#client_max_body_size
+    ##
+    nginx.ingress.kubernetes.io/client_max_body_size: "0"
+
+  defaultBackend:
+    enabled: false
+
+  rewriteRules: ""
+
+  configurationSnippet: |
+    set $cors 'true';
+
+    if ($request_method = 'OPTIONS') {
+      set $cors ${cors}options;
+    }
+
+    if ($cors = "true") {
+      more_set_headers 'Access-Control-Allow-Origin: $http_origin';
+      more_set_headers 'Access-Control-Allow-Credentials: true';
+      more_set_headers 'Access-Control-Allow-Methods: POST, PUT, GET, OPTIONS';
+      more_set_headers 'Access-Control-Allow-Headers: DNT,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization';
+
+      more_set_headers 'Access-Control-Max-Age: 1728000';
+    }
+
+    if ($cors = "trueoptions") {
+      more_set_headers 'Access-Control-Allow-Origin: $http_origin';
+      more_set_headers 'Access-Control-Allow-Credentials: true';
+      more_set_headers 'Access-Control-Allow-Methods: POST, PUT, GET, OPTIONS';
+      more_set_headers 'Access-Control-Allow-Headers: DNT,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization';
+
+      more_set_headers 'Access-Control-Max-Age: 1728000';
+      more_set_headers 'Content-Type: text/plain charset=UTF-8';
+      more_set_headers 'Content-Length: 0';
+      return 204;
+    }
+
   hosts:
+    - host: api.test.dataone.org
+      paths:
+        - path: /quality
+          pathType: Prefix
     - host: api.dataone.org
       paths:
         - path: /quality
@@ -67,6 +119,9 @@ ingress:
   tls:
   - hosts:
     - api.dataone.org
+    secretName: ingress-nginx-tls-cert
+  - hosts:
+    - api.test.dataone.org
     secretName: ingress-nginx-tls-cert
 
 resources: {}

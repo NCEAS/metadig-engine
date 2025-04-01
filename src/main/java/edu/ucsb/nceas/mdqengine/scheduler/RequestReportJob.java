@@ -190,9 +190,11 @@ public class RequestReportJob implements Job {
                 log.debug("Got token from env.");
             }
             String nodeAbbr = nodeId.replace("urn:node:", "");
+            log.trace("node abbreviated: " + nodeAbbr);
             subjectId = cfg.getString(nodeAbbr + ".subjectId");
             // TODO: Cache the node values from the CN listNode service
             nodeServiceUrl = cfg.getString(nodeAbbr + ".serviceUrl");
+            log.trace("Node Service URL: " + nodeServiceUrl);
         } catch (ConfigurationException | IOException ce) {
             JobExecutionException jee = new JobExecutionException(taskName + ": error executing task.");
             jee.initCause(ce);
@@ -204,6 +206,7 @@ public class RequestReportJob implements Job {
         /* Get connection to the DataONE MN or CN */
         try {
             mrc = new HttpMultipartRestClient();
+            log.debug("Successfully created HTTP rest client.");
         } catch (Exception e) {
             log.error(taskName + ": error creating rest client: " + e.getMessage());
             JobExecutionException jee = new JobExecutionException(e);
@@ -217,14 +220,16 @@ public class RequestReportJob implements Job {
         Boolean isCN = DataONE.isCN(nodeServiceUrl);
         if (isCN) {
             cnNode = new MultipartCNode(mrc, nodeServiceUrl, session);
+            log.trace("CN node detected.");
         } else {
             mnNode = new MultipartMNode(mrc, nodeServiceUrl, session);
+            log.trace("MN node detected.");
         }
 
         // Get a connection to the database
 
         try (DatabaseStore store = new DatabaseStore()) {
-
+            log.debug("Getting connection to the database store");
             ArrayList<Node> nodes = new ArrayList<>();
 
             /*
@@ -234,6 +239,7 @@ public class RequestReportJob implements Job {
             if (isCN) {
                 nodes = store.getNodes();
             } else {
+                log.trace("Not a CN Node. Proceeding to retrieve node.");
                 Node node = store.getNode(nodeId);
                 if (node.getIdentifier().getValue() == null) {
                     String msg = ("Node entry not found for node: " + nodeId);
@@ -242,7 +248,7 @@ public class RequestReportJob implements Job {
                     jee.setRefireImmediately(false);
                     throw jee;
                 } else {
-                    log.trace("Got node " + node.getIdentifier().getValue());
+                    log.debug("Got node " + node.getIdentifier().getValue());
                     nodes.add(node);
                 }
             }
@@ -256,6 +262,7 @@ public class RequestReportJob implements Job {
             for (Node node : nodes) {
 
                 harvestNodeId = node.getIdentifier().getValue();
+                log.trace("Node harvest ID retrieved: " + harvestNodeId);
                 // If processing a CN, check each MN to see if it is being synchronized and if
                 // it is marked as up.
                 if (isCN) {
@@ -305,6 +312,7 @@ public class RequestReportJob implements Job {
 
                 Task task;
                 task = store.getTask(taskName, taskType, harvestNodeId);
+                log.debug("Task retrieved from store: " + task.getTaskName());
                 // If a 'task' entry has not been saved for this task name yet (i.e. this is an
                 // MN that has just been registerd with DataONE), then a 'lastHarvested'
                 // DataTime will not be available, in which case the 'startHarvestDataTime' from
@@ -345,7 +353,7 @@ public class RequestReportJob implements Job {
                 String startDTstr = dtfOut.print(startDT);
                 String endDTstr = dtfOut.print(endDT);
 
-                log.trace("start time: " + startDTstr);
+                log.debug("start time: " + startDTstr);
 
                 Integer startCount = new Integer(0);
                 ListResult result = null;
@@ -353,7 +361,7 @@ public class RequestReportJob implements Job {
                 Integer filteredResultCount = 0;
                 Integer allPidsCnt = 0;
 
-                log.trace("Getting pids for nodeId: " + harvestNodeId);
+                log.debug("Getting pids for nodeId: " + harvestNodeId);
                 boolean morePids = true;
                 while (morePids) {
                     ArrayList<String> pidsToProcess = null;
@@ -375,6 +383,7 @@ public class RequestReportJob implements Job {
                         try {
                             log.debug(taskName + ": submitting pid: " + pidStr);
                             submitReportRequest(cnNode, mnNode, isCN, session, qualityServiceUrl, pidStr, suiteId);
+                            log.debug("Submitted report request for pid: " + pidStr);
                         } catch (org.dataone.service.exceptions.NotFound nfe) {
                             log.error("Unable to process pid: " + pidStr + nfe.getMessage());
                             continue;
@@ -405,10 +414,11 @@ public class RequestReportJob implements Job {
                     // DataONE object service
                     // (get) does harvest based on requested milliseonds.
                     task.setLastHarvestDatetime(dtfOut.print(lastDateModifiedDT.plusMillis(1)), harvestNodeId);
-                    log.trace("Saving lastHarvestDate: " + dtfOut.print(lastDateModifiedDT.plusMillis(1))
+                    log.debug("Saving lastHarvestDate: " + dtfOut.print(lastDateModifiedDT.plusMillis(1))
                             + " for node: " + harvestNodeId);
                     try {
                         store.saveTask(task, harvestNodeId);
+                        log.debug("Saving task to node: " + harvestNodeId);
                     } catch (MetadigStoreException mse) {
                         log.error("Error saving task: " + task.getTaskName());
                         JobExecutionException jee = new JobExecutionException("Unable to save new harvest date", mse);
@@ -419,6 +429,7 @@ public class RequestReportJob implements Job {
                             + startDTstr + ", end: " + endDTstr + ", servierUrl: " + nodeServiceUrl);
                 }
             }
+            log.debug("Completed checking nodes to schedule tasks for.");
         } catch (Exception e) {
             e.printStackTrace();
             throw new JobExecutionException("Cannot create store, unable to schedule job", e);

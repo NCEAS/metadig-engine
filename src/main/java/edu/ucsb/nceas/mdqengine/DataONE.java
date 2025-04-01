@@ -127,7 +127,7 @@ public class DataONE {
 
         try {
             // If results were returned, create an XML document from them
-            log.trace("qis available: " + qis.available());
+            log.debug("Solr Query qis bytes available: " + qis.available());
             if (qis.available() > 0) {
                 try {
                     DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
@@ -135,9 +135,9 @@ public class DataONE {
                     xmldoc = builder.parse(new InputSource(qis));
                     log.trace("Created xml doc: " + xmldoc.toString());
                 } catch (ParserConfigurationException pe) {
-                    log.error("XML parser configuration exception", pe);
+                    log.error("XML parser configuration exception: ", pe);
                 } catch (SAXException e) {
-                    log.error("Error parsing XML" + e.getMessage() + qis.read());
+                    log.error("Error parsing XML: " + e.getMessage() + qis.read());
                 } finally {
                     qis.close();
                 }
