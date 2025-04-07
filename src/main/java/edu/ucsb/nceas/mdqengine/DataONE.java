@@ -113,7 +113,7 @@ public class DataONE {
         log.trace("Sending query: " + queryStr);
         try {
             qis = d1Node.query(session, "solr", queryStr);
-            log.trace("Sent query");
+            log.debug("Sent query. d1Node.query - queryStr: " + queryStr);
         } catch (Exception e) {
             log.error("Error retrieving pids: " + e.getMessage());
             metadigException = new MetadigProcessException("Unable to query dataone node: " + e.getMessage());
