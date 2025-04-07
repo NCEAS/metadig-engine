@@ -2,7 +2,6 @@ package edu.ucsb.nceas.mdqengine.dispatch;
 
 import jep.SharedInterpreter;
 import jep.JepException;
-import jep.SubInterpreter;
 
 import java.io.Reader;
 
