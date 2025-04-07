@@ -2,6 +2,7 @@ package edu.ucsb.nceas.mdqengine.dispatch;
 
 import jep.SharedInterpreter;
 import jep.JepException;
+import jep.SubInterpreter;
 
 import java.io.Reader;
 
@@ -18,7 +19,8 @@ import javax.script.SimpleBindings;
  */
 public class JepScriptEngine implements ScriptEngine {
 
-    private SharedInterpreter jepInterpreter = null;
+//    private SharedInterpreter jepInterpreter = null;
+    private SubInterpreter jepInterpreter = null;
     private Bindings bindings = new SimpleBindings();
     private Bindings globalBindings = new SimpleBindings();
     private ScriptEngineFactory factory = null;
@@ -41,7 +43,8 @@ public class JepScriptEngine implements ScriptEngine {
 
         try {
             // create the interpreter for python executing
-            jepInterpreter = new SharedInterpreter();
+//            jepInterpreter = new SharedInterpreter();
+            jepInterpreter = new SubInterpreter();
         } catch (JepException e) {
             throw new RuntimeException("Error initializing Jep interpreter: " + e);
         }
