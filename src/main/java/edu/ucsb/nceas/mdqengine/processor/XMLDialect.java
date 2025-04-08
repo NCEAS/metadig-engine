@@ -191,8 +191,7 @@ public class XMLDialect {
 			}
 
 			// dispatch to checker impl
-			if (!check.isInheritState() || dispatcher == null || Objects.equals(
-				check.getEnvironment(), "python")) {
+			if (!check.isInheritState() || dispatcher == null) {
 				// create a fresh dispatcher
 				dispatcher = Dispatcher.getDispatcher(check.getEnvironment());
 				log.debug("Creating initial check dispatcher for " + check.getEnvironment());
