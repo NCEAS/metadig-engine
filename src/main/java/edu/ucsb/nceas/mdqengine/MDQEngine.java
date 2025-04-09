@@ -6,6 +6,8 @@ import edu.ucsb.nceas.mdqengine.exception.MetadigException;
 import edu.ucsb.nceas.mdqengine.model.*;
 import edu.ucsb.nceas.mdqengine.processor.GroupLookupCheck;
 import edu.ucsb.nceas.mdqengine.processor.XMLDialect;
+import edu.ucsb.nceas.mdqengine.processor.MetadataDialectFactory;
+import edu.ucsb.nceas.mdqengine.processor.MetadataDialect;
 import edu.ucsb.nceas.mdqengine.serialize.JsonMarshaller;
 import edu.ucsb.nceas.mdqengine.serialize.XmlMarshaller;
 import edu.ucsb.nceas.mdqengine.store.InMemoryStore;
@@ -81,7 +83,8 @@ public class MDQEngine {
 	 */
 	public Run runSuite(Suite suite, InputStream input, Map<String, Object> params, SystemMetadata sysMeta)
 			throws MalformedURLException, IOException, SAXException,
-			ParserConfigurationException, XPathExpressionException, ScriptException {
+			ParserConfigurationException, XPathExpressionException, ScriptException,
+			IllegalArgumentException {
 
 		// Make the location of the data directory available to checks that need to
 		// read data files located there.
@@ -94,11 +97,9 @@ public class MDQEngine {
 
 		String content = IOUtils.toString(input, "UTF-8");
 		String metadataContent = content;
-		// TODO: implement dialect factory
-		// eg: String contentType = detectContentType(metadataContent);
-		// eg: Dialect dialect = DialectFactory.createDialect(contentType, metadataContent);
-		// eg: dialect.runCheck(check); 
-		XMLDialect xml = new XMLDialect(IOUtils.toInputStream(metadataContent, "UTF-8"));
+		// TODO: implement for json as well
+		MetadataDialect xml = MetadataDialectFactory.createDialect("xml",
+				IOUtils.toInputStream(metadataContent, "UTF-8"));
 		xml.setSystemMetadata(sysMeta);
 		Path tempDir = Files.createTempDirectory("mdq_run");
 		xml.setDirectory(tempDir.toFile().getAbsolutePath());
