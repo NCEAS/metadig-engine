@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<xs:schema version="1.2" targetNamespace="https://nceas.ucsb.edu/mdqe/v1.2" xmlns:tns="https://nceas.ucsb.edu/mdqe/v1.2" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+  <xs:element name="check" type="tns:check"/>
+  <xs:element name="run" type="tns:run"/>
+  <xs:element name="suite" type="tns:suite"/>
+  <xs:element name="status" type="tns:runStatus"/>
+  <xs:element name="error" type="tns:errorDescription"/>
+
+  <xs:complexType name="systemMetadata">
+    <xs:sequence>
+      <xs:element name="originMemberNode" type="xs:string" minOccurs="0"/>
+      <xs:element name="rightsHolder" type="xs:string" minOccurs="0"/>
+      <xs:element name="group" type="xs:string" minOccurs="0"/>
+      <xs:element name="dateUploaded" type="xs:dateTime" minOccurs="0"/>
+      <xs:element name="formatId" type="xs:string" minOccurs="0"/>
+      <xs:element name="obsoletes" type="xs:string" minOccurs="0"/>
+      <xs:element name="obsoletedBy" type="xs:string" minOccurs="0"/>
+      <xs:element name="seriesId" type="xs:string" minOccurs="0"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="check">
+    <xs:sequence>
+      <xs:element name="id" type="xs:string"/>
+      <xs:element name="name" type="xs:string" minOccurs="0"/>
+      <xs:element name="description" type="xs:string" minOccurs="0"/>
+      <xs:element name="type" type="xs:string" minOccurs="0"/>
+      <xs:element name="level" type="tns:level" minOccurs="0"/>
+      <xs:element name="environment" type="xs:string" minOccurs="0"/>
+      <xs:element name="code" type="xs:string" minOccurs="0"/>
+      <xs:element name="library" type="xs:anyURI" minOccurs="0" maxOccurs="unbounded"/>
+      <xs:element name="inheritState" type="xs:boolean" minOccurs="0"/>
+      <xs:element name="selector" type="tns:selector" minOccurs="0" maxOccurs="unbounded"/>
+      <xs:element name="dialect" type="tns:dialect" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="selector">
+    <xs:sequence>
+      <xs:element name="name" type="xs:string"/>
+      <xs:element name="xpath" type="xs:string"/>
+      <xs:element name="expression" minOccurs="0" maxOccurs="unbounded">
+        <xs:complexType>
+          <xs:simpleContent>
+            <xs:extension base="xs:string">
+              <xs:attribute name="syntax" type="xs:string" use="optional" default="xpath"/>
+            </xs:extension>
+          </xs:simpleContent>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="subSelector" type="tns:selector" minOccurs="0"/>
+      <xs:element name="namespaces" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="namespace" type="tns:namespace" nillable="true" minOccurs="0" maxOccurs="unbounded"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+    <xs:attribute name="namespaceAware" type="xs:boolean"/>
+  </xs:complexType>
+
+  <xs:complexType name="namespace">
+    <xs:simpleContent>
+      <xs:extension base="xs:string">
+        <xs:attribute name="prefix" type="xs:string" use="required"/>
+      </xs:extension>
+    </xs:simpleContent>
+  </xs:complexType>
+
+  <xs:complexType name="dialect">
+    <xs:sequence>
+      <xs:element name="name" type="xs:string" minOccurs="0"/>
+      <xs:element name="xpath" type="xs:string" minOccurs="0"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="output">
+    <xs:simpleContent>
+      <xs:extension base="xs:string">
+        <xs:attribute name="type" type="xs:string"/>
+        <xs:attribute name="identifier" type="xs:string"/>
+      </xs:extension>
+    </xs:simpleContent>
+  </xs:complexType>
+
+  <xs:complexType name="result">
+    <xs:sequence>
+      <xs:element name="check" type="tns:check" minOccurs="0"/>
+      <xs:element name="timestamp" type="xs:dateTime" minOccurs="0"/>
+      <xs:element name="output" type="tns:output" nillable="true" minOccurs="0" maxOccurs="unbounded"/>
+      <xs:element name="status" type="tns:status" minOccurs="0"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="run">
+    <xs:sequence>
+      <xs:element name="id" type="xs:string"/>
+      <xs:element name="timestamp" type="xs:dateTime"/>
+      <xs:element name="objectIdentifier" type="xs:string" minOccurs="0"/>
+      <xs:element name="suiteId" type="xs:string" minOccurs="0"/>
+      <xs:element name="result" type="tns:result" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="suite">
+    <xs:sequence>
+      <xs:element name="id" type="xs:string"/>
+      <xs:element name="name" type="xs:string"/>
+      <xs:element name="description" type="xs:string" minOccurs="0"/>
+      <xs:element name="namespaces" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="namespace" type="tns:namespace" nillable="true" minOccurs="0" maxOccurs="unbounded"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="check" type="tns:check" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:simpleType name="level">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="OPTIONAL"/>
+      <xs:enumeration value="INFO"/>
+      <xs:enumeration value="METADATA"/>
+      <xs:enumeration value="REQUIRED"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <!-- 'status' applies to individual checks -->
+  <xs:simpleType name="status">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="FAILURE"/>
+      <xs:enumeration value="SUCCESS"/>
+      <xs:enumeration value="ERROR"/>
+      <xs:enumeration value="SKIP"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <!-- 'runStatus' applies to the entire run -->
+  <xs:simpleType name="runStatus">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="SUCCESS"/>
+      <xs:enumeration value="PROCESSING"/>
+      <xs:enumeration value="ERROR"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:complexType name="errorDescription">
+    <xs:simpleContent>
+      <xs:extension base="xs:string">
+      </xs:extension>
+    </xs:simpleContent>
+  </xs:complexType>
+</xs:schema>

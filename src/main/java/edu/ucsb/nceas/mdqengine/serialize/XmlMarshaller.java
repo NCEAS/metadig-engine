@@ -49,17 +49,18 @@ public class XmlMarshaller {
 		// TODO: include the schema in jar
 		InputStream schemaStreamV1 = XmlMarshaller.class.getResourceAsStream("/schemas/schema1.xsd");
 		InputStream schemaStreamV11 = XmlMarshaller.class.getResourceAsStream("/schemas/schema1.1.xsd");
-
-		if (schemaStreamV1 == null || schemaStreamV11 == null) {
+		InputStream schemaStreamV12 = XmlMarshaller.class.getResourceAsStream("/schemas/schema1.2.xsd");
+		
+		if (schemaStreamV1 == null || schemaStreamV11 == null || schemaStreamV12 == null) {
 			throw new IOException("One or more schema files not found");
 		}
 
 		SchemaFactory factory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
 		Schema schema = factory.newSchema(new StreamSource[] {
 				new StreamSource(schemaStreamV1),
-				new StreamSource(schemaStreamV11)
+				new StreamSource(schemaStreamV11),
+				new StreamSource(schemaStreamV12)
 		});
-		u.setSchema(schema);
 		u.setSchema(schema);
 
 		Object obj = u.unmarshal(IOUtils.toInputStream(xml, "UTF-8"));
