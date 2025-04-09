@@ -2,15 +2,7 @@ package edu.ucsb.nceas.mdqengine.processor;
 
 import edu.ucsb.nceas.mdqengine.dispatch.Dispatcher;
 import edu.ucsb.nceas.mdqengine.model.*;
-import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.BooleanUtils;
-import org.apache.commons.lang.math.NumberUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.dataone.service.exceptions.ServiceFailure;
-import org.dataone.service.types.v1.NodeReference;
-import org.dataone.service.types.v2.SystemMetadata;
 import org.dataone.service.util.TypeMarshaller;
 import org.springframework.util.xml.SimpleNamespaceContext;
 import org.w3c.dom.Document;
@@ -33,33 +25,15 @@ import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 import java.io.*;
 import java.net.URL;
-import java.nio.file.InvalidPathException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.*;
-import org.dataone.client.v2.itk.D1Client;
-import org.dataone.client.v2.MNode;
 
-public class XMLDialect {
+public class XMLDialect extends AbstractMetadataDialect {
 
 	private Document document;
-
 	private Document nsAwareDocument;
-
-	private SystemMetadata systemMetadata;
-
 	private XPathFactory xPathfactory;
-
-	private Map<String, Object> params;
-
-	private Map<String, Namespace> namespaces = new HashMap<String, Namespace>();
-
-	private String directory;
-
 	private Dispatcher dispatcher;
-
-	public static Log log = LogFactory.getLog(XMLDialect.class);
 
 	public XMLDialect(InputStream input) throws SAXException, IOException, ParserConfigurationException {
 		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
@@ -85,7 +59,8 @@ public class XMLDialect {
 
 	}
 
-	private void extractNamespaces() {
+	@Override
+	public void extractNamespaces() {
 		XPath xpath = xPathfactory.newXPath();
 		NodeList nodes = null;
 		try {
@@ -112,6 +87,7 @@ public class XMLDialect {
 	}
 
 	// include additional namespaces
+	@Override
 	public void mergeNamespaces(List<Namespace> namespaces) {
 		if (namespaces != null) {
 			for (Namespace namespace : namespaces) {
@@ -120,6 +96,7 @@ public class XMLDialect {
 		}
 	}
 
+	@Override
 	public Result runCheck(Check check) throws XPathExpressionException {
 
 		Result result = null;
@@ -282,48 +259,6 @@ public class XMLDialect {
 		return result;
 	}
 
-	private Result postProcess(Result result) {
-		// Return the result as-is if there are no outputs to post-process
-		if (result.getOutput() == null) {
-			log.debug("Skipping postProcess step because this result's output is null.");
-			return (result);
-		}
-
-		// Post-process each output (if needed)
-		for (Output output : result.getOutput()) {
-			if (output == null) {
-				log.debug("Output was null.");
-				continue;
-			}
-
-			String value = output.getValue();
-			if (value != null) {
-				Path path = null;
-				try {
-					path = Paths.get(value);
-				} catch (InvalidPathException e) {
-					// NOPE
-					return result;
-				}
-
-				if (path.toFile().exists()) {
-					// encode it
-					String encoded = null;
-					try {
-						encoded = Base64.encodeBase64String(IOUtils.toByteArray(path.toUri()));
-						output.setValue(encoded);
-						// TODO: set mime-type when we have support for that, or assume they did it
-						// already?
-					} catch (IOException e) {
-						log.error(e.getMessage());
-					}
-				}
-			}
-		}
-
-		return result;
-	}
-
 	/**
 	 * Determine if the check is valid for the document
 	 * 
@@ -331,6 +266,7 @@ public class XMLDialect {
 	 * @return
 	 * @throws XPathExpressionException
 	 */
+	@Override
 	public boolean isCheckValid(Check check) throws XPathExpressionException {
 
 		if (check.getDialect() == null) {
@@ -360,7 +296,8 @@ public class XMLDialect {
 		return false;
 	}
 
-	private Object selectPath(Selector selector, Node contextNode) throws XPathExpressionException {
+	@Override
+	public Object selectPath(Selector selector, Node contextNode) throws XPathExpressionException {
 
 		Object value = null;
 
@@ -458,56 +395,7 @@ public class XMLDialect {
 
 	}
 
-	/*
-	 * Retype an object based on a few simple assumptions. A "String" value is
-	 * typically passed in. If only numeric characters are present in the String,
-	 * then the object is caste to type "Number". If the string value appears to
-	 * be an "affirmative" or "negative" value (e.g. "Y", "Yes", "N", "No", ...)
-	 * then the value is caste to "Boolean".
-	 */
-	public static Object retypeObject(Object value) {
-		Object result = value;
-
-		if (value instanceof String stringValue) {
-			// try to type the value correctly
-			if (NumberUtils.isNumber(stringValue) && !stringValue.matches("^0\\d*$")) {
-				// If it's a valid number and doesn't start with zeros, create a Number object
-				result = NumberUtils.createNumber(stringValue);
-			} else {
-				// try to convert to bool
-				Boolean bool = BooleanUtils.toBooleanObject((String) value);
-				// if it worked, return the boolean, otherwise the original result is returned
-				if (bool != null) {
-					result = bool;
-				}
-			}
-
-		}
-
-		return result;
-	}
-
-	public Map<String, Object> getParams() {
-		return params;
-	}
-
-	public void setParams(Map<String, Object> params) {
-		this.params = params;
-	}
-
-	public void setDirectory(String dir) {
-		this.directory = dir;
-	}
-
-	public SystemMetadata getSystemMetadata() {
-		return systemMetadata;
-	}
-
-	public void setSystemMetadata(SystemMetadata systemMetadata) {
-		this.systemMetadata = systemMetadata;
-	}
-
-	private String toXmlString(Document document) {
+	public String toXmlString(Document document) {
 		try {
 			Transformer transformer = TransformerFactory.newInstance().newTransformer();
 			StreamResult result = new StreamResult(new StringWriter());

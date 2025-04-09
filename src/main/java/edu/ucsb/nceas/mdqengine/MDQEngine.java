@@ -20,6 +20,7 @@ import org.dataone.service.types.v1.NodeReference;
 import org.dataone.service.types.v2.SystemMetadata;
 import org.dataone.service.types.v2.TypeFactory;
 import org.dataone.service.util.TypeMarshaller;
+import org.hibernate.dialect.resolver.DialectFactory;
 import org.dataone.service.types.v1.Session;
 import org.xml.sax.SAXException;
 
@@ -93,7 +94,10 @@ public class MDQEngine {
 
 		String content = IOUtils.toString(input, "UTF-8");
 		String metadataContent = content;
-
+		// TODO: implement dialect factory
+		// eg: String contentType = detectContentType(metadataContent);
+		// eg: Dialect dialect = DialectFactory.createDialect(contentType, metadataContent);
+		// eg: dialect.runCheck(check); 
 		XMLDialect xml = new XMLDialect(IOUtils.toInputStream(metadataContent, "UTF-8"));
 		xml.setSystemMetadata(sysMeta);
 		Path tempDir = Files.createTempDirectory("mdq_run");
