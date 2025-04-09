@@ -7,6 +7,7 @@ import edu.ucsb.nceas.mdqengine.model.*;
 import edu.ucsb.nceas.mdqengine.processor.GroupLookupCheck;
 import edu.ucsb.nceas.mdqengine.processor.XMLDialect;
 import edu.ucsb.nceas.mdqengine.processor.MetadataDialectFactory;
+import edu.ucsb.nceas.mdqengine.processor.ProcessorUtils;
 import edu.ucsb.nceas.mdqengine.processor.MetadataDialect;
 import edu.ucsb.nceas.mdqengine.serialize.JsonMarshaller;
 import edu.ucsb.nceas.mdqengine.serialize.XmlMarshaller;
@@ -22,7 +23,6 @@ import org.dataone.service.types.v1.NodeReference;
 import org.dataone.service.types.v2.SystemMetadata;
 import org.dataone.service.types.v2.TypeFactory;
 import org.dataone.service.util.TypeMarshaller;
-import org.hibernate.dialect.resolver.DialectFactory;
 import org.dataone.service.types.v1.Session;
 import org.xml.sax.SAXException;
 
@@ -97,14 +97,16 @@ public class MDQEngine {
 
 		String content = IOUtils.toString(input, "UTF-8");
 		String metadataContent = content;
-		// TODO: implement for json as well
-		MetadataDialect xml = MetadataDialectFactory.createDialect("xml",
+		// detect either json or xml
+		String contentType = ProcessorUtils.detectContentType(IOUtils.toInputStream(metadataContent, "UTF-8"));
+		MetadataDialect docDialect = MetadataDialectFactory.createDialect(contentType,
 				IOUtils.toInputStream(metadataContent, "UTF-8"));
-		xml.setSystemMetadata(sysMeta);
+
+		docDialect.setSystemMetadata(sysMeta);
 		Path tempDir = Files.createTempDirectory("mdq_run");
-		xml.setDirectory(tempDir.toFile().getAbsolutePath());
+		docDialect.setDirectory(tempDir.toFile().getAbsolutePath());
 		// include the default namespaces from the suite
-		xml.mergeNamespaces(suite.getNamespace());
+		docDialect.mergeNamespaces(suite.getNamespace());
 
 		// make a run to capture results
 		Run run = new Run();
@@ -124,7 +126,7 @@ public class MDQEngine {
 		}
 		params.put("dataPids", dataPids);
 
-		xml.setParams(params);
+		docDialect.setParams(params);
 
 		// run the checks in the suite to get results
 		for (Check check : suite.getCheck()) {
@@ -154,7 +156,7 @@ public class MDQEngine {
 				if (origCheck.getType() != null)
 					check.setType(origCheck.getType());
 			}
-			Result result = xml.runCheck(check);
+			Result result = docDialect.runCheck(check);
 			results.add(result);
 		}
 		run.setResult(results);
