@@ -117,7 +117,7 @@ public class XMLDialect extends AbstractMetadataDialect {
 					}
 
 					String name = selector.getName();
-					Object value = this.selectPath(selector, docToUse);
+					Object value = this.selectXPath(selector, docToUse);
 
 					// make available in script
 					variables.put(name, value);
@@ -296,8 +296,7 @@ public class XMLDialect extends AbstractMetadataDialect {
 		return false;
 	}
 
-	@Override
-	public Object selectPath(Selector selector, Node contextNode) throws XPathExpressionException {
+	public Object selectXPath(Selector selector, Node contextNode) throws XPathExpressionException {
 
 		Object value = null;
 
@@ -365,7 +364,7 @@ public class XMLDialect extends AbstractMetadataDialect {
 					if (selector.getSubSelector() != null) {
 						Selector subSelector = selector.getSubSelector();
 						// recurse
-						Object subvalue = this.selectPath(subSelector, node);
+						Object subvalue = this.selectXPath(subSelector, node);
 						values.add(subvalue);
 					} else {
 						// otherwise just add the node value

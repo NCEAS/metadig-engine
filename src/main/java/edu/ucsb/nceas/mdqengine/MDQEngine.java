@@ -25,6 +25,7 @@ import org.dataone.service.types.v2.TypeFactory;
 import org.dataone.service.util.TypeMarshaller;
 import org.dataone.service.types.v1.Session;
 import org.xml.sax.SAXException;
+import net.thisptr.jackson.jq.exception.JsonQueryException;
 
 import javax.script.ScriptException;
 import javax.xml.parsers.ParserConfigurationException;
@@ -84,7 +85,7 @@ public class MDQEngine {
 	public Run runSuite(Suite suite, InputStream input, Map<String, Object> params, SystemMetadata sysMeta)
 			throws MalformedURLException, IOException, SAXException,
 			ParserConfigurationException, XPathExpressionException, ScriptException,
-			IllegalArgumentException {
+			IllegalArgumentException, JsonQueryException {
 
 		// Make the location of the data directory available to checks that need to
 		// read data files located there.
