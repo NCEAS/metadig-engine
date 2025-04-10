@@ -1,0 +1,180 @@
+{
+    "@context": "https://schema.org",
+
+    "@id": "https://doi.org/10.4211/hs.e99ee3f096964b31add85947894d812c#schemaorg",
+    "sameAs": "https://www.hydroshare.org/resource/e99ee3f096964b31add85947894d812c",
+    "url": "https://doi.org/10.4211/hs.e99ee3f096964b31add85947894d812c",
+
+    "@type": "Dataset",
+    "additionalType": "https://www.hydroshare.org/terms/CompositeResource",
+    "name": "Virginia Forest - DTW, Water Temperature, Specific conductance - Jun 2021-Jul 2024",
+    "description": "This dataset includes depth to water (m, from ground surface), water temperature (degrees C) and specific conductance (uS/cm) measurements from four monitoring wells at the Virginia Forest site (Brownsville) for the CZNet Coastal Cluster. Pressure, temperature and electrical conductivity were measured continuously in the field at 15\u002Dminute intervals with Solinst Levelogger 5 Model 3001s installed in each monitoring well. The Leveloggers were attached to a nylon cord and installed at the approximate depth of the well screen mid\u002Dpoint. Depth to water measurements were converted from Levelogger\u002Dmeasured pressure values. Pressure values were corrected for barometric pressure fluctuations and converted to depth to water values using reference manual depth to water measurements collected at the start and stop of each Levelogger deployment. No correction was done to the temperature values. Specific conductance values were calculated from Levelogger\u002Dmeasured electrical conductivity using the equation given by Standard Method 2510B. Between deployments, each Levelogger was submerged in a calibration solution with a known SC and the real\u002Dtime reading was recorded. If the real\u002Dtime reading was +/\u002D5% of the calibration solution concentration, the sensor was calibrated according to manufacturer specifications. SC values were adjusted for sensor drift by adding a correction factor to the sensor\u002Dmeasured value. Leveloggers were occasionally swapped between wells to allow for sensor maintenance and calibration. Because the Leveloggers were periodically stopped to download data before being redeployed, there may be gaps in the record between deployments.",
+    "keywords": ["CZNet", "Virginia", "depth to water", "Critical Zone", "water quality", "hydrology", "temperature", "hydrogeology", "water levels", "specific conductance", "CCZN"],
+
+    "creativeWorkStatus": "Published",
+
+    "inLanguage": "en-US",
+
+    "identifier": [
+      {
+        "@id": "https://doi.org/10.4211/hs.e99ee3f096964b31add85947894d812c",
+        "@type": "PropertyValue",
+        "propertyID": "https://registry.identifiers.org/registry/doi",
+        "url": "https://doi.org/10.4211/hs.e99ee3f096964b31add85947894d812c",
+        "value": "doi:10.4211/hs.e99ee3f096964b31add85947894d812c"
+      },
+      "https://www.hydroshare.org/resource/e99ee3f096964b31add85947894d812c"
+    ],
+
+    "creator": {
+      "@list": [
+            {
+                  "@type": "Person",
+                  "affiliation": {
+                        "@type": "Organization",
+                        "name": "University of Delaware"
+                  },
+                  "email": "depratt@udel.edu",
+                  "name": "Dannielle Pratt",
+                  "url": "https://www.hydroshare.org/user/11940/"
+            },
+            {
+                  "@type": "Person",
+                  "affiliation": {
+                        "@type": "Organization",
+                        "name": "University of Delaware"
+                  },
+                  "email": "hmichael@udel.edu",
+                  "name": "Holly Michael",
+                  "url": "https://www.hydroshare.org/user/5813/"
+            },
+            {
+                  "@type": "Person",
+                  "address": {
+                        "@type": "PostalAddress",
+                        "streetAddress": "MA, US"
+                  },
+                  "affiliation": {
+                        "@type": "Organization",
+                        "name": "Boston University"
+                  },
+                  "email": "nordiog@bu.edu",
+                  "name": "Giovanna Nordio",
+                  "url": "https://www.hydroshare.org/user/12915/"
+            },
+            {
+                  "@type": "Person",
+                  "affiliation": {
+                        "@type": "Organization",
+                        "name": "Boston University"
+                  },
+                  "name": "Sergio Fagherazzi"
+            }
+      ]
+    },
+
+
+
+
+    "temporalCoverage": "2021-11-23/2024-07-22",
+
+
+
+    "spatialCoverage": {
+        "@type": "Place",
+
+        "name": "Virignia Forest",
+
+        "geo": {
+
+            "@type": "GeoShape",
+            "box": "37.4578 -75.8391 37.4677 -75.8294"
+
+        }
+    },
+
+
+    "publisher": {
+        "@id": "https://www.hydroshare.org"
+    },
+
+    "provider": {
+        "@id": "https://www.hydroshare.org",
+        "@type": "Organization",
+        "name": "HydroShare",
+        "url": "https://www.hydroshare.org"
+    },
+    "includedInDataCatalog": {
+		"@type": "DataCatalog",
+		"name": "HydroShare",
+    	"url": "https://www.hydroshare.org/search/"
+	},
+
+	"license": {
+	    "@type": "CreativeWork",
+
+        "text": "This resource is shared under the Creative Commons Attribution CC BY.",
+        "url": "http://creativecommons.org/licenses/by/4.0/"
+
+	},
+
+     "isAccessibleForFree": true,
+
+    "citation": [
+
+        "Pratt, D., H. Michael, A. Sprague\u002DGetsy, E. S. Bacmeister, G. Nordio, S. Fagherazzi (2025). CCZN Virginia Forest Data, HydroShare, http://www.hydroshare.org/resource/4de1f9db7f644ace91bf7d6caca80766",
+
+        "Dannielle Pratt, Rachel W. McQuiggan, Eva Snell Bacmeister, Amanda Sprague\u002DGetsy, Holly A. Michael, Groundwater and soil moisture data collected in the Coastal Critical Zone of the Delmarva Peninsula, United States, Data in Brief, 2025, 111336, ISSN 2352\u002D3409, https://doi.org/10.1016/j.dib.2025.111336. (https://www.sciencedirect.com/science/article/pii/S235234092500068X)"
+
+    ],
+
+
+    "funding": [
+
+        {
+            "@type": "Grant",
+            "identifier": "2012484",
+            "name": "Collaborative Research: Network Cluster: The Coastal Critical Zone: Processes that transform landscapes and fluxes between land and sea",
+            "funder": {
+                "@type": "Organization",
+                "name": "NSF",
+                "identifier": "None"
+            }
+        }
+
+    ],
+
+    "dateCreated": "2024-08-09T17:25:03.151028+00:00",
+    "dateModified": "2025-01-30T20:28:48.848799+00:00",
+    "datePublished": "2025-01-30T20:28:49.257952+00:00",
+    "subjectOf": {
+        "@type": "DataDownload",
+        "name": "resourcemetadata.xml",
+        "description": "Dublin Core Metadata Document Describing the Dataset",
+        "url": "https://www.hydroshare.org/hsapi/resource/e99ee3f096964b31add85947894d812c/scimeta/",
+        "encodingFormat": "application/rdf+xml"
+    },
+    "distribution": {
+        "@type": "DataDownload",
+        "contentSize": "18.3&nbsp;MB",
+        "encodingFormat": "application/zip",
+        "contentUrl": "https://www.hydroshare.org/hsapi/resource/e99ee3f096964b31add85947894d812c/",
+        "description": "Zipped BagIt Bag containing the HydroShare Resource",
+        "dateModified": "2025-01-30T20:28:48.848799+00:00",
+
+        "identifier": [
+          "https://www.hydroshare.org/resource/e99ee3f096964b31add85947894d812c",
+          {
+            "@type": "PropertyValue",
+            "additionalType": [
+                "http://www.wikidata.org/entity/Q185235",
+                "http://id.loc.gov/vocabulary/preservation/cryptographicHashFunctions/md5"
+            ],
+            "identifier": "md5:f6e6f4c48754504db02ae87ff0b0d00a",
+            "propertyID": "MD5",
+            "value": "f6e6f4c48754504db02ae87ff0b0d00a"
+          }
+        ]
+
+    }
+}
