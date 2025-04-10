@@ -14,7 +14,7 @@ import java.util.List;
  * @author leinfelder
  *
  */
-@XmlRootElement
+@XmlRootElement(namespace = "https://nceas.ucsb.edu/mdqe/v1.2")
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(propOrder = {"id", "name", "description", "type", "level", "environment", "code", "library", "inheritState", "selector", "dialect"})
 public class Check {
