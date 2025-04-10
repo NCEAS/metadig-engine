@@ -19,7 +19,6 @@ public interface MetadataDialect {
     Result postProcess(Result result);
     boolean isCheckValid(Check check) throws XPathExpressionException;
     Object selectPath(Selector selector, Node contextNode) throws XPathExpressionException;
-    Object retypeObject(Object value);
     Map<String, Object> getParams();
     void setParams(Map<String, Object> params);
     void setDirectory(String dir);

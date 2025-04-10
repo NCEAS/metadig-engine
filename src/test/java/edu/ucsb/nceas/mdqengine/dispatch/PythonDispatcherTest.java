@@ -15,8 +15,7 @@ import org.apache.commons.io.IOUtils;
 
 import edu.ucsb.nceas.mdqengine.model.Result;
 import edu.ucsb.nceas.mdqengine.model.Status;
-import edu.ucsb.nceas.mdqengine.processor.MetadataDialect;
-import edu.ucsb.nceas.mdqengine.processor.MetadataDialectFactory;
+import edu.ucsb.nceas.mdqengine.processor.ProcessorUtils;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -51,13 +50,10 @@ public class PythonDispatcherTest {
 	public void testTypes() throws IllegalArgumentException, SAXException, IOException, ParserConfigurationException {
 		Map<String, Object> names = new HashMap<String, Object>();
 
-		MetadataDialect md = MetadataDialectFactory.createDialect("xml", IOUtils.toInputStream("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" + //
-						"<root></root>", "UTF-8"));
-
-		names.put("myInt", md.retypeObject("2"));
-		names.put("myFloat", md.retypeObject("1.5"));
-		names.put("myBool", md.retypeObject("true"));
-		names.put("myStr", md.retypeObject("hello"));
+		names.put("myInt", ProcessorUtils.retypeObject("2"));
+		names.put("myFloat", ProcessorUtils.retypeObject("1.5"));
+		names.put("myBool", ProcessorUtils.retypeObject("true"));
+		names.put("myStr", ProcessorUtils.retypeObject("hello"));
 
 		String code = "output = (type(myInt) is int) and (type(myFloat) is float) and (type(myBool) is bool)";
 		Result result = null;

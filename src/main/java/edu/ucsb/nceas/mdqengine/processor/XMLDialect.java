@@ -191,7 +191,7 @@ public class XMLDialect extends AbstractMetadataDialect {
 						// use the bindings from previous dispatcher
 						for (String key : bindings.keySet()) {
 							Object value = bindings.get(key);
-							value = retypeObject(value.toString());
+							value = ProcessorUtils.retypeObject(value.toString());
 							log.trace("binding: " + key + "=" + value);
 							variables.put(key, value);
 						}
@@ -350,7 +350,7 @@ public class XMLDialect extends AbstractMetadataDialect {
 
 				// just return single value, as a String
 				value = nodes.item(0).getTextContent();
-				value = retypeObject(value);
+				value = ProcessorUtils.retypeObject(value);
 
 			}
 
@@ -370,7 +370,7 @@ public class XMLDialect extends AbstractMetadataDialect {
 					} else {
 						// otherwise just add the node value
 						value = node.getTextContent();
-						value = retypeObject(value);
+						value = ProcessorUtils.retypeObject(value);
 						values.add(value);
 					}
 				}
@@ -383,7 +383,7 @@ public class XMLDialect extends AbstractMetadataDialect {
 			// try just a single value
 			try {
 				value = xpath.evaluate(selectorPath, contextNode);
-				value = retypeObject(value);
+				value = ProcessorUtils.retypeObject(value);
 			} catch (XPathExpressionException xpee2) {
 				log.error("Selector '" + selector.getName() + "'" + " could not select single value with given Xpath: "
 						+ xpee2.getCause().getMessage());
