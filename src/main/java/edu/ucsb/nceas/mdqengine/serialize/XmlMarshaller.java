@@ -2,19 +2,29 @@ package edu.ucsb.nceas.mdqengine.serialize;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringEscapeUtils;
+import org.w3c.dom.Document;
+import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
+
+import edu.ucsb.nceas.mdqengine.model.Check;
+import edu.ucsb.nceas.mdqengine.model.CheckV1;
+import edu.ucsb.nceas.mdqengine.model.CheckV2;
 
 import javax.xml.XMLConstants;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.stream.StreamSource;
 import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
 
 public class XmlMarshaller {
@@ -41,7 +51,12 @@ public class XmlMarshaller {
 
 	}
 
-	public static Object fromXml(String xml, Class clazz) throws JAXBException, IOException, SAXException {
+	public static Object fromXml(String xml, Class clazz) throws ParserConfigurationException, JAXBException, IOException, SAXException {
+
+		if (clazz == Check.class) {
+			String ns = getRootNamespace(xml);
+			clazz = getCheckClassFromNamespace(ns);
+		}
 
 		JAXBContext context = JAXBContext.newInstance(clazz);
 		Unmarshaller u = context.createUnmarshaller();
@@ -50,7 +65,7 @@ public class XmlMarshaller {
 		InputStream schemaStreamV1 = XmlMarshaller.class.getResourceAsStream("/schemas/schema1.xsd");
 		InputStream schemaStreamV11 = XmlMarshaller.class.getResourceAsStream("/schemas/schema1.1.xsd");
 		InputStream schemaStreamV12 = XmlMarshaller.class.getResourceAsStream("/schemas/schema1.2.xsd");
-		
+
 		if (schemaStreamV1 == null || schemaStreamV11 == null || schemaStreamV12 == null) {
 			throw new IOException("One or more schema files not found");
 		}
@@ -67,4 +82,24 @@ public class XmlMarshaller {
 		return obj;
 
 	}
+
+	private static String getRootNamespace(String xml) throws ParserConfigurationException, SAXException, IOException {
+		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+		dbf.setNamespaceAware(true);
+		DocumentBuilder db = dbf.newDocumentBuilder();
+		Document doc = db.parse(new InputSource(new StringReader(xml)));
+
+		return doc.getDocumentElement().getNamespaceURI();
+	}
+
+	private static Class<?> getCheckClassFromNamespace(String namespace) {
+    switch (namespace) {
+		case "https://nceas.ucsb.edu/mdqe/v1":
+            return CheckV1.class;
+        case "https://nceas.ucsb.edu/mdqe/v1.2":
+            return CheckV2.class;
+        default:
+            throw new IllegalArgumentException("Unknown Check namespace: " + namespace);
+    }
+}
 }
