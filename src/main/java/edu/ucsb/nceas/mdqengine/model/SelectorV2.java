@@ -44,6 +44,9 @@ public class SelectorV2 implements Selector {
 	@XmlElement(required = false)
 	private String xpath;
 
+	@XmlElement(required = false)
+	private Expression expression;
+
 	/**
 	 * Specifies whether or not this selector should be namespace aware or not.
 	 */
@@ -110,11 +113,11 @@ public class SelectorV2 implements Selector {
 	}
 	@Override
     public Expression getExpression() {
-        return null;
+        return expression;
     }
     @Override
     public void setExpression(Expression expression) {
-        return;
+        this.expression = expression;
     }
 
 }
