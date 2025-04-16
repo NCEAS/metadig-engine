@@ -71,7 +71,7 @@ public class JSONDialect extends AbstractMetadataDialect {
                     continue;
                 }
                 String syntax = expression.getSyntax();
-                if (syntax == "json-path") {
+                if ("json-path".equals(syntax)) {
                     String jq = expression.getValue();
                     Object value = this.selectJsonPath(jq, rootNode);
                     // TODO: what about subselectors?
