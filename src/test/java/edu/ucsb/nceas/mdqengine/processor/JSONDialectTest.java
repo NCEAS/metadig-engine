@@ -4,7 +4,11 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import edu.ucsb.nceas.mdqengine.serialize.XmlMarshaller;
+import jep.JepConfig;
 import edu.ucsb.nceas.mdqengine.model.Check;
+import edu.ucsb.nceas.mdqengine.model.Result;
+import edu.ucsb.nceas.mdqengine.model.Selector;
+import edu.ucsb.nceas.mdqengine.model.Expression;
 import net.thisptr.jackson.jq.exception.JsonQueryException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
@@ -27,6 +31,7 @@ public class JSONDialectTest {
 
     @BeforeEach
     public void setUp() throws Exception {
+
         InputStream jsonStream = getClass().getClassLoader().getResourceAsStream("test-docs/schema-dot-org-ex.json");
         assertNotNull(jsonStream, "Test JSON file not found in test-docs directory");
 
@@ -59,5 +64,15 @@ public class JSONDialectTest {
         check = (Check) XmlMarshaller.fromXml(xml, Check.class);
 
         assertNotNull(check, "Check object should be deserialized successfully from XML");
+
+        List<Selector> selector = new ArrayList<>(check.getSelector());
+        for (Selector sel : selector) {
+            Expression ex = sel.getExpression();
+            if (ex != null){
+                Object result = dialect.selectJsonPath(ex.getValue(), jsonDoc);
+                assertNotNull(result, "Selector should select something");
+            }
+
+        }
     }
 }
