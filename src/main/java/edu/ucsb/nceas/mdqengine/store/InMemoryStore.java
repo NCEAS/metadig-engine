@@ -16,6 +16,8 @@ import org.xml.sax.SAXException;
 
 import javax.script.ScriptContext;
 import javax.xml.bind.JAXBException;
+import javax.xml.parsers.ParserConfigurationException;
+
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -104,7 +106,7 @@ public class InMemoryStore implements MDQStore {
 					log.debug("Loading suite found at: " + url.toString());
 					String xml = IOUtils.toString(url.openStream(), "UTF-8");
 					suite = (Suite) XmlMarshaller.fromXml(xml, Suite.class);
-				} catch (JAXBException | IOException | SAXException e) {
+				} catch (ParserConfigurationException | JAXBException | IOException | SAXException e) {
 					log.warn("Could not load suite '" + resource.getFilename() + "' due to an error: " + e.getMessage()
 							+ ".");
 					continue;
@@ -139,7 +141,7 @@ public class InMemoryStore implements MDQStore {
 					log.trace("Loading check found at: " + url.toString());
 					String xml = IOUtils.toString(url.openStream(), "UTF-8");
 					check = (Check) XmlMarshaller.fromXml(xml, Check.class);
-				} catch (JAXBException | IOException | SAXException e) {
+				} catch (ParserConfigurationException | JAXBException | IOException | SAXException e) {
 					log.warn("Could not load check '" + resource.getFilename() + "' due to an error: " + e.getMessage()
 							+ ".");
 					continue;

@@ -18,6 +18,8 @@ import org.xml.sax.SAXException;
 
 import javax.sql.DataSource;
 import javax.xml.bind.JAXBException;
+import javax.xml.parsers.ParserConfigurationException;
+
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -117,7 +119,7 @@ public class DatabaseStore implements MDQStore, AutoCloseable {
                     URL url = resource.getURL();
                     String xml = IOUtils.toString(url.openStream(), "UTF-8");
                     suite = (Suite) XmlMarshaller.fromXml(xml, Suite.class);
-                } catch (JAXBException | IOException | SAXException e) {
+                } catch (ParserConfigurationException| JAXBException | IOException | SAXException e) {
                     log.error("Could not load suite.");
                     continue;
                 }

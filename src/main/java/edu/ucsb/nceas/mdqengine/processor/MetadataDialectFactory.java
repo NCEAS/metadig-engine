@@ -13,8 +13,8 @@ public class MetadataDialectFactory {
         switch (contentType.toLowerCase()) {
             case "xml":
                 return new XMLDialect(metadataContent);
-            // case "json":
-            // return new JsonDialect(metadataContent);
+            case "json":
+                return new JSONDialect(metadataContent);
             default:
                 throw new IllegalArgumentException("Unsupported content type: " + contentType);
         }
