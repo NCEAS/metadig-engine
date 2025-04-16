@@ -43,7 +43,10 @@ public class Suite {
 	/**
 	 * The list of checks to be performed. A suite must have at least one check.
 	 */
-	@XmlElement(required = true)
+	@XmlElements({
+		@XmlElement(name = "check", type = CheckV1.class),
+		@XmlElement(name = "check", type = CheckV2.class)
+	})
 	private List<Check> check;
 
 	public String getId() {
