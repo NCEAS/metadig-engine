@@ -67,6 +67,9 @@ public class JSONDialect extends AbstractMetadataDialect {
         if (check.getSelector() != null) {
             for (Selector selector : check.getSelector()) {
                 Expression expression = selector.getExpression();
+                if (expression == null) {
+                    continue;
+                }
                 String syntax = expression.getSyntax();
                 if (syntax == "json-path") {
                     String jq = expression.getValue();
@@ -139,17 +142,8 @@ public class JSONDialect extends AbstractMetadataDialect {
 
     @Override
     public boolean isCheckValid(Check check) {
-        if (check.getDialect() == null)
-            return true;
-
-        for (Dialect dialect : check.getDialect()) {
-            String path = dialect.getXpath(); // Assume path for JSON, not xpath
-            JsonNode node = rootNode.at(path);
-            if (!node.isMissingNode() && node.asBoolean(false)) {
-                return true;
-            }
-        }
-        return false;
+        // perhaps do something here...
+        return true;
     }
 
     public Object selectJsonPath(String jqExpression, JsonNode jsonDoc) throws JsonQueryException {
