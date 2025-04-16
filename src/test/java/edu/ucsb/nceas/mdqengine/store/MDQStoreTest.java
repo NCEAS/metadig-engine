@@ -160,7 +160,7 @@ public class MDQStoreTest {
 			SystemMetadata sysMeta = null;
 			
 			Suite suite = SuiteFactory.getMockSuite();
-			Check checkRef = new Check();
+			Check checkRef = CheckV2.newCheck();
 			String checkId = "check.1.1";
 			checkRef.setId(checkId );
 			suite.getCheck().add(checkRef);
