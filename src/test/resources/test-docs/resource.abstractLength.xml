@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <mdq:check xmlns:mdq="https://nceas.ucsb.edu/mdqe/v1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="https://nceas.ucsb.edu/mdqe/v1.2 ../schemas/schema1.2.xsd">
-  <id>resource.abstractLength.sufficient.1</id>
+  <id>resource.abstractLength.sufficient-2.0.0</id>
   <name>Resource Abstract Length Sufficient</name>
   <description>Check that an abstract exists and is of sufficient length.</description>
   <type>Findable</type>
@@ -56,7 +56,7 @@ def call():
   </selector>
   <selector namespaceAware="true">
     <name>abstract</name>
-    <expression syntax="json-path">.description."@value"</expression>
+    <expression syntax="json-path">.description</expression>
     <namespaces>
       <namespace prefix="schema">schema.org</namespace>
     </namespaces>
@@ -72,7 +72,7 @@ def call():
     <name>datasetTitle</name>
     <expression syntax="json-path">.name</expression>
     <namespaces>
-       <namespace prefix="schema">schema.org</namespace>
+      <namespace prefix="schema">schema.org</namespace>
     </namespaces>
   </selector>
   <dialect>
