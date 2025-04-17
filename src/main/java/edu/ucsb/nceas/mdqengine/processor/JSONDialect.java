@@ -71,10 +71,11 @@ public class JSONDialect extends AbstractMetadataDialect {
                     continue;
                 }
                 String syntax = expression.getSyntax();
+                // NB: we don't have to worry about sub-selectors here because our jq
+                // expressions instead just chain together within a single selector element
                 if ("json-path".equals(syntax)) {
                     String jq = expression.getValue();
                     Object value = this.selectJsonPath(jq, rootNode);
-                    // TODO: what about subselectors?
                     variables.put(selector.getName(), value);
                 }
             }
