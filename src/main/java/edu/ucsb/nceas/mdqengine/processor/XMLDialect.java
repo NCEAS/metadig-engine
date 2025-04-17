@@ -117,6 +117,16 @@ public class XMLDialect extends AbstractMetadataDialect {
 					}
 
 					String name = selector.getName();
+
+					if (selector.getXpath() == null && selector.getExpression() == null) {
+						continue;
+					}
+					if (selector.getExpression() != null) {
+						if (!"xpath".equals(selector.getExpression().getSyntax())) {
+							continue;
+						}
+					}
+
 					Object value = this.selectXPath(selector, docToUse);
 
 					// make available in script
@@ -299,6 +309,8 @@ public class XMLDialect extends AbstractMetadataDialect {
 	public Object selectXPath(Selector selector, Node contextNode) throws XPathExpressionException {
 
 		Object value = null;
+
+		// TODO: account for possible xpaths in expression element here
 
 		// select one or more values from document
 		String selectorPath = selector.getXpath();
