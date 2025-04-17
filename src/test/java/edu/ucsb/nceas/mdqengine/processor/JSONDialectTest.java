@@ -4,20 +4,14 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import edu.ucsb.nceas.mdqengine.serialize.XmlMarshaller;
-import jep.JepConfig;
 import edu.ucsb.nceas.mdqengine.model.Check;
-import edu.ucsb.nceas.mdqengine.model.Result;
 import edu.ucsb.nceas.mdqengine.model.Selector;
 import edu.ucsb.nceas.mdqengine.model.Expression;
-import net.thisptr.jackson.jq.exception.JsonQueryException;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.io.InputStream;
 
@@ -42,7 +36,7 @@ public class JSONDialectTest {
 
     @Test
     public void testSelectJsonPath_singleValue() throws Exception {
-        Object result = dialect.selectJsonPath("(.name | length) > 0", jsonDoc);
+        Object result = dialect.selectJsonPath(".name", jsonDoc);
         assertEquals("Virginia Forest - DTW, Water Temperature, Specific conductance - Jun 2021-Jul 2024", result);
     }
 
