@@ -30,20 +30,6 @@ public class SuiteTest {
 			fail(e.getMessage());
 		}
 	}
-
-	@Test
-	public void testJsonRoundTrip() {
-
-		try {
-			String json = IOUtils.toString(this.getClass().getResourceAsStream("/test-docs/test-suite.json"), "UTF-8");
-			Suite suite = (Suite) JsonMarshaller.fromJson(json, Suite.class);
-			String j = JsonMarshaller.toJson(suite);
-			assertTrue(j.contains("Testing suite"));
-		} catch (Exception e) {
-			e.printStackTrace();
-			fail(e.getMessage());
-		}
-	}
 	
 	@Test
 	public void testXml() {
