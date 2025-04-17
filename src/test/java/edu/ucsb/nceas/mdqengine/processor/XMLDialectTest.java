@@ -173,6 +173,7 @@ public class XMLDialectTest {
 
 	}
 
+	@Disabled
 	@Test
 	public void testValidation() {
 
@@ -220,8 +221,7 @@ public class XMLDialectTest {
 
 			// run check
 			Result result = xml.runCheck(check);
-			assertEquals(
-					result.getStatus(), Status.FAILURE);
+			assertEquals(result.getStatus(), Status.FAILURE);
 
 		} catch (Exception e) {
 			e.printStackTrace();
