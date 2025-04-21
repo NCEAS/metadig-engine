@@ -121,11 +121,11 @@ public class XMLDialectTest {
 		check.setName("testing dialect skipping");
 
 		List<Dialect> dialects = new ArrayList<Dialect>();
-		Dialect eml = new Dialect();
+		Dialect eml = DialectV2.newDialect();
 		eml.setName("EML");
 		eml.setXpath("boolean(/*[local-name() = 'eml'])");
 
-		Dialect iso = new Dialect();
+		Dialect iso = DialectV2.newDialect();
 		iso.setName("iso");
 		iso.setXpath("boolean(/*[local-name() = 'MI_Metadata' or local-name() = 'MD_Metadata'])");
 

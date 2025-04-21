@@ -14,6 +14,8 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.xml.sax.SAXException;
 
+import com.hp.hpl.jena.sparql.function.library.not;
+
 import javax.script.ScriptContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.parsers.ParserConfigurationException;
@@ -150,7 +152,6 @@ public class InMemoryStore implements MDQStore {
 			}
 		}
 	}
-
 	@Override
 	public Collection<String> listSuites() {
 		return suites.keySet();

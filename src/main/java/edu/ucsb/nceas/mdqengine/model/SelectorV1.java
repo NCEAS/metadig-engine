@@ -17,7 +17,7 @@ import javax.xml.bind.annotation.XmlType;
  *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-//@XmlType(propOrder = { "name", "xpath", "subSelector", "namespace"})
+// @XmlType(propOrder = { "name", "xpath", "subSelector", "namespace"})
 public class SelectorV1 implements Selector {
 
 	/**
@@ -61,56 +61,67 @@ public class SelectorV1 implements Selector {
 	 * lists (e.g., when examining attributes of multiple entities).
 	 */
 	@XmlElement(name = "subSelector", type = SelectorV1.class, required = false)
-	//@XmlElement(required = false)
+	// @XmlElement(required = false)
 	protected SelectorV1 subSelector;
 
 	@Override
 	public String getName() {
 		return name;
 	}
+
 	@Override
 	public void setName(String name) {
 		this.name = name;
 	}
+
 	@Override
 	public String getXpath() {
 		return xpath;
 	}
+
 	@Override
 	public void setXpath(String xpath) {
 		this.xpath = xpath;
 	}
+
 	@Override
 	public Selector getSubSelector() {
 		return subSelector;
 	}
+
 	@Override
 	public void setSubSelector(Selector subSelector) {
 		this.subSelector = (SelectorV1) subSelector;
 	}
+
 	@Override
 	public List<Namespace> getNamespace() {
 		return namespace;
 	}
+
 	@Override
 	public void setNamespace(List<Namespace> namespace) {
 		this.namespace = namespace;
 	}
+
 	@Override
 	public boolean isNamespaceAware() {
 		return namespaceAware == null ? false : namespaceAware;
 	}
+
 	@Override
 	public void setNamespaceAware(boolean namespaceAware) {
 		this.namespaceAware = namespaceAware;
 	}
+
 	@Override
-    public Expression getExpression() {
-        return null;
-    }
-    @Override
-    public void setExpression(Expression expression) {
-        return;
-    }
+	public Expression getExpression() {
+		return null;
+	}
+
+	@Override
+	public void setExpression(Expression expression) {
+		return;
+	}
 
 }

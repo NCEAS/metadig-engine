@@ -21,8 +21,8 @@ public interface Check {
 	public void setCode(String code);
     List<? extends Selector> getSelector();
 	public void setSelector(List<? extends Selector> selector);
-	public List<Dialect> getDialect();
-	public void setDialect(List<Dialect> dialect);
+	public List<? extends Dialect> getDialect();
+	public void setDialect(List<? extends Dialect> dialect);
 	public List<URL> getLibrary();
 	public void setLibrary(URL... library);
 	public void setLibrary(List<URL> library);

@@ -290,6 +290,9 @@ public class XMLDialect extends AbstractMetadataDialect {
 
 			String name = dialect.getName();
 			String expression = dialect.getXpath();
+			if (expression == null){
+				continue;
+			}
 			log.debug("Dialect name: " + name + ", expression: " + expression);
 			String value = xpath.evaluate(expression, document);
 

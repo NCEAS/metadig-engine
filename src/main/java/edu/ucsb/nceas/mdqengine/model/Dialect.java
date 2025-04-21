@@ -4,34 +4,18 @@ import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 
 @XmlAccessorType(XmlAccessType.FIELD)
-public class Dialect {
-	
-	/**
-	 * The name or label to associate with this dialect definition
-	 */
-	private String name;
-	
-	/**
-	 * The XPath expression that is used to determine if a document is of this dialect.
-	 * The expression should evaluate to a boolean value, where true indicates the document 
-	 * is of this dialect.
-	 */
-	private String xpath;
-	
-	public String getName() {
-		return name;
-	}
+public interface Dialect {
 
-	public void setName(String name) {
-		this.name = name;
-	}
+	public String getName();
 
-	public String getXpath() {
-		return xpath;
-	}
+	public void setName(String name);
 
-	public void setXpath(String xpath) {
-		this.xpath = xpath;
-	}
+	public String getXpath();
+
+	public void setXpath(String xpath);
+
+	public Expression getExpression();
+
+	public void setExpression(Expression expression);
 
 }

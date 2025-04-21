@@ -158,7 +158,7 @@ public class CheckV1 implements Check {
 	 * 
 	 */
 	@XmlElement(required = false)
-	private List<Dialect> dialect;
+	private List<DialectV1> dialect;
 
 	@Override
 	public String getId() {
@@ -242,13 +242,15 @@ public class CheckV1 implements Check {
 	}
 
 	@Override
-	public List<Dialect> getDialect() {
+	public List<? extends Dialect> getDialect() {
 		return dialect;
 	}
 
 	@Override
-	public void setDialect(List<Dialect> dialect) {
-		this.dialect = dialect;
+	public void setDialect(List<? extends Dialect> dialect) {
+		this.dialect = dialect.stream()
+        .map(s -> (DialectV1) s)
+        .collect(Collectors.toList());
 	}
 
 	@Override

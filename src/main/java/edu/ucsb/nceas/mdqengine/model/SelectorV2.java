@@ -17,7 +17,6 @@ import javax.xml.bind.annotation.XmlType;
  *
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-//@XmlType(propOrder = { "name", "xpath", "expression", "subSelector", "namespace" })
 public class SelectorV2 implements Selector {
 
     public static SelectorV2 newSelector() {

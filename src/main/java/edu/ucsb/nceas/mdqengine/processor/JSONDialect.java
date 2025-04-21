@@ -12,6 +12,8 @@ import edu.ucsb.nceas.mdqengine.dispatch.Dispatcher;
 import edu.ucsb.nceas.mdqengine.model.*;
 
 import javax.script.ScriptException;
+import javax.xml.xpath.XPathExpressionException;
+
 import org.apache.commons.io.IOUtils;
 import org.dataone.service.util.TypeMarshaller;
 
@@ -31,9 +33,9 @@ public class JSONDialect extends AbstractMetadataDialect {
         this.rootNode = mapper.readTree(input);
         // Use BuiltinFunctionLoader to load built-in functions from the classpath.
         BuiltinFunctionLoader.getInstance().loadFunctions(Versions.JQ_1_6, rootScope);
-        // For import statements to work, you need to set ModuleLoader.
-        // BuiltinModuleLoader uses ServiceLoader mechanism to
-        // load Module implementations.
+        // For import statements to work, you need to set ModuleLoader. Not sure if we
+        // need or not BuiltinModuleLoader uses ServiceLoader mechanism to load Module
+        // implementations.
         // rootScope.setModuleLoader(BuiltinModuleLoader.getInstance());
     }
 
@@ -141,9 +143,40 @@ public class JSONDialect extends AbstractMetadataDialect {
         return postProcess(result);
     }
 
+    /**
+     * Determine if the check is valid for the document
+     * 
+     * @param check
+     * @return
+     */
     @Override
     public boolean isCheckValid(Check check) {
-        // perhaps do something here...
+
+        if (check.getDialect() == null) {
+            log.debug("No dialects have been specified for check, assuming it is valid for this document");
+            return true;
+        }
+
+        for (Dialect dialect : check.getDialect()) {
+
+            String name = dialect.getName();
+            Expression expression = dialect.getExpression();
+            if (expression == null) {
+                continue;
+            }
+            log.debug("Dialect name: " + name + ", expression: " + expression.getValue());
+            String jq = expression.getValue();
+            try {
+                Object value = this.selectJsonPath(jq, rootNode);
+                if (value.equals("https://schema.org/")) {
+                    return true;
+                }
+            } catch (JsonQueryException e) {
+                // TODO Auto-generated catch block
+                log.error(e.getMessage());
+            }
+        }
+
         return true;
     }
 
