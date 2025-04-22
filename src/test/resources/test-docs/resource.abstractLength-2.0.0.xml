@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<mdq:check xmlns:mdq="https://nceas.ucsb.edu/mdqe/v1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="https://nceas.ucsb.edu/mdqe/v1 ../schemas/schema1.xsd">
-  <id>resource.abstractLength.sufficient.1</id>
+<mdq:check xmlns:mdq="https://nceas.ucsb.edu/mdqe/v1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="https://nceas.ucsb.edu/mdqe/v1.2 ../schemas/schema1.2.xsd">
+  <id>resource.abstractLength.sufficient-2.0.0</id>
   <name>Resource Abstract Length Sufficient</name>
   <description>Check that an abstract exists and is of sufficient length.</description>
   <type>Findable</type>
@@ -52,7 +52,22 @@ def call():
     <xpath>/resource/descriptions/description[@descriptionType='Abstract'] |
           /eml/*/abstract//text()[normalize-space()] |
           /*/identificationInfo/*/abstract//text()[normalize-space()]
-      </xpath>
+    </xpath>
+  </selector>
+  <selector namespaceAware="true">
+    <name>abstract</name>
+    <expression syntax="json-path">.description</expression>
+  </selector>
+  <selector>
+    <name>datasetTitle</name>
+    <xpath>/resource/titles/title[not(@titleType)]/text()  |
+           /eml/dataset/title/text() |
+           /*/identificationInfo/*/citation/CI_Citation/title/text()
+    </xpath>
+  </selector>
+  <selector namespaceAware="true">
+    <name>datasetTitle</name>
+    <expression syntax="json-path">.name</expression>
   </selector>
   <dialect>
     <name>DataCite 4</name>
@@ -65,5 +80,9 @@ def call():
   <dialect>
     <name>ISO 19115 and ISO 19115-2 / ISO 19139 and ISO 19139-2</name>
     <xpath>boolean(/*[local-name() = 'MI_Metadata' or local-name() = 'MD_Metadata'])</xpath>
+  </dialect>
+  <dialect>
+    <name>Schema.org</name>
+    <expression syntax="json-path">.["@context"]</expression>
   </dialect>
 </mdq:check>

@@ -172,7 +172,6 @@ public class JSONDialect extends AbstractMetadataDialect {
                     return true;
                 }
             } catch (JsonQueryException e) {
-                // TODO Auto-generated catch block
                 log.error(e.getMessage());
             }
         }
@@ -204,7 +203,7 @@ public class JSONDialect extends AbstractMetadataDialect {
                 value = ProcessorUtils.retypeObject(value);
             } else if (node.isObject() || node.isArray()) {
                 // If it's an ObjectNode or ArrayNode, handle accordingly
-                value = node.toString(); // Or process further if you need specific field extraction
+                value = node.toString();
                 value = ProcessorUtils.retypeObject(value);
             }
         } else {
