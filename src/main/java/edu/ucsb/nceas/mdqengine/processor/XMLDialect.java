@@ -96,6 +96,13 @@ public class XMLDialect extends AbstractMetadataDialect {
 		}
 	}
 
+	/**
+	 * Executes a quality check against an XML document and returns the result.
+	 *
+	 * @param check the {@link Check} to be executed
+	 * @return a {@link Result} object representing the outcome of the check
+	 * @throws XPathExpressionException
+	 */
 	@Override
 	public Result runCheck(Check check) throws XPathExpressionException {
 
@@ -290,7 +297,7 @@ public class XMLDialect extends AbstractMetadataDialect {
 
 			String name = dialect.getName();
 			String expression = dialect.getXpath();
-			if (expression == null){
+			if (expression == null) {
 				continue;
 			}
 			log.debug("Dialect name: " + name + ", expression: " + expression);

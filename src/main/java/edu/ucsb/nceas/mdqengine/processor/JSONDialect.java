@@ -12,7 +12,6 @@ import edu.ucsb.nceas.mdqengine.dispatch.Dispatcher;
 import edu.ucsb.nceas.mdqengine.model.*;
 
 import javax.script.ScriptException;
-import javax.xml.xpath.XPathExpressionException;
 
 import org.apache.commons.io.IOUtils;
 import org.dataone.service.util.TypeMarshaller;
@@ -41,15 +40,23 @@ public class JSONDialect extends AbstractMetadataDialect {
 
     @Override
     public void extractNamespaces() {
-        // check @context value
-        // this.namespaces.put(namespace)
+        // not implemented for json docs
+        return;
     }
 
     @Override
     public void mergeNamespaces(List<Namespace> namespaces) {
-        // Possibly no-op?
+        // not implemented for json docs
+        return;
     }
 
+    /**
+     * Executes a quality check against a JSON document and returns the result.
+     *
+     * @param check the {@link Check} to be executed
+     * @return a {@link Result} object representing the outcome of the check
+     * @throws JsonQueryException
+     */
     @Override
     public Result runCheck(Check check) throws JsonQueryException {
 
@@ -179,6 +186,17 @@ public class JSONDialect extends AbstractMetadataDialect {
         return true;
     }
 
+    /**
+     * Applies a jq-style JSON path expression to the given JSON document and
+     * returns the resulting value.
+     *
+     * @param jqExpression the jq expression (e.g., ".author.name")
+     * @param jsonDoc      the JSON document represented as a JsonNode
+     * @return the value resulting from the jq query
+     * @throws JsonQueryException if the jq expression is invalid or evaluation
+     *                            fails
+     */
+
     public Object selectJsonPath(String jqExpression, JsonNode jsonDoc) throws JsonQueryException {
         Object value = null;
 
@@ -195,6 +213,7 @@ public class JSONDialect extends AbstractMetadataDialect {
         List<JsonNode> resultNodes = new ArrayList<>();
         query.apply(childScope, jsonDoc, resultNodes::add);
 
+        // if only one node, make sure to return a single value
         if (resultNodes.size() == 1) {
             JsonNode node = resultNodes.get(0);
             if (node.isTextual()) {
@@ -206,7 +225,7 @@ public class JSONDialect extends AbstractMetadataDialect {
                 value = node.toString();
                 value = ProcessorUtils.retypeObject(value);
             }
-        } else {
+        } else { // otherwise we can send back a list
             List<Object> values = new ArrayList<>();
             for (JsonNode result : resultNodes) {
                 String resText = null;

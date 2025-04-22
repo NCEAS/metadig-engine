@@ -13,13 +13,22 @@ import org.dataone.service.types.v2.SystemMetadata;
 
 public interface MetadataDialect {
     void extractNamespaces();
+
     void mergeNamespaces(List<Namespace> namespaces);
+
     Result runCheck(Check check) throws XPathExpressionException, JsonQueryException;
+
     Result postProcess(Result result);
+
     boolean isCheckValid(Check check) throws XPathExpressionException;
+
     Map<String, Object> getParams();
+
     void setParams(Map<String, Object> params);
+
     void setDirectory(String dir);
+
     SystemMetadata getSystemMetadata();
+
     void setSystemMetadata(SystemMetadata systemMetadata);
 }
