@@ -1,5 +1,5 @@
 numpy
-metadig @ git+https://github.com/NCEAS/metadig-py.git
+metadig @ git+https://github.com/NCEAS/metadig-py.git@develop
 requests
 pandas
 python-magic
