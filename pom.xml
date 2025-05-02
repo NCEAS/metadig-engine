@@ -173,8 +173,14 @@
     <dependency>
       <groupId>com.rabbitmq</groupId>
       <artifactId>amqp-client</artifactId>
-      <version>5.18.0</version>
-    </dependency>
+      <version>5.22.0</version>
+      <exclusions>
+          <exclusion>
+              <groupId>org.slf4j</groupId>
+              <artifactId>slf4j-api</artifactId>
+          </exclusion>
+      </exclusions>
+  </dependency>
     <!-- https://mvnrepository.com/artifact/joda-time/joda-time -->
     <dependency>
       <groupId>joda-time</groupId>
