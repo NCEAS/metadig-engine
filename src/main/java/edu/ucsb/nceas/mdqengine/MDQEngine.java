@@ -98,8 +98,14 @@ public class MDQEngine {
 
 		String content = IOUtils.toString(input, "UTF-8");
 		String metadataContent = content;
-		// detect either json or xml
-		String contentType = ProcessorUtils.detectContentType(IOUtils.toInputStream(metadataContent, "UTF-8"));
+		// detect either json or xml, default xml
+		String contentType = "xml";
+		String formatId = sysMeta.getFormatId().getValue();
+
+		if (formatId.contains("json")){
+			contentType = "json";
+		}
+
 		MetadataDialect docDialect = MetadataDialectFactory.createDialect(contentType,
 				IOUtils.toInputStream(metadataContent, "UTF-8"));
 
