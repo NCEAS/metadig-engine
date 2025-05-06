@@ -7,7 +7,6 @@ import edu.ucsb.nceas.mdqengine.model.*;
 import edu.ucsb.nceas.mdqengine.processor.GroupLookupCheck;
 import edu.ucsb.nceas.mdqengine.processor.XMLDialect;
 import edu.ucsb.nceas.mdqengine.processor.MetadataDialectFactory;
-import edu.ucsb.nceas.mdqengine.processor.ProcessorUtils;
 import edu.ucsb.nceas.mdqengine.processor.MetadataDialect;
 import edu.ucsb.nceas.mdqengine.serialize.JsonMarshaller;
 import edu.ucsb.nceas.mdqengine.serialize.XmlMarshaller;
