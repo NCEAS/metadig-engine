@@ -122,9 +122,7 @@ public class XMLDialect extends AbstractMetadataDialect {
 					if (selector.isNamespaceAware()) {
 						docToUse = nsAwareDocument;
 					}
-
 					String name = selector.getName();
-
 					if (selector.getXpath() == null && selector.getExpression() == null) {
 						continue;
 					}
@@ -133,9 +131,7 @@ public class XMLDialect extends AbstractMetadataDialect {
 							continue;
 						}
 					}
-
 					Object value = this.selectXPath(selector, docToUse);
-
 					// make available in script
 					variables.put(name, value);
 				}
