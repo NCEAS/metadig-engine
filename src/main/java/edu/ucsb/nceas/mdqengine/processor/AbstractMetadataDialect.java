@@ -13,23 +13,21 @@ import java.util.Map;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.BooleanUtils;
-import org.apache.commons.lang.math.NumberUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.dataone.service.types.v2.SystemMetadata;
 
 public abstract class AbstractMetadataDialect implements MetadataDialect {
 
-    protected Map<String, Object> params;
-    protected String directory;
-    protected SystemMetadata systemMetadata;
+	protected Map<String, Object> params;
+	protected String directory;
+	protected SystemMetadata systemMetadata;
 	protected Map<String, Namespace> namespaces = new HashMap<String, Namespace>();
 
 	public static Log log = LogFactory.getLog(XMLDialect.class);
 
-    @Override 
-    public Result postProcess(Result result) {
+	@Override
+	public Result postProcess(Result result) {
 		// Return the result as-is if there are no outputs to post-process
 		if (result.getOutput() == null) {
 			log.debug("Skipping postProcess step because this result's output is null.");
@@ -71,29 +69,28 @@ public abstract class AbstractMetadataDialect implements MetadataDialect {
 		return result;
 	}
 
-    @Override
-    public Map<String, Object> getParams() {
+	@Override
+	public Map<String, Object> getParams() {
 		return params;
 	}
 
-    @Override
+	@Override
 	public void setParams(Map<String, Object> params) {
 		this.params = params;
 	}
 
-    @Override
+	@Override
 	public void setDirectory(String dir) {
 		this.directory = dir;
 	}
 
-    @Override
+	@Override
 	public SystemMetadata getSystemMetadata() {
 		return systemMetadata;
 	}
 
-    @Override
+	@Override
 	public void setSystemMetadata(SystemMetadata systemMetadata) {
 		this.systemMetadata = systemMetadata;
 	}
 }
-
