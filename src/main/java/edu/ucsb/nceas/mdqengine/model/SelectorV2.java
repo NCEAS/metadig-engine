@@ -7,11 +7,13 @@ import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
-import javax.xml.bind.annotation.XmlType;
 
 /**
- * Selectors are used to extract value[s] from metadata documents using XPath
+ * Selectors are used to extract value[s] from metadata documents using xpath
  * expressions.
+ * 
+ * SelectorV2 supports the optional expression element, which is more flexible
+ * than the existing xpath.
  * 
  * @author leinfelder
  *
@@ -19,11 +21,11 @@ import javax.xml.bind.annotation.XmlType;
 @XmlAccessorType(XmlAccessType.FIELD)
 public class SelectorV2 implements Selector {
 
-    public static SelectorV2 newSelector() {
-        return new SelectorV2();
-    }
+	public static SelectorV2 newSelector() {
+		return new SelectorV2();
+	}
 
-   	/**
+	/**
 	 * The selector name is used to create a variable in the environment specified
 	 * by Check.environment and should be a valid variable for that target
 	 * environment. reserved tokens like 'var', 'int', 'public', etc.. should be
@@ -67,56 +69,67 @@ public class SelectorV2 implements Selector {
 	 * lists (e.g., when examining attributes of multiple entities).
 	 */
 	@XmlElement(name = "subSelector", type = SelectorV1.class, required = false)
-	//@XmlElement(required = false)
+	// @XmlElement(required = false)
 	protected SelectorV2 subSelector;
 
 	@Override
 	public String getName() {
 		return name;
 	}
+
 	@Override
 	public void setName(String name) {
 		this.name = name;
 	}
+
 	@Override
 	public String getXpath() {
 		return xpath;
 	}
+
 	@Override
 	public void setXpath(String xpath) {
 		this.xpath = xpath;
 	}
+
 	@Override
 	public Selector getSubSelector() {
 		return subSelector;
 	}
+
 	@Override
 	public void setSubSelector(Selector subSelector) {
 		this.subSelector = (SelectorV2) subSelector;
 	}
+
 	@Override
 	public List<Namespace> getNamespace() {
 		return namespace;
 	}
+
 	@Override
 	public void setNamespace(List<Namespace> namespace) {
 		this.namespace = namespace;
 	}
+
 	@Override
 	public boolean isNamespaceAware() {
 		return namespaceAware == null ? false : namespaceAware;
 	}
+
 	@Override
 	public void setNamespaceAware(boolean namespaceAware) {
 		this.namespaceAware = namespaceAware;
 	}
+
 	@Override
-    public Expression getExpression() {
-        return expression;
-    }
-    @Override
-    public void setExpression(Expression expression) {
-        this.expression = expression;
-    }
+	public Expression getExpression() {
+		return expression;
+	}
+
+	@Override
+	public void setExpression(Expression expression) {
+		this.expression = expression;
+	}
 
 }
