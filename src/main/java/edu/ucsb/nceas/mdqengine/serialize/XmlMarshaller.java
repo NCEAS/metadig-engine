@@ -27,8 +27,26 @@ import java.io.InputStream;
 import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
 
+/**
+ * Utility class for marshalling and unmarshalling Java objects to and from XML.
+ *
+ * This class provides methods for converting Java objects to XML
+ * representations and vice versa, using JAXB.
+ */
 public class XmlMarshaller {
 
+	/**
+	 * Converts the given object to an XML string.
+	 * 
+	 * The unescapeXML flag determines whether XML escaping is applied to the
+	 * output.
+	 *
+	 * @param obj         the object to be converted to XML
+	 * @param unescapeXML flag indicating whether to unescape XML
+	 * @return the XML string representation of the object
+	 * @throws JAXBException                if an error occurs during XML binding
+	 * @throws UnsupportedEncodingException if the character encoding is unsupported
+	 */
 	public static String toXml(Object obj, Boolean unescapeXML) throws JAXBException, UnsupportedEncodingException {
 
 		JAXBContext context = JAXBContext.newInstance(obj.getClass());
@@ -51,7 +69,16 @@ public class XmlMarshaller {
 
 	}
 
-	public static Object fromXml(String xml, Class clazz) throws ParserConfigurationException, JAXBException, IOException, SAXException {
+	/**
+	 * Converts an XML string to a Java object of the specified class.
+	 * 
+	 * @param xml   the XML string to be converted
+	 * @param clazz the class type to which the XML should be mapped
+	 * @return the Java object represented by the XML
+	 * @throws JAXBException
+	 */
+	public static Object fromXml(String xml, Class clazz)
+			throws ParserConfigurationException, JAXBException, IOException, SAXException {
 
 		if (clazz == Check.class) {
 			String ns = getRootNamespace(xml);
@@ -83,6 +110,15 @@ public class XmlMarshaller {
 
 	}
 
+	/**
+	 * Extracts the root namespace URI from an XML string.
+	 * 
+	 * @param xml the XML string from which the root namespace will be extracted
+	 * @return the root namespace URI of the XML document
+	 * @throws ParserConfigurationException
+	 * @throws SAXException
+	 * @throws IOException
+	 */
 	private static String getRootNamespace(String xml) throws ParserConfigurationException, SAXException, IOException {
 		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 		dbf.setNamespaceAware(true);
@@ -92,14 +128,20 @@ public class XmlMarshaller {
 		return doc.getDocumentElement().getNamespaceURI();
 	}
 
+	/**
+	 * Retrieves the check class associated with a given namespace.
+	 * 
+	 * @param namespace the namespace used to determine the check class
+	 * @return the check class corresponding to the provided namespace
+	 */
 	private static Class<?> getCheckClassFromNamespace(String namespace) {
-    switch (namespace) {
-		case "https://nceas.ucsb.edu/mdqe/v1":
-            return CheckV1.class;
-        case "https://nceas.ucsb.edu/mdqe/v1.2":
-            return CheckV2.class;
-        default:
-            throw new IllegalArgumentException("Unknown Check namespace: " + namespace);
-    }
-}
+		switch (namespace) {
+			case "https://nceas.ucsb.edu/mdqe/v1":
+				return CheckV1.class;
+			case "https://nceas.ucsb.edu/mdqe/v1.2":
+				return CheckV2.class;
+			default:
+				throw new IllegalArgumentException("Unknown Check namespace: " + namespace);
+		}
+	}
 }
