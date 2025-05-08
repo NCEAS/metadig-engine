@@ -4,10 +4,17 @@ import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 
+/**
+ * Dialect is used to conditionally apply the check or ensure Check is valid. They
+ * contain a name, xpath and/or expression element which is used to extract an
+ * element that can be used to verify the check should be run on the document.
+ */
+
 @XmlAccessorType(XmlAccessType.FIELD)
 public class DialectV1 implements Dialect {
 
-    public DialectV1() {}
+    public DialectV1() {
+    }
 
     /**
      * The name or label to associate with this dialect definition
@@ -17,10 +24,8 @@ public class DialectV1 implements Dialect {
 
     /**
      * The XPath expression that is used to determine if a document is of this
-     * dialect.
-     * The expression should evaluate to a boolean value, where true indicates the
-     * document
-     * is of this dialect.
+     * dialect. The expression should evaluate to a boolean value, where true
+     * indicates the document is of this dialect.
      */
     @XmlElement(required = false)
     private String xpath;
@@ -41,14 +46,14 @@ public class DialectV1 implements Dialect {
         this.xpath = xpath;
     }
 
-	@Override
+    @Override
     public Expression getExpression() {
         return null;
     }
+
     @Override
     public void setExpression(Expression expression) {
         return;
     }
-
 
 }
