@@ -28,6 +28,13 @@ import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
+/**
+ * A concrete implementation of MetadataDialect for handling XML metadata
+ * documents.
+ * 
+ * This dialect provides xpath-based querying and namespace handling to support
+ * extraction of values from XML-based metadata standards.
+ */
 public class XMLDialect extends AbstractMetadataDialect {
 
 	private Document document;
@@ -96,13 +103,6 @@ public class XMLDialect extends AbstractMetadataDialect {
 		}
 	}
 
-	/**
-	 * Executes a quality check against an XML document and returns the result.
-	 *
-	 * @param check the {@link Check} to be executed
-	 * @return a {@link Result} object representing the outcome of the check
-	 * @throws XPathExpressionException
-	 */
 	@Override
 	public Result runCheck(Check check) throws XPathExpressionException {
 
@@ -272,13 +272,6 @@ public class XMLDialect extends AbstractMetadataDialect {
 		return result;
 	}
 
-	/**
-	 * Determine if the check is valid for the document
-	 * 
-	 * @param check
-	 * @return
-	 * @throws XPathExpressionException
-	 */
 	@Override
 	public boolean isCheckValid(Check check) throws XPathExpressionException {
 
@@ -312,6 +305,24 @@ public class XMLDialect extends AbstractMetadataDialect {
 		return false;
 	}
 
+	/**
+	 * Evaluates the xpath expression defined in the given {@link Selector} against
+	 * the provided XML node.
+	 * 
+	 * This method extracts value(s) from the XML document based on the xpath
+	 * specified in the selector. If namespaces are defined in the selector, they
+	 * are registered and applied during the xpath evaluation. The result may be a
+	 * single value, a list of values, or null if no match is found.
+	 *
+	 * @param selector    the {@link Selector} containing the xpath expression and
+	 *                    optional namespace context
+	 * @param contextNode the XML {@link Node} to evaluate the xpath expression
+	 *                    against
+	 * @return the value(s) extracted by the xpath expression, or null if no match
+	 *         is found
+	 * @throws XPathExpressionException if the xpath expression is invalid or cannot
+	 *                                  be evaluated
+	 */
 	public Object selectXPath(Selector selector, Node contextNode) throws XPathExpressionException {
 
 		Object value = null;
@@ -412,6 +423,15 @@ public class XMLDialect extends AbstractMetadataDialect {
 
 	}
 
+	/**
+	 * Converts the given Document object to a well-formed XML string
+	 * representation.
+	 * 
+	 * @param document the {@link Document} object to be converted to XML string
+	 * 
+	 * @return the XML string representation of the document, or null if an
+	 *         error occurs
+	 */
 	public String toXmlString(Document document) {
 		try {
 			Transformer transformer = TransformerFactory.newInstance().newTransformer();

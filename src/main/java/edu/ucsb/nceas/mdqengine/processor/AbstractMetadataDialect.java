@@ -17,6 +17,17 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.dataone.service.types.v2.SystemMetadata;
 
+/**
+ * An abstract base class for implementations of the {@link MetadataDialect}
+ * interface.
+ * 
+ * Provides common functionality and utility methods that are shared across
+ * different metadata dialects. This class is intended to reduce duplication and
+ * enforce consistency across dialect implementations.
+ * 
+ * @author clark
+ */
+
 public abstract class AbstractMetadataDialect implements MetadataDialect {
 
 	protected Map<String, Object> params;

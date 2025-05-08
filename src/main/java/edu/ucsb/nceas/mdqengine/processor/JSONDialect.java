@@ -21,6 +21,13 @@ import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
+/**
+ * A concrete implementation of MetadataDialect for handling JSON metadata
+ * documents.
+ * 
+ * This dialect provides jq-based querying to support extraction of values from
+ * JSON-based metadata standards.
+ */
 public class JSONDialect extends AbstractMetadataDialect {
     private JsonNode rootNode;
     private Dispatcher dispatcher;
