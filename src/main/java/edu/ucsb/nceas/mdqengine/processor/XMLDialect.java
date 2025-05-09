@@ -285,10 +285,20 @@ public class XMLDialect extends AbstractMetadataDialect {
 		for (Dialect dialect : check.getDialect()) {
 
 			String name = dialect.getName();
+			// first try to get xpath element
 			String expression = dialect.getXpath();
+			// then try to get the expression element if there is no xpath
 			if (expression == null) {
+				if (dialect.getExpression().getSyntax().equals("xpath")) {
+					expression = dialect.getExpression().getValue();
+				}
+			}
+			// if still null, continue to next dialect
+			if (expression == null) {
+				log.trace("No xpath expression specified for this dialect, continuing.");
 				continue;
 			}
+
 			log.debug("Dialect name: " + name + ", expression: " + expression);
 			String value = xpath.evaluate(expression, document);
 
@@ -327,10 +337,15 @@ public class XMLDialect extends AbstractMetadataDialect {
 
 		Object value = null;
 
-		// TODO: account for possible xpaths in expression element here
-
 		// select one or more values from document
 		String selectorPath = selector.getXpath();
+
+		// if no xpath element, try expression element
+		if (selectorPath == null){
+			if (selector.getExpression().getSyntax().equals("xpath")){
+				selectorPath = selector.getExpression().getValue();
+			}
+		}
 
 		XPath xpath = xPathfactory.newXPath();
 

@@ -1,7 +1,8 @@
 package edu.ucsb.nceas.mdqengine.processor;
 
-import edu.ucsb.nceas.mdqengine.MDQEngine;
 import edu.ucsb.nceas.mdqengine.model.*;
+import edu.ucsb.nceas.mdqengine.serialize.XmlMarshaller;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.dataone.service.types.v2.SystemMetadata;
@@ -11,18 +12,20 @@ import org.xml.sax.SAXException;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Field;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.w3c.dom.Document;
 
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 //@Disabled
 public class XMLDialectTest {
@@ -33,7 +36,42 @@ public class XMLDialectTest {
 	private String emlIdSingleTable = "knb-lter-sbc.18.18";
 	private String fgdcId = "361ede66-857b-4289-b4dc-8e414abbb1f0.xml";
 	private String isoId = "urn:uuid:8d639e70-55eb-40aa-b1a4-29712fd31b63";
-	
+	private Check check;
+	private XMLDialect dialect;
+
+	@Test
+	public void testSimpleSelector() throws Exception {
+
+		this.dialect = new XMLDialect(
+				getClass().getClassLoader().getResourceAsStream("test-docs/doi:10.18739_A2W08WG3R.xml"));
+
+		Field field = this.dialect.getClass().getDeclaredField("document");
+		field.setAccessible(true);
+		Document docToUse = (Document) field.get(this.dialect);
+
+		InputStream inputStream = getClass().getClassLoader()
+				.getResourceAsStream("test-docs/resource.abstractLength-all-combos.xml");
+		if (inputStream == null) {
+			throw new IOException("XML file not found");
+		}
+
+		String xml = new String(inputStream.readAllBytes(), "UTF-8");
+		check = (Check) XmlMarshaller.fromXml(xml, Check.class);
+
+		List<Selector> selector = new ArrayList<>(check.getSelector());
+		for (Selector sel : selector) {
+			if (sel.getXpath() == null && sel.getExpression() == null) {
+				continue;
+			}
+			if (sel.getExpression() != null) {
+				if (!"xpath".equals(sel.getExpression().getSyntax())) {
+					continue;
+				}
+			}
+			Object value = dialect.selectXPath(sel, docToUse);
+			assertNotNull(value, "Selector should select something");
+		}
+	}
 
 	@Test
 	public void testSubSelector() {
@@ -406,6 +444,7 @@ public class XMLDialectTest {
 		}
 
 	}
+
 	@Disabled
 	@Test
 	public void testPersist() {
@@ -511,6 +550,7 @@ public class XMLDialectTest {
 		}
 
 	}
+
 	@Disabled
 	@Test
 	public void testPersistMath() {
@@ -572,6 +612,7 @@ public class XMLDialectTest {
 		}
 
 	}
+
 	@Disabled
 	@Test
 	public void testSelectorNullIfNotFound() {
