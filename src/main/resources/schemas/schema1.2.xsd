@@ -41,8 +41,6 @@
     <xs:sequence>
       <xs:element name="name" type="xs:string" />
       <xs:element name="xpath" type="xs:string" minOccurs="0" maxOccurs="unbounded" />
-      <xs:element name="expression" type = "tns:expression" minOccurs="0" maxOccurs="unbounded">
-      </xs:element>
       <xs:element name="subSelector" type="tns:selector" minOccurs="0" />
       <xs:element name="namespaces" minOccurs="0">
         <xs:complexType>
@@ -52,6 +50,7 @@
           </xs:sequence>
         </xs:complexType>
       </xs:element>
+      <xs:element name="expression" type = "tns:expression" minOccurs="0" maxOccurs="unbounded"/>
     </xs:sequence>
     <xs:attribute name="namespaceAware" type="xs:boolean" />
   </xs:complexType>
