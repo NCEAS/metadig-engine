@@ -39,15 +39,15 @@ public class JSONDialectTest {
     @Test
     public void testSelectJsonPath_singleValue() throws Exception {
         Object result = dialect.selectJsonPath(".name", jsonDoc);
-        assertEquals("Virginia Forest - DTW, Water Temperature, Specific conductance - Jun 2021-Jul 2024", result);
+        assertEquals("Larval krill studies - fluorescence and clearance from ARSV Laurence M. Gould LMG0106, LMG0205 in the Southern Ocean from 2001-2002 (SOGLOBEC project)", result);
     }
 
     @Test
     public void testSelectJsonPath_arrayTextValues() throws Exception {
         Object result = dialect.selectJsonPath(".creator[\"@list\"][] | .name", jsonDoc);
         assertTrue(result instanceof java.util.List);
-        assertEquals(4, ((java.util.List<?>) result).size());
-        assertEquals("Dannielle Pratt", ((java.util.List<?>) result).get(0));
+        assertEquals(2, ((java.util.List<?>) result).size());
+        assertEquals("Dr Langdon Quetin", ((java.util.List<?>) result).get(0));
     }
 
     @Test
