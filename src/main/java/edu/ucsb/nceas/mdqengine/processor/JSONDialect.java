@@ -62,10 +62,9 @@ public class JSONDialect extends AbstractMetadataDialect {
      *
      * @param check the {@link Check} to be executed
      * @return a {@link Result} object representing the outcome of the check
-     * @throws JsonQueryException
      */
     @Override
-    public Result runCheck(Check check) throws JsonQueryException {
+    public Result runCheck(Check check) {
 
         Result result = new Result();
 
@@ -91,7 +90,15 @@ public class JSONDialect extends AbstractMetadataDialect {
                 // expressions instead just chain together within a single selector element
                 if ("json-path".equals(syntax)) {
                     String jq = expression.getValue();
-                    Object value = this.selectJsonPath(jq, rootNode);
+                    Object value;
+                    try {
+                        value = this.selectJsonPath(jq, rootNode);
+                    } catch (JsonQueryException e) {
+                        log.error("Error running check" + check.getId() + e.getMessage());
+                        result.setStatus(Status.ERROR);
+                        result.setOutput(new Output(e.getMessage()));
+                        return result;
+                    }
                     variables.put(selector.getName(), value);
                 }
             }
