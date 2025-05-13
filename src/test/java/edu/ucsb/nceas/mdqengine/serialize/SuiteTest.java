@@ -1,6 +1,7 @@
 package edu.ucsb.nceas.mdqengine.serialize;
 
 import edu.ucsb.nceas.mdqengine.model.*;
+
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -97,17 +98,31 @@ public class SuiteTest {
 		Check check = (Check) XmlMarshaller.fromXml(xml, Check.class);
 
 		assertNotNull(check, "Check object should be deserialized successfully from XML");
-		assertEquals(edu.ucsb.nceas.mdqengine.model.CheckV1.class, check.getClass());
+		assertEquals(edu.ucsb.nceas.mdqengine.model.Check.class, check.getClass());
 
 		List<Selector> selector = new ArrayList<>(check.getSelector());
 		for (Selector sel : selector) {
-			assertEquals(edu.ucsb.nceas.mdqengine.model.SelectorV1.class, sel.getClass());
+			assertEquals(edu.ucsb.nceas.mdqengine.model.Selector.class, sel.getClass());
 		}
 
 		List<Dialect> dialect = new ArrayList<>(check.getDialect());
 		for (Dialect di : dialect) {
-			assertEquals(edu.ucsb.nceas.mdqengine.model.DialectV1.class, di.getClass());
+			assertEquals(edu.ucsb.nceas.mdqengine.model.Dialect.class, di.getClass());
 		}
+
+	}
+
+	@Test
+	public void testSuiteXML() throws Exception {
+		InputStream inputStream = getClass().getClassLoader()
+				.getResourceAsStream("test-docs/FAIR-suite-0.5.0.xml");
+		if (inputStream == null) {
+			throw new IOException("XML file not found");
+		}
+		String xml = new String(inputStream.readAllBytes(), "UTF-8");
+		Suite suite = (Suite) XmlMarshaller.fromXml(xml, Suite.class);
+
+		assertNotNull(suite, "Suite object should be deserialized successfully from XML");
 
 	}
 
@@ -122,16 +137,16 @@ public class SuiteTest {
 		Check check = (Check) XmlMarshaller.fromXml(xml, Check.class);
 
 		assertNotNull(check, "Check object should be deserialized successfully from XML");
-		assertEquals(edu.ucsb.nceas.mdqengine.model.CheckV2.class, check.getClass());
+		assertEquals(edu.ucsb.nceas.mdqengine.model.Check.class, check.getClass());
 
 		List<Selector> selector = new ArrayList<>(check.getSelector());
 		for (Selector sel : selector) {
-			assertEquals(edu.ucsb.nceas.mdqengine.model.SelectorV2.class, sel.getClass());
+			assertEquals(edu.ucsb.nceas.mdqengine.model.Selector.class, sel.getClass());
 		}
 
 		List<Dialect> dialect = new ArrayList<>(check.getDialect());
 		for (Dialect di : dialect) {
-			assertEquals(edu.ucsb.nceas.mdqengine.model.DialectV2.class, di.getClass());
+			assertEquals(edu.ucsb.nceas.mdqengine.model.Dialect.class, di.getClass());
 		}
 	}
 

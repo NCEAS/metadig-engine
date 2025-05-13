@@ -1,6 +1,7 @@
 package edu.ucsb.nceas.mdqengine.model;
 
 import edu.ucsb.nceas.mdqengine.exception.MetadigException;
+import edu.ucsb.nceas.mdqengine.model.Check;
 
 import javax.xml.bind.annotation.*;
 import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
@@ -8,11 +9,12 @@ import java.util.List;
 
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(propOrder = {"id", "name", "description", "namespace", "check"})
+@XmlType(propOrder = { "id", "name", "description", "namespace", "check" })
 public class Suite {
-	
+
 	/**
-	 * The unique identifier for the suite. This should be unique, at the very least, 
+	 * The unique identifier for the suite. This should be unique, at the very
+	 * least,
 	 * within the scope of the MDQ engine store. It will be used to identify which
 	 * suite[s] to run on metadata documents and for organizing QC results.
 	 */
@@ -20,32 +22,34 @@ public class Suite {
 	private String id;
 
 	/**
-	 * A short and useful name for the suite that will be displayed in 
+	 * A short and useful name for the suite that will be displayed in
 	 * user interfaces and reports.
 	 */
 	@XmlElement(required = true)
 	private String name;
-	
+
 	/**
 	 * A comprehensive sumary of the suite and what it is intended to check.
 	 */
 	@XmlJavaTypeAdapter(CDataAdapter.class)
 	private String description;
-	
+
 	/**
-	 * The optional namespace list can be used to map namespace prefixes to full namespace uris.
-	 * This is useful if your xpath expressions utilize namespace prefixes and you don not want to 
-	 * loose the disambiguation that they provide, say, by using local-name() predicates.
+	 * The optional namespace list can be used to map namespace prefixes to full
+	 * namespace uris.
+	 * This is useful if your xpath expressions utilize namespace prefixes and you
+	 * don not want to
+	 * loose the disambiguation that they provide, say, by using local-name()
+	 * predicates.
 	 */
 	@XmlElementWrapper(name = "namespaces", required = false)
 	private List<Namespace> namespace;
-	
+
 	/**
 	 * The list of checks to be performed. A suite must have at least one check.
 	 */
 	@XmlElements({
-		@XmlElement(name = "check", type = CheckV1.class),
-		@XmlElement(name = "check", type = CheckV2.class)
+			@XmlElement(name = "check", type = Check.class),
 	})
 	private List<Check> check;
 
@@ -80,8 +84,8 @@ public class Suite {
 
 	// Find a specific check from the list of checks
 	public Check getCheck(String id) throws Exception {
-		for (Check thisCheck: check) {
-			if(thisCheck.equals(id) ) {
+		for (Check thisCheck : check) {
+			if (thisCheck.equals(id)) {
 				return thisCheck;
 			}
 		}
@@ -92,7 +96,7 @@ public class Suite {
 	public void setCheck(List<Check> check) {
 		this.check = check;
 	}
-	
+
 	public List<Namespace> getNamespace() {
 		return namespace;
 	}

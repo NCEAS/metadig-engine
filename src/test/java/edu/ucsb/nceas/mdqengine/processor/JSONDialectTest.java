@@ -3,10 +3,11 @@ package edu.ucsb.nceas.mdqengine.processor;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import edu.ucsb.nceas.mdqengine.serialize.XmlMarshaller;
 import edu.ucsb.nceas.mdqengine.model.Check;
-import edu.ucsb.nceas.mdqengine.model.Selector;
 import edu.ucsb.nceas.mdqengine.model.Expression;
+import edu.ucsb.nceas.mdqengine.model.Selector;
+import edu.ucsb.nceas.mdqengine.serialize.XmlMarshaller;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -31,7 +32,8 @@ public class JSONDialectTest {
 
         ObjectMapper mapper = new ObjectMapper();
         this.jsonDoc = mapper.readTree(jsonStream);
-        this.dialect = new JSONDialect(getClass().getClassLoader().getResourceAsStream("test-docs/schema-dot-org-ex.json"));
+        this.dialect = new JSONDialect(
+                getClass().getClassLoader().getResourceAsStream("test-docs/schema-dot-org-ex.json"));
     }
 
     @Test
@@ -50,7 +52,8 @@ public class JSONDialectTest {
 
     @Test
     public void testRunCheck_simpleSelector() throws Exception {
-        InputStream inputStream = getClass().getClassLoader().getResourceAsStream("test-docs/resource.abstractLength.xml");
+        InputStream inputStream = getClass().getClassLoader()
+                .getResourceAsStream("test-docs/resource.abstractLength-all-combos.xml");
         if (inputStream == null) {
             throw new IOException("XML file not found");
         }
@@ -62,11 +65,12 @@ public class JSONDialectTest {
         List<Selector> selector = new ArrayList<>(check.getSelector());
         for (Selector sel : selector) {
             Expression ex = sel.getExpression();
-            if (ex != null){
-                Object result = dialect.selectJsonPath(ex.getValue(), jsonDoc);
-                assertNotNull(result, "Selector should select something");
+            if (ex != null) {
+                if (ex.getSyntax().equals("json-path")) {
+                    Object result = dialect.selectJsonPath(ex.getValue(), jsonDoc);
+                    assertNotNull(result, "Selector should select something");
+                }
             }
-
         }
     }
 }

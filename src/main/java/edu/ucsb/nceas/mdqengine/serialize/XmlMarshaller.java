@@ -7,8 +7,6 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
 import edu.ucsb.nceas.mdqengine.model.Check;
-import edu.ucsb.nceas.mdqengine.model.CheckV1;
-import edu.ucsb.nceas.mdqengine.model.CheckV2;
 
 import javax.xml.XMLConstants;
 import javax.xml.bind.JAXBContext;
@@ -80,9 +78,12 @@ public class XmlMarshaller {
 	public static Object fromXml(String xml, Class clazz)
 			throws ParserConfigurationException, JAXBException, IOException, SAXException {
 
-		if (clazz == Check.class) {
-			String ns = getRootNamespace(xml);
-			clazz = getCheckClassFromNamespace(ns);
+		String ns = getRootNamespace(xml);
+		if ("https://nceas.ucsb.edu/mdqe/v1".equals(ns)
+				|| "https://nceas.ucsb.edu/mdqe/v1.1".equals(ns)) {
+			// Replace known older namespaces with v1.2
+			xml = xml.replace("https://nceas.ucsb.edu/mdqe/v1", "https://nceas.ucsb.edu/mdqe/v1.2");
+			xml = xml.replace("https://nceas.ucsb.edu/mdqe/v1.1", "https://nceas.ucsb.edu/mdqe/v1.2");
 		}
 
 		JAXBContext context = JAXBContext.newInstance(clazz);
@@ -126,22 +127,5 @@ public class XmlMarshaller {
 		Document doc = db.parse(new InputSource(new StringReader(xml)));
 
 		return doc.getDocumentElement().getNamespaceURI();
-	}
-
-	/**
-	 * Retrieves the check class associated with a given namespace.
-	 * 
-	 * @param namespace the namespace used to determine the check class
-	 * @return the check class corresponding to the provided namespace
-	 */
-	private static Class<?> getCheckClassFromNamespace(String namespace) {
-		switch (namespace) {
-			case "https://nceas.ucsb.edu/mdqe/v1":
-				return CheckV1.class;
-			case "https://nceas.ucsb.edu/mdqe/v1.2":
-				return CheckV2.class;
-			default:
-				throw new IllegalArgumentException("Unknown Check namespace: " + namespace);
-		}
 	}
 }

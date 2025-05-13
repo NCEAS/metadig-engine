@@ -1,6 +1,12 @@
 package edu.ucsb.nceas.mdqengine.processor;
 
-import edu.ucsb.nceas.mdqengine.model.*;
+import edu.ucsb.nceas.mdqengine.model.Check;
+import edu.ucsb.nceas.mdqengine.model.Dialect;
+import edu.ucsb.nceas.mdqengine.model.Level;
+import edu.ucsb.nceas.mdqengine.model.Output;
+import edu.ucsb.nceas.mdqengine.model.Result;
+import edu.ucsb.nceas.mdqengine.model.Selector;
+import edu.ucsb.nceas.mdqengine.model.Status;
 import edu.ucsb.nceas.mdqengine.serialize.XmlMarshaller;
 
 import org.apache.commons.logging.Log;
@@ -76,13 +82,13 @@ public class XMLDialectTest {
 	@Test
 	public void testSubSelector() {
 
-		Check complexCheck = CheckV2.newCheck();
+		Check complexCheck = new Check();
 
-		Selector selector = SelectorV2.newSelector();
+		Selector selector =new Selector();
 		selector.setName("entityListOfAttributes");
 		selector.setXpath("//dataset/dataTable");
 
-		Selector subselector = SelectorV2.newSelector();
+		Selector subselector =new Selector();
 		subselector.setName("attributeCount");
 		subselector.setXpath("./attributeList/attribute/attributeName");
 
@@ -143,9 +149,9 @@ public class XMLDialectTest {
 	@Test
 	public void testDialect() {
 
-		Check check = CheckV2.newCheck();
+		Check check = new Check();
 
-		Selector selector = SelectorV2.newSelector();
+		Selector selector =new Selector();
 		selector.setName("entityCount");
 		selector.setXpath("count(//dataset/dataTable)");
 
@@ -159,11 +165,11 @@ public class XMLDialectTest {
 		check.setName("testing dialect skipping");
 
 		List<Dialect> dialects = new ArrayList<Dialect>();
-		Dialect eml = DialectV2.newDialect();
+		Dialect eml = new Dialect();
 		eml.setName("EML");
 		eml.setXpath("boolean(/*[local-name() = 'eml'])");
 
-		Dialect iso = DialectV2.newDialect();
+		Dialect iso = new Dialect();
 		iso.setName("iso");
 		iso.setXpath("boolean(/*[local-name() = 'MI_Metadata' or local-name() = 'MD_Metadata'])");
 
@@ -215,9 +221,9 @@ public class XMLDialectTest {
 	@Test
 	public void testValidation() {
 
-		Check check = CheckV2.newCheck();
+		Check check = new Check();
 
-		Selector selector = SelectorV2.newSelector();
+		Selector selector =new Selector();
 		selector.setName("entityCount");
 		selector.setXpath("count(//dataset/dataTable)");
 
@@ -271,9 +277,9 @@ public class XMLDialectTest {
 	@Test
 	public void testNamespace() {
 
-		Check check = CheckV2.newCheck();
+		Check check = new Check();
 
-		Selector selector = SelectorV2.newSelector();
+		Selector selector =new Selector();
 		selector.setName("value");
 		selector.setXpath("/eml:eml/dataset/title");
 		selector.setNamespaceAware(true);
@@ -312,10 +318,10 @@ public class XMLDialectTest {
 	@Test
 	public void testGroupLookup() {
 
-		Check check = CheckV2.newCheck();
+		Check check = new Check();
 
 		// selector not important
-		Selector selector = SelectorV2.newSelector();
+		Selector selector =new Selector();
 		selector.setName("value");
 		selector.setXpath("/eml:eml/dataset/title");
 
@@ -358,10 +364,10 @@ public class XMLDialectTest {
 	@Test
 	public void testAwardLookup() {
 
-		Check check = CheckV2.newCheck();
+		Check check = new Check();
 
 		// selector for award id
-		Selector selector = SelectorV2.newSelector();
+		Selector selector =new Selector();
 		selector.setName("awards");
 		selector.setXpath("/eml/dataset/project/funding//para");
 
@@ -404,9 +410,9 @@ public class XMLDialectTest {
 	@Test
 	public void testLibrary() {
 
-		Check check = CheckV2.newCheck();
+		Check check = new Check();
 
-		Selector selector = SelectorV2.newSelector();
+		Selector selector =new Selector();
 		selector.setName("entityCount");
 		selector.setXpath("count(//dataset/dataTable)");
 
@@ -449,9 +455,9 @@ public class XMLDialectTest {
 	@Test
 	public void testPersist() {
 
-		Check check = CheckV2.newCheck();
+		Check check = new Check();
 
-		Selector selector = SelectorV2.newSelector();
+		Selector selector =new Selector();
 		selector.setName("entityCount");
 		selector.setXpath("count(//dataset/dataTable)");
 
@@ -489,9 +495,9 @@ public class XMLDialectTest {
 		}
 
 		// now run another check using information from the previous check
-		check = CheckV2.newCheck();
+		check = new Check();
 
-		selector = SelectorV2.newSelector();
+		selector =new Selector();
 		selector.setName("title");
 		selector.setXpath("//title");
 
@@ -518,9 +524,9 @@ public class XMLDialectTest {
 		}
 
 		// run yet another check using information from the previous check
-		check = CheckV2.newCheck();
+		check = new Check();
 
-		selector = SelectorV2.newSelector();
+		selector =new Selector();
 		selector.setName("packageId");
 		selector.setXpath("//@packageId");
 
@@ -555,7 +561,7 @@ public class XMLDialectTest {
 	@Test
 	public void testPersistMath() {
 
-		Check check = CheckV2.newCheck();
+		Check check = new Check();
 
 		check.setCode(
 				"x <- 1; status <- ifelse(x == 1, 'SUCCESS', 'FAILURE'); ");
@@ -589,7 +595,7 @@ public class XMLDialectTest {
 		}
 
 		// run yet another check using information from the previous check
-		check = CheckV2.newCheck();
+		check = new Check();
 
 		check.setCode("x = x + 1; status = (x == 2 ? 'SUCCESS' : 'FAILURE');");
 
@@ -628,17 +634,17 @@ public class XMLDialectTest {
 		// TODO: Make this test cover all environments, not just 'rscript'
 
 		// RScript
-		Check rscript_check = CheckV2.newCheck();
+		Check rscript_check = new Check();
 		rscript_check.setCode(
 				"mdq_result <- list(status = ifelse(is.null(test), 'SUCCESS', 'FAILURE'), output=list(list(value=TRUE)))");
 		rscript_check.setEnvironment("rscript");
 
 		// Python
-		Check python_check = CheckV2.newCheck();
+		Check python_check = new Check();
 		python_check.setCode("def call():\n\tglobal status; status = 'SUCCESS' if test is None else 'FAILURE';");
 		python_check.setEnvironment("python");
 
-		Selector selector = SelectorV2.newSelector();
+		Selector selector =new Selector();
 		selector.setName("test");
 		selector.setXpath("/eml/dataset/asdf");
 
@@ -677,7 +683,7 @@ public class XMLDialectTest {
 	@Disabled
 	@Test
 	public void testWildcardXpathsOnISODocs() {
-		Check check = CheckV2.newCheck();
+		Check check = new Check();
 		check.setCode("def call():\n" +
 				"\tglobal status\n" +
 				"\tglobal output\n" +
@@ -693,7 +699,7 @@ public class XMLDialectTest {
 		check.setEnvironment("python");
 
 		// Create a selector and add it to the check
-		Selector selector = SelectorV2.newSelector();
+		Selector selector =new Selector();
 		selector.setName("x");
 		selector.setXpath("/*/identificationInfo/*/descriptiveKeywords/MD_Keywords/keyword/CharacterString/text()");
 		List<Selector> selectors = new ArrayList<Selector>();
