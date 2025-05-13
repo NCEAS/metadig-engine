@@ -18,7 +18,7 @@ public class RunFactory {
 		Result r = null;
 		
 		// make some results! 
-		check = CheckV2.newCheck();
+		check = new Check();
 		check.setId("check.1");
 		check.setEnvironment("r");
 		check.setType("metadata");
@@ -30,7 +30,7 @@ public class RunFactory {
 		r.setCheck(check);
 		results.add(r);
 		
-		check = CheckV2.newCheck();
+		check = new Check();
 		check.setId("check.2");
 		check.setEnvironment("r");
 		check.setType("metadata");
@@ -42,7 +42,7 @@ public class RunFactory {
 		r.setCheck(check);
 		results.add(r);
 		
-		check = CheckV2.newCheck();
+		check = new Check();
 		check.setId("check.3");
 		check.setEnvironment("r");
 		check.setType("metadata");
@@ -54,7 +54,7 @@ public class RunFactory {
 		r.setCheck(check);
 		results.add(r);
 		
-		check = CheckV2.newCheck();
+		check = new Check();
 		check.setId("check.4");
 		check.setEnvironment("r");
 		check.setType("metadata");
@@ -66,7 +66,7 @@ public class RunFactory {
 		r.setCheck(check);
 		results.add(r);
 		
-		check = CheckV2.newCheck();
+		check = new Check();
 		check.setId("check.5");
 		check.setEnvironment("r");
 		check.setType("metadata");
@@ -78,7 +78,7 @@ public class RunFactory {
 		r.setCheck(check);
 		results.add(r);
 		
-		check = CheckV2.newCheck();
+		check = new Check();
 		check.setId("check.6");
 		check.setEnvironment("r");
 		check.setType("metadata");

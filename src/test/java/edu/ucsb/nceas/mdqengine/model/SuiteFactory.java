@@ -30,13 +30,13 @@ public class SuiteFactory {
 		List<Check> checks = new ArrayList<Check>();
 
 		// title
-		Check titleCheck = CheckV2.newCheck();
+		Check titleCheck = new Check();
 		titleCheck.setId("check.1.1");
 		titleCheck.setName("titleLength");
 		titleCheck.setEnvironment("r");
 		titleCheck.setLevel(Level.OPTIONAL);
 		List<Selector> selectors = new ArrayList<Selector>();
-		Selector s1 = SelectorV2.newSelector();
+		Selector s1 = new Selector();
 		s1.setName("title");
 		s1.setXpath("//dataset/title");
 		selectors.add(s1);
@@ -45,13 +45,13 @@ public class SuiteFactory {
 		checks.add(titleCheck);
 
 		// entityCount
-		Check entityCount = CheckV2.newCheck();
+		Check entityCount = new Check();
 		entityCount.setId("check.2.1");
 		entityCount.setName("entityCount");
 		entityCount.setEnvironment("JavaScript");
 		entityCount.setLevel(Level.INFO);
 		selectors = new ArrayList<Selector>();
-		Selector s2 = SelectorV2.newSelector();
+		Selector s2 = new Selector();
 		s2.setName("entityCount");
 		s2.setXpath("count(//dataset/dataTable | //dataset/otherEntity)");
 		selectors.add(s2);
@@ -60,13 +60,13 @@ public class SuiteFactory {
 		checks.add(entityCount);
 
 		// attributeNames
-		Check attributeNames = CheckV2.newCheck();
+		Check attributeNames = new Check();
 		attributeNames.setId("check.3.1");
 		attributeNames.setName("attributeNames");
 		attributeNames.setEnvironment("r");
 		attributeNames.setLevel(Level.REQUIRED);
 		selectors = new ArrayList<Selector>();
-		Selector s3 = SelectorV2.newSelector();
+		Selector s3 = new Selector();
 		s3.setName("attributeNames");
 		s3.setXpath("//attribute/attributeName");
 		selectors.add(s3);
