@@ -82,25 +82,27 @@ public class JSONDialect extends AbstractMetadataDialect {
         if (check.getSelector() != null) {
             for (Selector selector : check.getSelector()) {
                 Expression expression = selector.getExpression();
-                if (expression == null) {
-                    continue;
-                }
-                String syntax = expression.getSyntax();
-                // NB: we don't have to worry about sub-selectors here because our jq
-                // expressions instead just chain together within a single selector element
-                if ("json-path".equals(syntax)) {
-                    String jq = expression.getValue();
-                    Object value;
-                    try {
-                        value = this.selectJsonPath(jq, rootNode);
-                    } catch (JsonQueryException e) {
-                        log.error("Error running check" + check.getId() + e.getMessage());
-                        result.setStatus(Status.ERROR);
-                        result.setOutput(new Output(e.getMessage()));
-                        return result;
+                if (expression != null) {
+                    String syntax = expression.getSyntax();
+                    // NB: we don't have to worry about sub-selectors here because our jq
+                    // expressions instead just chain together within a single selector element
+                    if ("json-path".equals(syntax)) {
+                        String jq = expression.getValue();
+                        Object value;
+                        try {
+                            value = this.selectJsonPath(jq, rootNode);
+                        } catch (JsonQueryException e) {
+                            log.error("Error running check" + check.getId() + e.getMessage());
+                            result.setStatus(Status.ERROR);
+                            result.setOutput(new Output(e.getMessage()));
+                            return result;
+                        }
+                        variables.put(selector.getName(), value);
                     }
-                    variables.put(selector.getName(), value);
+                } else {
+                    variables.put(selector.getName(), null);
                 }
+               
             }
         }
 
