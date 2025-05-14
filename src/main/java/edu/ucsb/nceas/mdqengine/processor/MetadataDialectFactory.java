@@ -19,6 +19,7 @@ import org.xml.sax.SAXException;
 public class MetadataDialectFactory {
 
     public static Log log = LogFactory.getLog(XMLDialect.class);
+
     /**
      * Creates a MetadataDialect implementation based on the provided content type.
      *
@@ -40,10 +41,12 @@ public class MetadataDialectFactory {
         String formatId = sysMeta.getFormatId().getValue();
 
         if (formatId.contains("json")) {
-            log.debug("Parsing content with identifier" + sysMeta.getIdentifier().getValue() + " as JSON.");
+            log.debug("Parsing content with identifier" + sysMeta.getIdentifier().getValue() + "with formatId" +
+                    formatId + " as JSON.");
             return new JSONDialect(metadataContent);
         } else {
-            log.debug("Parsing content with identifier" + sysMeta.getIdentifier().getValue() + " as XML.");
+            log.debug("Parsing content with identifier" + sysMeta.getIdentifier().getValue() + "with formatId"
+                    + " as XML.");
             return new XMLDialect(metadataContent);
         }
 
