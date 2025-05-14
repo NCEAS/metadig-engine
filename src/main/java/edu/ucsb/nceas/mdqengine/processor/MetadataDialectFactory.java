@@ -5,6 +5,8 @@ import java.io.InputStream;
 
 import javax.xml.parsers.ParserConfigurationException;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.dataone.service.types.v2.SystemMetadata;
 import org.xml.sax.SAXException;
 
@@ -15,6 +17,8 @@ import org.xml.sax.SAXException;
  * Supports creation of dialects for both XML and JSON formats.
  */
 public class MetadataDialectFactory {
+
+    public static Log log = LogFactory.getLog(XMLDialect.class);
     /**
      * Creates a MetadataDialect implementation based on the provided content type.
      *
@@ -28,6 +32,7 @@ public class MetadataDialectFactory {
      * @throws IOException
      * @throws ParserConfigurationException
      */
+
     public static MetadataDialect createDialect(SystemMetadata sysMeta, InputStream metadataContent)
             throws IllegalArgumentException, SAXException, IOException, ParserConfigurationException {
 
@@ -35,8 +40,10 @@ public class MetadataDialectFactory {
         String formatId = sysMeta.getFormatId().getValue();
 
         if (formatId.contains("json")) {
+            log.debug("Parsing content with identifier" + sysMeta.getIdentifier().getValue() + " as JSON.");
             return new JSONDialect(metadataContent);
         } else {
+            log.debug("Parsing content with identifier" + sysMeta.getIdentifier().getValue() + " as XML.");
             return new XMLDialect(metadataContent);
         }
 
