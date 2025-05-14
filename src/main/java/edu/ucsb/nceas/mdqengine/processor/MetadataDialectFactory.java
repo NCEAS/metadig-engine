@@ -18,7 +18,7 @@ import org.xml.sax.SAXException;
  */
 public class MetadataDialectFactory {
 
-    public static Log log = LogFactory.getLog(XMLDialect.class);
+    public static Log log = LogFactory.getLog(MetadataDialectFactory.class);
 
     /**
      * Creates a MetadataDialect implementation based on the provided content type.

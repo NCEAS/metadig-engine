@@ -3,6 +3,8 @@ package edu.ucsb.nceas.mdqengine.processor;
 import edu.ucsb.nceas.mdqengine.dispatch.Dispatcher;
 import edu.ucsb.nceas.mdqengine.model.*;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.dataone.service.util.TypeMarshaller;
 import org.springframework.util.xml.SimpleNamespaceContext;
 import org.w3c.dom.Document;
@@ -41,6 +43,7 @@ public class XMLDialect extends AbstractMetadataDialect {
 	private Document nsAwareDocument;
 	private XPathFactory xPathfactory;
 	private Dispatcher dispatcher;
+	public static Log log = LogFactory.getLog(XMLDialect.class);
 
 	public XMLDialect(InputStream input) throws SAXException, IOException, ParserConfigurationException {
 		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();

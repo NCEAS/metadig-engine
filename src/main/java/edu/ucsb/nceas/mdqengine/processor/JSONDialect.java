@@ -14,6 +14,8 @@ import edu.ucsb.nceas.mdqengine.model.*;
 import javax.script.ScriptException;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.dataone.service.util.TypeMarshaller;
 
 import java.io.*;
@@ -33,6 +35,7 @@ public class JSONDialect extends AbstractMetadataDialect {
     private Dispatcher dispatcher;
     // Create a scope with the default built-in functions
     private Scope rootScope = Scope.newEmptyScope();
+    public static Log log = LogFactory.getLog(JSONDialect.class);
 
     public JSONDialect(InputStream input) throws IOException {
         ObjectMapper mapper = new ObjectMapper();
