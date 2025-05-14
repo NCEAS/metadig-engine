@@ -98,6 +98,7 @@ public class JSONDialect extends AbstractMetadataDialect {
                             log.error("Error running check" + check.getId() + e.getMessage());
                             result.setStatus(Status.ERROR);
                             result.setOutput(new Output(e.getMessage()));
+                            result.setCheck(check);
                             return result;
                         }
                         variables.put(selector.getName(), value);
