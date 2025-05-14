@@ -221,17 +221,17 @@ public class JSONDialect extends AbstractMetadataDialect {
 
         // compile the jq expression
         JsonQuery query;
-        
+
         BuiltinFunctionLoader.getInstance().loadFunctions(Versions.JQ_1_6, rootScope);
         query = JsonQuery.compile(jqExpression, Versions.JQ_1_6);
 
         // create child scope, this is very lightweight and we don't modify the root
         // scope
-        Scope childScope = Scope.newChildScope(rootScope);
+        //Scope childScope = Scope.newChildScope(rootScope);
 
         // apply the expression to the input JSON document
         List<JsonNode> resultNodes = new ArrayList<>();
-        query.apply(childScope, jsonDoc, resultNodes::add);
+        query.apply(rootScope, jsonDoc, resultNodes::add);
 
         // if only one node, make sure to return a single value
         if (resultNodes.size() == 1) {
