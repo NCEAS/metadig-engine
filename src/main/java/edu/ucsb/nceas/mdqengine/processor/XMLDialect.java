@@ -123,17 +123,21 @@ public class XMLDialect extends AbstractMetadataDialect {
 						docToUse = nsAwareDocument;
 					}
 					String name = selector.getName();
-					if (selector.getXpath() == null && selector.getExpression() == null) {
-						continue;
-					}
-					if (selector.getExpression() != null) {
-						if (!"xpath".equals(selector.getExpression().getSyntax())) {
-							continue;
+					// look for xpath syntax in the expression element
+					Expression ex = selector.getExpression();
+					Boolean xpathExpressionPresent = false;
+
+					if (ex != null) {
+						if (ex.getSyntax() == "xpath") {
+							xpathExpressionPresent = true;
 						}
 					}
-					Object value = this.selectXPath(selector, docToUse);
-					// make available in script
-					variables.put(name, value);
+					// select xpath if we found one of the two types that can be present
+					if (selector.getXpath() != null | xpathExpressionPresent) {
+						Object value = this.selectXPath(selector, docToUse);
+						// make available in script
+						variables.put(name, value);
+					}
 				}
 			}
 
@@ -341,8 +345,8 @@ public class XMLDialect extends AbstractMetadataDialect {
 		String selectorPath = selector.getXpath();
 
 		// if no xpath element, try expression element
-		if (selectorPath == null){
-			if (selector.getExpression().getSyntax().equals("xpath")){
+		if (selectorPath == null) {
+			if (selector.getExpression().getSyntax().equals("xpath")) {
 				selectorPath = selector.getExpression().getValue();
 			}
 		}
