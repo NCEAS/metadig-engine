@@ -40,11 +40,8 @@ public class JSONDialect extends AbstractMetadataDialect {
     public JSONDialect(InputStream input) throws IOException {
         ObjectMapper mapper = new ObjectMapper();
         this.rootNode = mapper.readTree(input);
-        // Use BuiltinFunctionLoader to load built-in functions from the classpath.
-        // For import statements to work, you need to set ModuleLoader. Not sure if we
-        // need or not BuiltinModuleLoader uses ServiceLoader mechanism to load Module
-        // implementations.
-        // rootScope.setModuleLoader(BuiltinModuleLoader.getInstance());
+        log.debug("Loading JQ version 1.6");
+        BuiltinFunctionLoader.getInstance().loadFunctions(Versions.JQ_1_6, rootScope);
     }
 
     @Override
@@ -222,7 +219,6 @@ public class JSONDialect extends AbstractMetadataDialect {
         // compile the jq expression
         JsonQuery query;
 
-        BuiltinFunctionLoader.getInstance().loadFunctions(Versions.JQ_1_6, rootScope);
         query = JsonQuery.compile(jqExpression, Versions.JQ_1_6);
 
         // create child scope, this is very lightweight and we don't modify the root
