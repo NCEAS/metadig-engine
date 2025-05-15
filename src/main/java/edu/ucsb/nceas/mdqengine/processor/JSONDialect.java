@@ -215,8 +215,6 @@ public class JSONDialect extends AbstractMetadataDialect {
         // compile the jq expression
         JsonQuery query;
 
-        query = JsonQuery.compile(jqExpression, Versions.JQ_1_5);
-
         // create child scope, this is very lightweight and we don't modify the root
         // scope
         //Scope childScope = Scope.newChildScope(rootScope);
@@ -226,6 +224,8 @@ public class JSONDialect extends AbstractMetadataDialect {
         log.debug("Loading JQ version 1.5");
         Scope rootScope = Scope.newEmptyScope();
         BuiltinFunctionLoader.getInstance().loadFunctions(Versions.JQ_1_5, rootScope);
+
+        query = JsonQuery.compile(jqExpression, Versions.JQ_1_5);
         query.apply(rootScope, jsonDoc, resultNodes::add);
 
         // if only one node, make sure to return a single value
