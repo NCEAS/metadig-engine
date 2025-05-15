@@ -223,9 +223,9 @@ public class JSONDialect extends AbstractMetadataDialect {
         List<JsonNode> resultNodes = new ArrayList<>();
         log.debug("Loading JQ version 1.5");
         Scope rootScope = Scope.newEmptyScope();
-        BuiltinFunctionLoader.getInstance().loadFunctions(Versions.JQ_1_5, rootScope);
+        BuiltinFunctionLoader.getInstance().loadFunctions(Versions.JQ_1_6, rootScope);
 
-        query = JsonQuery.compile(jqExpression, Versions.JQ_1_5);
+        query = JsonQuery.compile(jqExpression, Versions.JQ_1_6);
         query.apply(rootScope, jsonDoc, resultNodes::add);
 
         // if only one node, make sure to return a single value
