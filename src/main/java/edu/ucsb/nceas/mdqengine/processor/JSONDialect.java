@@ -33,11 +33,14 @@ import java.util.*;
 public class JSONDialect extends AbstractMetadataDialect {
     private JsonNode rootNode;
     private Dispatcher dispatcher;
+    private Scope rootScope = Scope.newEmptyScope();
     public static Log log = LogFactory.getLog(JSONDialect.class);
 
     public JSONDialect(InputStream input) throws IOException {
         ObjectMapper mapper = new ObjectMapper();
         this.rootNode = mapper.readTree(input);
+
+        BuiltinFunctionLoader.getInstance().loadFunctions(Versions.JQ_1_6, rootScope);
     }
 
     @Override
@@ -98,7 +101,7 @@ public class JSONDialect extends AbstractMetadataDialect {
                 } else {
                     variables.put(selector.getName(), null);
                 }
-               
+
             }
         }
 
@@ -217,16 +220,13 @@ public class JSONDialect extends AbstractMetadataDialect {
 
         // create child scope, this is very lightweight and we don't modify the root
         // scope
-        //Scope childScope = Scope.newChildScope(rootScope);
+        Scope childScope = Scope.newChildScope(rootScope);
 
         // apply the expression to the input JSON document
         List<JsonNode> resultNodes = new ArrayList<>();
-        log.debug("Loading JQ version 1.5");
-        Scope rootScope = Scope.newEmptyScope();
-        BuiltinFunctionLoader.getInstance().loadFunctions(Versions.JQ_1_6, rootScope);
 
         query = JsonQuery.compile(jqExpression, Versions.JQ_1_6);
-        query.apply(rootScope, jsonDoc, resultNodes::add);
+        query.apply(childScope, jsonDoc, resultNodes::add);
 
         // if only one node, make sure to return a single value
         if (resultNodes.size() == 1) {
