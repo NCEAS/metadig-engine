@@ -177,11 +177,10 @@ public class DatabaseStore implements MDQStore, AutoCloseable {
                 // Convert the returned run xml document to a 'run' object.
                 // first migrate the schema forward
                 String ns = XmlMarshaller.getRootNamespace(resultStr);
-                log.debug("Namespace " + ns + "found.");
+
                 if ("https://nceas.ucsb.edu/mdqe/v1".equals(ns)
                         || "https://nceas.ucsb.edu/mdqe/v1.1".equals(ns)) {
                     // Replace known older namespaces with v1.2
-                    log.debug("Migrating namespace forward.");
                     resultStr = resultStr.replace("https://nceas.ucsb.edu/mdqe/v1", "https://nceas.ucsb.edu/mdqe/v1.2");
                     resultStr = resultStr.replace("https://nceas.ucsb.edu/mdqe/v1.1",
                             "https://nceas.ucsb.edu/mdqe/v1.2");
