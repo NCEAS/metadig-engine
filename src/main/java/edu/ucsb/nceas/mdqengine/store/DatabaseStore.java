@@ -25,6 +25,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.sql.*;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -119,7 +120,7 @@ public class DatabaseStore implements MDQStore, AutoCloseable {
                     URL url = resource.getURL();
                     String xml = IOUtils.toString(url.openStream(), "UTF-8");
                     suite = (Suite) XmlMarshaller.fromXml(xml, Suite.class);
-                } catch (ParserConfigurationException| JAXBException | IOException | SAXException e) {
+                } catch (ParserConfigurationException | JAXBException | IOException | SAXException e) {
                     log.error("Could not load suite.");
                     continue;
                 }
@@ -172,7 +173,17 @@ public class DatabaseStore implements MDQStore, AutoCloseable {
                 resultStr = rs.getString("results");
                 rs.close();
                 stmt.close();
+
                 // Convert the returned run xml document to a 'run' object.
+                // first migrate the schema forward
+                String ns = XmlMarshaller.getRootNamespace(resultStr);
+                if ("https://nceas.ucsb.edu/mdqe/v1".equals(ns)
+                        || "https://nceas.ucsb.edu/mdqe/v1.1".equals(ns)) {
+                    // Replace known older namespaces with v1.2
+                    resultStr = resultStr.replace("https://nceas.ucsb.edu/mdqe/v1", "https://nceas.ucsb.edu/mdqe/v1.2");
+                    resultStr = resultStr.replace("https://nceas.ucsb.edu/mdqe/v1.1",
+                            "https://nceas.ucsb.edu/mdqe/v1.2");
+                }
                 InputStream is = new ByteArrayInputStream(resultStr.getBytes());
                 run = TypeMarshaller.unmarshalTypeFromStream(Run.class, is);
                 // Note: These fields are in the Solr index, but don't need to be in the run

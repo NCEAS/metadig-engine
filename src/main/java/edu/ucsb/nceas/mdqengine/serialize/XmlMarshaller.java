@@ -120,7 +120,7 @@ public class XmlMarshaller {
 	 * @throws SAXException
 	 * @throws IOException
 	 */
-	private static String getRootNamespace(String xml) throws ParserConfigurationException, SAXException, IOException {
+	public static String getRootNamespace(String xml) throws ParserConfigurationException, SAXException, IOException {
 		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 		dbf.setNamespaceAware(true);
 		DocumentBuilder db = dbf.newDocumentBuilder();
