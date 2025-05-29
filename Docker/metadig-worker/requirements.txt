@@ -4,3 +4,4 @@ requests
 pandas
 python-magic
 tabulate
+chardet
