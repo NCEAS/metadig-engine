@@ -2,15 +2,9 @@ package edu.ucsb.nceas.mdqengine.processor;
 
 import edu.ucsb.nceas.mdqengine.dispatch.Dispatcher;
 import edu.ucsb.nceas.mdqengine.model.*;
-import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.BooleanUtils;
-import org.apache.commons.lang.math.NumberUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.dataone.service.exceptions.ServiceFailure;
-import org.dataone.service.types.v1.NodeReference;
-import org.dataone.service.types.v2.SystemMetadata;
 import org.dataone.service.util.TypeMarshaller;
 import org.springframework.util.xml.SimpleNamespaceContext;
 import org.w3c.dom.Document;
@@ -33,32 +27,22 @@ import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 import java.io.*;
 import java.net.URL;
-import java.nio.file.InvalidPathException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.*;
-import org.dataone.client.v2.itk.D1Client;
-import org.dataone.client.v2.MNode;
 
-public class XMLDialect {
+/**
+ * A concrete implementation of MetadataDialect for handling XML metadata
+ * documents.
+ * 
+ * This dialect provides xpath-based querying and namespace handling to support
+ * extraction of values from XML-based metadata standards.
+ */
+public class XMLDialect extends AbstractMetadataDialect {
 
 	private Document document;
-
 	private Document nsAwareDocument;
-
-	private SystemMetadata systemMetadata;
-
 	private XPathFactory xPathfactory;
-
-	private Map<String, Object> params;
-
-	private Map<String, Namespace> namespaces = new HashMap<String, Namespace>();
-
-	private String directory;
-
 	private Dispatcher dispatcher;
-
 	public static Log log = LogFactory.getLog(XMLDialect.class);
 
 	public XMLDialect(InputStream input) throws SAXException, IOException, ParserConfigurationException {
@@ -85,7 +69,8 @@ public class XMLDialect {
 
 	}
 
-	private void extractNamespaces() {
+	@Override
+	public void extractNamespaces() {
 		XPath xpath = xPathfactory.newXPath();
 		NodeList nodes = null;
 		try {
@@ -112,6 +97,7 @@ public class XMLDialect {
 	}
 
 	// include additional namespaces
+	@Override
 	public void mergeNamespaces(List<Namespace> namespaces) {
 		if (namespaces != null) {
 			for (Namespace namespace : namespaces) {
@@ -120,6 +106,7 @@ public class XMLDialect {
 		}
 	}
 
+	@Override
 	public Result runCheck(Check check) throws XPathExpressionException {
 
 		Result result = null;
@@ -138,12 +125,22 @@ public class XMLDialect {
 					if (selector.isNamespaceAware()) {
 						docToUse = nsAwareDocument;
 					}
-
 					String name = selector.getName();
-					Object value = this.selectPath(selector, docToUse);
+					// look for xpath syntax in the expression element
+					Expression ex = selector.getExpression();
+					Boolean xpathExpressionPresent = false;
 
-					// make available in script
-					variables.put(name, value);
+					if (ex != null) {
+						if (ex.getSyntax() == "xpath") {
+							xpathExpressionPresent = true;
+						}
+					}
+					// select xpath if we found one of the two types that can be present
+					if (selector.getXpath() != null | xpathExpressionPresent) {
+						Object value = this.selectXPath(selector, docToUse);
+						// make available in script
+						variables.put(name, value);
+					}
 				}
 			}
 
@@ -214,7 +211,7 @@ public class XMLDialect {
 						// use the bindings from previous dispatcher
 						for (String key : bindings.keySet()) {
 							Object value = bindings.get(key);
-							value = retypeObject(value.toString());
+							value = ProcessorUtils.retypeObject(value.toString());
 							log.trace("binding: " + key + "=" + value);
 							variables.put(key, value);
 						}
@@ -282,55 +279,7 @@ public class XMLDialect {
 		return result;
 	}
 
-	private Result postProcess(Result result) {
-		// Return the result as-is if there are no outputs to post-process
-		if (result.getOutput() == null) {
-			log.debug("Skipping postProcess step because this result's output is null.");
-			return (result);
-		}
-
-		// Post-process each output (if needed)
-		for (Output output : result.getOutput()) {
-			if (output == null) {
-				log.debug("Output was null.");
-				continue;
-			}
-
-			String value = output.getValue();
-			if (value != null) {
-				Path path = null;
-				try {
-					path = Paths.get(value);
-				} catch (InvalidPathException e) {
-					// NOPE
-					return result;
-				}
-
-				if (path.toFile().exists()) {
-					// encode it
-					String encoded = null;
-					try {
-						encoded = Base64.encodeBase64String(IOUtils.toByteArray(path.toUri()));
-						output.setValue(encoded);
-						// TODO: set mime-type when we have support for that, or assume they did it
-						// already?
-					} catch (IOException e) {
-						log.error(e.getMessage());
-					}
-				}
-			}
-		}
-
-		return result;
-	}
-
-	/**
-	 * Determine if the check is valid for the document
-	 * 
-	 * @param check
-	 * @return
-	 * @throws XPathExpressionException
-	 */
+	@Override
 	public boolean isCheckValid(Check check) throws XPathExpressionException {
 
 		if (check.getDialect() == null) {
@@ -343,7 +292,20 @@ public class XMLDialect {
 		for (Dialect dialect : check.getDialect()) {
 
 			String name = dialect.getName();
+			// first try to get xpath element
 			String expression = dialect.getXpath();
+			// then try to get the expression element if there is no xpath
+			if (expression == null) {
+				if (dialect.getExpression().getSyntax().equals("xpath")) {
+					expression = dialect.getExpression().getValue();
+				}
+			}
+			// if still null, continue to next dialect
+			if (expression == null) {
+				log.trace("No xpath expression specified for this dialect, continuing.");
+				continue;
+			}
+
 			log.debug("Dialect name: " + name + ", expression: " + expression);
 			String value = xpath.evaluate(expression, document);
 
@@ -360,12 +322,37 @@ public class XMLDialect {
 		return false;
 	}
 
-	private Object selectPath(Selector selector, Node contextNode) throws XPathExpressionException {
+	/**
+	 * Evaluates the xpath expression defined in the given {@link Selector} against
+	 * the provided XML node.
+	 * 
+	 * This method extracts value(s) from the XML document based on the xpath
+	 * specified in the selector. If namespaces are defined in the selector, they
+	 * are registered and applied during the xpath evaluation. The result may be a
+	 * single value, a list of values, or null if no match is found.
+	 *
+	 * @param selector    the {@link Selector} containing the xpath expression and
+	 *                    optional namespace context
+	 * @param contextNode the XML {@link Node} to evaluate the xpath expression
+	 *                    against
+	 * @return the value(s) extracted by the xpath expression, or null if no match
+	 *         is found
+	 * @throws XPathExpressionException if the xpath expression is invalid or cannot
+	 *                                  be evaluated
+	 */
+	public Object selectXPath(Selector selector, Node contextNode) throws XPathExpressionException {
 
 		Object value = null;
 
 		// select one or more values from document
 		String selectorPath = selector.getXpath();
+
+		// if no xpath element, try expression element
+		if (selectorPath == null) {
+			if (selector.getExpression().getSyntax().equals("xpath")) {
+				selectorPath = selector.getExpression().getValue();
+			}
+		}
 
 		XPath xpath = xPathfactory.newXPath();
 
@@ -413,7 +400,7 @@ public class XMLDialect {
 
 				// just return single value, as a String
 				value = nodes.item(0).getTextContent();
-				value = retypeObject(value);
+				value = ProcessorUtils.retypeObject(value);
 
 			}
 
@@ -428,12 +415,12 @@ public class XMLDialect {
 					if (selector.getSubSelector() != null) {
 						Selector subSelector = selector.getSubSelector();
 						// recurse
-						Object subvalue = this.selectPath(subSelector, node);
+						Object subvalue = this.selectXPath(subSelector, node);
 						values.add(subvalue);
 					} else {
 						// otherwise just add the node value
 						value = node.getTextContent();
-						value = retypeObject(value);
+						value = ProcessorUtils.retypeObject(value);
 						values.add(value);
 					}
 				}
@@ -446,7 +433,7 @@ public class XMLDialect {
 			// try just a single value
 			try {
 				value = xpath.evaluate(selectorPath, contextNode);
-				value = retypeObject(value);
+				value = ProcessorUtils.retypeObject(value);
 			} catch (XPathExpressionException xpee2) {
 				log.error("Selector '" + selector.getName() + "'" + " could not select single value with given Xpath: "
 						+ xpee2.getCause().getMessage());
@@ -458,56 +445,16 @@ public class XMLDialect {
 
 	}
 
-	/*
-	 * Retype an object based on a few simple assumptions. A "String" value is
-	 * typically passed in. If only numeric characters are present in the String,
-	 * then the object is caste to type "Number". If the string value appears to
-	 * be an "affirmative" or "negative" value (e.g. "Y", "Yes", "N", "No", ...)
-	 * then the value is caste to "Boolean".
+	/**
+	 * Converts the given Document object to a well-formed XML string
+	 * representation.
+	 * 
+	 * @param document the {@link Document} object to be converted to XML string
+	 * 
+	 * @return the XML string representation of the document, or null if an
+	 *         error occurs
 	 */
-	public static Object retypeObject(Object value) {
-		Object result = value;
-
-		if (value instanceof String stringValue) {
-			// try to type the value correctly
-			if (NumberUtils.isNumber(stringValue) && !stringValue.matches("^0\\d*$")) {
-				// If it's a valid number and doesn't start with zeros, create a Number object
-				result = NumberUtils.createNumber(stringValue);
-			} else {
-				// try to convert to bool
-				Boolean bool = BooleanUtils.toBooleanObject((String) value);
-				// if it worked, return the boolean, otherwise the original result is returned
-				if (bool != null) {
-					result = bool;
-				}
-			}
-
-		}
-
-		return result;
-	}
-
-	public Map<String, Object> getParams() {
-		return params;
-	}
-
-	public void setParams(Map<String, Object> params) {
-		this.params = params;
-	}
-
-	public void setDirectory(String dir) {
-		this.directory = dir;
-	}
-
-	public SystemMetadata getSystemMetadata() {
-		return systemMetadata;
-	}
-
-	public void setSystemMetadata(SystemMetadata systemMetadata) {
-		this.systemMetadata = systemMetadata;
-	}
-
-	private String toXmlString(Document document) {
+	public String toXmlString(Document document) {
 		try {
 			Transformer transformer = TransformerFactory.newInstance().newTransformer();
 			StreamResult result = new StreamResult(new StringWriter());
