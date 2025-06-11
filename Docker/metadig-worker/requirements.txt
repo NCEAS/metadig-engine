@@ -1,5 +1,5 @@
 numpy
-metadig @ git+https://github.com/NCEAS/metadig-py.git@feature-36-check-testing
+metadig @ git+https://github.com/NCEAS/metadig-py.git@develop
 requests
 pandas
 python-magic
