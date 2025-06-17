@@ -5,3 +5,4 @@ pandas
 python-magic
 tabulate
 chardet
+yara-python
