@@ -49,8 +49,6 @@ ADD https://github.com/YARAHQ/yara-forge/releases/download/20250615/yara-forge-r
 
 RUN unzip /opt/local/metadig/yara-forge-rules-core -d /opt/local/metadig/
 
-RUN ls -l /opt/local/metadig/packages/core/
-
 RUN python3 -c "import yara; r = yara.compile(filepath='/opt/local/metadig/packages/core/yara-rules-core.yar'); r.save('/opt/local/metadig/yara-compiled.yc')"
 
 # Run the Worker process
