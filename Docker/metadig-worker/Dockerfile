@@ -26,7 +26,7 @@ COPY target/metadig-engine-$ENGINE_TAG.jar metadig-engine-$ENGINE_TAG.jar
 COPY Docker/metadig-worker/solr solr/
 
 RUN apt-get update
-RUN apt-get install -y g++ git r-base r-base-dev r-base-core r-doc-html libc6-dev libssl-dev libxml2 libxml2-dev libcurl4-openssl-dev file libmagic-dev python3 python3-pip python3-dev openjdk-17-jdk
+RUN apt-get install -y g++ git r-base r-base-dev r-base-core r-doc-html libc6-dev libssl-dev libxml2 libxml2-dev libcurl4-openssl-dev file libjansson4 libmagic-mgc libmagic1 libyara8 yara python3 python3-pip python3-dev openjdk-17-jdk
 
 # Set Java environment variables
 ENV JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
@@ -36,7 +36,6 @@ ENV PATH="$PATH:$JAVA_HOME/bin"
 RUN echo 'options(repos = c(CRAN = "http://cran.rstudio.com"))' >> /usr/lib/R/etc/Rprofile.site
 RUN Rscript -e "install.packages(c('remotes', 'stringr', 'jsonlite'))"
 RUN Rscript -e "remotes::install_github('NCEAS/metadig-r', ref = 'v.0.2.0')"
-RUN Rscript -e "remotes::install_github('NCEAS/metadig-rake', ref = 'develop')"
 
 # DataONE indexer prints copious error msgs if these files don't exist
 RUN mkdir -p /etc/dataone/index && touch /etc/dataone/index/d1client.properties && touch /etc/dataone/node.properties && touch /etc/dataone/index/cn-index-processor.properties
@@ -45,6 +44,11 @@ COPY Docker/metadig-worker/requirements.txt /opt/local/metadig/
 RUN pip install cython meson meson-python ninja
 RUN pip install -r /opt/local/metadig/requirements.txt
 
+# get the list of yara rules
+ADD https://github.com/YARAHQ/yara-forge/releases/download/20250615/yara-forge-rules-core.zip /opt/local/metadig/
+
+RUN unzip /opt/local/metadig/yara-forge-rules-core -d /opt/local/metadig/
+RUN python3 -c "import yara; r = yara.compile(filepath='/opt/local/metadig/packages/core/yara-rules-core.yar'); r.save('/opt/local/metadig/yara-compiled.yc')"
 # Run the Worker process
 # Note: docker --buile-arg only allows one argument (one token only, multiple tokens inside quotes doesn't work, so have
 #   to specify java options directly on command line.
