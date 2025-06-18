@@ -13,7 +13,7 @@ RUN mkdir -p /var/data/repos
 # Set the working directory 
 WORKDIR /var/lib/metadig
 
-ARG ENGINE_TAG=3.0.1
+ARG ENGINE_TAG=3.2.0-SNAPSHOT
 ENV ENGINE_TAG=${ENGINE_TAG}
 
 # The most recently built jar file is copied from the maven build directory to this dir by maven, so that
@@ -45,11 +45,11 @@ RUN pip install cython meson meson-python ninja
 RUN pip install -r /opt/local/metadig/requirements.txt
 
 # get the list of yara rules
-ADD https://github.com/YARAHQ/yara-forge/releases/download/20250615/yara-forge-rules-core.zip /opt/local/metadig/data
+ADD https://github.com/YARAHQ/yara-forge/releases/download/20250615/yara-forge-rules-core.zip /opt/local/metadig
 
-RUN unzip /opt/local/metadig/data/yara-forge-rules-core -d /opt/local/metadig/data/
-
-RUN python3 -c "import yara; r = yara.compile(filepath='/opt/local/metadig/data/packages/core/yara-rules-core.yar'); r.save('/opt/local/metadig/data/yara-compiled.yc')"
+RUN unzip /opt/local/metadig/yara-forge-rules-core -d /opt/local/metadig
+RUN mkdir /opt/local/metadig/data
+RUN python3 -c "import yara; r = yara.compile(filepath='/opt/local/metadig/packages/core/yara-rules-core.yar'); r.save('/opt/local/metadig/data/yara-compiled.yc')"
 RUN chmod o+rx /opt/local/metadig/data/yara-compiled.yc
 
 # Run the Worker process
