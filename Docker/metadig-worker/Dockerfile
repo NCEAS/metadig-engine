@@ -47,7 +47,7 @@ RUN pip install -r /opt/local/metadig/requirements.txt
 # get the list of yara rules
 ADD https://github.com/YARAHQ/yara-forge/releases/download/20250615/yara-forge-rules-core.zip /opt/local/metadig/data
 
-RUN unzip /opt/local/metadig/data yara-forge-rules-core -d /opt/local/metadig/data/
+RUN unzip /opt/local/metadig/data/yara-forge-rules-core -d /opt/local/metadig/data/
 
 RUN python3 -c "import yara; r = yara.compile(filepath='/opt/local/metadig/data/packages/core/yara-rules-core.yar'); r.save('/opt/local/metadig/data/yara-compiled.yc')"
 RUN chmod o+rx /opt/local/metadig/data/yara-compiled.yc
