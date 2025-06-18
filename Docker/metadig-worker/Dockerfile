@@ -45,11 +45,12 @@ RUN pip install cython meson meson-python ninja
 RUN pip install -r /opt/local/metadig/requirements.txt
 
 # get the list of yara rules
-ADD https://github.com/YARAHQ/yara-forge/releases/download/20250615/yara-forge-rules-core.zip /opt/local/metadig/
+ADD https://github.com/YARAHQ/yara-forge/releases/download/20250615/yara-forge-rules-core.zip /opt/local/metadig/data
 
-RUN unzip /opt/local/metadig/yara-forge-rules-core -d /opt/local/metadig/
+RUN unzip /opt/local/metadig/data yara-forge-rules-core -d /opt/local/metadig/data/
 
-RUN python3 -c "import yara; r = yara.compile(filepath='/opt/local/metadig/packages/core/yara-rules-core.yar'); r.save('/opt/local/metadig/yara-compiled.yc')"
+RUN python3 -c "import yara; r = yara.compile(filepath='/opt/local/metadig/data/packages/core/yara-rules-core.yar'); r.save('/opt/local/metadig/data/yara-compiled.yc')"
+RUN chmod o+rx /opt/local/metadig/data/yara-compiled.yc
 
 # Run the Worker process
 # Note: docker --buile-arg only allows one argument (one token only, multiple tokens inside quotes doesn't work, so have
