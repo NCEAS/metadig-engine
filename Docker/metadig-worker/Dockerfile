@@ -49,9 +49,6 @@ ADD https://github.com/YARAHQ/yara-forge/releases/download/20250615/yara-forge-r
 
 RUN unzip yara-forge-rules-core
 
-COPY Docker/metadig-worker/test.yar /var/lib/metadig/packages/core/
-RUN cat packages/core/test.yar >> packages/core/yara-rules-core.yar
-
 RUN python3 -c "import yara; r = yara.compile(filepath='/var/lib/metadig/packages/core/yara-rules-core.yar'); r.save('/var/lib/metadig/yara-compiled.yc')"
 RUN chmod o+rx /var/lib/metadig/yara-compiled.yc
 
