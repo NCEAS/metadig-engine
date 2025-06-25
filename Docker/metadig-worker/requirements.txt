@@ -1,5 +1,4 @@
 numpy
-metadig @ git+https://github.com/NCEAS/metadig-py.git@develop
 requests
 pandas
 python-magic
@@ -11,3 +10,4 @@ meson-python
 ninja
 yara-python
 xarray[io]
+metadig @ git+https://github.com/NCEAS/metadig-py.git@develop
