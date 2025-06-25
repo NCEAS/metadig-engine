@@ -5,4 +5,9 @@ pandas
 python-magic
 tabulate
 chardet
+cython
+meson
+meson-python
+ninja
 yara-python
+xarray[io]

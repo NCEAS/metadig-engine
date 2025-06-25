@@ -41,7 +41,7 @@ RUN Rscript -e "remotes::install_github('NCEAS/metadig-r', ref = 'v.0.2.0')"
 RUN mkdir -p /etc/dataone/index && touch /etc/dataone/index/d1client.properties && touch /etc/dataone/node.properties && touch /etc/dataone/index/cn-index-processor.properties
 
 COPY Docker/metadig-worker/requirements.txt /opt/local/metadig/
-RUN pip install cython meson meson-python ninja
+
 RUN pip install -r /opt/local/metadig/requirements.txt
 
 # get the list of yara rules
