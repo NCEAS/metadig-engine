@@ -5,7 +5,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>edu.ucsb.nceas</groupId>
   <artifactId>metadig-engine</artifactId>
-  <version>3.1.0</version>
+  <version>3.1.1</version>
   <packaging>jar</packaging>
   <name>metadig-engine</name>
   <description>MetaDIG library for running metadata quality tests</description>
@@ -369,7 +369,7 @@
     <dependency>
       <groupId>org.postgresql</groupId>
       <artifactId>postgresql</artifactId>
-      <version>42.7.4</version>
+      <version>42.7.7</version>
     </dependency>
     <!-- https://mvnrepository.com/artifact/org.apache.httpcomponents/httpcore -->
     <dependency>

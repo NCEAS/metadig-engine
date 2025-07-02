@@ -6,3 +6,4 @@ test/**
 metadig-engine.iml
 secret
 demo/**
+.vscode/*
