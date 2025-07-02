@@ -1,6 +1,13 @@
 numpy
-metadig @ git+https://github.com/NCEAS/metadig-py.git
 requests
 pandas
 python-magic
 tabulate
+chardet
+cython
+meson
+meson-python
+ninja
+yara-python
+xarray[io]
+metadig @ git+https://github.com/NCEAS/metadig-py.git
