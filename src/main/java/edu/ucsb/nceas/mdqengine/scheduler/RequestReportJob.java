@@ -733,22 +733,22 @@ public class RequestReportJob implements Job {
             log.debug("Retrieved object stream via hashstore");
 
         } catch (NoSuchAlgorithmException nsae) {
-            log.warn("Unable to retrieve object from hashstore for pid: " + pid.getValue()
+            log.trace("Unable to retrieve object from hashstore for pid: " + pid.getValue()
                     + ". Trying MN/CN API. Issue with store algorithm: " + nsae.getMessage());
             throw nsae;
 
         } catch (FileNotFoundException fnfe) {
-            log.warn("Unable to retrieve object from hashstore for pid: " + pid.getValue()
+            log.trace("Unable to retrieve object from hashstore for pid: " + pid.getValue()
                     + ". Trying MN/CN API. File not found: " + fnfe.getMessage());
             throw fnfe;
 
         } catch (IOException ioe) {
-            log.warn("Unable to retrieve object from hashstore for pid: " + pid.getValue()
+            log.trace("Unable to retrieve object from hashstore for pid: " + pid.getValue()
                     + ". Trying MN/CN API. Unexpected IOException: " + ioe.getMessage());
             throw ioe;
 
         } catch (Exception ge) {
-            log.error("Unable to retrieve eml metadata doc from hashstore for pid: " + pid.getValue()
+            log.trace("Unable to retrieve eml metadata doc from hashstore for pid: " + pid.getValue()
                     + ". Trying MN/CN API. Additional Details: " + ge.getMessage());
             throw ge;
         }
