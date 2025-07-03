@@ -117,7 +117,7 @@ public class MDQEngine {
 			log.error("Could not retrieve data objects for pid:" + sysMeta.getIdentifier().getValue() + ", node:"
 					+ nodeId.getValue() + ". Additional information: " + e.getMessage());
 			if (suite.getId().startsWith("data-suite")) {
-				run.setRunStatus("FAILURE");
+				run.setRunStatus(Run.FAILURE);
 				run.setErrorDescription("Could not retrieve data objects.");
 			}
 			return run;
