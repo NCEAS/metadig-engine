@@ -528,38 +528,40 @@ public class RequestReportJob implements Job {
                 // There could be multiple wildcard filters, which are separated by ','.
                 String[] filters = pidFilter.split("\\|");
                 boolean matchedFilter = false;
+                boolean found = false;
                 for (String thisFilter : filters) {
                     if (thisFormatId.matches(thisFilter)) {
                         matchedFilter = true;
-                        break;
                     }
+                }
+
+                if (!matchedFilter) {
+                    // skip this object and go to the next one
+                    continue;
                 }
 
                 SystemMetadata sysmeta = null;
 
-                // this section is some temporary code we put in to get a data suite run completed in a reasonable amount of time on production
-                boolean found = false;
+                // this section is some temporary code we put in to get a data suite run
+                // completed in a reasonable amount of time on production
                 if (matchedFilter) {
                     if (dataSuite) {
                         try {
                             if (isCN) {
-                                log.trace("Getting pids for cn, for nodeid: " + nodeIdFilter);
-                                nodeRef = new NodeReference();
-                                nodeRef.setValue(nodeIdFilter);
                                 sysmeta = cnNode.getSystemMetadata(session, oi.getIdentifier());
                             } else {
-                                log.trace("Getting pids for mn");
-                                sysmeta  = mnNode.getSystemMetadata(session, oi.getIdentifier());
+                                sysmeta = mnNode.getSystemMetadata(session, oi.getIdentifier());
                             }
-
                             if (sysmeta.getObsoletedBy() == null) {
                                 found = true;
                             }
                         } catch (Exception e) {
-                            log.warn("Failed to get system metadata for PID: " + thisPid, e);
+                            log.warn("Failed to get system metadata for PID while collecting pids for data suite: "
+                                    + thisPid, e);
+                            found = false;
                         }
                     } else {
-                        // if not a dataSuite, skip the sysmeta check, it's already found 
+                        // if not a dataSuite, skip the sysmeta check, it's already found
                         found = true;
                     }
                 }
