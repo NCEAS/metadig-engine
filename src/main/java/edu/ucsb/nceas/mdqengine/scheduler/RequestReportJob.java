@@ -476,6 +476,7 @@ public class RequestReportJob implements Job {
         NodeReference nodeRef = null;
         Identifier identifier = null;
         Boolean replicaStatus = false;
+        Boolean dataSuite = suiteId.startsWith("data-suite");
 
         // Do some back-flips to convert the start and end date to the ancient Java
         // 'Date' type that is used by DataONE 'listObjects()'.
@@ -526,13 +527,43 @@ public class RequestReportJob implements Job {
                 // desired formats.
                 // There could be multiple wildcard filters, which are separated by ','.
                 String[] filters = pidFilter.split("\\|");
-                Boolean found = false;
+                boolean matchedFilter = false;
                 for (String thisFilter : filters) {
                     if (thisFormatId.matches(thisFilter)) {
-                        found = true;
-                        continue;
+                        matchedFilter = true;
+                        break;
                     }
                 }
+
+                SystemMetadata sysmeta = null;
+
+                // this section is some temporary code we put in to get a data suite run completed in a reasonable amount of time on production
+                boolean found = false;
+                if (matchedFilter) {
+                    if (dataSuite) {
+                        try {
+                            if (isCN) {
+                                log.trace("Getting pids for cn, for nodeid: " + nodeIdFilter);
+                                nodeRef = new NodeReference();
+                                nodeRef.setValue(nodeIdFilter);
+                                sysmeta = cnNode.getSystemMetadata(session, oi.getIdentifier());
+                            } else {
+                                log.trace("Getting pids for mn");
+                                sysmeta  = mnNode.getSystemMetadata(session, oi.getIdentifier());
+                            }
+
+                            if (sysmeta.getObsoletedBy() == null) {
+                                found = true;
+                            }
+                        } catch (Exception e) {
+                            log.warn("Failed to get system metadata for PID: " + thisPid, e);
+                        }
+                    } else {
+                        // if not a dataSuite, skip the sysmeta check, it's already found 
+                        found = true;
+                    }
+                }
+                // end section
 
                 // Always re-create a report, even if it exists for a pid, as the sysmeta could
                 // have
