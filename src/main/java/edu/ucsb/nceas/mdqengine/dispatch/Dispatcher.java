@@ -151,7 +151,6 @@ public class Dispatcher {
                 // try to find other result items from python checks
                 try {
                     out = engine.get("call()"); // run the python function
-                    engine.eval("globals().clear()\nimport gc\ngc.collect()");
                 } catch (Exception e) {
                     log.error(e.getMessage());
                     log.error(e.getStackTrace());
@@ -220,6 +219,7 @@ public class Dispatcher {
                     // if we haven't found anything at this point it probably failed
                     dr.setStatus(Status.FAILURE);
                 }
+                engine.eval("globals().clear()\nimport gc\ngc.collect()");
             }
         }
 
