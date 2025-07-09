@@ -136,7 +136,7 @@ public class DataONE {
             } catch (ParserConfigurationException pe) {
                 log.error("XML parser configuration exception: ", pe);
             } catch (SAXException e) {
-                log.error("Error parsing XML: " + e.getMessage() + qis.read());
+                log.error("Error parsing XML: " + e.getMessage());
             } finally {
                 qis.close();
             }
