@@ -10,4 +10,5 @@ meson-python
 ninja
 yara-python
 xarray[io]
+cftime
 metadig @ git+https://github.com/NCEAS/metadig-py.git@develop
