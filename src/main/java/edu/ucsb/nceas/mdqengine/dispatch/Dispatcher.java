@@ -219,6 +219,7 @@ public class Dispatcher {
                     // if we haven't found anything at this point it probably failed
                     dr.setStatus(Status.FAILURE);
                 }
+                engine.eval("globals().clear()\nimport gc\ngc.collect()");
             }
         }
 
