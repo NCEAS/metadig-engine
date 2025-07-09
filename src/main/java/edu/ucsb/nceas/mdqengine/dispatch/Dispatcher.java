@@ -151,7 +151,7 @@ public class Dispatcher {
                 // try to find other result items from python checks
                 try {
                     out = engine.get("call()"); // run the python function
-                    Object clr = engine.get("globals().clear()\nimport gc\ngc.collect()");
+                    engine.eval("globals().clear()\nimport gc\ngc.collect()");
                 } catch (Exception e) {
                     log.error(e.getMessage());
                     log.error(e.getStackTrace());
