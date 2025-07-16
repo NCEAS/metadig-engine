@@ -27,8 +27,8 @@ quality,quality-cerp_sfwmd,metadig,20 0/1 * * * ?,"^eml.*|^http.*eml.*;FAIR-suit
 quality,quality-CA_OPC,metadig,25 0/1 * * * ?,"^eml.*|^http.*eml.*;FAIR-suite-0.4.0;urn:node:CA_OPC;2010-10-07T00:00:00.00Z;1;1000;"
 quality,quality-sctld,metadig,30 0/1 * * * ?,"^eml.*|^http.*eml.*;FAIR-suite-0.4.0;urn:node:SCTLD;2010-10-07T00:00:00.00Z;1;1000;"
 quality,quality-drp,metadig,35 0/1 * * * ?,"^eml.*|^http.*eml.*;FAIR-suite-0.4.0;urn:node:DRP;2010-10-07T00:00:00.00Z;1;1000;"
-quality,quality-si,metadig,45 0/1 * * * ?,"^eml.*|^http.*eml.*;FAIR-suite-0.4.0;urn:node:SI;2010-10-07T00:00:00.00Z;1;1000;"
-#quality,quality-data-suite,metadig,55 0/5 * * * ?,"^eml.*|^http.*eml.*;data-suite-0.1.0;urn:node:ARCTIC;1900-11-01T00:00:00.00Z;1;1000"
+#quality,quality-si,metadig,45 0/1 * * * ?,"^eml.*|^http.*eml.*;FAIR-suite-0.4.0;urn:node:SI;2010-10-07T00:00:00.00Z;1;1000;"
+quality,quality-data-suite,metadig,55 0/5 * * * ?,"^eml.*|^http.*eml.*;data-suite-0.1.0;urn:node:ARCTIC;1900-11-01T00:00:00.00Z;1;1000"
 #
 # Portal scoring tasks
 score,portal-KNB-FAIR,metadig,1 0/1 * * * ?,"*portals*;FAIR-suite-0.4.0;urn:node:KNB;2020-08-10T00:00:00.00Z;1;100;portal"

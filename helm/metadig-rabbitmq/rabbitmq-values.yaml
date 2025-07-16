@@ -1,0 +1,49 @@
+image:
+  registry: docker.io
+  repository: bitnami/rabbitmq
+
+auth:
+  username: metadig
+  password: quality
+
+replicaCount: 6
+
+podSecurityContext:
+  enabled: false
+  fsGroup: 1001
+
+podManagementPolicy: Parallel
+
+service:
+  type: ClusterIP
+  externalTrafficPolicy: Cluster
+
+resources:
+  requests:
+    cpu: 1
+    memory: 2Gi
+  limits:
+    cpu: 2
+    memory: 4Gi
+
+ingress:
+  enabled: false
+  tls: false
+  ingressClassName: nginx
+
+persistence:
+  enabled: true
+  storageClass: csi-rbd-sc
+  size: 10Gi
+
+volumePermissions:
+  enabled: false
+  containerSecurityContext:
+    runAsUser: 1001
+
+serviceAccount:
+  create: false
+  name: metadig
+
+tls:
+  enabled: false

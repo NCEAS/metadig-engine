@@ -33,7 +33,8 @@ public class DataONE {
      * @param CNnode       the DataONE CN to send the request to
      * @param session      the DataONE authenticated session
      * @return a DataONE subject information object
-     * @throws MetadigProcessException When unable to get subject information from CNnode
+     * @throws MetadigProcessException When unable to get subject information from
+     *                                 CNnode
      */
     public static SubjectInfo getSubjectInfo(Subject rightsHolder, MultipartCNode CNnode,
             Session session) throws MetadigProcessException {
@@ -127,22 +128,16 @@ public class DataONE {
 
         try {
             // If results were returned, create an XML document from them
-            log.debug("Solr Query qis bytes available: " + qis.available());
-            if (qis.available() > 0) {
-                try {
-                    DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-                    builder = factory.newDocumentBuilder();
-                    xmldoc = builder.parse(new InputSource(qis));
-                    log.trace("Created xml doc: " + xmldoc.toString());
-                } catch (ParserConfigurationException pe) {
-                    log.error("XML parser configuration exception: ", pe);
-                } catch (SAXException e) {
-                    log.error("Error parsing XML: " + e.getMessage() + qis.read());
-                } finally {
-                    qis.close();
-                }
-            } else {
-                log.info("No results returned from D1 Solr query");
+            try {
+                DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+                builder = factory.newDocumentBuilder();
+                xmldoc = builder.parse(new InputSource(qis));
+                log.trace("Created xml doc: " + xmldoc.toString());
+            } catch (ParserConfigurationException pe) {
+                log.error("XML parser configuration exception: ", pe);
+            } catch (SAXException e) {
+                log.error("Error parsing XML: " + e.getMessage());
+            } finally {
                 qis.close();
             }
         } catch (IOException ioe) {

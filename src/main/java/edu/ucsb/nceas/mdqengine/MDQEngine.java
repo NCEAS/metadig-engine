@@ -116,6 +116,11 @@ public class MDQEngine {
 		} catch (MetadigException e) {
 			log.error("Could not retrieve data objects for pid:" + sysMeta.getIdentifier().getValue() + ", node:"
 					+ nodeId.getValue() + ". Additional information: " + e.getMessage());
+			if (suite.getId().startsWith("data-suite")) {
+				run.setRunStatus(Run.FAILURE);
+				run.setErrorDescription("Could not retrieve data objects.");
+			}
+			return run;
 		}
 		params.put("dataPids", dataPids);
 
@@ -289,6 +294,11 @@ public class MDQEngine {
 			log.debug("Encoded query: " + encodedQuery);
 			doc = DataONE.querySolr(encodedQuery, 0, 10000, d1Node, session);
 
+			if (doc == null) {
+				MetadigException e = new MetadigException("No results returned when trying to find data pids.");
+				throw e;
+			}
+
 			doc.getDocumentElement().normalize();
 
 			NodeList nodeList = doc.getElementsByTagName("str");
@@ -302,6 +312,11 @@ public class MDQEngine {
 						dataObjects.add(element.getTextContent());
 					}
 				}
+			}
+
+			if (dataObjects.isEmpty()) {
+				MetadigException e = new MetadigException("No results returned when trying to find data pids.");
+				throw e;
 			}
 
 		} catch (IOException e) {

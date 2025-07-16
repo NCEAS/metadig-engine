@@ -476,6 +476,7 @@ public class RequestReportJob implements Job {
         NodeReference nodeRef = null;
         Identifier identifier = null;
         Boolean replicaStatus = false;
+        Boolean dataSuite = suiteId.startsWith("data-suite");
 
         // Do some back-flips to convert the start and end date to the ancient Java
         // 'Date' type that is used by DataONE 'listObjects()'.
@@ -526,13 +527,45 @@ public class RequestReportJob implements Job {
                 // desired formats.
                 // There could be multiple wildcard filters, which are separated by ','.
                 String[] filters = pidFilter.split("\\|");
-                Boolean found = false;
+                boolean matchedFilter = false;
+                boolean found = false;
                 for (String thisFilter : filters) {
                     if (thisFormatId.matches(thisFilter)) {
-                        found = true;
-                        continue;
+                        matchedFilter = true;
                     }
                 }
+
+                if (!matchedFilter) {
+                    // skip this object and go to the next one
+                    continue;
+                }
+
+                SystemMetadata sysmeta = null;
+
+                // this section is some temporary code we put in to get a data suite run
+                // completed in a reasonable amount of time on production
+                if (matchedFilter) {
+                    if (dataSuite) {
+                        try {
+                            if (isCN) {
+                                sysmeta = cnNode.getSystemMetadata(session, oi.getIdentifier());
+                            } else {
+                                sysmeta = mnNode.getSystemMetadata(session, oi.getIdentifier());
+                            }
+                            if (sysmeta.getObsoletedBy() == null) {
+                                found = true;
+                            }
+                        } catch (Exception e) {
+                            log.warn("Failed to get system metadata for PID while collecting pids for data suite: "
+                                    + thisPid, e);
+                            found = false;
+                        }
+                    } else {
+                        // if not a dataSuite, skip the sysmeta check, it's already found
+                        found = true;
+                    }
+                }
+                // end section
 
                 // Always re-create a report, even if it exists for a pid, as the sysmeta could
                 // have
@@ -733,22 +766,22 @@ public class RequestReportJob implements Job {
             log.debug("Retrieved object stream via hashstore");
 
         } catch (NoSuchAlgorithmException nsae) {
-            log.warn("Unable to retrieve object from hashstore for pid: " + pid.getValue()
+            log.trace("Unable to retrieve object from hashstore for pid: " + pid.getValue()
                     + ". Trying MN/CN API. Issue with store algorithm: " + nsae.getMessage());
             throw nsae;
 
         } catch (FileNotFoundException fnfe) {
-            log.warn("Unable to retrieve object from hashstore for pid: " + pid.getValue()
+            log.trace("Unable to retrieve object from hashstore for pid: " + pid.getValue()
                     + ". Trying MN/CN API. File not found: " + fnfe.getMessage());
             throw fnfe;
 
         } catch (IOException ioe) {
-            log.warn("Unable to retrieve object from hashstore for pid: " + pid.getValue()
+            log.trace("Unable to retrieve object from hashstore for pid: " + pid.getValue()
                     + ". Trying MN/CN API. Unexpected IOException: " + ioe.getMessage());
             throw ioe;
 
         } catch (Exception ge) {
-            log.error("Unable to retrieve eml metadata doc from hashstore for pid: " + pid.getValue()
+            log.trace("Unable to retrieve eml metadata doc from hashstore for pid: " + pid.getValue()
                     + ". Trying MN/CN API. Additional Details: " + ge.getMessage());
             throw ge;
         }
