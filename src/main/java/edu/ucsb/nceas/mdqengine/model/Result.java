@@ -34,7 +34,7 @@ public class Result {
 		return output;
 	}
 
-	public void setOutput(Output... output) {
+	public void setOutput(Output output) {
 		this.output = Arrays.asList(output);
 	}
 	
