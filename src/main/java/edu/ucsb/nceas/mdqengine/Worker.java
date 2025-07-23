@@ -253,6 +253,18 @@ public class Worker {
                                 + ex.getMessage());
                     }
                 }
+                // if run has been marked as failed elsewhere, don't try to index it
+                if (run.getRunStatus() == Run.FAILURE) {
+                    failFast = true;
+                    run.setRunCount(runCount);
+                    try {
+                        run.save();
+                    } catch (MetadigException ex) {
+                        log.error("Processing failed, then unable to save the quality report to database:"
+                                + ex.getMessage());
+                    }
+                    log.debug("Saved quality run status after error");
+                }
 
                 String sequenceId = null;
                 /* Save the processing report to persistent storage */
@@ -571,8 +583,10 @@ public class Worker {
                     + suiteId + e.getMessage(), e);
         }
 
-        // Reminder: System metadata is required for the solr index to obtain statistics/reports
-        // TODO: We will need a path to obtain the system metadata if its removed from qEntry
+        // Reminder: System metadata is required for the solr index to obtain
+        // statistics/reports
+        // TODO: We will need a path to obtain the system metadata if its removed from
+        // qEntry
         // Add DataONE sysmeta, if it was provided.
         if (sysmeta != null) {
             SysmetaModel smm = new SysmetaModel();
