@@ -1,6 +1,6 @@
 image:
   registry: docker.io
-  repository: bitnami/rabbitmq
+  repository: bitnamilegacy/rabbitmq
 
 auth:
   username: metadig

@@ -13,8 +13,7 @@ image:
 sidecar:
   enabled: true
   name: pgbouncer
-  repository: docker.io/bitnami/pgbouncer
-  #repository: docker.io/edoburu/pgbouncer
+  repository: docker.io/bitnamilegacy/pgbouncer
   pullPolicy: IfNotPresent
   tag: "1.16.1"
   #tag: "1.15.0"
