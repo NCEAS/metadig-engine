@@ -42,8 +42,10 @@ serviceAccount:
 
 podAnnotations: {}
 
-podSecurityContext: {}
-  # fsGroup: 2000
+podSecurityContext:
+  enabled: true
+  runAsUser: 59996
+  runAsGroup: 59996
 
 securityContext: {}
   # capabilities:
