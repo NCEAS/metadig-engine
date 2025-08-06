@@ -6,7 +6,9 @@ collection: "quality"
 cloudEnabled: false
 
 image:
-  tag: 8.11.1-debian-10-r153
+  registry: docker.io
+  repository: bitnamilegacy/solr
+  tag: 8.11.4-debian-12-r3
 
 collectionShards: 1
 collectionReplicas: 1
@@ -33,7 +35,7 @@ ingress:
 
 persistence:
   enabled: true
-  mountPath: /bitnamilegacy/solr
+  mountPath: /bitnami/solr
   storageClass: csi-rbd-sc
   size: 20Gi
 
@@ -67,3 +69,7 @@ zookeeper:
   persistence:
     enabled: false
     storageClass: ""
+
+global:
+  security:
+    allowInsecureImages: true

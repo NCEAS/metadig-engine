@@ -47,3 +47,7 @@ serviceAccount:
 
 tls:
   enabled: false
+
+global:
+  security:
+    allowInsecureImages: true
