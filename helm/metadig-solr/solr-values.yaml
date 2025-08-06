@@ -33,7 +33,7 @@ ingress:
 
 persistence:
   enabled: true
-  mountPath: /bitnami/solr
+  mountPath: /bitnamilegacy/solr
   storageClass: csi-rbd-sc
   size: 20Gi
 
