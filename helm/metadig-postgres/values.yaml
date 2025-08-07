@@ -6,9 +6,9 @@ replicaCount: 1
 
 image:
   repository: docker.io/postgres 
-  pullPolicy: IfNotPresent
+  pullPolicy: Always
   # Overrides the image tag whose default is the chart appVersion.
-  tag: "10.7-alpine"
+  tag: "10.7"
 
 sidecar:
   enabled: true
@@ -43,9 +43,9 @@ serviceAccount:
 podAnnotations: {}
 
 podSecurityContext:
-  enabled: true
   runAsUser: 59996
   runAsGroup: 59996
+  fsGroup: 59996
 
 securityContext: {}
   # capabilities:
