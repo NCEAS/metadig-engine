@@ -9,6 +9,9 @@ LABEL maintainer="Jeanette Clark jclark@nceas.ucsb.edu"
 ARG ENGINE_TAG=2.4.0
 ENV ENGINE_TAG=${ENGINE_TAG}
 
+RUN groupadd -g 59990 metadig
+RUN useradd -u 59990 -g 59990 metadig
+
 # Set the working directory
 WORKDIR /var/lib/metadig
 
@@ -31,6 +34,10 @@ RUN apt-get clean ; apt update
 RUN apt-get -y install vim bash r-base r-cran-httr r-cran-xml2 r-cran-tidyr r-cran-scales r-cran-lubridate r-cran-ggplot2 r-cran-magrittr r-cran-readr
 # Install the metadig-engine distribution
 RUN Rscript --vanilla -e 'install.packages("metadig.tar.gz", repos=NULL)'
+
+RUN chown -R metadig:metadig /var/lib/metadig /etc/dataone
+
+USER 59990
 
 # Run the Scorer process
 # Set classpath to include /opt/local/metadig/log4j.properties, if it exists, so that logging can be changed without

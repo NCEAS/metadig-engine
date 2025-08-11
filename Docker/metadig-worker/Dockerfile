@@ -16,6 +16,9 @@ WORKDIR /var/lib/metadig
 ARG ENGINE_TAG=3.2.0-SNAPSHOT
 ENV ENGINE_TAG=${ENGINE_TAG}
 
+RUN groupadd -g 59990 metadig
+RUN useradd -u 59990 -g 59990 metadig
+
 # The most recently built jar file is copied from the maven build directory to this dir by maven, so that
 # it can be copyied to the image.
 COPY target/metadig-engine-$ENGINE_TAG.jar metadig-engine-$ENGINE_TAG.jar
@@ -51,6 +54,10 @@ RUN unzip yara-forge-rules-core
 
 RUN python3 -c "import yara; r = yara.compile(filepath='/var/lib/metadig/packages/core/yara-rules-core.yar'); r.save('/var/lib/metadig/yara-compiled.yc')"
 RUN chmod o+rx /var/lib/metadig/yara-compiled.yc
+
+RUN chown -R metadig:metadig /var/lib/metadig /etc/dataone /opt/local/metadig
+
+USER 59990
 
 # Run the Worker process
 # Note: docker --buile-arg only allows one argument (one token only, multiple tokens inside quotes doesn't work, so have
