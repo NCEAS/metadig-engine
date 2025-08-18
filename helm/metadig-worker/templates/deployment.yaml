@@ -49,7 +49,7 @@ spec:
                       {{- if .Values.java.extraOpts }}
                         {{- printf " " }}
                       {{- end }}
-                      {{- join " " .Values.java.extraOpts }}
+                      {{- join " " .Values.java.jmxOpts }}
                     {{- end }}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
@@ -67,8 +67,8 @@ spec:
             mountPath: {{ .Values.persistence.metacat.mountPath }}
             readOnly: true
           ports:
-          {{- if .Values.tomcat.jmxEnabled }}
-            - containerPort: {{ .Values.tomcat.jmxPort }}
+          {{- if .Values.java.jmxEnabled }}
+            - containerPort: {{ .Values.java.jmxPort }}
               name: jmx
           {{- end }}
       volumes:
