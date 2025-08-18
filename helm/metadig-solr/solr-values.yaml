@@ -27,6 +27,19 @@ service:
   type: ClusterIP
   externalTrafficPolicy: Cluster
 
+customReadinessProbe:
+  exec:
+    command:
+      - bash
+      - -ec
+      - >
+        curl --silent --connect-timeout 15 http://localhost:${SOLR_PORT_NUMBER}/solr/admin/info/system | grep --quiet '"status":0'
+  initialDelaySeconds: 60
+  periodSeconds: 10
+  timeoutSeconds: 15
+  successThreshold: 1
+  failureThreshold: 6
+
 ingress:
   enabled: false
   tls: false

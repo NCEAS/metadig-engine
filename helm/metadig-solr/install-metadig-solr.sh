@@ -5,6 +5,6 @@
 #helm repo add bitnami https://charts.bitnami.com/bitnami
 
 helm upgrade metadig-solr bitnami/solr \
-  --version=9.6.8 \
+  --version=9.5.5 \
   --namespace metadig \
   -f solr-values.yaml
