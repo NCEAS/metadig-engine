@@ -64,7 +64,7 @@ USER 59990
 #   to specify java options directly on command line.
 # Set classpath to include /opt/local/metadig/log4j.properties, if it exists, so that logging can be changed without
 # having to rebuild the container. Note that on k8s, this dir is mapped to the persistent volume, so will be /data/metadig/log4j.properties
-CMD java $CATALINA_OPTS \
+CMD java $JMX_OPTS \
     -Dlog4j2.formatMsgNoLookups=true \
     -XX:+UnlockExperimentalVMOptions \
     -XX:+UseSerialGC \

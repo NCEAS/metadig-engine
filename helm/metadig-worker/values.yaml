@@ -26,22 +26,19 @@ env:
 - name: JAVA_OPTS
   value: "-Dlog4j2.formatMsgNoLookups=true"
 
-tomcat:
-  extraCatalinaOpts:
+java:
+  extraOpts:
     - -XX:MaxRAMPercentage=75
-
   jmxEnabled: true
-
   jmxPort: 9010
-
-  jmxCatalinaOpts:
+  jmxOpts:
     - -Dcom.sun.management.jmxremote
     - -Dcom.sun.management.jmxremote.port=9010
     - -Dcom.sun.management.jmxremote.rmi.port=9010
     - -Dcom.sun.management.jmxremote.local.only=false
     - -Dcom.sun.management.jmxremote.authenticate=false
     - -Dcom.sun.management.jmxremote.ssl=false
-    - -Djava.rmi.server.hostname=localhost
+    - -Djava.rmi.server.hostname=127.0.0.1
 
 serviceAccount:
   # Specifies whether a service account should be created

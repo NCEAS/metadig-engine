@@ -43,13 +43,13 @@ spec:
               secretKeyRef:
                 name: dataone-token
                 key: DataONEauthToken
-          - name: CATALINA_OPTS
-            value: {{ join " " .Values.tomcat.extraCatalinaOpts }}
-                    {{- if .Values.tomcat.jmxEnabled }}
-                      {{- if .Values.tomcat.extraCatalinaOpts }}
+          - name: JMX_OPTS
+            value: {{ join " " .Values.java.extraOpts }}
+                    {{- if .Values.java.jmxEnabled }}
+                      {{- if .Values.java.extraOpts }}
                         {{- printf " " }}
                       {{- end }}
-                      {{- join " " .Values.tomcat.jmxCatalinaOpts }}
+                      {{- join " " .Values.java.extraOpts }}
                     {{- end }}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
