@@ -28,8 +28,10 @@ spec:
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
-          command: [ "su", "-", "postgres", "-c", "postgres -D /opt/local/postgresql/data" ]
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env:
+            - name: PGDATA
+              value: /opt/local/postgresql/data
           ports:
           - name: postgres
             containerPort: 5432

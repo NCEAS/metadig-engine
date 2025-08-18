@@ -1,6 +1,6 @@
 image:
   registry: docker.io
-  repository: bitnami/rabbitmq
+  repository: bitnamilegacy/rabbitmq
 
 auth:
   username: metadig
@@ -47,3 +47,7 @@ serviceAccount:
 
 tls:
   enabled: false
+
+global:
+  security:
+    allowInsecureImages: true

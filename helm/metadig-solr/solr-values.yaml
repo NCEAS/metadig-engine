@@ -6,7 +6,9 @@ collection: "quality"
 cloudEnabled: false
 
 image:
-  tag: 8.11.1-debian-10-r153
+  registry: docker.io
+  repository: bitnamilegacy/solr
+  tag: 8.11.4-debian-12-r3
 
 collectionShards: 1
 collectionReplicas: 1
@@ -24,6 +26,19 @@ replicaCount: 1
 service:
   type: ClusterIP
   externalTrafficPolicy: Cluster
+
+customReadinessProbe:
+  exec:
+    command:
+      - bash
+      - -ec
+      - >
+        curl --silent --connect-timeout 15 http://localhost:${SOLR_PORT_NUMBER}/solr/admin/info/system | grep --quiet '"status":0'
+  initialDelaySeconds: 60
+  periodSeconds: 10
+  timeoutSeconds: 15
+  successThreshold: 1
+  failureThreshold: 6
 
 ingress:
   enabled: false
@@ -67,3 +82,7 @@ zookeeper:
   persistence:
     enabled: false
     storageClass: ""
+
+global:
+  security:
+    allowInsecureImages: true

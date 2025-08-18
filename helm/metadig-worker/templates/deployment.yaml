@@ -43,6 +43,14 @@ spec:
               secretKeyRef:
                 name: dataone-token
                 key: DataONEauthToken
+          - name: JMX_OPTS
+            value: {{ join " " .Values.java.extraOpts }}
+                    {{- if .Values.java.jmxEnabled }}
+                      {{- if .Values.java.extraOpts }}
+                        {{- printf " " }}
+                      {{- end }}
+                      {{- join " " .Values.java.jmxOpts }}
+                    {{- end }}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
           volumeMounts:
@@ -58,6 +66,11 @@ spec:
           - name: {{ .Values.persistence.metacat.claimName }}
             mountPath: {{ .Values.persistence.metacat.mountPath }}
             readOnly: true
+          ports:
+          {{- if .Values.java.jmxEnabled }}
+            - containerPort: {{ .Values.java.jmxPort }}
+              name: jmx
+          {{- end }}
       volumes:
       - name: metadig-pv
         persistentVolumeClaim:
