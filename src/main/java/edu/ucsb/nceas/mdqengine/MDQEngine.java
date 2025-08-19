@@ -125,8 +125,9 @@ public class MDQEngine {
 			if (suite.getId().startsWith("data-suite")) {
 				run.setRunStatus(Run.FAILURE);
 				run.setErrorDescription("Could not retrieve data objects.");
+				return run;
 			}
-			return run;
+			
 		}
 		params.put("dataPids", dataPids);
 
