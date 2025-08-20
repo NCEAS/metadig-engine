@@ -2,19 +2,13 @@ package edu.ucsb.nceas.mdqengine.serialize;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringEscapeUtils;
-import org.w3c.dom.Document;
-import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
-
-import edu.ucsb.nceas.mdqengine.model.Check;
 
 import javax.xml.XMLConstants;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.stream.StreamSource;
 import javax.xml.validation.Schema;
@@ -22,8 +16,8 @@ import javax.xml.validation.SchemaFactory;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
+import java.util.Map;
 
 /**
  * Utility class for marshalling and unmarshalling Java objects to and from XML.
@@ -78,13 +72,7 @@ public class XmlMarshaller {
 	public static Object fromXml(String xml, Class clazz)
 			throws ParserConfigurationException, JAXBException, IOException, SAXException {
 
-		String ns = getRootNamespace(xml);
-		if ("https://nceas.ucsb.edu/mdqe/v1".equals(ns)
-				|| "https://nceas.ucsb.edu/mdqe/v1.1".equals(ns)) {
-			// Replace known older namespaces with v1.2
-			xml = xml.replace("https://nceas.ucsb.edu/mdqe/v1", "https://nceas.ucsb.edu/mdqe/v1.2");
-			xml = xml.replace("https://nceas.ucsb.edu/mdqe/v1.1", "https://nceas.ucsb.edu/mdqe/v1.2");
-		}
+		xml = normalizeNamespace(xml);
 
 		JAXBContext context = JAXBContext.newInstance(clazz);
 		Unmarshaller u = context.createUnmarshaller();
@@ -112,20 +100,37 @@ public class XmlMarshaller {
 	}
 
 	/**
-	 * Extracts the root namespace URI from an XML string.
+	 * Normalizes known outdated namespace URIs in XML namespace declarations
+	 * to the most recent version.
 	 * 
-	 * @param xml the XML string from which the root namespace will be extracted
-	 * @return the root namespace URI of the XML document
-	 * @throws ParserConfigurationException
-	 * @throws SAXException
-	 * @throws IOException
+	 * This is necessary because maintaining two+ versions of the jaxb model, which
+	 * doesn't match the schema anyway, was not working. New schemas are always
+	 * backwards compatible with old ones, so an old document can always be
+	 * unmarshalled against a newer version of the schema.
+	 *
+	 * 
+	 * @param xml the XML string to normalize
+	 * @return the XML string with known namespaces rewritten
 	 */
-	public static String getRootNamespace(String xml) throws ParserConfigurationException, SAXException, IOException {
-		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-		dbf.setNamespaceAware(true);
-		DocumentBuilder db = dbf.newDocumentBuilder();
-		Document doc = db.parse(new InputSource(new StringReader(xml)));
+	public static String normalizeNamespace(String xml) {
+		if (xml == null)
+			return null;
 
-		return doc.getDocumentElement().getNamespaceURI();
+		Map<String, String> nsMap = Map.of(
+				"https://nceas.ucsb.edu/mdqe/v1", "https://nceas.ucsb.edu/mdqe/v1.2",
+				"https://nceas.ucsb.edu/mdqe/v1.1", "https://nceas.ucsb.edu/mdqe/v1.2");
+
+		String result = xml;
+
+		for (java.util.Map.Entry<String, String> entry : nsMap.entrySet()) {
+			result = result.replace(
+					"xmlns:mdq=\"" + entry.getKey() + "\"",
+					"xmlns:mdq=\"" + entry.getValue() + "\"");
+			result = result.replace(
+					"xsi:schemaLocation=\"" + entry.getKey(),
+					"xsi:schemaLocation=\"" + entry.getValue());
+		}
+		return result;
 	}
+
 }
