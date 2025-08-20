@@ -5,18 +5,16 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.xml.bind.JAXBException;
+import javax.xml.parsers.ParserConfigurationException;
 
 import org.apache.commons.io.IOUtils;
 import org.xml.sax.SAXException;
 
-import edu.ucsb.nceas.mdqengine.model.Check;
-import edu.ucsb.nceas.mdqengine.model.Suite;
-import edu.ucsb.nceas.mdqengine.model.Selector;
 import edu.ucsb.nceas.mdqengine.serialize.XmlMarshaller;
 
 public class SuiteFactory {
 	
-	public static Suite getLTERSuite() throws IOException, JAXBException, SAXException {
+	public static Suite getLTERSuite() throws ParserConfigurationException, IOException, JAXBException, SAXException {
 		String xmlStr = IOUtils.toString(SuiteFactory.class.getResourceAsStream("/suites/test-lter-suite.xml"), "UTF-8");
 		Suite suite = (Suite) XmlMarshaller.fromXml(xmlStr, Suite.class);
 		return suite;
@@ -53,10 +51,10 @@ public class SuiteFactory {
 		entityCount.setEnvironment("JavaScript");
 		entityCount.setLevel(Level.INFO);
 		selectors = new ArrayList<Selector>();
-		s1 = new Selector();
-		s1.setName("entityCount");
-		s1.setXpath("count(//dataset/dataTable | //dataset/otherEntity)");
-		selectors.add(s1);
+		Selector s2 = new Selector();
+		s2.setName("entityCount");
+		s2.setXpath("count(//dataset/dataTable | //dataset/otherEntity)");
+		selectors.add(s2);
 		entityCount.setSelector(selectors);
 		entityCount.setCode("status = (entityCount > 0 ? 'SUCCESS' : 'FAILURE')");
 		checks.add(entityCount);
@@ -68,10 +66,10 @@ public class SuiteFactory {
 		attributeNames.setEnvironment("r");
 		attributeNames.setLevel(Level.REQUIRED);
 		selectors = new ArrayList<Selector>();
-		s1 = new Selector();
-		s1.setName("attributeNames");
-		s1.setXpath("//attribute/attributeName");
-		selectors.add(s1);
+		Selector s3 = new Selector();
+		s3.setName("attributeNames");
+		s3.setXpath("//attribute/attributeName");
+		selectors.add(s3);
 		attributeNames.setSelector(selectors);
 		attributeNames.setCode("status <- ifelse(any(duplicated(attributeNames)), 'FAILURE', 'SUCCESS')");
 		checks.add(attributeNames);
