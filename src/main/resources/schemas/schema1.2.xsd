@@ -8,7 +8,7 @@
   <xs:element name="status" type="tns:runStatus" />
   <xs:element name="error" type="tns:errorDescription" />
 
-  <xs:complexType name="systemMetadata">
+  <xs:complexType name="sysmeta">
     <xs:sequence>
       <xs:element name="originMemberNode" type="xs:string" minOccurs="0" />
       <xs:element name="rightsHolder" type="xs:string" minOccurs="0" />
@@ -104,7 +104,15 @@
       <xs:element name="timestamp" type="xs:dateTime" />
       <xs:element name="objectIdentifier" type="xs:string" minOccurs="0" />
       <xs:element name="suiteId" type="xs:string" minOccurs="0" />
+      <xs:element name="check" type="tns:check" minOccurs="0" />
+      <xs:element name="nodeId" type="xs:string" minOccurs="0" />
+      <xs:element name="status" type="tns:status" minOccurs="0" />
+      <xs:element name="runStatus" type="tns:runStatus" minOccurs="0" />
+      <xs:element name="errorDescription" type="tns:errorDescription" minOccurs="0" />
+      <xs:element name="sysmeta" type="tns:sysmeta" minOccurs="0" />
       <xs:element name="result" type="tns:result" minOccurs="0" maxOccurs="unbounded" />
+      <xs:element name="sequenceId" type="xs:string" minOccurs="0" />
+      <xs:element name="runCount" type="xs:int" minOccurs="0" />
     </xs:sequence>
   </xs:complexType>
 
