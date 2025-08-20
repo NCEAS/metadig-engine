@@ -175,18 +175,17 @@ public class DatabaseStore implements MDQStore, AutoCloseable {
                 stmt.close();
 
                 // Convert the returned run xml document to a 'run' object.
-                // first migrate the schema forward
-                String ns = XmlMarshaller.getRootNamespace(resultStr);
-
-                if ("https://nceas.ucsb.edu/mdqe/v1".equals(ns)
-                        || "https://nceas.ucsb.edu/mdqe/v1.1".equals(ns)) {
-                    // Replace known older namespaces with v1.2
-                    resultStr = resultStr.replace("https://nceas.ucsb.edu/mdqe/v1", "https://nceas.ucsb.edu/mdqe/v1.2");
-                    resultStr = resultStr.replace("https://nceas.ucsb.edu/mdqe/v1.1",
-                            "https://nceas.ucsb.edu/mdqe/v1.2");
+                try {
+                    // try to use the schema
+                    run = (Run) XmlMarshaller.fromXml(resultStr, Run.class);
+                } catch (Exception e) {
+                    // a bunch of old docs don't conform to any schema, so if above fails
+                    // just unmarshall according to the class definition
+                    InputStream is = new ByteArrayInputStream(resultStr.getBytes());
+                    run = TypeMarshaller.unmarshalTypeFromStream(Run.class, is);
                 }
-                InputStream is = new ByteArrayInputStream(resultStr.getBytes());
-                run = TypeMarshaller.unmarshalTypeFromStream(Run.class, is);
+
+                //
                 // Note: These fields are in the Solr index, but don't need to be in the run
                 // XML, so have to be manually added after the JAXB marshalling has created the
                 // run object.
