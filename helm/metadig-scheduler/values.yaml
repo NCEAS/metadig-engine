@@ -36,8 +36,10 @@ podAnnotations: {}
 
 podSecurityContext:
   runAsUser: 59990
-  runAsGroup: 59990
+  runAsGroup: 59997
   fsGroup: 59990
+  supplementalGroups:
+    - 1004
 
 securityContext: {}
   # capabilities:

@@ -1,0 +1,31 @@
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: metadig-pg
+spec:
+  instances: 3
+  imageName: ghcr.io/cloudnative-pg/postgresql:15.6
+  bootstrap:
+    initdb:
+      import:
+        type: microservice
+        databases:
+          - metadig
+        source:
+          externalCluster: cluster-metadig-10
+        pgRestoreExtraOptions:
+          - '--verbose'
+      database: metadig
+      owner: metadig
+      secret:
+        name: metadig-pg
+  storage:
+    storageClass: csi-cephfs-sc
+    size: 50Gi
+  externalClusters:
+    - name: cluster-metadig-10
+      connectionParameters:
+        # Use the correct IP or host name for the source database
+        host: 10.109.52.33
+        user: metadig
+        dbname: metadig
