@@ -1,0 +1,15 @@
+apiVersion: postgresql.cnpg.io/v1
+kind: Pooler
+metadata:
+  name: pooler-metadig-pg
+spec:
+  cluster:
+    name: metadig-pg
+
+  instances: 3
+  type: rw
+  pgbouncer:
+    poolMode: transaction
+    parameters:
+      max_client_conn: "200"
+      default_pool_size: "30"
