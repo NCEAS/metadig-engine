@@ -144,11 +144,11 @@ The most comprehensive source of documentation for development is in the [develo
 
 ### Dependencies
 
-- `metadig-engine@feature-hashstore-support`
-- `metadig-checks@feature-data-quality`
-- `metadig-webapp@develop` (only if you are doing dev work on the API)
-- [`metadig-R`](https://github.com/NCEAS/metadig-r/tree)
-- [`metadig-py@feature-store-interface`](https://github.com/NCEAS/metadig-py/tree/feature-store-interface)
+- `metadig-engine`
+- `metadig-checks`
+- `metadig-webapp`
+- [`metadig-R`](https://github.com/NCEAS/metadig-r/)
+- [`metadig-py`](https://github.com/NCEAS/metadig-py)
 - Jep (it should install with metadig-py, but just in case `pip install jep`)
 
 ### Local Configuration
