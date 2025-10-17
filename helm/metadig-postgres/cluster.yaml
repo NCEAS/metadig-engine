@@ -21,11 +21,18 @@ spec:
         name: metadig-pg
   storage:
     storageClass: csi-cephfs-sc
-    size: 50Gi
+    size: 200Gi
+  resources:
+    requests:
+      cpu: 1
+      memory: 1Gi
+    limits:
+      cpu: 2
+      memory: 4Gi
   externalClusters:
     - name: cluster-metadig-10
       connectionParameters:
         # Use the correct IP or host name for the source database
-        host: 10.109.52.33
+        host: 10.98.125.147
         user: metadig
         dbname: metadig

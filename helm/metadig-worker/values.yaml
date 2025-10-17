@@ -55,6 +55,8 @@ podSecurityContext:
   runAsUser: 59990
   runAsGroup: 59997
   fsGroup: 59990
+  supplementalGroups:
+    - 1004
 
 #topologySpreadConstraints:
 #  - maxSkew: 10
@@ -80,7 +82,7 @@ ingress:
 
 resources:
   requests:
-    cpu: 500m
+    cpu: 50m
     memory: 512Mi
   limits:
     cpu: 1
