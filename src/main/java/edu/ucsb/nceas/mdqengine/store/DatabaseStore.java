@@ -181,8 +181,14 @@ public class DatabaseStore implements MDQStore, AutoCloseable {
                 } catch (Exception e) {
                     // a bunch of old docs don't conform to any schema, so if above fails
                     // just unmarshall according to the class definition
-                    String xml = XmlMarshaller.normalizeNamespace(resultStr);
-                    InputStream is = new ByteArrayInputStream(xml.getBytes());
+                    // Convert the returned run xml document to a 'run' object.
+
+                    // first migrate the schema forward
+
+                    resultStr = resultStr.replace("https://nceas.ucsb.edu/mdqe/v1", "https://nceas.ucsb.edu/mdqe/v1.2");
+                    resultStr = resultStr.replace("https://nceas.ucsb.edu/mdqe/v1.1","https://nceas.ucsb.edu/mdqe/v1.2");
+
+                    InputStream is = new ByteArrayInputStream(resultStr.getBytes());
                     run = TypeMarshaller.unmarshalTypeFromStream(Run.class, is);
                 }
 
