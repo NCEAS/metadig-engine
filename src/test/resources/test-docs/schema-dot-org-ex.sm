@@ -1,0 +1,29 @@
+<?xml version="1.0"?>
+<ns3:systemMetadata xmlns:ns2="http://ns.dataone.org/service/types/v1" xmlns:ns3="http://ns.dataone.org/service/types/v2.0">
+  <serialVersion>1</serialVersion>
+  <identifier>doi:10.18739/A2W08WG3R</identifier>
+  <formatId>science-on-schema.org/Dataset;ld+json</formatId>
+  <size>50031</size>
+  <checksum algorithm="SHA1">5000b077b6f0f306957523292ae8c2908b16ab65</checksum>
+  <submitter>http://orcid.org/0000-0002-1006-9496</submitter>
+  <rightsHolder>CN=DBO,DC=dataone,DC=org</rightsHolder>
+  <accessPolicy>
+    <allow>
+      <subject>DC=org</subject>
+      <permission>read</permission>
+      <permission>write</permission>
+      <permission>changePermission</permission>
+    </allow>
+  </accessPolicy>
+  <replicationPolicy replicationAllowed="false" numberReplicas="0">
+    <blockedMemberNode>urn:node:KNB</blockedMemberNode>
+    <blockedMemberNode>urn:node:mnUCSB1</blockedMemberNode>
+  </replicationPolicy>
+  <obsoletes>urn:uuid:288922fd-d9f0-4487-8886-2edb51aacad7</obsoletes>
+  <archived>false</archived>
+  <dateUploaded>2019-01-24T20:02:38.187+00:00</dateUploaded>
+  <dateSysMetadataModified>2019-01-24T20:02:41.430+00:00</dateSysMetadataModified>
+  <originMemberNode>urn:node:ARCTIC</originMemberNode>
+  <authoritativeMemberNode>urn:node:ARCTIC</authoritativeMemberNode>
+  <fileName>science_metadata.xml</fileName>
+</ns3:systemMetadata>

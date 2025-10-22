@@ -6,6 +6,8 @@ import edu.ucsb.nceas.mdqengine.exception.MetadigException;
 import edu.ucsb.nceas.mdqengine.model.*;
 import edu.ucsb.nceas.mdqengine.processor.GroupLookupCheck;
 import edu.ucsb.nceas.mdqengine.processor.XMLDialect;
+import edu.ucsb.nceas.mdqengine.processor.MetadataDialectFactory;
+import edu.ucsb.nceas.mdqengine.processor.MetadataDialect;
 import edu.ucsb.nceas.mdqengine.serialize.JsonMarshaller;
 import edu.ucsb.nceas.mdqengine.serialize.XmlMarshaller;
 import edu.ucsb.nceas.mdqengine.store.InMemoryStore;
@@ -22,6 +24,7 @@ import org.dataone.service.types.v2.TypeFactory;
 import org.dataone.service.util.TypeMarshaller;
 import org.dataone.service.types.v1.Session;
 import org.xml.sax.SAXException;
+import net.thisptr.jackson.jq.exception.JsonQueryException;
 
 import javax.script.ScriptException;
 import javax.xml.parsers.ParserConfigurationException;
@@ -80,7 +83,8 @@ public class MDQEngine {
 	 */
 	public Run runSuite(Suite suite, InputStream input, Map<String, Object> params, SystemMetadata sysMeta)
 			throws MalformedURLException, IOException, SAXException,
-			ParserConfigurationException, XPathExpressionException, ScriptException {
+			ParserConfigurationException, XPathExpressionException, ScriptException,
+			IllegalArgumentException, JsonQueryException {
 
 		// Make the location of the data directory available to checks that need to
 		// read data files located there.
@@ -94,12 +98,14 @@ public class MDQEngine {
 		String content = IOUtils.toString(input, "UTF-8");
 		String metadataContent = content;
 
-		XMLDialect xml = new XMLDialect(IOUtils.toInputStream(metadataContent, "UTF-8"));
-		xml.setSystemMetadata(sysMeta);
+		MetadataDialect docDialect = MetadataDialectFactory.createDialect(sysMeta,
+				IOUtils.toInputStream(metadataContent, "UTF-8"));
+
+		docDialect.setSystemMetadata(sysMeta);
 		Path tempDir = Files.createTempDirectory("mdq_run");
-		xml.setDirectory(tempDir.toFile().getAbsolutePath());
+		docDialect.setDirectory(tempDir.toFile().getAbsolutePath());
 		// include the default namespaces from the suite
-		xml.mergeNamespaces(suite.getNamespace());
+		docDialect.mergeNamespaces(suite.getNamespace());
 
 		// make a run to capture results
 		Run run = new Run();
@@ -125,7 +131,7 @@ public class MDQEngine {
 		}
 		params.put("dataPids", dataPids);
 
-		xml.setParams(params);
+		docDialect.setParams(params);
 
 		// run the checks in the suite to get results
 		for (Check check : suite.getCheck()) {
@@ -155,7 +161,7 @@ public class MDQEngine {
 				if (origCheck.getType() != null)
 					check.setType(origCheck.getType());
 			}
-			Result result = xml.runCheck(check);
+			Result result = docDialect.runCheck(check);
 			results.add(result);
 		}
 		run.setResult(results);
@@ -437,7 +443,6 @@ public class MDQEngine {
 
 			System.out.println(XmlMarshaller.toXml(run, true));
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
 			// Store the error in the 'Run' object so it can be saved to the run store.
 			try {
 				Run run = new Run();
