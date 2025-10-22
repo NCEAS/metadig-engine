@@ -19,9 +19,11 @@ task-type,task-name,task-group,cron-schedule,params
 #   - requestType: for score tasks, determine type of portal processing ("portal" or "node")
 #
 # Dataset quality scoring tasks
-quality,quality-test-arctic,metadig,5 0/1 * * * ?,"^eml.*|^http.*eml.*;arctic.data.center.suite-1.2.0;urn:node:mnTestARCTIC;2024-05-01T00:00:00.00Z;1;1000"
-quality,quality-test-dataone-fair,metadig,10 0/1 * * * ?,"^eml.*|^http.*eml.*|.*www.isotc211.org.*;FAIR-suite-0.4.0;urn:node:cnStage;2022-05-01T00:00:00.00Z;1;1000"
-quality,quality-test-data-suite,metadig,15 0/1 * * * ?,"^eml.*|^http.*eml.*;data.suite;urn:node:cnStage;2024-11-01T00:00:00.00Z;1;1000"
+#quality,quality-test-arctic,metadig,5 0/1 * * * ?,"^eml.*|^http.*eml.*;arctic.data.center.suite-1.2.0;urn:node:mnTestARCTIC;2024-05-01T00:00:00.00Z;1;1000"
+quality,quality-test-dataone-fair,metadig,10 0/1 * * * ?,"^eml.*|^http.*eml.*|.*www.isotc211.org.*|^science-on-schema.org.*;FAIR-suite-0.5.0;urn:node:mnTestARCTIC;2025-09-01T00:00:00.00Z;1;1000"
+quality,quality-test-data-suite,metadig,15 0/1 * * * ?,"^eml.*|^http.*eml.*;data-suite-0.1.0;urn:node:mnTestARCTIC;2024-11-01T00:00:00.00Z;1;1000"
+#quality,quality-test-essdive,metadig,20 0/1 * * * ?,"^eml.*|^http.*eml.*;ess-dive.data.center.suite-1.3.0;urn:node:mnTestARCTIC;2025-10-01T00:00:00.00Z;1;1000"
+
 #
 # Portal scoring tasks
 score,portal-test-arctic-FAIR,metadig,10 0/1 * * * ?,"*portals*;FAIR-suite-0.3.1;urn:node:mnTestARCTIC;2022-05-01T00:00:00.00Z;1;100;portal"
