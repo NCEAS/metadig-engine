@@ -181,7 +181,8 @@ public class DatabaseStore implements MDQStore, AutoCloseable {
                 } catch (Exception e) {
                     // a bunch of old docs don't conform to any schema, so if above fails
                     // just unmarshall according to the class definition
-                    InputStream is = new ByteArrayInputStream(resultStr.getBytes());
+                    String xml = XmlMarshaller.normalizeNamespace(resultStr);
+                    InputStream is = new ByteArrayInputStream(xml.getBytes());
                     run = TypeMarshaller.unmarshalTypeFromStream(Run.class, is);
                 }
 
