@@ -32,6 +32,8 @@ import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.util.*;
 import java.util.Date;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Persistent storage for quality runs.
@@ -184,9 +186,15 @@ public class DatabaseStore implements MDQStore, AutoCloseable {
                     // Convert the returned run xml document to a 'run' object.
 
                     // first migrate the schema forward
+                    String ns = XmlMarshaller.getRootNamespace(resultStr);
 
-                    resultStr = resultStr.replace("https://nceas.ucsb.edu/mdqe/v1", "https://nceas.ucsb.edu/mdqe/v1.2");
-                    resultStr = resultStr.replace("https://nceas.ucsb.edu/mdqe/v1.1","https://nceas.ucsb.edu/mdqe/v1.2");
+                    if ("https://nceas.ucsb.edu/mdqe/v1".equals(ns) || "https://nceas.ucsb.edu/mdqe/v1.1".equals(ns)) {
+                        // Replace known older namespaces with v1.2
+                        resultStr = resultStr.replace("https://nceas.ucsb.edu/mdqe/v1",
+                                "https://nceas.ucsb.edu/mdqe/v1.2");
+                        resultStr = resultStr.replace("https://nceas.ucsb.edu/mdqe/v1.1",
+                                "https://nceas.ucsb.edu/mdqe/v1.2");
+                    }
 
                     InputStream is = new ByteArrayInputStream(resultStr.getBytes());
                     run = TypeMarshaller.unmarshalTypeFromStream(Run.class, is);

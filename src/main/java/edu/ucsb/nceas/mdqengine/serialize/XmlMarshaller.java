@@ -2,6 +2,8 @@ package edu.ucsb.nceas.mdqengine.serialize;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringEscapeUtils;
+import org.w3c.dom.Document;
+import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
 import javax.xml.XMLConstants;
@@ -9,6 +11,8 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.stream.StreamSource;
 import javax.xml.validation.Schema;
@@ -16,6 +20,7 @@ import javax.xml.validation.SchemaFactory;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
 import java.util.Map;
 
@@ -131,6 +136,24 @@ public class XmlMarshaller {
 					"xsi:schemaLocation=\"" + entry.getValue());
 		}
 		return result;
+	}
+
+	/**
+	 * Extracts the root namespace URI from an XML string.
+	 * 
+	 * @param xml the XML string from which the root namespace will be extracted
+	 * @return the root namespace URI of the XML document
+	 * @throws ParserConfigurationException
+	 * @throws SAXException
+	 * @throws IOException
+	 */
+	public static String getRootNamespace(String xml) throws ParserConfigurationException, SAXException, IOException {
+		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+		dbf.setNamespaceAware(true);
+		DocumentBuilder db = dbf.newDocumentBuilder();
+		Document doc = db.parse(new InputSource(new StringReader(xml)));
+
+		return doc.getDocumentElement().getNamespaceURI();
 	}
 
 }
