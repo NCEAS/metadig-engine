@@ -47,7 +47,7 @@ spec:
             valueFrom:
               secretKeyRef:
                 name: metadig-rmq-auth
-                key: password
+                key: rabbitmq-password
           - name: JMX_OPTS
             value: {{ join " " .Values.java.extraOpts }}
                     {{- if .Values.java.jmxEnabled }}
