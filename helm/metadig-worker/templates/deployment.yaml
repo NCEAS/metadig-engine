@@ -43,6 +43,11 @@ spec:
               secretKeyRef:
                 name: dataone-token
                 key: DataONEauthToken
+          - name: RABBITMQ-AUTH
+            valueFrom:
+              secretKeyRef:
+                name: metadig-rmq-auth
+                key: password
           - name: JMX_OPTS
             value: {{ join " " .Values.java.extraOpts }}
                     {{- if .Values.java.jmxEnabled }}
