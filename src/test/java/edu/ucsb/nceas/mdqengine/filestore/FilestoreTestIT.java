@@ -8,8 +8,10 @@ import org.joda.time.DateTime;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Map;
 import java.util.UUID;
 
 import org.junit.jupiter.api.BeforeAll;
@@ -34,7 +36,7 @@ public class FilestoreTestIT {
 
     @BeforeAll
     public static void initStore() throws MetadigException, IOException, ConfigurationException {
-
+        System.setProperty("PG_AUTH", "fakepw");
         // use in-memory impl for now
         String prefix = null;
         tempDir = (Path) Files.createTempDirectory(prefix);

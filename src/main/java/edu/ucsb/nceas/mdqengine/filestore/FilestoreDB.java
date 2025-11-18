@@ -35,6 +35,9 @@ public class FilestoreDB {
             dbUrl = cfg.getString("jdbc.url");
             dbUser = cfg.getString("postgres.user");
             dbPasswd = System.getenv("PG_AUTH");
+            if (dbPasswd == null){
+                dbPasswd = System.getProperty("PG_AUTH");
+            }
 
         } catch (ConfigurationException | IOException ex) {
             log.error(ex.getMessage());
