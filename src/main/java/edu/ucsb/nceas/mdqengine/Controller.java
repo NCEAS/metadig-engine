@@ -290,7 +290,7 @@ public class Controller {
      */
     public void readConfig() throws ConfigurationException, IOException {
         MDQconfig cfg = new MDQconfig();
-        RabbitMQpassword = System.getenv("RABBITMQ-AUTH");
+        RabbitMQpassword = System.getenv("RABBITMQ_AUTH");
         RabbitMQusername = cfg.getString("RabbitMQ.username");
         RabbitMQhost = cfg.getString("RabbitMQ.host");
         RabbitMQport = cfg.getInt("RabbitMQ.port");

@@ -43,7 +43,7 @@ spec:
               secretKeyRef:
                 name: dataone-token
                 key: DataONEauthToken
-          - name: RABBITMQ-AUTH
+          - name: RABBITMQ_AUTH
             valueFrom:
               secretKeyRef:
                 name: metadig-rmq-auth

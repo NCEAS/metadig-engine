@@ -49,7 +49,7 @@ spec:
                 # If 'false", the secret must exist before the pod can start
                 # App versions before v2.3.4 will read this value from a config file, not the env var.
                 optional: true
-          - name: RABBITMQ-AUTH
+          - name: RABBITMQ_AUTH
             valueFrom:
               secretKeyRef:
                 name: metadig-rmq-auth
