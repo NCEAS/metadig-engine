@@ -48,6 +48,11 @@ spec:
               secretKeyRef:
                 name: metadig-rmq-auth
                 key: rabbitmq-password
+          - name: PG_AUTH
+            valueFrom:
+              secretKeyRef:
+                name: metadig-pg
+                key: password  
           - name: JMX_OPTS
             value: {{ join " " .Values.java.extraOpts }}
                     {{- if .Values.java.jmxEnabled }}

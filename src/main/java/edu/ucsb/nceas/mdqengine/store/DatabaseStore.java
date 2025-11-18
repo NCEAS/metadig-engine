@@ -71,7 +71,7 @@ public class DatabaseStore implements MDQStore, AutoCloseable {
             MDQconfig cfg = new MDQconfig();
             dbUrl = cfg.getString("jdbc.url");
             dbUser = cfg.getString("postgres.user");
-            dbPasswd = cfg.getString("postgres.passwd");
+            dbPasswd = System.getenv("PG_AUTH");
             additionalDir = cfg.getString("mdq.store.directory");
 
         } catch (ConfigurationException | IOException ex) {

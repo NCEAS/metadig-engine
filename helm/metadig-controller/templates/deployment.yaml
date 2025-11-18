@@ -54,6 +54,11 @@ spec:
               secretKeyRef:
                 name: metadig-rmq-auth
                 key: rabbitmq-password
+          - name: PG_AUTH
+            valueFrom:
+              secretKeyRef:
+                name: metadig-pg
+                key: password          
           volumeMounts:
           - name: metadig-pv
             mountPath: {{ .Values.persistence.mountPath }}
