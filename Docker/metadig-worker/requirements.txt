@@ -12,4 +12,5 @@ yara-python
 xarray[io]
 rasterio
 cftime
+geopandas
 metadig @ git+https://github.com/NCEAS/metadig-py@develop
