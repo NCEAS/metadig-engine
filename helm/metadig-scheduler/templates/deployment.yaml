@@ -45,6 +45,11 @@ spec:
                 # If 'false", the secret must exist before the pod can start
                 # App versions before v2.3.4 will read this value from a config file, not the env var.
                 optional: true
+          - name: PG_AUTH
+            valueFrom:
+              secretKeyRef:
+                name: metadig-pg
+                key: password   
           volumeMounts:
           - name: metadig-pv
             mountPath: {{ .Values.persistence.mountPath }}
