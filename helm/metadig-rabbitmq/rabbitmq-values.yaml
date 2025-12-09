@@ -3,8 +3,8 @@ image:
   repository: bitnamilegacy/rabbitmq
 
 auth:
-  username: metadig
-  password: quality
+  existingPasswordSecret: metadig-rmq-auth
+  username: metadig 
 
 replicaCount: 6
 

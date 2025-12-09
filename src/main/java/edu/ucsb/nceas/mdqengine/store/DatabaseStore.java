@@ -71,7 +71,10 @@ public class DatabaseStore implements MDQStore, AutoCloseable {
             MDQconfig cfg = new MDQconfig();
             dbUrl = cfg.getString("jdbc.url");
             dbUser = cfg.getString("postgres.user");
-            dbPasswd = cfg.getString("postgres.passwd");
+            dbPasswd = System.getenv("PG_AUTH");
+            if (dbPasswd == null){
+                dbPasswd = System.getProperty("PG_AUTH");
+            }
             additionalDir = cfg.getString("mdq.store.directory");
 
         } catch (ConfigurationException | IOException ex) {
@@ -470,7 +473,7 @@ public class DatabaseStore implements MDQStore, AutoCloseable {
         }
 
         // Next, insert a record into the child table ('runs')
-        log.trace("Records created successfully");
+        log.trace("Task saved successfully for task name: " + task.getTaskName() + ", node: " + nodeId);
     }
 
     public Task getTask(String taskName, String taskType, String nodeId) {

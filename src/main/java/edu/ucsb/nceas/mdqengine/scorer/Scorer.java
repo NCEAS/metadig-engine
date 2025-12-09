@@ -115,7 +115,7 @@ public class Scorer {
         }
 
         try {
-            RabbitMQpassword = cfg.getString("RabbitMQ.password");
+            RabbitMQpassword = System.getenv("RABBITMQ_AUTH");
             RabbitMQusername = cfg.getString("RabbitMQ.username");
             RabbitMQhost = cfg.getString("RabbitMQ.host");
             RabbitMQport = cfg.getInt("RabbitMQ.port");

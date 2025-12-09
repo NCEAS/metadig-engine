@@ -156,6 +156,9 @@ public class Dispatcher {
                     log.error(e.getStackTrace());
                     dr.setOutput(new Output("ERROR: " + e.getMessage())); // catch the python stack trace
                     dr.setStatus(Status.valueOf("ERROR"));
+                    // if it errors, just exit
+                    bindings = engine.getBindings(ScriptContext.ENGINE_SCOPE);
+                    return dr;
                 }
                 // try to get the global output variable from python
                 try {

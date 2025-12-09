@@ -14,9 +14,6 @@ import java.io.IOException;
 import java.sql.*;
 import java.util.Properties;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-
 public class FilestoreDB {
 
     private static String dbUrl = null;
@@ -37,7 +34,10 @@ public class FilestoreDB {
             MDQconfig cfg = new MDQconfig();
             dbUrl = cfg.getString("jdbc.url");
             dbUser = cfg.getString("postgres.user");
-            dbPasswd = cfg.getString("postgres.passwd");
+            dbPasswd = System.getenv("PG_AUTH");
+            if (dbPasswd == null){
+                dbPasswd = System.getProperty("PG_AUTH");
+            }
 
         } catch (ConfigurationException | IOException ex) {
             log.error(ex.getMessage());
