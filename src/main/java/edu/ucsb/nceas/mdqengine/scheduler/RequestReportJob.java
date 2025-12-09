@@ -854,17 +854,17 @@ public class RequestReportJob implements Job {
             log.debug("Retrieved system metadata stream via hashstore");
 
         } catch (NoSuchAlgorithmException nsae) {
-            log.warn("Unable to retrieve system metadata from hashstore for pid: " + pid.getValue()
+            log.trace("Unable to retrieve system metadata from hashstore for pid: " + pid.getValue()
                     + ". Trying MN/CN API. Issue with store algorithm: " + nsae.getMessage());
             throw nsae;
 
         } catch (IOException ioe) {
-            log.warn("Unable to retrieve system metadata from hashstore for pid: " + pid.getValue()
+            log.trace("Unable to retrieve system metadata from hashstore for pid: " + pid.getValue()
                     + ". Trying MN/CN API. Unexpected IOException: " + ioe.getMessage());
             throw ioe;
 
         } catch (Exception e) {
-            log.warn("Unable to retrieve system metadata from hashstore for pid: " + pid.getValue()
+            log.trace("Unable to retrieve system metadata from hashstore for pid: " + pid.getValue()
                     + ". Trying MN/CN API. Unexpected exception: " + e.getMessage());
             throw e;
         }
