@@ -473,7 +473,7 @@ public class DatabaseStore implements MDQStore, AutoCloseable {
         }
 
         // Next, insert a record into the child table ('runs')
-        log.trace("Records created successfully");
+        log.trace("Task saved successfully for task name: " + task.getTaskName() + ", node: " + nodeId);
     }
 
     public Task getTask(String taskName, String taskType, String nodeId) {
