@@ -13,4 +13,4 @@ xarray[io]
 rasterio
 cftime
 geopandas
-metadig @ git+https://github.com/NCEAS/metadig-py@develop
+metadig @ git+https://github.com/NCEAS/metadig-py@master
