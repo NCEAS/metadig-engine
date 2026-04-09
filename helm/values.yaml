@@ -124,6 +124,9 @@ controller:
       cpu: 4.0
       memory: 4Gi
 
+  autoscaling:
+    enabled: false
+
   nodeSelector: {}
 
   tolerations: []
@@ -189,6 +192,9 @@ scheduler:
     limits:
       cpu: 4.0
       memory: 4Gi
+
+  autoscaling:
+    enabled: false
 
   nodeSelector: {}
 
@@ -402,7 +408,7 @@ db:
   clusterName: metadig-pg
 
 rabbitmq:
-  enabled: true
+  enabled: false
   image:
     registry: docker.io
     repository: bitnamilegacy/rabbitmq
@@ -446,6 +452,7 @@ rabbitmq:
       allowInsecureImages: true
 
 solr:
+  enabled: false
   auth:
     enabled: false
   
