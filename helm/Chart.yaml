@@ -2,7 +2,7 @@ apiVersion: v2
 name: metadig
 description: MetaDIG Application
 type: application
-version: 1.0.0
+version: 2.0.0
 appVersion: "v.3.2.3"
 
 dependencies:
