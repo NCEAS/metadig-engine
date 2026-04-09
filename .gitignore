@@ -7,3 +7,7 @@ metadig-engine.iml
 secret
 demo/**
 .vscode/*
+
+# helm generated files
+/helm/charts
+/helm/Chart.lock
