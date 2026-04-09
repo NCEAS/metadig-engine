@@ -1,5 +1,5 @@
 {{- if .Values.controller.ingress.enabled -}}
-{{- $fullName := include "metadig.fullname" . -}}-controller
+{{- $fullName := printf "%s-controller" (include "metadig.fullname" .) -}}
 {{- $svcPort := .Values.controller.service.port -}}
 {{- if and .Values.controller.ingress.className (not (semverCompare ">=1.18-0" .Capabilities.KubeVersion.GitVersion)) }}
   {{- if not (hasKey .Values.controller.ingress.annotations "kubernetes.io/ingress.class") }}
