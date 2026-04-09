@@ -106,8 +106,7 @@ spec:
       dnsPolicy: None
       dnsConfig:
         nameservers:
-          {{- $dns := (lookup "v1" "Service" "kube-system" "kube-dns") }}
-          - {{ if $dns }}{{ $dns.spec.clusterIP }}{{ else }}10.96.0.10{{ end }}
+          - {{ (lookup "v1" "Service" "kube-system" "kube-dns").spec.clusterIP }}
         searches:
         - metadig.svc.cluster.local
         - svc.cluster.local
