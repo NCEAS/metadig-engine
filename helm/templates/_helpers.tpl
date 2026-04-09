@@ -55,7 +55,7 @@ Create the name of the service account to use
 */}}
 {{- define "metadig-controller.serviceAccountName" -}}
 {{- if .Values.serviceAccount.create }}
-{{- default (include "metadig-controller.fullname" .) .Values.serviceAccount.name }}
+{{- default (include "metadig.fullname" .) .Values.serviceAccount.name }}
 {{- else }}
 {{- default "default" .Values.serviceAccount.name }}
 {{- end }}
