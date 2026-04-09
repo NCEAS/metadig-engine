@@ -53,7 +53,7 @@ app.kubernetes.io/instance: {{ .Release.Name }}
 {{/*
 Create the name of the service account to use
 */}}
-{{- define "metadig-controller.serviceAccountName" -}}
+{{- define "metadig.serviceAccountName" -}}
 {{- if .Values.serviceAccount.create }}
 {{- default (include "metadig.fullname" .) .Values.serviceAccount.name }}
 {{- else }}
