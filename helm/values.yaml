@@ -1,0 +1,536 @@
+
+k8s:
+  cluster: prod
+
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: false
+  # Annotations to add to the service account
+  annotations: {}
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name: "metadig"
+
+imagePullSecrets: []
+
+podSecurityContext:
+  runAsUser: 59990
+  runAsGroup: 59997
+  fsGroup: 59990
+  supplementalGroups:
+    - 1004
+
+dns:
+  config: true
+
+# Default values for metadig-controller.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+controller:
+  replicaCount: 1
+
+  image:
+    repository: ghcr.io/nceas/metadig-controller
+    pullPolicy: Always
+    ## @param image.tag Overrides the image tag. Will default to the chart appVersion if set to ""
+    ##
+    tag: ""
+
+  podAnnotations: {}
+
+  securityContext: {}
+
+  service:
+    type: ClusterIP
+    port: 8080
+    targetPort: metadig-tomcat
+    
+  ingress:
+    prodHost: api.dataone.org
+    testHost: api.test.dataone.org
+    enabled: true
+    className: nginx
+    annotations:
+      cert-manager.io/cluster-issuer: "letsencrypt-prod"
+      ## @param ingress.annotations.nginx.ingress.kubernetes.io/client-body-buffer-size - see docs:
+      ## https://nginx.org/en/docs/http/ngx_http_core_module.html#client_body_buffer_size
+      ##
+      nginx.ingress.kubernetes.io/client-body-buffer-size: "1m"
+
+      ## @param ingress.annotations.nginx.ingress.kubernetes.io/client_max_body_size - see docs:
+      ## https://nginx.org/en/docs/http/ngx_http_core_module.html#client_max_body_size
+      ##
+      nginx.ingress.kubernetes.io/client_max_body_size: "0"
+
+    defaultBackend:
+      enabled: false
+
+    rewriteRules: ""
+
+    configurationSnippet: |
+      set $cors 'true';
+
+      if ($request_method = 'OPTIONS') {
+        set $cors ${cors}options;
+      }
+
+      if ($cors = "true") {
+        more_set_headers 'Access-Control-Allow-Origin: $http_origin';
+        more_set_headers 'Access-Control-Allow-Credentials: true';
+        more_set_headers 'Access-Control-Allow-Methods: POST, PUT, GET, OPTIONS';
+        more_set_headers 'Access-Control-Allow-Headers: DNT,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization';
+
+        more_set_headers 'Access-Control-Max-Age: 1728000';
+      }
+
+      if ($cors = "trueoptions") {
+        more_set_headers 'Access-Control-Allow-Origin: $http_origin';
+        more_set_headers 'Access-Control-Allow-Credentials: true';
+        more_set_headers 'Access-Control-Allow-Methods: POST, PUT, GET, OPTIONS';
+        more_set_headers 'Access-Control-Allow-Headers: DNT,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization';
+
+        more_set_headers 'Access-Control-Max-Age: 1728000';
+        more_set_headers 'Content-Type: text/plain charset=UTF-8';
+        more_set_headers 'Content-Length: 0';
+        return 204;
+      }
+
+    hosts:
+      - host: api.test.dataone.org
+        paths:
+          - path: /quality
+            pathType: Prefix
+      - host: api.dataone.org
+        paths:
+          - path: /quality
+            pathType: Prefix
+    tls:
+    - hosts:
+      - api.dataone.org
+      secretName: ingress-nginx-tls-cert
+    - hosts:
+      - api.test.dataone.org
+      secretName: ingress-nginx-tls-cert
+
+  env:
+    - name: JAVA_OPTS
+      value: "-Dlog4j2.formatMsgNoLookups=true"
+
+  resources:
+    requests:
+      cpu: 500m
+      memory: 1Gi
+    limits:
+      cpu: 4.0
+      memory: 4Gi
+
+  nodeSelector: {}
+
+  tolerations: []
+
+  affinity: {}
+
+  persistence:
+    ## @param persistence.enabled Use a PVC to persist data.
+    ##
+    enabled: true
+    ## @param persistence.existingClaim A manually managed Persistent Volume and Claim
+    ## If defined, PVC must be created manually before volume will be bound
+    ## The value is evaluated as a template
+    ##
+    claimName: "cephfs-metadig-pvc"
+    volumeName: "cephfs-metadig-pv"
+    ## @param persistence.storageClass Storage class of backing PVC
+    ## If defined, storageClassName: <storageClass>
+    ## If set to "-", storageClassName: "", which disables dynamic provisioning
+    ## If undefined (the default) or set to null, no storageClassName spec is
+    ## set, choosing the default provisioner.
+    ##
+    storageClass: ""
+    ## @param persistence.accessModes Persistent Volume Access Modes
+    ##
+    accessModes:
+      - ReadWriteMany
+    ## @param persistence.claimeSize size of data volume
+    ##
+    size: 100Gi
+    ## @param persistence.annotations Persistence annotations for Solr
+    ##
+    annotations: {}
+    ## @param persistence.mountPath Persistence mount path for Solr
+    ##
+    mountPath: "/opt/local"
+
+scheduler:
+  replicaCount: 1
+
+  image:
+    repository: ghcr.io/nceas/metadig-scheduler
+    pullPolicy: Always
+
+  podAnnotations: {}
+
+  securityContext: {}
+
+  service:
+    type: None
+
+  ingress:
+    enabled: false
+
+  env:
+    - name: JAVA_OPTS
+      value: "-Dlog4j2.formatMsgNoLookups=true"
+
+  resources:
+    requests:
+      cpu: 500m
+      memory: 1Gi
+    limits:
+      cpu: 4.0
+      memory: 4Gi
+
+  nodeSelector: {}
+
+  tolerations: []
+
+  affinity: {}
+
+  persistence:
+    ## @param persistence.enabled Use a PVC to persist data.
+    ##
+    enabled: true
+    ## @param persistence.existingClaim A manually managed Persistent Volume and Claim
+    ## If defined, PVC must be created manually before volume will be bound
+    ## The value is evaluated as a template
+    ##
+    claimName: "cephfs-metadig-pvc"
+    volumeName: "cephfs-metadig-pv"
+    ## @param persistence.storageClass Storage class of backing PVC
+    ## If defined, storageClassName: <storageClass>
+    ## If set to "-", storageClassName: "", which disables dynamic provisioning
+    ## If undefined (the default) or set to null, no storageClassName spec is
+    ## set, choosing the default provisioner.
+    ##
+    storageClass: ""
+    ## @param persistence.accessModes Persistent Volume Access Modes
+    ##
+    accessModes:
+      - ReadWriteMany
+    ## @param persistence.claimeSize size of data volume
+    ##
+    size: 100Gi
+    ## @param persistence.annotations Persistence annotations for Solr
+    ##
+    annotations: {}
+    ## @param persistence.mountPath Persistence mount path for Solr
+    ##
+    mountPath: "/opt/local"
+
+    # Scheduler needs access to this path to access hashstore to retrieve streams
+    metacat:
+      claimName: metadig-repos-rom
+      mountPath: "/var/data/repos"
+
+scorer:
+  replicaCount: 1
+
+  image:
+    repository: ghcr.io/nceas/metadig-scorer
+    pullPolicy: Always
+
+  podAnnotations: {}
+
+  securityContext: {}
+
+  service:
+    type: None
+
+  ingress:
+    enabled: false
+
+  env:
+    - name: JAVA_OPTS
+      value: "-Dlog4j2.formatMsgNoLookups=true"
+
+  resources:
+    requests:
+      cpu: 500m
+      memory: 1Gi
+    limits:
+      cpu: 4.0
+      memory: 4Gi
+
+  autoscaling:
+    enabled: false
+    minReplicas: 1
+    maxReplicas: 100
+    targetCPUUtilizationPercentage: 80
+    # targetMemoryUtilizationPercentage: 80
+
+  nodeSelector: {}
+
+  tolerations: []
+
+  affinity: {}
+
+  persistence:
+    ## @param persistence.enabled Use a PVC to persist data.
+    ##
+    enabled: true
+    ## @param persistence.existingClaim A manually managed Persistent Volume and Claim
+    ## If defined, PVC must be created manually before volume will be bound
+    ## The value is evaluated as a template
+    ##
+    claimName: "cephfs-metadig-pvc"
+    volumeName: "cephfs-metadig-pv"
+    ## @param persistence.storageClass Storage class of backing PVC
+    ## If defined, storageClassName: <storageClass>
+    ## If set to "-", storageClassName: "", which disables dynamic provisioning
+    ## If undefined (the default) or set to null, no storageClassName spec is
+    ## set, choosing the default provisioner.
+    ##
+    storageClass: ""
+    ## @param persistence.accessModes Persistent Volume Access Modes
+    ##
+    accessModes:
+      - ReadWriteMany
+    ## @param persistence.claimeSize size of data volume
+    ##
+    size: 100Gi
+    ## @param persistence.annotations Persistence annotations for Solr
+    ##
+    annotations: {}
+    ## @param persistence.mountPath Persistence mount path for Solr
+    ##
+    mountPath: "/opt/local"
+
+worker:
+  replicaCount: 1
+
+  labels:
+    app: metadig-worker
+
+  image:
+    repository: ghcr.io/nceas/metadig-worker
+    pullPolicy: Always
+
+  java:
+    extraOpts:
+      - -XX:MaxRAMPercentage=75
+    jmxEnabled: true
+    jmxPort: 9010
+    jmxOpts:
+      - -Dcom.sun.management.jmxremote
+      - -Dcom.sun.management.jmxremote.port=9010
+      - -Dcom.sun.management.jmxremote.rmi.port=9010
+      - -Dcom.sun.management.jmxremote.local.only=false
+      - -Dcom.sun.management.jmxremote.authenticate=false
+      - -Dcom.sun.management.jmxremote.ssl=false
+      - -Djava.rmi.server.hostname=127.0.0.1
+
+  podAnnotations: {}
+
+  #topologySpreadConstraints:
+  #  - maxSkew: 10
+  #    topologyKey: kubernetes.io/hostname
+  #    whenUnsatisfiable: ScheduleAnyway
+  #    labelSelector:
+  #      matchLabels:
+  #        app: metadig-worker
+
+  securityContext: {}
+
+  service:
+    type: None
+
+  ingress:
+    enabled: false
+
+  env:
+    - name: JAVA_OPTS
+      value: "-Dlog4j2.formatMsgNoLookups=true"
+
+  resources:
+    requests:
+      cpu: 50m
+      memory: 512Mi
+    limits:
+      cpu: 1
+      memory: 4Gi
+
+  autoscaling:
+    enabled: false
+    minReplicas: 1
+    maxReplicas: 100
+    targetCPUUtilizationPercentage: 80
+    # targetMemoryUtilizationPercentage: 80
+
+  nodeSelector: {}
+
+  tolerations: []
+
+  affinity: {}
+
+  persistence:
+    metadig:
+      enabled: true
+      ## @param persistence.existingClaim
+      claimName: "cephfs-metadig-pvc"
+      ## @param persistence.storageClass Storage class of backing PVC
+      ## If defined, storageClassName: <storageClass>
+      ## If set to "-", storageClassName: "", which disables dynamic provisioning
+      ## If undefined (the default) or set to null, no storageClassName spec is
+      ## set, choosing the default provisioner.
+      ##
+      storageClass: ""
+      accessModes: ReadWriteMany
+      size: 20Gi
+      ## @param persistence.annotations Persistence annotations for Solr
+      ##
+      annotations: {}
+      ## @param persistence.mountPath Persistence mount path for Solr
+      ##
+      mountPath: "/opt/local"
+
+    metacat:
+      claimName: metadig-repos-rom
+      mountPath: "/var/data/repos"
+
+
+db:
+  clusterName: metadig-pg
+
+rabbitmq:
+  enabled: true
+  image:
+    registry: docker.io
+    repository: bitnamilegacy/rabbitmq
+  auth:
+    existingPasswordSecret: metadig-rmq-auth
+    username: metadig 
+  replicaCount: 6
+  podSecurityContext:
+    enabled: false
+    fsGroup: 1001
+  podManagementPolicy: Parallel
+  service:
+    type: ClusterIP
+    externalTrafficPolicy: Cluster
+  resources:
+    requests:
+      cpu: 1
+      memory: 2Gi
+    limits:
+      cpu: 2
+      memory: 4Gi
+  ingress:
+    enabled: false
+    tls: false
+    ingressClassName: nginx
+  persistence:
+    enabled: true
+    storageClass: csi-rbd-sc
+    size: 10Gi
+  volumePermissions:
+    enabled: false
+    containerSecurityContext:
+      runAsUser: 1001
+  serviceAccount:
+    create: false
+    name: metadig
+  tls:
+    enabled: false
+  global:
+    security:
+      allowInsecureImages: true
+
+solr:
+  auth:
+    enabled: false
+  
+  coreNames: "quality"
+  collection: "quality"
+  cloudEnabled: false
+  
+  image:
+    registry: docker.io
+    repository: bitnamilegacy/solr
+    tag: 8.11.4-debian-12-r3
+  
+  collectionShards: 1
+  collectionReplicas: 1
+  
+  podSecurityContext:
+    enabled: true
+    fsGroup: 1001
+  
+  containerSecurityContext:
+    enabled: true
+    runAsUser: 1001
+  
+  replicaCount: 1
+  
+  service:
+    type: ClusterIP
+    externalTrafficPolicy: Cluster
+  
+  customReadinessProbe:
+    exec:
+      command:
+        - bash
+        - -ec
+        - >
+          curl --silent --connect-timeout 15 http://localhost:${SOLR_PORT_NUMBER}/solr/admin/info/system | grep --quiet '"status":0'
+    initialDelaySeconds: 60
+    periodSeconds: 10
+    timeoutSeconds: 15
+    successThreshold: 1
+    failureThreshold: 6
+  
+  ingress:
+    enabled: false
+    tls: false
+    ingressClassName: "nginx"
+    hostname: "solr.local"
+  
+  persistence:
+    enabled: true
+    mountPath: /bitnami/solr
+    storageClass: csi-rbd-sc
+    size: 20Gi
+  
+  volumePermissions:
+    enabled: false
+    containerSecurityContext:
+      runAsUser: 1001
+  
+  serviceAccount:
+    create: false
+    name: "metadig"
+  
+  tls:
+    enabled: false
+    autoGenerated: false
+    certificatesSecretName: "ingress-nginx-tls-cert-jks"
+    passwordsSecretName: "metadig-solr/jks-password-secret"
+    keystorePassword: "metadig"
+    truststorePassword: "metadig"
+  
+  resources:
+    requests:
+      cpu: 1.0
+      memory: 2Gi
+    limits:
+      cpu: 1.5
+      memory: 3Gi
+  
+  zookeeper:
+    enabled: false
+    persistence:
+      enabled: false
+      storageClass: ""
+  
+  global:
+    security:
+      allowInsecureImages: true

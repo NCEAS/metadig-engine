@@ -1,0 +1,17 @@
+apiVersion: v2
+name: metadig
+description: MetaDIG Application
+type: application
+version: 1.0.0
+appVersion: "v.3.2.3"
+
+dependencies:
+  # remote
+  - name: rabbitmq
+    version: "12.8.2"
+    repository: "https://charts.bitnami.com/bitnami"
+    condition: rabbitmq.enabled
+  - name: solr
+    version: "9.5.5"
+    repository: "https://charts.bitnami.com/bitnami"
+    condition: solr.enabled

@@ -1,0 +1,121 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "metadig.fullname" . }}-scheduler
+  labels:
+    {{- include "metadig.labels" . | nindent 4 }}-scheduler
+spec:
+  {{- if not .Values.scheduler.autoscaling.enabled }}
+  replicas: {{ .Values.scheduler.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "metadig.selectorLabels" . | nindent 6 }}-scheduler
+  template:
+    metadata:
+      {{- with .Values.scheduler.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+        rollme: {{ randAlphaNum 5 | quote }}
+      {{- end }}
+      labels:
+        {{- include "metadig.selectorLabels" . | nindent 8 }}-scheduler
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "metadig.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ .Chart.Name }}-scheduler
+          securityContext:
+            {{- toYaml .Values.scheduler.securityContext | nindent 12 }}
+          image: "{{ .Values.scheduler.image.repository }}:{{ .Values.scheduler.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.scheduler.image.pullPolicy }}
+          env:
+          - name: JAVA_OPTS
+            value: "-Dlog4j2.formatMsgNoLookups=true"
+          - name: DATAONE_AUTH_TOKEN
+            valueFrom:
+              secretKeyRef:
+                name: dataone-token
+                key: DataONEauthToken
+                # If 'false", the secret must exist before the pod can start
+                # App versions before v2.3.4 will read this value from a config file, not the env var.
+                optional: true
+          - name: PG_AUTH
+            valueFrom:
+              secretKeyRef:
+                name: metadig-pg
+                key: password   
+          volumeMounts:
+          - name: metadig-pv
+            mountPath: {{ .Values.scheduler.persistence.mountPath }}
+            readOnly: false
+          - name: metadig-config-volume
+            mountPath: {{ .Values.scheduler.persistence.mountPath }}/metadig/metadig.properties
+            subPath: metadig.properties
+          - name: metadig-tasks-volume
+            mountPath: {{ .Values.scheduler.persistence.mountPath }}/metadig/taskList.csv
+            subPath: taskList.csv
+          - name: metadig-log4j-volume
+            mountPath: {{ .Values.scheduler.persistence.mountPath }}/metadig/config/log4j.properties
+            subPath: log4j.properties
+          - name: metadig-downloads-list-volume
+            mountPath: {{ .Values.scheduler.persistence.mountPath }}/metadig/data/downloadsList.csv
+            subPath: downloadsList.csv
+          - name: {{ .Values.scheduler.persistence.metacat.claimName }}
+            mountPath: {{ .Values.scheduler.persistence.metacat.mountPath }}
+            readOnly: true
+      volumes:
+      - name: metadig-pv
+        persistentVolumeClaim:
+          claimName: {{ .Values.scheduler.persistence.claimName }}
+      - name: metadig-config-volume
+        configMap:
+          name: metadig-config-volume
+          defaultMode: 0644
+      - name: metadig-tasks-volume
+        configMap:
+          name: metadig-tasks-volume
+          defaultMode: 0644
+      - name: metadig-log4j-volume
+        configMap:
+          name: metadig-log4j-volume
+          defaultMode: 0644
+      - name: metadig-downloads-list-volume
+        configMap:
+          name: metadig-downloads-list-volume
+          defaultMode: 0644
+      - name:  {{ .Values.scheduler.persistence.metacat.claimName }}
+        persistentVolumeClaim:
+          claimName: {{ .Values.scheduler.persistence.metacat.claimName }}
+          readOnly: true
+      restartPolicy: Always
+      {{- with .Values.scheduler.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.scheduler.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.scheduler.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- if .Values.dns.config}}
+      dnsPolicy: None
+      dnsConfig:
+        nameservers:
+          - {{ (lookup "v1" "Service" "kube-system" "kube-dns").spec.clusterIP }}
+        searches:
+        - metadig.svc.cluster.local
+        - svc.cluster.local
+        - cluster.local
+        options:
+        - name: ndots
+          value: "5"
+      {{- end }}

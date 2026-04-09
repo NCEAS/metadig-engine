@@ -1,0 +1,104 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "metadig.fullname" . }}-scorer
+  labels:
+    {{- include "metadig.labels" . | nindent 4 }}-scorer
+spec:
+  {{- if not .Values.scorer.autoscaling.enabled }}
+  replicas: {{ .Values.scorer.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "metadig.selectorLabels" . | nindent 6 }}-scorer
+  template:
+    metadata:
+      {{- with .Values.scorer.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "metadig.selectorLabels" . | nindent 8 }}-scorer
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "metadig.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ .Chart.Name }}-scorer
+          securityContext:
+            {{- toYaml .Values.scorer.securityContext | nindent 12 }}
+          image: "{{ .Values.scorer.image.repository }}:{{ .Values.scorer.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.scorer.image.pullPolicy }}
+          env:
+          - name: JAVA_OPTS
+            value: "-Dlog4j2.formatMsgNoLookups=true"
+          - name: DATAONE_AUTH_TOKEN
+            valueFrom:
+              secretKeyRef:
+                name: dataone-token
+                key: DataONEauthToken
+                # If 'false", the secret must exist before the pod can start
+                # App versions before v2.3.4 will read this value from a config file, not the env var.
+                optional: true
+          - name: RABBITMQ_AUTH
+            valueFrom:
+              secretKeyRef:
+                name: metadig-rmq-auth
+                key: rabbitmq-password
+          - name: PG_AUTH
+            valueFrom:
+              secretKeyRef:
+                name: metadig-pg
+                key: password  
+          volumeMounts:
+          - name: metadig-pv
+            mountPath: {{ .Values.scorer.persistence.mountPath }}
+            readOnly: false
+          - name: metadig-config-volume
+            mountPath: {{ .Values.scorer.persistence.mountPath }}/metadig/metadig.properties
+            subPath: metadig.properties
+          - name: metadig-log4j-volume
+            mountPath: {{ .Values.scorer.persistence.mountPath }}/metadig/config/log4j.properties
+            subPath: log4j.properties
+      volumes:
+      - name: metadig-pv
+        persistentVolumeClaim:
+          claimName: {{ .Values.scorer.persistence.claimName }}
+      - name: metadig-config-volume
+        configMap:
+          name: metadig-config-volume
+          defaultMode: 0644
+      - name: metadig-log4j-volume
+        configMap:
+          name: metadig-log4j-volume
+          defaultMode: 0644
+      restartPolicy: Always
+      {{- with .Values.scorer.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.scorer.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.scorer.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- if .Values.dns.config}}
+      dnsPolicy: None
+      dnsConfig:
+        nameservers:
+          - {{ (lookup "v1" "Service" "kube-system" "kube-dns").spec.clusterIP }}
+        searches:
+        - metadig.svc.cluster.local
+        - svc.cluster.local
+        - cluster.local
+        options:
+        - name: ndots
+          value: "5"
+      {{- end }}
