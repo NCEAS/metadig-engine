@@ -21,7 +21,7 @@ podSecurityContext:
     - 1004
 
 dns:
-  config: true
+  config: false
 
 # Default values for metadig-controller.
 # This is a YAML-formatted file.
@@ -403,12 +403,8 @@ worker:
       claimName: metadig-repos-rom
       mountPath: "/var/data/repos"
 
-
-db:
-  clusterName: metadig-pg
-
 rabbitmq:
-  enabled: false
+  enabled: true
   image:
     registry: docker.io
     repository: bitnamilegacy/rabbitmq
@@ -452,7 +448,6 @@ rabbitmq:
       allowInsecureImages: true
 
 solr:
-  enabled: false
   auth:
     enabled: false
   
