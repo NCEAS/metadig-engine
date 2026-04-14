@@ -67,7 +67,7 @@ spec:
             mountPath: {{ .Values.controller.persistence.mountPath }}/metadig/metadig.properties
             subPath: metadig.properties
           - name: metadig-log4j-volume
-            mountPath: {{ .Values.controller.persistence.mountPath }}/metadig/config/log4j.properties
+            mountPath: {{ .Values.controller.persistence.mountPath }}/metadig/config/prod/log4j.properties
             subPath: log4j.properties
       restartPolicy: Always
       volumes:

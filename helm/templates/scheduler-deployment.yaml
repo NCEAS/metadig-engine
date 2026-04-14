@@ -61,7 +61,7 @@ spec:
             mountPath: {{ .Values.scheduler.persistence.mountPath }}/metadig/taskList.csv
             subPath: taskList.csv
           - name: metadig-log4j-volume
-            mountPath: {{ .Values.scheduler.persistence.mountPath }}/metadig/config/log4j.properties
+            mountPath: {{ .Values.scheduler.persistence.mountPath }}/metadig/config/prod/log4j.properties
             subPath: log4j.properties
           - name: metadig-downloads-list-volume
             mountPath: {{ .Values.scheduler.persistence.mountPath }}/metadig/data/downloadsList.csv

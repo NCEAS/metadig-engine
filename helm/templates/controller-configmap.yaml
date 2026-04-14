@@ -8,7 +8,7 @@ kind: ConfigMap
 metadata:
   name: metadig-config-volume
 data:
-{{ (tpl (.Files.Glob "config/metadig.properties").AsConfig . ) | indent 4 }}
+{{ (tpl (.Files.Glob "config/prod/metadig.properties").AsConfig . ) | indent 4 }}
 
 --- 
 apiVersion: v1
@@ -16,7 +16,7 @@ kind: ConfigMap
 metadata:
   name: metadig-log4j-volume
 data:
-{{ (tpl (.Files.Glob "config/log4j.properties").AsConfig . ) | indent 4 }}
+{{ (tpl (.Files.Glob "config/prod/log4j.properties").AsConfig . ) | indent 4 }}
 
 {{- else }}
 #
@@ -28,7 +28,7 @@ kind: ConfigMap
 metadata:
   name: metadig-config-volume
 data:
-{{ (tpl (.Files.Glob "config.dev/metadig.properties").AsConfig . ) | indent 4 }}
+{{ (tpl (.Files.Glob "config/dev/metadig.properties").AsConfig . ) | indent 4 }}
 
 --- 
 apiVersion: v1
@@ -36,5 +36,5 @@ kind: ConfigMap
 metadata:
   name: metadig-log4j-volume
 data:
-{{ (tpl (.Files.Glob "config.dev/log4j.properties").AsConfig . ) | indent 4 }}
+{{ (tpl (.Files.Glob "config/dev/log4j.properties").AsConfig . ) | indent 4 }}
 {{- end }}
