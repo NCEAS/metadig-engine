@@ -1,6 +1,17 @@
+# -- The path to the core application properties file. This is injected into 
+# the Controller pod to configure runtime parameters and database connections.
 configPath: "config/prod/metadig.properties"
+
+# -- The path to the Log4j configuration file. This controls the application's 
+# logging verbosity, formats, and output destinations.
 logConfigPath: "config/prod/log4j.properties"
+
+# -- The path to the scheduler's task list. This CSV file is mounted into 
+# the Scheduler pod to dictate the specific jobs and intervals to execute.
 tasksPath: "config/prod/taskList.csv"
+
+# -- The path to the downloads configuration. This CSV file dictates which 
+# external resources or data files the application needs to pull down.
 downloadsPath: "config/prod/downloadsList.csv"
 
 serviceAccount:
@@ -25,8 +36,6 @@ dns:
   config: false
 
 # Default values for metadig-controller.
-# This is a YAML-formatted file.
-# Declare variables to be passed into your templates.
 controller:
   replicaCount: 1
 
