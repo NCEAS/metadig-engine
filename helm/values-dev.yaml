@@ -3,3 +3,15 @@ configPath: "config/dev/metadig.properties"
 logConfigPath: "config/dev/log4j.properties"
 tasksPath: "config/dev/taskList.csv"
 downloadsPath: "config/dev/downloadsList.csv"
+
+controller:
+  ingress:
+    hosts:
+      - host: api.test.dataone.org
+        paths:
+          - path: /quality
+            pathType: Prefix
+    tls:
+      - secretName: ingress-nginx-tls-cert
+        hosts:
+          - api.test.dataone.org

@@ -47,8 +47,6 @@ controller:
     targetPort: metadig-tomcat
     
   ingress:
-    prodHost: api.dataone.org
-    testHost: api.test.dataone.org
     enabled: true
     className: nginx
     annotations:
@@ -97,21 +95,14 @@ controller:
       }
 
     hosts:
-      - host: api.test.dataone.org
-        paths:
-          - path: /quality
-            pathType: Prefix
       - host: api.dataone.org
         paths:
           - path: /quality
             pathType: Prefix
     tls:
-    - hosts:
-      - api.dataone.org
-      secretName: ingress-nginx-tls-cert
-    - hosts:
-      - api.test.dataone.org
-      secretName: ingress-nginx-tls-cert
+      - secretName: ingress-nginx-tls-cert
+        hosts:
+          - api.dataone.org
 
   env:
     - name: JAVA_OPTS
@@ -143,7 +134,6 @@ controller:
     ## The value is evaluated as a template
     ##
     claimName: "cephfs-metadig-pvc"
-    volumeName: "cephfs-metadig-pv"
     ## @param persistence.storageClass Storage class of backing PVC
     ## If defined, storageClassName: <storageClass>
     ## If set to "-", storageClassName: "", which disables dynamic provisioning
@@ -212,7 +202,6 @@ scheduler:
     ## The value is evaluated as a template
     ##
     claimName: "cephfs-metadig-pvc"
-    volumeName: "cephfs-metadig-pv"
     ## @param persistence.storageClass Storage class of backing PVC
     ## If defined, storageClassName: <storageClass>
     ## If set to "-", storageClassName: "", which disables dynamic provisioning
@@ -290,7 +279,6 @@ scorer:
     ## The value is evaluated as a template
     ##
     claimName: "cephfs-metadig-pvc"
-    volumeName: "cephfs-metadig-pv"
     ## @param persistence.storageClass Storage class of backing PVC
     ## If defined, storageClassName: <storageClass>
     ## If set to "-", storageClassName: "", which disables dynamic provisioning
