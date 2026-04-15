@@ -1,14 +1,11 @@
-#
-# Production k8s cluster configuration files
-#
-{{- if eq .Values.k8s.cluster "prod" }}
 # Load all files in the "config" directory into a ConfigMap
 apiVersion: v1
 kind: ConfigMap
 metadata:
   name: metadig-config-volume
 data:
-{{ (tpl (.Files.Glob "config/prod/metadig.properties").AsConfig . ) | indent 4 }}
+  metadig.properties: |
+    {{- tpl (.Files.Get .Values.configPath) . | nindent 4 }}
 
 --- 
 apiVersion: v1
@@ -16,25 +13,5 @@ kind: ConfigMap
 metadata:
   name: metadig-log4j-volume
 data:
-{{ (tpl (.Files.Glob "config/prod/log4j.properties").AsConfig . ) | indent 4 }}
-
-{{- else }}
-#
-# Development k8s cluster configuration files
-#
-# Load all files in the "config" directory into a ConfigMap
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: metadig-config-volume
-data:
-{{ (tpl (.Files.Glob "config/dev/metadig.properties").AsConfig . ) | indent 4 }}
-
---- 
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: metadig-log4j-volume
-data:
-{{ (tpl (.Files.Glob "config/dev/log4j.properties").AsConfig . ) | indent 4 }}
-{{- end }}
+  log4j.properties: |
+    {{- tpl (.Files.Get .Values.logConfigPath) . | nindent 4 }}

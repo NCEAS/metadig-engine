@@ -1,6 +1,7 @@
-
-k8s:
-  cluster: prod
+configPath: "config/prod/metadig.properties"
+logConfigPath: "config/prod/log4j.properties"
+tasksPath: "config/prod/taskList.csv"
+downloadsPath: "config/prod/downloadsList.csv"
 
 serviceAccount:
   # Specifies whether a service account should be created
