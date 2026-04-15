@@ -83,7 +83,7 @@ public class RequestReportJobTest {
         Path projectRoot = Paths.get("..").toAbsolutePath().normalize();
         Path projectRootWithMetadigEngine = projectRoot.resolve("metadig-engine");
         Path helmMetadigPropsFilePath = projectRootWithMetadigEngine.resolve(
-            "helm/metadig-controller/config.dev/metadig.properties");
+            "helm/config/dev/metadig.properties");
         Properties properties = new Properties();
         try (FileInputStream inputStream = new FileInputStream(helmMetadigPropsFilePath.toFile())) {
             properties.load(inputStream);
