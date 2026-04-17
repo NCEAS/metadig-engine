@@ -1,6 +1,17 @@
 # -- The path to the core application properties file. This is injected into 
 # the Controller pod to configure runtime parameters and database connections.
-configPath: "config/metadig.properties"
+nodesList: |
+  cnStage.subjectId = CN=urn:node:cnStage,DC=dataone,DC=org
+  cnStage.serviceUrl = https://cn-stage.test.dataone.org/cn 
+  cnSandbox.subjectId = CN=urn:node:cnSandbox,DC=dataone,DC=org
+  cnSandbox.serviceUrl = https://cn-sandbox.test.dataone.org/cn 
+  CN.subjectId = CN=urn:node:cnStage,DC=dataone,DC=org
+  CN.serviceUrl = https://cn-stage.test.dataone.org/cn 
+  mnTestARCTIC.subjectId = CN=urn:node:mnTestARCTIC,DC=dataone,DC=org
+  mnTestARCTIC.serviceUrl = https://test.arcticdata.io/metacat/d1/mn
+  mnTestKNB.subjectId = CN=urn:node:mnTestKNB,DC=dataone,DC=org
+  mnTestKNB.serviceUrl = https://dev.nceas.ucsb.edu/knb/d1/mn
+  
 
 # -- The path to the Log4j configuration file. This controls the application's 
 # logging verbosity, formats, and output destinations.
@@ -14,8 +25,8 @@ tasksPath: "config/taskList.csv"
 # external resources or data files the application needs to pull down.
 downloadsPath: "config/downloadsList.csv"
 
-# Toggle this to true to switch to DEBUG level from ERROR level
-loglevel: "ERROR"
+# Set to TRACE, DEBUG, INFO, WARN, or ERROR
+logLevel: "ERROR"
 
 serviceAccount:
   # Specifies whether a service account should be created
@@ -104,14 +115,14 @@ controller:
       }
 
     hosts:
-      - host: api.dataone.org
+      - host: api.test.dataone.org
         paths:
           - path: /quality
             pathType: Prefix
     tls:
       - secretName: ingress-nginx-tls-cert
         hosts:
-          - api.dataone.org
+          - api.test.dataone.org
 
   env:
     - name: JAVA_OPTS

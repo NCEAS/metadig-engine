@@ -1,0 +1,41 @@
+# value overrides
+tasksPath: "config/prod/taskList.csv"
+
+nodesList: |
+  CN.subjectId = CN=urn:node:CN,DC=dataone,DC=org
+  CN.serviceUrl = https://cn.dataone.org/cn
+  KNB.subjectId = CN=urn:node:KNB,DC=dataone,DC=org
+  KNB.serviceUrl = https://knb.ecoinformatics.org/knb/d1/mn
+  ARCTIC.subjectId = CN=urn:node:ARCTIC,DC=dataone,DC=org
+  ARCTIC.serviceUrl = https://arcticdata.io/metacat/d1/mn
+  ESS_DIVE.subjectId = CN=urn:node:ESS-DIVE,DC=dataone,DC=org
+  ESS_DIVE.serviceUrl = https://data.ess-dive.lbl.gov/catalog/d1/mn
+  CA_OPC.subjectId = CN=urn:node:CA_OPC,DC=dataone,DC=org
+  CA_OPC.serviceUrl = https://opc.dataone.org/metacat/d1/mn
+  CERP_SFWMD.subjectId = CN=urn:node:CERP_SFWMD,DC=dataone,DC=org
+  CERP_SFWMD.serviceUrl = https://cerp-sfwmd.dataone.org/metacat/d1/mn
+  SCTLD.subjectId = CN=urn:node:SCTLD,DC=dataone,DC=org
+  SCTLD.serviceUrl = https://sctld.dataone.org/metacat/d1/mn
+  DRP.subjectId = urn:node:DRP
+  DRP.serviceUrl = https://drp.dataone.org/metacat/d1/mn
+  SDR.subjectId = CN=urn:node:SDR,DC=dataone,DC=org
+  SDR.serviceUrl = https://seafloor.dataone.org/metacat/d1/mn
+  mnUCSB1.subjectId = CN=urn:node:mnUCSB1,DC=dataone,DC=org
+  mnUCSB1.serviceUrl = https://mn-ucsb-1.dataone.org/knb/d1/mn
+  mnStageUCSB2.subjectId = CN=urn:node:mnStageUCSB2,DC=dataone,DC=org
+  mnStageUCSB2.serviceUrl = https://mn-stage-ucsb-2.test.dataone.org/metacat/d1/mn
+
+# Set to TRACE, DEBUG, INFO, WARN, or ERROR
+logLevel: "ERROR"
+
+controller:
+  ingress:
+    hosts:
+      - host: api.dataone.org
+        paths:
+          - path: /quality
+            pathType: Prefix
+    tls:
+      - secretName: ingress-nginx-tls-cert
+        hosts:
+          - api.dataone.org
