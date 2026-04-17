@@ -5,7 +5,48 @@ metadata:
   name: {{ .Release.Name }}-config-volume
 data:
   metadig.properties: |
-    {{- tpl (.Files.Get .Values.configPath) . | nindent 4 }}
+    RabbitMQ.host = metadig-rabbitmq.metadig.svc.cluster.local
+    RabbitMQ.port = 5672
+    RabbitMQ.username = metadig
+    solr.location = http://metadig-solr.metadig.svc.cluster.local:8983/solr
+    jdbc.url = jdbc:postgresql://pooler-metadig-pg.metadig.svc.cluster.local:5432/metadig?sslmode=disable
+    postgres.user = metadig
+    task.file = /opt/local/metadig/taskList.csv
+    quality.serviceUrl = http://metadig-controller.metadig.svc:8080/quality
+    metadig.base.directory = /opt/local/metadig
+    metadig.store.directory = /opt/local/metadig/store
+    index.latest = false
+    metadig.data.dir = /opt/local/metadig/data
+    bookkeeper.enabled = false
+    # CN stage short-lived token for Peter's ORCID
+    bookkeeper.authToken =
+    bookkeeper.url = http://bookkeeper.bookkeeper.svc.cluster.local:8080/bookkeeper/v1
+    # Stuck job monitoring configuration
+    # Runs every day at midnight, looking for jobs stuck for 12 hours,
+    # will attempt to reprocess until a run limit of 10 is hit
+    quartz.monitor = true
+    quartz.monitor.schedule = 0 0 0 * * ?
+    quartz.monitor.processing.time = 12
+    quartz.monitor.run.limit = 100
+    # jep library
+    jep.path = /usr/local/lib/python3.10/dist-packages/jep
+    # Path to the downloadsList.csv to retrieve web resources
+    downloadsList = /opt/local/metadig/data/downloadsList.csv
+    # HashStore properties
+    store.store_type = HashStore
+    # Path for knb dev.nceas
+    # store.store_path = /var/data/repos/dev/metacat/hashstore
+    # Path for test adc
+    store.store_path = /var/data/repos/arctic/metacat/hashstore
+    store.store_depth = 3
+    store.store_width = 2
+    store.store_algorithm = SHA-256
+    store.store_metadata_namespace = https://ns.dataone.org/service/types/v2.0#SystemMetadata
+
+    # --- node list ---
+    {{- if .Values.nodesList }}
+    {{- .Values.nodesList | nindent 4 }}
+    {{- end }}
 
 --- 
 apiVersion: v1
