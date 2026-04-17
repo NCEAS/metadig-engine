@@ -1,8 +1,6 @@
 # value overrides
 configPath: "config/dev/metadig.properties"
-logConfigPath: "config/dev/log4j.properties"
 tasksPath: "config/dev/taskList.csv"
-downloadsPath: "config/dev/downloadsList.csv"
 
 controller:
   ingress:

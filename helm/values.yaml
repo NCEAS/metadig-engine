@@ -1,18 +1,18 @@
 # -- The path to the core application properties file. This is injected into 
 # the Controller pod to configure runtime parameters and database connections.
-configPath: "config/prod/metadig.properties"
+configPath: "config/metadig.properties"
 
 # -- The path to the Log4j configuration file. This controls the application's 
 # logging verbosity, formats, and output destinations.
-logConfigPath: "config/prod/log4j.properties"
+logConfigPath: "config/log4j.properties"
 
 # -- The path to the scheduler's task list. This CSV file is mounted into 
 # the Scheduler pod to dictate the specific jobs and intervals to execute.
-tasksPath: "config/prod/taskList.csv"
+tasksPath: "config/taskList.csv"
 
 # -- The path to the downloads configuration. This CSV file dictates which 
 # external resources or data files the application needs to pull down.
-downloadsPath: "config/prod/downloadsList.csv"
+downloadsPath: "config/downloadsList.csv"
 
 serviceAccount:
   # Specifies whether a service account should be created
