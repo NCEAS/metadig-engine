@@ -10,6 +10,5 @@ spec:
     - port: {{ .Values.controller.service.port }}
       targetPort: {{ .Values.controller.service.targetPort }}
       protocol: TCP
-      name: 
   selector:
     {{- include "metadig.selectorLabels" . | nindent 4 }}-controller
