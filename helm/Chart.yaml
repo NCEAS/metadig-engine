@@ -34,10 +34,6 @@ appVersion: "v.3.2.3"
 # Chart dependencies - also see https://github.com/bitnami/charts/tree/main/bitnami
 dependencies:
   # remote
-  - name: rabbitmq
-    version: "12.8.2"
-    repository: "https://charts.bitnami.com/bitnami"
-    condition: rabbitmq.enabled
   - name: solr
     version: "9.5.5"
     repository: "https://charts.bitnami.com/bitnami"

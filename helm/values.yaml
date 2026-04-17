@@ -15,7 +15,7 @@ tasksPath: "config/taskList.csv"
 downloadsPath: "config/downloadsList.csv"
 
 # Set to TRACE, DEBUG, INFO, WARN, or ERROR
-logLevel: "ERROR"
+logLevel: "DEBUG"
 
 serviceAccount:
   # Specifies whether a service account should be created
@@ -403,20 +403,13 @@ worker:
 
 rabbitmq:
   enabled: true
-  image:
-    registry: docker.io
-    repository: bitnamilegacy/rabbitmq
+
   auth:
     existingPasswordSecret: metadig-rmq-auth
-    username: metadig 
+    username: metadig
+
   replicaCount: 6
-  podSecurityContext:
-    enabled: false
-    fsGroup: 1001
-  podManagementPolicy: Parallel
-  service:
-    type: ClusterIP
-    externalTrafficPolicy: Cluster
+  
   resources:
     requests:
       cpu: 1
@@ -424,26 +417,16 @@ rabbitmq:
     limits:
       cpu: 2
       memory: 4Gi
-  ingress:
-    enabled: false
-    tls: false
-    ingressClassName: nginx
+      
   persistence:
-    enabled: true
-    storageClass: csi-rbd-sc
+    # Changed from 'storageClass' to match your template's 'storageClassName'
+    storageClassName: csi-rbd-sc
     size: 10Gi
-  volumePermissions:
-    enabled: false
-    containerSecurityContext:
-      runAsUser: 1001
-  serviceAccount:
-    create: false
-    name: metadig
-  tls:
-    enabled: false
-  global:
-    security:
-      allowInsecureImages: true
+
+  # I am adding these blank blocks just so you know they are available 
+  # for your template's envConfig and additionalConfig mappings if you need them later!
+  envConfig: {}
+  additionalConfig: {}
 
 solr:
   auth:
