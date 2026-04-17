@@ -2,6 +2,9 @@
 configPath: "config/dev/metadig.properties"
 tasksPath: "config/dev/taskList.csv"
 
+# Set to TRACE, DEBUG, INFO, WARN, or ERROR
+loglevel: "DEBUG"
+
 controller:
   ingress:
     hosts:

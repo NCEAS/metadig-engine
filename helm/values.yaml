@@ -14,6 +14,9 @@ tasksPath: "config/taskList.csv"
 # external resources or data files the application needs to pull down.
 downloadsPath: "config/downloadsList.csv"
 
+# Toggle this to true to switch to DEBUG level from ERROR level
+loglevel: "ERROR"
+
 serviceAccount:
   # Specifies whether a service account should be created
   create: false
