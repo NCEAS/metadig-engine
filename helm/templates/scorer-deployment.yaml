@@ -34,8 +34,7 @@ spec:
           image: "{{ .Values.scorer.image.repository }}:{{ .Values.scorer.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.scorer.image.pullPolicy }}
           env:
-          - name: JAVA_OPTS
-            value: "-Dlog4j2.formatMsgNoLookups=true"
+            {{- toYaml .Values.scorer.env | nindent 12 }}
           - name: DATAONE_AUTH_TOKEN
             valueFrom:
               secretKeyRef:

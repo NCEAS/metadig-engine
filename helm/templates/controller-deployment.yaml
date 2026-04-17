@@ -39,8 +39,7 @@ spec:
             containerPort: 8080
             protocol: TCP
           env:
-          - name: JAVA_OPTS
-            value: "-Dlog4j2.formatMsgNoLookups=true"
+            {{- toYaml .Values.controller.env | nindent 12 }}
           - name: DATAONE_AUTH_TOKEN
             valueFrom:
               secretKeyRef:
