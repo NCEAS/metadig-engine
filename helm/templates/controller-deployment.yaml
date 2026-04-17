@@ -39,7 +39,7 @@ spec:
             containerPort: 8080
             protocol: TCP
           env:
-            {{- toYaml .Values.controller.env | nindent 12 }}
+          {{- toYaml .Values.controller.env | nindent 10 }}
           - name: DATAONE_AUTH_TOKEN
             valueFrom:
               secretKeyRef:

@@ -36,7 +36,7 @@ spec:
           image: "{{ .Values.worker.image.repository }}:{{ .Values.worker.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.worker.image.pullPolicy }}
           env:
-            {{- toYaml .Values.worker.env | nindent 12 }}
+            {{- toYaml .Values.worker.env | nindent 10 }}
           - name: DATAONE_AUTH_TOKEN
             valueFrom:
               secretKeyRef:

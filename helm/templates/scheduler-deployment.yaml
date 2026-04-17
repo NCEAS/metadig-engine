@@ -35,7 +35,7 @@ spec:
           image: "{{ .Values.scheduler.image.repository }}:{{ .Values.scheduler.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.scheduler.image.pullPolicy }}
           env:
-            {{- toYaml .Values.scheduler.env | nindent 12 }}
+            {{- toYaml .Values.scheduler.env | nindent 10 }}
           - name: DATAONE_AUTH_TOKEN
             valueFrom:
               secretKeyRef:

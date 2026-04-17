@@ -34,7 +34,7 @@ spec:
           image: "{{ .Values.scorer.image.repository }}:{{ .Values.scorer.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.scorer.image.pullPolicy }}
           env:
-            {{- toYaml .Values.scorer.env | nindent 12 }}
+            {{- toYaml .Values.scorer.env | nindent 10 }}
           - name: DATAONE_AUTH_TOKEN
             valueFrom:
               secretKeyRef:
