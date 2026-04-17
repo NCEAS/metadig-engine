@@ -1,17 +1,6 @@
 # -- The path to the core application properties file. This is injected into 
 # the Controller pod to configure runtime parameters and database connections.
-nodesList: |
-  cnStage.subjectId = CN=urn:node:cnStage,DC=dataone,DC=org
-  cnStage.serviceUrl = https://cn-stage.test.dataone.org/cn 
-  cnSandbox.subjectId = CN=urn:node:cnSandbox,DC=dataone,DC=org
-  cnSandbox.serviceUrl = https://cn-sandbox.test.dataone.org/cn 
-  CN.subjectId = CN=urn:node:cnStage,DC=dataone,DC=org
-  CN.serviceUrl = https://cn-stage.test.dataone.org/cn 
-  mnTestARCTIC.subjectId = CN=urn:node:mnTestARCTIC,DC=dataone,DC=org
-  mnTestARCTIC.serviceUrl = https://test.arcticdata.io/metacat/d1/mn
-  mnTestKNB.subjectId = CN=urn:node:mnTestKNB,DC=dataone,DC=org
-  mnTestKNB.serviceUrl = https://dev.nceas.ucsb.edu/knb/d1/mn
-  
+configPath: "config/metadig.properties"
 
 # -- The path to the Log4j configuration file. This controls the application's 
 # logging verbosity, formats, and output destinations.
