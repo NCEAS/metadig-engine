@@ -71,7 +71,7 @@ spec:
             mountPath: {{ .Values.worker.persistence.metadig.mountPath }}/metadig/metadig.properties
             subPath: metadig.properties
           - name: metadig-log4j-volume
-            mountPath: {{ .Values.worker.persistence.metadig.mountPath }}/metadig/config/prod/log4j.properties
+            mountPath: {{ .Values.worker.persistence.metadig.mountPath }}/metadig/config/log4j.properties
             subPath: log4j.properties
           - name: {{ .Values.worker.persistence.metacat.claimName }}
             mountPath: {{ .Values.worker.persistence.metacat.mountPath }}

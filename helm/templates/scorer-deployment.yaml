@@ -62,7 +62,7 @@ spec:
             mountPath: {{ .Values.scorer.persistence.mountPath }}/metadig/metadig.properties
             subPath: metadig.properties
           - name: metadig-log4j-volume
-            mountPath: {{ .Values.scorer.persistence.mountPath }}/metadig/config/prod/log4j.properties
+            mountPath: {{ .Values.scorer.persistence.mountPath }}/metadig/config/log4j.properties
             subPath: log4j.properties
       volumes:
       - name: metadig-pv
