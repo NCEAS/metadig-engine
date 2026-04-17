@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: metadig-tasks-volume
+  name: {{ .Release.Name }}-tasks-volume
 data:
   taskList.csv: |
     {{- tpl (.Files.Get .Values.tasksPath) . | nindent 4 }}
@@ -10,7 +10,7 @@ data:
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: metadig-downloads-list-volume
+  name: {{ .Release.Name }}-downloads-list-volume
 data:
   downloadsList.csv: |
     {{- tpl (.Files.Get .Values.downloadsPath) . | nindent 4 }}

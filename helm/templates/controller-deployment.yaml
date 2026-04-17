@@ -63,10 +63,10 @@ spec:
           - name: metadig-pv
             mountPath: {{ .Values.controller.persistence.mountPath }}
             readOnly: false
-          - name: metadig-config-volume
+          - name: {{ .Release.Name }}-config-volume
             mountPath: {{ .Values.controller.persistence.mountPath }}/metadig/metadig.properties
             subPath: metadig.properties
-          - name: metadig-log4j-volume
+          - name: {{ .Release.Name }}-log4j-volume
             mountPath: {{ .Values.controller.persistence.mountPath }}/metadig/config/log4j.properties
             subPath: log4j.properties
       restartPolicy: Always
@@ -74,13 +74,13 @@ spec:
       - name: metadig-pv
         persistentVolumeClaim:
           claimName: {{ .Values.controller.persistence.claimName }}
-      - name: metadig-config-volume
+      - name: {{ .Release.Name }}-config-volume
         configMap:
-          name: metadig-config-volume
+          name: {{ .Release.Name }}-config-volume
           defaultMode: 0640
-      - name: metadig-log4j-volume
+      - name: {{ .Release.Name }}-log4j-volume
         configMap:
-          name: metadig-log4j-volume
+          name: {{ .Release.Name }}-log4j-volume
           defaultMode: 0640
       {{- with .Values.controller.nodeSelector }}
       nodeSelector:
