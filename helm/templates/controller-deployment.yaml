@@ -94,16 +94,3 @@ spec:
       tolerations:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      {{- if .Values.dns.config}}
-      dnsPolicy: None
-      dnsConfig:
-        nameservers:
-          - {{ (lookup "v1" "Service" "kube-system" "kube-dns").spec.clusterIP }}
-        searches:
-        - metadig.svc.cluster.local
-        - svc.cluster.local
-        - cluster.local
-        options:
-        - name: ndots
-          value: "5"
-      {{- end }}

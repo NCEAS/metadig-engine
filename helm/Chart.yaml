@@ -6,7 +6,7 @@ description: |
   
 # OCI Annotations - see https://github.com/helm/helm/pull/11204
 sources:
-  - https://github.com/NCEAS/metacat
+  - https://github.com/NCEAS/metadig
 
 # A chart can be either an 'application' or a 'library' chart.
 #

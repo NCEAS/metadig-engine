@@ -35,9 +35,6 @@ podSecurityContext:
   supplementalGroups:
     - 1004
 
-dns:
-  config: false
-
 # Default values for metadig-controller.
 controller:
   replicaCount: 1
