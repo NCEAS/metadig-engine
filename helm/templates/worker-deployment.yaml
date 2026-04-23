@@ -1,0 +1,103 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "metadig.fullname" . }}-worker
+  labels:
+    {{- include "metadig.labels" . | nindent 4 }}-worker
+spec:
+  {{- if not .Values.worker.autoscaling.enabled }}
+  replicas: {{ .Values.worker.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "metadig.selectorLabels" . | nindent 6 }}-worker
+  template:
+    metadata:
+      {{- with .Values.worker.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "metadig.selectorLabels" . | nindent 8 }}-worker
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "metadig.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      topologySpreadConstraints:
+        {{- toYaml .Values.worker.topologySpreadConstraints | nindent 8}}
+      containers:
+        - name: {{ .Chart.Name }}-worker
+          securityContext:
+            {{- toYaml .Values.worker.securityContext | nindent 12 }}
+          image: "{{ .Values.worker.image.repository }}:{{ .Values.worker.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.worker.image.pullPolicy }}
+          env:
+            {{- toYaml .Values.worker.env | nindent 10 }}
+          - name: DATAONE_AUTH_TOKEN
+            valueFrom:
+              secretKeyRef:
+                name: dataone-token
+                key: DataONEauthToken
+          - name: RABBITMQ_AUTH
+            valueFrom:
+              secretKeyRef:
+                name: metadig-rmq-auth
+                key: rabbitmq-password
+          - name: PG_AUTH
+            valueFrom:
+              secretKeyRef:
+                name: metadig-pg
+                key: password  
+          - name: JMX_OPTS
+            value: {{ join " " .Values.worker.java.extraOpts }}
+                    {{- if .Values.worker.java.jmxEnabled }}
+                      {{- if .Values.worker.java.extraOpts }}
+                        {{- printf " " }}
+                      {{- end }}
+                      {{- join " " .Values.worker.java.jmxOpts }}
+                    {{- end }}
+          resources:
+            {{- toYaml .Values.worker.resources | nindent 12 }}
+          volumeMounts:
+          - name: metadig-pv
+            mountPath: {{ .Values.worker.persistence.metadig.mountPath }}
+            readOnly: false
+          - name: {{ .Release.Name }}-config-volume
+            mountPath: {{ .Values.worker.persistence.metadig.mountPath }}/metadig/metadig.properties
+            subPath: metadig.properties
+          - name: {{ .Release.Name }}-log4j-volume
+            mountPath: {{ .Values.worker.persistence.metadig.mountPath }}/metadig/config/log4j.properties
+            subPath: log4j.properties
+          - name: {{ .Values.worker.persistence.metacat.claimName }}
+            mountPath: {{ .Values.worker.persistence.metacat.mountPath }}
+            readOnly: true
+          ports:
+          {{- if .Values.worker.java.jmxEnabled }}
+            - containerPort: {{ .Values.worker.java.jmxPort }}
+              name: jmx
+          {{- end }}
+      volumes:
+      - name: metadig-pv
+        persistentVolumeClaim:
+          claimName: {{ .Values.worker.persistence.metadig.claimName }}
+      - name: {{ .Release.Name }}-config-volume
+        configMap:
+          name: {{ .Release.Name }}-config-volume
+          defaultMode: 0644
+      - name: {{ .Release.Name }}-log4j-volume
+        configMap:
+          name: {{ .Release.Name }}-log4j-volume
+          defaultMode: 0644
+      - name:  {{ .Values.worker.persistence.metacat.claimName }}
+        persistentVolumeClaim:
+          claimName: {{ .Values.worker.persistence.metacat.claimName }}
+          readOnly: true
+      restartPolicy: Always
+      {{- with .Values.worker.nodeSelector }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

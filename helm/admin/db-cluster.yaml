@@ -1,0 +1,22 @@
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: {{ .Values.db.clusterName | default "metadig-pg" }}
+  labels:
+    {{- include "metadig.labels" . | nindent 4 }}
+  annotations:
+    meta.helm.sh/release-name: {{ .Release.Name }}
+    meta.helm.sh/release-namespace: {{ .Release.Namespace }}
+spec:
+  instances: 3
+  imageName: ghcr.io/cloudnative-pg/postgresql:15.6
+  storage:
+    storageClass: csi-cephfs-sc
+    size: 200Gi
+  resources:
+    requests:
+      cpu: 1
+      memory: 1Gi
+    limits:
+      cpu: 2
+      memory: 4Gi

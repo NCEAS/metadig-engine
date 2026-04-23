@@ -1,0 +1,95 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "metadig.fullname" . }}-controller
+  labels:
+    {{- include "metadig.labels" . | nindent 4 }}-controller
+spec:
+  {{- if not .Values.controller.autoscaling.enabled }}
+  replicas: {{ .Values.controller.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "metadig.selectorLabels" . | nindent 6 }}-controller
+  template:
+    metadata:
+      {{- with .Values.controller.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+        rollme: {{ randAlphaNum 5 | quote }}
+      {{- end }}
+      labels:
+        {{- include "metadig.selectorLabels" . | nindent 8 }}-controller
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "metadig.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ .Chart.Name }}-controller
+          securityContext:
+            {{- toYaml .Values.controller.securityContext | nindent 12 }}
+          image: "{{ .Values.controller.image.repository }}:{{ .Values.controller.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.controller.image.pullPolicy }}
+          ports:
+          - name: metadig-tomcat
+            containerPort: 8080
+            protocol: TCP
+          env:
+          {{- toYaml .Values.controller.env | nindent 10 }}
+          - name: DATAONE_AUTH_TOKEN
+            valueFrom:
+              secretKeyRef:
+                name: dataone-token
+                key: DataONEauthToken
+                # If 'false", the secret must exist before the pod can start
+                # App versions before v2.3.4 will read this value from a config file, not the env var.
+                optional: true
+          - name: RABBITMQ_AUTH
+            valueFrom:
+              secretKeyRef:
+                name: metadig-rmq-auth
+                key: rabbitmq-password
+          - name: PG_AUTH
+            valueFrom:
+              secretKeyRef:
+                name: metadig-pg
+                key: password          
+          volumeMounts:
+          - name: metadig-pv
+            mountPath: {{ .Values.controller.persistence.mountPath }}
+            readOnly: false
+          - name: {{ .Release.Name }}-config-volume
+            mountPath: {{ .Values.controller.persistence.mountPath }}/metadig/metadig.properties
+            subPath: metadig.properties
+          - name: {{ .Release.Name }}-log4j-volume
+            mountPath: {{ .Values.controller.persistence.mountPath }}/metadig/config/log4j.properties
+            subPath: log4j.properties
+      restartPolicy: Always
+      volumes:
+      - name: metadig-pv
+        persistentVolumeClaim:
+          claimName: {{ .Values.controller.persistence.claimName }}
+      - name: {{ .Release.Name }}-config-volume
+        configMap:
+          name: {{ .Release.Name }}-config-volume
+          defaultMode: 0640
+      - name: {{ .Release.Name }}-log4j-volume
+        configMap:
+          name: {{ .Release.Name }}-log4j-volume
+          defaultMode: 0640
+      {{- with .Values.controller.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.controller.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.controller.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

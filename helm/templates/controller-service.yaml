@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "metadig.fullname" . }}-controller
+  labels:
+    {{- include "metadig.labels" . | nindent 4 }}-controller
+spec:
+  type: {{ .Values.controller.service.type }}
+  ports:
+    - port: {{ .Values.controller.service.port }}
+      targetPort: {{ .Values.controller.service.targetPort }}
+      protocol: TCP
+  selector:
+    {{- include "metadig.selectorLabels" . | nindent 4 }}-controller

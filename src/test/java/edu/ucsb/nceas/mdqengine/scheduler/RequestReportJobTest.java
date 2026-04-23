@@ -79,13 +79,11 @@ public class RequestReportJobTest {
         hashStoreRootDirectory = tempFolder.resolve("hashstore").toString();
         createHashStoreAndTestObjects(hashStoreRootDirectory);
 
-        // Load test metadig.properties from helm/metadig-controller
-        Path projectRoot = Paths.get("..").toAbsolutePath().normalize();
-        Path projectRootWithMetadigEngine = projectRoot.resolve("metadig-engine");
-        Path helmMetadigPropsFilePath = projectRootWithMetadigEngine.resolve(
-            "helm/metadig-controller/config.dev/metadig.properties");
+        // Load config
+        String configFilePath = "/opt/local/metadig/metadig.properties";
         Properties properties = new Properties();
-        try (FileInputStream inputStream = new FileInputStream(helmMetadigPropsFilePath.toFile())) {
+
+        try (FileInputStream inputStream = new FileInputStream(configFilePath)) {
             properties.load(inputStream);
         }
 
