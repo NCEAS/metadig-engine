@@ -29,7 +29,7 @@ version: 2.0.0
 # It is recommended to use it with quotes.
 # NOTE that the chart will pull the docker image whose tag matches this value, if 'image.tag' is
 # not set in values.yaml
-appVersion: "v.3.2.3"
+appVersion: "v.3.2.4"
 
 # Chart dependencies - also see https://github.com/bitnami/charts/tree/main/bitnami
 dependencies:
