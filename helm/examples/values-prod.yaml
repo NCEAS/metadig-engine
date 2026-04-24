@@ -3,7 +3,7 @@ tasksPath: "config/prod/taskList.csv"
 configPath: "config/prod/metadig.properties"
 
 # Set to TRACE, DEBUG, INFO, WARN, or ERROR
-logLevel: "ERROR"
+logLevel: "DEBUG"
 
 controller:
   ingress:
