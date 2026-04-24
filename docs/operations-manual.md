@@ -6,6 +6,20 @@ For information regarding building MetaDIG software, please refer to the MetaDIG
 
 # Deploying MetaDIG Assessment Services on k8s
 
+First time installation of metadig on a cluster can be done with a simple:
+
+```
+helm install metadig .
+```
+
+This will use the default values in `values.yaml` which are oriented towards the NCEAS dev cluster. This chart deploys all of the services listed below, except for postgres which is configured separately in `admin/db-cluster.yaml` (see section below).
+
+To install on production, the prod cluster value overrides file can be found in `examples`.
+
+```
+helm install metadig . -f examples/values-prod.yaml
+```
+
 ## MetaDIG Service Dependencies
 
 The MetaDIG Assessment services are dependent on the following components which must be configured and installed before any of the services can be installed.
@@ -71,79 +85,17 @@ These commands only need to be entered once, and as they have been run for the c
 
 ### PostgreSQL
 
-The MetaDIG PostgreSQL stores assessment reports, DataONE persistent Identifier (pid) information, and information about the DataONE Member Nodes and Coordinating Node from which metadata is harvested.
-
-PostgreSQL must be started before any MetaDIG service is started. The PostgreSQL server can be started from a local copy of the metadig-engine github repository using the [Helm package manager](https://helm.sh). For example:
-
-```
-cd git/NCEAS/metadig-engine/helm
-kubectl config use-context prod-metadig
-helm install postgres ./metadig-postgres --namespace metadig --version=1.0.0
-```
+The MetaDIG PostgreSQL stores assessment reports, DataONE persistent Identifier (pid) information, and information about the DataONE Member Nodes and Coordinating Node from which metadata is harvested. MetaDIG runs a Cloud Native Postgres (cnpg) operator. This, and its connection pooler, are configured in `helm/admin/db-cluster.yaml` and `helm/admin/db-pooler.yaml`. The pooler pods provide connection caching between postgres and client pods (metadig-controller, metadig-worker, metadig-scorer, metadig-scheduler).
 
 The metadig-postgres service uses the CephFS Persistent Volume 'cephfs-metadig-pv'. Communication between the metadig-postgres pod and the PV is provided by [ceph-csi](https://github.com/DataONEorg/k8s-cluster/blob/main/storage/Ceph/Ceph-CSI.md).
 
 In addition, the PV has been made available to the Linux command line on the production control node `k8s-ctrl-1.dataone.org` via a volume mount. This volume mount was manually created and is available at `/mnt/k8ssubvol`. The subdirectory `postgresql` contains the metadig-postgres database files.
 
-Two containers run inside the metadig-postgres pod, named `postgres` and `pgbouncer`. 
-
-The `pgbouncer` container provides connection caching between postgres and client pods (metadig-controller, metadig-worker, metadig-scorer, metadig-scheduler).
-
-
 ### RabbitMQ
 
-RabbitMQ is used to queue assement requests that are created by the metadig-scheduler service.
+The k8s RabbitMQ operator is used to queue assement requests that are created by the metadig-scheduler service. Relevant files for its configuration are in the `rabbimq` section of values.yaml.
 
-First the Bitnami repository that contains the Helm chart must be added:
 
-```
-helm repo add bitnami https://charts.bitnami.com/bitnami
-```
-
-Then RabbitMQ can be installed with the commands:
-
-```
-helm install metadig-rabbitmq bitnami/rabbitmq \
---version=10.3.9 \
---namespace metadig \
---set image.registry=docker.io \
---set image.repository=bitnami/rabbitmq \
---set image.tag=8.11.1-debian-10-r14 \
---set kubeVersion=v1.23.3 \
---set auth.username=<username> \
---set auth.password=<password> \
---set replicaCount=3 \
---set podSecurityContext.enabled=false \
---set podSecurityContext.fsGroup=1001 \
---set podManagementPolicy=Parallel \
---set service.type=NodePort \
---set service.externalTrafficPolicy=Cluster \
---set ingress.enabled=false \
---set ingress.tls=false \
---set ingress.ingressClassName="nginx" \
---set persistence.enabled=true \
---set persistence.storageClass=csi-rbd-sc \
---set persistence.size=20Gi \
---set volumePermissions.enabled=false \
---set volumePermissions.containerSecurityContext.runAsUser=1001 \
---set serviceAccount.create=false \
---set serviceAccount.name="metadig" \
---set tls.enabled=false
-```
-
-See `metadig-rabbitmq/install-metadig-rabbitmq.sh`.
-
-The Bitnami Helm chart is described [here](https://bitnami.com/stack/rabbitmq/helm). 
-
-Chart options and additional information is described [here](https://github.com/bitnami/charts/tree/master/bitnami/rabbitmq#installing-the-chart)
-
-Note that when metadig-controller starts, it will create RabbitMQ queues if they don't already exist.
-
-The Metadig RabbitMQ Server can be uninstalled with the command:
-
-```
-helm delete metadig-rabbitmq -n metadig
-```
 
 ### Solr
 
@@ -248,9 +200,9 @@ The CN token contained in the secret can be inspected with the command:
     `kubectl get secret dataone-token -n metadig -o jsonpath='{.data.DataONEauthToken}' | base64 --decode`
 
 
-## MetaDIG Assessment Services
+## MetaDIG Assessment Deployments
 
-The metadata assessment engine (metadig-engine) components are installed and updated on the DataONE Kubernetes cluster using helm. Helm charts for metadig-engine servers are in the metadig-engine repo `./helm` directory.
+The metadata assessment engine (metadig-engine) components are installed and updated on the DataONE Kubernetes cluster using the helm chart.
 
 The following sections describe the commands needed configure, install and update metadig-engine services.
 
@@ -258,22 +210,10 @@ The following sections describe the commands needed configure, install and updat
 
 All requests from clients (via the MetaDIG REST API) are routed to metadig-controller. Metadig-controller determines what action needs occur to fulfil a request and will either complete that request itself, or send a request to one of the quality services.
 
-The metadig-controller service can be started with the commands:
-
-```
-cd ./helm
-helm install metadig-controller ./metadig-controller --namespace metadig --version=1.0.0
-```
-
-The metadig-controller helm chart contains the Java property file ("metadig.properties") that is used by all metadig k8s applications. If you wish to change any of the configuration values, this property file can be edited locally and then restarted with helm. Since all of the metadig  applications mount this configuration file as a k8s volume, they will need to be restarted after any configuration change.
+The metadig-controller deployment contains the Java property file ("metadig.properties") that is used by all metadig k8s applications. If you wish to change any of the configuration values, this property file can be edited locally and then restarted with helm. Since all of the metadig  applications mount this configuration file as a k8s volume, they will need to be restarted after any configuration change.
 
 This same technique can be used to update the configuration file "log4j.properties", which is used to control the logging level of metadig applications.
 
-This service can be uninstalled with the command:
-
-```
-helm delete metadig-controller -n metadig
-```
 
 ### metadig-scheduler
 
@@ -281,26 +221,9 @@ The metadig-scheduler facility manages all harvesting tasks performed by the qua
 
 The taskList.csv file is described [here](#taskList.csv),
 
-The metadig-scheduler service can be started with the command:
-
-```
-helm install metadig-scheduler ./metadig-scheduler --namespace metadig --version=1.0.0
-```
-
-This service can be uninstalled with the command:
-
-```
-helm delete metadig-scheduler -n metadig
-```
-
 ### metadig-scorer
 
 The metadig-scorer service creates summary graphics for DataONE portals and member nodes.
-
-metadig-scorer is started with the command:
-```
-helm install metadig-scorer ./metadig-scorer --namespace metadig --version=1.0.0 --set image.pullPolicy=Always
-```
     
 Work done by metadig-scorer is scheduled via metadig-scheduler, which sends requests to metadig-controller that forwards them to metadig-scorer determined by the task list.
 
@@ -309,22 +232,7 @@ Work done by metadig-scorer is scheduled via metadig-scheduler, which sends requ
 
 The metadig-worker service creates metadata assessments for a metadata document and associated DataONE system metadata. 
 
-The metadig-worker service is started with the command:
-```
-helm install metadig-worker ./metadig-worker --namespace metadig --version=1.0.0 --set replicaCount=1
-```
-
-This service can be uninstalled with the command:
-
-```
-helm delete metadig-worker -n metadig
-```
-
-Modifications can be made to a Helm chart while it is running, for example, to increase or decrease the number of metadig-worker replicas that are running. To  modify the replica count, for example, specify a different count number with the command:
-
-```
-helm upgrade metadig-worker ./metadig-worker --namespace metadig --version=1.0.0 --set replicaCount=20
-```
+Modifications can be made to a Helm chart while it is running, for example, to increase or decrease the number of metadig-worker replicas that are running. To  modify the replica count, modify the `values.yaml` override you are using.
 
 Alternatively, once `metadig-worker` is running, the number of workers can also be scaled using standard k8s `kubectl scale`, such as:
 
@@ -495,20 +403,20 @@ $ curl --insecure -H "Accept: image/png" "https://api.dataone.org/quality/scores
 $ curl --insecure -H "Accept: text/csv" "https://api.dataone.org/quality/scores?id=${pid}&suite=${qualitySuite}
 ```
 
-# Upgrading metadig-engine services on k8s
+# Upgrading metadig-engine deployments on k8s
 
-Services are upgraded using the [`helm upgrade`](https://helm.sh/docs/helm/helm_upgrade/) command. 
+Deployments are upgraded using the [`helm upgrade`](https://helm.sh/docs/helm/helm_upgrade/) command. 
 
-Once you have released a new verion of metadig-engine and published new Docker images, you can modify `values.xml` file in each metadig-engine service to update `image.tag` value. Also update the `Chart.yaml` file to upgrade the `version` and `appVersion` values. Once that is done, the new chart can be installed with the command:
-
-```
-helm upgrade <service> ./<service directory>
-```
-
-for each service to be upgraded. For example:
+Once you have released a new verion of metadig-engine and published new Docker images, you can modify `Chart.yaml` file to upgrade the `version` and `appVersion` values to the new chart version and metadig-engine application version, respectively. Once that is done, the new chart can be installed with the command:
 
 ```
-helm upgrade metadig-controller ./metadig-controller
+helm upgrade metadig .
+```
+
+The value overrides file for production can be applied in the same manner:
+
+```
+helm upgrade metadig . -f examples/values-prod.yaml
 ```
 
 # Adding a Member Node to the Assessment Harvest

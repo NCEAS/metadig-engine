@@ -54,32 +54,26 @@ To deploy a set of checks, from `metadig-checks`:
 
 ### Dev cluster
 
-Update `Chart.yaml` to increment chart version and app version. In `values.yaml` for **each** of the scheduler, scorer, worker, and controller, adjust the `image.tag` value to the value of the iamge tag to deploy. Can also be a branch name.
+Update `Chart.yaml` to increment chart version and app version. For testing purposes, the image tag for particular components (scheduler, scorer, worker, controller) can be controlled for testing purposes. This tag can also be a branch name.
 
 Set your context to `dev-metadig`.
 
-Run all of these commands from `metadig-engine/helm`. Adjust helm chart version, and number of worker pods, as needed.
+Run this from `metadig-engine/helm`.
 
 ```
-helm upgrade metadig-scheduler ./metadig-scheduler --namespace metadig --set image.pullPolicy=Always --recreate-pods=true --set k8s.cluster=dev
-helm upgrade metadig-scorer ./metadig-scorer --namespace metadig --set image.pullPolicy=Always --recreate-pods=true --set k8s.cluster=dev
-helm upgrade metadig-worker ./metadig-worker --namespace metadig --set image.pullPolicy=Always --set replicaCount=1 --recreate-pods=true --set k8s.cluster=dev
-helm upgrade metadig-controller ./metadig-controller --namespace metadig --set image.pullPolicy=Always --recreate-pods=true --set k8s.cluster=dev
+helm upgrade metadig .
 ```
 
 ### Production cluster
 
-Update `Chart.yaml` to increment chart version and app version. In `values.yaml` for **each** of the scheduler, scorer, worker, and controller, adjust the `image.tag` value to the value of the tag to deploy.
+Update `Chart.yaml` to increment chart version and app version. 
 
 Set your context to `prod-metadig`.
 
-Again, run from `metadig-engine/helm`. Adjust helm chart version, and number of worker pods, as needed.
+Again, run from `metadig-engine/helm`. Note the value overrides file here. This overrides default values that are oriented towards dev and replaces them with their prod counterparts.
 
 ```
-helm upgrade metadig-scheduler ./metadig-scheduler --namespace metadig --set image.pullPolicy=Always --recreate-pods=true
-helm upgrade metadig-scorer ./metadig-scorer --namespace metadig --set image.pullPolicy=Always --recreate-pods=true
-helm upgrade metadig-worker ./metadig-worker --namespace metadig --set image.pullPolicy=Always --set replicaCount=20 --recreate-pods=true 
-helm upgrade metadig-controller ./metadig-controller --namespace metadig --set image.pullPolicy=Always --recreate-pods=true
+helm upgrade metadig . -f examples/values-prod.yaml
 ```
 
 ## Maintenance
