@@ -158,6 +158,7 @@ public class DatabaseStore implements MDQStore, AutoCloseable {
         boolean isLatest;
         Integer runCount = null;
         String resultStr = null;
+        String status = null;
 
         // Hope for the best, prepare for the worst!
         MetadigStoreException me = new MetadigStoreException("Unable get quality report to the database.");
@@ -176,6 +177,7 @@ public class DatabaseStore implements MDQStore, AutoCloseable {
                 isLatest = rs.getBoolean("is_latest");
                 runCount = rs.getInt("run_count");
                 resultStr = rs.getString("results");
+                status = rs.getString("status");
                 rs.close();
                 stmt.close();
 
@@ -212,6 +214,7 @@ public class DatabaseStore implements MDQStore, AutoCloseable {
                 run.setRunCount(runCount);
                 run.setSequenceId(seqId);
                 run.setIsLatest(isLatest);
+                run.setStatus(status);
                 log.trace("Retrieved run successfully for metadata id: " + run.getObjectIdentifier());
             } else {
                 log.trace("Run not found for metadata id: " + metadataId + ", suiteId: " + suiteId);
