@@ -574,7 +574,7 @@ public class RequestReportJob implements Job {
                 if (found) {
                     try (DatabaseStore store = new DatabaseStore()) {
                         Boolean exists = runExists(thisPid, suiteId, store);
-                        log.debug("Found pid" + thisPid + "already exists:" + exists);
+                        log.trace("Found pid" + thisPid + "already exists: " + exists);
                         if (!exists) {
                             pidCount = pidCount++;
                             pids.add(thisPid);
