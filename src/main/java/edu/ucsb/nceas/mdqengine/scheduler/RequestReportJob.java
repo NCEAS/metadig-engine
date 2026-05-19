@@ -753,7 +753,7 @@ public class RequestReportJob implements Job {
         try {
             // First, try the quickest path to retrieve object stream via hashstore
             objectIS = hashStore.retrieveObject(pid.getValue());
-            log.debug("Retrieved object stream via hashstore");
+            log.trace("Retrieved object stream via hashstore");
 
         } catch (NoSuchAlgorithmException nsae) {
             log.trace("Unable to retrieve object from hashstore for pid: " + pid.getValue()
@@ -809,9 +809,9 @@ public class RequestReportJob implements Job {
             } else {
                 objectIS = mnNode.get(session, pid);
             }
-            log.debug("Retrieved metadata eml object stream for pid: " + pid.getValue());
+            log.trace("Retrieved metadata eml object stream for pid: " + pid.getValue());
         } catch (NotAuthorized na) {
-            log.info("Not authorized to read eml metadata doc for pid: " + pid.getValue()
+            log.error("Not authorized to read eml metadata doc for pid: " + pid.getValue()
                     + ", unable to retrieve stream to eml metadata document.");
         } catch (Exception e) {
             // Raise unexpected exception
@@ -838,7 +838,7 @@ public class RequestReportJob implements Job {
         try {
             // First, try the quickest path to retrieve sysmeta object via hashstore
             sysmetaIS = hashStore.retrieveMetadata(pid.getValue());
-            log.debug("Retrieved system metadata stream via hashstore");
+            log.trace("Retrieved system metadata stream via hashstore");
 
         } catch (NoSuchAlgorithmException nsae) {
             log.trace("Unable to retrieve system metadata from hashstore for pid: " + pid.getValue()
