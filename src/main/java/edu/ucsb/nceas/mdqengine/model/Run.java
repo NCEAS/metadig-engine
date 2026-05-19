@@ -267,6 +267,7 @@ public class Run {
 	 */
 	public void save() throws MetadigException {
 
+		// try with resources closes this connection automatically since it implements the AutoCloseable interface
 		try (DatabaseStore store = new DatabaseStore()) {
 
 			log.debug("Saving to persistent storage: metadata PID: " + this.getObjectIdentifier() + ", suite id: "
@@ -303,6 +304,7 @@ public class Run {
 	public static Run getRun(String metadataId, String suiteId)
 			throws MetadigException, IOException, ConfigurationException {
 
+		// try with resources closes this connection automatically since it implements the AutoCloseable interface
 		try (DatabaseStore store = new DatabaseStore()) {
 
 			log.debug("Getting run for suiteId: " + suiteId + ", metadataId: " + metadataId);
