@@ -636,7 +636,7 @@ public class RequestReportJob implements Job {
 
         Run run = store.getRun(pid, suiteId);
 
-        return run != null && "success".equals(run.getStatus());
+        return run != null && "success".equalsIgnoreCase(run.getStatus());
     }
 
     /**
