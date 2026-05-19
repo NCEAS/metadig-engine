@@ -290,7 +290,7 @@ public class RequestReportJob implements Job {
                     * don't have new content.
                      */
 
-                    /*
+ /*
                     // temporarily disable this, and just allow processing so we can get historical data reprocessed
                     Boolean skip = false;
                     if (skip) {
@@ -300,9 +300,7 @@ public class RequestReportJob implements Job {
                                 + dtfOut.print(mnLastHarvestDT));
                         continue;
                     }
-                    */
-
-
+                     */
                 }
 
                 log.trace("Harvesting node: " + node.getIdentifier().getValue());
@@ -571,13 +569,12 @@ public class RequestReportJob implements Job {
 
                 // Always re-create a report, even if it exists for a pid, as the sysmeta
                 // could have been updated (i.e. obsoletedBy, access) and the quality 
-
                 // temporarily don't re-run documents if a successful run is found
                 // this is just to get a snapshot for FAIR analysis for the paper
                 if (found) {
                     try (DatabaseStore store = new DatabaseStore()) {
                         Boolean exists = runExists(thisPid, suiteId, store);
-
+                        log.debug("Found pid" + thisPid + "already exists:" + exists);
                         if (!exists) {
                             pidCount = pidCount++;
                             pids.add(thisPid);
@@ -633,26 +630,13 @@ public class RequestReportJob implements Job {
     public boolean runExists(String pid, String suiteId, MDQStore store)
             throws MetadigStoreException {
 
-        boolean found = false;
-
         if (!store.isAvailable()) {
-            try {
-                store.renew();
-            } catch (MetadigStoreException e) {
-                e.printStackTrace();
-                throw e;
-            }
+            store.renew();
         }
 
         Run run = store.getRun(pid, suiteId);
-        String status = run.getStatus();
-        if (run != null & status == "success") {
-            found = true;
-        } else {
-            found = false;
-        }
 
-        return found;
+        return run != null && "success".equals(run.getStatus());
     }
 
     /**
