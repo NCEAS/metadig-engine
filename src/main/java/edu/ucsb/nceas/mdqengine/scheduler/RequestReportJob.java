@@ -59,9 +59,8 @@ import org.dataone.hashstore.HashStoreFactory;
 
 /**
  * <p>
- * Run a MetaDIG Quality Engine Scheduler task, for example,
- * query a member node for new pids and request that a quality
- * report is created for each one.
+ * Run a MetaDIG Quality Engine Scheduler task, for example, query a member node
+ * for new pids and request that a quality report is created for each one.
  * </p>
  *
  * @author Peter Slaughter
@@ -73,6 +72,7 @@ public class RequestReportJob implements Job {
     private Log log = LogFactory.getLog(RequestReportJob.class);
 
     class ListResult {
+
         // The total result count for all object types returned from DataONE. This is
         // the count of all object types
         // that were retrieved for a given request. The DataONE 'listObjects' service
@@ -131,14 +131,13 @@ public class RequestReportJob implements Job {
     // Since Quartz will re-instantiate a class every time it
     // gets executed, non-static member variables can
     // not be used to maintain state!
-
     /**
      * <p>
      * Empty constructor for job initialization
      * </p>
      * <p>
-     * Quartz requires a public empty constructor so that the
-     * scheduler can instantiate the class whenever it needs.
+     * Quartz requires a public empty constructor so that the scheduler can
+     * instantiate the class whenever it needs.
      * </p>
      */
     public RequestReportJob() {
@@ -147,12 +146,12 @@ public class RequestReportJob implements Job {
     /**
      * <p>
      * Called by the <code>{@link org.quartz.Scheduler}</code> when a
-     * <code>{@link org.quartz.Trigger}</code> fires that is associated with
-     * the <code>Job</code>.
+     * <code>{@link org.quartz.Trigger}</code> fires that is associated with the
+     * <code>Job</code>.
      * </p>
      *
-     * @throws JobExecutionException if there is an exception while executing the
-     *                               job.
+     * @throws JobExecutionException if there is an exception while executing
+     * the job.
      */
     public void execute(JobExecutionContext context)
             throws JobExecutionException {
@@ -227,14 +226,13 @@ public class RequestReportJob implements Job {
         }
 
         // Get a connection to the database
-
         try (DatabaseStore store = new DatabaseStore()) {
             log.debug("Getting connection to the database store");
             ArrayList<Node> nodes = new ArrayList<>();
 
             /*
-             * If the CN is being harvested, then get all the nodes in the node db. The node
-             * db contains info about all nodes registered with the CN.
+            * If the CN is being harvested, then get all the nodes in the node db. The node
+            * db contains info about all nodes registered with the CN.
              */
             if (isCN) {
                 nodes = store.getNodes();
@@ -254,9 +252,9 @@ public class RequestReportJob implements Job {
             }
 
             /*
-             * Depending on the scheduled task, either process a single MN or if the task is
-             * for the CN,
-             * process all nodes current registered with the CN.
+            * Depending on the scheduled task, either process a single MN or if the task is
+            * for the CN,
+            * process all nodes current registered with the CN.
              */
             String harvestNodeId = null;
             for (Node node : nodes) {
@@ -287,17 +285,23 @@ public class RequestReportJob implements Job {
                     DateTime oneMonthAgoDT = new DateTime(DateTimeZone.UTC).minusMonths(1);
 
                     /*
-                     * If an MN hasn't been harvested for a month, then skip it - we don't want to
-                     * waste time contacting MNs that
-                     * don't have new content.
+                    * If an MN hasn't been harvested for a month, then skip it - we don't want to
+                    * waste time contacting MNs that
+                    * don't have new content.
                      */
-                    if (mnLastHarvestDT.isBefore(oneMonthAgoDT.toInstant())) {
+
+                    /*
+                    // temporarily disable this, and just allow processing so we can get historical data reprocessed
+                    Boolean skip = false;
+                    if (skip) {
                         DateTimeZone.setDefault(DateTimeZone.UTC);
                         DateTimeFormatter dtfOut = DateTimeFormat.forPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
                         log.trace("Skipping node " + node.getIdentifier().getValue() + " that hasn't been sync'd since "
                                 + dtfOut.print(mnLastHarvestDT));
                         continue;
                     }
+                    */
+
 
                 }
 
@@ -438,28 +442,26 @@ public class RequestReportJob implements Job {
     }
 
     /**
-     * Query a DataONE CN or MN to obtain a list of persistent identifiers (pids)
-     * for metadata objects have been
-     * added to the system during a specific time period.
-     * 
-     * @param cnNode                  a DataONE CN connection client object
-     * @param mnNode                  a DataONE MN connection client object
-     * @param isCN                    a logical indicating whether a CN of MN object
-     *                                is being used
-     * @param session                 a DataONE authentication session
-     * @param suiteId                 the quality suite to check (if this pids has
-     *                                already been processed)
-     * @param pidFilter               the DataONE format identifies to filter for
+     * Query a DataONE CN or MN to obtain a list of persistent identifiers
+     * (pids) for metadata objects have been added to the system during a
+     * specific time period.
+     *
+     * @param cnNode a DataONE CN connection client object
+     * @param mnNode a DataONE MN connection client object
+     * @param isCN a logical indicating whether a CN of MN object is being used
+     * @param session a DataONE authentication session
+     * @param suiteId the quality suite to check (if this pids has already been
+     * processed)
+     * @param pidFilter the DataONE format identifies to filter for
      * @param startHarvestDatetimeStr the starting date to harvest pids from
-     * @param endHarvestDatetimeStr   the ending data to harvest pids from
-     * @param startCount              the start count for paging results from
-     *                                DataONE, for large results
-     * @param countRequested          the number of items to get from DataONE on
-     *                                each request
-     * @param lastDateModifiedDT      the sysmeta 'dateSystemMetadataModified' value
-     *                                of the last harvested pid
-     * @param nodeIdFilter            filter results for this nodeId (applies only
-     *                                to CN)
+     * @param endHarvestDatetimeStr the ending data to harvest pids from
+     * @param startCount the start count for paging results from DataONE, for
+     * large results
+     * @param countRequested the number of items to get from DataONE on each
+     * request
+     * @param lastDateModifiedDT the sysmeta 'dateSystemMetadataModified' value
+     * of the last harvested pid
+     * @param nodeIdFilter filter results for this nodeId (applies only to CN)
      * @throws Exception if there is an exception while executing the job.
      * @return a ListResult object containing the matching pids
      */
@@ -567,28 +569,32 @@ public class RequestReportJob implements Job {
                 }
                 // end section
 
-                // Always re-create a report, even if it exists for a pid, as the sysmeta could
-                // have
-                // been updated (i.e. obsoletedBy, access) and the quality report and index
-                // contain
-                // sysmeta fields.
+                // Always re-create a report, even if it exists for a pid, as the sysmeta
+                // could have been updated (i.e. obsoletedBy, access) and the quality 
+
+                // temporarily don't re-run documents if a successful run is found
+                // this is just to get a snapshot for FAIR analysis for the paper
                 if (found) {
-                    // if (!runExists(thisPid, suiteId, store)) {
-                    pidCount = pidCount++;
-                    pids.add(thisPid);
-                    log.trace("adding pid " + thisPid + ", formatId: " + thisFormatId);
-                    // If this pid's modified date is after the stored latest encountered modified
-                    // date, then update
-                    // the lastModified date
-                    thisDateModifiedDT = new DateTime(oi.getDateSysMetadataModified());
-                    // Add a millisecond to lastDateModfiedDT so that this pid won't be harvested
-                    // again (in the event
-                    // that this is the last pid to be harvested in this round.
-                    if (thisDateModifiedDT.isAfter(lastDateModifiedDT)) {
-                        lastDateModifiedDT = thisDateModifiedDT.plusMillis(1);
-                        log.debug("New value for lastDateMoidifed: " + lastDateModifiedDT.toString());
+                    try (DatabaseStore store = new DatabaseStore()) {
+                        Boolean exists = runExists(thisPid, suiteId, store);
+
+                        if (!exists) {
+                            pidCount = pidCount++;
+                            pids.add(thisPid);
+                            log.trace("adding pid " + thisPid + ", formatId: " + thisFormatId);
+                            // If this pid's modified date is after the stored latest encountered modified
+                            // date, then update
+                            // the lastModified date
+                            thisDateModifiedDT = new DateTime(oi.getDateSysMetadataModified());
+                            // Add a millisecond to lastDateModfiedDT so that this pid won't be harvested
+                            // again (in the event
+                            // that this is the last pid to be harvested in this round.
+                            if (thisDateModifiedDT.isAfter(lastDateModifiedDT)) {
+                                lastDateModifiedDT = thisDateModifiedDT.plusMillis(1);
+                                log.debug("New value for lastDateMoidifed: " + lastDateModifiedDT.toString());
+                            }
+                        }
                     }
-                    // }
                 }
             }
         }
@@ -610,25 +616,24 @@ public class RequestReportJob implements Job {
     /**
      * Check if the specified quality suite has already been run for a pid.
      * <p>
-     * An additional check is made to see if the system metadata in the
-     * run is older than the passed in date. Because the quality engine
-     * uses fields from sysmeta (obsoletes, obsoletedBy), a run may need
-     * to be performed on an existing run in order to update the sysmeta, as
-     * the system is stored in the run object, and this run object is
-     * parsed when the run is inserted into the Solr index.
+     * An additional check is made to see if the system metadata in the run is
+     * older than the passed in date. Because the quality engine uses fields
+     * from sysmeta (obsoletes, obsoletedBy), a run may need to be performed on
+     * an existing run in order to update the sysmeta, as the system is stored
+     * in the run object, and this run object is parsed when the run is inserted
+     * into the Solr index.
      * </p>
-     * 
-     * @param pid     the pid to check
+     *
+     * @param pid the pid to check
      * @param suiteId the suite identifier to check (e.g. "FAIR-suite-0.3.1")
-     * @param store   the DataStore object to send the check request to.
+     * @param store the DataStore object to send the check request to.
      * @throws MetadigStoreException
      *
      */
-    public boolean runExists(String pid, String suiteId, MDQStore store, Date dateSystemMetadataModified)
+    public boolean runExists(String pid, String suiteId, MDQStore store)
             throws MetadigStoreException {
 
         boolean found = false;
-        Date runDateSystemMetadataModified = null;
 
         if (!store.isAvailable()) {
             try {
@@ -640,7 +645,8 @@ public class RequestReportJob implements Job {
         }
 
         Run run = store.getRun(pid, suiteId);
-        if (run != null) {
+        String status = run.getStatus();
+        if (run != null & status == "success") {
             found = true;
         } else {
             found = false;
@@ -656,13 +662,13 @@ public class RequestReportJob implements Job {
      * The system metadata for a pid is also obtained and sent with the request
      * </p>
      *
-     * @param cnNode            a DataONE CN connection client object
-     * @param mnNode            a DataONE MN connection client object
-     * @param isCN              a logical indicating whether a CN of MN object
-     * @param session           a DataONE authentication session
+     * @param cnNode a DataONE CN connection client object
+     * @param mnNode a DataONE MN connection client object
+     * @param isCN a logical indicating whether a CN of MN object
+     * @param session a DataONE authentication session
      * @param qualityServiceUrl the URL of the MetaDIG quality service
-     * @param pidStr            the pid to submit the request for
-     * @param suiteId           the suite identifier to submit the request for
+     * @param pidStr the pid to submit the request for
+     * @param suiteId the suite identifier to submit the request for
      *
      * @throws Exception
      */
@@ -747,15 +753,15 @@ public class RequestReportJob implements Job {
     }
 
     /**
-     * Returns an input stream to a data object for a given pid through a hashstore
+     * Returns an input stream to a data object for a given pid through a
+     * hashstore
      *
-     * @param pid       Persistent identifier
+     * @param pid Persistent identifier
      * @param hashStore HashStore to check
      * @return Input stream to eml metadata doc
      * @throws NoSuchAlgorithmException An issue with the store algorithm
-     * @throws FileNotFoundException    If a data object is not found
-     * @throws IOException              If there is an issue with retrieving the
-     *                                  stream
+     * @throws FileNotFoundException If a data object is not found
+     * @throws IOException If there is an issue with retrieving the stream
      */
     public InputStream getObjectFromHashStore(Identifier pid, HashStore hashStore)
             throws NoSuchAlgorithmException, FileNotFoundException, IOException {
@@ -789,28 +795,25 @@ public class RequestReportJob implements Job {
     }
 
     /**
-     * Returns an input stream to an eml metadata document for a given pid from the
-     * MN or CN
+     * Returns an input stream to an eml metadata document for a given pid from
+     * the MN or CN
      *
-     * @param pid      Persistent identifier
-     * @param cnNode   Coordinating Node
-     * @param mnNode   Member Node
-     * @param isCN     Boolean to check whether we should check the CN or MN
-     * @param session  User session to check for credentials to access the CN or MN
+     * @param pid Persistent identifier
+     * @param cnNode Coordinating Node
+     * @param mnNode Member Node
+     * @param isCN Boolean to check whether we should check the CN or MN
+     * @param session User session to check for credentials to access the CN or
+     * MN
      * @param objectIS Inputstream to set
      * @return Input stream to eml metadata doc
-     * @throws InvalidToken          If the token used to access the MN or CN is
-     *                               invalid
-     * @throws ServiceFailure        Unexpected issue when accessing via the MN or
-     *                               CN
-     * @throws NotFound              When the sysmeta is not found when accessing
-     *                               via the MN or CN
-     * @throws NotImplemented        If the method to retrieve the eml metadata doc
-     *                               through the MN
-     *                               or CN is not implemented
-     * @throws InsufficientResources An unexpected issue with insufficient resources
-     *                               when retrieving
-     *                               the eml metadata doc through the MN or CN
+     * @throws InvalidToken If the token used to access the MN or CN is invalid
+     * @throws ServiceFailure Unexpected issue when accessing via the MN or CN
+     * @throws NotFound When the sysmeta is not found when accessing via the MN
+     * or CN
+     * @throws NotImplemented If the method to retrieve the eml metadata doc
+     * through the MN or CN is not implemented
+     * @throws InsufficientResources An unexpected issue with insufficient
+     * resources when retrieving the eml metadata doc through the MN or CN
      */
     public InputStream getObjectFromMnOrCn(
             Identifier pid, MultipartCNode cnNode, MultipartMNode mnNode, Boolean isCN, Session session,
@@ -838,7 +841,7 @@ public class RequestReportJob implements Job {
     /**
      * Returns a system metadata object for a given pid through a hashstore.
      *
-     * @param pid       Persistent identifier
+     * @param pid Persistent identifier
      * @param hashStore HashStore to check
      * @return System metadata object
      */
@@ -897,7 +900,7 @@ public class RequestReportJob implements Job {
         } catch (Exception ge) {
             log.error(
                     "Unable to create sysmeta object with hashstore stream for pid: " + pid.getValue()
-                            + ". Trying MN/CN API. Unexpected exception: " + ge.getMessage());
+                    + ". Trying MN/CN API. Unexpected exception: " + ge.getMessage());
             throw ge;
 
         }
@@ -908,19 +911,20 @@ public class RequestReportJob implements Job {
     /**
      * Returns a system metadata object for a given pid from the MN or CN
      *
-     * @param pid     Persistent identifier
-     * @param cnNode  Coordinating Node
-     * @param mnNode  Member Node
-     * @param isCN    Boolean to check whether we should check the CN or MN
-     * @param session User session to check for credentials to access the CN or MN
+     * @param pid Persistent identifier
+     * @param cnNode Coordinating Node
+     * @param mnNode Member Node
+     * @param isCN Boolean to check whether we should check the CN or MN
+     * @param session User session to check for credentials to access the CN or
+     * MN
      * @param sysmeta Sysmeta object to set
      * @return System metadata object
-     * @throws InvalidToken   If the token used to access the MN or CN is invalid
+     * @throws InvalidToken If the token used to access the MN or CN is invalid
      * @throws ServiceFailure Unexpected issue when accessing via the MN or CN
-     * @throws NotFound       When the sysmeta is not found when accessing via the
-     *                        MN or CN
-     * @throws NotImplemented If the method to retrieve the sysmeta through the MN
-     *                        or CN is not
+     * @throws NotFound When the sysmeta is not found when accessing via the MN
+     * or CN
+     * @throws NotImplemented If the method to retrieve the sysmeta through the
+     * MN or CN is not
      */
     public SystemMetadata getSystemMetadataFromMnOrCn(
             Identifier pid, MultipartCNode cnNode, MultipartMNode mnNode, Boolean isCN, Session session,
@@ -945,22 +949,18 @@ public class RequestReportJob implements Job {
     }
 
     /**
-     * Retrieve a hashstore by loading the metadig.properties file and parsing it
-     * for keys with the
-     * 'store.' prefix. These keys are then used to form properties to instantiate a
-     * hashstore which
-     * can be used to retrieve system metadata or data objects.
+     * Retrieve a hashstore by loading the metadig.properties file and parsing
+     * it for keys with the 'store.' prefix. These keys are then used to form
+     * properties to instantiate a hashstore which can be used to retrieve
+     * system metadata or data objects.
      *
      * @return A hashstore based on metadig properties
-     * @throws IOException               When there is an issue with using metadig
-     *                                   properties to
-     *                                   retrieve store keys to retrieve a hashstore
-     * @throws IllegalArgumentException  When a hashstore config property is missing
-     *                                   (ex.
-     *                                   store_path)
+     * @throws IOException When there is an issue with using metadig properties
+     * to retrieve store keys to retrieve a hashstore
+     * @throws IllegalArgumentException When a hashstore config property is
+     * missing (ex. store_path)
      * @throws HashStoreFactoryException An issue with instantiating a hashstore
-     *                                   (ex. missing
-     *                                   class)
+     * (ex. missing class)
      */
     public HashStore getHashStoreFromMetadigProps()
             throws IllegalArgumentException, HashStoreFactoryException, IOException {
@@ -998,12 +998,10 @@ public class RequestReportJob implements Job {
 
     /**
      * Retrieves the properties for a hashstore by loading and parsing a metadig
-     * properties file for
-     * keys with the prefix 'store.'
+     * properties file for keys with the prefix 'store.'
      *
      * @return Map object that contains the following properties: store_path,
-     *         store_depth,
-     *         store_width, store_algorithm and store_metadata_namespace
+     * store_depth, store_width, store_algorithm and store_metadata_namespace
      */
     public Map<String, Object> getStorePropsFromMetadigProps() {
         // In the metadig.properties file, hashstore properties are keys that begin with
