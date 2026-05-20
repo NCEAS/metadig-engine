@@ -538,7 +538,7 @@ public class RequestReportJob implements Job {
                             String thisPid = null;
                             DateTime thisDateModifiedDT;
                             
-                            if (objList.getCount() > 0) {
+                            if (objList != null && objList.getCount() > 0) {
                                 for (ObjectInfo oi : objList.getObjectInfoList()) {
                                     
                                     thisPid = oi.getIdentifier().getValue(); 
