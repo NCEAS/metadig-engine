@@ -42,6 +42,7 @@ import org.quartz.*;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -56,11 +57,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+
 import org.dataone.hashstore.HashStore;
 import org.dataone.hashstore.HashStoreFactory;
 import org.dataone.service.types.v2.Node;
 import org.dataone.service.types.v2.ObjectFormat;
 import org.dataone.service.types.v2.ObjectFormatList;
+import org.w3c.dom.Document;
 
 /**
 * <p>
@@ -496,25 +501,38 @@ public class RequestReportJob implements Job {
                 msSinceEpoch = zdt.toInstant().toEpochMilli();
                 Date endDate = new Date(msSinceEpoch);
                 
-                ObjectFormatList objectFormatList = cnNode.listFormats();
-                List<ObjectFormat> ofList = objectFormatList.getObjectFormatList();
-                
-                List<ObjectFormatIdentifier> matchedIds = new ArrayList<>();
+                List<String> matchedIds = new ArrayList<>();
                 String[] filters = pidFilter.split("\\|");
-                
-                for (ObjectFormat obj : ofList) {
-                    ObjectFormatIdentifier fid = obj.getFormatId();
-                    for (String filter : filters) {
-                        if (fid.getValue().matches(filter)) { 
-                            matchedIds.add(fid);
-                            break;
+                // read in the dataone formats list from disk. this is put here regularly (and updated)
+                // by the downloads task in the scheduler.
+                try {
+                    File xmlFile = new File("/opt/local/metadig/data/all-dataone-formats.xml");
+                    DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+                    DocumentBuilder builder = factory.newDocumentBuilder();
+                    Document doc = builder.parse(xmlFile);
+                    
+                    org.w3c.dom.NodeList formatIdNodes = doc.getElementsByTagName("formatId");
+                    
+                    for (int i = 0; i < formatIdNodes.getLength(); i++) {
+                        String fid = formatIdNodes.item(i).getTextContent();
+                        
+                        for (String filter : filters) {
+                            if (fid.matches(filter)) {
+                                matchedIds.add(fid);
+                                break;
+                            }
                         }
                     }
+                } catch (Exception e) {
+                    log.error("Failed to parse formats XML file: " + e.getMessage());
+                    throw e;
                 }
                 
                 int pidCount = 0;
-                for (ObjectFormatIdentifier searchFormat : matchedIds) {
+                for (String searchFormat : matchedIds) {
                     try {
+                        ObjectFormatIdentifier formatIdentifier = new ObjectFormatIdentifier();
+                        formatIdentifier.setValue(searchFormat);
                         // Even though MultipartMNode and MultipartCNode have the same parent class
                         // D1Node, the interface for D1Node doesn't
                         // include listObjects, as the parameters differ from CN to MN, so we have to
@@ -523,11 +541,11 @@ public class RequestReportJob implements Job {
                             log.trace("Getting pids for cn, for nodeid: " + nodeIdFilter + " and format: " + searchFormat);
                             nodeRef = new NodeReference();
                             nodeRef.setValue(nodeIdFilter);
-                            objList = cnNode.listObjects(session, startDate, endDate, searchFormat, nodeRef, identifier, startCount,
+                            objList = cnNode.listObjects(session, startDate, endDate, formatIdentifier, nodeRef, identifier, startCount,
                                 countRequested);
                             } else {
                                 log.trace("Getting pids for mn and format: " + searchFormat);
-                                objList = mnNode.listObjects(session, startDate, endDate, searchFormat, identifier, replicaStatus,
+                                objList = mnNode.listObjects(session, startDate, endDate, formatIdentifier, identifier, replicaStatus,
                                     startCount, countRequested);
                                 }
                             } catch (Exception e) {
