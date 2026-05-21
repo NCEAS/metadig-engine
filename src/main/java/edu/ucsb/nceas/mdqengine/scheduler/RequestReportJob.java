@@ -529,6 +529,7 @@ public class RequestReportJob implements Job {
                 }
                 
                 int pidCount = 0;
+                int countTotal = 0;
                 for (String searchFormat : matchedIds) {
                     try {
                         ObjectFormatIdentifier formatIdentifier = new ObjectFormatIdentifier();
@@ -556,17 +557,18 @@ public class RequestReportJob implements Job {
                             String thisPid = null;
                             DateTime thisDateModifiedDT;
                             
-                            if (objList != null && objList.getCount() > 0) {
-                                for (ObjectInfo oi : objList.getObjectInfoList()) {
-                                    
-                                    thisPid = oi.getIdentifier().getValue(); 
-                                    
-                                    // Always re-create a report, even if it exists for a pid, as the sysmeta
-                                    // could have been updated (i.e. obsoletedBy, access) and the quality 
-                                    
-                                    // update: temporarily don't re-run documents if a successful run is found
-                                    // this is just to get a snapshot for FAIR analysis for the paper
-                                    try (DatabaseStore store = new DatabaseStore()) {
+                            try(DatabaseStore store = new DatabaseStore()){
+                                if (objList != null && objList.getCount() > 0) {
+                                    countTotal = countTotal + objList.getCount();
+                                    for (ObjectInfo oi : objList.getObjectInfoList()) {
+                                        
+                                        thisPid = oi.getIdentifier().getValue(); 
+                                        
+                                        // Always re-create a report, even if it exists for a pid, as the sysmeta
+                                        // could have been updated (i.e. obsoletedBy, access) and the quality 
+                                        
+                                        // update: temporarily don't re-run documents if a successful run is found
+                                        // this is just to get a snapshot for FAIR analysis for the paper
                                         Boolean exists = runExists(thisPid, suiteId, store);
                                         log.trace("Found pid " + thisPid + " already exists: " + exists);
                                         if (!exists) {
@@ -588,6 +590,7 @@ public class RequestReportJob implements Job {
                                     }
                                 }
                             }
+                            
                         }
                         
                         ListResult result = new ListResult();
@@ -596,7 +599,7 @@ public class RequestReportJob implements Job {
                         result.setFilteredResultCount(pidCount);
                         // Set the count for the total number of pids returned from DataONE (all
                         // formatIds) for this query
-                        result.setTotalResultCount(objList.getCount());
+                        result.setTotalResultCount(countTotal);
                         result.setResult(pids);
                         // Return the sysmeta 'dateSystemMetadataModified' of the last pid harvested.
                         result.setLastDateModified(lastDateModifiedDT);
