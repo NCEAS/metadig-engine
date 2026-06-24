@@ -533,7 +533,9 @@ public class RequestReportJob implements Job {
                 for (String searchFormat : matchedIds) {
                     try {
                         ObjectFormatIdentifier formatIdentifier = new ObjectFormatIdentifier();
-                        formatIdentifier.setValue(searchFormat);
+                        // manually encode semi colons
+                        String safeSearchFormat = searchFormat.replace(";", "%3B");
+                        formatIdentifier.setValue(safeSearchFormat);
                         // Even though MultipartMNode and MultipartCNode have the same parent class
                         // D1Node, the interface for D1Node doesn't
                         // include listObjects, as the parameters differ from CN to MN, so we have to
