@@ -29,8 +29,11 @@ quality,quality-CA_OPC,metadig,25 0/1 * * * ?,"^eml.*|^http.*eml.*;FAIR-suite-0.
 quality,quality-sctld,metadig,30 0/1 * * * ?,"^eml.*|^http.*eml.*;FAIR-suite-0.5.0;urn:node:SCTLD;2010-10-07T00:00:00.00Z;1;1000;"
 quality,quality-drp,metadig,35 0/1 * * * ?,"^eml.*|^http.*eml.*;FAIR-suite-0.5.0;urn:node:DRP;2010-10-07T00:00:00.00Z;1;1000;"
 quality,quality-sdr,metadig,45 0/1 * * * ?,"^eml.*|^http.*eml.*;FAIR-suite-0.5.0;urn:node:SDR;2010-10-07T00:00:00.00Z;1;1000;"
-#quality,quality-si,metadig,45 0/1 * * * ?,"^eml.*|^http.*eml.*;FAIR-suite-0.4.0;urn:node:SI;2010-10-07T00:00:00.00Z;1;1000;"
-quality,quality-data-suite,metadig,55 0/5 * * * ?,"^eml.*|^http.*eml.*;data-suite-0.2.0;urn:node:ARCTIC;1900-11-01T00:00:00.00Z;1;1000"
+quality,quality-cib,metadig,55 0/1 * * * ?,"^eml.*|^http.*eml.*;FAIR-suite-0.5.0;urn:node:CIB;2010-10-07T00:00:00.00Z;1;1000;"
+quality,quality-fwc,metadig,3 0/1 * * * ?,"^eml.*|^http.*eml.*;FAIR-suite-0.5.0;urn:node:FWC;2010-10-07T00:00:00.00Z;1;1000;"
+quality,quality-geri,metadig,8 0/1 * * * ?,"^eml.*|^http.*eml.*;FAIR-suite-0.5.0;urn:node:GERI;2010-10-07T00:00:00.00Z;1;1000;"
+quality,quality-si,metadig,13 0/1 * * * ?,"^eml.*|^http.*eml.*;FAIR-suite-0.4.0;urn:node:SI;2010-10-07T00:00:00.00Z;1;1000;"
+quality,quality-data-suite,metadig,18 0/5 * * * ?,"^eml.*|^http.*eml.*;data-suite-0.2.0;urn:node:ARCTIC;1900-11-01T00:00:00.00Z;1;1000"
 #
 # Portal scoring tasks
 #score,portal-KNB-FAIR,metadig,1 0/1 * * * ?,"*portals*;FAIR-suite-0.5.0;urn:node:KNB;2020-08-10T00:00:00.00Z;1;100;portal"
