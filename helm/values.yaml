@@ -1,16 +1,16 @@
-# -- The path to the core application properties file. This is injected into 
+# -- The path to the core application properties file. This is injected into
 # the Controller pod to configure runtime parameters and database connections.
 configPath: "config/metadig.properties"
 
-# -- The path to the Log4j configuration file. This controls the application's 
+# -- The path to the Log4j configuration file. This controls the application's
 # logging verbosity, formats, and output destinations.
 logConfigPath: "config/log4j.properties"
 
-# -- The path to the scheduler's task list. This CSV file is mounted into 
+# -- The path to the scheduler's task list. This CSV file is mounted into
 # the Scheduler pod to dictate the specific jobs and intervals to execute.
 tasksPath: "config/taskList.csv"
 
-# -- The path to the downloads configuration. This CSV file dictates which 
+# -- The path to the downloads configuration. This CSV file dictates which
 # external resources or data files the application needs to pull down.
 downloadsPath: "config/downloadsList.csv"
 
@@ -54,54 +54,13 @@ controller:
     type: ClusterIP
     port: 8080
     targetPort: metadig-tomcat
-    
+
   ingress:
     enabled: true
-    className: nginx
+    className: traefik
+    corsEnabled: true
     annotations:
       cert-manager.io/cluster-issuer: "letsencrypt-prod"
-      ## @param ingress.annotations.nginx.ingress.kubernetes.io/client-body-buffer-size - see docs:
-      ## https://nginx.org/en/docs/http/ngx_http_core_module.html#client_body_buffer_size
-      ##
-      nginx.ingress.kubernetes.io/client-body-buffer-size: "1m"
-
-      ## @param ingress.annotations.nginx.ingress.kubernetes.io/client_max_body_size - see docs:
-      ## https://nginx.org/en/docs/http/ngx_http_core_module.html#client_max_body_size
-      ##
-      nginx.ingress.kubernetes.io/client_max_body_size: "0"
-
-    defaultBackend:
-      enabled: false
-
-    rewriteRules: ""
-
-    configurationSnippet: |
-      set $cors 'true';
-
-      if ($request_method = 'OPTIONS') {
-        set $cors ${cors}options;
-      }
-
-      if ($cors = "true") {
-        more_set_headers 'Access-Control-Allow-Origin: $http_origin';
-        more_set_headers 'Access-Control-Allow-Credentials: true';
-        more_set_headers 'Access-Control-Allow-Methods: POST, PUT, GET, OPTIONS';
-        more_set_headers 'Access-Control-Allow-Headers: DNT,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization';
-
-        more_set_headers 'Access-Control-Max-Age: 1728000';
-      }
-
-      if ($cors = "trueoptions") {
-        more_set_headers 'Access-Control-Allow-Origin: $http_origin';
-        more_set_headers 'Access-Control-Allow-Credentials: true';
-        more_set_headers 'Access-Control-Allow-Methods: POST, PUT, GET, OPTIONS';
-        more_set_headers 'Access-Control-Allow-Headers: DNT,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization';
-
-        more_set_headers 'Access-Control-Max-Age: 1728000';
-        more_set_headers 'Content-Type: text/plain charset=UTF-8';
-        more_set_headers 'Content-Length: 0';
-        return 204;
-      }
 
     hosts:
       - host: api.test.dataone.org
@@ -109,7 +68,7 @@ controller:
           - path: /quality
             pathType: Prefix
     tls:
-      - secretName: ingress-nginx-tls-cert
+      - secretName: ingress-tls-cert
         hosts:
           - api.test.dataone.org
 
@@ -409,7 +368,7 @@ rabbitmq:
     username: metadig
 
   replicaCount: 6
-  
+
   resources:
     requests:
       cpu: 1
@@ -417,13 +376,13 @@ rabbitmq:
     limits:
       cpu: 2
       memory: 4Gi
-      
+
   persistence:
     # Changed from 'storageClass' to match your template's 'storageClassName'
     storageClassName: csi-rbd-sc
     size: 10Gi
 
-  # I am adding these blank blocks just so you know they are available 
+  # I am adding these blank blocks just so you know they are available
   # for your template's envConfig and additionalConfig mappings if you need them later!
   envConfig: {}
   additionalConfig: {}
@@ -431,33 +390,33 @@ rabbitmq:
 solr:
   auth:
     enabled: false
-  
+
   coreNames: "quality"
   collection: "quality"
   cloudEnabled: false
-  
+
   image:
     registry: docker.io
     repository: bitnamilegacy/solr
     tag: 8.11.4-debian-12-r3
-  
+
   collectionShards: 1
   collectionReplicas: 1
-  
+
   podSecurityContext:
     enabled: true
     fsGroup: 1001
-  
+
   containerSecurityContext:
     enabled: true
     runAsUser: 1001
-  
+
   replicaCount: 1
-  
+
   service:
     type: ClusterIP
     externalTrafficPolicy: Cluster
-  
+
   customReadinessProbe:
     exec:
       command:
@@ -470,28 +429,28 @@ solr:
     timeoutSeconds: 15
     successThreshold: 1
     failureThreshold: 6
-  
+
   ingress:
     enabled: false
     tls: false
     ingressClassName: "nginx"
     hostname: "solr.local"
-  
+
   persistence:
     enabled: true
     mountPath: /bitnami/solr
     storageClass: csi-rbd-sc
     size: 20Gi
-  
+
   volumePermissions:
     enabled: false
     containerSecurityContext:
       runAsUser: 1001
-  
+
   serviceAccount:
     create: false
     name: "metadig"
-  
+
   tls:
     enabled: false
     autoGenerated: false
@@ -499,7 +458,7 @@ solr:
     passwordsSecretName: "metadig-solr/jks-password-secret"
     keystorePassword: "metadig"
     truststorePassword: "metadig"
-  
+
   resources:
     requests:
       cpu: 1.0
@@ -507,13 +466,13 @@ solr:
     limits:
       cpu: 1.5
       memory: 3Gi
-  
+
   zookeeper:
     enabled: false
     persistence:
       enabled: false
       storageClass: ""
-  
+
   global:
     security:
       allowInsecureImages: true
