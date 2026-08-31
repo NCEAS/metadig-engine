@@ -3,7 +3,7 @@ name: metadig
 description: |
   Helm chart for Kubernetes deploymeny of the MetaDIG application
   (https://github.com/NCEAS/metadig-engine)
-  
+
 # OCI Annotations - see https://github.com/helm/helm/pull/11204
 sources:
   - https://github.com/NCEAS/metadig
@@ -29,7 +29,7 @@ version: 2.0.1
 # It is recommended to use it with quotes.
 # NOTE that the chart will pull the docker image whose tag matches this value, if 'image.tag' is
 # not set in values.yaml
-appVersion: "3.2.5"
+appVersion: "v.3.2.5"
 
 # Chart dependencies - also see https://github.com/bitnami/charts/tree/main/bitnami
 dependencies:
