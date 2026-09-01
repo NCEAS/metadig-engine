@@ -269,7 +269,7 @@ scorer:
     mountPath: "/opt/local"
 
 worker:
-  replicaCount: 1
+  replicaCount: 5
 
   labels:
     app: metadig-worker
