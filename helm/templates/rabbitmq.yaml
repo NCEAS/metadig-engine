@@ -41,6 +41,7 @@ spec:
   replicas: {{ .Values.rabbitmq.replicaCount }}
   resources:
     {{ toYaml .Values.rabbitmq.resources | nindent 4 }}
+  {{- if or .Values.rabbitmq.envConfig .Values.rabbitmq.additionalConfig }}
   rabbitmq:
     {{- if .Values.rabbitmq.envConfig }}
     envConfig: |
@@ -54,6 +55,7 @@ spec:
       {{ $k }} = {{ $v }}
       {{- end }}
     {{- end }}
+  {{- end }}
   persistence:
     storageClassName: {{ .Values.rabbitmq.persistence.storageClassName }}
     storage: {{ .Values.rabbitmq.persistence.size }}
