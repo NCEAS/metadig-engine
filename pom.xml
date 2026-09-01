@@ -608,7 +608,7 @@
     <extensions>
       <extension>
         <groupId>org.apache.maven.wagon</groupId>
-        <artifactId>wagon-ssh</artifactId>
+        <artifactId>wagon-ssh-external</artifactId>
         <version>${maven.wagon.version}</version>
       </extension>
     </extensions>
@@ -618,7 +618,7 @@
       <uniqueVersion>false</uniqueVersion>
       <id>maven.dataone.org</id>
       <name>DataONE</name>
-      <url>scp://maven.dataone.org/var/www/maven</url>
+      <url>scpexe://maven.dataone.org/var/www/maven</url>
       <layout>default</layout>
     </repository>
   </distributionManagement>
