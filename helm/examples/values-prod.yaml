@@ -13,6 +13,7 @@ controller:
           - path: /quality
             pathType: Prefix
     tls:
+      - secretName: ingress-tls-cert
         hosts:
           - api.dataone.org
 
