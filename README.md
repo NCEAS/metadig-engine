@@ -1,7 +1,9 @@
-# metadig-engine
-The Java project for MetaDig
+# metadig-engine: Automated metadata quality assessment engine
 
-[![](https://api.travis-ci.com/NCEAS/metadig-engine.svg?branch=main)](https://api.travis-ci.com/repos/NCEAS/metadig-engine)
+- **Author**: Matthew B. Jones, Peter Slaughter ([NCEAS](http://www.nceas.ucsb.edu)), Peter Slaughter, S. Jeanette Clark, Ben Lienfelder, Bryce Mecum, Sean Gordon
+- **License**: [Apache 2](http://opensource.org/licenses/Apache-2.0)
+- [**Submit Bugs and feature requests**](https://github.com/NCEAS/metadig-engine/issues)
+- **Citation**: metadig-engine: Automated metadata quality assessment engine. Matthew B. Jones, Peter Slaughter, S. Jeanette Clark, Ben Lienfelder, Bryce Mecum, Sean Gordon. doi:10.18739/A2W37KZ0H
 
 The Metadata Quality Engine is a flexible engine for managing and executing metadata quality checks on a wide variety of metadata documents.
 Quality Checks are organized into Suites that can be stored and managed by the engine before ultimately being run against input metadata documents.
